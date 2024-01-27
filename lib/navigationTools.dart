@@ -1,0 +1,269 @@
+import 'dart:math';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'APIMODELS/patchDataModel.dart' as PDM;
+import 'API/PatchApi.dart';
+
+class tools{
+
+  static List<PDM.Coordinates>? _cachedCordData;
+
+
+  static Future<void> fetchData() async {
+    await patchAPI().fetchPatchData().then((value){
+      _cachedCordData = value.patchData!.coordinates;
+    });
+  }
+
+  static  LatLng calculateRoomCenterinLatLng(List<LatLng> roomCoordinates) {
+    double latSum = 0.0;
+    double lngSum = 0.0;
+
+    for (int i = 0; i < 4; i++) {
+      latSum += roomCoordinates[i].latitude;
+      lngSum += roomCoordinates[i].longitude;
+    }
+
+    double latCenter = latSum / 4;
+    double lngCenter = lngSum / 4;
+    return LatLng(latCenter, lngCenter);
+  }
+
+  static  List<double> calculateRoomCenterinList(List<LatLng> roomCoordinates) {
+    double latSum = 0.0;
+    double lngSum = 0.0;
+
+    for (int i = 0; i < 4; i++) {
+      latSum += roomCoordinates[i].latitude;
+      lngSum += roomCoordinates[i].longitude;
+    }
+
+    double latCenter = latSum / 4;
+    double lngCenter = lngSum / 4;
+    return [latCenter, lngCenter];
+  }
+
+  static String numericalToAlphabetical(int number) {
+    switch (number) {
+      case 0:
+        return 'ground';
+      case 1:
+        return 'first';
+      case 2:
+        return 'second';
+      case 3:
+        return 'third';
+      case 4:
+        return 'fourth';
+      case 5:
+        return 'fifth';
+      case 6:
+        return 'sixth';
+      case 7:
+        return 'seventh';
+      case 8:
+        return 'eighth';
+      case 9:
+        return 'ninth';
+      case 10:
+        return 'tenth';
+      default:
+        return 'Invalid number';
+    }
+  }
+
+  static List<double> localtoglobal(int x, int y,) {
+
+    int floor = 0;
+
+    List<double> diff = [0,0,0,];
+
+    Map<String, dynamic> cordData =
+    // {"coordinates" : patchDataApi().fetchedPatchData!.patchData!.coordinates! } ;
+    { "coordinates": [
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "28.543833319119475",
+          "lng": "77.18729871127312"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "275",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "28.54314073334607",
+          "lng": "77.18695033060165"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "275",
+          "lng": "282"
+        },
+        "globalRef": {
+          "lat": "28.542810928996282",
+          "lng": "77.18774356659209"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "282"
+        },
+        "globalRef": {
+          "lat": "28.543505872671684",
+          "lng": "77.18809998681755"
+        }
+      }
+    ],
+      "parkingCoords": [
+        {
+          "lat": "28.54390169863704",
+          "lon": "77.1873419496217"
+        },
+        {
+          "lat": "28.543879319250493",
+          "lon": "77.187411625756"
+        },
+        {
+          "lat": "28.543809825335625",
+          "lon": "77.18736472835792"
+        }
+      ]
+    };
+
+    List<Map<String, double>> ref = [
+      {
+        "lat": double.parse(cordData['coordinates'][2]['globalRef']['lat']),
+        "lon": double.parse(cordData['coordinates'][2]['globalRef']['lng']),
+        "localx": double.parse(cordData['coordinates'][2]['localRef']['lng']),
+        "localy": double.parse(cordData['coordinates'][2]['localRef']['lat']),
+      },
+      {
+        "lat": double.parse(cordData['coordinates'][1]['globalRef']['lat']),
+        "lon": double.parse(cordData['coordinates'][1]['globalRef']['lng']),
+        "localx": double.parse(cordData['coordinates'][1]['localRef']['lng']),
+        "localy": double.parse(cordData['coordinates'][1]['localRef']['lat']),
+      },
+      {
+        "lat": double.parse(cordData['coordinates'][0]['globalRef']['lat']),
+        "lon": double.parse(cordData['coordinates'][0]['globalRef']['lng']),
+        "localx": double.parse(cordData['coordinates'][0]['localRef']['lng']),
+        "localy": double.parse(cordData['coordinates'][0]['localRef']['lat']),
+      },
+      {
+        "lat": double.parse(cordData['coordinates'][3]['globalRef']['lat']),
+        "lon": double.parse(cordData['coordinates'][3]['globalRef']['lng']),
+        "localx": double.parse(cordData['coordinates'][3]['localRef']['lng']),
+        "localy": double.parse(cordData['coordinates'][3]['localRef']['lat']),
+      },
+    ];
+
+    int leastLat = 0;
+    for (int i = 0; i < ref.length; i++) {
+      if (ref[i]["lat"] == ref[leastLat]["lat"]) {
+        if (ref[i]["lon"]! > ref[leastLat]["lon"]!) {
+          leastLat = i;
+        }
+      } else if (ref[i]["lat"]! < ref[leastLat]["lat"]!) {
+        leastLat = i;
+      }
+    }
+
+    int c1 = (leastLat == 3) ? 0 : (leastLat + 1);
+    int c2 = (leastLat == 0) ? 3 : (leastLat - 1);
+    int highLon = (ref[c1]["lon"]! > ref[c2]["lon"]!) ? c1 : c2;
+
+    List<double> lengths = [];
+    for (int i = 0; i < ref.length; i++) {
+      double temp1;
+      if (i == ref.length - 1) {
+        temp1 = getHaversineDistance(ref[i], ref[0]);
+      } else {
+        temp1 = getHaversineDistance(ref[i], ref[i + 1]);
+      }
+      lengths.add(temp1);
+    }
+
+    double b = getHaversineDistance(ref[leastLat], ref[highLon]);
+    Map<String, double> horizontal = obtainCoordinates(ref[leastLat], 0, b);
+
+    double c = getHaversineDistance(ref[leastLat], horizontal);
+    double a = getHaversineDistance(ref[highLon], horizontal);
+
+    double out = acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / pi;
+
+    Map<String, double> localRef = {"localx": 0, "localy": 0};
+
+    if (diff != null && diff.length > 1) {
+      List<double> test = diff.where((d) => d == floor).toList();
+      if (test.isNotEmpty) {
+        localRef["localx"] = x - test[0];
+        localRef["localy"] = y - test[1];
+      } else {
+        localRef["localx"] = x as double;
+        localRef["localy"] = y as double;
+      }
+    } else {
+      localRef["localx"] = x as double;
+      localRef["localy"] = y as double;
+    }
+
+    double l = distance(ref[leastLat], ref[highLon]);
+    double m = distance(localRef, ref[highLon]);
+    double n = distance(ref[leastLat], localRef);
+
+    double theta = acos((l * l + n * n - m * m) / (2 * l * n)) * 180 / pi;
+
+    if (((l * l + n * n - m * m) / (2 * l * n) > 1) || m == 0 || n == 0) {
+      theta = 0;
+    }
+
+    double ang = theta + out;
+    double dist = distance(ref[leastLat], localRef) * 0.3048; // to convert to meter
+
+    double ver = dist * sin(ang * pi / 180.0);
+    double hor = dist * cos(ang * pi / 180.0);
+
+    Map<String, double> finalCoords = obtainCoordinates(ref[leastLat], ver, hor);
+
+    return [finalCoords["lat"]!, finalCoords["lon"]!];
+  }
+
+  static double getHaversineDistance(Map<String, double> firstLocation, Map<String, double> secondLocation) {
+    const earthRadius = 6371; // km
+    double diffLat = ((secondLocation["lat"]! - firstLocation["lat"]!) * pi) / 180;
+    double difflon = ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
+    double arc = cos((firstLocation["lat"]! * pi) / 180) *
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
+        sin(diffLat / 2) * sin(diffLat / 2);
+    double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
+    double distance = earthRadius * line * 1000;
+    return distance;
+  }
+
+  static Map<String, double> obtainCoordinates(Map<String, double> reference, double vertical, double horizontal) {
+    const double R = 6378137; // Earth’s radius, sphere
+    double dLat = vertical / R;
+    double dLon = horizontal / (R * cos((pi * reference["lat"]!) / 180));
+    double latA = reference["lat"]! + (dLat * 180) / pi;
+    double lonA = reference["lon"]! + (dLon * 180) / pi;
+    return {"lat": latA, "lon": lonA};
+  }
+
+  static double distance(Map<String, double> first, Map<String, double> second) {
+    double dist1 = pow((second["localy"]! - first["localy"]!), 2) as double ;
+    double dist2 = pow((second["localx"]! - first["localx"]!), 2) as double ;
+    double dist = dist1 + dist2;
+    //  pow((second["localy"] - first["localy"]), 2) as double + pow((second["localx"] - first["localx"]), 2) as double ;
+    return sqrt(dist);
+  }
+}

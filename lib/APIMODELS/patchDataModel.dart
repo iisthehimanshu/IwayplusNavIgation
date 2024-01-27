@@ -1,0 +1,184 @@
+class patchDataModel {
+  bool? patchExist;
+  PatchData? patchData;
+
+  patchDataModel({this.patchExist, this.patchData});
+
+  patchDataModel.fromJson(Map<String, dynamic> json) {
+    patchExist = json['patchExist'];
+    patchData = json['patchData'] != null
+        ? new PatchData.fromJson(json['patchData'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['patchExist'] = this.patchExist;
+    if (this.patchData != null) {
+      data['patchData'] = this.patchData!.toJson();
+    }
+    return data;
+  }
+}
+
+class PatchData {
+  String? sId;
+  String? buildingID;
+  String? breadth;
+  String? fileName;
+  String? length;
+  List<Coordinates>? coordinates;
+  List<ParkingCoords>? parkingCoords;
+  List<PickupCoords>? pickupCoords;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+
+  PatchData(
+      {this.sId,
+        this.buildingID,
+        this.breadth,
+        this.fileName,
+        this.length,
+        this.coordinates,
+        this.parkingCoords,
+        this.pickupCoords,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
+
+  PatchData.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    buildingID = json['building_ID'];
+    breadth = json['breadth'];
+    fileName = json['fileName'];
+    length = json['length'];
+    if (json['coordinates'] != null) {
+      coordinates = <Coordinates>[];
+      json['coordinates'].forEach((v) {
+        coordinates!.add(new Coordinates.fromJson(v));
+      });
+    }
+    if (json['parkingCoords'] != null) {
+      parkingCoords = <ParkingCoords>[];
+      json['parkingCoords'].forEach((v) {
+        parkingCoords!.add(new ParkingCoords.fromJson(v));
+      });
+    }
+    if (json['pickupCoords'] != null) {
+      pickupCoords = <PickupCoords>[];
+      json['pickupCoords'].forEach((v) {
+        pickupCoords!.add(new PickupCoords.fromJson(v));
+      });
+    }
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    iV = json['__v'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
+    data['building_ID'] = this.buildingID;
+    data['breadth'] = this.breadth;
+    data['fileName'] = this.fileName;
+    data['length'] = this.length;
+    if (this.coordinates != null) {
+      data['coordinates'] = this.coordinates!.map((v) => v.toJson()).toList();
+    }
+    if (this.parkingCoords != null) {
+      data['parkingCoords'] =
+          this.parkingCoords!.map((v) => v.toJson()).toList();
+    }
+    if (this.pickupCoords != null) {
+      data['pickupCoords'] = this.pickupCoords!.map((v) => v.toJson()).toList();
+    }
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    data['__v'] = this.iV;
+    return data;
+  }
+}
+
+class Coordinates {
+  LocalRef? localRef;
+  LocalRef? globalRef;
+
+  Coordinates({this.localRef, this.globalRef});
+
+  Coordinates.fromJson(Map<String, dynamic> json) {
+    localRef = json['localRef'] != null
+        ? new LocalRef.fromJson(json['localRef'])
+        : null;
+    globalRef = json['globalRef'] != null
+        ? new LocalRef.fromJson(json['globalRef'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.localRef != null) {
+      data['localRef'] = this.localRef!.toJson();
+    }
+    if (this.globalRef != null) {
+      data['globalRef'] = this.globalRef!.toJson();
+    }
+    return data;
+  }
+}
+
+class LocalRef {
+  String? lat;
+  String? lng;
+
+  LocalRef({this.lat, this.lng});
+
+  LocalRef.fromJson(Map<String, dynamic> json) {
+    lat = json['lat'];
+    lng = json['lng'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lat'] = this.lat;
+    data['lng'] = this.lng;
+    return data;
+  }
+}
+
+class ParkingCoords {
+  String? lat;
+  String? lon;
+
+  ParkingCoords({this.lat, this.lon});
+
+  ParkingCoords.fromJson(Map<String, dynamic> json) {
+    lat = json['lat'];
+    lon = json['lon'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lat'] = this.lat;
+    data['lon'] = this.lon;
+    return data;
+  }
+}
+class PickupCoords {
+  String? lat;
+  String? lon;
+
+  PickupCoords({this.lat, this.lon});
+
+  PickupCoords.fromJson(Map<String, dynamic> json) {
+    lat = json['lat'];
+    lon = json['lon'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lat'] = this.lat;
+    data['lon'] = this.lon;
+    return data;
+  }
+}

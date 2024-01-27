@@ -1,0 +1,481 @@
+class land {
+  bool? landmarkExist;
+  List<Landmarks>? landmarks;
+
+  land({this.landmarkExist, this.landmarks});
+
+  land.fromJson(Map<String, dynamic> json) {
+    landmarkExist = json['landmarkExist'];
+    if (json['landmarks'] != null) {
+      landmarks = <Landmarks>[];
+      json['landmarks'].forEach((v) {
+        landmarks!.add(new Landmarks.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['landmarkExist'] = this.landmarkExist;
+    if (this.landmarks != null) {
+      data['landmarks'] = this.landmarks!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Landmarks {
+  Element? element;
+  Properties? properties;
+  String? sId;
+  String? buildingID;
+  int? coordinateX;
+  int? coordinateY;
+  int? doorX;
+  int? doorY;
+  String? featureType;
+  String? type;
+  int? floor;
+  String? geometryType;
+  String? name;
+  List<Lifts>? lifts;
+  List<Stairs>? stairs;
+  List<Others>? others;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+  String? buildingName;
+  String? venueName;
+
+  Landmarks(
+      {this.element,
+        this.properties,
+        this.sId,
+        this.buildingID,
+        this.coordinateX,
+        this.coordinateY,
+        this.doorX,
+        this.doorY,
+        this.featureType,
+        this.type,
+        this.floor,
+        this.geometryType,
+        this.name,
+        this.lifts,
+        this.stairs,
+        this.others,
+        this.createdAt,
+        this.updatedAt,
+        this.iV,
+        this.buildingName,
+        this.venueName});
+
+  Landmarks.fromJson(Map<String, dynamic> json) {
+    element =
+    json['element'] != null ? new Element.fromJson(json['element']) : null;
+    properties = json['properties'] != null
+        ? new Properties.fromJson(json['properties'])
+        : null;
+    sId = json['_id'];
+    buildingID = json['building_ID'];
+    coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
+    coordinateY = json['coordinateY']!=null?json['coordinateY'].toInt():json['coordinateY'];
+    doorX = json['doorX'] != null ? json['doorX'].toInt():json['doorX'];
+    doorY = json['doorY']!=null? json['doorY'].toInt():json['doorY'];
+    featureType = json['feature_type'];
+    type = json['type'];
+    floor = json['floor'];
+    geometryType = json['geometryType'];
+    name = json['name'];
+    if (json['lifts'] != null) {
+      lifts = <Lifts>[];
+      json['lifts'].forEach((v) {
+        lifts!.add(new Lifts.fromJson(v));
+      });
+    }
+    if (json['stairs'] != null) {
+      stairs = <Stairs>[];
+      json['stairs'].forEach((v) {
+        stairs!.add(new Stairs.fromJson(v));
+      });
+    }
+    if (json['others'] != null) {
+      others = <Others>[];
+      json['others'].forEach((v) {
+        others!.add(new Others.fromJson(v));
+      });
+    }
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    iV = json['__v'];
+    buildingName = json['buildingName'];
+    venueName = json['venueName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.element != null) {
+      data['element'] = this.element!.toJson();
+    }
+    if (this.properties != null) {
+      data['properties'] = this.properties!.toJson();
+    }
+    data['_id'] = this.sId;
+    data['building_ID'] = this.buildingID;
+    data['coordinateX'] = this.coordinateX;
+    data['coordinateY'] = this.coordinateY;
+    data['doorX'] = this.doorX;
+    data['doorY'] = this.doorY;
+    data['feature_type'] = this.featureType;
+    data['type'] = this.type;
+    data['floor'] = this.floor;
+    data['geometryType'] = this.geometryType;
+    data['name'] = this.name;
+    if (this.lifts != null) {
+      data['lifts'] = this.lifts!.map((v) => v.toJson()).toList();
+    }
+    if (this.stairs != null) {
+      data['stairs'] = this.stairs!.map((v) => v.toJson()).toList();
+    }
+    if (this.others != null) {
+      data['others'] = this.others!.map((v) => v.toJson()).toList();
+    }
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    data['__v'] = this.iV;
+    data['buildingName'] = this.buildingName;
+    data['venueName'] = this.venueName;
+    return data;
+  }
+}
+
+class Element {
+  String? type;
+  String? subType;
+
+  Element({this.type, this.subType});
+
+  Element.fromJson(Map<String, dynamic> json) {
+    type = json['type'];
+    subType = json['subType'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['type'] = this.type;
+    data['subType'] = this.subType;
+    return data;
+  }
+}
+
+class Properties {
+  String? contactNo;
+  String? daysOpen;
+  String? direction;
+  String? doorMaterial;
+  String? doorType;
+  String? email;
+  String? endTime;
+  String? latitude;
+  String? longitude;
+  String? motion;
+  String? node;
+  String? nodeId;
+  String? openingMechanism;
+  String? protocol;
+  String? startTime;
+  String? timings;
+  String? url;
+  List<String>? nonWalkableGrids;
+  List<String>? flrDistMatrix;
+  List<String>? frConn;
+  List<String>? clickedPoints;
+  List<String>? polygonId;
+  bool? polygonExist;
+  String? polyId;
+  String? downwardSteps;
+  String? name;
+  String? stepHeight;
+  int? stepsNumber;
+  String? upwardSteps;
+  String? stairsPoint;
+  String? wheelChairAccessibility;
+  String? audio;
+  String? brailleAvailability;
+  String? capacity;
+  String? callLocation;
+  String? panelDir;
+  String? macId;
+  String? basinClock;
+  bool? blowDryer;
+  String? cubicleClock;
+  bool? handShower;
+  bool? liquidSoap;
+  String? numCubicles;
+  String? numUrinals;
+  String? numWashbasin;
+  bool? paperNapkins;
+  bool? sanitaryNapkins;
+  bool? soapbar;
+  bool? tapMug;
+  bool? toiletRolls;
+  String? urinalClock;
+  String? washroomType;
+  int? floorLength;
+  int? floorBreadth;
+  int? floorAngle;
+
+  Properties(
+      {this.contactNo,
+        this.daysOpen,
+        this.direction,
+        this.doorMaterial,
+        this.doorType,
+        this.email,
+        this.endTime,
+        this.latitude,
+        this.longitude,
+        this.motion,
+        this.node,
+        this.nodeId,
+        this.openingMechanism,
+        this.protocol,
+        this.startTime,
+        this.timings,
+        this.url,
+        this.nonWalkableGrids,
+        this.flrDistMatrix,
+        this.frConn,
+        this.clickedPoints,
+        this.polygonId,
+        this.polygonExist,
+        this.polyId,
+        this.downwardSteps,
+        this.name,
+        this.stepHeight,
+        this.stepsNumber,
+        this.upwardSteps,
+        this.stairsPoint,
+        this.wheelChairAccessibility,
+        this.audio,
+        this.brailleAvailability,
+        this.capacity,
+        this.callLocation,
+        this.panelDir,
+        this.macId,
+        this.basinClock,
+        this.blowDryer,
+        this.cubicleClock,
+        this.handShower,
+        this.liquidSoap,
+        this.numCubicles,
+        this.numUrinals,
+        this.numWashbasin,
+        this.paperNapkins,
+        this.sanitaryNapkins,
+        this.soapbar,
+        this.tapMug,
+        this.toiletRolls,
+        this.urinalClock,
+        this.washroomType,
+        this.floorLength,
+        this.floorBreadth,
+        this.floorAngle});
+
+  Properties.fromJson(Map<String, dynamic> json) {
+    contactNo = json['contactNo'];
+    daysOpen = json['daysOpen'];
+    direction = json['direction'];
+    doorMaterial = json['doorMaterial'];
+    doorType = json['doorType'];
+    email = json['email'];
+    endTime = json['endTime'];
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+    motion = json['motion'];
+    node = json['node'];
+    nodeId = json['nodeId'];
+    openingMechanism = json['openingMechanism'];
+    protocol = json['protocol'];
+    startTime = json['startTime'];
+    timings = json['timings'];
+    url = json['url'];
+    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
+    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
+    frConn = json['frConn'].cast<String>();
+    clickedPoints = json['clickedPoints'].cast<String>();
+    polygonId = json['polygonId'].cast<String>();
+    polygonExist = json['polygonExist'];
+    polyId = json['polyId'];
+    downwardSteps = json['downwardSteps'];
+    name = json['name'];
+    stepHeight = json['stepHeight'];
+    stepsNumber = json['stepsNumber'];
+    upwardSteps = json['upwardSteps'];
+    stairsPoint = json['stairsPoint'];
+    wheelChairAccessibility = json['wheelChairAccessibility'];
+    audio = json['audio'];
+    brailleAvailability = json['brailleAvailability'];
+    capacity = json['capacity'];
+    callLocation = json['callLocation'];
+    panelDir = json['panelDir'];
+    macId = json['macId'];
+    basinClock = json['basinClock'];
+    blowDryer = json['blowDryer'];
+    cubicleClock = json['cubicleClock'];
+    handShower = json['handShower'];
+    liquidSoap = json['liquidSoap'];
+    numCubicles = json['numCubicles'];
+    numUrinals = json['numUrinals'];
+    numWashbasin = json['numWashbasin'];
+    paperNapkins = json['paperNapkins'];
+    sanitaryNapkins = json['sanitaryNapkins'];
+    soapbar = json['soapbar'];
+    tapMug = json['tapMug'];
+    toiletRolls = json['toiletRolls'];
+    urinalClock = json['urinalClock'];
+    washroomType = json['washroomType'];
+    floorLength = json['floorLength'];
+    floorBreadth = json['floorBreadth'];
+    floorAngle = json['floorAngle'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['contactNo'] = this.contactNo;
+    data['daysOpen'] = this.daysOpen;
+    data['direction'] = this.direction;
+    data['doorMaterial'] = this.doorMaterial;
+    data['doorType'] = this.doorType;
+    data['email'] = this.email;
+    data['endTime'] = this.endTime;
+    data['latitude'] = this.latitude;
+    data['longitude'] = this.longitude;
+    data['motion'] = this.motion;
+    data['node'] = this.node;
+    data['nodeId'] = this.nodeId;
+    data['openingMechanism'] = this.openingMechanism;
+    data['protocol'] = this.protocol;
+    data['startTime'] = this.startTime;
+    data['timings'] = this.timings;
+    data['url'] = this.url;
+    data['nonWalkableGrids'] = this.nonWalkableGrids;
+    data['flr_dist_matrix'] = this.flrDistMatrix;
+    data['frConn'] = this.frConn;
+    data['clickedPoints'] = this.clickedPoints;
+    data['polygonId'] = this.polygonId;
+    data['polygonExist'] = this.polygonExist;
+    data['polyId'] = this.polyId;
+    data['downwardSteps'] = this.downwardSteps;
+    data['name'] = this.name;
+    data['stepHeight'] = this.stepHeight;
+    data['stepsNumber'] = this.stepsNumber;
+    data['upwardSteps'] = this.upwardSteps;
+    data['stairsPoint'] = this.stairsPoint;
+    data['wheelChairAccessibility'] = this.wheelChairAccessibility;
+    data['audio'] = this.audio;
+    data['brailleAvailability'] = this.brailleAvailability;
+    data['capacity'] = this.capacity;
+    data['callLocation'] = this.callLocation;
+    data['panelDir'] = this.panelDir;
+    data['macId'] = this.macId;
+    data['basinClock'] = this.basinClock;
+    data['blowDryer'] = this.blowDryer;
+    data['cubicleClock'] = this.cubicleClock;
+    data['handShower'] = this.handShower;
+    data['liquidSoap'] = this.liquidSoap;
+    data['numCubicles'] = this.numCubicles;
+    data['numUrinals'] = this.numUrinals;
+    data['numWashbasin'] = this.numWashbasin;
+    data['paperNapkins'] = this.paperNapkins;
+    data['sanitaryNapkins'] = this.sanitaryNapkins;
+    data['soapbar'] = this.soapbar;
+    data['tapMug'] = this.tapMug;
+    data['toiletRolls'] = this.toiletRolls;
+    data['urinalClock'] = this.urinalClock;
+    data['washroomType'] = this.washroomType;
+    data['floorLength'] = this.floorLength;
+    data['floorBreadth'] = this.floorBreadth;
+    data['floorAngle'] = this.floorAngle;
+    return data;
+  }
+}
+
+class Lifts {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Lifts({this.name, this.distance, this.x, this.y});
+
+  Lifts.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+class CommonLifts {
+  String? name;
+  int? distance;
+  int? x1;
+  int? x2;
+  int? y1;
+  int? y2;
+
+  CommonLifts({this.name, this.distance, this.x1, this.y1,this.x2,this.y2});
+
+}
+class Stairs {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Stairs({this.name, this.distance, this.x, this.y});
+
+  Stairs.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+
+class Others {
+  String? name;
+  int? distance;
+
+  Others({this.name, this.distance});
+
+  Others.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    return data;
+  }
+}

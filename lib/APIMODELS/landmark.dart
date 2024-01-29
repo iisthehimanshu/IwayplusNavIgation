@@ -1,15 +1,32 @@
 class land {
   bool? landmarkExist;
   List<Landmarks>? landmarks;
+  Map<String, Landmarks>? landmarksMap; // Add this line
+  Map<String, String>? landmarksNameMap; // Add this line
+  List<String>? landmarkNames;
 
-  land({this.landmarkExist, this.landmarks});
+
+  land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
   land.fromJson(Map<String, dynamic> json) {
     landmarkExist = json['landmarkExist'];
     if (json['landmarks'] != null) {
       landmarks = <Landmarks>[];
+      landmarksMap = {}; // Initialize the map
+      landmarkNames = [];
+      landmarksNameMap = {};
       json['landmarks'].forEach((v) {
-        landmarks!.add(new Landmarks.fromJson(v));
+        Landmarks landmark = Landmarks.fromJson(v);
+        landmarks!.add(landmark);
+        if(landmark.properties!.polyId != null){
+          landmarksMap![landmark.properties!.polyId!] = landmark; // Add to the map using polyID as the key
+        }
+        if(landmark.name != null){
+          landmarkNames!.add(landmark.name!);
+          if(landmark.properties!.polyId != null){
+            landmarksNameMap![landmark.name!] = landmark.properties!.polyId!;
+          }
+        }
       });
     }
   }
@@ -23,6 +40,7 @@ class land {
     return data;
   }
 }
+
 
 class Landmarks {
   Element? element;

@@ -169,10 +169,10 @@ int heuristic(Node a, Node b) {
 
 
 void main(){
-  // int numRows = 587;
-  // int numCols = 1079;
-  // int sourceIndex = 381859;
-  // int destinationIndex = 420861;
+  // int numRows = 275; //floor breadth
+  // int numCols = 282; //floor length
+  // int sourceIndex = 22043;
+  // int destinationIndex = 69896;
   //
   // List<int> path = findPath(
   //   numRows,
@@ -191,8 +191,8 @@ void main(){
   // List<LatLng> coordinates = [];
   // for (int node in path) {
   //   if(!building.nonWalkable[0]!.contains(node)){
-  //     int row = (node % 1079);
-  //     int col = (node ~/ 1079);
+  //     int row = (node % 282); //divide by floor length
+  //     int col = (node ~/ 282); //divide by floor length
   //     print("[$row,$col]");
   //     coordinates.add(LatLng(tools.localtoglobal(row, col)[0], tools.localtoglobal(row, col)[1]));
   //   }

@@ -12,6 +12,7 @@ import 'API/PatchApi.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'Elements/HomepageSearch.dart';
 import 'buildingState.dart';
 import 'buildingState.dart';
 import 'buildingState.dart';
@@ -71,6 +72,7 @@ class _NavigationState extends State<Navigation> {
     });
 
     landmarkApi().fetchLandmarkData().then((value){
+      building.landmarkdata = value;
       for(int i = 0; i<value.landmarks!.length ; i++){
         if(value.landmarks![i].element!.type == "Floor"){
           List<int> allIntegers = [];
@@ -84,43 +86,6 @@ class _NavigationState extends State<Navigation> {
           building.nonWalkable[value.landmarks![i].floor!] = allIntegers;
         }
       }
-      int numRows = 275; //floor breadth
-      int numCols = 282; //floor length
-      int sourceIndex = 22043;
-      int destinationIndex = 69896;
-
-      List<int> path = findPath(
-        numRows,
-        numCols,
-        building.nonWalkable[0]!,
-        sourceIndex,
-        destinationIndex,
-      );
-
-      if (path.isNotEmpty) {
-        print("Path found: $path");
-      } else {
-        print("No path found.");
-      }
-
-      List<LatLng> coordinates = [];
-      for (int node in path) {
-        if(!building.nonWalkable[0]!.contains(node)){
-          int row = (node % 282); //divide by floor length
-          int col = (node ~/ 282); //divide by floor length
-          print("[$row,$col]");
-          coordinates.add(LatLng(tools.localtoglobal(row, col)[0], tools.localtoglobal(row, col)[1]));
-        }
-
-      }
-      setState(() {
-        singleroute.add(gmap.Polyline(
-          polylineId: PolylineId("route"),
-          points: coordinates,
-          color: Colors.red,
-          width: 1,
-        ));
-      });
     });
   }
   void createPatch(patchDataModel value) {
@@ -284,6 +249,32 @@ class _NavigationState extends State<Navigation> {
 
   }
 
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false, // Set this property to false
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Container(
+              color: Colors.white,
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text('Item $index'),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
   @override
   void dispose() {
     _googleMapController.dispose();
@@ -292,65 +283,74 @@ class _NavigationState extends State<Navigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            child: GoogleMap(
-              initialCameraPosition: _initialCameraPosition,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              zoomGesturesEnabled: true,
-              polygons: patch.union(closedpolygons),
-              polylines: polylines.union(singleroute),
-              onTap: (x) {},
-              mapType: MapType.normal,
-              buildingsEnabled: false,
-              compassEnabled: true,
-              rotateGesturesEnabled: true,
-              onMapCreated: (controller) {
-                controller.setMapStyle(maptheme);
-                _googleMapController = controller;
-              },
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              child: GoogleMap(
+                initialCameraPosition: _initialCameraPosition,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                zoomGesturesEnabled: true,
+                polygons: patch.union(closedpolygons),
+                polylines: polylines.union(singleroute),
+                onTap: (x) {},
+                mapType: MapType.normal,
+                buildingsEnabled: false,
+                compassEnabled: true,
+                rotateGesturesEnabled: true,
+                onMapCreated: (controller) {
+                  controller.setMapStyle(maptheme);
+                  _googleMapController = controller;
+                },
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 95.0, // Adjust the position as needed
-            right: 16.0,
-            child: Column(
-              children: [
-                SpeedDial(
-                  child: Text(building.floor == 0 ? 'G' : '${building.floor}',style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xff000000),
-                    height: 23/16,
-                  ),),
-                  activeIcon: Icons.close,backgroundColor: Colors.white,
-                  children: [
-                    for (int i = 0; i < building.numberOfFloors; i++)
-                      SpeedDialChild(
-                        child: Text(i == 0 ? 'G' : '${i}'),
-                        onTap: () {
-                          building.floor = i;
-                          createRooms(building.polyLineData!, building.floor);
-                        },
-                      ),
-                  ],
-                ),
-                SizedBox(height: 28.0), // Adjust the height as needed
-                FloatingActionButton(
-                  onPressed: () {
-                    fitPolygonInScreen(patch.first);
-                  },
-                  child: Icon(Icons.my_location_sharp,color: Colors.black,),
-                  backgroundColor: Colors.white, // Set the background color of the FAB
-                ),
-              ],
+            Positioned(
+              bottom: 95.0, // Adjust the position as needed
+              right: 16.0,
+              child: Column(
+                children: [
+                  SpeedDial(
+                    child: Text(building.floor == 0 ? 'G' : '${building.floor}',style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff000000),
+                      height: 23/16,
+                    ),),
+                    activeIcon: Icons.close,backgroundColor: Colors.white,
+                    children: [
+                      for (int i = 0; i < building.numberOfFloors; i++)
+                        SpeedDialChild(
+                          child: Text(i == 0 ? 'G' : '${i}'),
+                          onTap: () {
+                            building.floor = i;
+                            createRooms(building.polyLineData!, building.floor);
+                          },
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 28.0), // Adjust the height as needed
+                  FloatingActionButton(
+                    onPressed: () {
+                      _showBottomSheet(context);
+                      fitPolygonInScreen(patch.first);
+                    },
+                    child: Icon(Icons.my_location_sharp,color: Colors.black,),
+                    backgroundColor: Colors.white, // Set the background color of the FAB
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Positioned(
+              top: 16,left: 16,right: 16,
+              child: HomepageSearch()
+            )
+          ],
+        ),
       ),
     );
   }

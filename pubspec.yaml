@@ -45,6 +45,7 @@ dependencies:
   permission_handler: ^11.0.1
   flutter_tts: ^3.8.5
   flutter_compass: ^0.8.0
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:

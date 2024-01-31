@@ -4,12 +4,14 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
+import 'package:iwayplusnav/Elements/directionInstruction.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
 import 'package:iwayplusnav/navigationTools.dart';
@@ -32,6 +34,8 @@ import 'buildingState.dart';
 import 'buildingState.dart';
 import 'cutommarker.dart';
 import 'dart:math' as math;
+import 'APIMODELS/landmark.dart' as la;
+
 
 
 void main() {
@@ -65,16 +69,17 @@ class _NavigationState extends State<Navigation> {
   Set<gmap.Polyline> polylines = Set();
   Set<Polygon> closedpolygons = Set();
   Set<Marker> selectedroomMarker = Set();
+  Set<Marker> pathMarkers = Set();
   List<Marker> markers = [];
   Building building = Building(floor: 0, numberOfFloors: 1);
-  Set<gmap.Polyline> singleroute = Set();
+  Map<int,Set<gmap.Polyline>> singleroute = {};
   BT btadapter = new BT();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
-  UserState user = UserState(floor: -1, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972);
+  UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972);
   pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
 
   @override
@@ -207,6 +212,10 @@ class _NavigationState extends State<Navigation> {
           20, // Specify your custom zoom level here
         ),
       );
+      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      user.lat = double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+      user.lng = double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
       setState(() {
         markers.clear();
         markers.add(Marker(
@@ -424,6 +433,8 @@ class _NavigationState extends State<Navigation> {
                     setState(() {
                       if(building.selectedLandmarkID != polyArray.id){
                         building.selectedLandmarkID = polyArray.id;
+                        _isRoutePanelOpen = false;
+                        singleroute.clear();
                         _isLandmarkPanelOpen = true;
                         addselectedRoomMarker(coordinates);
                       }
@@ -465,8 +476,8 @@ class _NavigationState extends State<Navigation> {
   }
 
   PanelController _landmarkPannelController = new PanelController();
-  Widget landmarkdetailpannel(
-      BuildContext context, AsyncSnapshot<land> snapshot) {
+  Widget landmarkdetailpannel(BuildContext context, AsyncSnapshot<land> snapshot) {
+    pathMarkers.clear();
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -479,6 +490,7 @@ class _NavigationState extends State<Navigation> {
       return Container();
 
     }
+
     return Stack(
       children: [Positioned(
         left: 16,
@@ -665,27 +677,23 @@ class _NavigationState extends State<Navigation> {
                             child: TextButton(
                               onPressed: ()async{
                                 _isLandmarkPanelOpen = false;
-                                PathState.destinationX = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.coordinateX!;
-                                PathState.destinationY = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.coordinateY!;
-                                if(snapshot.data!.landmarksMap![building.selectedLandmarkID]!.doorX != null){
-                                   PathState.destinationX = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.doorX!;
-                                   PathState.destinationY = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.doorY!;
-                                }
-                                PathState.sourceX = user.coordX;
-                                PathState.sourceY = user.coordY;
-                                print(PathState.destinationX);
-                                print(PathState.destinationY);
-                                await fetchroute(PathState.sourceX, PathState.sourceY, PathState.destinationX, PathState.destinationY, snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!).then((value){
-                                  List<double> mvalue = tools.localtoglobal(user.coordX, user.coordY);
-                                  selectedroomMarker.add(
+                                await calculateroute(snapshot.data!.landmarksMap!, building.selectedLandmarkID!).then((value){
+                                  List<double> svalue = tools.localtoglobal(user.coordX, user.coordY);
+                                  List<double> dvalue = tools.localtoglobal(PathState.destinationX, PathState.destinationY);
+                                  pathMarkers.clear();
+                                  pathMarkers.add(
+                                      Marker(markerId: MarkerId("destination"),
+                                          position: LatLng(dvalue[0],dvalue[1]),
+                                          icon: BitmapDescriptor.defaultMarker)
+                                  );
+                                  pathMarkers.add(
                                     Marker(
                                       markerId: MarkerId('source'),
-                                      position: LatLng(mvalue[0], mvalue[1]),
+                                      position: LatLng(svalue[0], svalue[1]),
                                       icon: BitmapDescriptor.defaultMarker,
                                     ),
                                   );
-                                  setCameraPosition(selectedroomMarker);
-                                  PathState.path.add(value);
+                                  setCameraPosition(pathMarkers);
                                   PathState.destinationPolyID = building.selectedLandmarkID!;
                                   PathState.destinationName = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!;
                                   _isRoutePanelOpen = true;
@@ -885,8 +893,51 @@ class _NavigationState extends State<Navigation> {
     return(y*fl)+x;
   }
 
+  List<CommonLifts> findCommonLifts(
+      List<la.Lifts> list1, List<la.Lifts> list2) {
+    List<CommonLifts> commonLifts = [];
 
-  PanelController _routeDetailPannelController = new PanelController();
+    for (var lift1 in list1) {
+      for (var lift2 in list2) {
+        if (lift1.name == lift2.name) {
+          // Create a new Lifts object with x and y values from both input lists
+          commonLifts.add(CommonLifts(
+              name: lift1.name,
+              distance: lift1.distance,
+              x1: lift1.x,
+              y1: lift1.y,
+              x2: lift2.x,
+              y2: lift2.y));
+          break;
+        }
+      }
+    }
+
+    // Sort the commonLifts based on distance
+    commonLifts.sort((a, b) => (a.distance ?? 0).compareTo(b.distance ?? 0));
+    return commonLifts;
+  }
+
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap, String destinationID)async{
+    PathState.destinationX = landmarksMap[building.selectedLandmarkID]!.coordinateX!;
+    PathState.destinationY = landmarksMap[building.selectedLandmarkID]!.coordinateY!;
+    if(landmarksMap[building.selectedLandmarkID]!.doorX != null){
+      PathState.destinationX = landmarksMap[building.selectedLandmarkID]!.doorX!;
+      PathState.destinationY = landmarksMap[building.selectedLandmarkID]!.doorY!;
+    }
+    PathState.sourceX = user.coordX;
+    PathState.sourceY = user.coordY;
+    if(user.floor == landmarksMap[destinationID]!.floor){
+      await fetchroute(PathState.sourceX, PathState.sourceY, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
+    }else if(user.floor != landmarksMap[destinationID]!.floor){
+      // print("inside for loop");
+      // print(landmarksMap[destinationID]!.lifts![0].x!);
+      // print(landmarksMap[destinationID]!.lifts![0].y!);
+      // print(user.floor);
+      // await fetchroute(PathState.sourceX, PathState.sourceY, landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!,user.floor);
+      // await fetchroute(landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
+    }
+  }
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX, int destinationY, int floor)async{
     int numRows = building.floorDimenssion[floor]![1]; //floor breadth
@@ -899,10 +950,12 @@ class _NavigationState extends State<Navigation> {
       numCols,
       building.nonWalkable[floor]!,
       sourceIndex,
-      destinationIndex,
+      destinationIndex
     );
-
-
+    PathState.path[floor] = path;
+    List<Map<String,int>> directions = tools.getDirections(path, numCols);
+    PathState.directions = directions;
+    print("directions $directions , ${path.length}");
 
     if (path.isNotEmpty) {
       print("Path found: $path");
@@ -915,43 +968,55 @@ class _NavigationState extends State<Navigation> {
       if(!building.nonWalkable[floor]!.contains(node)){
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
-        print("[$row,$col]");
         List<double> value = tools.localtoglobal(row, col);
         coordinates.add(LatLng(value[0], value[1]));
       }
 
     }
     setState(() {
-      singleroute.add(gmap.Polyline(
+      Set<gmap.Polyline> innerset = Set();
+      innerset.add(gmap.Polyline(
         polylineId: PolylineId("route"),
         points: coordinates,
         color: Colors.red,
         width: 1,
       ));
+      singleroute[floor] = innerset;
     });
-
     return path;
   }
 
+
+  PanelController _routeDetailPannelController = new PanelController();
   Widget routeDeatilPannel(){
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    List<Widget> directionWidgets = [];
+    directionWidgets.clear();
+    for(int i = 0 ; i<PathState.directions.length ; i++){
+      if(PathState.directions[i].keys.first == "Straight"){
+        directionWidgets.add(directionInstruction(direction: "Go "+PathState.directions[i].keys.first, distance: (PathState.directions[i].values.first*0.3048).toStringAsFixed(0)));
+      }else{
+        directionWidgets.add(directionInstruction(direction: "Turn "+PathState.directions[i].keys.first+", and Go Straight", distance: (PathState.directions[++i].values.first*0.3048).toStringAsFixed(0)));
+      }
+
+    }
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
-    DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
     if(PathState.path.isNotEmpty){
       if(PathState.sourcePolyID == ""){
         PathState.sourceName = "Your current location";
       }
-      for(int i = 0 ; i<PathState.path.length; i++){
-        time = time + PathState.path[i].length/120;
-        distance = distance + PathState.path[i].length;
-      }
-      time = double.parse(time.toStringAsFixed(1));
+      PathState.path.forEach((key, value) {
+        time = time + value.length/120;
+        distance = distance + value.length;
+      });
+      time = time.ceil().toDouble();
       distance = distance*0.3048;
       distance = double.parse(distance.toStringAsFixed(2));
     }
+    DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
     return Visibility(
       visible: _isRoutePanelOpen,
       child: Stack(
@@ -988,7 +1053,7 @@ class _NavigationState extends State<Navigation> {
                   _isRoutePanelOpen = false;
                   _isLandmarkPanelOpen = true;
                   PathState = pathState(-1, -1, -1, -1, -1, -1);
-                  PathState.path = [];
+                  PathState.path.clear();
                   PathState.sourcePolyID = "";
                   PathState.destinationPolyID = "";
                   singleroute.clear();
@@ -996,6 +1061,7 @@ class _NavigationState extends State<Navigation> {
                     Marker temp = selectedroomMarker.first;
                     selectedroomMarker.clear();
                     selectedroomMarker.add(temp);
+                    pathMarkers.clear();
                     print(selectedroomMarker);
                   });
 
@@ -1049,8 +1115,8 @@ class _NavigationState extends State<Navigation> {
                 ),
               ],
               minHeight: 163,
-              maxHeight: 163,
-              snapPoint: 0.6,
+              maxHeight: screenHeight*0.9,
+              snapPoint: 0.9,
               panel: Stack(
                 children: [
                   Container(
@@ -1133,45 +1199,169 @@ class _NavigationState extends State<Navigation> {
                               SizedBox(
                                 height: 8,
                               ),
-                              Container(
-                                width: 108,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Color(0xff24B9B0),
-                                  borderRadius: BorderRadius.circular(4.0),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 108,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xff24B9B0),
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.assistant_navigation,
+                                            color: Colors.black,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Start",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  Container(
+                                    width: 91,
+                                    height: 40,
+                                    margin: EdgeInsets.only(left: 12),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      border: Border.all(color: Colors.black),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {
+                                        if(_routeDetailPannelController.isPanelOpen){
+                                          _routeDetailPannelController.close();
+                                        }else{
+                                          _routeDetailPannelController.open();
+                                        }
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.short_text_outlined,
+                                            color: Colors.black,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Steps",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: screenWidth,
+                          height: 1,
+                          color: Color(0xffEBEBEB),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 17,top: 12,right: 17),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Steps",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff000000),
+                                  height: 24/18,
                                 ),
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                textAlign: TextAlign.left,
+                              ),
+                              SizedBox(height: 22,),
+                              Container(
+                                height: 522,
+                                child: SingleChildScrollView(
+                                  child: Column(
                                     children: [
-                                      Icon(
-                                        Icons.assistant_navigation,
-                                        color: Colors.black,
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 25,
+                                            margin: EdgeInsets.only(right: 8),
+                                            child: SvgPicture.asset("assets/StartpointVector.svg"),
+                                          ),
+                                          Text(
+                                            "Start point",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff0e0d0d),
+                                              height: 25/16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
                                       ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        "Start",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                        ),
+                                      SizedBox(height: 15,),
+                                      Container(width: screenHeight,height: 1,color: Color(0xffEBEBEB),),
+                                      Column(
+                                        children: directionWidgets,
                                       ),
+                                      SizedBox(height: 22,),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 25,
+                                            margin: EdgeInsets.only(right: 8),
+                                            child: Icon(Icons.pin_drop_sharp,size: 24,),
+                                          ),
+                                          Text(
+                                            "End point",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff0e0d0d),
+                                              height: 25/16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 15,),
+                                      Container(width: screenHeight,height: 1,color: Color(0xffEBEBEB),),
                                     ],
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),
                   Positioned(top:13,right:15,child: IconButton(onPressed: (){
                     _isRoutePanelOpen = false;
                     selectedroomMarker.clear();
+                    pathMarkers.clear();
                     building.selectedLandmarkID = null;
                     PathState = pathState(-1, -1, -1, -1, -1, -1);
-                    PathState.path = [];
+                    PathState.path.clear();
                     PathState.sourcePolyID = "";
                     PathState.destinationPolyID = "";
                     singleroute.clear();
@@ -1211,8 +1401,8 @@ class _NavigationState extends State<Navigation> {
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 polygons: patch.union(closedpolygons),
-                polylines: polylines.union(singleroute),
-                markers: selectedroomMarker.union(Set<Marker>.of(markers)),
+                polylines: singleroute[building.floor] != null?polylines.union(singleroute[building.floor]!):polylines,
+                markers: _isLandmarkPanelOpen?selectedroomMarker.union(Set<Marker>.of(markers)):pathMarkers.union(Set<Marker>.of(markers)),
                 onTap: (x) {},
                 mapType: MapType.normal,
                 buildingsEnabled: false,

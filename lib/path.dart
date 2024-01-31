@@ -56,6 +56,7 @@ List<int> findPath(
         path.insert(0, current.index);
         current = current.parent!;
       }
+      path.insert(0, sourceIndex+1);
       return path;
     }
 

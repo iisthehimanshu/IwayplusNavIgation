@@ -266,4 +266,91 @@ class tools{
     //  pow((second["localy"] - first["localy"]), 2) as double + pow((second["localx"] - first["localx"]), 2) as double ;
     return sqrt(dist);
   }
+
+  static String angleToClocks(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    if (angle >= 337.5 || angle <= 22.5) {
+      return "Straight";
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return "Slight Right";
+    } else if (angle > 67.5 && angle <= 112.5) {
+      return "Right";
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return "Sharp Right";
+    } else if (angle > 157.5 && angle <= 202.5) {
+      return "U Turn";
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return "Sharp Left";
+    } else if (angle > 247.5 && angle <= 292.5) {
+      return "Left";
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return "Slight Left";
+    } else {
+      return "None";
+    }
+
+  }
+  
+  static double calculateAngle(List<int> a, List<int> b, List<int> c) {
+    double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
+    double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
+
+    double angle = (angle2 - angle1) * 180 / pi;
+
+    if (angle < 0) {
+      angle += 360;
+    }
+
+    return angle;
+  }
+  static List<Map<String,int>> getDirections(List<int> path,int columns) {
+    List<Map<String,int>> directions = [{"Straight":1}];
+
+    for (int i = 1; i < path.length - 1; i++) {
+      int prev = path[i - 1];
+      int current = path[i];
+      int next = path[i + 1];
+
+
+      // Compare current and next nodes' indices to determine direction
+
+      int prevrow = prev % columns;
+      int prevrcol = prev ~/ columns;
+      int currrow = current % columns;
+      int currcol = current ~/ columns;
+      int nextrrow = next % columns;
+      int nextrcol = next ~/ columns;
+
+      double angle = calculateAngle([prevrow,prevrcol],[currrow,currcol],[nextrrow,nextrcol]);
+      print(angle);
+      String dir = angleToClocks(angle);
+      if(directions.isNotEmpty){
+        if(directions.last.keys.first != dir){
+          Map<String,int> innermap = {dir:1};
+          directions.add(innermap);
+        }else{
+          directions.last[dir]  = directions.last[dir]! + 1;
+        }
+      }else{
+        Map<String,int> innermap = {dir:1};
+        directions.add(innermap);
+      }
+    }
+    String dir = "Straight";
+    if(directions.isNotEmpty){
+      if(directions.last.keys.first != dir){
+        Map<String,int> innermap = {dir:1};
+        directions.add(innermap);
+      }else{
+        directions.last[dir]  = directions.last[dir]! + 1;
+      }
+    }else{
+      Map<String,int> innermap = {dir:1};
+      directions.add(innermap);
+    }
+    return directions;
+  }
 }

@@ -9,7 +9,8 @@ class pathState{
   int destinationY;
   int sourceFloor;
   int destinationFloor;
-  List<List<int>> path = [];
+  Map<int,List<int>> path = {};
+  List<Map<String,int>> directions = [];
 
   pathState(this.sourceX,this.sourceY,this.sourceFloor,this.destinationX,this.destinationY,this.destinationFloor);
 }

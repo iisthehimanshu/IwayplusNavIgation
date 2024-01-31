@@ -19,7 +19,7 @@ class landmarkApi {
     final Map<String, dynamic> data = {
       "id": "659001bce6c204e1eec04c0f",
     };
-
+    print("inside land");
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
@@ -28,6 +28,7 @@ class landmarkApi {
         'x-access-token': token
       },
     );
+    print("response code in land is ${response.statusCode}");
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       return land.fromJson(responseBody);

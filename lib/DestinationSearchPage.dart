@@ -54,14 +54,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       ),
                       Expanded(
                         child: Container(
-                            child: Text(
-                              "Search",
+                            child: TextFormField(
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                hintText: "Search"
+                              ),
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xff8e8d8d),
-                                height: 25 / 16,
+                                color: Color(0xff000000),
+                                height: 25/16,
                               ),
                             )),
                       ),

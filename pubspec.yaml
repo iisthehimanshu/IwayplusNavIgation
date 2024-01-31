@@ -39,6 +39,12 @@ dependencies:
   http: ^1.1.0
   flutter_speed_dial: ^7.0.0
   collection: ^1.17.1
+  sliding_up_panel: ^2.0.0+1
+  flutter_blue_plus: ^1.31.12
+  shimmer: ^3.0.0
+  permission_handler: ^11.0.1
+  flutter_tts: ^3.8.5
+  flutter_compass: ^0.8.0
 
 dev_dependencies:
   flutter_test:

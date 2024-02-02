@@ -95,6 +95,9 @@ class Landmarks {
         ? new Properties.fromJson(json['properties'])
         : null;
     sId = json['_id'];
+    if(properties!.polyId == null){
+      properties!.polyId = json['_id'];
+    }
     buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
     coordinateY = json['coordinateY']!=null?json['coordinateY'].toInt():json['coordinateY'];

@@ -62,14 +62,15 @@ class _NavigationState extends State<Navigation> {
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
-    zoom: 20,
+    zoom: 0,
   );
   late GoogleMapController _googleMapController;
   Set<Polygon> patch = Set();
   Set<gmap.Polyline> polylines = Set();
   Set<Polygon> closedpolygons = Set();
+  Set<Marker> Markers = Set();
   Set<Marker> selectedroomMarker = Set();
-  Set<Marker> pathMarkers = Set();
+  Map<int,Set<Marker>> pathMarkers = {};
   List<Marker> markers = [];
   Building building = Building(floor: 0, numberOfFloors: 1);
   Map<int,Set<gmap.Polyline>> singleroute = {};
@@ -142,10 +143,8 @@ class _NavigationState extends State<Navigation> {
       building.polyLineData = value;
       createRooms(value, building.floor);
     });
-    print("going to call land");
-    building.landmarkdata = landmarkApi().fetchLandmarkData();
-    building.landmarkdata!.then((value) {
 
+    building.landmarkdata = landmarkApi().fetchLandmarkData().then((value){
       for (int i = 0; i < value.landmarks!.length; i++) {
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
@@ -160,6 +159,8 @@ class _NavigationState extends State<Navigation> {
           building.floorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
         }
       }
+      createMarkers(value,building.floor);
+      return value;
     });
 
     // beaconapi().fetchBeaconData().then((value){
@@ -227,6 +228,9 @@ class _NavigationState extends State<Navigation> {
         building.floor = apibeaconmap[nearestBeacon]!.floor!;
 
         createRooms(building.polyLineData!, building.floor);
+        building.landmarkdata!.then((value){
+          createMarkers(value, building.floor);
+        });
       });
     }
     btadapter.stopScanning();
@@ -296,6 +300,19 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  Future<void> addselectedMarker(LatLng Point) async {
+    selectedroomMarker.clear(); // Clear existing markers
+    setState(() {
+      selectedroomMarker.add(
+        Marker(
+          markerId: MarkerId('selectedroomMarker'),
+          position: Point,
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      );
+    });
+  }
+
   LatLng calculateRoomCenter(List<LatLng> polygonPoints){
     double lat = 0.0;
     double long = 0.0;
@@ -333,6 +350,7 @@ class _NavigationState extends State<Navigation> {
           northeast: LatLng(maxLat, maxLng),
         ),
         0));
+
   }
 
   List<LatLng> getPolygonPoints(Polygon polygon) {
@@ -464,6 +482,123 @@ class _NavigationState extends State<Navigation> {
         }
       }
     });
+  }
+
+
+  void createMarkers(land _landData, int floor) async {
+    Markers.clear();
+    List<Landmarks> landmarks = _landData.landmarks!;
+
+    for (int i = 0; i < landmarks.length; i++) {
+      if(landmarks[i].floor == floor){
+        if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "room door"  && landmarks[i].doorX != null) {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/room_marker_icon.png',
+          );
+          setState(() {
+            List<double> value = tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
+            Markers.add(Marker(
+                markerId: MarkerId("Room $i"),
+                position: LatLng(value[0],value[1]),
+                icon: customMarker,
+              visible: false,
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if(building.selectedLandmarkID != landmarks[i].properties!.polyId){
+                      building.selectedLandmarkID = landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                )
+            ));
+          });
+        } else if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "restRoom") {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/rest_room_marker_icon.png',
+          );
+          setState(() {
+            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+            Markers.add(Marker(
+              markerId: MarkerId("Rest $i"),
+              position: LatLng(value[0], value[1]),
+              icon: customMarker,
+              visible: false,
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if(building.selectedLandmarkID != landmarks[i].properties!.polyId){
+                      building.selectedLandmarkID = landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                )
+            ));
+          });
+        } else if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "main entry") {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/main_entry_marker_icon.png',
+          );
+          setState(() {
+            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+            Markers.add(Marker(
+                markerId: MarkerId("Entry $i"),
+                position: LatLng(value[0], value[1]),
+                icon: customMarker,
+              visible: true,
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if(building.selectedLandmarkID != landmarks[i].properties!.polyId){
+                      building.selectedLandmarkID = landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                ),
+              onTap: (){
+                if(building.selectedLandmarkID != landmarks[i].properties!.polyId){
+                  building.selectedLandmarkID = landmarks[i].properties!.polyId;
+                  _isRoutePanelOpen = false;
+                  singleroute.clear();
+                  _isLandmarkPanelOpen = true;
+                  addselectedMarker(LatLng(value[0], value[1]));
+                }
+              }
+            ));
+          });
+        } else {}
+      }
+    }
+    setState(() {
+      Markers.add(Marker(
+          markerId: MarkerId("Building"),
+          position: _initialCameraPosition.target,
+          icon: BitmapDescriptor.defaultMarker,
+          visible: false,
+      ));
+    });
+
   }
 
   void toggleLandmarkPanel() {
@@ -681,19 +816,19 @@ class _NavigationState extends State<Navigation> {
                                   List<double> svalue = tools.localtoglobal(user.coordX, user.coordY);
                                   List<double> dvalue = tools.localtoglobal(PathState.destinationX, PathState.destinationY);
                                   pathMarkers.clear();
-                                  pathMarkers.add(
-                                      Marker(markerId: MarkerId("destination"),
-                                          position: LatLng(dvalue[0],dvalue[1]),
-                                          icon: BitmapDescriptor.defaultMarker)
-                                  );
-                                  pathMarkers.add(
+                                  Set<Marker> innerMarker = Set();
+                                  innerMarker.add(Marker(markerId: MarkerId("destination"),
+                                      position: LatLng(dvalue[0],dvalue[1]),
+                                      icon: BitmapDescriptor.defaultMarker));
+                                  innerMarker.add(
                                     Marker(
                                       markerId: MarkerId('source'),
                                       position: LatLng(svalue[0], svalue[1]),
                                       icon: BitmapDescriptor.defaultMarker,
                                     ),
                                   );
-                                  setCameraPosition(pathMarkers);
+                                  pathMarkers[snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!] = innerMarker;
+                                  setCameraPosition(innerMarker);
                                   PathState.destinationPolyID = building.selectedLandmarkID!;
                                   PathState.destinationName = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!;
                                   _isRoutePanelOpen = true;
@@ -930,10 +1065,6 @@ class _NavigationState extends State<Navigation> {
     if(user.floor == landmarksMap[destinationID]!.floor){
       await fetchroute(PathState.sourceX, PathState.sourceY, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
     }else if(user.floor != landmarksMap[destinationID]!.floor){
-      // print("inside for loop");
-      // print(landmarksMap[destinationID]!.lifts![0].x!);
-      // print(landmarksMap[destinationID]!.lifts![0].y!);
-      // print(user.floor);
       // await fetchroute(PathState.sourceX, PathState.sourceY, landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!,user.floor);
       // await fetchroute(landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
     }
@@ -955,7 +1086,17 @@ class _NavigationState extends State<Navigation> {
     PathState.path[floor] = path;
     List<Map<String,int>> directions = tools.getDirections(path, numCols);
     PathState.directions = directions;
-    print("directions $directions , ${path.length}");
+
+    await building.landmarkdata!.then((value){
+      print("starting to find");
+      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(path, value.landmarksMap!, 20, numCols, floor);
+      print("length of nearbyLandmarks ${nearbyLandmarks.length}");
+      nearbyLandmarks.forEach((element) {
+        print(element.name);
+      });
+    });
+
+
 
     if (path.isNotEmpty) {
       print("Path found: $path");
@@ -1062,7 +1203,6 @@ class _NavigationState extends State<Navigation> {
                     selectedroomMarker.clear();
                     selectedroomMarker.add(temp);
                     pathMarkers.clear();
-                    print(selectedroomMarker);
                   });
 
                   }, icon: Icon(Icons.arrow_back_ios_new,size: 28,)),
@@ -1249,12 +1389,12 @@ class _NavigationState extends State<Navigation> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
-                                            Icons.short_text_outlined,
+                                            _routeDetailPannelController.isAttached?_routeDetailPannelController.isPanelClosed?Icons.short_text_outlined:Icons.map_sharp: Icons.short_text_outlined,
                                             color: Colors.black,
                                           ),
                                           SizedBox(width: 8),
                                           Text(
-                                            "Steps",
+                                            _routeDetailPannelController.isAttached?_routeDetailPannelController.isPanelClosed?"Steps":"Map" : "Steps",
                                             style: TextStyle(
                                               color: Colors.black,
                                             ),
@@ -1331,7 +1471,7 @@ class _NavigationState extends State<Navigation> {
                                             child: Icon(Icons.pin_drop_sharp,size: 24,),
                                           ),
                                           Text(
-                                            "End point",
+                                            PathState.destinationName,
                                             style: const TextStyle(
                                               fontFamily: "Roboto",
                                               fontSize: 16,
@@ -1379,6 +1519,65 @@ class _NavigationState extends State<Navigation> {
 
 
 
+  Set<Marker> getCombinedMarkers() {
+    if (_isLandmarkPanelOpen) {
+      return (selectedroomMarker.union(Set<Marker>.of(markers))).union(Markers);
+    } else {
+      return pathMarkers[building.floor] != null
+          ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers))).union(Markers)
+          : (Set<Marker>.of(markers)).union(Markers);
+    }
+  }
+
+  void _updateMarkers(double zoom) {
+    print(zoom);
+    Set<Marker> updatedMarkers = Set();
+    setState(() {
+      Markers.forEach((marker) {
+        if (marker.markerId.value.contains("Room")) {
+          Marker _marker = customMarker.visibility(zoom > 20.7, marker);
+          updatedMarkers.add(_marker);
+        }
+        if (marker.markerId.value.contains("Rest")) {
+          Marker _marker = customMarker.visibility(zoom > 19, marker);
+          updatedMarkers.add(_marker);
+        }
+        if (marker.markerId.value.contains("Entry")) {
+          Marker _marker = customMarker.visibility(zoom > 18.5, marker);
+          updatedMarkers.add(_marker);
+        }
+        if (marker.markerId.value.contains("Building")) {
+          Marker _marker = customMarker.visibility(zoom < 16.0, marker);
+          updatedMarkers.add(_marker);
+        }
+      });
+      Markers = updatedMarkers;
+    });
+  }
+
+  void _updateBuilding(double zoom) {
+    print(zoom);
+    Set<Polygon> updatedclosedPolygon = Set();
+    Set<Polygon> updatedpatchPolygon = Set();
+    Set<gmap.Polyline> updatedpolyline = Set();
+    setState(() {
+      closedpolygons.forEach((polygon) {
+        Polygon _polygon = polygon.copyWith(visibleParam: zoom > 16.0 );
+        updatedclosedPolygon.add(_polygon);
+      });
+      patch.forEach((polygon) {
+        Polygon _polygon = polygon.copyWith(visibleParam: zoom > 16.0 );
+        updatedpatchPolygon.add(_polygon);
+      });
+      polylines.forEach((polyline) {
+        gmap.Polyline _polyline = polyline.copyWith(visibleParam: zoom > 16.0 );
+        updatedpolyline.add(_polyline);
+      });
+      closedpolygons = updatedclosedPolygon;
+      patch = updatedpatchPolygon;
+      polylines = updatedpolyline;
+    });
+  }
 
   @override
   void dispose() {
@@ -1402,7 +1601,7 @@ class _NavigationState extends State<Navigation> {
                 zoomGesturesEnabled: true,
                 polygons: patch.union(closedpolygons),
                 polylines: singleroute[building.floor] != null?polylines.union(singleroute[building.floor]!):polylines,
-                markers: _isLandmarkPanelOpen?selectedroomMarker.union(Set<Marker>.of(markers)):pathMarkers.union(Set<Marker>.of(markers)),
+                markers: getCombinedMarkers(),
                 onTap: (x) {},
                 mapType: MapType.normal,
                 buildingsEnabled: false,
@@ -1414,6 +1613,10 @@ class _NavigationState extends State<Navigation> {
                 },
                 onCameraMove: (CameraPosition cameraPosition){
                   mapbearing = cameraPosition.bearing;
+                  if(true){
+                    _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                  }
                 },
               ),
             ),
@@ -1447,6 +1650,9 @@ class _NavigationState extends State<Navigation> {
                           onTap: () {
                             building.floor = i;
                             createRooms(building.polyLineData!, building.floor);
+                            building.landmarkdata!.then((value){
+                              createMarkers(value, building.floor);
+                            });
                           },
                         ),
                     ],

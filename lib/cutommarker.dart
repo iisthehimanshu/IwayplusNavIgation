@@ -24,7 +24,6 @@ class customMarker {
   }
 
   static Marker visibility(bool visible , Marker marker ) {
-    print("$visible HimanTika");
     return Marker(
         markerId: marker.markerId,
         position: marker.position,
@@ -33,5 +32,9 @@ class customMarker {
         anchor: marker.anchor,
         visible: visible
     );
+  }
+
+  static Polygon Polygonvisibility(bool visible , Polygon polygon ) {
+    return polygon.copyWith(visibleParam: visible);
   }
 }

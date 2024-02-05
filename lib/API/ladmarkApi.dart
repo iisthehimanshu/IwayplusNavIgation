@@ -5,7 +5,7 @@ import '../APIMODELS/landmark.dart';
 import 'guestloginapi.dart';
 
 class landmarkApi {
-  final String baseUrl = "https://maps.iwayplus.in/secured/landmarks";
+  final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
   String token = "";
 
   Future<land> fetchLandmarkData() async {

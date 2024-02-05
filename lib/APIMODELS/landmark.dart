@@ -108,6 +108,9 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
+    if(name == "3A-2B-Iwayplus"){
+      print(json['lifts']);
+    }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {

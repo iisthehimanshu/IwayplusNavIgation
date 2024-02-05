@@ -4,6 +4,7 @@ class UserState{
   int coordY;
   double lat;
   double lng;
+  String? key;
 
-  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng});
+  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, this.key = null});
 }

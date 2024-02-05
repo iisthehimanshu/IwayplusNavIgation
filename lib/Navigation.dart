@@ -80,7 +80,7 @@ class _NavigationState extends State<Navigation> {
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
-  UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972);
+  UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
   pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
 
   @override
@@ -94,7 +94,7 @@ class _NavigationState extends State<Navigation> {
       maptheme = value;
     });
     checkPermissions();
-    apiCalls();
+
   }
 
   void handleCompassEvents() {
@@ -117,6 +117,7 @@ class _NavigationState extends State<Navigation> {
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
+    apiCalls();
   }
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
@@ -363,33 +364,66 @@ class _NavigationState extends State<Navigation> {
     return polygonPoints;
   }
 
-  void setCameraPosition(Set<Marker> selectedroomMarker) {
+  void setCameraPosition(Set<Marker> selectedroomMarker1, {Set<Marker>? selectedroomMarker2 = null}) {
     double minLat = double.infinity;
     double minLng = double.infinity;
     double maxLat = double.negativeInfinity;
     double maxLng = double.negativeInfinity;
 
-    for (Marker marker in selectedroomMarker) {
-      double lat = marker.position.latitude;
-      double lng = marker.position.longitude;
+    if(selectedroomMarker2 == null){
+      for (Marker marker in selectedroomMarker1) {
+        double lat = marker.position.latitude;
+        double lng = marker.position.longitude;
 
-      minLat = math.min(minLat, lat);
-      minLng = math.min(minLng, lng);
-      maxLat = math.max(maxLat, lat);
-      maxLng = math.max(maxLng, lng);
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(minLat, minLng),
+        northeast: LatLng(maxLat, maxLng),
+      );
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          bounds,
+          100.0, // padding to adjust the bounding box on the screen
+        ),
+      );
+    }else{
+      for (Marker marker in selectedroomMarker1) {
+        double lat = marker.position.latitude;
+        double lng = marker.position.longitude;
+
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+      for (Marker marker in selectedroomMarker2) {
+        double lat = marker.position.latitude;
+        double lng = marker.position.longitude;
+
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(minLat, minLng),
+        northeast: LatLng(maxLat, maxLng),
+      );
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          bounds,
+          100.0, // padding to adjust the bounding box on the screen
+        ),
+      );
     }
-
-    LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
-
-    _googleMapController.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        bounds,
-        100.0, // padding to adjust the bounding box on the screen
-      ),
-    );
   }
 
 
@@ -813,22 +847,6 @@ class _NavigationState extends State<Navigation> {
                               onPressed: ()async{
                                 _isLandmarkPanelOpen = false;
                                 await calculateroute(snapshot.data!.landmarksMap!, building.selectedLandmarkID!).then((value){
-                                  List<double> svalue = tools.localtoglobal(user.coordX, user.coordY);
-                                  List<double> dvalue = tools.localtoglobal(PathState.destinationX, PathState.destinationY);
-                                  pathMarkers.clear();
-                                  Set<Marker> innerMarker = Set();
-                                  innerMarker.add(Marker(markerId: MarkerId("destination"),
-                                      position: LatLng(dvalue[0],dvalue[1]),
-                                      icon: BitmapDescriptor.defaultMarker));
-                                  innerMarker.add(
-                                    Marker(
-                                      markerId: MarkerId('source'),
-                                      position: LatLng(svalue[0], svalue[1]),
-                                      icon: BitmapDescriptor.defaultMarker,
-                                    ),
-                                  );
-                                  pathMarkers[snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!] = innerMarker;
-                                  setCameraPosition(innerMarker);
                                   PathState.destinationPolyID = building.selectedLandmarkID!;
                                   PathState.destinationName = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!;
                                   _isRoutePanelOpen = true;
@@ -1028,14 +1046,14 @@ class _NavigationState extends State<Navigation> {
     return(y*fl)+x;
   }
 
-  List<CommonLifts> findCommonLifts(
-      List<la.Lifts> list1, List<la.Lifts> list2) {
+  List<CommonLifts> findCommonLifts(List<la.Lifts> list1, List<la.Lifts> list2) {
     List<CommonLifts> commonLifts = [];
 
     for (var lift1 in list1) {
       for (var lift2 in list2) {
         if (lift1.name == lift2.name) {
           // Create a new Lifts object with x and y values from both input lists
+          print("name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
           commonLifts.add(CommonLifts(
               name: lift1.name,
               distance: lift1.distance,
@@ -1053,6 +1071,7 @@ class _NavigationState extends State<Navigation> {
     return commonLifts;
   }
 
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap, String destinationID)async{
     PathState.destinationX = landmarksMap[building.selectedLandmarkID]!.coordinateX!;
     PathState.destinationY = landmarksMap[building.selectedLandmarkID]!.coordinateY!;
@@ -1063,10 +1082,14 @@ class _NavigationState extends State<Navigation> {
     PathState.sourceX = user.coordX;
     PathState.sourceY = user.coordY;
     if(user.floor == landmarksMap[destinationID]!.floor){
+      print("${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
       await fetchroute(PathState.sourceX, PathState.sourceY, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
     }else if(user.floor != landmarksMap[destinationID]!.floor){
-      // await fetchroute(PathState.sourceX, PathState.sourceY, landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!,user.floor);
-      // await fetchroute(landmarksMap[destinationID]!.lifts![0].x!, landmarksMap[destinationID]!.lifts![0].y!, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
+      List<CommonLifts> commonlifts = findCommonLifts(landmarksMap[user.key]!.lifts!, landmarksMap[destinationID]!.lifts!);
+      print("mmm ${commonlifts[0].x1},${commonlifts[0].y1}    ${commonlifts[0].x2},${commonlifts[0].y2}");
+      print("${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
+      await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!,user.floor);
+      await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.destinationX, PathState.destinationY,landmarksMap[destinationID]!.floor!);
     }
   }
 
@@ -1088,17 +1111,27 @@ class _NavigationState extends State<Navigation> {
     PathState.directions = directions;
 
     await building.landmarkdata!.then((value){
-      print("starting to find");
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(path, value.landmarksMap!, 20, numCols, floor);
-      print("length of nearbyLandmarks ${nearbyLandmarks.length}");
-      nearbyLandmarks.forEach((element) {
-        print(element.name);
-      });
     });
 
 
 
     if (path.isNotEmpty) {
+      List<double> svalue = tools.localtoglobal(sourceX, sourceY);
+      List<double> dvalue = tools.localtoglobal(destinationX, destinationY);
+      Set<Marker> innerMarker = Set();
+      innerMarker.add(Marker(markerId: MarkerId("destination"),
+          position: LatLng(dvalue[0],dvalue[1]),
+          icon: BitmapDescriptor.defaultMarker));
+      innerMarker.add(
+        Marker(
+          markerId: MarkerId('source'),
+          position: LatLng(svalue[0], svalue[1]),
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      );
+      pathMarkers[floor] = innerMarker;
+      setCameraPosition(innerMarker);
       print("Path found: $path");
     } else {
       print("No path found.");
@@ -1124,6 +1157,7 @@ class _NavigationState extends State<Navigation> {
       ));
       singleroute[floor] = innerset;
     });
+    print("$floor    $path");
     return path;
   }
 
@@ -1530,7 +1564,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void _updateMarkers(double zoom) {
-    print(zoom);
     Set<Marker> updatedMarkers = Set();
     setState(() {
       Markers.forEach((marker) {
@@ -1556,7 +1589,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void _updateBuilding(double zoom) {
-    print(zoom);
     Set<Polygon> updatedclosedPolygon = Set();
     Set<Polygon> updatedpatchPolygon = Set();
     Set<gmap.Polyline> updatedpolyline = Set();
@@ -1650,6 +1682,9 @@ class _NavigationState extends State<Navigation> {
                           onTap: () {
                             building.floor = i;
                             createRooms(building.polyLineData!, building.floor);
+                            if(pathMarkers[i] != null){
+                              setCameraPosition(pathMarkers[i]!);
+                            }
                             building.landmarkdata!.then((value){
                               createMarkers(value, building.floor);
                             });

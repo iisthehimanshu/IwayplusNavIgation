@@ -95,6 +95,9 @@ class Landmarks {
         ? new Properties.fromJson(json['properties'])
         : null;
     sId = json['_id'];
+    if(properties!.polyId == null){
+      properties!.polyId = json['_id'];
+    }
     buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
     coordinateY = json['coordinateY']!=null?json['coordinateY'].toInt():json['coordinateY'];
@@ -105,6 +108,9 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
+    if(name == "3A-2B-Iwayplus"){
+      print(json['lifts']);
+    }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {

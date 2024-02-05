@@ -28,14 +28,17 @@ class Polyline {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  Map<String, PolyArray>? polylineMap; // New property
 
-  Polyline(
-      {this.sId,
-        this.buildingID,
-        this.floors,
-        this.createdAt,
-        this.updatedAt,
-        this.iV});
+  Polyline({
+    this.sId,
+    this.buildingID,
+    this.floors,
+    this.createdAt,
+    this.updatedAt,
+    this.iV,
+    this.polylineMap,
+  });
 
   Polyline.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
@@ -43,7 +46,14 @@ class Polyline {
     if (json['floors'] != null) {
       floors = <Floors>[];
       json['floors'].forEach((v) {
-        floors!.add(new Floors.fromJson(v));
+        Floors floor = Floors.fromJson(v);
+        floors!.add(floor);
+
+        // Combine polylineMap from each floor into the parent polylineMap
+        if (floor.polylineMap != null) {
+          polylineMap ??= {};
+          polylineMap!.addAll(floor.polylineMap!);
+        }
       });
     }
     createdAt = json['createdAt'];
@@ -61,6 +71,7 @@ class Polyline {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['polylineMap'] = this.polylineMap?.map((key, value) => MapEntry(key, value.toJson()));
     return data;
   }
 }
@@ -68,16 +79,20 @@ class Polyline {
 class Floors {
   String? floor;
   List<PolyArray>? polyArray;
+  Map<String,PolyArray>? polylineMap;
   String? sId;
 
-  Floors({this.floor, this.polyArray, this.sId});
+  Floors({this.floor, this.polyArray, this.sId, this.polylineMap});
 
   Floors.fromJson(Map<dynamic, dynamic> json) {
     floor = json['floor'];
+    polylineMap = {};
     if (json['poly_array'] != null) {
       polyArray = <PolyArray>[];
       json['poly_array'].forEach((v) {
-        polyArray!.add(new PolyArray.fromJson(v));
+        PolyArray _PolyArray = PolyArray.fromJson(v);
+        polyArray!.add(_PolyArray);
+        polylineMap![_PolyArray.id!] = _PolyArray;
       });
     }
     sId = json['_id'];

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 
@@ -325,7 +326,6 @@ class tools{
       int nextrcol = next ~/ columns;
 
       double angle = calculateAngle([prevrow,prevrcol],[currrow,currcol],[nextrrow,nextrcol]);
-      print(angle);
       String dir = angleToClocks(angle);
       if(directions.isNotEmpty){
         if(directions.last.keys.first != dir){
@@ -353,4 +353,40 @@ class tools{
     }
     return directions;
   }
+
+  static List<Landmarks> findNearbyLandmark(List<int>path, Map<String, Landmarks> landmarksMap, int distance, int numCols, int floor){
+    print("called");
+    List<Landmarks> nearbyLandmarks = [];
+    for(int node in path){
+      landmarksMap.forEach((key, value) {
+        if(floor == value.floor){
+          List<int> pCoord = computeCellCoordinates(node, numCols);
+          double d = 0.0;
+          if(value.doorX == null){
+            d = calculateDistance(pCoord, [value.coordinateX!,value.coordinateY!]);
+          }else{
+            d = calculateDistance(pCoord, [value.doorX!,value.doorY!]);
+          }
+          if(d<distance){
+            if(!nearbyLandmarks.contains(value)){
+              nearbyLandmarks.add(value);
+            }
+          }
+        }
+      });
+    }
+    return nearbyLandmarks;
+  }
+
+  static List<int> computeCellCoordinates(int node, int numCols) {
+    int row = (node % numCols);
+    int col = (node ~/ numCols);
+    return [row,col];
+  }
+
+  static double calculateDistance(List<int> p1 , List<int> p2) {
+    return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
+  }
+
+
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:iwayplusnav/API/ladmarkApi.dart';
 
+import 'APIMODELS/landmark.dart';
 import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
   const DestinationSearchPage({super.key});
@@ -9,6 +11,43 @@ class DestinationSearchPage extends StatefulWidget {
 }
 
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
+
+  late land landmarkData;
+
+  List<Widget> searchResults = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchlist();
+  }
+
+  void fetchlist()async{
+    await landmarkApi().fetchLandmarkData().then((value){
+      landmarkData = value;
+    });
+  }
+
+  void search(String searchText){
+    setState(() {
+      searchResults.clear();
+      if(searchText.length>0){
+        landmarkData.landmarksMap!.forEach((key, value) {
+          if(searchResults.length<10){
+            if(value.name != null && value.element!.subType != "beacons"){
+              if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
+                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}"));
+                print(value.name);
+              }
+            }
+          }else{
+            return;
+          }
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -66,6 +105,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 color: Color(0xff000000),
                                 height: 25/16,
                               ),
+                              onChanged: (value){
+                                search(value);
+                              },
                             )),
                       ),
                       Container(
@@ -107,7 +149,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 height: 1,
                 color: Color(0xffB3B3B3),
               ),
-              SearchpageResults(name: 'S', location: 'H',)
+              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: searchResults,)))
             ],
           ),
         ),

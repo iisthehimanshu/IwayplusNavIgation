@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:iwayplusnav/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import 'guestloginapi.dart';
 
@@ -8,6 +10,14 @@ class PolyLineApi {
   String token = "";
 
   Future<polylinedata> fetchPolyData() async {
+    final PolyLineBox = PolylineAPIModelBOX.getData();
+
+    if(PolyLineBox.length!=0){
+      //print("POLYLINE API DATA FROM DATABASE");
+      Map<String, dynamic> responseBody = PolyLineBox.getAt(0)!.responseBody;
+      return polylinedata.fromJson(responseBody);
+    }
+
 
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null){
@@ -29,6 +39,9 @@ class PolyLineApi {
     );
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
+      final polyLineData = PolyLineAPIModel(responseBody: responseBody);
+      PolyLineBox.add(polyLineData);
+      //print("POLYLINE API DATA FROM API");
       return polylinedata.fromJson(responseBody);
     } else {
       print(response.statusCode);

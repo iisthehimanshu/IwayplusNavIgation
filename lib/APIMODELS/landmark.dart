@@ -8,7 +8,7 @@ class land {
 
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
-  land.fromJson(Map<String, dynamic> json) {
+  land.fromJson(Map<dynamic, dynamic> json) {
     landmarkExist = json['landmarkExist'];
     if (json['landmarks'] != null) {
       landmarks = <Landmarks>[];
@@ -88,7 +88,7 @@ class Landmarks {
         this.buildingName,
         this.venueName});
 
-  Landmarks.fromJson(Map<String, dynamic> json) {
+  Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
     properties = json['properties'] != null
@@ -179,7 +179,7 @@ class Element {
 
   Element({this.type, this.subType});
 
-  Element.fromJson(Map<String, dynamic> json) {
+  Element.fromJson(Map<dynamic, dynamic> json) {
     type = json['type'];
     subType = json['subType'];
   }
@@ -306,7 +306,7 @@ class Properties {
         this.floorBreadth,
         this.floorAngle});
 
-  Properties.fromJson(Map<String, dynamic> json) {
+  Properties.fromJson(Map<dynamic, dynamic> json) {
     contactNo = json['contactNo'];
     daysOpen = json['daysOpen'];
     direction = json['direction'];
@@ -433,7 +433,7 @@ class Lifts {
 
   Lifts({this.name, this.distance, this.x, this.y});
 
-  Lifts.fromJson(Map<String, dynamic> json) {
+  Lifts.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
     x = json['x'].toInt();
@@ -468,7 +468,7 @@ class Stairs {
 
   Stairs({this.name, this.distance, this.x, this.y});
 
-  Stairs.fromJson(Map<String, dynamic> json) {
+  Stairs.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
     x = json['x'].toInt();
@@ -491,7 +491,7 @@ class Others {
 
   Others({this.name, this.distance});
 
-  Others.fromJson(Map<String, dynamic> json) {
+  Others.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
   }

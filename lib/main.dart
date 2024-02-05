@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'Navigation.dart';
 
 void main() async {
@@ -11,7 +13,10 @@ void main() async {
   Hive.init(directory.path);
   Hive.registerAdapter(LandMarkApiModelAdapter());
   await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile'); //LandMarkApiModelFile name ke ek file bn rhi hy and usme LandMarkApiModelFile type ke object store ho rhe hy
-
+  Hive.registerAdapter(PatchAPIModelAdapter());
+  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
+  Hive.registerAdapter(PolyLineAPIModelAdapter());
+  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
   runApp(const MyApp());
 }
 

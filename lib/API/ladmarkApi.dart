@@ -16,9 +16,9 @@ class landmarkApi {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
     if(LandMarkBox.length!=0){
-      print("COMING FROM DATABASE ");
-      print("DATABASE SIZE: ${LandMarkBox.length}");
-      print(LandMarkBox.getAt(0)?.responseBody.values);
+      // print("COMING FROM DATABASE ");
+      // print("DATABASE SIZE: ${LandMarkBox.length}");
+      //print(LandMarkBox.getAt(0)?.responseBody.values);
       Map<String, dynamic> responseBody = LandMarkBox.getAt(0)!.responseBody;
      // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
@@ -45,10 +45,10 @@ class landmarkApi {
     print("response code in land is ${response.statusCode}");
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-      final LandMarkBox = LandMarkApiModelBox.getData();
+      //final LandMarkBox = LandMarkApiModelBox.getData();
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
 
-      // print('TESTING LANDMARK API DATABASE START');
+      //print('TESTING LANDMARK API DATABASE START');
       // print(LandMarkBox.length);
       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
       //print(demoresponseBody?.responseBody);

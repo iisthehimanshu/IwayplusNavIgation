@@ -4,15 +4,15 @@ class polylinedata {
 
   polylinedata({this.polylineExist, this.polyline});
 
-  polylinedata.fromJson(Map<String, dynamic> json) {
+  polylinedata.fromJson(Map<dynamic, dynamic> json) {
     polylineExist = json['polylineExist'];
     polyline = json['polyline'] != null
         ? new Polyline.fromJson(json['polyline'])
         : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['polylineExist'] = this.polylineExist;
     if (this.polyline != null) {
       data['polyline'] = this.polyline!.toJson();
@@ -37,7 +37,7 @@ class Polyline {
         this.updatedAt,
         this.iV});
 
-  Polyline.fromJson(Map<String, dynamic> json) {
+  Polyline.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     buildingID = json['building_ID'];
     if (json['floors'] != null) {
@@ -51,8 +51,8 @@ class Polyline {
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['building_ID'] = this.buildingID;
     if (this.floors != null) {
@@ -72,7 +72,7 @@ class Floors {
 
   Floors({this.floor, this.polyArray, this.sId});
 
-  Floors.fromJson(Map<String, dynamic> json) {
+  Floors.fromJson(Map<dynamic, dynamic> json) {
     floor = json['floor'];
     if (json['poly_array'] != null) {
       polyArray = <PolyArray>[];
@@ -83,8 +83,8 @@ class Floors {
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['floor'] = this.floor;
     if (this.polyArray != null) {
       data['poly_array'] = this.polyArray!.map((v) => v.toJson()).toList();
@@ -120,7 +120,7 @@ class PolyArray {
         this.wallNature,
         this.sId});
 
-  PolyArray.fromJson(Map<String, dynamic> json) {
+  PolyArray.fromJson(Map<dynamic, dynamic> json) {
     contact = json['contact'];
     cubicleContact = json['cubicleContact'];
     cubicleName = json['cubicleName'];
@@ -139,8 +139,8 @@ class PolyArray {
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['contact'] = this.contact;
     data['cubicleContact'] = this.cubicleContact;
     data['cubicleName'] = this.cubicleName;
@@ -169,7 +169,7 @@ class Nodes {
   Nodes(
       {this.coordx, this.coordy, this.lat, this.lon, this.indexNode, this.sId});
 
-  Nodes.fromJson(Map<String, dynamic> json) {
+  Nodes.fromJson(Map<dynamic, dynamic> json) {
     coordx = json['coordx'];
     coordy = json['coordy'];
     lat = json['lat'];
@@ -178,8 +178,8 @@ class Nodes {
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['coordx'] = this.coordx;
     data['coordy'] = this.coordy;
     data['lat'] = this.lat;

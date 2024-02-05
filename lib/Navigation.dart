@@ -135,17 +135,20 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls()async{
     await patchAPI().fetchPatchData().then((value) {
+      //print("object ${value.patchData!.length}");
+
       createPatch(value);
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
+      //print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
       createRooms(value, building.floor);
     });
     print("going to call land");
     building.landmarkdata = landmarkApi().fetchLandmarkData();
     building.landmarkdata!.then((value) {
-
+      //print("object ${value.landmarksMap}");
       for (int i = 0; i < value.landmarks!.length; i++) {
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
@@ -279,7 +282,7 @@ class _NavigationState extends State<Navigation> {
           ),
         );
       });
-      fitPolygonInScreen(patch.first);
+      // fitPolygonInScreen(patch.first);
     }
   }
 

@@ -6,6 +6,7 @@ class land {
   List<String>? landmarkNames;
 
 
+
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
   land.fromJson(Map<dynamic, dynamic> json) {
@@ -108,9 +109,7 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
-    if(name == "3A-2B-Iwayplus"){
-      print(json['lifts']);
-    }
+
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {

@@ -4,7 +4,8 @@ import '../DestinationSearchPage.dart';
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
-  const HomepageSearch({this.searchText = "Search"});
+  final Function(String ID) onVenueClicked;
+  const HomepageSearch({this.searchText = "Search", required this.onVenueClicked});
 
   @override
   State<HomepageSearch> createState() => _HomepageSearchState();
@@ -59,7 +60,9 @@ class _HomepageSearchState extends State<HomepageSearch> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => DestinationSearchPage())
-                  );
+                  ).then((value){
+                    widget.onVenueClicked(value);
+                  });
                 },
                 child: Container(
                     child: Text(

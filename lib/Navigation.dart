@@ -124,7 +124,7 @@ class _NavigationState extends State<Navigation> {
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
-    apiCalls();
+
   }
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
@@ -146,8 +146,8 @@ class _NavigationState extends State<Navigation> {
     await patchAPI().fetchPatchData().then((value) {
       print("object ${value.patchData!.length}");
       print(value);
-
       createPatch(value);
+      tools.Data = value;
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
@@ -250,7 +250,7 @@ class _NavigationState extends State<Navigation> {
   }
 
 
-  void createPatch(patchDataModel value) {
+  void createPatch(patchDataModel value)async{
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -296,7 +296,13 @@ class _NavigationState extends State<Navigation> {
           ),
         );
       });
-      // fitPolygonInScreen(patch.first);
+
+      try{
+        fitPolygonInScreen(patch.first);
+      }catch(e){
+
+      }
+
     }
   }
 
@@ -1167,7 +1173,7 @@ class _NavigationState extends State<Navigation> {
         polylineId: PolylineId("route"),
         points: coordinates,
         color: Colors.red,
-        width: 1,
+        width: 3,
       ));
       singleroute[floor] = innerset;
     });
@@ -1625,6 +1631,25 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  void onVenueClicked(String ID){
+    setState(() {
+      if(building.selectedLandmarkID != ID){
+        building.landmarkdata!.then((value){
+          building.floor = value.landmarksMap![ID]!.floor!;
+          createRooms(building.polyLineData!, building.floor);
+          createMarkers(value, building.floor);
+          building.selectedLandmarkID = ID;
+          _isRoutePanelOpen = false;
+          singleroute.clear();
+          _isLandmarkPanelOpen = true;
+          List<double> pvalues = tools.localtoglobal(value.landmarksMap![ID]!.coordinateX!, value.landmarksMap![ID]!.coordinateY!);
+          LatLng point = LatLng(pvalues[0],pvalues[1]);
+          addselectedMarker(point);
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     _googleMapController.dispose();
@@ -1656,6 +1681,10 @@ class _NavigationState extends State<Navigation> {
                 onMapCreated: (controller) {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
+                  apiCalls();
+                  if(patch.isNotEmpty){
+                    fitPolygonInScreen(patch.first);
+                  }
                 },
                 onCameraMove: (CameraPosition cameraPosition){
                   mapbearing = cameraPosition.bearing;
@@ -1693,6 +1722,7 @@ class _NavigationState extends State<Navigation> {
                             fontWeight: FontWeight.w500,
                             height: 19/16,
                           ),),
+                          backgroundColor: pathMarkers[i] == null?Colors.white:Color(0xff24b9b0),
                           onTap: () {
                             building.floor = i;
                             createRooms(building.polyLineData!, building.floor);
@@ -1721,7 +1751,7 @@ class _NavigationState extends State<Navigation> {
                 ],
               ),
             ),
-            Positioned(top: 16, left: 16, right: 16, child: _isLandmarkPanelOpen?Container():HomepageSearch()),
+            Positioned(top: 16, left: 16, right: 16, child: _isLandmarkPanelOpen?Container():HomepageSearch(onVenueClicked: onVenueClicked,)),
             FutureBuilder(
               future: building.landmarkdata,
               builder: (context, snapshot) {

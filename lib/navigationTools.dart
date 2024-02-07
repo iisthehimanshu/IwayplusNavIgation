@@ -4,11 +4,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
+import 'APIMODELS/patchDataModel.dart';
 
 class tools{
 
   static List<PDM.Coordinates>? _cachedCordData;
 
+  static patchDataModel Data = patchDataModel();
 
   static Future<void> fetchData() async {
     await patchAPI().fetchPatchData().then((value){
@@ -74,96 +76,39 @@ class tools{
     }
   }
 
-  static List<double> localtoglobal(int x, int y,) {
+  static List<double> localtoglobal(int x, int y,){
 
     int floor = 0;
 
     List<double> diff = [0,0,0,];
 
-    Map<String, dynamic> cordData =
+
     // {"coordinates" : patchDataApi().fetchedPatchData!.patchData!.coordinates! } ;
-    { "coordinates": [
-      {
-        "localRef": {
-          "lat": "0",
-          "lng": "0"
-        },
-        "globalRef": {
-          "lat": "28.543833319119475",
-          "lng": "77.18729871127312"
-        }
-      },
-      {
-        "localRef": {
-          "lat": "275",
-          "lng": "0"
-        },
-        "globalRef": {
-          "lat": "28.54314073334607",
-          "lng": "77.18695033060165"
-        }
-      },
-      {
-        "localRef": {
-          "lat": "275",
-          "lng": "282"
-        },
-        "globalRef": {
-          "lat": "28.542810928996282",
-          "lng": "77.18774356659209"
-        }
-      },
-      {
-        "localRef": {
-          "lat": "0",
-          "lng": "282"
-        },
-        "globalRef": {
-          "lat": "28.543505872671684",
-          "lng": "77.18809998681755"
-        }
-      }
-    ],
-      "parkingCoords": [
-        {
-          "lat": "28.54390169863704",
-          "lon": "77.1873419496217"
-        },
-        {
-          "lat": "28.543879319250493",
-          "lon": "77.187411625756"
-        },
-        {
-          "lat": "28.543809825335625",
-          "lon": "77.18736472835792"
-        }
-      ]
-    };
 
     List<Map<String, double>> ref = [
       {
-        "lat": double.parse(cordData['coordinates'][2]['globalRef']['lat']),
-        "lon": double.parse(cordData['coordinates'][2]['globalRef']['lng']),
-        "localx": double.parse(cordData['coordinates'][2]['localRef']['lng']),
-        "localy": double.parse(cordData['coordinates'][2]['localRef']['lat']),
+        "lat": double.parse(Data.patchData!.coordinates![2].globalRef!.lat!),
+        "lon": double.parse(Data.patchData!.coordinates![2].globalRef!.lng!),
+        "localx": double.parse(Data.patchData!.coordinates![2].localRef!.lng!),
+        "localy": double.parse(Data.patchData!.coordinates![2].localRef!.lat!),
       },
       {
-        "lat": double.parse(cordData['coordinates'][1]['globalRef']['lat']),
-        "lon": double.parse(cordData['coordinates'][1]['globalRef']['lng']),
-        "localx": double.parse(cordData['coordinates'][1]['localRef']['lng']),
-        "localy": double.parse(cordData['coordinates'][1]['localRef']['lat']),
+        "lat": double.parse(Data.patchData!.coordinates![1].globalRef!.lat!),
+        "lon": double.parse(Data.patchData!.coordinates![1].globalRef!.lng!),
+        "localx": double.parse(Data.patchData!.coordinates![1].localRef!.lng!),
+        "localy": double.parse(Data.patchData!.coordinates![1].localRef!.lat!),
       },
       {
-        "lat": double.parse(cordData['coordinates'][0]['globalRef']['lat']),
-        "lon": double.parse(cordData['coordinates'][0]['globalRef']['lng']),
-        "localx": double.parse(cordData['coordinates'][0]['localRef']['lng']),
-        "localy": double.parse(cordData['coordinates'][0]['localRef']['lat']),
+        "lat": double.parse(Data.patchData!.coordinates![0].globalRef!.lat!),
+        "lon": double.parse(Data.patchData!.coordinates![0].globalRef!.lng!),
+        "localx": double.parse(Data.patchData!.coordinates![0].localRef!.lng!),
+        "localy": double.parse(Data.patchData!.coordinates![0].localRef!.lat!),
       },
       {
-        "lat": double.parse(cordData['coordinates'][3]['globalRef']['lat']),
-        "lon": double.parse(cordData['coordinates'][3]['globalRef']['lng']),
-        "localx": double.parse(cordData['coordinates'][3]['localRef']['lng']),
-        "localy": double.parse(cordData['coordinates'][3]['localRef']['lat']),
+        "lat": double.parse(Data.patchData!.coordinates![3].globalRef!.lat!),
+        "lon": double.parse(Data.patchData!.coordinates![3].globalRef!.lng!),
+        "localx": double.parse(Data.patchData!.coordinates![3].localRef!.lng!),
+        "localy": double.parse(Data.patchData!.coordinates![3].localRef!.lat!),
       },
     ];
 

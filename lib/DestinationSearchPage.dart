@@ -1,5 +1,11 @@
+import 'dart:convert';
+
+import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
+import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Elements/SearchpageResults.dart';
@@ -16,16 +22,36 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   List<Widget> searchResults = [];
 
+  List<Widget> recentResults = [];
+
+  List<dynamic> recent = [];
+
+
   @override
   void initState() {
     super.initState();
     fetchlist();
+    fetchRecents();
+    recentResults.add(Container(
+
+    ));
   }
 
   void fetchlist()async{
     await landmarkApi().fetchLandmarkData().then((value){
       landmarkData = value;
     });
+  }
+
+  void addtoRecents(String name, String location)async{
+
+    if(!recent.contains([name,location])){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      recent.add([name,location]);
+      await prefs.setString('recents', jsonEncode(recent)).then((value){
+        print("saved $name");
+      });
+    }
   }
 
   void search(String searchText){
@@ -36,16 +62,48 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           if(searchResults.length<10){
             if(value.name != null && value.element!.subType != "beacons"){
               if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}"));
-                print(value.name);
+                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked,));
               }
             }
           }else{
             return;
           }
         });
+      }else{
+        searchResults = recentResults;
       }
     });
+  }
+
+  void fetchRecents()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedData = prefs.getString('recents');
+    if(savedData != null){
+      recent = jsonDecode(savedData);
+      setState(() {
+        for(List<dynamic> value in recent){
+          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked));
+          searchResults = recentResults;
+        }
+      });
+    }
+  }
+
+  void onVenueClicked(String name, String location){
+    addtoRecents(name, location);
+    Navigator.pop(context,landmarkData.landmarksNameMap![name]);
+  }
+
+  void showToast(String mssg) {
+    Fluttertoast.showToast(
+      msg: mssg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.grey,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   @override
@@ -124,21 +182,32 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                           ),
                         ),
                       ),
-                      Container(
-                        width: 40,
-                        height: 48,
-                        margin: EdgeInsets.only(right: 7),
-                        child: Center(
-                          child: IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.qr_code_scanner_sharp,
-                              color: Color(0xff8E8C8C),
-                              size: 24,
+                      EasterEggTrigger(
+                        child: Container(
+                          width: 40,
+                          height: 48,
+                          margin: EdgeInsets.only(right: 7),
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                print("no easter egg");
+                              },
+                              icon: Icon(
+                                Icons.qr_code_scanner_sharp,
+                                color: Color(0xff8E8C8C),
+                                size: 24,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        ),codes: [
+                          EasterEggTriggers.SwipeDown,
+                        EasterEggTriggers.LongPress,
+                      ],
+                        action: (){
+                          showToast("Why are you doing this");
+                        },
+                      )
+                      ,
                     ],
                   )),
               SizedBox(

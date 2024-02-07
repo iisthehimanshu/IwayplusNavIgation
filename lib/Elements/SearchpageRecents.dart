@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-class SearchpageResults extends StatefulWidget {
-  final Function(String name, String location) onClicked;
+class SearchpageRecents extends StatefulWidget {
+  final Function(String name, String location) onVenueClicked;
   final String name;
   final String location;
-  const SearchpageResults({required this.name,required this.location,required this.onClicked});
+  const SearchpageRecents({required this.name,required this.location,required this.onVenueClicked});
 
   @override
-  State<SearchpageResults> createState() => _SearchpageResultsState();
+  State<SearchpageRecents> createState() => _SearchpageRecentsState();
 }
 
-class _SearchpageResultsState extends State<SearchpageResults> {
+class _SearchpageRecentsState extends State<SearchpageRecents> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return InkWell(
       onTap: (){
-       widget.onClicked(widget.name, widget.location);
+        widget.onVenueClicked(widget.name,widget.location);
       },
       child:Container(
         padding: EdgeInsets.only(left:4,top: 16,bottom: 16),
@@ -39,7 +39,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                 shape: BoxShape.circle,
                 color: Color(0xffebebeb), // Color of the circular container
               ),
-              child: Icon(Icons.location_on_outlined,color: Colors.black,size: 24,),
+              child: Icon(Icons.access_time_sharp,color: Colors.black,size: 24,),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +55,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                   textAlign: TextAlign.left,
                 ),
                 Text(
-                 widget.location,
+                  widget.location,
                   style: const TextStyle(
                     fontFamily: "Roboto",
                     fontSize: 14,

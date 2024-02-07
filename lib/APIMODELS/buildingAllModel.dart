@@ -28,7 +28,7 @@ class buildingAllModel {
         this.iV,
         this.photo});
 
-  buildingAllModel.fromJson(Map<String, dynamic> json) {
+  buildingAllModel.fromJson(Map<dynamic, dynamic> json) {
     pickupCoords = json['pickupCoords'].cast<double>();
     sId = json['_id'];
     initialBuildingName = json['initialBuildingName'];
@@ -44,8 +44,8 @@ class buildingAllModel {
     photo = json['photo'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['pickupCoords'] = this.pickupCoords;
     data['_id'] = this.sId;
     data['initialBuildingName'] = this.initialBuildingName;

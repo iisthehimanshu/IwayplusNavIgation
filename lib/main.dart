@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'BuildingSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
@@ -17,6 +19,8 @@ void main() async {
   await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
   Hive.registerAdapter(PolyLineAPIModelAdapter());
   await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
+  Hive.registerAdapter(BuildingAllAPIModelAdapter());
+  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
   runApp(const MyApp());
 }
 
@@ -32,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "IWAYPLUS",
-      home: Navigation(),
+      home: BuildingSelectionScreen(),
     );
   }
 }

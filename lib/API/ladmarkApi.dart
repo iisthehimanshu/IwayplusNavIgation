@@ -16,11 +16,11 @@ class landmarkApi {
   Future<land> fetchLandmarkData() async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
-    if(LandMarkBox.containsKey(buildingAllApi.selectedID)){
+    if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
       print("COMING FROM DATABASE ");
       // print("DATABASE SIZE: ${LandMarkBox.length}");
       //print(LandMarkBox.getAt(0)?.responseBody.values);
-      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.selectedID)!.responseBody;
+      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
       print(LandMarkBox.keys);
      // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
@@ -33,7 +33,7 @@ class landmarkApi {
     });
 
     final Map<String, dynamic> data = {
-      "id": buildingAllApi.selectedID,
+      "id": buildingAllApi.getStoredString(),
     };
     print("inside land");
     final response = await http.post(
@@ -54,7 +54,7 @@ class landmarkApi {
       // print(LandMarkBox.length);
       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
       //print(demoresponseBody?.responseBody);
-      LandMarkBox.put(buildingAllApi.selectedID,landmarkData);
+      LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
 
       // print(LandMarkBox.length);
       // print('TESTING LANDMARK API DATABASE OVER');

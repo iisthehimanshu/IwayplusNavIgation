@@ -17,10 +17,10 @@ class PolyLineApi {
   Future<polylinedata> fetchPolyData() async {
     final PolyLineBox = PolylineAPIModelBOX.getData();
 
-    if(PolyLineBox.containsKey(buildingAllApi.selectedID)){
+    if(PolyLineBox.containsKey(buildingAllApi.getStoredString())){
       print("POLYLINE API DATA FROM DATABASE");
-      print(buildingAllApi.selectedID);
-      Map<String, dynamic> responseBody = PolyLineBox.get(buildingAllApi.selectedID)!.responseBody;
+      print(buildingAllApi.getStoredString());
+      Map<String, dynamic> responseBody = PolyLineBox.get(buildingAllApi.getStoredString())!.responseBody;
       return polylinedata.fromJson(responseBody);
     }
 
@@ -32,7 +32,7 @@ class PolyLineApi {
     });
 
     final Map<String, dynamic> data = {
-      "id": buildingAllApi.selectedID,
+      "id": buildingAllApi.getStoredString(),
     };
 
     final response = await http.post(
@@ -46,7 +46,7 @@ class PolyLineApi {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       final polyLineData = PolyLineAPIModel(responseBody: responseBody);
-      PolyLineBox.put(buildingAllApi.selectedID,polyLineData);
+      PolyLineBox.put(buildingAllApi.getStoredString(),polyLineData);
       print("POLYLINE API DATA FROM API");
       return polylinedata.fromJson(responseBody);
     } else {

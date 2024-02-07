@@ -12,6 +12,7 @@ class tools{
 
   static Future<void> fetchData() async {
     await patchAPI().fetchPatchData().then((value){
+      print("object ${value.patchData!.coordinates.toString()}");
       _cachedCordData = value.patchData!.coordinates;
     });
   }

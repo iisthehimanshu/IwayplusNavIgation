@@ -27,7 +27,7 @@ class _directionInstructionState extends State<directionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    }else if(direction == "Turn Slight Right"){
+    }else if(direction == "Turn Slight Right, and Go Straight"){
       return Icon(
         Icons.turn_slight_right,
         color: Colors.black,

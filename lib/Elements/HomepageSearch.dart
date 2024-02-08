@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:iwayplusnav/SourceAndDestinationPage.dart';
 
 import '../DestinationSearchPage.dart';
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
   final Function(String ID) onVenueClicked;
-  const HomepageSearch({this.searchText = "Search", required this.onVenueClicked});
+  final Function(List<String>) fromSourceAndDestinationPage;
+  const HomepageSearch({this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage});
 
   @override
   State<HomepageSearch> createState() => _HomepageSearchState();
@@ -59,7 +61,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => DestinationSearchPage())
+                          builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
                   ).then((value){
                     widget.onVenueClicked(value);
                   });
@@ -123,7 +125,15 @@ class _HomepageSearchState extends State<HomepageSearch> {
               width: 47,
               child: Center(
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SourceAndDestinationPage())
+                    ).then((value){
+                      widget.fromSourceAndDestinationPage(value);
+                    });
+                  },
                   icon: Icon(
                     Icons.directions,
                     color: Color(0xff24B9B0),

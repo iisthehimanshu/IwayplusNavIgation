@@ -10,13 +10,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
-  const DestinationSearchPage({super.key});
+  String hintText ;
+  DestinationSearchPage({required this.hintText});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
 }
 
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
+
 
   late land landmarkData;
 
@@ -33,7 +35,40 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     fetchlist();
     fetchRecents();
     recentResults.add(Container(
-
+      margin: EdgeInsets.only(left:16, right: 16, top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Recent Searches",
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(0xff000000),
+              height: 23/16,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          TextButton(onPressed: (){
+            clearAllRecents();
+            recent.clear();
+            setState(() {
+              recentResults.clear();
+            });
+          }, child: Text(
+            "Clear all",
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Color(0xff24b9b0),
+              height: 25/16,
+            ),
+            textAlign: TextAlign.left,
+          ))
+        ],
+      ),
     ));
   }
 
@@ -43,15 +78,20 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     });
   }
 
-  void addtoRecents(String name, String location)async{
-
-    if(!recent.contains([name,location])){
+  void addtoRecents(String name, String location, String ID)async{
+    if (!recent.any((element) => element[0] == name && element[1] == location)) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      recent.add([name,location]);
+      recent.add([name,location,ID]);
       await prefs.setString('recents', jsonEncode(recent)).then((value){
         print("saved $name");
       });
     }
+
+  }
+
+  void clearAllRecents()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('recents');
   }
 
   void search(String searchText){
@@ -62,7 +102,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           if(searchResults.length<10){
             if(value.name != null && value.element!.subType != "beacons"){
               if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked,));
+                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!,));
               }
             }
           }else{
@@ -82,16 +122,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       recent = jsonDecode(savedData);
       setState(() {
         for(List<dynamic> value in recent){
-          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked));
+          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2],));
           searchResults = recentResults;
         }
       });
     }
   }
 
-  void onVenueClicked(String name, String location){
-    addtoRecents(name, location);
-    Navigator.pop(context,landmarkData.landmarksNameMap![name]);
+  void onVenueClicked(String name, String location, String ID){
+    addtoRecents(name, location,ID);
+    Navigator.pop(context,ID);
   }
 
   void showToast(String mssg) {
@@ -154,7 +194,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                             child: TextFormField(
                               autofocus: true,
                               decoration: InputDecoration(
-                                hintText: "Search"
+                                hintText: "${widget.hintText}"
                               ),
                               style: const TextStyle(
                                 fontFamily: "Roboto",

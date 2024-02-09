@@ -4,6 +4,7 @@ import 'package:iwayplusnav/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
 import 'package:hive/hive.dart';
 
@@ -15,11 +16,12 @@ class landmarkApi {
   Future<land> fetchLandmarkData() async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
-    if(LandMarkBox.length!=0){
-      // print("COMING FROM DATABASE ");
+    if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
+      print("COMING FROM DATABASE ");
       // print("DATABASE SIZE: ${LandMarkBox.length}");
       //print(LandMarkBox.getAt(0)?.responseBody.values);
-      Map<String, dynamic> responseBody = LandMarkBox.getAt(0)!.responseBody;
+      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      print(LandMarkBox.keys);
      // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
     }
@@ -31,7 +33,7 @@ class landmarkApi {
     });
 
     final Map<String, dynamic> data = {
-      "id": "659001bce6c204e1eec04c0f",
+      "id": buildingAllApi.getStoredString(),
     };
     print("inside land");
     final response = await http.post(
@@ -48,11 +50,11 @@ class landmarkApi {
       //final LandMarkBox = LandMarkApiModelBox.getData();
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
 
-      //print('TESTING LANDMARK API DATABASE START');
+      print('TESTING LANDMARK API DATABASE START');
       // print(LandMarkBox.length);
       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
       //print(demoresponseBody?.responseBody);
-      LandMarkBox.add(landmarkData);
+      LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
 
       // print(LandMarkBox.length);
       // print('TESTING LANDMARK API DATABASE OVER');

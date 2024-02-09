@@ -9,6 +9,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:iwayplusnav/API/PolyLineApi.dart';
+import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
@@ -26,6 +27,7 @@ import 'API/ladmarkApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/landmarkPannelShimmer.dart';
@@ -46,13 +48,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Navigation(),
+      home: Navigation(buildingID: "",),
     );
   }
 }
 
 class Navigation extends StatefulWidget {
-  const Navigation({Key? key}) : super(key: key);
+  String buildingID='';
+  Navigation({required this.buildingID});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -85,11 +88,14 @@ class _NavigationState extends State<Navigation> {
       UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "");
   pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
 
+
   @override
   void initState() {
     super.initState();
+    print("widget.buildingID");
+    print(widget.buildingID);
     flutterTts = FlutterTts();
-    handleCompassEvents();
+    //handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -116,6 +122,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void checkPermissions() async {
+    print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
@@ -139,11 +146,14 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls() async {
     await patchAPI().fetchPatchData().then((value) {
+      print("object ${value.patchData!.length}");
+      print(value);
       createPatch(value);
       tools.Data = value;
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
+      print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
       createRooms(value, building.floor);
     });

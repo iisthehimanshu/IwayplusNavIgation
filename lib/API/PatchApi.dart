@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/patchDataModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 
@@ -14,11 +15,14 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData() async {
-    final PatchBox = PatchAPIModelBox.getData();
 
-    if(PatchBox.length!=0){
-      //print("PATCH API DATA FROM DATABASE");
-      Map<String, dynamic> responseBody = PatchBox.getAt(0)!.responseBody;
+    final PatchBox = PatchAPIModelBox.getData();
+    print(buildingAllApi.getStoredString());
+
+    if(PatchBox.containsKey(buildingAllApi.getStoredString())){
+      print("PATCH API DATA FROM DATABASE");
+      print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
+      Map<String, dynamic> responseBody = PatchBox.get(buildingAllApi.getStoredString())!.responseBody;
       return patchDataModel.fromJson(responseBody);
     }
 
@@ -29,7 +33,7 @@ class patchAPI {
     });
 
     final Map<String, dynamic> data = {
-      "id": "659001bce6c204e1eec04c0f"
+      "id": buildingAllApi.getStoredString()
     };
 
     final response = await http.post(
@@ -44,8 +48,9 @@ class patchAPI {
       print("running");
       Map<String, dynamic> responseBody = json.decode(response.body);
        final patchData = PatchAPIModel(responseBody: responseBody);
-       PatchBox.add(patchData);
-      //print("PATCH API DATA FROM API");
+       PatchBox.put(buildingAllApi.getStoredString(),patchData);
+        print("PATCH API DATA FROM API");
+        print(responseBody);
 
       return patchDataModel.fromJson(responseBody);
 

@@ -895,20 +895,11 @@ class _NavigationState extends State<Navigation> {
                                       _isRoutePanelOpen = true;
                                     });
                                   } else {
-                                    PathState.sourceName =
-                                        "Choose Starting Point";
-                                    PathState.destinationPolyID =
-                                        building.selectedLandmarkID!;
-                                    PathState.destinationName = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                            building.selectedLandmarkID]!
-                                        .name!;
-                                    PathState.destinationFloor = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                            building.selectedLandmarkID]!
-                                        .floor!;
+                                    PathState.sourceName = "Choose Starting Point";
+                                    PathState.destinationPolyID = building.selectedLandmarkID!;
+                                    PathState.destinationName = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!;
+                                    PathState.destinationFloor = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!;
+                                    building.selectedLandmarkID = "";
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -1146,6 +1137,7 @@ class _NavigationState extends State<Navigation> {
   int calculateindex(int x, int y, int fl) {
     return (y * fl) + x;
   }
+
 
   List<CommonLifts> findCommonLifts(
       List<la.Lifts> list1, List<la.Lifts> list2) {
@@ -1405,24 +1397,36 @@ class _NavigationState extends State<Navigation> {
                           });
                         },
                       ),
-                      Container(
-                        height: 40,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          border: Border.all(color: Color(0xffE2E2E2)),
-                        ),
-                        padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                        child: Text(
-                          PathState.destinationName,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff282828),
+                      InkWell(
+                        child: Container(
+                          height: 40,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Color(0xffE2E2E2)),
                           ),
-                          textAlign: TextAlign.left,
+                          padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                          child: Text(
+                            PathState.destinationName,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff282828),
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DestinationSearchPage(
+                                    hintText: 'Destination location',
+                                  ))).then((value) {
+                            onDestinationVenueClicked(value);
+                          });
+                        },
                       ),
                     ],
                   ),
@@ -1827,7 +1831,7 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  void onDestinationVenueClicked(String ID) {
+  void onLandmarkVenueClicked(String ID) {
     setState(() {
       if (building.selectedLandmarkID != ID) {
         building.landmarkdata!.then((value) {
@@ -1842,6 +1846,12 @@ class _NavigationState extends State<Navigation> {
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!);
           LatLng point = LatLng(pvalues[0], pvalues[1]);
+          _googleMapController.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              point,
+              22,
+            ),
+          );
           addselectedMarker(point);
         });
       }
@@ -1899,6 +1909,30 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  void onDestinationVenueClicked(String ID) {
+    setState(() {
+      building.landmarkdata!.then((value) {
+        _isLandmarkPanelOpen = false;
+        PathState.destinationX = value.landmarksMap![ID]!.coordinateX!;
+        PathState.destinationY = value.landmarksMap![ID]!.coordinateY!;
+        if (value.landmarksMap![ID]!.doorX != null) {
+          PathState.destinationX = value.landmarksMap![ID]!.doorX!;
+          PathState.destinationY = value.landmarksMap![ID]!.doorY!;
+        }
+        PathState.destinationFloor = value.landmarksMap![ID]!.floor!;
+        PathState.destinationPolyID = ID;
+        PathState.destinationName = value.landmarksMap![ID]!.name!;
+        PathState.path.clear();
+        PathState.directions.clear();
+        calculateroute(value.landmarksMap!).then((value) {
+          _isRoutePanelOpen = true;
+        });
+      });
+    });
+  }
+
+
+
   @override
   void dispose() {
     _googleMapController.dispose();
@@ -1937,6 +1971,7 @@ class _NavigationState extends State<Navigation> {
                     fitPolygonInScreen(patch.first);
                   }
                 },
+
                 onCameraMove: (CameraPosition cameraPosition) {
                   mapbearing = cameraPosition.bearing;
                   if (true) {
@@ -2014,7 +2049,7 @@ class _NavigationState extends State<Navigation> {
                 child: _isLandmarkPanelOpen
                     ? Container()
                     : HomepageSearch(
-                        onVenueClicked: onDestinationVenueClicked,
+                        onVenueClicked: onLandmarkVenueClicked,
                         fromSourceAndDestinationPage:
                             fromSourceAndDestinationPage,
                       )),

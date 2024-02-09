@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class Node {
   int index;
   int x, y;
@@ -118,14 +120,15 @@ List<int> getNeighbors(
 }
 
 int heuristic(Node a, Node b) {
-  double distance =
-  ((a.x - b.x).abs() + (a.y - b.y).abs()).toDouble();
-  return distance.round();
+  double dx = (a.x - b.x).toDouble();
+  double dy = (a.y - b.y).toDouble();
+  return sqrt(dx * dx + dy * dy).round();
 }
 
 int getMovementCost(Node a, Node b) {
-  return (a.x != b.x && a.y != b.y) ? 14 : 10;
+  return (a.x != b.x && a.y != b.y) ? 15 : 10;
 }
+
 
 
 

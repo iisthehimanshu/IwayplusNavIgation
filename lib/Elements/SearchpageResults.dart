@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 class SearchpageResults extends StatefulWidget {
-  final Function(String name, String location) onClicked;
+  final Function(String name, String location, String ID) onClicked;
   final String name;
   final String location;
-  const SearchpageResults({required this.name,required this.location,required this.onClicked});
+  final String ID;
+  const SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID});
 
   @override
   State<SearchpageResults> createState() => _SearchpageResultsState();
@@ -16,7 +17,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
     double screenHeight = MediaQuery.of(context).size.height;
     return InkWell(
       onTap: (){
-       widget.onClicked(widget.name, widget.location);
+       widget.onClicked(widget.name, widget.location, widget.ID);
       },
       child:Container(
         padding: EdgeInsets.only(left:4,top: 16,bottom: 16),

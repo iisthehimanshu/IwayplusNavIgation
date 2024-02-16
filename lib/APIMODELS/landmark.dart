@@ -192,43 +192,29 @@ class Element {
 }
 
 class Properties {
-  String? contactNo;
-  String? daysOpen;
-  String? direction;
-  String? doorMaterial;
-  String? doorType;
+  Null? contactNo;
+  Null? daysOpen;
+  Null? direction;
+  Null? doorMaterial;
+  Null? doorType;
   String? email;
-  String? endTime;
+  Null? endTime;
   String? latitude;
   String? longitude;
-  String? motion;
+  Null? motion;
   String? node;
   String? nodeId;
-  String? openingMechanism;
+  Null? openingMechanism;
   String? protocol;
-  String? startTime;
-  String? timings;
-  String? url;
-  List<String>? nonWalkableGrids;
-  List<String>? flrDistMatrix;
-  List<String>? frConn;
-  List<String>? clickedPoints;
-  List<String>? polygonId;
-  bool? polygonExist;
-  String? polyId;
-  String? downwardSteps;
-  String? name;
-  String? stepHeight;
-  int? stepsNumber;
-  String? upwardSteps;
-  String? stairsPoint;
-  String? wheelChairAccessibility;
-  String? audio;
-  String? brailleAvailability;
-  String? capacity;
-  String? callLocation;
-  String? panelDir;
-  String? macId;
+  Null? startTime;
+  Null? timings;
+  Null? url;
+  Null? macId;
+  String? arName;
+  String? arValue;
+  String? approxHeight;
+  Null? tapDirection;
+  Null? tapType;
   String? basinClock;
   bool? blowDryer;
   String? cubicleClock;
@@ -244,9 +230,31 @@ class Properties {
   bool? toiletRolls;
   String? urinalClock;
   String? washroomType;
+  String? wheelChairAccessibility;
+  String? downwardSteps;
+  String? name;
+  Null? stepHeight;
+  Null? stepsNumber;
+  String? upwardSteps;
+  Null? stairsPoint;
+  String? audio;
+  String? brailleAvailability;
+  Null? capacity;
+  Null? callLocation;
+  String? panelDir;
+  Null? shopNature;
+  Null? photo;
+  bool? polygonExist;
+  String? polyId;
+  Null? filename;
+  List<String>? nonWalkableGrids;
   int? floorLength;
   int? floorBreadth;
-  int? floorAngle;
+  List<String>? flrDistMatrix;
+  List<String>? frConn;
+  List<String>? clickedPoints;
+  Null? floorAngle;
+  List<String>? polygonId;
 
   Properties(
       {this.contactNo,
@@ -266,26 +274,12 @@ class Properties {
         this.startTime,
         this.timings,
         this.url,
-        this.nonWalkableGrids,
-        this.flrDistMatrix,
-        this.frConn,
-        this.clickedPoints,
-        this.polygonId,
-        this.polygonExist,
-        this.polyId,
-        this.downwardSteps,
-        this.name,
-        this.stepHeight,
-        this.stepsNumber,
-        this.upwardSteps,
-        this.stairsPoint,
-        this.wheelChairAccessibility,
-        this.audio,
-        this.brailleAvailability,
-        this.capacity,
-        this.callLocation,
-        this.panelDir,
         this.macId,
+        this.arName,
+        this.arValue,
+        this.approxHeight,
+        this.tapDirection,
+        this.tapType,
         this.basinClock,
         this.blowDryer,
         this.cubicleClock,
@@ -301,9 +295,31 @@ class Properties {
         this.toiletRolls,
         this.urinalClock,
         this.washroomType,
+        this.wheelChairAccessibility,
+        this.downwardSteps,
+        this.name,
+        this.stepHeight,
+        this.stepsNumber,
+        this.upwardSteps,
+        this.stairsPoint,
+        this.audio,
+        this.brailleAvailability,
+        this.capacity,
+        this.callLocation,
+        this.panelDir,
+        this.shopNature,
+        this.photo,
+        this.polygonExist,
+        this.polyId,
+        this.filename,
+        this.nonWalkableGrids,
         this.floorLength,
         this.floorBreadth,
-        this.floorAngle});
+        this.flrDistMatrix,
+        this.frConn,
+        this.clickedPoints,
+        this.floorAngle,
+        this.polygonId});
 
   Properties.fromJson(Map<dynamic, dynamic> json) {
     contactNo = json['contactNo'];
@@ -323,26 +339,12 @@ class Properties {
     startTime = json['startTime'];
     timings = json['timings'];
     url = json['url'];
-    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
-    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
-    frConn = json['frConn'].cast<String>();
-    clickedPoints = json['clickedPoints'].cast<String>();
-    polygonId = json['polygonId'].cast<String>();
-    polygonExist = json['polygonExist'];
-    polyId = json['polyId'];
-    downwardSteps = json['downwardSteps'];
-    name = json['name'];
-    stepHeight = json['stepHeight'];
-    stepsNumber = json['stepsNumber'];
-    upwardSteps = json['upwardSteps'];
-    stairsPoint = json['stairsPoint'];
-    wheelChairAccessibility = json['wheelChairAccessibility'];
-    audio = json['audio'];
-    brailleAvailability = json['brailleAvailability'];
-    capacity = json['capacity'];
-    callLocation = json['callLocation'];
-    panelDir = json['panelDir'];
     macId = json['macId'];
+    arName = json['arName'];
+    arValue = json['arValue'];
+    approxHeight = json['approxHeight'];
+    tapDirection = json['tapDirection'];
+    tapType = json['tapType'];
     basinClock = json['basinClock'];
     blowDryer = json['blowDryer'];
     cubicleClock = json['cubicleClock'];
@@ -358,9 +360,31 @@ class Properties {
     toiletRolls = json['toiletRolls'];
     urinalClock = json['urinalClock'];
     washroomType = json['washroomType'];
+    wheelChairAccessibility = json['wheelChairAccessibility'];
+    downwardSteps = json['downwardSteps'];
+    name = json['name'];
+    stepHeight = json['stepHeight'];
+    stepsNumber = json['stepsNumber'];
+    upwardSteps = json['upwardSteps'];
+    stairsPoint = json['stairsPoint'];
+    audio = json['audio'];
+    brailleAvailability = json['brailleAvailability'];
+    capacity = json['capacity'];
+    callLocation = json['callLocation'];
+    panelDir = json['panelDir'];
+    shopNature = json['shopNature'];
+    photo = json['photo'];
+    polygonExist = json['polygonExist'];
+    polyId = json['polyId'];
+    filename = json['filename'];
+    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
     floorLength = json['floorLength'];
     floorBreadth = json['floorBreadth'];
+    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
+    frConn = json['frConn'].cast<String>();
+    clickedPoints = json['clickedPoints'].cast<String>();
     floorAngle = json['floorAngle'];
+    polygonId = json['polygonId'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -382,26 +406,12 @@ class Properties {
     data['startTime'] = this.startTime;
     data['timings'] = this.timings;
     data['url'] = this.url;
-    data['nonWalkableGrids'] = this.nonWalkableGrids;
-    data['flr_dist_matrix'] = this.flrDistMatrix;
-    data['frConn'] = this.frConn;
-    data['clickedPoints'] = this.clickedPoints;
-    data['polygonId'] = this.polygonId;
-    data['polygonExist'] = this.polygonExist;
-    data['polyId'] = this.polyId;
-    data['downwardSteps'] = this.downwardSteps;
-    data['name'] = this.name;
-    data['stepHeight'] = this.stepHeight;
-    data['stepsNumber'] = this.stepsNumber;
-    data['upwardSteps'] = this.upwardSteps;
-    data['stairsPoint'] = this.stairsPoint;
-    data['wheelChairAccessibility'] = this.wheelChairAccessibility;
-    data['audio'] = this.audio;
-    data['brailleAvailability'] = this.brailleAvailability;
-    data['capacity'] = this.capacity;
-    data['callLocation'] = this.callLocation;
-    data['panelDir'] = this.panelDir;
     data['macId'] = this.macId;
+    data['arName'] = this.arName;
+    data['arValue'] = this.arValue;
+    data['approxHeight'] = this.approxHeight;
+    data['tapDirection'] = this.tapDirection;
+    data['tapType'] = this.tapType;
     data['basinClock'] = this.basinClock;
     data['blowDryer'] = this.blowDryer;
     data['cubicleClock'] = this.cubicleClock;
@@ -417,9 +427,31 @@ class Properties {
     data['toiletRolls'] = this.toiletRolls;
     data['urinalClock'] = this.urinalClock;
     data['washroomType'] = this.washroomType;
+    data['wheelChairAccessibility'] = this.wheelChairAccessibility;
+    data['downwardSteps'] = this.downwardSteps;
+    data['name'] = this.name;
+    data['stepHeight'] = this.stepHeight;
+    data['stepsNumber'] = this.stepsNumber;
+    data['upwardSteps'] = this.upwardSteps;
+    data['stairsPoint'] = this.stairsPoint;
+    data['audio'] = this.audio;
+    data['brailleAvailability'] = this.brailleAvailability;
+    data['capacity'] = this.capacity;
+    data['callLocation'] = this.callLocation;
+    data['panelDir'] = this.panelDir;
+    data['shopNature'] = this.shopNature;
+    data['photo'] = this.photo;
+    data['polygonExist'] = this.polygonExist;
+    data['polyId'] = this.polyId;
+    data['filename'] = this.filename;
+    data['nonWalkableGrids'] = this.nonWalkableGrids;
     data['floorLength'] = this.floorLength;
     data['floorBreadth'] = this.floorBreadth;
+    data['flr_dist_matrix'] = this.flrDistMatrix;
+    data['frConn'] = this.frConn;
+    data['clickedPoints'] = this.clickedPoints;
     data['floorAngle'] = this.floorAngle;
+    data['polygonId'] = this.polygonId;
     return data;
   }
 }

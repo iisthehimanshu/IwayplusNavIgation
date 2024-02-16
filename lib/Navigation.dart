@@ -12,6 +12,7 @@ import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
+import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
@@ -147,8 +148,6 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls() async {
     await patchAPI().fetchPatchData().then((value) {
-      print("object ${value.patchData!.length}");
-      print(value);
       createPatch(value);
       tools.Data = value;
     });
@@ -160,7 +159,11 @@ class _NavigationState extends State<Navigation> {
     });
 
     building.landmarkdata = landmarkApi().fetchLandmarkData().then((value) {
+      Map<int,LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
+        if(value.landmarks![i].element!.subType == "AR"){
+          coordinates[int.parse(value.landmarks![i].properties!.arValue!)] = LatLng(double.parse(value.landmarks![i].properties!.latitude!), double.parse(value.landmarks![i].properties!.longitude!));
+        }
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
@@ -178,6 +181,7 @@ class _NavigationState extends State<Navigation> {
           ];
         }
       }
+      createARPatch(coordinates);
       createMarkers(value, building.floor);
       return value;
     });
@@ -308,6 +312,29 @@ class _NavigationState extends State<Navigation> {
       try {
         fitPolygonInScreen(patch.first);
       } catch (e) {}
+    }
+  }
+
+  void createARPatch(Map<int,LatLng> coordinates) async {
+    if (coordinates.isNotEmpty) {
+      List<LatLng> points = [];
+      for(int i = 1 ; i<=coordinates.length; i++){
+        points.add(coordinates[i]!);
+      }
+      setState(() {
+        patch.clear();
+        patch.add(
+          Polygon(
+            polygonId: PolygonId('patch'),
+            points: points,
+            strokeWidth: 2,
+            strokeColor: Colors.blue,
+            fillColor: Colors.white,
+            geodesic: false,
+            consumeTapEvents: true,
+          ),
+        );
+      });
     }
   }
 
@@ -2187,11 +2214,12 @@ class _NavigationState extends State<Navigation> {
                 right: 16,
                 child: _isLandmarkPanelOpen
                     ? Container()
-                    : HomepageSearch(
-                        onVenueClicked: onLandmarkVenueClicked,
-                        fromSourceAndDestinationPage:
-                            fromSourceAndDestinationPage,
-                      )
+                    : buildingCard(imageURL: "imageURL", Name: "Name", Address: "Address", Distance: 88, NumberofBuildings: 3, Tag: 'Academic',)
+                // HomepageSearch(
+                //         onVenueClicked: onLandmarkVenueClicked,
+                //         fromSourceAndDestinationPage:
+                //             fromSourceAndDestinationPage,
+                //       )
             ),
             FutureBuilder(
               future: building.landmarkdata,

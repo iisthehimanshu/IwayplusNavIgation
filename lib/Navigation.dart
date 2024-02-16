@@ -30,6 +30,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
+import 'Elements/SearchNearby.dart';
 import 'Elements/landmarkPannelShimmer.dart';
 import 'SourceAndDestinationPage.dart';
 import 'bluetooth_scanning.dart';
@@ -515,17 +516,145 @@ class _NavigationState extends State<Navigation> {
                   }));
             }
           } else if (polyArray.polygonType == 'Cubicle') {
+            if(polyArray.cubicleName == "Green Area"){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                    polygonId: PolygonId(polyArray.id!),
+                    points: coordinates,
+                    strokeWidth: 1,
+                    // Modify the color and opacity based on the selectedRoomId
+
+                    strokeColor: Colors.black,
+                    fillColor: Color(0xff7CFC00),
+                    consumeTapEvents: true,
+                    ));
+              }
+            }else if(polyArray.cubicleName == "Male Washroom"){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff0000FF),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName == "Female Washroom"){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFF69B4),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName!.toLowerCase().contains("fire")){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFF4500),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName!.toLowerCase().contains("water")){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff00FFFF),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName!.toLowerCase().contains("wall")){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffCCCCCC),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName == "Restricted Area"){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff800000),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if(polyArray.cubicleName == "Non Walkable Area"){
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff333333),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else{
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  strokeColor: Colors.black,
+                  fillColor: Colors.black.withOpacity(0.2),
+                ));
+              }
+            }
+          }else if(polyArray.polygonType == "Wall"){
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
               closedpolygons.add(Polygon(
                 polygonId: PolygonId(polyArray.id!),
                 points: coordinates,
                 strokeWidth: 1,
+                // Modify the color and opacity based on the selectedRoomId
+
                 strokeColor: Colors.black,
-                fillColor: Colors.black.withOpacity(0.2),
+                fillColor: Color(0xffCCCCCC),
+                consumeTapEvents: true,
               ));
             }
-          } else {
+          }else {
             polylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
@@ -2062,7 +2191,8 @@ class _NavigationState extends State<Navigation> {
                         onVenueClicked: onLandmarkVenueClicked,
                         fromSourceAndDestinationPage:
                             fromSourceAndDestinationPage,
-                      )),
+                      )
+            ),
             FutureBuilder(
               future: building.landmarkdata,
               builder: (context, snapshot) {

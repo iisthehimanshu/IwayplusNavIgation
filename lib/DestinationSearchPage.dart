@@ -4,6 +4,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
+import 'package:iwayplusnav/Elements/SearchNearby.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -258,7 +259,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 height: 1,
                 color: Color(0xffB3B3B3),
               ),
-              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: searchResults,)))
+              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: searchResults,))),
             ],
           ),
         ),

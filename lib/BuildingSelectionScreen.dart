@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iwayplusnav/Elements/buildingCard.dart';
 
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAllModel.dart';
@@ -17,7 +18,7 @@ class BuildingSelectionScreen extends StatefulWidget{
 class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
   late List<buildingAllModel> buildingList=[];
   bool isLoading_buildingList = true;
-
+  List<Widget> BuildingCard = [];
   @override
   void initState(){
     super.initState();
@@ -29,8 +30,18 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
     await buildingAllApi().fetchBuildingAllData().then((value) {
       setState(() {
         buildingList = value;
+        createBuildingCards(buildingList);
         isLoading_buildingList = false; // Set loading to false when data is loaded
       });
+    });
+  }
+
+  void createBuildingCards(List<buildingAllModel> buildingList){
+    setState(() {
+      BuildingCard.add(SizedBox(height: 12,));
+      for(int i = 0; i<buildingList.length; i++){
+        BuildingCard.add(buildingCard(imageURL: buildingList[i].photo != null? buildingList[i].photo!:"", Name: buildingList[i].buildingName!, Tag: buildingList[i].category != null?buildingList[i].category!:"", Address: buildingList[i].address!, Distance: 119, NumberofBuildings: 3, bid: buildingList[i].sId!,));
+      }
     });
   }
 
@@ -101,40 +112,11 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                 )
                 // Show linear loading indicator
               )
-              : AnimationLimiter(
-          child: ListView.builder(
-            itemCount: buildingList.length,
-            itemBuilder: (context, index) {
-              // Apply animation to each ListTile
-              return AnimationConfiguration.staggeredList(
-                position: index,
-                duration: const Duration(milliseconds: 500),
-                child: SlideAnimation(
-                  verticalOffset: 50.0,
-                  child: FadeInAnimation(
-                    child: ListTile(
-                      title: Text(buildingList[index].buildingName!),
-                      subtitle: Text(buildingList[index].sId!),
-                      onTap: () {
-                        // Navigate to a new screen on tap
-                        print("buildingList[index].sId!");
-                        print(buildingList[index].sId!);
-                        buildingAllApi.setStoredString(buildingList[index].sId!);
-                        print(buildingAllApi.getStoredString());
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Navigation(buildingID: buildingList[index].sId!),
-                          ),
-                        );                      },
-                      // Add more UI elements based on your data
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+              : SingleChildScrollView(
+                child: Column(
+          children: BuildingCard,
         ),
+              )
 
       ),
     );

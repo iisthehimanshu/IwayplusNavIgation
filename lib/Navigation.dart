@@ -2214,12 +2214,11 @@ class _NavigationState extends State<Navigation> {
                 right: 16,
                 child: _isLandmarkPanelOpen
                     ? Container()
-                    : buildingCard(imageURL: "imageURL", Name: "Name", Address: "Address", Distance: 88, NumberofBuildings: 3, Tag: 'Academic',)
-                // HomepageSearch(
-                //         onVenueClicked: onLandmarkVenueClicked,
-                //         fromSourceAndDestinationPage:
-                //             fromSourceAndDestinationPage,
-                //       )
+                    : HomepageSearch(
+                        onVenueClicked: onLandmarkVenueClicked,
+                        fromSourceAndDestinationPage:
+                            fromSourceAndDestinationPage,
+                      )
             ),
             FutureBuilder(
               future: building.landmarkdata,

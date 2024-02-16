@@ -72,12 +72,12 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
           actions: [
             Container(
               margin: EdgeInsets.only(right: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(
-                  color: Color(0x204A4545),
-                ),
-              ),
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(8.0),
+              //   border: Border.all(
+              //     color: Color(0x204A4545),
+              //   ),
+              // ),
               child: IconButton(
                 onPressed: () {
                   // Handle search icon pressed
@@ -113,9 +113,12 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                 // Show linear loading indicator
               )
               : SingleChildScrollView(
-                child: Column(
+                child: Container(
+                  color: Colors.white,
+                  child: Column(
           children: BuildingCard,
         ),
+                ),
               )
 
       ),

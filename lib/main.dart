@@ -7,6 +7,7 @@ import 'BuildingSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'MainScreen.dart';
 import 'Navigation.dart';
 
 void main() async {
@@ -36,7 +37,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "IWAYPLUS",
-      home: BuildingSelectionScreen(),
+      home: MainScreen(initialIndex: 0,),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAllModel.dart';
@@ -33,10 +34,55 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          title: Container(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              "Iwayplus",
+              style: const TextStyle(
+                fontFamily: "Roboto",
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Color(0xff000000),
+              ),
+            ),
+          ),
+          centerTitle: true,
+          leading: Container(
+            alignment: Alignment.centerRight,
+            width: 60,
+            child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
+          ),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(
+                  color: Color(0x204A4545),
+                ),
+              ),
+              child: IconButton(
+                onPressed: () {
+                  // Handle search icon pressed
+                  // You can add your search functionality here
+                },
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.black,
+                ),
+                iconSize: 30,
+              ),
+            ),
+          ],
+          backgroundColor: Color(0xffFFFFFF),
+          elevation: 0,
+        ),
         body: isLoading_buildingList
             ? Center(
                 child: Animate(

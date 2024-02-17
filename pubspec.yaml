@@ -55,6 +55,9 @@ dependencies:
   shared_preferences: ^2.2.2
   easter_egg_trigger: ^1.0.1
   fluttertoast: ^8.2.4
+  anim_search_bar: ^2.0.3
+  expandable_search_bar: ^0.0.1
+  easy_search_bar: ^2.5.0
 
 dev_dependencies:
   build_runner: ^2.4.7

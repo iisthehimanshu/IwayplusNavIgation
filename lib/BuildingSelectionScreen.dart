@@ -89,12 +89,12 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
           actions: [
             Container(
               margin: EdgeInsets.only(right: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(
-                  color: Color(0x204A4545),
-                ),
-              ),
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(8.0),
+              //   border: Border.all(
+              //     color: Color(0x204A4545),
+              //   ),
+              // ),
               child: IconButton(
                 icon: Icon(Icons.search),
                 color: Color(0xffFFFFFF),

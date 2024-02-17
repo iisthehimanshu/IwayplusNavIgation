@@ -316,6 +316,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void createARPatch(Map<int,LatLng> coordinates) async {
+    print("object $coordinates");
     if (coordinates.isNotEmpty) {
       List<LatLng> points = [];
       for(int i = 1 ; i<=coordinates.length; i++){
@@ -328,7 +329,6 @@ class _NavigationState extends State<Navigation> {
             polygonId: PolygonId('patch'),
             points: points,
             strokeWidth: 2,
-            strokeColor: Colors.blue,
             fillColor: Colors.white,
             geodesic: false,
             consumeTapEvents: true,
@@ -533,6 +533,8 @@ class _NavigationState extends State<Navigation> {
                     );
                     setState(() {
                       if (building.selectedLandmarkID != polyArray.id) {
+                        print("inside for loop");
+                        print(polyArray.id);
                         building.selectedLandmarkID = polyArray.id;
                         _isRoutePanelOpen = false;
                         singleroute.clear();

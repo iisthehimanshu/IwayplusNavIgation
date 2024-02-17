@@ -6,7 +6,6 @@ class land {
   List<String>? landmarkNames;
 
 
-
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
   land.fromJson(Map<dynamic, dynamic> json) {
@@ -109,7 +108,6 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
-
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {
@@ -192,29 +190,29 @@ class Element {
 }
 
 class Properties {
-  Null? contactNo;
-  Null? daysOpen;
-  Null? direction;
-  Null? doorMaterial;
-  Null? doorType;
+  String? contactNo;
+  String? daysOpen;
+  String? direction;
+  String? doorMaterial;
+  String? doorType;
   String? email;
-  Null? endTime;
+  String? endTime;
   String? latitude;
   String? longitude;
-  Null? motion;
+  String? motion;
   String? node;
   String? nodeId;
-  Null? openingMechanism;
+  String? openingMechanism;
   String? protocol;
-  Null? startTime;
-  Null? timings;
-  Null? url;
-  Null? macId;
+  String? startTime;
+  String? timings;
+  String? url;
+  String? macId;
   String? arName;
   String? arValue;
   String? approxHeight;
-  Null? tapDirection;
-  Null? tapType;
+  String? tapDirection;
+  String? tapType;
   String? basinClock;
   bool? blowDryer;
   String? cubicleClock;
@@ -233,27 +231,27 @@ class Properties {
   String? wheelChairAccessibility;
   String? downwardSteps;
   String? name;
-  Null? stepHeight;
-  Null? stepsNumber;
+  String? stepHeight;
+  String? stepsNumber;
   String? upwardSteps;
-  Null? stairsPoint;
+  String? stairsPoint;
   String? audio;
   String? brailleAvailability;
-  Null? capacity;
-  Null? callLocation;
+  String? capacity;
+  String? callLocation;
   String? panelDir;
-  Null? shopNature;
-  Null? photo;
+  String? shopNature;
+  String? photo;
   bool? polygonExist;
   String? polyId;
-  Null? filename;
+  String? filename;
   List<String>? nonWalkableGrids;
   int? floorLength;
   int? floorBreadth;
   List<String>? flrDistMatrix;
   List<String>? frConn;
   List<String>? clickedPoints;
-  Null? floorAngle;
+  int? floorAngle;
   List<String>? polygonId;
 
   Properties(
@@ -387,7 +385,7 @@ class Properties {
     polygonId = json['polygonId'].cast<String>();
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['contactNo'] = this.contactNo;
     data['daysOpen'] = this.daysOpen;

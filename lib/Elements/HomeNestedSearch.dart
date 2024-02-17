@@ -28,7 +28,7 @@ class HomeNestedSearch extends SearchDelegate{
         onPressed: (){
           close(context, null);
         },
-        icon: const Icon(Icons.clear)
+        icon: const Icon(Icons.arrow_back)
     );
   }
 

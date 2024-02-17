@@ -252,6 +252,44 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                           },
                           itemCount: newbuildingList.length,
                         ),
+                        ListView.builder(
+                          itemBuilder: (context, index) {
+                            var currentData = newbuildingList[index];
+                            if (currentData.category == "Mall") {
+                              return buildingCard(
+                                imageURL: currentData.photo ?? "",
+                                Name: currentData.buildingName ?? "",
+                                Tag: currentData.category ?? "",
+                                Address: currentData.address ?? "",
+                                Distance: 190,
+                                NumberofBuildings: 3,
+                                bid: currentData.sId ?? "",
+                              );
+                            } else {
+                              return SizedBox.shrink(); // Empty widget if not Hospital
+                            }
+                          },
+                          itemCount: newbuildingList.length,
+                        ),
+                        ListView.builder(
+                          itemBuilder: (context, index) {
+                            var currentData = newbuildingList[index];
+                            if (currentData.category == "Event") {
+                              return buildingCard(
+                                imageURL: currentData.photo ?? "",
+                                Name: currentData.buildingName ?? "",
+                                Tag: currentData.category ?? "",
+                                Address: currentData.address ?? "",
+                                Distance: 190,
+                                NumberofBuildings: 3,
+                                bid: currentData.sId ?? "",
+                              );
+                            } else {
+                              return SizedBox.shrink(); // Empty widget if not Hospital
+                            }
+                          },
+                          itemCount: newbuildingList.length,
+                        ),
 
                       ],
 

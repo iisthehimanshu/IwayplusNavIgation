@@ -74,9 +74,9 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               "Iwayplus",
               style: const TextStyle(
                 fontFamily: "Roboto",
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xffFFFFFF),
+                color: Color(0xff000000),
               ),
             ),
           ),
@@ -97,7 +97,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               // ),
               child: IconButton(
                 icon: Icon(Icons.search),
-                color: Color(0xffFFFFFF),
+                color: Color(0xff000000),
                 onPressed: () {
                   showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
                 },
@@ -110,7 +110,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF0F6862), Color(0xFF032137)], // Set your gradient colors
+                colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
               ),
             ),
           ),
@@ -134,7 +134,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               // Show linear loading indicator
             )
             : DefaultTabController(
-            length: 5,
+            length: 4,
             child: Column(
               children: [
                 Material(
@@ -147,14 +147,14 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF0F6862), Color(0xFF032137)], // Set your gradient colors
+                          colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
                         ),
                       ),
                       child: TabBar(
                         unselectedLabelColor: Color(0xffB3B3B3),
-                        isScrollable: true,
-                        indicatorColor: Colors.white,
-                        labelColor: Colors.white,
+                        // isScrollable: true,
+                        indicatorColor: Colors.black,
+                        labelColor: Colors.black,
 
                         tabs: [
                           Tab(child: Container(
@@ -181,14 +181,14 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                             ),
                           ),
                           ),
-                          Tab(child: Container(
-                            height: 35,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text("Mall"),
-                            ),
-                          ),
-                          ),
+                          // Tab(child: Container(
+                          //   height: 35,
+                          //   child: Align(
+                          //     alignment: Alignment.center,
+                          //     child: Text("Mall"),
+                          //   ),
+                          // ),
+                          // ),
                           Tab(child: Container(
                             height: 35,
                             child: Align(
@@ -252,25 +252,25 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                           },
                           itemCount: newbuildingList.length,
                         ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
-                            var currentData = newbuildingList[index];
-                            if (currentData.category == "Mall") {
-                              return buildingCard(
-                                imageURL: currentData.photo ?? "",
-                                Name: currentData.buildingName ?? "",
-                                Tag: currentData.category ?? "",
-                                Address: currentData.address ?? "",
-                                Distance: 190,
-                                NumberofBuildings: 3,
-                                bid: currentData.sId ?? "",
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: newbuildingList.length,
-                        ),
+                        // ListView.builder(
+                        //   itemBuilder: (context, index) {
+                        //     var currentData = newbuildingList[index];
+                        //     if (currentData.category == "Mall") {
+                        //       return buildingCard(
+                        //         imageURL: currentData.photo ?? "",
+                        //         Name: currentData.buildingName ?? "",
+                        //         Tag: currentData.category ?? "",
+                        //         Address: currentData.address ?? "",
+                        //         Distance: 190,
+                        //         NumberofBuildings: 3,
+                        //         bid: currentData.sId ?? "",
+                        //       );
+                        //     } else {
+                        //       return SizedBox.shrink(); // Empty widget if not Hospital
+                        //     }
+                        //   },
+                        //   itemCount: newbuildingList.length,
+                        // ),
                         ListView.builder(
                           itemBuilder: (context, index) {
                             var currentData = newbuildingList[index];

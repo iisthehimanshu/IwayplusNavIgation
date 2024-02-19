@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../APIMODELS/buildingAllModel.dart';
-import 'buildingCard.dart';
+import 'APIMODELS/buildingAllModel.dart';
+import 'Elements/buildingCard.dart';
 
 class HomeNestedSearch extends SearchDelegate{
   List<buildingAllModel> searchList=[];

@@ -30,15 +30,16 @@ class buildingCard extends StatelessWidget {
 
     return Center(
       child: InkWell(
-        onTap: (){
-          buildingAllApi.setStoredString(bid);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BuildingInfoScreen(),
-            ),
-          );
-        },
+        // onTap: (){
+        //   buildingAllApi.setStoredString(bid);
+        //   buildingAllApi.setStoredVenue(Name);
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => BuildingInfoScreen(),
+        //     ),
+        //   );
+        // },
         child: Container(
           width: screenWidth - 32,
           height: 145,

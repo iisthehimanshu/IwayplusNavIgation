@@ -1692,28 +1692,28 @@ class _NavigationState extends State<Navigation> {
                                     )
                                   ],
                                 ),
-                                Text(
-                                  "via",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ),
-                                Text(
-                                  "ETA- ${newTime.hour}:${newTime.minute}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ),
+                                // Text(
+                                //   "via",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 16,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff4a4545),
+                                //     height: 25 / 16,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
+                                // Text(
+                                //   "ETA- ${newTime.hour}:${newTime.minute}",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 14,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff8d8c8c),
+                                //     height: 20 / 14,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
                                 SizedBox(
                                   height: 8,
                                 ),

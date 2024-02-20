@@ -1,13 +1,18 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
-
+import 'package:iwayplusnav/Elements/buildingCard.dart';
+import 'package:iwayplusnav/Navigation.dart';
 import 'APIMODELS/buildingAllModel.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'Elements/InsideBuildingCard.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
-  const BuildingInfoScreen({Key? key,}) : super(key: key);
+  List<buildingAllModel>? receivedAllBuildingList;
+
+  BuildingInfoScreen({ this.receivedAllBuildingList,});
 
 
   @override
@@ -15,9 +20,12 @@ class BuildingInfoScreen extends StatefulWidget {
 }
 
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
-  late List<buildingAllModel> buildingList=[];
+  late List<buildingAllModel> allBuildingList=[];
   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-
+  late String buildingTag="";
+  late String buildingLocation="";
+  late String buildingAddress="";
+  late String buildingDescription="";
 
 
   String truncateString(String input, int maxLength) {
@@ -34,15 +42,26 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       print("BUILDING API DATA FROM DATABASE");
       print(BuildingAllBox.length);
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      buildingList = responseBody.map((data) => buildingAllModel.fromJson(data)).toList();
-      print(buildingList);
+      allBuildingList = responseBody.map((data) => buildingAllModel.fromJson(data)).toList();
+      print(allBuildingList);
     }
-    print(buildingList[0]);
+    print(allBuildingList[0]);
+    print(buildingAllApi.selectedVenue);
+    print(widget.receivedAllBuildingList);
   }
+
 
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -82,100 +101,423 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
             ),
           ),
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IntrinsicWidth(
-              child: Container(
-                height: 22,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Color(0xff0f98B5),Color(0xff872DE1)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(4)),
-
-                ),
-                child: Row(
-                  children: [
-                    Container(margin: EdgeInsets.only(left: 8,right: 8),child: Icon(Icons.school_outlined,color: Colors.white,size: 17,)),
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Text(
-                        "",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xffffffff),
-                          height: 18/12,
-                        ),
-                        textAlign: TextAlign.left,
+        body: SingleChildScrollView(
+          child: Container(
+            height: screenHeight+171,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IntrinsicWidth(
+                  child: Container(
+                    height: 22,
+                    margin: EdgeInsets.only(top: 20,left: 18),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: [Color(0xff0f98B5),Color(0xff872DE1)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight
                       ),
-                    )
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+          
+                    ),
+                    child: Row(
+                      children: [
+                        Container(margin: EdgeInsets.only(left: 8,right: 8),child: Icon(Icons.school_outlined,color: Colors.white,size: 17,)),
+                        Container(
+                          margin: EdgeInsets.only(right: 8),
+                          child: Text(
+                            widget.receivedAllBuildingList![0].category??"No category",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffffffff),
+                              height: 18/12,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                IntrinsicHeight(
+                  child: Container(
+                    margin: EdgeInsets.only(top: 6,left: 16),
+                    child: Text(
+                      widget.receivedAllBuildingList![0].venueName??"",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff000000),
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 16,top: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.location_on_outlined,size: 15,color: Color(0xff8D8C8C),),
+                      SizedBox(width: 8,),
+                      Container(
+                        child: Text(
+                          truncateString(widget.receivedAllBuildingList![0].address ?? "",20),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8d8c8c),
+                            height: 20/14,
+                          ),
+                          textAlign: TextAlign.left,
+                          maxLines: 3, // Set the maximum number of lines
+                          overflow: TextOverflow.ellipsis, // Display '...' when overflowed
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 6,left:16,right: 16),
+                  child: Text(
+                    "Ashoka University’s Liberal Arts and Sciences education enables critical thinking, read more",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+
+
+                Container(
+                  margin: EdgeInsets.only(top: 32,left:16),
+                  child: Text(
+                    " Buildings",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                Container(
+                  height: 330,
+                  child: ListView.builder(
+                    scrollDirection:Axis.horizontal ,
+                    itemBuilder: (context,index){
+                      var currentData = widget.receivedAllBuildingList?[index];
+                      return GestureDetector(
+                        child: InsideBuildingCard(
+                          imageURL: currentData?.buildingName?? "",
+                          buildingName: currentData?.buildingName?? "",
+                          Tag: currentData?.buildingName?? "",
+                          buildingId: currentData?.sId??"",
+                        ),
+                      );
+                    },
+                    itemCount: widget.receivedAllBuildingList?.length,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 32,left:16),
+                  child: Text(
+                    "This Buildings has",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                Container(
+                  child: Row(
+                    children: [
+                      Container(
+                          child: Expanded(
+                            child: Container(
+                              margin: EdgeInsets.all(16),
+                              padding: EdgeInsets.all(8),
+                              height: 70,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Color(0xffEBEBEB),
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(8))
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
+                                  ),
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(top: 10,),
+                                    child: Text(
+                                      "Parking",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a789c),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            )
+                          )
+                      ),
+                      Container(
+                          child: Expanded(
+                              child: Container(
+                                  margin: EdgeInsets.all(16),
+                                  padding: EdgeInsets.all(8),
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Color(0xffEBEBEB),
+                                      ),
+                                      borderRadius: BorderRadius.all(Radius.circular(8))
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        alignment: Alignment.topLeft,
+                                        child: SvgPicture.asset("assets/BuildingInfoScreen_ElevatorLogo.svg",width: 22),
+                                      ),
+                                      Container(
+                                        alignment: Alignment.topLeft,
+                                        margin: EdgeInsets.only(top: 8,),
+                                        child: Text(
+                                          "Elevator",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a789c),
+                                            height: 20/14,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                              )
+                          )
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                        child: Container(
+                            height: 55,
+                            margin: EdgeInsets.only(left: 16,right: 16,top: 8),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Color(0xffEBEBEB),
+                                ),
+                                borderRadius: BorderRadius.all(Radius.circular(8))
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 8),
+                                  alignment: Alignment.center,
+                                  child: SvgPicture.asset("assets/BuildingInfoScreen_AccesibilityLogo.svg",width: 24),
+                                ),
+                                Container(
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.only(left: 12),
+                                  child: Text(
+                                    "Accessible Pathways",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff4a789c),
+                                      height: 20/14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
+                            )
+                        )
+                    ),
                   ],
                 ),
-              ),
-            ),
-            SizedBox(height: 8,),
-            Text(
-              "",
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Color(0xff000000),
-                height: 25/16,
-              ),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: 4,),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.location_on_outlined,size: 13,color: Color(0xff8D8C8C),),
-                SizedBox(width: 8,),
-                Text(
-                  truncateString("", 25),
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff8d8c8c),
-                    height: 20/14,
+                Container(
+                  margin: EdgeInsets.only(top: 32,left:16),
+                  child: Text(
+                    "Venue Information",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  maxLines: 1, // Set the maximum number of lines
-                  overflow: TextOverflow.ellipsis, // Display '...' when overflowed
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 12,top:16 ),
+                  width: screenWidth,
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset("assets/BuildingInfoScreen_VenueLocationIconsvg.svg",width: 40),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(left: 12),
+                        child: Text(
+                          "Plot No. 2, Rajivpat Haryana-131029",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff4a789c),
+                            height: 20/14,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 12,top:12),
+                  width: screenWidth,
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset("assets/BuildingInfoScreen_VenuePhoneIcon.svg",width: 40),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(left: 12),
+                        child: Text(
+                          "044 - 2344542",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff4a789c),
+                            height: 20/14,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 12,top:12),
+                  width: screenWidth,
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset("assets/BuildingInfoScreen_VenueLinkIcon.svg",width: 40),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(left: 12),
+                        child: Text(
+                          "https://www.ashoka.edu.in/",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff4a789c),
+                            height: 20/14,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 12,top:12),
+                  alignment: Alignment.centerLeft,
+                  width: screenWidth,
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 8),
+                        child: SvgPicture.asset("assets/BuildingInfoScreen_VenueLinkIcon.svg",width: 40),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(left: 12),
+                        child: Column(
+                          children: [
+                            Container(
+                              child: Text(
+                                "Opening Hours: Monday to Saturday",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff4a789c),
+                                  height: 20/14,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            // Container(
+                            //   alignment: Alignment.bottomLeft,
+                            //   child: Text(
+                            //     "9:00 Am - 05:00 Pm",
+                            //     style: const TextStyle(
+                            //       fontFamily: "Roboto",
+                            //       fontSize: 14,
+                            //       fontWeight: FontWeight.w400,
+                            //       color: Color(0xff4a789c),
+                            //       height: 20/14,
+                            //     ),
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 4,),
-            Text(
-              "Km to Venue",
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xff24b9b0),
-                height: 20/14,
-              ),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: 4,),
-            Text(
-              " Buildings",
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xff000000),
-                height: 20/14,
-              ),
-              textAlign: TextAlign.left,
-            )
-          ],
+          ),
         ),
+
 
       ),
     );

@@ -1,21 +1,16 @@
 
 import 'dart:collection';
-
-import 'package:anim_search_bar/anim_search_bar.dart';
-import 'package:easy_search_bar/easy_search_bar.dart';
-import 'package:expandable_search_bar/expandable_search_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/MODELS/VenueModel.dart';
 
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAllModel.dart';
+import 'BuildingInfoScreen.dart';
 import 'HomeNestedSearch.dart';
-import 'Navigation.dart';
 
 class BuildingSelectionScreen extends StatefulWidget{
   @override
@@ -31,14 +26,13 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
   late Map<String, List<buildingAllModel>> venueHashMap = new HashMap();
 
 
-
   @override
   void initState(){
     super.initState();
     apiCall();
     // print("object");
-
   }
+
   void apiCall() async  {
     // print('Running api');
     await Future.delayed(Duration(milliseconds: 1300));
@@ -72,19 +66,19 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
   }
 
   Map<String, List<buildingAllModel>> createVenueHashMap(List<buildingAllModel> buildingList) {
-    Map<String, List<buildingAllModel>> venueHashMap = HashMap<String, List<buildingAllModel>>();
+    Map<String, List<buildingAllModel>> dummyVenueHashMap = HashMap<String, List<buildingAllModel>>();
 
     for (buildingAllModel building in buildingList) {
       // Check if the venueName is already a key in the HashMap
-      if (venueHashMap.containsKey(building.venueName)) {
+      if (dummyVenueHashMap.containsKey(building.venueName)) {
         // If yes, add the building to the existing list
-        venueHashMap[building.venueName]!.add(building);
+        dummyVenueHashMap[building.venueName]!.add(building);
       } else {
         // If no, create a new list with the building and add it to the HashMap
-        venueHashMap[building.venueName??""] = [building];
+        dummyVenueHashMap[building.venueName??""] = [building];
       }
     }
-    return venueHashMap;
+    return dummyVenueHashMap;
   }
 
 
@@ -177,160 +171,176 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               // Show linear loading indicator
             )
             : DefaultTabController(
-            length: 4,
-            child: Column(
-              children: [
-                Material(
-                  child: Container(
-                    height: 55,
-                    color: Color(0xffFFFFFF),
+              length: 4,
+              child: Column(
+                children: [
+                  Material(
                     child: Container(
                       height: 55,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
+                      color: Color(0xffFFFFFF),
+                      child: Container(
+                        height: 55,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
+                          ),
                         ),
-                      ),
-                      child: TabBar(
-                        unselectedLabelColor: Color(0xffB3B3B3),
-                        // isScrollable: true,
-                        indicatorColor: Colors.black,
-                        labelColor: Colors.black,
+                        child: TabBar(
+                          unselectedLabelColor: Color(0xffB3B3B3),
+                          // isScrollable: true,
+                          indicatorColor: Colors.black,
+                          labelColor: Colors.black,
 
-                        tabs: [
-                          Tab(
-                            child: Container(
+                          tabs: [
+                            Tab(
+                              child: Container(
+                                height: 35,
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text("All"),
+                                ),
+                              ),
+                            ),
+                            Tab(
+                              child: Container(
                               height: 35,
                               child: Align(
                                 alignment: Alignment.center,
-                                child: Text("All"),
+                                child: Text("Academic"),
                               ),
                             ),
-                          ),
-                          Tab(
-                            child: Container(
-                            height: 35,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text("Academic"),
                             ),
-                          ),
-                          ),
-                          Tab(
-                            child: Container(
-                            height: 35,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text("Hospital"),
+                            Tab(
+                              child: Container(
+                              height: 35,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text("Hospital"),
+                              ),
                             ),
-                          ),
-                          ),
-                          // Tab(child: Container(
-                          //   height: 35,
-                          //   child: Align(
-                          //     alignment: Alignment.center,
-                          //     child: Text("Mall"),
-                          //   ),
-                          // ),
-                          // ),
-                          Tab(child: Container(
-                            height: 35,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text("Event"),
                             ),
-                          ),
-                          ),
-                        ],
+                            // Tab(child: Container(
+                            //   height: 35,
+                            //   child: Align(
+                            //     alignment: Alignment.center,
+                            //     child: Text("Mall"),
+                            //   ),
+                            // ),
+                            // ),
+                            Tab(child: Container(
+                              height: 35,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text("Event"),
+                              ),
+                            ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                    child: TabBarView(
-                      children: [
-                        ListView.builder(
-
-                            itemBuilder: (context,index){
+                  Expanded(
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                              itemBuilder: (context,index){
+                                var currentData = venueList[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    // Handle onTap for the specific item here
+                                    // For example, you can navigate to a new screen or perform some action
+                                    // print("Tapped on item at index $index");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName]),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(
+                                    imageURL: currentData.imageURL ?? "",
+                                    Name: currentData.venueName ?? "",
+                                    Tag: currentData.Tag ?? "",
+                                    Address: currentData.address ?? "",
+                                    Distance: 190,
+                                    NumberofBuildings: currentData.buildingNumber ?? 0,
+                                    bid: currentData.venueName ?? "",
+                                  ),
+                                );
+                              },
+                              itemCount: venueList.length,
+                          ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
                               var currentData = venueList[index];
-                              return buildingCard(imageURL: currentData.imageURL??"",
-                                Name: currentData.venueName??"",
-                                Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                              );
+                              if (currentData.Tag == "Academic") {
+                                return buildingCard(imageURL: currentData.imageURL??"",
+                                  Name: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                );
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
                             },
-
                             itemCount: venueList.length,
-                        ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
-                            var currentData = venueList[index];
-                            if (currentData.Tag == "Academic") {
-                              return buildingCard(imageURL: currentData.imageURL??"",
-                                Name: currentData.venueName??"",
-                                Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
-                            var currentData = venueList[index];
-                            if (currentData.Tag == "Hospital") {
-                              return buildingCard(imageURL: currentData.imageURL??"",
-                                Name: currentData.venueName??"",
-                                Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
-                        // ListView.builder(
-                        //   itemBuilder: (context, index) {
-                        //     var currentData = newbuildingList[index];
-                        //     if (currentData.category == "Mall") {
-                        //       return buildingCard(
-                        //         imageURL: currentData.photo ?? "",
-                        //         Name: currentData.buildingName ?? "",
-                        //         Tag: currentData.category ?? "",
-                        //         Address: currentData.address ?? "",
-                        //         Distance: 190,
-                        //         NumberofBuildings: 3,
-                        //         bid: currentData.sId ?? "",
-                        //       );
-                        //     } else {
-                        //       return SizedBox.shrink(); // Empty widget if not Hospital
-                        //     }
-                        //   },
-                        //   itemCount: newbuildingList.length,
-                        // ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
-                            var currentData = venueList[index];
-                            if (currentData.Tag == "Event") {
-                              return buildingCard(imageURL: currentData.imageURL??"",
-                                Name: currentData.venueName??"",
-                                Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
+                          ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
+                              var currentData = venueList[index];
+                              if (currentData.Tag == "Hospital") {
+                                return buildingCard(imageURL: currentData.imageURL??"",
+                                  Name: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                );
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
+                            },
+                            itemCount: venueList.length,
+                          ),
+                          // ListView.builder(
+                          //   itemBuilder: (context, index) {
+                          //     var currentData = newbuildingList[index];
+                          //     if (currentData.category == "Mall") {
+                          //       return buildingCard(
+                          //         imageURL: currentData.photo ?? "",
+                          //         Name: currentData.buildingName ?? "",
+                          //         Tag: currentData.category ?? "",
+                          //         Address: currentData.address ?? "",
+                          //         Distance: 190,
+                          //         NumberofBuildings: 3,
+                          //         bid: currentData.sId ?? "",
+                          //       );
+                          //     } else {
+                          //       return SizedBox.shrink(); // Empty widget if not Hospital
+                          //     }
+                          //   },
+                          //   itemCount: newbuildingList.length,
+                          // ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
+                              var currentData = venueList[index];
+                              if (currentData.Tag == "Event") {
+                                return buildingCard(imageURL: currentData.imageURL??"",
+                                  Name: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                );
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
+                            },
+                            itemCount: venueList.length,
+                          ),
 
-                      ],
+                        ],
 
-                    )
-                )
-              ],
-            )
+                      )
+                  )
+                ],
+              )
         )
         // AnimationLimiter(
         //   child: ListView.builder(

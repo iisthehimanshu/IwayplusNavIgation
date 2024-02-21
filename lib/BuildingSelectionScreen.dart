@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iwayplusnav/API/BuildingAPI.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/MODELS/VenueModel.dart';
 
@@ -25,7 +26,6 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
   late List<VenueModel> venueList=[];
   late Map<String, List<buildingAllModel>> venueHashMap = new HashMap();
 
-
   @override
   void initState(){
     super.initState();
@@ -44,6 +44,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
         isLoading_buildingList = false; // Set loading to false when data is loaded
       });
     });
+
     // print("print after");
     //filterVenueList(buildingList);
     print(venueList);
@@ -253,6 +254,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                                     // Handle onTap for the specific item here
                                     // For example, you can navigate to a new screen or perform some action
                                     // print("Tapped on item at index $index");
+                                    buildingAllApi.setStoredVenue(currentData.venueName!);
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -277,9 +279,19 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                             itemBuilder: (context, index) {
                               var currentData = venueList[index];
                               if (currentData.Tag == "Academic") {
-                                return buildingCard(imageURL: currentData.imageURL??"",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName]),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: currentData.imageURL??"",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  ),
                                 );
                               } else {
                                 return SizedBox.shrink(); // Empty widget if not Hospital
@@ -291,9 +303,19 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                             itemBuilder: (context, index) {
                               var currentData = venueList[index];
                               if (currentData.Tag == "Hospital") {
-                                return buildingCard(imageURL: currentData.imageURL??"",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName]),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: currentData.imageURL??"",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  ),
                                 );
                               } else {
                                 return SizedBox.shrink(); // Empty widget if not Hospital
@@ -324,9 +346,20 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                             itemBuilder: (context, index) {
                               var currentData = venueList[index];
                               if (currentData.Tag == "Event") {
-                                return buildingCard(imageURL: currentData.imageURL??"",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                return GestureDetector(
+                                  onTap: () {
+                                    print("Object Handeling");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName]),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: currentData.imageURL??"",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  ),
                                 );
                               } else {
                                 return SizedBox.shrink(); // Empty widget if not Hospital

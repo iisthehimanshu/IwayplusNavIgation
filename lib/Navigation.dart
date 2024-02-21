@@ -252,7 +252,6 @@ class _NavigationState extends State<Navigation> {
           anchor: Offset(0.5, 0.829),
         ));
         building.floor = apibeaconmap[nearestBeacon]!.floor!;
-
         createRooms(building.polyLineData!, building.floor);
         building.landmarkdata!.then((value) {
           createMarkers(value, building.floor);
@@ -2138,6 +2137,9 @@ class _NavigationState extends State<Navigation> {
                   if (patch.isNotEmpty) {
                     fitPolygonInScreen(patch.first);
                   }
+                },
+                onLongPress: (Lat){
+                  print("pressed so long"+Lat.toString());
                 },
 
                 onCameraMove: (CameraPosition cameraPosition) {

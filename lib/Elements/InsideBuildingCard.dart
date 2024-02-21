@@ -32,9 +32,18 @@ class InsideBuildingCard extends StatelessWidget {
         .size
         .height;
 
-    return Center(
+    return GestureDetector(
+      onTap: (){
+        buildingAllApi.setStoredString(buildingId);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
+          ),
+        );
+      },
         child: Container(
-          margin: EdgeInsets.only(left: 10,top: 10),
+          margin: EdgeInsets.only(left: 16,top: 10,right: 8),
           width: screenWidth-150,
           decoration: BoxDecoration(
               color: Colors.white,
@@ -46,6 +55,9 @@ class InsideBuildingCard extends StatelessWidget {
           child: Column(
             children: [
               Container(
+                width: screenWidth-150,
+                height: 170,
+                padding: EdgeInsets.only(left:8,right: 8,top: 8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
                 ),
@@ -64,71 +76,71 @@ class InsideBuildingCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                alignment: Alignment.bottomLeft,
-                margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Text(
-                  "Academic Block",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff0c141c),
-                    height: 25/16,
-                  ),
-                ),
-              ),
-              Container(
-                alignment: Alignment.bottomLeft,
-                margin: EdgeInsets.fromLTRB(16, 3, 16, 0),
-                child: Text(
-                  "Office",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff4a4545),
-                    height: 20/14,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: (){
-                    buildingAllApi.setStoredString(buildingId);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(16),
-                    width: screenWidth-130,
-                    height: 90,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Color(0xffEBEBEB),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.bottomLeft,
+                        margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Text(
+                          truncateString(buildingName,25),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff0c141c),
+                            height: 25/16,
+                          ),
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(8))
-                    ),
-                    child: Text(
-                      "View Map",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff000000),
-                        height: 20/14,
                       ),
-                    ),
+                      Container(
+                        alignment: Alignment.bottomLeft,
+                        margin: EdgeInsets.fromLTRB(16, 3, 16, 0),
+                        child: Text(
+                          truncateString(Tag,25),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff4a4545),
+                            height: 20/14,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              )
+                  // Container(
+                  //   child: GestureDetector(
+                  //     onTap: (){
+                  //       buildingAllApi.setStoredString(buildingId);
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
+                  //         ),
+                  //       );
+                  //     },
+                  //     child: Container(
+                  //       margin: EdgeInsets.all(16),
+                  //       width: 10,
+                  //       height: 10,
+                  //       alignment: Alignment.center,
+                  //       decoration: BoxDecoration(
+                  //           color: Colors.white,
+                  //           border: Border.all(
+                  //             color: Color(0xffEBEBEB),
+                  //           ),
+                  //           borderRadius: BorderRadius.all(Radius.circular(8))
+                  //       ),
+                  //     ),
+                  //   ),
+                  // )
+                ],
+              ),
+
+
 
 
 

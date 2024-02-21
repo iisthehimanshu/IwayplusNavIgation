@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Navigation.dart';
+import 'API/BuildingAPI.dart';
+import 'APIMODELS/BuildingAPIModel.dart';
 import 'APIMODELS/buildingAllModel.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
@@ -21,11 +23,7 @@ class BuildingInfoScreen extends StatefulWidget {
 
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAllModel> allBuildingList=[];
-  final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-  late String buildingTag="";
-  late String buildingLocation="";
-  late String buildingAddress="";
-  late String buildingDescription="";
+  List<BuildingAPIInsideModel> dd = [];
 
 
   String truncateString(String input, int maxLength) {
@@ -35,33 +33,39 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       return input.substring(0, maxLength - 2) + '..';
     }
   }
-  @override
-  void initState(){
-    super.initState();
-    if(BuildingAllBox.length!=0){
-      print("BUILDING API DATA FROM DATABASE");
-      print(BuildingAllBox.length);
-      List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      allBuildingList = responseBody.map((data) => buildingAllModel.fromJson(data)).toList();
-      print(allBuildingList);
+  String extractLastThreeWords(String inputString) {
+    List<String> words = inputString.split(',');
+    // Ensure there are at least three words before extracting the last three
+    if (words.length > 3) {
+      return words[words.length-3]+","+words[words.length-4];
+    } else {
+      // Handle the case when there are fewer than three words
+      return "";
     }
-    print(allBuildingList[0]);
-    print(buildingAllApi.selectedVenue);
+  }
+
+  @override
+  void initState() {
+    super.initState();
     print(widget.receivedAllBuildingList);
+    apiCall();
+  }
+
+  void apiCall() async{
+    await BuildingAPI().fetchBuildData().then((value) => dd = value.data!);
+    print("API CAll");
+    for (BuildingAPIInsideModel i in dd){
+      print(i.buildingName);
+    }
+    //print(dd[0].buildingName);
   }
 
 
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    double screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -103,7 +107,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
         ),
         body: SingleChildScrollView(
           child: Container(
-            height: screenHeight+171,
+            height: screenHeight+250,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -118,7 +122,14 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                           end: Alignment.centerRight
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(4)),
-          
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
@@ -165,7 +176,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       SizedBox(width: 8,),
                       Container(
                         child: Text(
-                          truncateString(widget.receivedAllBuildingList![0].address ?? "",20),
+                          truncateString(extractLastThreeWords(widget.receivedAllBuildingList![0].address.toString()) ?? "",25),
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 14,
@@ -216,13 +227,13 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   child: ListView.builder(
                     scrollDirection:Axis.horizontal ,
                     itemBuilder: (context,index){
-                      var currentData = widget.receivedAllBuildingList?[index];
+                      var currentData = widget.receivedAllBuildingList![index];
                       return GestureDetector(
                         child: InsideBuildingCard(
-                          imageURL: currentData?.buildingName?? "",
-                          buildingName: currentData?.buildingName?? "",
-                          Tag: currentData?.buildingName?? "",
-                          buildingId: currentData?.sId??"",
+                          imageURL: currentData.photo?? "",
+                          buildingName: currentData.buildingName?? "",
+                          Tag: currentData.category?? "",
+                          buildingId: currentData.sId??"",
                         ),
                       );
                     },

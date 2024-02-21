@@ -42,7 +42,7 @@ class buildingCard extends StatelessWidget {
         // },
         child: Container(
           width: screenWidth - 32,
-          height: 145,
+          height: 149,
           margin: EdgeInsets.only(top: 8,bottom: 8),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -59,6 +59,8 @@ class buildingCard extends StatelessWidget {
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4)),
                 ),
                 width: 124,
+                height: 147,
+
                 child: ClipRRect(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4)),
                   child: Image.network(
@@ -70,7 +72,7 @@ class buildingCard extends StatelessWidget {
                         fit: BoxFit.fill,
                       );
                     },
-                    fit: BoxFit.fill,
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
               ),
@@ -89,6 +91,14 @@ class buildingCard extends StatelessWidget {
                           end: Alignment.centerRight
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(4)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
 
                       ),
                       child: Row(

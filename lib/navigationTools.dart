@@ -334,5 +334,29 @@ class tools{
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
+  static List<int> eightcelltransition(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
 
+    if (angle >= 337.5 || angle <= 22.5) {
+      return [0, 1];
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return [1, 1];
+    } else if (angle > 67.5 && angle <= 112.5) {
+      return [1, 0];
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return [1, -1];
+    } else if (angle > 157.5 && angle <= 202.5) {
+      return [0, 1];
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return [1, 1];
+    } else if (angle > 247.5 && angle <= 292.5) {
+      return [1, 0];
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return [1, -1];
+    } else {
+      return [0, 0];
+    }
+  }
 }

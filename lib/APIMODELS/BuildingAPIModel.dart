@@ -29,14 +29,23 @@ class BuildingAPIInsideModel {
   String? initialBuildingName;
   String? initialVenueName;
   String? buildingName;
-  String? buildingCode;
   String? venueName;
-  String? category;
+  Null? venueCategory;
+  Null? buildingCategory;
   List<double>? coordinates;
-  List<Null>? pickupCoords;
+  List<double>? pickupCoords;
   String? address;
   bool? liveStatus;
-  String? photo;
+  bool? geofencing;
+  Null? description;
+  List<String>? features;
+  Null? phone;
+  Null? website;
+  Null? venuePhoto;
+  Null? buildingPhoto;
+  List<WorkingDays>? workingDays;
+  String? createdAt;
+  String? updatedAt;
   int? iV;
 
   BuildingAPIInsideModel(
@@ -44,14 +53,23 @@ class BuildingAPIInsideModel {
         this.initialBuildingName,
         this.initialVenueName,
         this.buildingName,
-        this.buildingCode,
         this.venueName,
-        this.category,
+        this.venueCategory,
+        this.buildingCategory,
         this.coordinates,
         this.pickupCoords,
         this.address,
         this.liveStatus,
-        this.photo,
+        this.geofencing,
+        this.description,
+        this.features,
+        this.phone,
+        this.website,
+        this.venuePhoto,
+        this.buildingPhoto,
+        this.workingDays,
+        this.createdAt,
+        this.updatedAt,
         this.iV});
 
   BuildingAPIInsideModel.fromJson(Map<String, dynamic> json) {
@@ -59,19 +77,28 @@ class BuildingAPIInsideModel {
     initialBuildingName = json['initialBuildingName'];
     initialVenueName = json['initialVenueName'];
     buildingName = json['buildingName'];
-    buildingCode = json['buildingCode'];
     venueName = json['venueName'];
-    category = json['category'];
+    venueCategory = json['venueCategory'];
+    buildingCategory = json['buildingCategory'];
     coordinates = json['coordinates'].cast<double>();
-    if (json['pickupCoords'] != null) {
-      pickupCoords = <Null>[];
-      json['pickupCoords'].forEach((v) {
-        pickupCoords!.add(v??"");
-      });
-    }
+    pickupCoords = json['pickupCoords'].cast<double>();
     address = json['address'];
     liveStatus = json['liveStatus'];
-    photo = json['photo'];
+    geofencing = json['geofencing'];
+    description = json['description'];
+    features = json['features'].cast<String>();
+    phone = json['phone'];
+    website = json['website'];
+    venuePhoto = json['venuePhoto'];
+    buildingPhoto = json['buildingPhoto'];
+    if (json['workingDays'] != null) {
+      workingDays = <WorkingDays>[];
+      json['workingDays'].forEach((v) {
+        workingDays!.add(new WorkingDays.fromJson(v));
+      });
+    }
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
     iV = json['__v'];
   }
 
@@ -81,17 +108,50 @@ class BuildingAPIInsideModel {
     data['initialBuildingName'] = this.initialBuildingName;
     data['initialVenueName'] = this.initialVenueName;
     data['buildingName'] = this.buildingName;
-    data['buildingCode'] = this.buildingCode;
     data['venueName'] = this.venueName;
-    data['category'] = this.category;
+    data['venueCategory'] = this.venueCategory;
+    data['buildingCategory'] = this.buildingCategory;
     data['coordinates'] = this.coordinates;
-    if (this.pickupCoords != null) {
-      data['pickupCoords'] = this.pickupCoords!.map((v) => v).toList();
-    }
+    data['pickupCoords'] = this.pickupCoords;
     data['address'] = this.address;
     data['liveStatus'] = this.liveStatus;
-    data['photo'] = this.photo;
+    data['geofencing'] = this.geofencing;
+    data['description'] = this.description;
+    data['features'] = this.features;
+    data['phone'] = this.phone;
+    data['website'] = this.website;
+    data['venuePhoto'] = this.venuePhoto;
+    data['buildingPhoto'] = this.buildingPhoto;
+    if (this.workingDays != null) {
+      data['workingDays'] = this.workingDays!.map((v) => v.toJson()).toList();
+    }
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    return data;
+  }
+}
+class WorkingDays {
+  String? day;
+  String? openingTime;
+  String? closingTime;
+  String? sId;
+
+  WorkingDays({this.day, this.openingTime, this.closingTime, this.sId});
+
+  WorkingDays.fromJson(Map<String, dynamic> json) {
+    day = json['day'];
+    openingTime = json['openingTime'];
+    closingTime = json['closingTime'];
+    sId = json['_id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['day'] = this.day;
+    data['openingTime'] = this.openingTime;
+    data['closingTime'] = this.closingTime;
+    data['_id'] = this.sId;
     return data;
   }
 }

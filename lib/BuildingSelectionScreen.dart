@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/API/BuildingAPI.dart';
-import 'package:iwayplusnav/Elements/buildingCard.dart';
+import 'package:iwayplusnav/Class/buildingCard.dart';
 import 'package:iwayplusnav/MODELS/VenueModel.dart';
 
 import 'API/buildingAllApi.dart';
@@ -82,8 +82,6 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
     return dummyVenueHashMap;
   }
 
-
-
   void createBuildingCards(List<buildingAllModel> buildingList){
     setState(() {
 
@@ -93,10 +91,6 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
       }
     });
   }
-
-
-
-
 
 
   @override
@@ -134,7 +128,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
               //   ),
               // ),
               child: IconButton(
-                icon: Icon(Icons.search),
+                icon: Icon(Icons.search,color: Colors.black,),
                 color: Color(0xff000000),
                 onPressed: () {
                   showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));

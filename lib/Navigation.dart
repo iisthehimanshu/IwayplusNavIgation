@@ -12,7 +12,7 @@ import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
-import 'package:iwayplusnav/Elements/buildingCard.dart';
+import 'package:iwayplusnav/Class/buildingCard.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';

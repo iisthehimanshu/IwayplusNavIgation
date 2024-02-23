@@ -4,6 +4,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'BuildingSelectionScreen.dart';
+import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
@@ -22,6 +23,9 @@ void main() async {
   await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
   Hive.registerAdapter(BuildingAllAPIModelAdapter());
   await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+
   runApp(const MyApp());
 }
 

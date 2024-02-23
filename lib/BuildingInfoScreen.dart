@@ -2,13 +2,13 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/Elements/buildingCard.dart';
+import 'package:iwayplusnav/Class/buildingCard.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/BuildingAPIModel.dart';
 import 'APIMODELS/buildingAllModel.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'Elements/InsideBuildingCard.dart';
+import 'Class/InsideBuildingCard.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
@@ -24,6 +24,7 @@ class BuildingInfoScreen extends StatefulWidget {
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAllModel> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
+  ScrollController _scrollController = ScrollController();
 
 
   String truncateString(String input, int maxLength) {
@@ -206,12 +207,10 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     textAlign: TextAlign.left,
                   ),
                 ),
-
-
                 Container(
                   margin: EdgeInsets.only(top: 32,left:16),
                   child: Text(
-                    " Buildings",
+                    "Buildings",
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 18,
@@ -223,7 +222,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  height: 330,
+                  height: 214,
                   child: ListView.builder(
                     scrollDirection:Axis.horizontal ,
                     itemBuilder: (context,index){

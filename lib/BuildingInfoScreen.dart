@@ -33,7 +33,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       return input.substring(0, maxLength - 2) + '..';
     }
   }
-  String extractLastThreeWords(String inputString) {
+  String makeAddress(String inputString) {
     List<String> words = inputString.split(',');
     // Ensure there are at least three words before extracting the last three
     if (words.length > 3) {
@@ -176,7 +176,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       SizedBox(width: 8,),
                       Container(
                         child: Text(
-                          truncateString(extractLastThreeWords(widget.receivedAllBuildingList![0].address.toString()) ?? "",25),
+                          truncateString(makeAddress(widget.receivedAllBuildingList![0].address.toString()) ?? "",25),
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 14,

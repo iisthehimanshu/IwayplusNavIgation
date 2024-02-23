@@ -140,16 +140,10 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen>{
                 Material(
                   child: Container(
                     height: 55,
+                    width: screenWidth,
                     color: Color(0xffFFFFFF),
                     child: Container(
                       height: 55,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF0F6862), Color(0xFF032137)], // Set your gradient colors
-                        ),
-                      ),
                       child: TabBar(
                         unselectedLabelColor: Color(0xffB3B3B3),
                         isScrollable: true,

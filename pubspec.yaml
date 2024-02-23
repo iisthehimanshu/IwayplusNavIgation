@@ -58,6 +58,9 @@ dependencies:
   anim_search_bar: ^2.0.3
   expandable_search_bar: ^0.0.1
   easy_search_bar: ^2.5.0
+  sensors_plus: ^4.0.2
+  device_information: ^0.0.4
+  change_app_package_name: ^1.1.0
 
 dev_dependencies:
   build_runner: ^2.4.7

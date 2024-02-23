@@ -252,7 +252,6 @@ class _NavigationState extends State<Navigation> {
           anchor: Offset(0.5, 0.829),
         ));
         building.floor = apibeaconmap[nearestBeacon]!.floor!;
-
         createRooms(building.polyLineData!, building.floor);
         building.landmarkdata!.then((value) {
           createMarkers(value, building.floor);
@@ -1692,28 +1691,28 @@ class _NavigationState extends State<Navigation> {
                                     )
                                   ],
                                 ),
-                                Text(
-                                  "via",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ),
-                                Text(
-                                  "ETA- ${newTime.hour}:${newTime.minute}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ),
+                                // Text(
+                                //   "via",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 16,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff4a4545),
+                                //     height: 25 / 16,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
+                                // Text(
+                                //   "ETA- ${newTime.hour}:${newTime.minute}",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 14,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff8d8c8c),
+                                //     height: 20 / 14,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
                                 SizedBox(
                                   height: 8,
                                 ),
@@ -2138,6 +2137,9 @@ class _NavigationState extends State<Navigation> {
                   if (patch.isNotEmpty) {
                     fitPolygonInScreen(patch.first);
                   }
+                },
+                onLongPress: (Lat){
+                  print("pressed so long"+Lat.toString());
                 },
 
                 onCameraMove: (CameraPosition cameraPosition) {

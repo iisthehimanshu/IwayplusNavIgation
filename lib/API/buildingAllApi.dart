@@ -12,6 +12,7 @@ class buildingAllApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
   String token = "";
   static String selectedID="";
+  static String selectedVenue="";
 
   Future<List<buildingAllModel>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
@@ -61,6 +62,18 @@ class buildingAllApi {
   static String getStoredString() {
     print(selectedID);
     return selectedID;
+  }
+
+  // Method to set the stored string
+  static void setStoredVenue(String value) {
+    selectedVenue = value;
+    //print("Set${selectedID}");
+  }
+
+  // Method to get the stored string
+  static String getStoredVenue() {
+    //print(selectedID);
+    return selectedVenue;
   }
 
 }

@@ -12,12 +12,12 @@ class MotionModel{
     print("$newX, $newY");
     if(newX<0 || newX >=cols || newY < 0 || newY >= rows){
       print("1");
-      return true;
+      return false;
     }
 
     if(nonWalkable.contains((newY*cols)+newX)){
       print("${(newY*cols)+newX}");
-      return true;
+      return false;
     }
 
     return true;

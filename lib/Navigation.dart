@@ -68,6 +68,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
@@ -90,8 +91,7 @@ class _NavigationState extends State<Navigation> {
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
-  UserState user =
-      UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0 );
+  UserState user = UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0 );
   pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
 
 
@@ -169,6 +169,9 @@ class _NavigationState extends State<Navigation> {
       } else if (manufacturer.toLowerCase().contains("redmi")) {
         print("manufacture $manufacturer $step_threshold");
         step_threshold = 0.12;
+      }else if (manufacturer.toLowerCase().contains("google")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 1.08;
       }
     } catch (e) {
       throw (e);
@@ -209,10 +212,21 @@ class _NavigationState extends State<Navigation> {
     print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
-    // Timer.periodic(Duration(milliseconds: 100), (timer) {
-    //   onStepCount();
-    // });
     //  await requestActivityPermission();
+  }
+
+  // Function to start the timer
+  void StartPDR() {
+    PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      onStepCount();
+    });
+  }
+
+// Function to stop the timer
+  void StopPDR() {
+    if (PDRTimer != null && PDRTimer!.isActive) {
+      PDRTimer!.cancel();
+    }
   }
 
   void onStepCount() {
@@ -220,6 +234,7 @@ class _NavigationState extends State<Navigation> {
       if (_userAccelerometerEvent?.y != null) {
         if (_userAccelerometerEvent!.y > step_threshold ||
             _userAccelerometerEvent!.y < -step_threshold) {
+
           bool isvalid = MotionModel.isValidStep(user,building.floorDimenssion[user.floor]![0],building.floorDimenssion[user.floor]![1],building.nonWalkable[user.floor]!);
           if (isvalid) {
             user.move_show().then((value) {
@@ -263,6 +278,10 @@ class _NavigationState extends State<Navigation> {
     await patchAPI().fetchPatchData().then((value) {
       createPatch(value);
       tools.Data = value;
+      for(int i = 0 ; i<4; i++){
+        tools.corners.add(math.Point(double.parse(value.patchData!.coordinates![i].globalRef!.lat!), double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
+      }
+      tools.angleBetweenBuildingAndNorth();
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
@@ -2343,7 +2362,6 @@ class _NavigationState extends State<Navigation> {
                     backgroundColor:
                         Colors.white, // Set the background color of the FAB
                   ),
-                  Text("${user.theta}")
                 ],
               ),
             ),

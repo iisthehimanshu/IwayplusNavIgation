@@ -33,7 +33,7 @@ class BuildingAPIInsideModel {
   String? venueName;
   String? category;
   List<double>? coordinates;
-  List<Null>? pickupCoords;
+  List<double>? pickupCoords;
   String? address;
   bool? liveStatus;
   String? photo;
@@ -64,7 +64,7 @@ class BuildingAPIInsideModel {
     category = json['category'];
     coordinates = json['coordinates'].cast<double>();
     if (json['pickupCoords'] != null) {
-      pickupCoords = <Null>[];
+      pickupCoords = <double>[];
       json['pickupCoords'].forEach((v) {
         pickupCoords!.add(v??"");
       });

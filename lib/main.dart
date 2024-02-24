@@ -4,6 +4,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'BuildingSelectionScreen.dart';
+import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
@@ -25,6 +26,8 @@ void main() async {
   await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
   Hive.registerAdapter(FavouriteDataBaseModelAdapter());
   await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+  Hive.registerAdapter(BeaconAPIModelAdapter());
+  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
 
   runApp(const MyApp());
 }

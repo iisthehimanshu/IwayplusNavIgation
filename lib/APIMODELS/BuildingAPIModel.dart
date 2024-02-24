@@ -81,7 +81,12 @@ class BuildingAPIInsideModel {
     venueCategory = json['venueCategory'];
     buildingCategory = json['buildingCategory'];
     coordinates = json['coordinates'].cast<double>();
-    pickupCoords = json['pickupCoords'].cast<double>();
+    if (json['pickupCoords'] != null) {
+      pickupCoords = <double>[];
+      json['pickupCoords'].forEach((v) {
+        pickupCoords!.add(v??"");
+      });
+    }
     address = json['address'];
     liveStatus = json['liveStatus'];
     geofencing = json['geofencing'];

@@ -9,6 +9,8 @@ import 'APIMODELS/patchDataModel.dart';
 class tools{
 
   static List<PDM.Coordinates>? _cachedCordData;
+  static List<Point<double>> corners = [];
+  static double AngleBetweenBuildingandGlobalNorth = 0.0;
 
   static patchDataModel Data = patchDataModel();
 
@@ -334,5 +336,55 @@ class tools{
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
+  static double angleBetweenBuildingAndNorth() {
+    // Assuming corners is a list of Point objects representing coordinates of the building corners
 
+    // Choose two adjacent corners
+    Point<double> corner1 = corners[0];
+    Point<double> corner2 = corners[1];
+
+    // Calculate the slope
+    double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
+
+    // Calculate the angle in radians
+    double angleRad = atan(slope);
+
+    // Convert angle to degrees
+    double angleDeg = angleRad * (180 / pi);
+
+    // Adjust for the correct quadrant
+    if (angleDeg < 0) {
+      angleDeg += 360;
+    }
+
+    AngleBetweenBuildingandGlobalNorth = angleDeg;
+    return angleDeg;
+  }
+
+  static List<int> eightcelltransition(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 337.5 || angle <= 22.5) {
+      return [0, -1];
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return [1, -1];
+    } else if (angle > 67.5 && angle <= 112.5) {
+      return [1, 0];
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return [1, 1];
+    } else if (angle > 157.5 && angle <= 202.5) {
+      return [0, 1];
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return [-1, 1];
+    } else if (angle > 247.5 && angle <= 292.5) {
+      return [-1, 0];
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return [-1, -1];
+    } else {
+      return [0, 0];
+    }
+  }
 }

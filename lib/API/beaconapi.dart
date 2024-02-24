@@ -29,7 +29,7 @@ class beaconapi {
       }
     });
     final Map<String, dynamic> data = {
-      "buildingId": "659001bce6c204e1eec04c0f",
+      "buildingId": "65d887a5db333f89457145f6",
     };
 
     final response = await http.post(

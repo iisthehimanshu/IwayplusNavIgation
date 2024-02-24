@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:device_information/device_information.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:iwayplusnav/API/PolyLineApi.dart';
@@ -20,6 +22,7 @@ import 'package:iwayplusnav/navigationTools.dart';
 import 'package:iwayplusnav/path.dart';
 import 'package:iwayplusnav/pathState.dart';
 import 'package:iwayplusnav/pathState.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'API/PatchApi.dart';
@@ -33,6 +36,7 @@ import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/SearchNearby.dart';
 import 'Elements/landmarkPannelShimmer.dart';
+import 'MotionModel.dart';
 import 'SourceAndDestinationPage.dart';
 import 'bluetooth_scanning.dart';
 import 'buildingState.dart';
@@ -64,6 +68,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
@@ -86,10 +91,23 @@ class _NavigationState extends State<Navigation> {
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
-  UserState user =
-      UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "");
+  UserState user = UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0 );
   pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
 
+
+  late String manufacturer;
+  double step_threshold = 0.6;
+
+
+  static const Duration _ignoreDuration = Duration(milliseconds: 20);
+  UserAccelerometerEvent? _userAccelerometerEvent;
+  DateTime? _userAccelerometerUpdateTime;
+  int? _userAccelerometerLastInterval;
+  DateTime? _accelerometerUpdateTime;
+  DateTime? _gyroscopeUpdateTime;
+  DateTime? _magnetometerUpdateTime;
+  final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  Duration sensorInterval = Duration(milliseconds: 100);
 
   @override
   void initState() {
@@ -97,13 +115,67 @@ class _NavigationState extends State<Navigation> {
     print("widget.buildingID");
     print(widget.buildingID);
     flutterTts = FlutterTts();
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
       maptheme = value;
     });
     checkPermissions();
+
+    getDeviceManufacturer();
+    _streamSubscriptions.add(
+      userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
+              (UserAccelerometerEvent event) {
+            final now = DateTime.now();
+            setState(() {
+              _userAccelerometerEvent = event;
+              if (_userAccelerometerUpdateTime != null) {
+                final interval = now.difference(_userAccelerometerUpdateTime!);
+                if (interval > _ignoreDuration) {
+                  _userAccelerometerLastInterval = interval.inMilliseconds;
+                }
+              }
+            });
+            _userAccelerometerUpdateTime = now;
+          }, onError: (e) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return const AlertDialog(
+                title: Text("Sensor Not Found"),
+                content: Text(
+                    "It seems that your device doesn't support User Accelerometer Sensor"),
+              );
+            });
+        cancelOnError:
+        true;
+      }),
+    );
+  }
+
+  Future<void> getDeviceManufacturer() async {
+    try {
+      manufacturer = await DeviceInformation.deviceManufacturer;
+      if (manufacturer.toLowerCase().contains("samsung")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 0.12;
+      } else if (manufacturer.toLowerCase().contains("oneplus")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 0.7;
+      } else if (manufacturer.toLowerCase().contains("realme")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 0.7;
+      } else if (manufacturer.toLowerCase().contains("redmi")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 0.12;
+      }else if (manufacturer.toLowerCase().contains("google")) {
+        print("manufacture $manufacturer $step_threshold");
+        step_threshold = 1.08;
+      }
+    } catch (e) {
+      throw (e);
+    }
   }
 
   void handleCompassEvents() {
@@ -111,10 +183,23 @@ class _NavigationState extends State<Navigation> {
       double? compassHeading = event.heading;
       setState(() {
         if (markers.length > 0)
-          markers[0] =
-              customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+          markers[0] = customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+
+          user.theta = compassHeading!;
       });
     });
+  }
+
+  void showToast(String mssg) {
+    Fluttertoast.showToast(
+      msg: mssg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.grey,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   Future<void> speak(String msg) async {
@@ -128,6 +213,49 @@ class _NavigationState extends State<Navigation> {
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
+  }
+
+  // Function to start the timer
+  void StartPDR() {
+    PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      onStepCount();
+    });
+  }
+
+// Function to stop the timer
+  void StopPDR() {
+    if (PDRTimer != null && PDRTimer!.isActive) {
+      PDRTimer!.cancel();
+    }
+  }
+
+  void onStepCount() {
+    setState(() {
+      if (_userAccelerometerEvent?.y != null) {
+        if (_userAccelerometerEvent!.y > step_threshold ||
+            _userAccelerometerEvent!.y < -step_threshold) {
+
+          bool isvalid = MotionModel.isValidStep(user,building.floorDimenssion[user.floor]![0],building.floorDimenssion[user.floor]![1],building.nonWalkable[user.floor]!);
+          if (isvalid) {
+            user.move_show().then((value) {
+              setState(() {
+                if (markers.length > 0) {
+                  markers[0] = customMarker.move(
+                      LatLng(
+                          tools.localtoglobal(user.showcoordX.toInt(),
+                              user.showcoordY.toInt())[0],
+                          tools.localtoglobal(user.showcoordX.toInt(),
+                              user.showcoordY.toInt())[1]),
+                      markers[0]);
+                }
+              });
+            });
+          } else {
+            showToast("You are out of path");
+          }
+        }
+      }
+    });
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -150,6 +278,10 @@ class _NavigationState extends State<Navigation> {
     await patchAPI().fetchPatchData().then((value) {
       createPatch(value);
       tools.Data = value;
+      for(int i = 0 ; i<4; i++){
+        tools.corners.add(math.Point(double.parse(value.patchData!.coordinates![i].globalRef!.lat!), double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
+      }
+      tools.angleBetweenBuildingAndNorth();
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
@@ -186,21 +318,21 @@ class _NavigationState extends State<Navigation> {
       return value;
     });
 
-    // beaconapi().fetchBeaconData().then((value){
-    //   building.beacondata = value;
-    //   for (int i = 0; i < value.length; i++) {
-    //     beacon beacons = value[i];
-    //     if (beacons.properties!.macId != null) {
-    //       apibeaconmap[beacons.properties!.macId!] = beacons;
-    //     }
-    //   }
-    //   btadapter.startScanning(apibeaconmap);
-    //   late Timer _timer;
-    //   _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-    //     localizeUser();
-    //     _timer.cancel();
-    //   });
-    // });
+    beaconapi().fetchBeaconData().then((value){
+      building.beacondata = value;
+      for (int i = 0; i < value.length; i++) {
+        beacon beacons = value[i];
+        if (beacons.properties!.macId != null) {
+          apibeaconmap[beacons.properties!.macId!] = beacons;
+        }
+      }
+      btadapter.startScanning(apibeaconmap);
+      late Timer _timer;
+      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
+        localizeUser();
+        _timer.cancel();
+      });
+    });
   }
 
   Future<void> localizeUser() async {
@@ -243,10 +375,12 @@ class _NavigationState extends State<Navigation> {
           double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
       user.lng =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      user.floor = apibeaconmap[nearestBeacon]!.floor!;
+      user.key = apibeaconmap[nearestBeacon]!.sId!;
       setState(() {
         markers.clear();
         markers.add(Marker(
-          markerId: MarkerId(nearestBeacon),
+          markerId: MarkerId("UserLocation"),
           position: beaconLocation,
           icon: userloc,
           anchor: Offset(0.5, 0.829),
@@ -533,7 +667,6 @@ class _NavigationState extends State<Navigation> {
                     setState(() {
                       if (building.selectedLandmarkID != polyArray.id) {
                         print("inside for loop");
-                        print(polyArray.id);
                         building.selectedLandmarkID = polyArray.id;
                         _isRoutePanelOpen = false;
                         singleroute.clear();
@@ -837,6 +970,7 @@ class _NavigationState extends State<Navigation> {
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
         snapshot.data!.landmarksMap![building.selectedLandmarkID] == null) {
+      print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
       selectedroomMarker.clear();
@@ -1042,6 +1176,7 @@ class _NavigationState extends State<Navigation> {
                                     PathState.sourceY = user.coordY;
                                     PathState.sourceFloor = user.floor;
                                     PathState.sourcePolyID = user.key;
+                                    print("object ${PathState.sourcePolyID}");
                                     PathState.sourceName =
                                         "Your current location";
                                     PathState.destinationPolyID =
@@ -2200,7 +2335,25 @@ class _NavigationState extends State<Navigation> {
                   SizedBox(height: 28.0), // Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () {
-                      fitPolygonInScreen(patch.first);
+                      bool isvalid = MotionModel.isValidStep(user,building.floorDimenssion[user.floor]![0],building.floorDimenssion[user.floor]![1],building.nonWalkable[user.floor]!);
+                      if (isvalid) {
+                        user.move_show().then((value) {
+                          setState(() {
+                            if (markers.length > 0) {
+                              markers[0] = customMarker.move(
+                                  LatLng(
+                                      tools.localtoglobal(user.showcoordX.toInt(),
+                                          user.showcoordY.toInt())[0],
+                                      tools.localtoglobal(user.showcoordX.toInt(),
+                                          user.showcoordY.toInt())[1]),
+                                  markers[0]);
+                            }
+                          });
+                        });
+                      } else {
+                        showToast("You are out of path");
+                      }
+                      //fitPolygonInScreen(patch.first);
                     },
                     child: Icon(
                       Icons.my_location_sharp,

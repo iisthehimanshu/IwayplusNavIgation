@@ -57,6 +57,8 @@ dependencies:
   fluttertoast: ^8.2.4
   easy_search_bar: ^2.5.0
   auto_size_text: ^3.0.0
+  sensors_plus: ^4.0.2
+  device_information: ^0.0.4
 
 
 dev_dependencies:

@@ -13,7 +13,7 @@ import 'Elements/InsideBuildingCard.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
-  List<String>? receivedAllBuildingList;
+  List<buildingAll>? receivedAllBuildingList;
   String? venueTitle;
   String? venueDescription;
   String? venueCategory;
@@ -240,16 +240,16 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   child: ListView.builder(
                     scrollDirection:Axis.horizontal ,
                     itemBuilder: (context,index){
-                      var currentData = dd[index];
+                      var currentData = widget.receivedAllBuildingList![index];
                       return InsideBuildingCard(
                         buildingImageURL: currentData.buildingPhoto?? "",
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",
-                        buildingFavourite: currentData.favourite??false,
+                        buildingFavourite: false,
                       );
                     },
-                    itemCount:dd.length,
+                    itemCount:widget.receivedAllBuildingList!.length,
                   ),
                 ),
                 Container(
@@ -295,7 +295,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     margin: EdgeInsets.only(left: 12,top: 12),
                                     alignment: Alignment.topLeft,
                                     child: Text(
-                                      truncateString(widget.receivedAllBuildingList![index],25),
+                                      truncateString("Parking",25),
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
                                         fontSize: 14,

@@ -51,7 +51,6 @@ class patchAPI {
        PatchBox.put(buildingAllApi.getStoredString(),patchData);
         print("PATCH API DATA FROM API");
         print(responseBody);
-
       return patchDataModel.fromJson(responseBody);
 
     } else {

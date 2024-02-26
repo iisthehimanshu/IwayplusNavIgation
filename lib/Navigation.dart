@@ -36,6 +36,7 @@ import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/SearchNearby.dart';
 import 'Elements/landmarkPannelShimmer.dart';
+import 'MapState.dart';
 import 'MotionModel.dart';
 import 'SourceAndDestinationPage.dart';
 import 'bluetooth_scanning.dart';
@@ -54,13 +55,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Navigation(buildingID: "",),
+      home: Navigation(
+        buildingID: "",
+      ),
     );
   }
 }
 
 class Navigation extends StatefulWidget {
-  String buildingID='';
+  String buildingID = '';
   Navigation({required this.buildingID});
 
   @override
@@ -68,6 +71,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  MapState mapState = new MapState();
   Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
@@ -87,17 +91,18 @@ class _NavigationState extends State<Navigation> {
   BT btadapter = new BT();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
+  bool _isnavigationPannelOpen = false;
+  bool _isreroutePannelOpen = false;
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
-  UserState user = UserState(floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0 );
-  pathState PathState = pathState(-1, -1, -1, -1, -1, -1);
-
+  UserState user = UserState(
+      floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0);
+  pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
 
   late String manufacturer;
   double step_threshold = 0.6;
-
 
   static const Duration _ignoreDuration = Duration(milliseconds: 20);
   UserAccelerometerEvent? _userAccelerometerEvent;
@@ -126,19 +131,19 @@ class _NavigationState extends State<Navigation> {
     getDeviceManufacturer();
     _streamSubscriptions.add(
       userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-              (UserAccelerometerEvent event) {
-            final now = DateTime.now();
-            setState(() {
-              _userAccelerometerEvent = event;
-              if (_userAccelerometerUpdateTime != null) {
-                final interval = now.difference(_userAccelerometerUpdateTime!);
-                if (interval > _ignoreDuration) {
-                  _userAccelerometerLastInterval = interval.inMilliseconds;
-                }
-              }
-            });
-            _userAccelerometerUpdateTime = now;
-          }, onError: (e) {
+          (UserAccelerometerEvent event) {
+        final now = DateTime.now();
+        setState(() {
+          _userAccelerometerEvent = event;
+          if (_userAccelerometerUpdateTime != null) {
+            final interval = now.difference(_userAccelerometerUpdateTime!);
+            if (interval > _ignoreDuration) {
+              _userAccelerometerLastInterval = interval.inMilliseconds;
+            }
+          }
+        });
+        _userAccelerometerUpdateTime = now;
+      }, onError: (e) {
         showDialog(
             context: context,
             builder: (context) {
@@ -169,7 +174,7 @@ class _NavigationState extends State<Navigation> {
       } else if (manufacturer.toLowerCase().contains("redmi")) {
         print("manufacture $manufacturer $step_threshold");
         step_threshold = 0.12;
-      }else if (manufacturer.toLowerCase().contains("google")) {
+      } else if (manufacturer.toLowerCase().contains("google")) {
         print("manufacture $manufacturer $step_threshold");
         step_threshold = 1.08;
       }
@@ -180,12 +185,27 @@ class _NavigationState extends State<Navigation> {
 
   void handleCompassEvents() {
     FlutterCompass.events!.listen((event) {
-      double? compassHeading = event.heading;
+      double? compassHeading = event.heading!;
       setState(() {
-        if (markers.length > 0)
-          markers[0] = customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+        user.theta = compassHeading!;
+        if(mapState.interaction2){
+          mapState.bearing = compassHeading!;
+          _googleMapController.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: mapState.target,
+                zoom: 20,
+                bearing: mapState.bearing!,
+              ),
+            ),
+            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+          );
+        }else{
+          if (markers.length > 0)
+            markers[0] =
+                customMarker.rotate(compassHeading! - mapbearing, markers[0]);
 
-          user.theta = compassHeading!;
+        }
       });
     });
   }
@@ -234,10 +254,14 @@ class _NavigationState extends State<Navigation> {
       if (_userAccelerometerEvent?.y != null) {
         if (_userAccelerometerEvent!.y > step_threshold ||
             _userAccelerometerEvent!.y < -step_threshold) {
-
-          bool isvalid = MotionModel.isValidStep(user,building.floorDimenssion[user.floor]![0],building.floorDimenssion[user.floor]![1],building.nonWalkable[user.floor]!);
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              building.floorDimenssion[user.floor]![0],
+              building.floorDimenssion[user.floor]![1],
+              building.nonWalkable[user.floor]!,
+              reroute);
           if (isvalid) {
-            user.move_show().then((value) {
+            user.move().then((value) {
               setState(() {
                 if (markers.length > 0) {
                   markers[0] = customMarker.move(
@@ -256,6 +280,13 @@ class _NavigationState extends State<Navigation> {
         }
       }
     });
+  }
+
+  void reroute() {
+    _isnavigationPannelOpen = false;
+    _isRoutePanelOpen = false;
+    _isLandmarkPanelOpen = false;
+    _isreroutePannelOpen = true;
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -278,8 +309,10 @@ class _NavigationState extends State<Navigation> {
     await patchAPI().fetchPatchData().then((value) {
       createPatch(value);
       tools.Data = value;
-      for(int i = 0 ; i<4; i++){
-        tools.corners.add(math.Point(double.parse(value.patchData!.coordinates![i].globalRef!.lat!), double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
+      for (int i = 0; i < 4; i++) {
+        tools.corners.add(math.Point(
+            double.parse(value.patchData!.coordinates![i].globalRef!.lat!),
+            double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
       }
       tools.angleBetweenBuildingAndNorth();
     });
@@ -291,10 +324,12 @@ class _NavigationState extends State<Navigation> {
     });
 
     building.landmarkdata = landmarkApi().fetchLandmarkData().then((value) {
-      Map<int,LatLng> coordinates = {};
+      Map<int, LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
-        if(value.landmarks![i].element!.subType == "AR"){
-          coordinates[int.parse(value.landmarks![i].properties!.arValue!)] = LatLng(double.parse(value.landmarks![i].properties!.latitude!), double.parse(value.landmarks![i].properties!.longitude!));
+        if (value.landmarks![i].element!.subType == "AR") {
+          coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+              LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+                  double.parse(value.landmarks![i].properties!.longitude!));
         }
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
@@ -318,7 +353,7 @@ class _NavigationState extends State<Navigation> {
       return value;
     });
 
-    beaconapi().fetchBeaconData().then((value){
+    beaconapi().fetchBeaconData().then((value) {
       building.beacondata = value;
       for (int i = 0; i < value.length; i++) {
         beacon beacons = value[i];
@@ -363,6 +398,8 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.coordinateX!,
           apibeaconmap[nearestBeacon]!.coordinateY!);
       LatLng beaconLocation = LatLng(values[0], values[1]);
+      mapState.target = LatLng(values[0], values[1]);
+      mapState.zoom = 20.0;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(values[0], values[1]),
@@ -448,11 +485,11 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
-  void createARPatch(Map<int,LatLng> coordinates) async {
+  void createARPatch(Map<int, LatLng> coordinates) async {
     print("object $coordinates");
     if (coordinates.isNotEmpty) {
       List<LatLng> points = [];
-      for(int i = 1 ; i<=coordinates.length; i++){
+      for (int i = 1; i <= coordinates.length; i++) {
         points.add(coordinates[i]!);
       }
       setState(() {
@@ -528,12 +565,20 @@ class _NavigationState extends State<Navigation> {
         maxLng = point.longitude;
       }
     }
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
     _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(minLat, minLng),
-          northeast: LatLng(maxLat, maxLng),
-        ),
+        bounds,
         0));
+  }
+
+  LatLng calculateBoundsCenter(LatLngBounds bounds) {
+    double centerLat = (bounds.southwest.latitude + bounds.northeast.latitude) / 2;
+    double centerLng = (bounds.southwest.longitude + bounds.northeast.longitude) / 2;
+
+    return LatLng(centerLat, centerLng);
   }
 
   List<LatLng> getPolygonPoints(Polygon polygon) {
@@ -677,21 +722,21 @@ class _NavigationState extends State<Navigation> {
                   }));
             }
           } else if (polyArray.polygonType == 'Cubicle') {
-            if(polyArray.cubicleName == "Green Area"){
+            if (polyArray.cubicleName == "Green Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                    polygonId: PolygonId(polyArray.id!),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: Color(0xff7CFC00),
-                    consumeTapEvents: true,
-                    ));
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff7CFC00),
+                  consumeTapEvents: true,
+                ));
               }
-            }else if(polyArray.cubicleName == "Male Washroom"){
+            } else if (polyArray.cubicleName == "Male Washroom") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -705,7 +750,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName == "Female Washroom"){
+            } else if (polyArray.cubicleName == "Female Washroom") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -719,7 +764,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName!.toLowerCase().contains("fire")){
+            } else if (polyArray.cubicleName!.toLowerCase().contains("fire")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -733,7 +778,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName!.toLowerCase().contains("water")){
+            } else if (polyArray.cubicleName!.toLowerCase().contains("water")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -747,7 +792,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName!.toLowerCase().contains("wall")){
+            } else if (polyArray.cubicleName!.toLowerCase().contains("wall")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -761,7 +806,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName == "Restricted Area"){
+            } else if (polyArray.cubicleName == "Restricted Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -775,7 +820,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else if(polyArray.cubicleName == "Non Walkable Area"){
+            } else if (polyArray.cubicleName == "Non Walkable Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -789,7 +834,7 @@ class _NavigationState extends State<Navigation> {
                   consumeTapEvents: true,
                 ));
               }
-            }else{
+            } else {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
@@ -801,7 +846,7 @@ class _NavigationState extends State<Navigation> {
                 ));
               }
             }
-          }else if(polyArray.polygonType == "Wall"){
+          } else if (polyArray.polygonType == "Wall") {
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
               closedpolygons.add(Polygon(
@@ -815,7 +860,7 @@ class _NavigationState extends State<Navigation> {
                 consumeTapEvents: true,
               ));
             }
-          }else {
+          } else {
             polylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
@@ -1197,10 +1242,20 @@ class _NavigationState extends State<Navigation> {
                                       _isRoutePanelOpen = true;
                                     });
                                   } else {
-                                    PathState.sourceName = "Choose Starting Point";
-                                    PathState.destinationPolyID = building.selectedLandmarkID!;
-                                    PathState.destinationName = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!;
-                                    PathState.destinationFloor = snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!;
+                                    PathState.sourceName =
+                                        "Choose Starting Point";
+                                    PathState.destinationPolyID =
+                                        building.selectedLandmarkID!;
+                                    PathState.destinationName = snapshot
+                                        .data!
+                                        .landmarksMap![
+                                            building.selectedLandmarkID]!
+                                        .name!;
+                                    PathState.destinationFloor = snapshot
+                                        .data!
+                                        .landmarksMap![
+                                            building.selectedLandmarkID]!
+                                        .floor!;
                                     building.selectedLandmarkID = "";
                                     Navigator.push(
                                         context,
@@ -1440,7 +1495,6 @@ class _NavigationState extends State<Navigation> {
     return (y * fl) + x;
   }
 
-
   List<CommonLifts> findCommonLifts(
       List<la.Lifts> list1, List<la.Lifts> list2) {
     List<CommonLifts> commonLifts = [];
@@ -1519,6 +1573,7 @@ class _NavigationState extends State<Navigation> {
     List<int> path = findPath(numRows, numCols, building.nonWalkable[floor]!,
         sourceIndex, destinationIndex);
     PathState.path[floor] = path;
+    PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
       PathState.directions.insert(0, element);
@@ -1606,8 +1661,9 @@ class _NavigationState extends State<Navigation> {
         distance = distance + value.length;
       });
       time = time.ceil().toDouble();
+
       distance = distance * 0.3048;
-      distance = double.parse(distance.toStringAsFixed(2));
+      distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
     return Visibility(
@@ -1647,7 +1703,8 @@ class _NavigationState extends State<Navigation> {
                         );
                         _isRoutePanelOpen = false;
                         _isLandmarkPanelOpen = true;
-                        PathState = pathState(-1, -1, -1, -1, -1, -1);
+                        PathState =
+                            pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
                         PathState.path.clear();
                         PathState.sourcePolyID = "";
                         PathState.destinationPolyID = "";
@@ -1719,13 +1776,13 @@ class _NavigationState extends State<Navigation> {
                             textAlign: TextAlign.left,
                           ),
                         ),
-                        onTap: (){
+                        onTap: () {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => DestinationSearchPage(
-                                    hintText: 'Destination location',
-                                  ))).then((value) {
+                                        hintText: 'Destination location',
+                                      ))).then((value) {
                             onDestinationVenueClicked(value);
                           });
                         },
@@ -1804,7 +1861,7 @@ class _NavigationState extends State<Navigation> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "$time min ",
+                                      "${time.toInt()} min ",
                                       style: const TextStyle(
                                         color: Color(0xffDC6A01),
                                         fontFamily: "Roboto",
@@ -1862,7 +1919,39 @@ class _NavigationState extends State<Navigation> {
                                             BorderRadius.circular(4.0),
                                       ),
                                       child: TextButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          user.pathobj = PathState;
+                                          user.path = PathState.path.values
+                                              .expand((list) => list)
+                                              .toList();
+                                          user.isnavigating = true;
+                                          user
+                                              .moveToStartofPath()
+                                              .then((value) {
+                                            setState(() {
+                                              if (markers.length > 0) {
+                                                markers[0] = customMarker.move(
+                                                    LatLng(
+                                                        tools.localtoglobal(
+                                                            user.showcoordX
+                                                                .toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[0],
+                                                        tools.localtoglobal(
+                                                            user.showcoordX
+                                                                .toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[1]),
+                                                    markers[0]);
+                                              }
+                                            });
+                                          });
+                                          _isRoutePanelOpen = false;
+                                          //selectedroomMarker.clear();
+                                          //pathMarkers.clear();
+                                          building.selectedLandmarkID = null;
+                                          _isnavigationPannelOpen = true;
+                                        },
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -2055,7 +2144,8 @@ class _NavigationState extends State<Navigation> {
                               selectedroomMarker.clear();
                               pathMarkers.clear();
                               building.selectedLandmarkID = null;
-                              PathState = pathState(-1, -1, -1, -1, -1, -1);
+                              PathState = pathState.withValues(
+                                  -1, -1, -1, -1, -1, -1, 0, 0);
                               PathState.path.clear();
                               PathState.sourcePolyID = "";
                               PathState.destinationPolyID = "";
@@ -2074,14 +2164,421 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
+  Widget navigationPannel() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    List<Widget> directionWidgets = [];
+    directionWidgets.clear();
+    for (int i = 0; i < PathState.directions.length; i++) {
+      if (PathState.directions[i].keys.first == "Straight") {
+        directionWidgets.add(directionInstruction(
+            direction: "Go " + PathState.directions[i].keys.first,
+            distance: (PathState.directions[i].values.first * 0.3048)
+                .toStringAsFixed(0)));
+      } else {
+        directionWidgets.add(directionInstruction(
+            direction: "Turn " +
+                PathState.directions[i].keys.first +
+                ", and Go Straight",
+            distance: (PathState.directions[++i].values.first * 0.3048)
+                .toStringAsFixed(0)));
+      }
+    }
+    double time = 0;
+    double distance = 0;
+    DateTime currentTime = DateTime.now();
+    if (PathState.path.isNotEmpty) {
+      PathState.path.forEach((key, value) {
+        time = time + value.length / 120;
+        distance = distance + value.length;
+      });
+      time = time.ceil().toDouble();
+      distance = distance * 0.3048;
+      distance = double.parse(distance.toStringAsFixed(1));
+    }
+    DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+    return Visibility(
+        visible: _isnavigationPannelOpen,
+        child: SlidingUpPanel(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20.0,
+              color: Colors.grey,
+            ),
+          ],
+          minHeight: 90,
+          maxHeight: screenHeight * 0.9,
+          snapPoint: 0.9,
+          panel: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  height: 90,
+                  padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.keyboard_arrow_up_outlined,
+                            size: 36,
+                            color: Colors.black,
+                          )),
+                      Container(
+                        child: Row(
+                          children: [
+                            SvgPicture.asset("assets/navigationVector.svg"),
+                            SizedBox(
+                              width: 12,
+                            ),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${time.toInt()} min",
+                                      style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                          height: 26 / 20,
+                                          color: Color(0xffDC6A01)),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                    Text(
+                                      " (${distance} m)",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        height: 26 / 20,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                                Text(
+                                  "ETA- ${newTime.hour}:${newTime.minute}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8d8c8c),
+                                    height: 20 / 14,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            _isnavigationPannelOpen = false;
+                            user.isnavigating = false;
+                            user.pathobj = pathState();
+                            user.path = [];
+                            PathState = pathState.withValues(
+                                -1, -1, -1, -1, -1, -1, 0, 0);
+                            selectedroomMarker.clear();
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+                            fitPolygonInScreen(patch.first);
+                          },
+                          icon: Icon(
+                            Icons.cancel_outlined,
+                            size: 24,
+                            color: Colors.black,
+                          ))
+                    ],
+                  ),
+                ),
+                Container(
+                  width: screenWidth,
+                  height: 1,
+                  color: Color(0xffEBEBEB),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 17, top: 12, right: 17),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Steps",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff000000),
+                          height: 24 / 18,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                      SizedBox(
+                        height: 22,
+                      ),
+                      Container(
+                        height: 522,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 25,
+                                    margin: EdgeInsets.only(right: 8),
+                                    child: SvgPicture.asset(
+                                        "assets/StartpointVector.svg"),
+                                  ),
+                                  Text(
+                                    "${PathState.sourceName}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff0e0d0d),
+                                      height: 25 / 16,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Container(
+                                width: screenHeight,
+                                height: 1,
+                                color: Color(0xffEBEBEB),
+                              ),
+                              Column(
+                                children: directionWidgets,
+                              ),
+                              SizedBox(
+                                height: 22,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 25,
+                                    margin: EdgeInsets.only(right: 8),
+                                    child: Icon(
+                                      Icons.pin_drop_sharp,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Text(
+                                    PathState.destinationName,
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff0e0d0d),
+                                      height: 25 / 16,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Container(
+                                width: screenHeight,
+                                height: 1,
+                                color: Color(0xffEBEBEB),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ));
+  }
+
+  Widget reroutePannel() {
+    return Visibility(
+        visible: _isreroutePannelOpen,
+        child: SlidingUpPanel(
+          minHeight: 119,
+          backdropEnabled: true,
+          isDraggable: false,
+          panel: Container(
+            padding: EdgeInsets.only(left: 13, top: 13),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset("assets/Reroutevector.svg"),
+                SizedBox(
+                  width: 12,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Off-Path Notification",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
+                        height: 26 / 20,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    Text(
+                      "Lost the path? New route?",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8d8c8c),
+                        height: 20 / 14,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 85,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Color(0xff24B9B0),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: TextButton(
+                            onPressed: ()async{
+                              PathState.sourceX = user.coordX;
+                              PathState.sourceY = user.coordY;
+                              user.showcoordX = user.coordX;
+                              user.showcoordY = user.coordY;
+                              PathState.sourceFloor = user.floor;
+                              PathState.sourcePolyID = user.key;
+                              print("object ${PathState.sourcePolyID}");
+                              PathState.sourceName =
+                              "Your current location";
+                              building.landmarkdata!.then((value)async{
+                                await calculateroute(value.landmarksMap!)
+                                    .then((value) {
+                                  user.pathobj = PathState;
+                                  user.path = PathState.path.values
+                                      .expand((list) => list)
+                                      .toList();
+                                  user.pathobj.index = 0;
+                                  user.isnavigating = true;
+                                  user
+                                      .moveToStartofPath()
+                                      .then((value) {
+                                    setState(() {
+                                      if (markers.length > 0) {
+                                        markers[0] = customMarker.move(
+                                            LatLng(
+                                                tools.localtoglobal(
+                                                    user.showcoordX
+                                                        .toInt(),
+                                                    user.showcoordY
+                                                        .toInt())[0],
+                                                tools.localtoglobal(
+                                                    user.showcoordX
+                                                        .toInt(),
+                                                    user.showcoordY
+                                                        .toInt())[1]),
+                                            markers[0]);
+                                      }
+                                    });
+                                  });
+                                  _isRoutePanelOpen = false;
+                                  building.selectedLandmarkID = null;
+                                  _isnavigationPannelOpen = true;
+                                  _isreroutePannelOpen = false;
+                                });
+                              });
+                            },
+                            child: Text(
+                              "Reroute",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                                height: 20 / 14,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Container(
+                          width: 92,
+                          height: 36,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.0),
+                              border: Border.all(color: Colors.black)),
+                          child: TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              "Continue",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                                height: 20 / 14,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ));
+  }
+
   Set<Marker> getCombinedMarkers() {
-    if (_isLandmarkPanelOpen) {
-      return (selectedroomMarker.union(Set<Marker>.of(markers))).union(Markers);
-    } else {
-      return pathMarkers[building.floor] != null
-          ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
-              .union(Markers)
-          : (Set<Marker>.of(markers)).union(Markers);
+    if(user.floor == building.floor){
+      if (_isLandmarkPanelOpen) {
+        return (selectedroomMarker.union(Set<Marker>.of(markers))).union(Markers);
+      } else {
+        return pathMarkers[building.floor] != null
+            ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
+            .union(Markers)
+            : (Set<Marker>.of(markers)).union(Markers);
+      }
+    }else {
+      if (_isLandmarkPanelOpen) {
+        return (selectedroomMarker).union(Markers);
+      } else {
+        return pathMarkers[building.floor] != null
+            ? (pathMarkers[building.floor]!)
+            .union(Markers)
+            : Markers;
+      }
     }
   }
 
@@ -2233,8 +2730,6 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-
-
   @override
   void dispose() {
     _googleMapController.dispose();
@@ -2245,6 +2740,10 @@ class _NavigationState extends State<Navigation> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidthPixels = MediaQuery.of(context).size.width *
+        MediaQuery.of(context).devicePixelRatio;
+    double screenHeightPixel = MediaQuery.of(context).size.height *
+        MediaQuery.of(context).devicePixelRatio;
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -2260,7 +2759,7 @@ class _NavigationState extends State<Navigation> {
                     ? polylines.union(singleroute[building.floor]!)
                     : polylines,
                 markers: getCombinedMarkers(),
-                onTap: (x) {},
+                onTap: (x) {mapState.interaction = true;},
                 mapType: MapType.normal,
                 buildingsEnabled: false,
                 compassEnabled: true,
@@ -2273,21 +2772,26 @@ class _NavigationState extends State<Navigation> {
                     fitPolygonInScreen(patch.first);
                   }
                 },
-                onLongPress: (Lat){
-                  print("pressed so long"+Lat.toString());
-                },
-
                 onCameraMove: (CameraPosition cameraPosition) {
+                  //mapState.interaction = true;
                   mapbearing = cameraPosition.bearing;
                   if (true) {
                     _updateMarkers(cameraPosition.zoom);
                     //_updateBuilding(cameraPosition.zoom);
                   }
                 },
+                onCameraIdle: (){
+                  if(!mapState.interaction){
+                    mapState.interaction2 = true;
+                  }
+                },
+                onCameraMoveStarted: (){
+                  mapState.interaction2 = false;
+                },
               ),
             ),
             Positioned(
-              bottom: 95.0, // Adjust the position as needed
+              bottom: 150.0, // Adjust the position as needed
               right: 16.0,
               child: Column(
                 children: [
@@ -2335,25 +2839,37 @@ class _NavigationState extends State<Navigation> {
                   SizedBox(height: 28.0), // Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () {
-                      bool isvalid = MotionModel.isValidStep(user,building.floorDimenssion[user.floor]![0],building.floorDimenssion[user.floor]![1],building.nonWalkable[user.floor]!);
-                      if (isvalid) {
-                        user.move_show().then((value) {
-                          setState(() {
-                            if (markers.length > 0) {
-                              markers[0] = customMarker.move(
-                                  LatLng(
-                                      tools.localtoglobal(user.showcoordX.toInt(),
-                                          user.showcoordY.toInt())[0],
-                                      tools.localtoglobal(user.showcoordX.toInt(),
-                                          user.showcoordY.toInt())[1]),
-                                  markers[0]);
-                            }
-                          });
-                        });
-                      } else {
-                        showToast("You are out of path");
-                      }
-                      //fitPolygonInScreen(patch.first);
+                      // bool isvalid = MotionModel.isValidStep(
+                      //     user,
+                      //     building.floorDimenssion[user.floor]![0],
+                      //     building.floorDimenssion[user.floor]![1],
+                      //     building.nonWalkable[user.floor]!,
+                      //     reroute);
+                      // if (isvalid) {
+                      //   user.move().then((value) {
+                      //     setState(() {
+                      //       if (markers.length > 0) {
+                      //         markers[0] = customMarker.move(
+                      //             LatLng(
+                      //                 tools.localtoglobal(
+                      //                     user.showcoordX.toInt(),
+                      //                     user.showcoordY.toInt())[0],
+                      //                 tools.localtoglobal(
+                      //                     user.showcoordX.toInt(),
+                      //                     user.showcoordY.toInt())[1]),
+                      //             markers[0]);
+                      //       }
+                      //     });
+                      //   });
+                      // } else {
+                      //   reroute();
+                      //   showToast("You are out of path");
+                      // }
+                      if (markers.length > 0)
+                        markers[0] =
+                            customMarker.rotate(0, markers[0]);
+                      mapState.interaction = !mapState.interaction;
+                      fitPolygonInScreen(patch.first);
                     },
                     child: Icon(
                       Icons.my_location_sharp,
@@ -2375,8 +2891,7 @@ class _NavigationState extends State<Navigation> {
                         onVenueClicked: onLandmarkVenueClicked,
                         fromSourceAndDestinationPage:
                             fromSourceAndDestinationPage,
-                      )
-            ),
+                      )),
             FutureBuilder(
               future: building.landmarkdata,
               builder: (context, snapshot) {
@@ -2387,7 +2902,9 @@ class _NavigationState extends State<Navigation> {
                 }
               },
             ),
-            routeDeatilPannel()
+            routeDeatilPannel(),
+            navigationPannel(),
+            reroutePannel()
           ],
         ),
       ),

@@ -59,6 +59,9 @@ dependencies:
   auto_size_text: ^3.0.0
   sensors_plus: ^4.0.2
   device_information: ^0.0.4
+  marquee_widget: ^1.2.0
+  firebase_core: ^2.4.1
+  cloud_firestore: ^4.3.2
 
 
 dev_dependencies:

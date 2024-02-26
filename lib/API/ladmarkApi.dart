@@ -58,7 +58,8 @@ class landmarkApi {
 
       // print(LandMarkBox.length);
       // print('TESTING LANDMARK API DATABASE OVER');
-      //landmarkData.save();
+      landmarkData.save();
+
 
       //print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);

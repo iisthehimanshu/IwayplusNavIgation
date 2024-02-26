@@ -1,20 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/DATABASE/BOXES/LandMarkApiModelBox.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '../APIMODELS/BuildingAPIModel.dart';
-import '../APIMODELS/polylinedata.dart';
-import '../APIMODELS/landmark.dart';
+import 'package:iwayplusnav/DATABASE/BOXES/BuildingAPIModelBox.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import '../APIMODELS/Building.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
-import 'package:hive/hive.dart';
 
 
 class BuildingAPI {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/get/venue";
   String token = "";
 
-  Future<BuildingAPIModel> fetchBuildData() async {
+  Future<Building> fetchBuildData() async {
     // final LandMarkBox = LandMarkApiModelBox.getData();
     //
     // if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
@@ -26,6 +23,16 @@ class BuildingAPI {
     //   // print("object ${responseBody['landmarks'][0].runtimeType}");
     //   return land.fromJson(responseBody);
     // }
+    final BuildingBox = BuildingAPIModelBox.getData();
+    if(BuildingBox.length !=0){
+      print("BUILDING API DATA FROM DATABASE");
+      print(BuildingBox.length);
+      Map<String, dynamic> responseBody = BuildingBox.getAt(0)!.responseBody;
+      //List<Building> buildingList = responseBody.map((key, value) => null)
+      return Building.fromJson(responseBody);
+    }
+    
+    
 
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null){
@@ -48,7 +55,7 @@ class BuildingAPI {
     print("response code in land is ${response.statusCode}");
     if (response.statusCode == 200) {
       Map<String,dynamic> responseBody = json.decode(response.body);
-      //final LandMarkBox = LandMarkApiModelBox.getData();
+      final BuildingData = BuildingAPIModel(responseBody: responseBody);
 
       print(responseBody);
       print('BUILDING DATA FROM API');
@@ -62,7 +69,10 @@ class BuildingAPI {
       //landmarkData.save();
 
       //print("object ${responseBody['landmarks'][0].runtimeType}");
-      return BuildingAPIModel.fromJson(responseBody);
+      
+      BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
+      BuildingData.save();
+      return Building.fromJson(responseBody);
     } else {
       print(response.statusCode);
       print(response.body);

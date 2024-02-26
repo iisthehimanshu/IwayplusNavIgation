@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '../APIMODELS/beaconData.dart';
-import '../APIMODELS/buildingAllModel.dart';
+import '../APIMODELS/buildingAll.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
 import 'guestloginapi.dart';
@@ -14,14 +14,14 @@ class buildingAllApi {
   static String selectedID="";
   static String selectedVenue="";
 
-  Future<List<buildingAllModel>> fetchBuildingAllData() async {
+  Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
 
     if(BuildingAllBox.length!=0){
-      print("BUILDING API DATA FROM DATABASE");
+      print("BUILDINGALL API DATA FROM DATABASE");
       print(BuildingAllBox.length);
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAllModel> buildingList = responseBody.map((data) => buildingAllModel.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
 
       return buildingList;
     }
@@ -40,11 +40,13 @@ class buildingAllApi {
       },
     );
     if (response.statusCode == 200) {
-      print("BUILDING API DATA FROM API");
+      print("BUILDINGALL API DATA FROM API");
       List<dynamic> responseBody = json.decode(response.body);
       final buildingData = BuildingAllAPIModel(responseBody: responseBody);
       BuildingAllBox.add(buildingData);
-      List<buildingAllModel> buildingList = responseBody.map((data) => buildingAllModel.fromJson(data)).toList();
+      buildingData.save();
+      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+
       return buildingList;
     } else {
       print(response.statusCode);

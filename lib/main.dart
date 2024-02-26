@@ -1,9 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'BuildingSelectionScreen.dart';
+import 'VenueSelectionScreen.dart';
+import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
@@ -12,6 +16,7 @@ import 'Navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   Hive.registerAdapter(LandMarkApiModelAdapter());
@@ -22,6 +27,15 @@ void main() async {
   await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
   Hive.registerAdapter(BuildingAllAPIModelAdapter());
   await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+  Hive.registerAdapter(BeaconAPIModelAdapter());
+  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
+  Hive.registerAdapter(BuildingAPIModelAdapter());
+  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
+  await Firebase.initializeApp();
+
+
   runApp(const MyApp());
 }
 
@@ -38,6 +52,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: "IWAYPLUS",
       home: MainScreen(initialIndex: 0,),
+
     );
   }
 }

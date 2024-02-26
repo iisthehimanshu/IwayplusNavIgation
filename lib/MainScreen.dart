@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:iwayplusnav/BuildingSelectionScreen.dart';
+import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
+
+import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -17,16 +19,15 @@ class _MainScreenState extends State<MainScreen> {
 
   late int index;
   final screens = [
-    BuildingSelectionScreen(),
+    VenueSelectionScreen(),
     Navigation(buildingID: '',),
-    BuildingSelectionScreen(),
-    BuildingSelectionScreen(),
+    VenueSelectionScreen(),
+    FavouriteScreen(),
   ];
   @override
   void initState() {
     super.initState();
     index = widget.initialIndex;
-
   }
 
 
@@ -50,7 +51,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if (index == 3 || index==2 || index==4 || index==1 ){
+            if (index==3 || index==2 || index==4 || index==1 ){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {

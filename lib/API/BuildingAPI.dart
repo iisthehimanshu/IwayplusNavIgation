@@ -71,7 +71,7 @@ class BuildingAPI {
       //print("object ${responseBody['landmarks'][0].runtimeType}");
       
       BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
-      BuildingData.save();
+      //BuildingData.save();
       return Building.fromJson(responseBody);
     } else {
       print(response.statusCode);

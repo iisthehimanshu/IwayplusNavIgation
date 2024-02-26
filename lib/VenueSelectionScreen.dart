@@ -312,7 +312,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: ["Parking","Elevator","Accessible Pathways"],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                       ),
                                     );
                                   },
@@ -338,7 +338,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: ["Parking","Elevator","Accessible Pathways"],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                         ),
                                       );
                                     },
@@ -362,7 +362,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: [],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                         ),
                                       );
                                     },
@@ -406,7 +406,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: [],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                          builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                         ),
                                       );
                                     },

@@ -13,7 +13,7 @@ import 'Elements/InsideBuildingCard.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
-  List<String>? receivedAllBuildingList;
+  List<buildingAll>? receivedAllBuildingList;
   String? venueTitle;
   String? venueDescription;
   String? venueCategory;
@@ -240,16 +240,16 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   child: ListView.builder(
                     scrollDirection:Axis.horizontal ,
                     itemBuilder: (context,index){
-                      var currentData = dd[index];
+                      var currentData = widget.receivedAllBuildingList![index];
                       return InsideBuildingCard(
                         buildingImageURL: currentData.buildingPhoto?? "",
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",
-                        buildingFavourite: currentData.favourite??false,
+                        buildingFavourite: false,
                       );
                     },
-                    itemCount:dd.length,
+                    itemCount:widget.receivedAllBuildingList!.length,
                   ),
                 ),
                 Container(
@@ -266,60 +266,36 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                // Container(
-                //   height: 70,
-                //   child: ListView.builder(
-                //     scrollDirection: Axis.horizontal,
-                //       itemCount: widget.receivedAllBuildingList?.length,
-                //       itemBuilder: (BuildContext context, int index) {
-                //         return Padding(
-                //           padding: EdgeInsets.all(8.0), // Adjust the value as needed
-                //           child: Container(
-                //             width: 150,
-                //             decoration: BoxDecoration(
-                //                 border: Border.all(
-                //                   color: Color(0xffEBEBEB),
-                //                 ),
-                //               borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
-                //             ),
-                //             child: ListTile(
-                //               contentPadding: EdgeInsets.all(8.0), // Adjust the value as needed
-                //               leading: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg", width: 24),
-                //               title: Text(widget.receivedAllBuildingList![index]),
-                //             ),
-                //           ),
-                //         );
-                //       }),
-                // ),
-
-
                 Container(
-                  child: Row(
-                    children: [
-                      Container(
-                          child: Expanded(
-                            child: Container(
-                              margin: EdgeInsets.all(16),
-                              padding: EdgeInsets.all(8),
-                              height: 70,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Color(0xffEBEBEB),
-                                  ),
-                                  borderRadius: BorderRadius.all(Radius.circular(8))
-                              ),
-                              child: Column(
-                                children: [
-                                  Container(
+                  height: 90,
+                  padding: EdgeInsets.only(left: 10),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                      itemCount: widget.receivedAllBuildingList?.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: EdgeInsets.all(8.0), // Adjust the value as needed
+                          child: Container(
+                            width: 170,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color(0xffEBEBEB),
+                                ),
+                              borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 12,top: 12),
+                                  alignment: Alignment.topLeft,
+                                  child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
+                                ),
+                                Flexible(
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 12,top: 12),
                                     alignment: Alignment.topLeft,
-                                    child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.topLeft,
-                                    margin: EdgeInsets.only(top: 10,),
                                     child: Text(
-                                      "Parking",
+                                      truncateString("Parking",25),
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
                                         fontSize: 14,
@@ -330,94 +306,139 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                       textAlign: TextAlign.left,
                                     ),
                                   ),
-                                ],
-                              )
-                            )
-                          )
-                      ),
-                      Container(
-                          child: Expanded(
-                              child: Container(
-                                  margin: EdgeInsets.all(16),
-                                  padding: EdgeInsets.all(8),
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: Color(0xffEBEBEB),
-                                      ),
-                                      borderRadius: BorderRadius.all(Radius.circular(8))
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        alignment: Alignment.topLeft,
-                                        child: SvgPicture.asset("assets/BuildingInfoScreen_ElevatorLogo.svg",width: 22),
-                                      ),
-                                      Container(
-                                        alignment: Alignment.topLeft,
-                                        margin: EdgeInsets.only(top: 8,),
-                                        child: Text(
-                                          "Elevator",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a789c),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                              )
-                          )
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                        child: Container(
-                            height: 55,
-                            margin: EdgeInsets.only(left: 16,right: 16,top: 8),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: Color(0xffEBEBEB),
-                                ),
-                                borderRadius: BorderRadius.all(Radius.circular(8))
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.only(left: 8),
-                                  alignment: Alignment.center,
-                                  child: SvgPicture.asset("assets/BuildingInfoScreen_AccesibilityLogo.svg",width: 24),
-                                ),
-                                Container(
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.only(left: 12),
-                                  child: Text(
-                                    "Accessible Pathways",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff4a789c),
-                                      height: 20/14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
                                 ),
                               ],
                             )
-                        )
-                    ),
-                  ],
+                          ),
+                        );
+                      }),
                 ),
+
+                // Container(
+                //   child: Row(
+                //     children: [
+                //       Container(
+                //           child: Expanded(
+                //             child: Container(
+                //               margin: EdgeInsets.all(16),
+                //               padding: EdgeInsets.all(8),
+                //               height: 70,
+                //               decoration: BoxDecoration(
+                //                   color: Colors.white,
+                //                   border: Border.all(
+                //                     color: Color(0xffEBEBEB),
+                //                   ),
+                //                   borderRadius: BorderRadius.all(Radius.circular(8))
+                //               ),
+                //               child: Column(
+                //                 children: [
+                //                   Container(
+                //                     alignment: Alignment.topLeft,
+                //                     child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
+                //                   ),
+                //                   Container(
+                //                     alignment: Alignment.topLeft,
+                //                     margin: EdgeInsets.only(top: 10,),
+                //                     child: Text(
+                //                       "Parking",
+                //                       style: const TextStyle(
+                //                         fontFamily: "Roboto",
+                //                         fontSize: 14,
+                //                         fontWeight: FontWeight.w400,
+                //                         color: Color(0xff4a789c),
+                //                         height: 20/14,
+                //                       ),
+                //                       textAlign: TextAlign.left,
+                //                     ),
+                //                   ),
+                //                 ],
+                //               )
+                //             )
+                //           )
+                //       ),
+                //       Container(
+                //           child: Expanded(
+                //               child: Container(
+                //                   margin: EdgeInsets.all(16),
+                //                   padding: EdgeInsets.all(8),
+                //                   height: 70,
+                //                   decoration: BoxDecoration(
+                //                       color: Colors.white,
+                //                       border: Border.all(
+                //                         color: Color(0xffEBEBEB),
+                //                       ),
+                //                       borderRadius: BorderRadius.all(Radius.circular(8))
+                //                   ),
+                //                   child: Column(
+                //                     children: [
+                //                       Container(
+                //                         alignment: Alignment.topLeft,
+                //                         child: SvgPicture.asset("assets/BuildingInfoScreen_ElevatorLogo.svg",width: 22),
+                //                       ),
+                //                       Container(
+                //                         alignment: Alignment.topLeft,
+                //                         margin: EdgeInsets.only(top: 8,),
+                //                         child: Text(
+                //                           "Elevator",
+                //                           style: const TextStyle(
+                //                             fontFamily: "Roboto",
+                //                             fontSize: 14,
+                //                             fontWeight: FontWeight.w400,
+                //                             color: Color(0xff4a789c),
+                //                             height: 20/14,
+                //                           ),
+                //                           textAlign: TextAlign.left,
+                //                         ),
+                //                       ),
+                //                     ],
+                //                   )
+                //               )
+                //           )
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // Row(
+                //   children: [
+                //     Expanded(
+                //         child: Container(
+                //             height: 55,
+                //             margin: EdgeInsets.only(left: 16,right: 16,top: 8),
+                //             decoration: BoxDecoration(
+                //                 color: Colors.white,
+                //                 border: Border.all(
+                //                   color: Color(0xffEBEBEB),
+                //                 ),
+                //                 borderRadius: BorderRadius.all(Radius.circular(8))
+                //             ),
+                //             child: Row(
+                //               children: [
+                //                 Container(
+                //                   margin: EdgeInsets.only(left: 8),
+                //                   alignment: Alignment.center,
+                //                   child: SvgPicture.asset("assets/BuildingInfoScreen_AccesibilityLogo.svg",width: 24),
+                //                 ),
+                //                 Container(
+                //                   alignment: Alignment.center,
+                //                   margin: EdgeInsets.only(left: 12),
+                //                   child: Text(
+                //                     "Accessible Pathways",
+                //                     style: const TextStyle(
+                //                       fontFamily: "Roboto",
+                //                       fontSize: 14,
+                //                       fontWeight: FontWeight.w400,
+                //                       color: Color(0xff4a789c),
+                //                       height: 20/14,
+                //                     ),
+                //                     textAlign: TextAlign.left,
+                //                   ),
+                //                 ),
+                //               ],
+                //             )
+                //         )
+                //     ),
+                //   ],
+                // ),
                 Container(
                   margin: EdgeInsets.only(top: 32,left:16),
                   child: Text(

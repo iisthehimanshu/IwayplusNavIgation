@@ -266,31 +266,31 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                Container(
-                  height: 70,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                      itemCount: widget.receivedAllBuildingList?.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: EdgeInsets.all(8.0), // Adjust the value as needed
-                          child: Container(
-                            width: 150,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Color(0xffEBEBEB),
-                                ),
-                              borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
-                            ),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.all(8.0), // Adjust the value as needed
-                              leading: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg", width: 24),
-                              title: Text(widget.receivedAllBuildingList![index]),
-                            ),
-                          ),
-                        );
-                      }),
-                ),
+                // Container(
+                //   height: 70,
+                //   child: ListView.builder(
+                //     scrollDirection: Axis.horizontal,
+                //       itemCount: widget.receivedAllBuildingList?.length,
+                //       itemBuilder: (BuildContext context, int index) {
+                //         return Padding(
+                //           padding: EdgeInsets.all(8.0), // Adjust the value as needed
+                //           child: Container(
+                //             width: 150,
+                //             decoration: BoxDecoration(
+                //                 border: Border.all(
+                //                   color: Color(0xffEBEBEB),
+                //                 ),
+                //               borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
+                //             ),
+                //             child: ListTile(
+                //               contentPadding: EdgeInsets.all(8.0), // Adjust the value as needed
+                //               leading: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg", width: 24),
+                //               title: Text(widget.receivedAllBuildingList![index]),
+                //             ),
+                //           ),
+                //         );
+                //       }),
+                // ),
 
 
                 Container(

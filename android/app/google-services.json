@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "880966987613",
+    "firebase_url": "https://task-1dccb-default-rtdb.firebaseio.com",
+    "project_id": "task-1dccb",
+    "storage_bucket": "task-1dccb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880966987613:android:e1160ebb36cb9752c3c2b4",
+        "android_client_info": {
+          "package_name": "com.iwayplus.navigation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "880966987613-bpv0p25kn4pr9uropodspclepdb0t2en.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7yXKMS0HNcMEUKuaDEoG4_0H5AlAKtyY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880966987613-bpv0p25kn4pr9uropodspclepdb0t2en.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

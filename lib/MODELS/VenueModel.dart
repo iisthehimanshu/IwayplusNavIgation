@@ -5,6 +5,10 @@ class VenueModel{
   int? distance;
   int? buildingNumber;
   String? address;
+  String? phoneNo;
+  String? description;
+  String? website;
+
 
   VenueModel({
     required this.imageURL,
@@ -12,7 +16,10 @@ class VenueModel{
     required this.venueName,
     required this.distance,
     required this.buildingNumber,
-    required this.address
+    required this.address,
+    required this.phoneNo,
+    required this.description,
+    required this.website
   });
 
 }

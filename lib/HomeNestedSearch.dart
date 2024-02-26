@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 
-import 'APIMODELS/buildingAllModel.dart';
-import 'Class/buildingCard.dart';
+import 'APIMODELS/buildingAll.dart';
+import 'Elements/buildingCard.dart';
 import 'Navigation.dart';
 
 class HomeNestedSearch extends SearchDelegate{
-  List<buildingAllModel> searchList=[];
+  List<buildingAll> searchList=[];
 
-  HomeNestedSearch(List<buildingAllModel> initialSearchList) {
+  HomeNestedSearch(List<buildingAll> initialSearchList) {
     searchList = initialSearchList;
   }
 
@@ -42,7 +42,7 @@ class HomeNestedSearch extends SearchDelegate{
 
   @override
   Widget buildResults(BuildContext context) {
-    List<buildingAllModel> bbsearchList = [];
+    List<buildingAll> bbsearchList = [];
     for(var item in searchList){
       if(item.buildingName!.toLowerCase().contains(query.toLowerCase())){
         bbsearchList.add(item);
@@ -51,9 +51,9 @@ class HomeNestedSearch extends SearchDelegate{
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         var data = bbsearchList[index];
-        return buildingCard(imageURL: data.photo??"",
+        return buildingCard(imageURL: data.buildingPhoto??"",
           Name: data.buildingName??"",
-          Tag: data.category?? "", Address: data.address?? "", Distance: 190, NumberofBuildings: 3, bid: data.sId??"",);
+          Tag: data.buildingCategory?? "", Address: data.address?? "", Distance: 190, NumberofBuildings: 3, bid: data.sId??"",);
       },
 
     );
@@ -61,7 +61,7 @@ class HomeNestedSearch extends SearchDelegate{
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    List<buildingAllModel> bbsearchList = [];
+    List<buildingAll> bbsearchList = [];
     for (var item in searchList) {
       if (item.buildingName!.toLowerCase().contains(query.toLowerCase()) || item.venueName!.toLowerCase().contains(query.toLowerCase())) {
         bbsearchList.add(item);
@@ -80,9 +80,9 @@ class HomeNestedSearch extends SearchDelegate{
               ),
             );
           },
-          child: buildingCard(imageURL: data.photo ?? "",
+          child: buildingCard(imageURL: data.buildingPhoto ?? "",
             Name: data.buildingName ?? "",
-            Tag: data.category ?? "",
+            Tag: data.buildingCategory ?? "",
             Address: data.address ?? "",
             Distance: 190,
             NumberofBuildings: 3,

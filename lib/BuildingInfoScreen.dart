@@ -2,19 +2,26 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/Class/buildingCard.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'API/BuildingAPI.dart';
-import 'APIMODELS/BuildingAPIModel.dart';
-import 'APIMODELS/buildingAllModel.dart';
+import 'APIMODELS/Building.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'Class/InsideBuildingCard.dart';
+import 'Elements/InsideBuildingCard.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
-  List<buildingAllModel>? receivedAllBuildingList;
+  List<String>? receivedAllBuildingList;
+  String? venueTitle;
+  String? venueDescription;
+  String? venueCategory;
+  String? venueAddress;
+  String? venuePhone;
+  String? venueWebsite;
 
-  BuildingInfoScreen({ this.receivedAllBuildingList,});
+  BuildingInfoScreen({ this.receivedAllBuildingList,this.venueTitle,this.venueDescription,this.venueCategory,this.venueAddress,this.venuePhone,this.venueWebsite});
 
 
   @override
@@ -22,10 +29,8 @@ class BuildingInfoScreen extends StatefulWidget {
 }
 
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
-  late List<buildingAllModel> allBuildingList=[];
+  late List<buildingAll> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
-  ScrollController _scrollController = ScrollController();
-
 
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
@@ -53,18 +58,25 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
 
   void apiCall() async{
-    await BuildingAPI().fetchBuildData().then((value) => dd = value.data!);
+    setState(() async {
+      await BuildingAPI().fetchBuildData().then((value){
+        setState(() {
+          dd = value.data!;
+        });
+      });
+    });
     print("API CAll");
     for (BuildingAPIInsideModel i in dd){
-      print(i.buildingName);
+      print(i);
     }
-    //print(dd[0].buildingName);
+    print(dd.length);
   }
 
 
 
   @override
   Widget build(BuildContext context) {
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
@@ -138,7 +150,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         Container(
                           margin: EdgeInsets.only(right: 8),
                           child: Text(
-                            widget.receivedAllBuildingList![0].category??"No category",
+                            widget.venueCategory??"No category",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 12,
@@ -157,7 +169,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   child: Container(
                     margin: EdgeInsets.only(top: 6,left: 16),
                     child: Text(
-                      widget.receivedAllBuildingList![0].venueName??"",
+                      widget.venueTitle??"",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 20,
@@ -177,7 +189,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       SizedBox(width: 8,),
                       Container(
                         child: Text(
-                          truncateString(makeAddress(widget.receivedAllBuildingList![0].address.toString()) ?? "",25),
+                          truncateString(makeAddress(widget.venueAddress.toString()) ?? "",25),
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 14,
@@ -193,18 +205,20 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: 6,left:16,right: 16),
-                  child: Text(
-                    "Ashoka University’s Liberal Arts and Sciences education enables critical thinking, read more",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff000000),
-                      height: 24/18,
+                Flexible(
+                  child: Container(
+                    margin: EdgeInsets.only(top: 6,left:16,right: 16),
+                    child: Text(
+                      widget.venueDescription??"",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff000000),
+                        height: 24/18,
+                      ),
+                      textAlign: TextAlign.left,
                     ),
-                    textAlign: TextAlign.left,
                   ),
                 ),
                 Container(
@@ -226,17 +240,16 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   child: ListView.builder(
                     scrollDirection:Axis.horizontal ,
                     itemBuilder: (context,index){
-                      var currentData = widget.receivedAllBuildingList![index];
-                      return GestureDetector(
-                        child: InsideBuildingCard(
-                          imageURL: currentData.photo?? "",
-                          buildingName: currentData.buildingName?? "",
-                          Tag: currentData.category?? "",
-                          buildingId: currentData.sId??"",
-                        ),
+                      var currentData = dd[index];
+                      return InsideBuildingCard(
+                        buildingImageURL: currentData.buildingPhoto?? "",
+                        buildingName: currentData.buildingName?? "",
+                        buildingTag: currentData.venueCategory?? "",
+                        buildingId: currentData.sId??"",
+                        buildingFavourite: currentData.favourite??false,
                       );
                     },
-                    itemCount: widget.receivedAllBuildingList?.length,
+                    itemCount:dd.length,
                   ),
                 ),
                 Container(
@@ -253,6 +266,33 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     textAlign: TextAlign.left,
                   ),
                 ),
+                Container(
+                  height: 70,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                      itemCount: widget.receivedAllBuildingList?.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: EdgeInsets.all(8.0), // Adjust the value as needed
+                          child: Container(
+                            width: 150,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color(0xffEBEBEB),
+                                ),
+                              borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
+                            ),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.all(8.0), // Adjust the value as needed
+                              leading: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg", width: 24),
+                              title: Text(widget.receivedAllBuildingList![index]),
+                            ),
+                          ),
+                        );
+                      }),
+                ),
+
+
                 Container(
                   child: Row(
                     children: [
@@ -393,7 +433,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(left: 12,top:16 ),
+                  margin: EdgeInsets.only(left: 12,top:16 ,right: 12),
                   width: screenWidth,
                   child: Row(
                     children: [
@@ -402,19 +442,20 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         alignment: Alignment.center,
                         child: SvgPicture.asset("assets/BuildingInfoScreen_VenueLocationIconsvg.svg",width: 40),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.only(left: 12),
-                        child: Text(
-                          "Plot No. 2, Rajivpat Haryana-131029",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff4a789c),
-                            height: 20/14,
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            widget.venueAddress?.trim()??"",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff4a789c),
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
                       ),
                     ],
@@ -430,19 +471,21 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         alignment: Alignment.center,
                         child: SvgPicture.asset("assets/BuildingInfoScreen_VenuePhoneIcon.svg",width: 40),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.only(left: 12),
-                        child: Text(
-                          "044 - 2344542",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff4a789c),
-                            height: 20/14,
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            widget.venuePhone??"",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff4a789c),
+                              height: 20/14,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
                       ),
                     ],
@@ -458,19 +501,21 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         alignment: Alignment.center,
                         child: SvgPicture.asset("assets/BuildingInfoScreen_VenueLinkIcon.svg",width: 40),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.only(left: 12),
-                        child: Text(
-                          "https://www.ashoka.edu.in/",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff4a789c),
-                            height: 20/14,
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                           widget.venueWebsite??"",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff4a789c),
+                              height: 20/14,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
                       ),
                     ],
@@ -523,6 +568,14 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ),
+                // Flexible(
+                //   child: Container(
+                //     child: Text(
+                //       'This text will determine the height of thedsvvfzvsvszdvs row item',
+                //       style: TextStyle(fontSize: 16),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

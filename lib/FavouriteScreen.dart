@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/Class/buildingCard.dart';
+import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'API/BuildingAPI.dart';
-import 'APIMODELS/BuildingAPIModel.dart';
-import 'APIMODELS/buildingAllModel.dart';
+import 'APIMODELS/Building.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'Class/InsideBuildingCard.dart';
+import 'Elements/InsideBuildingCard.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 

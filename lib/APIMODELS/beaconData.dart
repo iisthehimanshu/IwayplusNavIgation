@@ -41,7 +41,7 @@ class beacon {
         this.updatedAt
       });
 
-  beacon.fromJson(Map<String, dynamic> json) {
+  beacon.fromJson(Map<dynamic, dynamic> json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
     properties = json['properties'] != null

@@ -4,19 +4,21 @@ import 'package:hive/hive.dart';
 import 'package:iwayplusnav/BuildingInfoScreen.dart';
 import 'package:iwayplusnav/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../API/buildingAllApi.dart';
+import '../APIMODELS/buildingAll.dart';
+import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import '../Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {
-  String imageURL;
+  String buildingImageURL;
   String buildingName;
-  String Tag;
+  String buildingTag;
   String buildingId;
-  bool favourite = false;
+  bool buildingFavourite;
 
   InsideBuildingCard(
-      {required this.imageURL, required this.buildingName, required this.Tag, required this.buildingId, this.favourite = false});
+      {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite});
 
   @override
   _InsideBuildingCardState createState() => _InsideBuildingCardState();
@@ -24,7 +26,7 @@ class InsideBuildingCard extends StatefulWidget {
 }
 
 class _InsideBuildingCardState extends State<InsideBuildingCard> {
-  bool isFavourite = false;
+  //bool isFavourite = false;
   var favouriteBox = FavouriteDataBaseModelBox.getData();
 
 
@@ -134,7 +136,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   margin: EdgeInsets.only(left: 8,top:3,bottom: 8),
                   alignment: Alignment.topLeft,
                   child: Text(
-                    truncateString(widget.Tag,25),
+                    truncateString(widget.buildingTag,25),
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 14,
@@ -150,23 +152,60 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               GestureDetector(
                 onTap: (){
                   //widget.favourite = true;
-                  // print("HEART");
+                  print("HEART");
                   setState(() {
-                    isFavourite = !isFavourite;
-                  });
-                  if(isFavourite){
-                    final data = FavouriteDataBaseModel(venueBuildingName: widget.buildingName, venueBuildingLocation: widget.Tag);
-                    favouriteBox.add(data);
-                  }else{
-                    print("favouriteBox.keys.contains(widget.buildingName");
-                    print(favouriteBox.keys.contains(widget.buildingName));
+                    widget.buildingFavourite = !widget.buildingFavourite;
+                    final getBuildingAllBox = BuildingAPIModelBox.getData();
+                    Map<String,dynamic> responseBody = getBuildingAllBox.getAt(0)!.responseBody;
+                    print(responseBody);
 
-                    favouriteBox.deleteAt(favouriteBox.get(widget.buildingName) as int);
+                    // for (int i = 0; i < responseBody.length; i++) {
+                    //   var building = buildingAll.fromJson(responseBody[i]);
+                    //
+                    //   if (building.buildingName == widget.buildingName) {
+                    //     print("FAVOURITE CHECK");
+                    //     print(building.buildingName);
+                    //     print(widget.buildingName);
+                    //     print(building.);
+                    //
+                    //     building.favourite = true;
+                    //     print(building.favourite);
+                    //
+                    //     // Update only the specific item in the list
+                    //     getBuildingAllBox.getAt(0)!.responseBody[i] = building.toJson();
+                    //   }
+                    // }
+
+                  });
+
+                  if(widget.buildingFavourite){
+                    final getBuildingAllBox = BuildingAllAPIModelBOX.getData();
+                    List<dynamic> responseBody = getBuildingAllBox.getAt(0)!.responseBody;
+                    List<buildingAll> updatedBuildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+                    for (buildingAll bb in updatedBuildingList){
+                      if(bb.venueName==widget.buildingName){
+
+                        // print("FAVOURTE CHECK");
+                        // print(bb.favourite);
+                        // bb.favourite = true;
+                        // print(bb.favourite);
+                      }
+                    }
+
+                    // final data = FavouriteDataBaseModel(venueBuildingName: widget.buildingName, venueBuildingLocation: widget.buildingTag);
+                    // favouriteBox.add(data);
+                  }else{
+                    // print("favouriteBox.keys.contains(widget.buildingName");
+                    // print(favouriteBox.keys.contains(widget.buildingName));
+                    //
+                    // favouriteBox.deleteAt(favouriteBox.get(widget.buildingName) as int);
                   }
+
+
                 },
                 child: Container(
                     margin:EdgeInsets.only(right: 8,bottom: 7),
-                    child: isFavourite ? SvgPicture.asset("assets/IndideBuildingCard_HeartRed.svg") : SvgPicture.asset("assets/InsideBuildingCard_HeartIcon.svg"),
+                    child: widget.buildingFavourite ? SvgPicture.asset("assets/IndideBuildingCard_HeartRed.svg") : SvgPicture.asset("assets/InsideBuildingCard_HeartIcon.svg"),
               ))
             ],
           ),

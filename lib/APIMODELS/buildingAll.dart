@@ -1,54 +1,28 @@
-class BuildingAPIModel {
-  bool? status;
-  List<BuildingAPIInsideModel>? data;
-
-  BuildingAPIModel({this.status, this.data});
-
-  BuildingAPIModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    if (json['data'] != null) {
-      data = <BuildingAPIInsideModel>[];
-      json['data'].forEach((v) {
-        data!.add(new BuildingAPIInsideModel.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class BuildingAPIInsideModel {
+class buildingAll {
   String? sId;
   String? initialBuildingName;
   String? initialVenueName;
   String? buildingName;
   String? venueName;
-  Null? venueCategory;
-  Null? buildingCategory;
+  String? venueCategory;
+  String? buildingCategory;
   List<double>? coordinates;
   List<double>? pickupCoords;
   String? address;
   bool? liveStatus;
   bool? geofencing;
-  Null? description;
+  String? description;
   List<String>? features;
-  Null? phone;
-  Null? website;
-  Null? venuePhoto;
-  Null? buildingPhoto;
+  String? phone;
+  String? website;
+  String? venuePhoto;
+  String? buildingPhoto;
   List<WorkingDays>? workingDays;
   String? createdAt;
   String? updatedAt;
   int? iV;
 
-  BuildingAPIInsideModel(
+  buildingAll.buildngAllAPIModel(
       {this.sId,
         this.initialBuildingName,
         this.initialVenueName,
@@ -70,9 +44,9 @@ class BuildingAPIInsideModel {
         this.workingDays,
         this.createdAt,
         this.updatedAt,
-        this.iV});
+        this.iV,});
 
-  BuildingAPIInsideModel.fromJson(Map<String, dynamic> json) {
+  buildingAll.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     initialBuildingName = json['initialBuildingName'];
     initialVenueName = json['initialVenueName'];
@@ -107,8 +81,8 @@ class BuildingAPIInsideModel {
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['initialBuildingName'] = this.initialBuildingName;
     data['initialVenueName'] = this.initialVenueName;
@@ -128,7 +102,7 @@ class BuildingAPIInsideModel {
     data['venuePhoto'] = this.venuePhoto;
     data['buildingPhoto'] = this.buildingPhoto;
     if (this.workingDays != null) {
-      data['workingDays'] = this.workingDays!.map((v) => v.toJson()).toList();
+    data['workingDays'] = this.workingDays!.map((v) => v.toJson()).toList();
     }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
@@ -144,15 +118,15 @@ class WorkingDays {
 
   WorkingDays({this.day, this.openingTime, this.closingTime, this.sId});
 
-  WorkingDays.fromJson(Map<String, dynamic> json) {
+  WorkingDays.fromJson(Map<dynamic, dynamic> json) {
     day = json['day'];
     openingTime = json['openingTime'];
     closingTime = json['closingTime'];
     sId = json['_id'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['day'] = this.day;
     data['openingTime'] = this.openingTime;
     data['closingTime'] = this.closingTime;

@@ -36,6 +36,7 @@ import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/SearchNearby.dart';
 import 'Elements/landmarkPannelShimmer.dart';
+import 'MapState.dart';
 import 'MotionModel.dart';
 import 'SourceAndDestinationPage.dart';
 import 'bluetooth_scanning.dart';
@@ -70,6 +71,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  MapState mapState = new MapState();
   Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
@@ -183,13 +185,27 @@ class _NavigationState extends State<Navigation> {
 
   void handleCompassEvents() {
     FlutterCompass.events!.listen((event) {
-      double? compassHeading = event.heading;
+      double? compassHeading = event.heading!;
       setState(() {
-        if (markers.length > 0)
-          markers[0] =
-              customMarker.rotate(compassHeading! - mapbearing, markers[0]);
-
         user.theta = compassHeading!;
+        if(mapState.interaction2){
+          mapState.bearing = compassHeading!;
+          _googleMapController.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: mapState.target,
+                zoom: 20,
+                bearing: mapState.bearing!,
+              ),
+            ),
+            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+          );
+        }else{
+          if (markers.length > 0)
+            markers[0] =
+                customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+
+        }
       });
     });
   }
@@ -382,6 +398,8 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.coordinateX!,
           apibeaconmap[nearestBeacon]!.coordinateY!);
       LatLng beaconLocation = LatLng(values[0], values[1]);
+      mapState.target = LatLng(values[0], values[1]);
+      mapState.zoom = 20.0;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(values[0], values[1]),
@@ -547,12 +565,20 @@ class _NavigationState extends State<Navigation> {
         maxLng = point.longitude;
       }
     }
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
     _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(minLat, minLng),
-          northeast: LatLng(maxLat, maxLng),
-        ),
+        bounds,
         0));
+  }
+
+  LatLng calculateBoundsCenter(LatLngBounds bounds) {
+    double centerLat = (bounds.southwest.latitude + bounds.northeast.latitude) / 2;
+    double centerLng = (bounds.southwest.longitude + bounds.northeast.longitude) / 2;
+
+    return LatLng(centerLat, centerLng);
   }
 
   List<LatLng> getPolygonPoints(Polygon polygon) {
@@ -2535,13 +2561,24 @@ class _NavigationState extends State<Navigation> {
   }
 
   Set<Marker> getCombinedMarkers() {
-    if (_isLandmarkPanelOpen) {
-      return (selectedroomMarker.union(Set<Marker>.of(markers))).union(Markers);
-    } else {
-      return pathMarkers[building.floor] != null
-          ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
-              .union(Markers)
-          : (Set<Marker>.of(markers)).union(Markers);
+    if(user.floor == building.floor){
+      if (_isLandmarkPanelOpen) {
+        return (selectedroomMarker.union(Set<Marker>.of(markers))).union(Markers);
+      } else {
+        return pathMarkers[building.floor] != null
+            ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
+            .union(Markers)
+            : (Set<Marker>.of(markers)).union(Markers);
+      }
+    }else {
+      if (_isLandmarkPanelOpen) {
+        return (selectedroomMarker).union(Markers);
+      } else {
+        return pathMarkers[building.floor] != null
+            ? (pathMarkers[building.floor]!)
+            .union(Markers)
+            : Markers;
+      }
     }
   }
 
@@ -2703,6 +2740,10 @@ class _NavigationState extends State<Navigation> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidthPixels = MediaQuery.of(context).size.width *
+        MediaQuery.of(context).devicePixelRatio;
+    double screenHeightPixel = MediaQuery.of(context).size.height *
+        MediaQuery.of(context).devicePixelRatio;
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -2718,7 +2759,7 @@ class _NavigationState extends State<Navigation> {
                     ? polylines.union(singleroute[building.floor]!)
                     : polylines,
                 markers: getCombinedMarkers(),
-                onTap: (x) {},
+                onTap: (x) {mapState.interaction = true;},
                 mapType: MapType.normal,
                 buildingsEnabled: false,
                 compassEnabled: true,
@@ -2731,15 +2772,21 @@ class _NavigationState extends State<Navigation> {
                     fitPolygonInScreen(patch.first);
                   }
                 },
-                onLongPress: (Lat) {
-                  print("pressed so long" + Lat.toString());
-                },
                 onCameraMove: (CameraPosition cameraPosition) {
+                  //mapState.interaction = true;
                   mapbearing = cameraPosition.bearing;
                   if (true) {
                     _updateMarkers(cameraPosition.zoom);
                     //_updateBuilding(cameraPosition.zoom);
                   }
+                },
+                onCameraIdle: (){
+                  if(!mapState.interaction){
+                    mapState.interaction2 = true;
+                  }
+                },
+                onCameraMoveStarted: (){
+                  mapState.interaction2 = false;
                 },
               ),
             ),
@@ -2792,33 +2839,37 @@ class _NavigationState extends State<Navigation> {
                   SizedBox(height: 28.0), // Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () {
-                      bool isvalid = MotionModel.isValidStep(
-                          user,
-                          building.floorDimenssion[user.floor]![0],
-                          building.floorDimenssion[user.floor]![1],
-                          building.nonWalkable[user.floor]!,
-                          reroute);
-                      if (isvalid) {
-                        user.move().then((value) {
-                          setState(() {
-                            if (markers.length > 0) {
-                              markers[0] = customMarker.move(
-                                  LatLng(
-                                      tools.localtoglobal(
-                                          user.showcoordX.toInt(),
-                                          user.showcoordY.toInt())[0],
-                                      tools.localtoglobal(
-                                          user.showcoordX.toInt(),
-                                          user.showcoordY.toInt())[1]),
-                                  markers[0]);
-                            }
-                          });
-                        });
-                      } else {
-                        reroute();
-                        showToast("You are out of path");
-                      }
-                      //fitPolygonInScreen(patch.first);
+                      // bool isvalid = MotionModel.isValidStep(
+                      //     user,
+                      //     building.floorDimenssion[user.floor]![0],
+                      //     building.floorDimenssion[user.floor]![1],
+                      //     building.nonWalkable[user.floor]!,
+                      //     reroute);
+                      // if (isvalid) {
+                      //   user.move().then((value) {
+                      //     setState(() {
+                      //       if (markers.length > 0) {
+                      //         markers[0] = customMarker.move(
+                      //             LatLng(
+                      //                 tools.localtoglobal(
+                      //                     user.showcoordX.toInt(),
+                      //                     user.showcoordY.toInt())[0],
+                      //                 tools.localtoglobal(
+                      //                     user.showcoordX.toInt(),
+                      //                     user.showcoordY.toInt())[1]),
+                      //             markers[0]);
+                      //       }
+                      //     });
+                      //   });
+                      // } else {
+                      //   reroute();
+                      //   showToast("You are out of path");
+                      // }
+                      if (markers.length > 0)
+                        markers[0] =
+                            customMarker.rotate(0, markers[0]);
+                      mapState.interaction = !mapState.interaction;
+                      fitPolygonInScreen(patch.first);
                     },
                     child: Icon(
                       Icons.my_location_sharp,

@@ -72,7 +72,8 @@ class BuildingAPIInsideModel {
         this.createdAt,
         this.updatedAt,
         this.iV,
-      this.favourite});
+        this.favourite
+      });
 
   BuildingAPIInsideModel.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];

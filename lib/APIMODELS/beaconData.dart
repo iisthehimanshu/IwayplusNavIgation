@@ -81,8 +81,8 @@ class beacon {
     doorY = json['doorY'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     if (this.element != null) {
       data['element'] = this.element!.toJson();
     }
@@ -122,13 +122,13 @@ class Element {
 
   Element({this.type, this.subType});
 
-  Element.fromJson(Map<String, dynamic> json) {
+  Element.fromJson(Map<dynamic, dynamic> json) {
     type = json['type'];
     subType = json['subType'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['type'] = this.type;
     data['subType'] = this.subType;
     return data;
@@ -159,7 +159,7 @@ class Properties {
         this.clickedPoints,
         this.polygonId});
 
-  Properties.fromJson(Map<String, dynamic> json) {
+  Properties.fromJson(Map<dynamic, dynamic> json) {
     latitude = json['latitude'];
     longitude = json['longitude'];
     node = json['node'];
@@ -197,8 +197,8 @@ class Properties {
     }
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['latitude'] = this.latitude;
     data['longitude'] = this.longitude;
     data['node'] = this.node;
@@ -232,13 +232,13 @@ class Lifts {
 
   Lifts({this.name, this.distance});
 
-  Lifts.fromJson(Map<String, dynamic> json) {
+  Lifts.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['name'] = this.name;
     data['distance'] = this.distance;
     return data;
@@ -251,13 +251,13 @@ class Stairs {
 
   Stairs({this.name, this.distance});
 
-  Stairs.fromJson(Map<String, dynamic> json) {
+  Stairs.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['name'] = this.name;
     data['distance'] = this.distance;
     return data;
@@ -270,13 +270,13 @@ class Others {
 
   Others({this.name, this.distance});
 
-  Others.fromJson(Map<String, dynamic> json) {
+  Others.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['name'] = this.name;
     data['distance'] = this.distance;
     return data;
@@ -288,13 +288,13 @@ class Null {
 
   Null({this.name, this.distance});
 
-  Null.fromJson(Map<String, dynamic> json) {
+  Null.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['name'] = this.name;
     data['distance'] = this.distance;
     return data;

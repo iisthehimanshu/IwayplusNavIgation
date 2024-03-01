@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/API/BuildingAPI.dart';
+import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 
@@ -29,7 +30,7 @@ class beaconapi {
       }
     });
     final Map<String, dynamic> data = {
-      "buildingId": "65d887a5db333f89457145f6",
+      "buildingId": buildingAllApi.getStoredString(),
     };
 
     final response = await http.post(

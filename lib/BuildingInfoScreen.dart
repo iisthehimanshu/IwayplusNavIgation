@@ -453,7 +453,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                Container(
+                widget.venueAddress != null ?Container(
                   margin: EdgeInsets.only(left: 12,top:16 ,right: 12),
                   width: screenWidth,
                   child: Row(
@@ -481,8 +481,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       ),
                     ],
                   ),
-                ),
-                Container(
+                ):Container(),
+                widget.venuePhone != null ?Container(
                   margin: EdgeInsets.only(left: 12,top:12),
                   width: screenWidth,
                   child: Row(
@@ -511,8 +511,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       ),
                     ],
                   ),
-                ),
-                Container(
+                ):Container(),
+                widget.venueWebsite != null ?Container(
                   margin: EdgeInsets.only(left: 12,top:12),
                   width: screenWidth,
                   child: Row(
@@ -541,7 +541,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       ),
                     ],
                   ),
-                ),
+                ):Container(),
                 Container(
                   margin: EdgeInsets.only(left: 12,top:12),
                   alignment: Alignment.centerLeft,

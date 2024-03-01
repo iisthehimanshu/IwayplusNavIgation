@@ -488,9 +488,13 @@ class _NavigationState extends State<Navigation> {
   void createARPatch(Map<int, LatLng> coordinates) async {
     print("object $coordinates");
     if (coordinates.isNotEmpty) {
+      print("$coordinates");
       List<LatLng> points = [];
       for (int i = 1; i <= coordinates.length; i++) {
-        points.add(coordinates[i]!);
+        print("object $i");
+        if(coordinates[i] != null){
+          points.add(coordinates[i]!);
+        }
       }
       setState(() {
         patch.clear();

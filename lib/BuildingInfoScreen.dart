@@ -246,7 +246,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",
-                        buildingFavourite: false,
+                        buildingFavourite: currentData.favorite??false,
                       );
                     },
                     itemCount:widget.receivedAllBuildingList!.length,

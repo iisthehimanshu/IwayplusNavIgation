@@ -68,6 +68,11 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     print(venueHashMap.keys);
     //venueList = venueHashMap.keys
     venueList = createVenueList(venueHashMap);
+    for(buildingAll i in buildingList){
+        print(i.favorite);
+        i.favorite = false;
+        print(i.favorite);
+    }
 
 
   }

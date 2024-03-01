@@ -21,6 +21,7 @@ class buildingAll {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  bool? favorite;
 
   buildingAll.buildngAllAPIModel(
       {this.sId,
@@ -44,7 +45,8 @@ class buildingAll {
         this.workingDays,
         this.createdAt,
         this.updatedAt,
-        this.iV,});
+        this.iV,
+        this.favorite});
 
   buildingAll.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];

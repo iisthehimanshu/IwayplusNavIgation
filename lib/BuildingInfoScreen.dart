@@ -58,16 +58,16 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
 
   void apiCall() async{
-    setState(() async {
-      await BuildingAPI().fetchBuildData().then((value){
-        setState(() {
-          dd = value.data!;
-        });
+    await BuildingAPI().fetchBuildData().then((value){
+      setState(() {
+        dd = value.data!;
       });
     });
     print("API CAll");
+    print(buildingAllApi.selectedVenue);
     for (BuildingAPIInsideModel i in dd){
-      print(i);
+      print(i.venuePhoto);
+      print(i.buildingPhoto);
     }
     print(dd.length);
   }
@@ -242,7 +242,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     itemBuilder: (context,index){
                       var currentData = widget.receivedAllBuildingList![index];
                       return InsideBuildingCard(
-                        buildingImageURL: currentData.buildingPhoto?? "",
+                        buildingImageURL: currentData.venuePhoto?? "",
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",
@@ -252,67 +252,67 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     itemCount:widget.receivedAllBuildingList!.length,
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: 32,left:16),
-                  child: Text(
-                    "This Buildings has",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff000000),
-                      height: 24/18,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                Container(
-                  height: 90,
-                  padding: EdgeInsets.only(left: 10),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                      itemCount: widget.receivedAllBuildingList?.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: EdgeInsets.all(8.0), // Adjust the value as needed
-                          child: Container(
-                            width: 170,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Color(0xffEBEBEB),
-                                ),
-                              borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.only(left: 12,top: 12),
-                                  alignment: Alignment.topLeft,
-                                  child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
-                                ),
-                                Flexible(
-                                  child: Container(
-                                    margin: EdgeInsets.only(left: 12,top: 12),
-                                    alignment: Alignment.topLeft,
-                                    child: Text(
-                                      truncateString("Parking",25),
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a789c),
-                                        height: 20/14,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ),
-                        );
-                      }),
-                ),
+                // Container(
+                //   margin: EdgeInsets.only(top: 32,left:16),
+                //   child: Text(
+                //     "This Buildings has",
+                //     style: const TextStyle(
+                //       fontFamily: "Roboto",
+                //       fontSize: 18,
+                //       fontWeight: FontWeight.w400,
+                //       color: Color(0xff000000),
+                //       height: 24/18,
+                //     ),
+                //     textAlign: TextAlign.left,
+                //   ),
+                // ),
+                // Container(
+                //   height: 90,
+                //   padding: EdgeInsets.only(left: 10),
+                //   child: ListView.builder(
+                //     scrollDirection: Axis.horizontal,
+                //       itemCount: widget.receivedAllBuildingList?.length,
+                //       itemBuilder: (BuildContext context, int index) {
+                //         return Padding(
+                //           padding: EdgeInsets.all(8.0), // Adjust the value as needed
+                //           child: Container(
+                //             width: 170,
+                //             decoration: BoxDecoration(
+                //                 border: Border.all(
+                //                   color: Color(0xffEBEBEB),
+                //                 ),
+                //               borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
+                //             ),
+                //             child: Column(
+                //               children: [
+                //                 Container(
+                //                   margin: EdgeInsets.only(left: 12,top: 12),
+                //                   alignment: Alignment.topLeft,
+                //                   child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
+                //                 ),
+                //                 Flexible(
+                //                   child: Container(
+                //                     margin: EdgeInsets.only(left: 12,top: 12),
+                //                     alignment: Alignment.topLeft,
+                //                     child: Text(
+                //                       truncateString("Parking",25),
+                //                       style: const TextStyle(
+                //                         fontFamily: "Roboto",
+                //                         fontSize: 14,
+                //                         fontWeight: FontWeight.w400,
+                //                         color: Color(0xff4a789c),
+                //                         height: 20/14,
+                //                       ),
+                //                       textAlign: TextAlign.left,
+                //                     ),
+                //                   ),
+                //                 ),
+                //               ],
+                //             )
+                //           ),
+                //         );
+                //       }),
+                // ),
 
                 // Container(
                 //   child: Row(
@@ -465,7 +465,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       ),
                       Flexible(
                         child: Container(
-                          alignment: Alignment.center,
+                          alignment: Alignment.centerLeft,
                           margin: EdgeInsets.only(left: 12),
                           child: Text(
                             widget.venueAddress?.trim()??"",

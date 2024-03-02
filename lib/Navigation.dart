@@ -883,7 +883,7 @@ class _NavigationState extends State<Navigation> {
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(64, 64)),
+            const ImageConfiguration(devicePixelRatio: 2.5),
             'assets/7.png',
           );
           setState(() {
@@ -911,11 +911,11 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
-        } else if (landmarks[i].element!.subType != null &&
-            landmarks[i].element!.subType == "restRoom") {
+        } else if (landmarks[i].properties!.washroomType != null &&
+            landmarks[i].properties!.washroomType == "Male") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
-            'assets/rest_room_marker_icon.png',
+            'assets/6.png',
           );
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -1007,8 +1007,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   PanelController _landmarkPannelController = new PanelController();
-  Widget landmarkdetailpannel(
-      BuildContext context, AsyncSnapshot<land> snapshot) {
+  Widget landmarkdetailpannel(BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -1070,8 +1069,7 @@ class _NavigationState extends State<Navigation> {
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                          .name!,
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!,
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,

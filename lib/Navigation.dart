@@ -407,6 +407,7 @@ class _NavigationState extends State<Navigation> {
           20, // Specify your custom zoom level here
         ),
       );
+
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       user.lat =
@@ -415,6 +416,7 @@ class _NavigationState extends State<Navigation> {
           double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
       user.floor = apibeaconmap[nearestBeacon]!.floor!;
       user.key = apibeaconmap[nearestBeacon]!.sId!;
+      user.initialallyLocalised = true;
       setState(() {
         markers.clear();
         markers.add(Marker(
@@ -471,8 +473,8 @@ class _NavigationState extends State<Navigation> {
           Polygon(
             polygonId: PolygonId('patch'),
             points: polygonPoints,
-            strokeWidth: 2,
-            strokeColor: Colors.blue,
+            strokeWidth: 1,
+            strokeColor: Colors.white,
             fillColor: Colors.white,
             geodesic: false,
             consumeTapEvents: true,
@@ -510,7 +512,8 @@ class _NavigationState extends State<Navigation> {
           Polygon(
             polygonId: PolygonId('patch'),
             points: points,
-            strokeWidth: 2,
+            strokeWidth: 1,
+            strokeColor: Colors.white,
             fillColor: Colors.white,
             geodesic: false,
             consumeTapEvents: true,
@@ -979,7 +982,37 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
-        } else if (landmarks[i].properties!.washroomType != null &&
+        } else if (landmarks[i].name!.toLowerCase().contains("lift")) {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/1.png',
+          );
+          setState(() {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+            Markers.add(Marker(
+                markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
+                position: LatLng(value[0], value[1]),
+                icon: customMarker,
+                visible: false,
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if (building.selectedLandmarkID !=
+                        landmarks[i].properties!.polyId) {
+                      building.selectedLandmarkID =
+                          landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                )));
+          });
+        }else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
@@ -2709,6 +2742,10 @@ class _NavigationState extends State<Navigation> {
             Marker _marker = customMarker.visibility(zoom < 16.0, marker);
             updatedMarkers.add(_marker);
           }
+          if (marker.markerId.value.contains("Lift")) {
+            Marker _marker = customMarker.visibility(zoom < 20.5, marker);
+            updatedMarkers.add(_marker);
+          }
           if (building.ignoredMarker.contains(words[1])) {
             if (marker.markerId.value.contains("Door")) {
               Marker _marker = customMarker.visibility(true, marker);
@@ -3008,7 +3045,9 @@ class _NavigationState extends State<Navigation> {
                       if (markers.length > 0)
                         markers[0] =
                             customMarker.rotate(0, markers[0]);
-                      mapState.interaction = !mapState.interaction;
+                      if(user.initialallyLocalised){
+                        mapState.interaction = !mapState.interaction;
+                      }
                       mapState.zoom = 21;
                       fitPolygonInScreen(patch.first);
                     },

@@ -43,6 +43,7 @@ class BuildingAPI {
     final Map<String, dynamic> data = {
       "venueName": buildingAllApi.getStoredVenue(),
     };
+    print("inside land");
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
@@ -71,7 +72,6 @@ class BuildingAPI {
       
       BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
       BuildingData.save();
-      print(BuildingData);
       return Building.fromJson(responseBody);
     } else {
       print(response.statusCode);

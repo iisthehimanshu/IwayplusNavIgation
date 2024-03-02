@@ -51,7 +51,7 @@ class HomeNestedSearch extends SearchDelegate{
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         var data = bbsearchList[index];
-        return buildingCard(imageURL: data.venuePhoto??"",
+        return buildingCard(imageURL: data.buildingPhoto??"",
           Name: data.buildingName??"",
           Tag: data.buildingCategory?? "", Address: data.address?? "", Distance: 190, NumberofBuildings: 3, bid: data.sId??"",);
       },
@@ -80,9 +80,9 @@ class HomeNestedSearch extends SearchDelegate{
               ),
             );
           },
-          child: buildingCard(imageURL: data.venuePhoto ?? "",
+          child: buildingCard(imageURL: data.buildingPhoto ?? "",
             Name: data.buildingName ?? "",
-            Tag: data.venueCategory ?? "",
+            Tag: data.buildingCategory ?? "",
             Address: data.address ?? "",
             Distance: 190,
             NumberofBuildings: 3,

@@ -489,10 +489,21 @@ class _NavigationState extends State<Navigation> {
   void createARPatch(Map<int, LatLng> coordinates) async {
     print("object $coordinates");
     if (coordinates.isNotEmpty) {
+      print("$coordinates");
+      print("${coordinates.length}");
       List<LatLng> points = [];
-      for(int i = 1 ; i<=coordinates.length; i++){
-        points.add(coordinates[i]!);
-      }
+      List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
+
+      // Sort the list by keys
+      entryList.sort((a, b) => a.key.compareTo(b.key));
+
+      // Create a new LinkedHashMap from the sorted list
+      LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
+
+      // Print the sorted map
+      sortedCoordinates.forEach((key, value) {
+        points.add(value);
+      });
       setState(() {
         patch.clear();
         patch.add(
@@ -906,8 +917,8 @@ class _NavigationState extends State<Navigation> {
       if (landmarks[i].floor == floor) {
         if(landmarks[i].element!.type == "Rooms" && landmarks[i].coordinateX != null){
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(),
-            'assets/7.png',
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/room_marker_icon.png',
           );
           setState(() {
             List<double> value =
@@ -968,11 +979,11 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
-        } else if (landmarks[i].properties!.washroomType != null &&
-            landmarks[i].properties!.washroomType == "Male") {
+        } else if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "restRoom") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
-            'assets/6.png',
+            'assets/rest_room_marker_icon.png',
           );
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -1002,8 +1013,8 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(),
-            'assets/1.png',
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/3.png',
           );
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -1064,7 +1075,8 @@ class _NavigationState extends State<Navigation> {
   }
 
   PanelController _landmarkPannelController = new PanelController();
-  Widget landmarkdetailpannel(BuildContext context, AsyncSnapshot<land> snapshot) {
+  Widget landmarkdetailpannel(
+      BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -1128,7 +1140,8 @@ class _NavigationState extends State<Navigation> {
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!,
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                          .name!,
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,

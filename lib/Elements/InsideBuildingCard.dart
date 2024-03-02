@@ -81,7 +81,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               child: ClipRRect(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
                 child: Image.network(
-                  'https://dev.iwayplus.in/uploads/${widget.buildingImageURL}',
+                  'https://dev.iwayplus.in/uploads/$widget.imageURL',
                   // You can replace the placeholder image URL with your default image URL
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(

@@ -34,6 +34,17 @@ class customMarker {
     );
   }
 
+  static Marker toggleVisibility(Marker marker ) {
+    return Marker(
+        markerId: marker.markerId,
+        position: marker.position,
+        icon: marker.icon,
+        rotation: marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
+        anchor: marker.anchor,
+        visible: !marker.visible
+    );
+  }
+
   static Polygon Polygonvisibility(bool visible , Polygon polygon ) {
     return polygon.copyWith(visibleParam: visible);
   }

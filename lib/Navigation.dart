@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
@@ -194,7 +195,7 @@ class _NavigationState extends State<Navigation> {
             CameraUpdate.newCameraPosition(
               CameraPosition(
                 target: mapState.target,
-                zoom: 20,
+                zoom: mapState.zoom,
                 bearing: mapState.bearing!,
               ),
             ),
@@ -399,7 +400,7 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.coordinateY!);
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
-      mapState.zoom = 20.0;
+      mapState.zoom = 21.0;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(values[0], values[1]),
@@ -488,10 +489,21 @@ class _NavigationState extends State<Navigation> {
   void createARPatch(Map<int, LatLng> coordinates) async {
     print("object $coordinates");
     if (coordinates.isNotEmpty) {
+      print("$coordinates");
+      print("${coordinates.length}");
       List<LatLng> points = [];
-      for (int i = 1; i <= coordinates.length; i++) {
-        points.add(coordinates[i]!);
-      }
+      List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
+
+      // Sort the list by keys
+      entryList.sort((a, b) => a.key.compareTo(b.key));
+
+      // Create a new LinkedHashMap from the sorted list
+      LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
+
+      // Print the sorted map
+      sortedCoordinates.forEach((key, value) {
+        points.add(value);
+      });
       setState(() {
         patch.clear();
         patch.add(
@@ -537,11 +549,20 @@ class _NavigationState extends State<Navigation> {
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     double lat = 0.0;
     double long = 0.0;
-    for (int i = 0; i < polygonPoints.length; i++) {
-      lat = lat + polygonPoints[i].latitude;
-      long = long + polygonPoints[i].longitude;
+    if(polygonPoints.length <= 4){
+      for (int i = 0; i < polygonPoints.length; i++) {
+        lat = lat + polygonPoints[i].latitude;
+        long = long + polygonPoints[i].longitude;
+      }
+      return LatLng(lat / polygonPoints.length, long / polygonPoints.length);
+    }else{
+      for (int i = 0; i < 4; i++) {
+        lat = lat + polygonPoints[i].latitude;
+        long = long + polygonPoints[i].longitude;
+      }
+      return LatLng(lat / 4, long / 4);
     }
-    return LatLng(lat / polygonPoints.length, long / polygonPoints.length);
+
   }
 
   void fitPolygonInScreen(Polygon polygon) {
@@ -711,8 +732,9 @@ class _NavigationState extends State<Navigation> {
                     );
                     setState(() {
                       if (building.selectedLandmarkID != polyArray.id) {
-                        print("inside for loop");
                         building.selectedLandmarkID = polyArray.id;
+                        building.ignoredMarker.clear();
+                        building.ignoredMarker.add(polyArray.id!);
                         _isRoutePanelOpen = false;
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
@@ -733,6 +755,20 @@ class _NavigationState extends State<Navigation> {
 
                   strokeColor: Colors.black,
                   fillColor: Color(0xff7CFC00),
+                  consumeTapEvents: true,
+                ));
+              }
+            }else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                closedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFFFF00),
                   consumeTapEvents: true,
                 ));
               }
@@ -860,7 +896,7 @@ class _NavigationState extends State<Navigation> {
                 consumeTapEvents: true,
               ));
             }
-          } else {
+          }else {
             polylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
@@ -879,18 +915,50 @@ class _NavigationState extends State<Navigation> {
 
     for (int i = 0; i < landmarks.length; i++) {
       if (landmarks[i].floor == floor) {
-        if (landmarks[i].element!.subType != null &&
-            landmarks[i].element!.subType == "room door" &&
-            landmarks[i].doorX != null) {
+        if(landmarks[i].element!.type == "Rooms" && landmarks[i].coordinateX != null){
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(devicePixelRatio: 2.5),
             'assets/7.png',
           );
           setState(() {
             List<double> value =
+            tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+            Markers.add(Marker(
+                markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
+                position: LatLng(value[0], value[1]),
+                icon: customMarker,
+                visible: false,
+                anchor: Offset(0.5, 0.5),
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if (building.selectedLandmarkID !=
+                        landmarks[i].properties!.polyId) {
+                      building.selectedLandmarkID =
+                          landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                )));
+          });
+        }
+        if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "room door" &&
+            landmarks[i].doorX != null) {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(),
+            'assets/dooricon.png',
+          );
+          setState(() {
+            List<double> value =
                 tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
             Markers.add(Marker(
-                markerId: MarkerId("Room $i"),
+                markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
                 icon: customMarker,
                 visible: false,
@@ -921,7 +989,7 @@ class _NavigationState extends State<Navigation> {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
-                markerId: MarkerId("Rest $i"),
+                markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
                 icon: customMarker,
                 visible: false,
@@ -952,7 +1020,7 @@ class _NavigationState extends State<Navigation> {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
-                markerId: MarkerId("Entry $i"),
+                markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
                 icon: customMarker,
                 visible: true,
@@ -989,7 +1057,7 @@ class _NavigationState extends State<Navigation> {
     }
     setState(() {
       Markers.add(Marker(
-        markerId: MarkerId("Building"),
+        markerId: MarkerId("Building marker"),
         position: _initialCameraPosition.target,
         icon: BitmapDescriptor.defaultMarker,
         visible: false,
@@ -1017,6 +1085,7 @@ class _NavigationState extends State<Navigation> {
       print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
+      showMarkers();
       selectedroomMarker.clear();
       building.selectedLandmarkID = null;
       return Container();
@@ -1056,6 +1125,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          showMarkers();
                           toggleLandmarkPanel();
                         },
                         icon: Icon(
@@ -1085,6 +1155,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          showMarkers();
                           toggleLandmarkPanel();
                         },
                         icon: Icon(
@@ -1691,6 +1762,7 @@ class _NavigationState extends State<Navigation> {
                 Container(
                   child: IconButton(
                       onPressed: () {
+                        showMarkers();
                         List<double> mvalues = tools.localtoglobal(
                             PathState.destinationX, PathState.destinationY);
                         _googleMapController.animateCamera(
@@ -2138,6 +2210,7 @@ class _NavigationState extends State<Navigation> {
                         right: 15,
                         child: IconButton(
                             onPressed: () {
+                              showMarkers();
                               _isRoutePanelOpen = false;
                               selectedroomMarker.clear();
                               pathMarkers.clear();
@@ -2581,28 +2654,60 @@ class _NavigationState extends State<Navigation> {
   }
 
   void _updateMarkers(double zoom) {
-    Set<Marker> updatedMarkers = Set();
-    setState(() {
-      Markers.forEach((marker) {
-        if (marker.markerId.value.contains("Room")) {
-          Marker _marker = customMarker.visibility(zoom > 20.7, marker);
-          updatedMarkers.add(_marker);
-        }
-        if (marker.markerId.value.contains("Rest")) {
-          Marker _marker = customMarker.visibility(zoom > 19, marker);
-          updatedMarkers.add(_marker);
-        }
-        if (marker.markerId.value.contains("Entry")) {
-          Marker _marker = customMarker.visibility(zoom > 18.5, marker);
-          updatedMarkers.add(_marker);
-        }
-        if (marker.markerId.value.contains("Building")) {
-          Marker _marker = customMarker.visibility(zoom < 16.0, marker);
-          updatedMarkers.add(_marker);
-        }
+    if(building.updateMarkers){
+      Set<Marker> updatedMarkers = Set();
+      setState(() {
+        Markers.forEach((marker) {
+          print(marker);
+          List<String> words = marker.markerId.value.split(' ');
+          if (marker.markerId.value.contains("Room")) {
+            Marker _marker = customMarker.visibility(zoom > 20.5, marker);
+            updatedMarkers.add(_marker);
+          }
+          if (marker.markerId.value.contains("Rest")) {
+            Marker _marker = customMarker.visibility(zoom > 19, marker);
+            updatedMarkers.add(_marker);
+          }
+          if (marker.markerId.value.contains("Entry")) {
+            Marker _marker = customMarker.visibility(zoom > 18.5, marker);
+            updatedMarkers.add(_marker);
+          }
+          if (marker.markerId.value.contains("Building")) {
+            Marker _marker = customMarker.visibility(zoom < 16.0, marker);
+            updatedMarkers.add(_marker);
+          }
+          if (building.ignoredMarker.contains(words[1])) {
+            if (marker.markerId.value.contains("Door")) {
+              Marker _marker = customMarker.visibility(true, marker);
+              print(_marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Room")) {
+              Marker _marker = customMarker.visibility(false, marker);
+              updatedMarkers.add(_marker);
+            }
+
+          }
+        });
+        Markers = updatedMarkers;
       });
-      Markers = updatedMarkers;
+    }
+  }
+
+  void hideMarkers(){
+    building.updateMarkers = false;
+    Set<Marker> updatedMarkers = Set();
+    Markers.forEach((marker) {
+      Marker _marker = customMarker.visibility(false, marker);
+      updatedMarkers.add(_marker);
     });
+    Markers = updatedMarkers;
+  }
+
+
+  void showMarkers(){
+    building.ignoredMarker.clear();
+    building.updateMarkers = true;
   }
 
   void _updateBuilding(double zoom) {
@@ -2762,6 +2867,7 @@ class _NavigationState extends State<Navigation> {
                 buildingsEnabled: false,
                 compassEnabled: true,
                 rotateGesturesEnabled: true,
+            minMaxZoomPreference: MinMaxZoomPreference(2,30),
                 onMapCreated: (controller) {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
@@ -2773,6 +2879,9 @@ class _NavigationState extends State<Navigation> {
                 onCameraMove: (CameraPosition cameraPosition) {
                   //mapState.interaction = true;
                   mapbearing = cameraPosition.bearing;
+                  if(!mapState.interaction){
+                    mapState.zoom = cameraPosition.zoom;
+                  }
                   if (true) {
                     _updateMarkers(cameraPosition.zoom);
                     //_updateBuilding(cameraPosition.zoom);
@@ -2867,6 +2976,7 @@ class _NavigationState extends State<Navigation> {
                         markers[0] =
                             customMarker.rotate(0, markers[0]);
                       mapState.interaction = !mapState.interaction;
+                      mapState.zoom = 21;
                       fitPolygonInScreen(patch.first);
                     },
                     child: Icon(

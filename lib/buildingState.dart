@@ -13,6 +13,8 @@ class Building{
   Future<land>? landmarkdata = null;
   List<beacon>? beacondata = null;
   String? selectedLandmarkID = null;
+  bool updateMarkers = true;
+  List<String> ignoredMarker = [];
   Building({required this.floor,required this.numberOfFloors});
 
 }

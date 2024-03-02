@@ -489,21 +489,10 @@ class _NavigationState extends State<Navigation> {
   void createARPatch(Map<int, LatLng> coordinates) async {
     print("object $coordinates");
     if (coordinates.isNotEmpty) {
-      print("$coordinates");
-      print("${coordinates.length}");
       List<LatLng> points = [];
-      List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
-
-      // Sort the list by keys
-      entryList.sort((a, b) => a.key.compareTo(b.key));
-
-      // Create a new LinkedHashMap from the sorted list
-      LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
-
-      // Print the sorted map
-      sortedCoordinates.forEach((key, value) {
-        points.add(value);
-      });
+      for(int i = 1 ; i<=coordinates.length; i++){
+        points.add(coordinates[i]!);
+      }
       setState(() {
         patch.clear();
         patch.add(
@@ -917,7 +906,7 @@ class _NavigationState extends State<Navigation> {
       if (landmarks[i].floor == floor) {
         if(landmarks[i].element!.type == "Rooms" && landmarks[i].coordinateX != null){
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(devicePixelRatio: 2.5),
+            const ImageConfiguration(),
             'assets/7.png',
           );
           setState(() {

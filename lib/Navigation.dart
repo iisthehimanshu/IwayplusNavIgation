@@ -883,8 +883,8 @@ class _NavigationState extends State<Navigation> {
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/room_marker_icon.png',
+            ImageConfiguration(size: Size(64, 64)),
+            'assets/7.png',
           );
           setState(() {
             List<double> value =
@@ -945,8 +945,8 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/main_entry_marker_icon.png',
+            const ImageConfiguration(),
+            'assets/1.png',
           );
           setState(() {
             List<double> value = tools.localtoglobal(

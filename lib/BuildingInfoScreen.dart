@@ -58,11 +58,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
 
   void apiCall() async{
-    setState(() async {
-      await BuildingAPI().fetchBuildData().then((value){
-        setState(() {
-          dd = value.data!;
-        });
+    BuildingAPI().fetchBuildData().then((value){
+      setState(() {
+        dd = value.data!;
       });
     });
     print("API CAll");

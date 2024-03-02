@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
@@ -33,7 +32,7 @@ void main() async {
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
 
   runApp(const MyApp());

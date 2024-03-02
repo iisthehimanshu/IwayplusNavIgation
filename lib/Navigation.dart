@@ -918,7 +918,7 @@ class _NavigationState extends State<Navigation> {
         if(landmarks[i].element!.type == "Rooms" && landmarks[i].coordinateX != null){
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
-            'assets/room_marker_icon.png',
+            'assets/location_on.png',
           );
           setState(() {
             List<double> value =
@@ -979,11 +979,42 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
-        } else if (landmarks[i].element!.subType != null &&
-            landmarks[i].element!.subType == "restRoom") {
+        } else if (landmarks[i].properties!.washroomType != null &&
+            landmarks[i].properties!.washroomType == "Male") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
-            'assets/rest_room_marker_icon.png',
+            'assets/6.png',
+          );
+          setState(() {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+            Markers.add(Marker(
+                markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
+                position: LatLng(value[0], value[1]),
+                icon: customMarker,
+                visible: false,
+                infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  snippet: 'Additional Information',
+                  // Replace with additional information
+                  onTap: () {
+                    if (building.selectedLandmarkID !=
+                        landmarks[i].properties!.polyId) {
+                      building.selectedLandmarkID =
+                          landmarks[i].properties!.polyId;
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedMarker(LatLng(value[0], value[1]));
+                    }
+                  },
+                )));
+          });
+        } else if (landmarks[i].properties!.washroomType != null &&
+            landmarks[i].properties!.washroomType == "Female") {
+          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(44, 44)),
+            'assets/4.png',
           );
           setState(() {
             List<double> value = tools.localtoglobal(

@@ -16,7 +16,7 @@ class UserState{
   int showcoordY;
   pathState pathobj = pathState();
   List<int> path = [];
-
+  bool initialallyLocalised = false;
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 

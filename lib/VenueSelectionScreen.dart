@@ -41,6 +41,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   void initState(){
     super.initState();
     apiCall();
+    print("venueHashMap");
+    print(venueHashMap);
   }
 
   // void _updateProjectValue() async {

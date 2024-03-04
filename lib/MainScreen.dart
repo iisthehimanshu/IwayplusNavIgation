@@ -57,13 +57,14 @@ class _MainScreenState extends State<MainScreen> {
               showToast('Feature coming soon');
             } else {
               // Switch to the selected screen for other cases
-              if (index == 1) {
-                // Open MapScreen in full screen
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MapScreen()));
-              } else {
-                // Switch to the selected screen for other cases
-                this.index = index;
-              }
+              // if (index == 1) {
+              //   // Open MapScreen in full screen
+              //   Navigator.push(context, MaterialPageRoute(builder: (context) => MapScreen()));
+              // } else {
+              //   // Switch to the selected screen for other cases
+              //   this.index = index;
+              // }
+              this.index = index;
             }
           }),
           destinations: [

@@ -82,14 +82,15 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                 child: Image.network(
                   // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
                   "https://dev.iwayplus.in/uploads/${widget.buildingImageURL}",
+
                   // You can replace the placeholder image URL with your default image URL
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(
                       'assets/default-image.jpg', // Replace with the path to your default image asset
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                     );
                   },
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),

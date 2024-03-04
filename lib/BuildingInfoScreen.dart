@@ -240,7 +240,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     itemBuilder: (context,index){
                       var currentData = widget.receivedAllBuildingList![index];
                       return InsideBuildingCard(
-                        buildingImageURL: currentData.buildingPhoto?? "",
+                        buildingImageURL: currentData.venuePhoto?? "",
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",

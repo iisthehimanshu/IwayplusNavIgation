@@ -29,7 +29,6 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
   //bool isFavourite = false;
   var favouriteBox = FavouriteDataBaseModelBox.getData();
 
-
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -81,7 +80,8 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               child: ClipRRect(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
                 child: Image.network(
-                  'https://dev.iwayplus.in/uploads/$widget.imageURL',
+                  // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
+                  "https://dev.iwayplus.in/uploads/${widget.buildingImageURL}",
                   // You can replace the placeholder image URL with your default image URL
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(

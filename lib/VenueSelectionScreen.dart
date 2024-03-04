@@ -69,7 +69,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     //venueList = venueHashMap.keys
     venueList = createVenueList(venueHashMap);
 
-
   }
 
   List<VenueModel> createVenueList(Map<String, List<buildingAll>> venueHashMap){

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Iwayplusnav</string>
+	<string>Iwayplus</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,11 +25,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMotionUsageDescription</key>
-    <string>This application tracks your steps</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>We need location access to localise user to nearest building on our map</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>locating the user to the nearest building</string>
+	<string>This application tracks your steps</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location access to localise user to nearest building on our map</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>locating the user to the nearest building</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

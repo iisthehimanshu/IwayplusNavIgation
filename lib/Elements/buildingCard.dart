@@ -69,10 +69,10 @@ class buildingCard extends StatelessWidget {
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
                         'assets/default-image.jpg', // Replace with the path to your default image asset
-                        fit: BoxFit.fill,
+                        fit: BoxFit.cover,
                       );
                     },
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

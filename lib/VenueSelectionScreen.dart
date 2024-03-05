@@ -309,7 +309,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 );
                               },
                               child: buildingCard(
-                                imageURL: currentData.imageURL ?? "",
+                                imageURL: "",
                                 Name: currentData.venueName ?? "",
                                 Tag: currentData.Tag ?? "Null",
                                 Address: currentData.address ?? "",
@@ -334,7 +334,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                     ),
                                   );
                                 },
-                                child: buildingCard(imageURL: currentData.imageURL??"",
+                                child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
                                   Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),
@@ -358,7 +358,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                     ),
                                   );
                                 },
-                                child: buildingCard(imageURL: currentData.imageURL??"",
+                                child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
                                   Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),
@@ -402,7 +402,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                     ),
                                   );
                                 },
-                                child: buildingCard(imageURL: currentData.imageURL??"",
+                                child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
                                   Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),

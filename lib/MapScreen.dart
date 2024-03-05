@@ -143,15 +143,19 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: GoogleMap(
-          initialCameraPosition: initialCameraPosition,
-          mapType: MapType.normal,
-          onMapCreated: (GoogleMapController controller){
-            _controller.complete(controller);
-          },
-          markers: myMarker,
-
+        child: Stack(
+          children: [
+            GoogleMap(
+            initialCameraPosition: initialCameraPosition,
+            mapType: MapType.normal,
+            onMapCreated: (GoogleMapController controller){
+              _controller.complete(controller);
+            },
+            markers: myMarker,
+          ),
+        ]
         ),
+
       ),
     );
   }

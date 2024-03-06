@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:device_information/device_information.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
@@ -47,6 +50,8 @@ import 'buildingState.dart';
 import 'cutommarker.dart';
 import 'dart:math' as math;
 import 'APIMODELS/landmark.dart' as la;
+import 'dart:ui' as ui;
+
 
 void main() {
   runApp(MyApp());
@@ -535,6 +540,9 @@ class _NavigationState extends State<Navigation> {
           markerId: MarkerId('selectedroomMarker'),
           position: calculateRoomCenter(polygonPoints),
           icon: BitmapDescriptor.defaultMarker,
+          onTap: (){
+            print("infowindowcheck");
+          }
         ),
       );
     });
@@ -916,6 +924,13 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  Future<Uint8List> getImagesFromMarker(String path ,int width) async{
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),targetHeight:width);
+    ui.FrameInfo frameInfo = await codec.getNextFrame();
+    return (await frameInfo.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+  }
+
   void createMarkers(land _landData, int floor) async {
     Markers.clear();
     List<Landmarks> landmarks = _landData.landmarks!;
@@ -923,51 +938,49 @@ class _NavigationState extends State<Navigation> {
     for (int i = 0; i < landmarks.length; i++) {
       if (landmarks[i].floor == floor) {
         if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType != "main entry" && landmarks[i].coordinateX != null){
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/location_on.png',
-          );
-          setState(() {
-            List<double> value =
-            tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!);
-            Markers.add(Marker(
-                markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
-                position: LatLng(value[0], value[1]),
-                icon: customMarker,
-                visible: false,
-                anchor: Offset(0.5, 0.5),
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
+          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+          //   ImageConfiguration(size: Size(44, 44)),
+          //   getImagesFromMarker('assets/location_on.png',50),
+          // );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/location_on.png',55);
+          List<double> value =
+          tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+          Markers.add(
+              Marker(
+                  markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
+                  position: LatLng(value[0], value[1]),
+                  icon: BitmapDescriptor.fromBytes(iconMarker),
+                  anchor: Offset(0.5, 0.5),
+                  visible: false,
+                  onTap: (){
+                    print("Info Window");
                   },
-                )));
-          });
+                  infoWindow: InfoWindow(
+                      title: landmarks[i].name,
+                      snippet: 'Additional Information',
+                      // Replace with additional information
+                      onTap: (){
+                        print("Info Window ");
+                      }
+                  )
+              )
+          );
         }
         if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(),
-            'assets/dooricon.png',
-          );
+          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+          //   ImageConfiguration(),
+          //   'assets/dooricon.png',
+          // );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/dooricon.png',55);
           setState(() {
             List<double> value =
                 tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
             Markers.add(Marker(
                 markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
-                icon: customMarker,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,

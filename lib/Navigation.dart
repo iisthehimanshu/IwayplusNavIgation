@@ -969,11 +969,7 @@ class _NavigationState extends State<Navigation> {
         if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
-          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-          //   ImageConfiguration(),
-          //   'assets/dooricon.png',
-          // );
-          final Uint8List iconMarker = await getImagesFromMarker('assets/dooricon.png',55);
+          final Uint8List iconMarker = await getImagesFromMarker('assets/dooricon.png',65);
           setState(() {
             List<double> value =
                 tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
@@ -1001,10 +997,8 @@ class _NavigationState extends State<Navigation> {
           });
 
         } else if (landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("lift")) {
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/1.png',
-          );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/entry.png',65);
+
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
@@ -1012,7 +1006,7 @@ class _NavigationState extends State<Navigation> {
 
                 markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
-                icon: customMarker,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
@@ -1034,17 +1028,14 @@ class _NavigationState extends State<Navigation> {
 
         }else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/6.png',
-          );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/6.png',65);
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
                 markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
-                icon: customMarker,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
@@ -1066,17 +1057,15 @@ class _NavigationState extends State<Navigation> {
         }
         else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/4.png',
-          );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/4.png',65);
+
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
                 markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
-                icon: customMarker,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
@@ -1097,17 +1086,15 @@ class _NavigationState extends State<Navigation> {
           });
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
-          BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(44, 44)),
-            'assets/3.png',
-          );
+          final Uint8List iconMarker = await getImagesFromMarker('assets/4.png',65);
+
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
                 markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
-                icon: customMarker,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: true,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,

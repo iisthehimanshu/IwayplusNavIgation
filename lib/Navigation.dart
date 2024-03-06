@@ -120,6 +120,8 @@ class _NavigationState extends State<Navigation> {
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   Duration sensorInterval = Duration(milliseconds: 100);
 
+  late StreamSubscription<CompassEvent> compassSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -190,7 +192,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void handleCompassEvents() {
-    FlutterCompass.events!.listen((event) {
+    compassSubscription = FlutterCompass.events!.listen((event) {
       double? compassHeading = event.heading!;
       setState(() {
         user.theta = compassHeading!;
@@ -360,6 +362,8 @@ class _NavigationState extends State<Navigation> {
     });
 
     beaconapi().fetchBeaconData().then((value) {
+      print("beacondatacheck");
+      print(value.toString());
       building.beacondata = value;
       for (int i = 0; i < value.length; i++) {
         beacon beacons = value[i];
@@ -933,7 +937,7 @@ class _NavigationState extends State<Navigation> {
 
     for (int i = 0; i < landmarks.length; i++) {
       if (landmarks[i].floor == floor) {
-        if(landmarks[i].element!.type == "Rooms" && landmarks[i].coordinateX != null){
+        if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType != "main entry" && landmarks[i].coordinateX != null){
           // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
           //   ImageConfiguration(size: Size(44, 44)),
           //   getImagesFromMarker('assets/location_on.png',50),
@@ -996,7 +1000,7 @@ class _NavigationState extends State<Navigation> {
                 )));
           });
 
-        } else if (landmarks[i].name!.toLowerCase().contains("lift")) {
+        } else if (landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("lift")) {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
             'assets/1.png',
@@ -1700,10 +1704,6 @@ class _NavigationState extends State<Navigation> {
       List<CommonLifts> commonlifts = findCommonLifts(
           landmarksMap[PathState.sourcePolyID]!.lifts!,
           landmarksMap[PathState.destinationPolyID]!.lifts!);
-      print(
-          "mmm ${commonlifts[0].x1},${commonlifts[0].y1}    ${commonlifts[0].x2},${commonlifts[0].y2}");
-      print(
-          "${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
       await fetchroute(
           commonlifts[0].x2!,
           commonlifts[0].y2!,
@@ -1728,7 +1728,7 @@ class _NavigationState extends State<Navigation> {
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
-      PathState.directions.insert(0, element);
+      PathState.directions.add(element);
     });
 
     await building.landmarkdata!.then((value) {
@@ -1739,6 +1739,10 @@ class _NavigationState extends State<Navigation> {
     if (path.isNotEmpty) {
       List<double> svalue = tools.localtoglobal(sourceX, sourceY);
       List<double> dvalue = tools.localtoglobal(destinationX, destinationY);
+      BitmapDescriptor tealtorch = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(),
+        'assets/tealtorch.png',
+      );
       Set<Marker> innerMarker = Set();
       innerMarker.add(Marker(
           markerId: MarkerId("destination"),
@@ -1748,7 +1752,8 @@ class _NavigationState extends State<Navigation> {
         Marker(
           markerId: MarkerId('source'),
           position: LatLng(svalue[0], svalue[1]),
-          icon: BitmapDescriptor.defaultMarker,
+          icon: tealtorch,
+          anchor: Offset(0.5, 0.5),
         ),
       );
       pathMarkers[floor] = innerMarker;
@@ -2741,7 +2746,6 @@ class _NavigationState extends State<Navigation> {
       Set<Marker> updatedMarkers = Set();
       setState(() {
         Markers.forEach((marker) {
-          print(marker);
           List<String> words = marker.markerId.value.split(' ');
           if (marker.markerId.value.contains("Room")) {
             Marker _marker = customMarker.visibility(zoom > 20.5, marker);
@@ -2923,6 +2927,10 @@ class _NavigationState extends State<Navigation> {
   @override
   void dispose() {
     _googleMapController.dispose();
+    for (final subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
+    compassSubscription.cancel();
     super.dispose();
   }
 

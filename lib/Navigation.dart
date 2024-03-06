@@ -1097,7 +1097,7 @@ class _NavigationState extends State<Navigation> {
           });
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
-          final Uint8List iconMarker = await getImagesFromMarker('assets/4.png',65);
+          final Uint8List iconMarker = await getImagesFromMarker('assets/1.png',65);
 
           setState(() {
             List<double> value = tools.localtoglobal(

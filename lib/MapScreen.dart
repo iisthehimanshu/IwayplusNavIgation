@@ -16,6 +16,8 @@ import "package:google_maps_flutter_platform_interface/src/types/polyline.dart" 
 import 'package:iwayplusnav/APIMODELS/polylinedata.dart' as ply;
 import 'package:google_maps_flutter_platform_interface/src/types/polyline.dart' as gmappol;
 
+import 'MODELS/GMapIconNameModel.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -50,7 +52,7 @@ class _MapScreenState extends State<MapScreen> {
   late List<buildingAll> getting_buildingAllApi_List=[];
   List<buildingAll> uniqueVenuesList = [];
   Set<String> uniqueVenueNames = Set<String>();
-  List<String> GMapIconList = [];
+  List<GMapIconNameModel> GMapIconList = [];
   final List<LatLng> GMapLatLngForIcons = <LatLng>[];
   polylinedata? polyLineData = null;
   ply.Polyline? polyLine = null;
@@ -61,6 +63,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState(){
     super.initState();
     apiCall();
+    createPolyArray();
   }
 
   void apiCall() async {
@@ -80,7 +83,7 @@ class _MapScreenState extends State<MapScreen> {
       print(polyLineData?.polylineExist);
       //createRooms(value, building.floor);
     });
-    createPolyArray();
+    //createPolyArray();
     print("roomPolylibe");
     print(roomPolylibe2);
 
@@ -103,19 +106,19 @@ class _MapScreenState extends State<MapScreen> {
   void createGMAPIconList(){
     for(buildingAll venue in uniqueVenuesList){
       if(venue.venueCategory=='Academic'){
-        GMapIconList.add('assets/Academic.png');
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png'));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Hospital') {
-        GMapIconList.add('assets/Hospital.png');
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png'));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Tech Park') {
-        GMapIconList.add('assets/IT park.png');
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png'));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Event') {
-        GMapIconList.add('assets/Events.png');
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png'));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else{
-        GMapIconList.add('assets/Landmark.png');
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png'));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }
     }
@@ -133,14 +136,20 @@ class _MapScreenState extends State<MapScreen> {
 
   packData() async{
     for(int a=0 ; a<GMapIconList.length ; a++){
-      final Uint8List iconMarker = await getImagesFromMarker(GMapIconList[a],90);
+      final Uint8List iconMarker = await getImagesFromMarker(GMapIconList[a].IconAddress,90);
       myMarker.add(
         Marker(
-            markerId: MarkerId(a.toString()),
+          markerId: MarkerId(a.toString()),
           position: GMapLatLngForIcons[a],
           icon: BitmapDescriptor.fromBytes(iconMarker),
+            onTap: (){
+              print("Info Window ");
+            },
           infoWindow: InfoWindow(
-            title:'$a',
+            title:'${GMapIconList[a].buildingName}',
+            onTap: (){
+              print("Info Window ");
+            }
           )
         ),
       );
@@ -177,7 +186,7 @@ class _MapScreenState extends State<MapScreen> {
   void createPolyArray() {
     var PY = polyLineData?.polyline;
     print("PY!.polylineMap");
-    print(PY!.polylineMap?.values);
+    //print(PY!.polylineMap?.values);
 
     // for (ply.PolyArray dd in PY.polylineMap!.values){
     //   // print(dd!.);
@@ -268,7 +277,7 @@ class _MapScreenState extends State<MapScreen> {
       );
     roomPolylibe2.add(
       new gmap.Polyline(
-        polylineId: PolylineId('building6'),
+        polylineId: PolylineId('building7'),
         points: building31Points,
         color: Colors.black,
         width: 1,
@@ -276,7 +285,7 @@ class _MapScreenState extends State<MapScreen> {
     );
     roomPolylibe2.add(
       new gmap.Polyline(
-        polylineId: PolylineId('building6'),
+        polylineId: PolylineId('building8'),
         points: building32Points,
         color: Colors.black,
         width: 1,
@@ -284,7 +293,7 @@ class _MapScreenState extends State<MapScreen> {
     );
     roomPolylibe2.add(
       new gmap.Polyline(
-        polylineId: PolylineId('building6'),
+        polylineId: PolylineId('building9'),
         points: building41Points,
         color: Colors.black,
         width: 1,
@@ -500,4 +509,63 @@ class _MapScreenState extends State<MapScreen> {
       LatLng(12.99165369295745, 80.24204046774767),
   ];
 
+}
+
+class CustomInfoWindow extends StatelessWidget {
+  final String title;
+  final String snippet;
+
+  CustomInfoWindow({required this.title, required this.snippet});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+          bottomLeft: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Add an image here
+          Container(
+            height: 80,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: AssetImage('your_image_path_here'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          // Add a title here
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(snippet),
+        ],
+      ),
+    );
+  }
 }

@@ -218,6 +218,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
           // Show linear loading indicator
         )
             : DefaultTabController(
+
             length: 4,
             child: Column(
               children: [
@@ -236,10 +237,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                       ),
                       child: TabBar(
                         unselectedLabelColor: Color(0xffB3B3B3),
-                        // isScrollable: true,
+                        isScrollable: false,
                         indicatorColor: Colors.black,
                         labelColor: Colors.black,
-
                         tabs: [
                           Tab(
                             child: Container(

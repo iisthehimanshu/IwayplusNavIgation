@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:iwayplusnav/MapScreen.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
 
@@ -20,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   late int index;
   final screens = [
     VenueSelectionScreen(),
-    Navigation(buildingID: '',),
+    MapScreen(),
     VenueSelectionScreen(),
     FavouriteScreen(),
   ];
@@ -51,14 +52,19 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if (index==3 || index==2 || index==4 || index==1 ){
+            if (index==3 || index==2 || index==4){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {
               // Switch to the selected screen for other cases
-              setState(() {
-                this.index = index;
-              });
+              // if (index == 1) {
+              //   // Open MapScreen in full screen
+              //   Navigator.push(context, MaterialPageRoute(builder: (context) => MapScreen()));
+              // } else {
+              //   // Switch to the selected screen for other cases
+              //   this.index = index;
+              // }
+              this.index = index;
             }
           }),
           destinations: [

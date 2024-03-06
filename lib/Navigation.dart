@@ -982,6 +982,7 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
+
         } else if (landmarks[i].name!.toLowerCase().contains("lift")) {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
@@ -991,6 +992,7 @@ class _NavigationState extends State<Navigation> {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
             Markers.add(Marker(
+
                 markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
                 icon: customMarker,
@@ -1012,6 +1014,7 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
+
         }else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
@@ -1043,7 +1046,8 @@ class _NavigationState extends State<Navigation> {
                   },
                 )));
           });
-        } else if (landmarks[i].properties!.washroomType != null &&
+        }
+        else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),

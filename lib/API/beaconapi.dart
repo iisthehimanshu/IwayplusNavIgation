@@ -47,6 +47,7 @@ class beaconapi {
       List<dynamic> responseBody = json.decode(response.body);
       final beaconData = BeaconAPIModel(responseBody: responseBody);
       BeaconBox.add(beaconData);
+      beaconData.save();
       List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
 
       return beaconList;

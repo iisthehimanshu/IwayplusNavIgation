@@ -355,6 +355,8 @@ class _NavigationState extends State<Navigation> {
     });
 
     beaconapi().fetchBeaconData().then((value) {
+      print("beacondatacheck");
+      print(value.toString());
       building.beacondata = value;
       for (int i = 0; i < value.length; i++) {
         beacon beacons = value[i];
@@ -983,7 +985,7 @@ class _NavigationState extends State<Navigation> {
                 )));
           });
 
-        } else if (landmarks[i].name!.toLowerCase().contains("lift")) {
+        } else if (landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("lift")) {
           BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(44, 44)),
             'assets/1.png',
@@ -2728,7 +2730,6 @@ class _NavigationState extends State<Navigation> {
       Set<Marker> updatedMarkers = Set();
       setState(() {
         Markers.forEach((marker) {
-          print(marker);
           List<String> words = marker.markerId.value.split(' ');
           if (marker.markerId.value.contains("Room")) {
             Marker _marker = customMarker.visibility(zoom > 20.5, marker);
@@ -2910,6 +2911,7 @@ class _NavigationState extends State<Navigation> {
   @override
   void dispose() {
     _googleMapController.dispose();
+
     super.dispose();
   }
 

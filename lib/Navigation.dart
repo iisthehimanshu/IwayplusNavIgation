@@ -785,6 +785,17 @@ class _NavigationState extends State<Navigation> {
                   strokeColor: Colors.black,
                   fillColor: Color(0xffFFFF00),
                   consumeTapEvents: true,
+                  onTap: (){
+                    if (building.selectedLandmarkID != polyArray.id) {
+                      building.selectedLandmarkID = polyArray.id;
+                      building.ignoredMarker.clear();
+                      building.ignoredMarker.add(polyArray.id!);
+                      _isRoutePanelOpen = false;
+                      singleroute.clear();
+                      _isLandmarkPanelOpen = true;
+                      addselectedRoomMarker(coordinates);
+                    }
+                  }
                 ));
               }
             } else if (polyArray.cubicleName == "Male Washroom") {
@@ -937,7 +948,7 @@ class _NavigationState extends State<Navigation> {
 
     for (int i = 0; i < landmarks.length; i++) {
       if (landmarks[i].floor == floor) {
-        if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType != "main entry" && landmarks[i].coordinateX != null){
+        if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType != "main entry" && landmarks[i].coordinateX != null && !landmarks[i].wasPolyIdNull!){
           // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
           //   ImageConfiguration(size: Size(44, 44)),
           //   getImagesFromMarker('assets/location_on.png',50),
@@ -957,7 +968,7 @@ class _NavigationState extends State<Navigation> {
                   },
                   infoWindow: InfoWindow(
                       title: landmarks[i].name,
-                      snippet: 'Additional Information',
+                      snippet: '${landmarks[i].properties!.polyId}',
                       // Replace with additional information
                       onTap: (){
                         print("Info Window ");
@@ -2764,7 +2775,7 @@ class _NavigationState extends State<Navigation> {
             updatedMarkers.add(_marker);
           }
           if (marker.markerId.value.contains("Lift")) {
-            Marker _marker = customMarker.visibility(zoom < 20.5, marker);
+            Marker _marker = customMarker.visibility(zoom > 19, marker);
             updatedMarkers.add(_marker);
           }
           if (building.ignoredMarker.contains(words[1])) {

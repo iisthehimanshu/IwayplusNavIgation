@@ -64,6 +64,7 @@ class Landmarks {
   int? iV;
   String? buildingName;
   String? venueName;
+  bool? wasPolyIdNull ;
 
   Landmarks(
       {this.element,
@@ -86,7 +87,8 @@ class Landmarks {
         this.updatedAt,
         this.iV,
         this.buildingName,
-        this.venueName});
+        this.venueName,
+      this.wasPolyIdNull});
 
   Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =
@@ -95,7 +97,9 @@ class Landmarks {
         ? new Properties.fromJson(json['properties'])
         : null;
     sId = json['_id'];
+    wasPolyIdNull = false;
     if(properties!.polyId == null){
+      wasPolyIdNull = true;
       properties!.polyId = json['_id'];
     }
     buildingID = json['building_ID'];

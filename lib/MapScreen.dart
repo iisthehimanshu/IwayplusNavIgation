@@ -57,13 +57,11 @@ class _MapScreenState extends State<MapScreen> {
   Set<gmap.Polyline> _myPolyLine = {};
   List<LatLng> poly = <LatLng>[];
 
-
   @override
   void initState(){
     super.initState();
     apiCall();
   }
-
 
   void apiCall() async {
     await buildingAllApi().fetchBuildingAllData().then((value) {
@@ -294,7 +292,6 @@ class _MapScreenState extends State<MapScreen> {
     );
     print(roomPolylibe2);
   }
-
 
 
 

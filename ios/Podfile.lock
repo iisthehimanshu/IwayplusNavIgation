@@ -75,7 +75,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   device_information: d652f6dcea86bdc5300ffd495486de1d5047bf4f
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_blue_plus: 4837da7d00cf5d441fdd6635b3a57f936778ea96
   flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
   flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
@@ -90,4 +90,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2

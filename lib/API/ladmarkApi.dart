@@ -22,6 +22,8 @@ class landmarkApi {
       //print(LandMarkBox.getAt(0)?.responseBody.values);
       Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
       print(LandMarkBox.keys);
+      print(LandMarkBox.get(buildingAllApi.getStoredString())?.responseBody.toString());
+      buildingAllApi.getStoredString();
      // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
     }
@@ -51,6 +53,7 @@ class landmarkApi {
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
 
       print('LANDMARK DATA FROM API');
+      print(responseBody.containsValue("polylineExist"));
       // print(LandMarkBox.length);
       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
       //print(demoresponseBody?.responseBody);

@@ -63,7 +63,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState(){
     super.initState();
     apiCall();
-    createPolyArray();
+    //createPolyArray();
   }
 
   void apiCall() async {
@@ -183,126 +183,124 @@ class _MapScreenState extends State<MapScreen> {
   //   ),
   // };
 
-  void createPolyArray() {
-    var PY = polyLineData?.polyline;
-    print("PY!.polylineMap");
-    //print(PY!.polylineMap?.values);
-
-    // for (ply.PolyArray dd in PY.polylineMap!.values){
-    //   // print(dd!.);
-    //   List<LatLng> buildingNodesPoints = [];
-    //   for(ply.Nodes ddNodes in dd.nodes!){
-    //     building1Points.add(new LatLng(ddNodes.lat!,ddNodes.lon!));
-    //   }
-    //   testroomPolylibe2.add(
-    //     new gmappol.Polyline(
-    //           polylineId: PolylineId('building3'),
-    //           points: buildingNodesPoints,
-    //           color: Colors.green,
-    //           width: 5,
-    //         )
-    //   );
-    // }
-
-    // for(int j=0 ; j<polyLineData!.polyline!.floors![0].polyArray!.length ; j++){
-    //   List<LatLng> nodes = [];
-    //   for(int k=0 ; k<polyLineData!.polyline!.floors![0].polyArray![j].nodes!.length ; k++){
-    //     print("Polyline${k}");
-    //     print(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat);
-    //     nodes.add(
-    //         LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
-    //     );
-    //     // poly.add(
-    //     //     LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
-    //     // );
-    //   }
-    //   roomPolylibe.add(
-    //     new gmap.Polyline(
-    //         polylineId: PolylineId('${polyLineData!.polyline!.floors![0]}'),
-    //       points: nodes,
-    //       color: Colors.black12,
-    //       width: 10,
-    //     ),
-    //   );
-    // }
-    print("Polyttttt");
-    print(poly);
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building1'),
-        points: building1Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building2'),
-        points: building2Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building3'),
-        points: building3Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building4'),
-        points: building21Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building5'),
-        points: building22Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-        new gmap.Polyline(
-          polylineId: PolylineId('building6'),
-          points: building31Points,
-          color: Colors.black,
-          width: 1,
-        ),
-      );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building7'),
-        points: building31Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building8'),
-        points: building32Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    roomPolylibe2.add(
-      new gmap.Polyline(
-        polylineId: PolylineId('building9'),
-        points: building41Points,
-        color: Colors.black,
-        width: 1,
-      ),
-    );
-    print(roomPolylibe2);
-  }
-
-
+  // void createPolyArray() {
+  //   var PY = polyLineData?.polyline;
+  //   print("PY!.polylineMap");
+  //   //print(PY!.polylineMap?.values);
+  //
+  //   // for (ply.PolyArray dd in PY.polylineMap!.values){
+  //   //   // print(dd!.);
+  //   //   List<LatLng> buildingNodesPoints = [];
+  //   //   for(ply.Nodes ddNodes in dd.nodes!){
+  //   //     building1Points.add(new LatLng(ddNodes.lat!,ddNodes.lon!));
+  //   //   }
+  //   //   testroomPolylibe2.add(
+  //   //     new gmappol.Polyline(
+  //   //           polylineId: PolylineId('building3'),
+  //   //           points: buildingNodesPoints,
+  //   //           color: Colors.green,
+  //   //           width: 5,
+  //   //         )
+  //   //   );
+  //   // }
+  //
+  //   // for(int j=0 ; j<polyLineData!.polyline!.floors![0].polyArray!.length ; j++){
+  //   //   List<LatLng> nodes = [];
+  //   //   for(int k=0 ; k<polyLineData!.polyline!.floors![0].polyArray![j].nodes!.length ; k++){
+  //   //     print("Polyline${k}");
+  //   //     print(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat);
+  //   //     nodes.add(
+  //   //         LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
+  //   //     );
+  //   //     // poly.add(
+  //   //     //     LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
+  //   //     // );
+  //   //   }
+  //   //   roomPolylibe.add(
+  //   //     new gmap.Polyline(
+  //   //         polylineId: PolylineId('${polyLineData!.polyline!.floors![0]}'),
+  //   //       points: nodes,
+  //   //       color: Colors.black12,
+  //   //       width: 10,
+  //   //     ),
+  //   //   );
+  //   // }
+  //   print("Polyttttt");
+  //   print(poly);
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building1'),
+  //       points: building1Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building2'),
+  //       points: building2Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building3'),
+  //       points: building3Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building4'),
+  //       points: building21Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building5'),
+  //       points: building22Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //       new gmap.Polyline(
+  //         polylineId: PolylineId('building6'),
+  //         points: building31Points,
+  //         color: Colors.black,
+  //         width: 1,
+  //       ),
+  //     );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building7'),
+  //       points: building31Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building8'),
+  //       points: building32Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   roomPolylibe2.add(
+  //     new gmap.Polyline(
+  //       polylineId: PolylineId('building9'),
+  //       points: building41Points,
+  //       color: Colors.black,
+  //       width: 1,
+  //     ),
+  //   );
+  //   print(roomPolylibe2);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -316,6 +314,7 @@ class _MapScreenState extends State<MapScreen> {
               zoomControlsEnabled: false,
               myLocationButtonEnabled: false,
               zoomGesturesEnabled: true,
+
               mapType: MapType.normal,
               onMapCreated: (GoogleMapController controller){
                 _controller.complete(controller);
@@ -439,133 +438,133 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-
-  List<LatLng> building1Points = [
-    LatLng(28.946807108420224, 77.10240023349384),
-    LatLng(28.946771333539516, 77.10162341992492),
-    LatLng(28.94528375398357, 77.10171371156895),
-    LatLng(28.9453180178885, 77.10249170054986),
-    LatLng(28.946812387912427, 77.10255897751944),
-    LatLng(28.945333701382303, 77.10249469750464),
-  ];
-  List<LatLng> building2Points = [
-    LatLng(28.94758159627567, 77.10187742076033),
-    LatLng(28.94756502954852, 77.101613315484),
-    LatLng(28.94695255984797, 77.10165083340246),
-    LatLng(28.946966639651855, 77.1019107789804),
-    LatLng(28.94754625658468, 77.1019482968989),
-  ];
-
-  List<LatLng> building3Points = [
-    LatLng(28.947856871175023, 77.10091528634611),
-    LatLng(28.947239668896962, 77.10097700482592),
-    LatLng(28.94728425777793, 77.10189473178647),
-    LatLng(28.947903806559008, 77.1018598474283),
-    LatLng(28.947934314547194, 77.10098237165022),
-  ];
-  List<LatLng> building21Points = [
-    LatLng(28.54504245860697, 77.19003055826083),
-    LatLng(28.54475493570298, 77.19016748839225),
-    LatLng(28.544990610272432, 77.1908628786675),
-    LatLng(28.54528284600625, 77.19073400324967),
-
-    LatLng(28.5450104953636, 77.18993357809752),
-    LatLng(28.544959825385234, 77.18995371488157),
-    LatLng(28.54499399816404, 77.19005037144491),
-  ];
-  List<LatLng> building22Points = [
-    LatLng(28.543833319119475, 77.18729871127312),
-    LatLng(28.54314073334607, 77.18695033060165),
-    LatLng(28.542810928996282, 77.18774356659209),
-    LatLng(28.543505872671684, 77.18809998681755),
-
-    LatLng(28.54390169863704, 77.1873419496217),
-    LatLng(28.543879319250493, 77.187411625756),
-    LatLng(28.543809825335625, 77.18736472835792),
-  ];
-  List<LatLng> building31Points = [
-    LatLng(28.716152844633058, 77.10992677715875),
-    LatLng(28.71574820854187, 77.11053793831083),
-    LatLng(28.716717450516096, 77.11146004110172),
-    LatLng(28.717103262783066, 77.11083815782416),
-    LatLng(28.715861171347132, 77.1096903401304),
-
-  ];
-  List<LatLng> building32Points = [
-    LatLng(15.49291812533953, 73.81538123411657),
-    LatLng(15.492773418532117, 73.81554228730947),
-    LatLng(15.49235996995271, 73.81607913128579),
-    LatLng(15.492515013266894, 73.81635829015349),
-    LatLng(15.492308288822144, 73.81625092135823),
-    LatLng(15.492308288822144, 73.81625092135823),
-  ];
-  List<LatLng> building41Points = [
-    LatLng(12.99156999333836, 80.2418149932776),
-    LatLng(12.989875069982592, 80.24184720391621),
-    LatLng(12.990000620257467, 80.24383352662865),
-    LatLng(12.99168508030733, 80.24374763159244),
-
-    LatLng(12.991789704778292, 80.24194383583196),
-      LatLng(12.99165369295745, 80.24204046774767),
-  ];
-
-}
-
-class CustomInfoWindow extends StatelessWidget {
-  final String title;
-  final String snippet;
-
-  CustomInfoWindow({required this.title, required this.snippet});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-          bottomLeft: Radius.circular(8),
-          bottomRight: Radius.circular(8),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Add an image here
-          Container(
-            height: 80,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: AssetImage('your_image_path_here'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          // Add a title here
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(snippet),
-        ],
-      ),
-    );
-  }
+//
+//   List<LatLng> building1Points = [
+//     LatLng(28.946807108420224, 77.10240023349384),
+//     LatLng(28.946771333539516, 77.10162341992492),
+//     LatLng(28.94528375398357, 77.10171371156895),
+//     LatLng(28.9453180178885, 77.10249170054986),
+//     LatLng(28.946812387912427, 77.10255897751944),
+//     LatLng(28.945333701382303, 77.10249469750464),
+//   ];
+//   List<LatLng> building2Points = [
+//     LatLng(28.94758159627567, 77.10187742076033),
+//     LatLng(28.94756502954852, 77.101613315484),
+//     LatLng(28.94695255984797, 77.10165083340246),
+//     LatLng(28.946966639651855, 77.1019107789804),
+//     LatLng(28.94754625658468, 77.1019482968989),
+//   ];
+//
+//   List<LatLng> building3Points = [
+//     LatLng(28.947856871175023, 77.10091528634611),
+//     LatLng(28.947239668896962, 77.10097700482592),
+//     LatLng(28.94728425777793, 77.10189473178647),
+//     LatLng(28.947903806559008, 77.1018598474283),
+//     LatLng(28.947934314547194, 77.10098237165022),
+//   ];
+//   List<LatLng> building21Points = [
+//     LatLng(28.54504245860697, 77.19003055826083),
+//     LatLng(28.54475493570298, 77.19016748839225),
+//     LatLng(28.544990610272432, 77.1908628786675),
+//     LatLng(28.54528284600625, 77.19073400324967),
+//
+//     LatLng(28.5450104953636, 77.18993357809752),
+//     LatLng(28.544959825385234, 77.18995371488157),
+//     LatLng(28.54499399816404, 77.19005037144491),
+//   ];
+//   List<LatLng> building22Points = [
+//     LatLng(28.543833319119475, 77.18729871127312),
+//     LatLng(28.54314073334607, 77.18695033060165),
+//     LatLng(28.542810928996282, 77.18774356659209),
+//     LatLng(28.543505872671684, 77.18809998681755),
+//
+//     LatLng(28.54390169863704, 77.1873419496217),
+//     LatLng(28.543879319250493, 77.187411625756),
+//     LatLng(28.543809825335625, 77.18736472835792),
+//   ];
+//   List<LatLng> building31Points = [
+//     LatLng(28.716152844633058, 77.10992677715875),
+//     LatLng(28.71574820854187, 77.11053793831083),
+//     LatLng(28.716717450516096, 77.11146004110172),
+//     LatLng(28.717103262783066, 77.11083815782416),
+//     LatLng(28.715861171347132, 77.1096903401304),
+//
+//   ];
+//   List<LatLng> building32Points = [
+//     LatLng(15.49291812533953, 73.81538123411657),
+//     LatLng(15.492773418532117, 73.81554228730947),
+//     LatLng(15.49235996995271, 73.81607913128579),
+//     LatLng(15.492515013266894, 73.81635829015349),
+//     LatLng(15.492308288822144, 73.81625092135823),
+//     LatLng(15.492308288822144, 73.81625092135823),
+//   ];
+//   List<LatLng> building41Points = [
+//     LatLng(12.99156999333836, 80.2418149932776),
+//     LatLng(12.989875069982592, 80.24184720391621),
+//     LatLng(12.990000620257467, 80.24383352662865),
+//     LatLng(12.99168508030733, 80.24374763159244),
+//
+//     LatLng(12.991789704778292, 80.24194383583196),
+//       LatLng(12.99165369295745, 80.24204046774767),
+//   ];
+//
+// }
+//
+// class CustomInfoWindow extends StatelessWidget {
+//   final String title;
+//   final String snippet;
+//
+//   CustomInfoWindow({required this.title, required this.snippet});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: EdgeInsets.all(16),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.only(
+//           topLeft: Radius.circular(16),
+//           topRight: Radius.circular(16),
+//           bottomLeft: Radius.circular(8),
+//           bottomRight: Radius.circular(8),
+//         ),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.grey.withOpacity(0.5),
+//             spreadRadius: 1,
+//             blurRadius: 5,
+//             offset: Offset(0, 3),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           // Add an image here
+//           Container(
+//             height: 80,
+//             width: double.infinity,
+//             decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(8),
+//               image: DecorationImage(
+//                 image: AssetImage('your_image_path_here'),
+//                 fit: BoxFit.cover,
+//               ),
+//             ),
+//           ),
+//           SizedBox(height: 8),
+//           // Add a title here
+//           Text(
+//             title,
+//             style: TextStyle(
+//               fontWeight: FontWeight.bold,
+//               fontSize: 16,
+//             ),
+//           ),
+//           SizedBox(height: 8),
+//           Text(snippet),
+//         ],
+//       ),
+//     );
+//   }
 }

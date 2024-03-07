@@ -17,6 +17,8 @@ class buildingAllApi {
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
 
+
+
     if(BuildingAllBox.length!=0){
       print("BUILDINGALL API DATA FROM DATABASE");
       print(BuildingAllBox.length);

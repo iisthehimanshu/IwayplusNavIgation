@@ -23,7 +23,6 @@ class beaconapi {
       return beaconList;
     }
 
-
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null) {
         token = value.accessToken!;

@@ -61,6 +61,7 @@ dependencies:
   device_information: ^0.0.4
   marquee_widget: ^1.2.0
   google_maps: ^6.3.0
+  geodesy: ^0.10.2
 
 
 dev_dependencies:

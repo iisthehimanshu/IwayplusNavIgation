@@ -55,6 +55,7 @@ class PolyLineApi {
       if(!PolyLineBox.containsKey(buildingAllApi.getStoredString())){ // WHEN NO DATA IN DATABASE
         final polyLineData = PolyLineAPIModel(responseBody: responseBody);
         PolyLineBox.put(buildingAllApi.getStoredString(),polyLineData);
+        polyLineData.save();
         print("POLYLINE API DATA FROM API");
         return polylinedata.fromJson(responseBody);
       }else{
@@ -68,6 +69,7 @@ class PolyLineApi {
           print("POLYLINE API DATA FROM DATABASE AND UPDATED");
           final polyLineData = PolyLineAPIModel(responseBody: responseBody);
           PolyLineBox.put(buildingAllApi.getStoredString(),polyLineData);
+          polyLineData.save();
           return polylinedata.fromJson(responseBody);
         }
       }

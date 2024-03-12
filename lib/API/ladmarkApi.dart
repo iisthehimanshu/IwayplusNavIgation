@@ -18,11 +18,8 @@ class landmarkApi {
 
     if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
-      // print("DATABASE SIZE: ${LandMarkBox.length}");
-      //print(LandMarkBox.getAt(0)?.responseBody.values);
       Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
       print(LandMarkBox.keys);
-     // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
     }
 
@@ -35,7 +32,6 @@ class landmarkApi {
     final Map<String, dynamic> data = {
       "id": buildingAllApi.getStoredString(),
     };
-    print("inside land");
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
@@ -44,25 +40,31 @@ class landmarkApi {
         'x-access-token': token
       },
     );
-    print("response code in land is ${response.statusCode}");
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-      //final LandMarkBox = LandMarkApiModelBox.getData();
+      String APITime = responseBody['landmarks'][0]['updatedAt']!;
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
-
-      print('LANDMARK DATA FROM API');
-      // print(LandMarkBox.length);
-      //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
-      //print(demoresponseBody?.responseBody);
-      LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
-
-      // print(LandMarkBox.length);
-      // print('TESTING LANDMARK API DATABASE OVER');
-      landmarkData.save();
-
-
-      //print("object ${responseBody['landmarks'][0].runtimeType}");
-      return land.fromJson(responseBody);
+      if(!LandMarkBox.containsKey(buildingAllApi.getStoredString())){
+        print('LANDMARK DATA FROM API');
+        LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+        landmarkData.save();
+        return land.fromJson(responseBody);
+      }else{
+        Map<String, dynamic> databaseresponseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+        String LastUpdatedTime = databaseresponseBody['landmarks'][0]['updatedAt']!;
+        print("APITime");
+        if(APITime==LastUpdatedTime){
+          print("LANDMARK DATA FROM DATABASE");
+          print("Current Time: ${APITime} Lastupdated Time: ${LastUpdatedTime}");
+          return land.fromJson(databaseresponseBody);
+        }else{
+          print("LANDMARK DATA FROM DATABASE AND UPDATED");
+          print("Current Time: ${APITime} Lastupdated Time: ${LastUpdatedTime}");
+          LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+          landmarkData.save();
+          return land.fromJson(responseBody);
+        }
+      }
     } else {
       print(response.statusCode);
       print(response.body);

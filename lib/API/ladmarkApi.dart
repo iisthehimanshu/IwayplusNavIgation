@@ -55,11 +55,11 @@ class landmarkApi {
         print("APITime");
         if(APITime==LastUpdatedTime){
           print("LANDMARK DATA FROM DATABASE");
-          print("Current Time: ${APITime} Lastupdated Time: ${LastUpdatedTime}");
+          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
           return land.fromJson(databaseresponseBody);
         }else{
           print("LANDMARK DATA FROM DATABASE AND UPDATED");
-          print("Current Time: ${APITime} Lastupdated Time: ${LastUpdatedTime}");
+          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
           LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
           landmarkData.save();
           return land.fromJson(responseBody);

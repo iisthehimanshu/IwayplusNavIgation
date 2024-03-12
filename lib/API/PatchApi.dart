@@ -47,11 +47,32 @@ class patchAPI {
     if (response.statusCode == 200) {
       print("running");
       Map<String, dynamic> responseBody = json.decode(response.body);
-       final patchData = PatchAPIModel(responseBody: responseBody);
-       PatchBox.put(buildingAllApi.getStoredString(),patchData);
+      String APITime = responseBody['patchData']['updatedAt']!;
+
+      if(!PatchBox.containsKey(buildingAllApi.getStoredString())) {
+        final patchData = PatchAPIModel(responseBody: responseBody);
+        PatchBox.put(buildingAllApi.getStoredString(),patchData);
         print("PATCH API DATA FROM API");
-        print(responseBody);
-      return patchDataModel.fromJson(responseBody);
+        return patchDataModel.fromJson(responseBody);
+      }else{
+        Map<String, dynamic> databaseresponseBody = PatchBox.get(buildingAllApi.getStoredString())!.responseBody;
+        String LastUpdatedTime = databaseresponseBody['patchData']!['updatedAt'];
+        print("${APITime} ${LastUpdatedTime}");
+        if(APITime==LastUpdatedTime){
+          print("POLYLINE API DATA FROM DATABASE");
+          return patchDataModel.fromJson(databaseresponseBody);
+        }else{
+          print("POLYLINE API DATA FROM DATABASE AND UPDATED");
+          final patchData = PatchAPIModel(responseBody: responseBody);
+          PatchBox.put(buildingAllApi.getStoredString(),patchData);
+          return patchDataModel.fromJson(responseBody);
+        }
+
+        return patchDataModel.fromJson(responseBody);
+      }
+
+
+
 
     } else {
       print(Exception);

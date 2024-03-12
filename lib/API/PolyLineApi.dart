@@ -47,9 +47,9 @@ class PolyLineApi {
     );
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-      responseBody['polyline']!=null? print("contain--") : print("not--");
+      //responseBody['polyline']!=null? print("contain--") : print("not--");
       var getting = responseBody['polyline'];
-      print(getting['createdAt']!);
+      //print(getting['createdAt']!);
       String APITime = getting['updatedAt']!;
 
       if(!PolyLineBox.containsKey(buildingAllApi.getStoredString())){ // WHEN NO DATA IN DATABASE
@@ -57,7 +57,6 @@ class PolyLineApi {
         PolyLineBox.put(buildingAllApi.getStoredString(),polyLineData);
         print("POLYLINE API DATA FROM API");
         return polylinedata.fromJson(responseBody);
-        //2024-03-07T07:06:53.829Z 2024-03-11T13:01:08.640Z
       }else{
         Map<String, dynamic> databaseresponseBody = PolyLineBox.get(buildingAllApi.getStoredString())!.responseBody;
         String LastStoredTime = databaseresponseBody['polyline']!['updatedAt'];

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:iwayplusnav/buildingState.dart';
 import "package:google_maps_flutter_platform_interface/src/types/polyline.dart" as gmap;
 import 'package:iwayplusnav/APIMODELS/polylinedata.dart' as ply;
 import 'package:google_maps_flutter_platform_interface/src/types/polyline.dart' as gmappol;
+import 'package:geodesy/geodesy.dart' as geo;
 
 import 'MODELS/GMapIconNameModel.dart';
 
@@ -48,7 +50,6 @@ class _MapScreenState extends State<MapScreen> {
     zoom: 5.5,
   );
   final Set<Marker> myMarker = Set<Marker>();
-
   late List<buildingAll> getting_buildingAllApi_List=[];
   List<buildingAll> uniqueVenuesList = [];
   Set<String> uniqueVenueNames = Set<String>();
@@ -58,12 +59,33 @@ class _MapScreenState extends State<MapScreen> {
   ply.Polyline? polyLine = null;
   Set<gmap.Polyline> _myPolyLine = {};
   List<LatLng> poly = <LatLng>[];
+  HashMap<String,LatLng> idLatLngHashMap = new HashMap();
+  HashMap<String,bool> chekIfRendered = new HashMap();
+  geo.Geodesy geodesy = geo.Geodesy();
+
+  Set<gmap.Polyline> roomPolylibe = {};
+  Set<gmap.Polyline> roomPolylibe2 = {};
+  Set<gmap.Polyline> testroomPolylibe2 = {};
+  Set<gmap.Polyline> GMapPolylineSet = {};
+  // // Create a set of polylines for the three buildings
+  // final Set<Polyline> buildingPolylines = {
+  //   Polyline(
+  //     polylineId: PolylineId('building1'),
+  //     points: building1Points,
+  //     color: Colors.blue,
+  //     width: 5,
+  //   ),
+  // };
+  List<PolyArray> polyArray = [];
+  //Set<gmap.Polyline> polylines = {};
+  bool runned = false;
 
   @override
   void initState(){
     super.initState();
     apiCall();
     //createPolyArray();
+
   }
 
   void apiCall() async {
@@ -76,6 +98,10 @@ class _MapScreenState extends State<MapScreen> {
     createVenueListForGMIconList();
     //buildingAllApi.setStoredVenue("65d8825cdb333f89456d0562");
 
+
+
+  }
+  void apiPlycall() async{
     await PolyLineApi().fetchPolyData().then((value) {
       print("object ${value.polylineExist}");
       polyLineData = value;
@@ -85,12 +111,190 @@ class _MapScreenState extends State<MapScreen> {
     });
     //createPolyArray();
     print("roomPolylibe");
-    print(roomPolylibe2);
+    print(polyLineData!.polyline!);
+    print(polyLineData);
+    var listt = polyLineData?.polyline?.floors![0].polyArray;
 
+    polyArray = polyLineData!.polyline!.floors![0].polyArray!;
+    setState(() {
+      GMapPolylineSet.addAll(createPolylines(polyArray));
+    });
+    // polylines = createPolylines(polyArray);
+    print("Polyline---");
+    print(GMapPolylineSet.length);
   }
+
+
+// Function to create polylines for cubicles
+  Set<gmap.Polyline> createPolylines(List<PolyArray> cubicles) {
+    Set<gmap.Polyline> polylines = Set<gmap.Polyline>();
+
+    // Iterate through the cubicles
+    for (var cubicle in cubicles) {
+      // Extract cubicle information
+      String cubicleName = cubicle.sId!;
+      List<dynamic> nodes = cubicle.nodes!;
+
+      if (nodes.isNotEmpty) {
+        // Create a List<LatLng> from the nodes
+        List<LatLng> polylinePoints = [];
+        for (Nodes ss in nodes){
+          polylinePoints.add(LatLng(ss.lat!, ss.lon!));
+        }
+        // List<LatLng> polylinePoints = nodes
+        //     .where((node) => node['lat'] != null && node['lon'] != null)
+        //     .map((node) {
+        //   print("nodecheck");
+        //   print(node);
+        //   print(nodes);
+        //   return LatLng(node['lat'], node['lon']);
+        // }).toList();
+
+        // Create a Polyline for the cubicle
+        gmap.Polyline polyline = gmap.Polyline(
+          polylineId: PolylineId(cubicleName),
+          points: polylinePoints,
+          color: Colors.black,
+          width: 1,
+        );
+
+        // Add the polyline to the set
+        polylines.add(polyline);
+      }
+    }
+
+    return polylines;
+  }
+
+
+  // void createPolyArray() {
+  //   var PY = polyLineData?.polyline;
+  //   print("PY!.polylineMap");
+  //   print(PY!.polylineMap?.values);
+  //
+  //
+  //   for (ply.PolyArray dd in PY.polylineMap!.values){
+  //     // print(dd!.);
+  //     List<LatLng> buildingNodesPoints = [];
+  //     for(ply.Nodes ddNodes in dd.nodes!){
+  //       building1Points.add(new LatLng(ddNodes.lat!,ddNodes.lon!));
+  //     }
+  //     testroomPolylibe2.add(
+  //         new gmappol.Polyline(
+  //           polylineId: PolylineId('building3'),
+  //           points: buildingNodesPoints,
+  //           color: Colors.green,
+  //           width: 5,
+  //         )
+  //     );
+  //   }
+  //
+  //   for(int j=0 ; j<polyLineData!.polyline!.floors![0].polyArray!.length ; j++){
+  //     List<LatLng> nodes = [];
+  //     for(int k=0 ; k<polyLineData!.polyline!.floors![0].polyArray![j].nodes!.length ; k++){
+  //       print("Polyline${k}");
+  //       print(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat);
+  //       nodes.add(
+  //           LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
+  //       );
+  //       // poly.add(
+  //       //     LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
+  //       // );
+  //     }
+  //     roomPolylibe.add(
+  //       new gmap.Polyline(
+  //         polylineId: PolylineId('${polyLineData!.polyline!.floors![0]}'),
+  //         points: nodes,
+  //         color: Colors.black12,
+  //         width: 10,
+  //       ),
+  //     );
+  //   }
+  //   // print("Polyttttt");
+  //   // print(poly);
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building1'),
+  //   //     points: building1Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building2'),
+  //   //     points: building2Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building3'),
+  //   //     points: building3Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building4'),
+  //   //     points: building21Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building5'),
+  //   //     points: building22Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //     new gmap.Polyline(
+  //   //       polylineId: PolylineId('building6'),
+  //   //       points: building31Points,
+  //   //       color: Colors.black,
+  //   //       width: 1,
+  //   //     ),
+  //   //   );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building7'),
+  //   //     points: building31Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building8'),
+  //   //     points: building32Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // roomPolylibe2.add(
+  //   //   new gmap.Polyline(
+  //   //     polylineId: PolylineId('building9'),
+  //   //     points: building41Points,
+  //   //     color: Colors.black,
+  //   //     width: 1,
+  //   //   ),
+  //   // );
+  //   // print(roomPolylibe2);
+  // }
   
   void createVenueListForGMIconList(){
     for (buildingAll venue in getting_buildingAllApi_List) {
+      print("Adding in idLatLngHashMap");
+      print(venue.coordinates![0]);
+      print(venue.coordinates![1]);
+      LatLng kk = LatLng(venue.coordinates![0], venue.coordinates![1]);
+      idLatLngHashMap[venue.sId!] = kk;
+
       if (!uniqueVenueNames.contains(venue.venueName)) {
         uniqueVenuesList.add(venue);
         uniqueVenueNames.add(venue.venueName!);
@@ -101,6 +305,8 @@ class _MapScreenState extends State<MapScreen> {
     //   print('Venue Name: ${venue.venueName}, Building Name: ${venue.venueCategory}, Coordinates: ${venue.coordinates}');
     //   // Add more properties if needed
     // });
+    print("idLatLngHashMap.length");
+    print(idLatLngHashMap.length);
     createGMAPIconList();
   }
   void createGMAPIconList(){
@@ -153,9 +359,6 @@ class _MapScreenState extends State<MapScreen> {
           )
         ),
       );
-      setState(() {
-
-      });
       _myPolyLine.add(
         gmap.Polyline(polylineId: PolylineId("First"),
           points: GMapLatLngForIcons,
@@ -170,137 +373,9 @@ class _MapScreenState extends State<MapScreen> {
   //   // Add more points as needed
   // ];
   //
-  Set<gmap.Polyline> roomPolylibe = {};
-  Set<gmap.Polyline> roomPolylibe2 = {};
-  Set<gmap.Polyline> testroomPolylibe2 = {};
-  // // Create a set of polylines for the three buildings
-  // final Set<Polyline> buildingPolylines = {
-  //   Polyline(
-  //     polylineId: PolylineId('building1'),
-  //     points: building1Points,
-  //     color: Colors.blue,
-  //     width: 5,
-  //   ),
-  // };
 
-  // void createPolyArray() {
-  //   var PY = polyLineData?.polyline;
-  //   print("PY!.polylineMap");
-  //   //print(PY!.polylineMap?.values);
-  //
-  //   // for (ply.PolyArray dd in PY.polylineMap!.values){
-  //   //   // print(dd!.);
-  //   //   List<LatLng> buildingNodesPoints = [];
-  //   //   for(ply.Nodes ddNodes in dd.nodes!){
-  //   //     building1Points.add(new LatLng(ddNodes.lat!,ddNodes.lon!));
-  //   //   }
-  //   //   testroomPolylibe2.add(
-  //   //     new gmappol.Polyline(
-  //   //           polylineId: PolylineId('building3'),
-  //   //           points: buildingNodesPoints,
-  //   //           color: Colors.green,
-  //   //           width: 5,
-  //   //         )
-  //   //   );
-  //   // }
-  //
-  //   // for(int j=0 ; j<polyLineData!.polyline!.floors![0].polyArray!.length ; j++){
-  //   //   List<LatLng> nodes = [];
-  //   //   for(int k=0 ; k<polyLineData!.polyline!.floors![0].polyArray![j].nodes!.length ; k++){
-  //   //     print("Polyline${k}");
-  //   //     print(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat);
-  //   //     nodes.add(
-  //   //         LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
-  //   //     );
-  //   //     // poly.add(
-  //   //     //     LatLng(polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lat!, polyLineData!.polyline!.floors![0].polyArray![j].nodes![k].lon!)
-  //   //     // );
-  //   //   }
-  //   //   roomPolylibe.add(
-  //   //     new gmap.Polyline(
-  //   //         polylineId: PolylineId('${polyLineData!.polyline!.floors![0]}'),
-  //   //       points: nodes,
-  //   //       color: Colors.black12,
-  //   //       width: 10,
-  //   //     ),
-  //   //   );
-  //   // }
-  //   print("Polyttttt");
-  //   print(poly);
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building1'),
-  //       points: building1Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building2'),
-  //       points: building2Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building3'),
-  //       points: building3Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building4'),
-  //       points: building21Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building5'),
-  //       points: building22Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //       new gmap.Polyline(
-  //         polylineId: PolylineId('building6'),
-  //         points: building31Points,
-  //         color: Colors.black,
-  //         width: 1,
-  //       ),
-  //     );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building7'),
-  //       points: building31Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building8'),
-  //       points: building32Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   roomPolylibe2.add(
-  //     new gmap.Polyline(
-  //       polylineId: PolylineId('building9'),
-  //       points: building41Points,
-  //       color: Colors.black,
-  //       width: 1,
-  //     ),
-  //   );
-  //   print(roomPolylibe2);
-  // }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -314,13 +389,44 @@ class _MapScreenState extends State<MapScreen> {
               zoomControlsEnabled: false,
               myLocationButtonEnabled: false,
               zoomGesturesEnabled: true,
-
+              buildingsEnabled: false,
               mapType: MapType.normal,
               onMapCreated: (GoogleMapController controller){
                 _controller.complete(controller);
               },
+              onCameraMove: (CameraPosition position) {
+                LatLng currentLatLng = position.target;
+                double distanceThreshold = 100.0;
+                String closestBuildingId = "";
+                idLatLngHashMap.forEach((String buildingId, LatLng storedLatLng) {
+                  num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+                    geo.LatLng(storedLatLng.latitude, storedLatLng.longitude),
+                    geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+                  );
+
+                  if (distance < distanceThreshold) {
+                    closestBuildingId = buildingId;
+                    buildingAllApi.setStoredString(closestBuildingId);
+                    chekIfRendered.putIfAbsent(closestBuildingId, () => false);
+                    if(chekIfRendered.containsKey(closestBuildingId) && chekIfRendered[closestBuildingId]==false){
+                      print("chekIfRendered");
+                      print(chekIfRendered);
+                      chekIfRendered[closestBuildingId] = true;
+                      //polylines.clear();
+                      print(chekIfRendered);
+                      apiPlycall();
+                    }
+                    // if(!chekIfRendered[closestBuildingId]!){
+                    //   chekIfRendered[closestBuildingId] = true;
+                    //   polylines.clear();
+                    //   apiPlycall();
+                    // }
+                    print('Close LatLng found in idLatLngHashMap for buildingId: $closestBuildingId');
+                  }
+                });
+              },
               markers: myMarker,
-              polylines: roomPolylibe2,
+              polylines: GMapPolylineSet,
               ),
             ),
             Positioned(

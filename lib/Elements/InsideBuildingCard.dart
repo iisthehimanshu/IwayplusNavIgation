@@ -16,9 +16,10 @@ class InsideBuildingCard extends StatefulWidget {
   String buildingTag;
   String buildingId;
   bool buildingFavourite;
+  List<String> allBuildingID ;
 
   InsideBuildingCard(
-      {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite});
+      {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite, required this.allBuildingID});
 
   @override
   _InsideBuildingCardState createState() => _InsideBuildingCardState();
@@ -63,10 +64,11 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
           GestureDetector(
             onTap: (){
               buildingAllApi.setStoredString(widget.buildingId);
+              buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
+                  builder: (context) => Navigation(),
                 ),
               );
             },
@@ -98,11 +100,11 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
           GestureDetector(
             onTap: (){
               buildingAllApi.setStoredString(widget.buildingId);
-
+              buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
+                  builder: (context) => Navigation(),
                 ),
               );
             },
@@ -126,10 +128,11 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               GestureDetector(
                 onTap: (){
                   buildingAllApi.setStoredString(widget.buildingId);
+                  buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Navigation(buildingID: buildingAllApi.selectedID,),
+                      builder: (context) => Navigation(),
                     ),
                   );
                 },

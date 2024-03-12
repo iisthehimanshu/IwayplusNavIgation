@@ -13,6 +13,7 @@ class buildingAllApi {
   String token = "";
   static String selectedID="";
   static String selectedVenue="";
+  static List<String> allBuildingID = [];
 
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
@@ -67,6 +68,15 @@ class buildingAllApi {
     print(selectedID);
     return selectedID;
   }
+
+  static void setStoredAllBuildingID(List<String> value){
+    allBuildingID = value;
+  }
+
+  static List<String> getStoredAllBuildingID(){
+    return allBuildingID;
+  }
+
 
   // Method to set the stored string
   static void setStoredVenue(String value) {

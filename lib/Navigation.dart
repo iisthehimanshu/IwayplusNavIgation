@@ -61,15 +61,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Navigation(
-        buildingID: "",
       ),
     );
   }
 }
 
 class Navigation extends StatefulWidget {
-  String buildingID = '';
-  Navigation({required this.buildingID});
+  Navigation();
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -126,7 +124,6 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     print("widget.buildingID");
-    print(widget.buildingID);
     flutterTts = FlutterTts();
     handleCompassEvents();
     DefaultAssetBundle.of(context)
@@ -768,7 +765,7 @@ class _NavigationState extends State<Navigation> {
                   // Modify the color and opacity based on the selectedRoomId
 
                   strokeColor: Colors.black,
-                  fillColor: Color(0xff7CFC00),
+                  fillColor: Color(0xffc2f1d5),
                   consumeTapEvents: true,
                 ));
               }

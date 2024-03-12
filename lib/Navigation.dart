@@ -380,33 +380,33 @@ class _NavigationState extends State<Navigation> {
       });
     });
 
-    buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
-    for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
-      print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
-      buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
-        await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-          print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
-          createotherPatch(value);
-        });
-
-        await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-          print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
-          createotherRooms(value, 0);
-        });
-
-        await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-          Map<int, LatLng> coordinates = {};
-          for (int i = 0; i < value.landmarks!.length; i++) {
-            if (value.landmarks![i].element!.subType == "AR") {
-              coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-                  LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-                      double.parse(value.landmarks![i].properties!.longitude!));
-            }
-          }
-          createotherARPatch(coordinates,value.landmarks![0].buildingID!);
-        });
-      });
-    }
+    // buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
+    // for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
+    //   print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
+    //   buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
+    //     await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
+    //       createotherPatch(value);
+    //     });
+    //
+    //     await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
+    //       createotherRooms(value, 0);
+    //     });
+    //
+    //     await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       Map<int, LatLng> coordinates = {};
+    //       for (int i = 0; i < value.landmarks!.length; i++) {
+    //         if (value.landmarks![i].element!.subType == "AR") {
+    //           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+    //               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+    //                   double.parse(value.landmarks![i].properties!.longitude!));
+    //         }
+    //       }
+    //       createotherARPatch(coordinates,value.landmarks![0].buildingID!);
+    //     });
+    //   });
+    // }
   }
 
   Future<void> localizeUser() async {

@@ -34,7 +34,7 @@ void main() async {
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
   // await Firebase.initializeApp();
 
-
+  await Hive.openBox('Favourites');
   runApp(const MyApp());
 }
 

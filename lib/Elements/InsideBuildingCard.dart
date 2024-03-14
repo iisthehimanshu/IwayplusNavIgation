@@ -155,56 +155,6 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               Spacer(),
               GestureDetector(
                 onTap: (){
-                  //widget.favourite = true;
-                  print("HEART");
-                  setState(() {
-                    widget.buildingFavourite = !widget.buildingFavourite;
-                    final getBuildingAllBox = BuildingAPIModelBox.getData();
-                    Map<String,dynamic> responseBody = getBuildingAllBox.getAt(0)!.responseBody;
-                    print(responseBody);
-
-                    // for (int i = 0; i < responseBody.length; i++) {
-                    //   var building = buildingAll.fromJson(responseBody[i]);
-                    //
-                    //   if (building.buildingName == widget.buildingName) {
-                    //     print("FAVOURITE CHECK");
-                    //     print(building.buildingName);
-                    //     print(widget.buildingName);
-                    //     print(building.);
-                    //
-                    //     building.favourite = true;
-                    //     print(building.favourite);
-                    //
-                    //     // Update only the specific item in the list
-                    //     getBuildingAllBox.getAt(0)!.responseBody[i] = building.toJson();
-                    //   }
-                    // }
-
-                  });
-
-                  if(widget.buildingFavourite){
-                    final getBuildingAllBox = BuildingAllAPIModelBOX.getData();
-                    List<dynamic> responseBody = getBuildingAllBox.getAt(0)!.responseBody;
-                    List<buildingAll> updatedBuildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
-                    for (buildingAll bb in updatedBuildingList){
-                      if(bb.venueName==widget.buildingName){
-
-                        // print("FAVOURTE CHECK");
-                        // print(bb.favourite);
-                        // bb.favourite = true;
-                        // print(bb.favourite);
-                      }
-                    }
-
-                    // final data = FavouriteDataBaseModel(venueBuildingName: widget.buildingName, venueBuildingLocation: widget.buildingTag);
-                    // favouriteBox.add(data);
-                  }else{
-                    // print("favouriteBox.keys.contains(widget.buildingName");
-                    // print(favouriteBox.keys.contains(widget.buildingName));
-                    //
-                    // favouriteBox.deleteAt(favouriteBox.get(widget.buildingName) as int);
-                  }
-
 
                 },
                 child: Container(

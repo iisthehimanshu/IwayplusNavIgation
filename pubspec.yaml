@@ -62,6 +62,7 @@ dependencies:
   marquee_widget: ^1.2.0
   google_maps: ^6.3.0
   geodesy: ^0.10.2
+  chips_choice: ^3.0.1
 
 
 dev_dependencies:

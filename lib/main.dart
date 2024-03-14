@@ -35,6 +35,7 @@ void main() async {
   // await Firebase.initializeApp();
 
   await Hive.openBox('Favourites');
+  await Hive.openBox('Filters');
   runApp(const MyApp());
 }
 

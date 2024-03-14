@@ -145,10 +145,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
           ),
           centerTitle: true,
           leading: EasterEggTrigger(
-            child: Container(
-              alignment: Alignment.centerRight,
-              width: 60,
-              child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
+            child: Semantics(
+              label: "Iwayplus Logo",
+              child: Container(
+                alignment: Alignment.centerRight,
+                width: 60,
+                child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
+              ),
             ),codes: [
             EasterEggTriggers.SwipeDown,
             EasterEggTriggers.LongPress,
@@ -179,12 +182,15 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
               //     color: Color(0x204A4545),
               //   ),
               // ),
-              child: IconButton(
-                icon: Icon(Icons.search,color: Colors.black,),
-                color: Color(0xff000000),
-                onPressed: () {
-                  showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
-                },
+              child: Semantics(
+                label: 'Search',
+                child: IconButton(
+                  icon: Icon(Icons.search,color: Colors.black,),
+                  color: Color(0xff000000),
+                  onPressed: () {
+                    showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
+                  },
+                ),
               ))
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent

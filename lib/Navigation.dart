@@ -2721,94 +2721,94 @@ class _NavigationState extends State<Navigation> {
 
   bool _isFilterOpen = false;
 
-  Widget FILTERPannel() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    log("Wilson Checker ${landmarkData.landmarkNames}");
-    return Visibility(
-        visible: _isBuildingPannelOpen,
-        child: SlidingUpPanel(
-            borderRadius: BorderRadius.all(Radius.circular(24.0)),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 20.0,
-                color: Colors.grey,
-              ),
-            ],
-            minHeight: 155,
-            snapPoint: 190/screenHeight,
-            maxHeight: screenHeight*0.9,
-            panel: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    child: ValueListenableBuilder(
-                      valueListenable: Hive.box('Filters').listenable(),
-                      builder: (BuildContext context, value, Widget? child) {
-                        //List<dynamic> aa = []
-                        if(value.length!=0){
-                          tags = value.getAt(0);
-                        }
-                        return ChipsChoice<String>.multiple(
-                          value: tags,
-                          onChanged: (val){
-                            //value.clear();
-                            setState(() {
-                              tags = val;
-                              value.putAt(0, val);
-                              onTagsChanged();
-                            });
-                            //value.put(val, val);
-                            log("Wilson Checker ${tags}");
-                            // log("Wilson Checker ${tagsBox}");
-                            log("Wilson Checker ${value.getAt(0)}");
-                          },
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: options,
-                            value: (i, v) => v,
-                            label: (i, v) => v,
-                            tooltip: (i, v) => v,
-                          ),
-                          choiceCheckmark: true,
-                          choiceStyle: C2ChipStyle.filled(
-                            selectedStyle: const C2ChipStyle(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20),
-                                ),
-                                backgroundColor: Colors.yellow
-                            ),
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(20),
-                            ),
-
-                          ),
-                          wrapped: true,
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    height: 200,
-                    child: ListView.builder(
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return NavigatonFilterCard(LandmarkName: item.venueName!,
-                          LandmarkDistance: "90 m",
-                          LandmarkFloor: "Floor ${item.floor}",
-                          LandmarksubName: item.buildingName!,
-
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ),
-            )
-        ));
-  }
+  // Widget FILTERPannel() {
+  //   double screenWidth = MediaQuery.of(context).size.width;
+  //   double screenHeight = MediaQuery.of(context).size.height;
+  //   log("Wilson Checker ${landmarkData.landmarkNames}");
+  //   return Visibility(
+  //       visible: _isBuildingPannelOpen,
+  //       child: SlidingUpPanel(
+  //           borderRadius: BorderRadius.all(Radius.circular(24.0)),
+  //           boxShadow: [
+  //             BoxShadow(
+  //               blurRadius: 20.0,
+  //               color: Colors.grey,
+  //             ),
+  //           ],
+  //           minHeight: 155,
+  //           snapPoint: 190/screenHeight,
+  //           maxHeight: screenHeight*0.9,
+  //           panel: Container(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Container(
+  //                   child: ValueListenableBuilder(
+  //                     valueListenable: Hive.box('Filters').listenable(),
+  //                     builder: (BuildContext context, value, Widget? child) {
+  //                       //List<dynamic> aa = []
+  //                       if(value.length!=0){
+  //                         tags = value.getAt(0);
+  //                       }
+  //                       return ChipsChoice<String>.multiple(
+  //                         value: tags,
+  //                         onChanged: (val){
+  //                           //value.clear();
+  //                           setState(() {
+  //                             tags = val;
+  //                             value.putAt(0, val);
+  //                             onTagsChanged();
+  //                           });
+  //                           //value.put(val, val);
+  //                           log("Wilson Checker ${tags}");
+  //                           // log("Wilson Checker ${tagsBox}");
+  //                           log("Wilson Checker ${value.getAt(0)}");
+  //                         },
+  //                         choiceItems: C2Choice.listFrom<String, String>(
+  //                           source: options,
+  //                           value: (i, v) => v,
+  //                           label: (i, v) => v,
+  //                           tooltip: (i, v) => v,
+  //                         ),
+  //                         choiceCheckmark: true,
+  //                         choiceStyle: C2ChipStyle.filled(
+  //                           selectedStyle: const C2ChipStyle(
+  //                               borderRadius: BorderRadius.all(
+  //                                 Radius.circular(20),
+  //                               ),
+  //                               backgroundColor: Colors.yellow
+  //                           ),
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.all(
+  //                             Radius.circular(20),
+  //                           ),
+  //
+  //                         ),
+  //                         wrapped: true,
+  //                       );
+  //                     },
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   child: ListView.builder(
+  //                     itemCount: filteredItems.length,
+  //                     itemBuilder: (context, index) {
+  //                       final item = filteredItems[index];
+  //                       return NavigatonFilterCard(LandmarkName: item.venueName!,
+  //                         LandmarkDistance: "90 m",
+  //                         LandmarkFloor: "Floor ${item.floor}",
+  //                         LandmarksubName: item.buildingName!,
+  //
+  //                       );
+  //                     },
+  //                   ),
+  //                 )
+  //               ],
+  //             ),
+  //           )
+  //       ));
+  // }
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();

@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'LOGIN SIGNUP/LoginScreen.dart';
 import 'VenueSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -13,8 +16,9 @@ import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'MainScreen.dart';
 import 'Navigation.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
@@ -50,7 +54,25 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "IWAYPLUS",
-      home: MainScreen(initialIndex: 0,),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if(snapshot.hasError){
+            return Text(snapshot.error.toString());
+          }
+          if(snapshot.connectionState == ConnectionState.active){
+            if(snapshot.data == null){
+              return LoginScreen();
+            }else{
+              return MainScreen(initialIndex: 0,);
+            }
+          }
+          return Center(child: CircularProgressIndicator(),);
+        },
+      )
+
+      //LoginScreen(),
+      // MainScreen(initialIndex: 0,),
 
     );
   }

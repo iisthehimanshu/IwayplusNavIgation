@@ -31,8 +31,6 @@ class BuildingAPI {
       //List<Building> buildingList = responseBody.map((key, value) => null)
       return Building.fromJson(responseBody);
     }
-    
-    
 
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null){

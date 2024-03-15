@@ -203,7 +203,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
             ? Center(
             child: Animate(
                 effects: [FadeEffect(), ScaleEffect()],
-                child: Text("Loading Data!!",style: TextStyle(
+                child: Text("Loading Data. . .",style: TextStyle(
+                  fontFamily: "Roboto",
                   fontSize: 30,
                   color: Color(0xFF666870),
                   height: 1,

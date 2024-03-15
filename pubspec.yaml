@@ -64,6 +64,15 @@ dependencies:
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
 
+  upgrader:
+  intl_phone_number_input: ^0.7.3+1
+  lottie: ^2.6.0
+  firebase_core:
+  firebase_auth:
+  google_sign_in: ^6.2.1
+
+
+
 
 dev_dependencies:
   build_runner: ^2.4.7

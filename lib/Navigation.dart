@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -37,6 +38,7 @@ import 'API/PatchApi.dart';
 import 'API/beaconapi.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/beaconData.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -102,6 +104,8 @@ class _NavigationState extends State<Navigation> {
   bool _isnavigationPannelOpen = false;
   bool _isreroutePannelOpen = false;
   bool _isBuildingPannelOpen = true;
+  bool _isFilterPanelOpen = false;
+
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
@@ -2839,9 +2843,114 @@ class _NavigationState extends State<Navigation> {
   }
 
 
+  bool _isFilterOpen = false;
+
+  // Widget FILTERPannel() {
+  //   double screenWidth = MediaQuery.of(context).size.width;
+  //   double screenHeight = MediaQuery.of(context).size.height;
+  //   log("Wilson Checker ${landmarkData.landmarkNames}");
+  //   return Visibility(
+  //       visible: _isBuildingPannelOpen,
+  //       child: SlidingUpPanel(
+  //           borderRadius: BorderRadius.all(Radius.circular(24.0)),
+  //           boxShadow: [
+  //             BoxShadow(
+  //               blurRadius: 20.0,
+  //               color: Colors.grey,
+  //             ),
+  //           ],
+  //           minHeight: 155,
+  //           snapPoint: 190/screenHeight,
+  //           maxHeight: screenHeight*0.9,
+  //           panel: Container(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Container(
+  //                   child: ValueListenableBuilder(
+  //                     valueListenable: Hive.box('Filters').listenable(),
+  //                     builder: (BuildContext context, value, Widget? child) {
+  //                       //List<dynamic> aa = []
+  //                       if(value.length!=0){
+  //                         tags = value.getAt(0);
+  //                       }
+  //                       return ChipsChoice<String>.multiple(
+  //                         value: tags,
+  //                         onChanged: (val){
+  //                           //value.clear();
+  //                           setState(() {
+  //                             tags = val;
+  //                             value.putAt(0, val);
+  //                             onTagsChanged();
+  //                           });
+  //                           //value.put(val, val);
+  //                           log("Wilson Checker ${tags}");
+  //                           // log("Wilson Checker ${tagsBox}");
+  //                           log("Wilson Checker ${value.getAt(0)}");
+  //                         },
+  //                         choiceItems: C2Choice.listFrom<String, String>(
+  //                           source: options,
+  //                           value: (i, v) => v,
+  //                           label: (i, v) => v,
+  //                           tooltip: (i, v) => v,
+  //                         ),
+  //                         choiceCheckmark: true,
+  //                         choiceStyle: C2ChipStyle.filled(
+  //                           selectedStyle: const C2ChipStyle(
+  //                               borderRadius: BorderRadius.all(
+  //                                 Radius.circular(20),
+  //                               ),
+  //                               backgroundColor: Colors.yellow
+  //                           ),
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.all(
+  //                             Radius.circular(20),
+  //                           ),
+  //
+  //                         ),
+  //                         wrapped: true,
+  //                       );
+  //                     },
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   child: ListView.builder(
+  //                     itemCount: filteredItems.length,
+  //                     itemBuilder: (context, index) {
+  //                       final item = filteredItems[index];
+  //                       return NavigatonFilterCard(LandmarkName: item.venueName!,
+  //                         LandmarkDistance: "90 m",
+  //                         LandmarkFloor: "Floor ${item.floor}",
+  //                         LandmarksubName: item.buildingName!,
+  //
+  //                       );
+  //                     },
+  //                   ),
+  //                 )
+  //               ],
+  //             ),
+  //           )
+  //       ));
+  // }
+
   Widget buildingDetailPannel() {
+    buildingAll element = new buildingAll.buildngAllAPIModel();
+    final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+    if(BuildingAllBox.length>0){
+      List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
+      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      buildingList.forEach((Element) {
+        if(Element.sId == buildingAllApi.getStoredString()){
+          setState(() {
+            element = Element;
+          });
+        }
+      });
+    }
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(
@@ -2856,559 +2965,674 @@ class _NavigationState extends State<Navigation> {
             snapPoint: 190/screenHeight,
             maxHeight: screenHeight*0.9,
           panel: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 6,
-                      margin: EdgeInsets.only(top: 8),
-                      decoration: BoxDecoration(
-                        color: Color(0xffd9d9d9),
-                        borderRadius: BorderRadius.circular(5.0),
+            child: !_isFilterOpen?Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 6,
+                        margin: EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Color(0xffd9d9d9),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 16),
-                      padding: EdgeInsets.only(left: 16,right: 16,bottom: 4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Academic Building",
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                              height: 27/18,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                          SizedBox(height: 4,),
-                          Row(
-                            children: [
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 16),
+                        padding: EdgeInsets.only(left: 16,right: 16,bottom: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              "Open ",
+                              "${element.buildingName}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xff4caf50),
-                                height: 25/16,
+                                height: 27/18,
                               ),
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.left,
                             ),
+                            SizedBox(height: 4,),
+                            element.workingDays != null && element.workingDays!.length>0 ? Row(
+                              children: [
                               Text(
-                                "  Closes 5:30 pm",
+                                "Open ",
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
-                                  color: Color(0xff8d8c8c),
+                                  color: Color(0xff4caf50),
                                   height: 25/16,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                          ],)
-                        ],
+                                Text(
+                                  "  Closes ${element.workingDays![0].closingTime}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8d8c8c),
+                                    height: 25/16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                            ],):Container()
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 141,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: Color(0xff24B9B0),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: TextButton(
-                              onPressed: (){
-
-                              },
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset("assets/ExploreInside.svg"),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Explore Inside",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xffffffff),
-                                      height: 20/14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8,),
-                          Container(
-                            width: 80,
-                            height: 42,
-                            decoration: BoxDecoration(
-                                color: Color(0xffffffff),
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(color: Color(0xff000000))
-                            ),
-                            child: TextButton(
-                              onPressed: (){
-
-                              },
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.call,color: Color(0xff000000),),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Call",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff000000),
-                                      height: 20/14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8,),
-                          Container(
-                            width: 92,
-                            height: 42,
-                            decoration: BoxDecoration(
-                                color: Color(0xffffffff),
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(color: Color(0xff000000))
-                            ),
-                            child: TextButton(
-                              onPressed: (){
-
-                              },
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.share,color: Color(0xff000000),),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Share",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff000000),
-                                      height: 20/14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                        child: Column(
+                      Container(
+                        padding: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
+                        child: Row(
                           children: [
                             Container(
-                              padding:EdgeInsets.only(left: 16,right: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Services",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff000000),
-                                      height: 23/16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  TextButton(onPressed: (){}, child:Text(
-                                    "See All",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff4a4545),
-                                      height: 20/14,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ) )
-                                ],
+                              width: 141,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: Color(0xff24B9B0),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset("assets/ExploreInside.svg"),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Explore Inside",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xffffffff),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
+                            SizedBox(width: 8,),
                             Container(
-                              padding: EdgeInsets.only(left: 16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    child: Column(
-                                      children: [
-                                        Container(width: 61,height: 56,
-                                          padding: EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                                              border: Border.all(color: Color(0xffB3B3B3))
-                                          ),child: SvgPicture.asset("assets/washroomservice.svg"),),
-                                        Text(
-                                          "Washroom",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a4545),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 16,),
-                                  Container(
-                                    child: Column(
-                                      children: [
-                                        Container(width: 61,height: 56,
-                                          padding: EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                                              border: Border.all(color: Color(0xffB3B3B3))
-                                          ),child: SvgPicture.asset("assets/foodservice.svg"),),
-                                        Text(
-                                          "Food",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a4545),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 16,),
-                                  Container(
-                                    child: Column(
-                                      children: [
-                                        Container(width: 61,height: 56,
-                                          padding: EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                                              border: Border.all(color: Color(0xffB3B3B3))
-                                          ),child: SvgPicture.asset("assets/accservice.svg"),),
-                                        Text(
-                                          "Accessibility",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a4545),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 16,),
-                                  Container(
-                                    child: Column(
-                                      children: [
-                                        Container(width: 61,height: 56,
-                                          padding: EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                                              border: Border.all(color: Color(0xffB3B3B3))
-                                          ),child: SvgPicture.asset("assets/exitservice.svg"),),
-                                        Text(
-                                          "Exit",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a4545),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
+                              width: 80,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                  color: Color(0xffffffff),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: Color(0xff000000))
+                              ),
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.call,color: Color(0xff000000),),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Call",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
+                            SizedBox(width: 8,),
                             Container(
-                              margin: EdgeInsets.only(top: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                      margin: EdgeInsets.only(left: 17),
-                                      child: Text(
-                                        "Information",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff000000),
-                                          height: 23/16,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      )
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0, color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset("assets/Depth 3, Frame 0.svg"),
-                                        SizedBox(width: 16,),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                  "Plot No. 2, Rajiv Gandhi Education City, National Capital Region P.O. Rai, Sonepat Haryana-131029",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                    EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0,
-                                              color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                        SizedBox(width: 16,),
-                                        Container(
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                  "6 Floors",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                    EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0,
-                                              color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset("assets/Depth 3, Frame 1-1.svg"),
-                                        SizedBox(width: 16,),
-                                        Container(
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                  "044 - 2344542",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                    EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0,
-                                              color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset("assets/Depth 3, Frame 1-2.svg"),
-                                        SizedBox(width: 16,),
-                                        Container(
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                  "https://www.ashoka.edu.in/",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                    EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0,
-                                              color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset("assets/Depth 3, Frame 1-3.svg"),
-                                        SizedBox(width: 16,),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(top: 8),
-                                              child: RichText(
-                                                text: TextSpan(
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xff4a4545),
-                                                    height: 25 / 16,
-                                                  ),
-                                                  children: [
-                                                    TextSpan(
-                                                      text:
-                                                      "Opening Hours: Monday to Saturday",
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(top: 8),
-                                              child: RichText(
-                                                text: TextSpan(
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xff4a4545),
-                                                    height: 25 / 16,
-                                                  ),
-                                                  children: [
-                                                    TextSpan(
-                                                      text:
-                                                      "9:00 Am - 05:00 Pm",
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                              width: 92,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                  color: Color(0xffffffff),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: Color(0xff000000))
                               ),
-                            )
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.share,color: Color(0xff000000),),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Share",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
-                        )
-                    )
-                  ],
-                ),
-              ],
-            ),
+                        ),
+                      ),
+                      Container(
+                          child: Column(
+                            children: [
+                              Container(
+                                padding:EdgeInsets.only(left: 16,right: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Services",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 23/16,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    TextButton(onPressed: (){
+                                      setState(() {
+                                        print("Himanshuchecker");
+                                        _isFilterOpen = !_isFilterOpen;
+                                      });
+                                    }, child:Text(
+                                      "See All",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff4a4545),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ) )
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(left: 16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/washroomservice.svg"),),
+                                          Text(
+                                            "Washroom",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/foodservice.svg"),),
+                                          Text(
+                                            "Food",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/accservice.svg"),),
+                                          Text(
+                                            "Accessibility",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/exitservice.svg"),),
+                                          Text(
+                                            "Exit",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                        margin: EdgeInsets.only(left: 17),
+                                        child: Text(
+                                          "Information",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff000000),
+                                            height: 23/16,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        )
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0, color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 0.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            width: screenWidth - 100,
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.address}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Container(
+                                    //   margin:
+                                    //   EdgeInsets.only(left: 16, right: 16),
+                                    //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                    //   decoration: BoxDecoration(
+                                    //     border: Border(
+                                    //         bottom: BorderSide(
+                                    //             width: 1.0,
+                                    //             color: Color(0xffebebeb))),
+                                    //   ),
+                                    //   child: Row(
+                                    //     crossAxisAlignment:
+                                    //     CrossAxisAlignment.center,
+                                    //     children: [
+                                    //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                    //       SizedBox(width: 16,),
+                                    //       Container(
+                                    //         margin: EdgeInsets.only(top: 8),
+                                    //         child: RichText(
+                                    //           text: TextSpan(
+                                    //             style: const TextStyle(
+                                    //               fontFamily: "Roboto",
+                                    //               fontSize: 16,
+                                    //               fontWeight: FontWeight.w400,
+                                    //               color: Color(0xff4a4545),
+                                    //               height: 25 / 16,
+                                    //             ),
+                                    //             children: [
+                                    //               TextSpan(
+                                    //                 text:
+                                    //                 "6 Floors",
+                                    //               ),
+                                    //             ],
+                                    //           ),
+                                    //         ),
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    element.phone != null?Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-1.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.phone}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ):Container(),
+                                    element.website != null ? Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-2.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.website}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ):Container(),
+                                    element.workingDays != null && element.workingDays!.length>1 ?Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-3.svg"),
+                                          SizedBox(width: 16,),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                margin: EdgeInsets.only(top: 8),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff4a4545),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                        "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length-1].day}",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(top: 8),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff4a4545),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                        "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length-1].closingTime}",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ) : Container()
+                                  ],
+                                ),
+                              )
+                            ],
+                          )
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ): Container(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 6,
+                        margin: EdgeInsets.only(top: 8,bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Color(0xffd9d9d9),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 17,top: 8),
+                        child: InkWell(
+                          onTap: (){
+                            _isFilterOpen = !_isFilterOpen;
+                          },
+                          child: SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 17,top: 8),
+                        child: Text(
+                          "Filters",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff000000),
+                            height: 26/20,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Spacer(),
+                      Container(
+                        margin: EdgeInsets.only(right: 14,top: 10),
+                        child: TextButton(onPressed: () {  },
+                        child: Text(
+                            "Clear All",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff24b9b0),
+                              height: 20/14,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Services",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Choose Floor",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Filter results (16)",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
+            )
           )
         ));
   }

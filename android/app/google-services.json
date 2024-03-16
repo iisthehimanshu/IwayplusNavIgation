@@ -1,37 +1,27 @@
 {
   "project_info": {
-    "project_number": "880966987613",
-    "firebase_url": "https://task-1dccb-default-rtdb.firebaseio.com",
-    "project_id": "task-1dccb",
-    "storage_bucket": "task-1dccb.appspot.com"
+    "project_number": "61576302596",
+    "firebase_url": "https://iwaymaps-9af30-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "iwaymaps-9af30",
+    "storage_bucket": "iwaymaps-9af30.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:880966987613:android:e1160ebb36cb9752c3c2b4",
+        "mobilesdk_app_id": "1:61576302596:android:d3fe1d777f07152f14e551",
         "android_client_info": {
           "package_name": "com.iwayplus.navigation"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "880966987613-bpv0p25kn4pr9uropodspclepdb0t2en.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD7yXKMS0HNcMEUKuaDEoG4_0H5AlAKtyY"
+          "current_key": "AIzaSyCLSREgrglMD3YDY7vlyNWDvhh1O9yZhUE"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "880966987613-bpv0p25kn4pr9uropodspclepdb0t2en.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

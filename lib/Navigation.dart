@@ -3750,6 +3750,7 @@ class _NavigationState extends State<Navigation> {
                         margin: EdgeInsets.only(right: 14,top: 10),
                         child: TextButton(onPressed: () {
                           optionsTags.clear();
+                          floorOptionsTags.clear();
                         },
                         child: Text(
                             "Clear All",

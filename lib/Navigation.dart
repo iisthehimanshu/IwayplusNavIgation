@@ -2743,7 +2743,10 @@ class _NavigationState extends State<Navigation> {
     LandmarkItems = landmarkData.landmarks!;
   }
   void filterItems() {
-    filteredItems = LandmarkItems.where((item) => tags.contains(item.name)).toList();
+    setState(() {
+      filteredItems = LandmarkItems.where((item) => tags.contains(item.name)).toList();
+      log('Wilsonchecker ${filteredItems}');
+    });
   }
 
 // Call filterItems() whenever tags change
@@ -2756,9 +2759,9 @@ class _NavigationState extends State<Navigation> {
   Widget FILTERPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    log("Wilson Checker ${landmarkData.landmarkNames}");
+    //log("Wilson Checker ${landmarkData.landmarkNames}");
     return Visibility(
-        visible: _isBuildingPannelOpen,
+        visible: !_isBuildingPannelOpen,
         child: SlidingUpPanel(
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
             boxShadow: [
@@ -3159,6 +3162,7 @@ class _NavigationState extends State<Navigation> {
                                     TextButton(onPressed: (){
                                       setState(() {
                                         print("Himanshuchecker");
+                                        _isBuildingPannelOpen = !_isBuildingPannelOpen;
                                         _isFilterOpen = !_isFilterOpen;
                                       });
                                     }, child:Text(
@@ -4041,7 +4045,7 @@ class _NavigationState extends State<Navigation> {
             routeDeatilPannel(),
             navigationPannel(),
             reroutePannel(),
-            //buildingDetailPannel(),
+            buildingDetailPannel(),
             FILTERPannel()
           ],
         ),

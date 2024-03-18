@@ -63,7 +63,7 @@ class _MyAppState extends State<MyApp> {
           }
           if(snapshot.connectionState == ConnectionState.active){
             if(snapshot.data == null){
-              return MainScreen(initialIndex: 0,);
+              return LoginScreen();
             }else{
               return MainScreen(initialIndex: 0,);
             }

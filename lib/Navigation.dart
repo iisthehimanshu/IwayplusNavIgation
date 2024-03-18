@@ -171,6 +171,11 @@ class _NavigationState extends State<Navigation> {
         true;
       }),
     );
+    print("Wilsonchecker $LandmarkItems");
+    print("Wilsonchecker $tags");
+
+
+
     fetchlist();
     filterItems();
   }
@@ -2726,11 +2731,16 @@ class _NavigationState extends State<Navigation> {
         ));
   }
   List<String> tags = [];
+
   List<String> options = [
-    'Academic Block Front Entry (S-2)', 'Washroom', 'LR113',
-    'Automotive', 'Sports', 'Education',
-    'Fashion', 'Travel', 'Food', 'Tech',
+    'Washroom', 'Food & Drinks',
+    'Reception', 'Sports', 'Education',
+    'Fashion', 'Travel', 'Rooms', 'Tech',
     'Science',
+  ];
+  List<String> floorOptions = [
+    'All', 'Ground', 'Floor 1',
+    'Floor 2', 'Floor 3'
   ];
   late land landmarkData = new land();
   List<Landmarks> LandmarkItems = [];
@@ -2741,6 +2751,8 @@ class _NavigationState extends State<Navigation> {
       landmarkData = value;
     });
     LandmarkItems = landmarkData.landmarks!;
+    print("checking${LandmarkItems}");
+
   }
   void filterItems() {
     setState(() {
@@ -2756,186 +2768,8 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  Widget FILTERPannel() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    //log("Wilson Checker ${landmarkData.landmarkNames}");
-    return Visibility(
-        visible: !_isBuildingPannelOpen,
-        child: SlidingUpPanel(
-            borderRadius: BorderRadius.all(Radius.circular(24.0)),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 20.0,
-                color: Colors.grey,
-              ),
-            ],
-            minHeight: 155,
-            snapPoint: 190/screenHeight,
-            maxHeight: screenHeight*0.9,
-            panel: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                    Container(
-                      child: ValueListenableBuilder(
-                        valueListenable: Hive.box('Filters').listenable(),
-                        builder: (BuildContext context, value, Widget? child) {
-                          //List<dynamic> aa = []
-                          if(value.length!=0){
-                            tags = value.getAt(0);
-                          }
-                          return ChipsChoice<String>.multiple(
-                            value: tags,
-                            onChanged: (val){
-                              //value.clear();
-                              setState(() {
-                                tags = val;
-                                value.putAt(0, val);
-                                onTagsChanged();
-                              });
-                              //value.put(val, val);
-                              log("Wilson Checker ${tags}");
-                              // log("Wilson Checker ${tagsBox}");
-                              log("Wilson Checker ${value.getAt(0)}");
-                            },
-                            choiceItems: C2Choice.listFrom<String, String>(
-                              source: options,
-                              value: (i, v) => v,
-                              label: (i, v) => v,
-                              tooltip: (i, v) => v,
-                            ),
-                            choiceCheckmark: true,
-                            choiceStyle: C2ChipStyle.filled(
-                              selectedStyle: const C2ChipStyle(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20),
-                                ),
-                                backgroundColor: Colors.yellow
-                              ),
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-
-                            ),
-                            wrapped: true,
-                          );
-                        },
-                      ),
-                    ),
-                  Container(
-                    height: 200,
-                    child: ListView.builder(
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return NavigatonFilterCard(LandmarkName: item.venueName!,
-                          LandmarkDistance: "90 m",
-                          LandmarkFloor: "Floor ${item.floor}",
-                          LandmarksubName: item.buildingName!,
-
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ),
-            )
-        ));
-  }
-
 
   bool _isFilterOpen = false;
-
-  // Widget FILTERPannel() {
-  //   double screenWidth = MediaQuery.of(context).size.width;
-  //   double screenHeight = MediaQuery.of(context).size.height;
-  //   log("Wilson Checker ${landmarkData.landmarkNames}");
-  //   return Visibility(
-  //       visible: _isBuildingPannelOpen,
-  //       child: SlidingUpPanel(
-  //           borderRadius: BorderRadius.all(Radius.circular(24.0)),
-  //           boxShadow: [
-  //             BoxShadow(
-  //               blurRadius: 20.0,
-  //               color: Colors.grey,
-  //             ),
-  //           ],
-  //           minHeight: 155,
-  //           snapPoint: 190/screenHeight,
-  //           maxHeight: screenHeight*0.9,
-  //           panel: Container(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Container(
-  //                   child: ValueListenableBuilder(
-  //                     valueListenable: Hive.box('Filters').listenable(),
-  //                     builder: (BuildContext context, value, Widget? child) {
-  //                       //List<dynamic> aa = []
-  //                       if(value.length!=0){
-  //                         tags = value.getAt(0);
-  //                       }
-  //                       return ChipsChoice<String>.multiple(
-  //                         value: tags,
-  //                         onChanged: (val){
-  //                           //value.clear();
-  //                           setState(() {
-  //                             tags = val;
-  //                             value.putAt(0, val);
-  //                             onTagsChanged();
-  //                           });
-  //                           //value.put(val, val);
-  //                           log("Wilson Checker ${tags}");
-  //                           // log("Wilson Checker ${tagsBox}");
-  //                           log("Wilson Checker ${value.getAt(0)}");
-  //                         },
-  //                         choiceItems: C2Choice.listFrom<String, String>(
-  //                           source: options,
-  //                           value: (i, v) => v,
-  //                           label: (i, v) => v,
-  //                           tooltip: (i, v) => v,
-  //                         ),
-  //                         choiceCheckmark: true,
-  //                         choiceStyle: C2ChipStyle.filled(
-  //                           selectedStyle: const C2ChipStyle(
-  //                               borderRadius: BorderRadius.all(
-  //                                 Radius.circular(20),
-  //                               ),
-  //                               backgroundColor: Colors.yellow
-  //                           ),
-  //                           color: Colors.white,
-  //                           borderRadius: BorderRadius.all(
-  //                             Radius.circular(20),
-  //                           ),
-  //
-  //                         ),
-  //                         wrapped: true,
-  //                       );
-  //                     },
-  //                   ),
-  //                 ),
-  //                 Container(
-  //                   height: 200,
-  //                   child: ListView.builder(
-  //                     itemCount: filteredItems.length,
-  //                     itemBuilder: (context, index) {
-  //                       final item = filteredItems[index];
-  //                       return NavigatonFilterCard(LandmarkName: item.venueName!,
-  //                         LandmarkDistance: "90 m",
-  //                         LandmarkFloor: "Floor ${item.floor}",
-  //                         LandmarksubName: item.buildingName!,
-  //
-  //                       );
-  //                     },
-  //                   ),
-  //                 )
-  //               ],
-  //             ),
-  //           )
-  //       ));
-  // }
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
@@ -3162,7 +2996,7 @@ class _NavigationState extends State<Navigation> {
                                     TextButton(onPressed: (){
                                       setState(() {
                                         print("Himanshuchecker");
-                                        _isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
                                         _isFilterOpen = !_isFilterOpen;
                                       });
                                     }, child:Text(
@@ -3549,11 +3383,11 @@ class _NavigationState extends State<Navigation> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 17,top: 8),
-                        child: InkWell(
-                          onTap: (){
+                        child: IconButton(
+                          onPressed: (){
                             _isFilterOpen = !_isFilterOpen;
                           },
-                          child: SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
+                          icon : SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
                         ),
                       ),
                       Container(
@@ -3570,10 +3404,13 @@ class _NavigationState extends State<Navigation> {
                           textAlign: TextAlign.left,
                         ),
                       ),
+
                       Spacer(),
                       Container(
                         margin: EdgeInsets.only(right: 14,top: 10),
-                        child: TextButton(onPressed: () {  },
+                        child: TextButton(onPressed: () {
+                          tags.clear();
+                        },
                         child: Text(
                             "Clear All",
                             style: const TextStyle(
@@ -3589,6 +3426,7 @@ class _NavigationState extends State<Navigation> {
                       )
                     ],
                   ),
+
                   Container(
                     margin: EdgeInsets.only(top: 8,left: 16),
                     alignment: Alignment.bottomLeft,
@@ -3602,6 +3440,56 @@ class _NavigationState extends State<Navigation> {
                         height: 23/16,
                       ),
                       textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Container(
+                    child: ValueListenableBuilder(
+                      valueListenable: Hive.box('Filters').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        //List<dynamic> aa = []
+                        if(value.length!=0){
+                          tags = value.getAt(0);
+                          print("tags");
+                          print(tags);
+                        }
+                        return ChipsChoice<String>.multiple(
+                          value: tags,
+                          onChanged: (val){
+                            //value.clear();
+                            setState(() {
+                              tags = val;
+                              value.putAt(0, val);
+                              onTagsChanged();
+                              //filterItems();
+                            });
+                            //value.put(val, val);
+                            print("Wilson Checker ${tags}");
+                            // log("Wilson Checker ${tagsBox}");
+                            log("Wilson Checker ${value.getAt(0)}");
+                          },
+                          choiceItems: C2Choice.listFrom<String, String>(
+                            source: options,
+                            value: (i, v) => v,
+                            label: (i, v) => v,
+                            tooltip: (i, v) => v,
+                          ),
+                          choiceCheckmark: true,
+                          choiceStyle: C2ChipStyle.filled(
+                            selectedStyle: const C2ChipStyle(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(7),
+                                ),
+                                backgroundColor: Color(0XFFABF9F4)
+                            ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(7),
+                            ),
+
+                          ),
+                          wrapped: false,
+                        );
+                      },
                     ),
                   ),
                   Container(
@@ -3620,6 +3508,56 @@ class _NavigationState extends State<Navigation> {
                     ),
                   ),
                   Container(
+                    child: ValueListenableBuilder(
+                      valueListenable: Hive.box('Filters').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        //List<dynamic> aa = []
+                        if(value.length!=0){
+                          tags = value.getAt(0);
+                          print("tags");
+                          print(tags);
+                        }
+                        return ChipsChoice<String>.multiple(
+                          value: tags,
+                          onChanged: (val){
+                            //value.clear();
+                            setState(() {
+                              tags = val;
+                              value.putAt(0, val);
+                              onTagsChanged();
+                              //filterItems();
+                            });
+                            //value.put(val, val);
+                            print("Wilson Checker ${tags}");
+                            // log("Wilson Checker ${tagsBox}");
+                            log("Wilson Checker ${value.getAt(0)}");
+                          },
+                          choiceItems: C2Choice.listFrom<String, String>(
+                            source: floorOptions,
+                            value: (i, v) => v,
+                            label: (i, v) => v,
+                            tooltip: (i, v) => v,
+                          ),
+                          choiceCheckmark: true,
+                          choiceStyle: C2ChipStyle.filled(
+                            selectedStyle: const C2ChipStyle(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(7),
+                                ),
+                                backgroundColor: Color(0XFFABF9F4)
+                            ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(7),
+                            ),
+
+                          ),
+                          wrapped: false,
+                        );
+                      },
+                    ),
+                  ),
+                  Container(
                     margin: EdgeInsets.only(top: 8,left: 16),
                     alignment: Alignment.bottomLeft,
                     child: Text(
@@ -3634,6 +3572,21 @@ class _NavigationState extends State<Navigation> {
                       textAlign: TextAlign.start,
                     ),
                   ),
+                  Container(
+                    height: 200,
+                    child: ListView.builder(
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return NavigatonFilterCard(LandmarkName: item.venueName!,
+                          LandmarkDistance: "90 m",
+                          LandmarkFloor: "Floor ${item.floor}",
+                          LandmarksubName: item.buildingName!,
+
+                        );
+                      },
+                    ),
+                  )
                 ],
               ),
             )
@@ -4046,7 +3999,7 @@ class _NavigationState extends State<Navigation> {
             navigationPannel(),
             reroutePannel(),
             buildingDetailPannel(),
-            FILTERPannel()
+
           ],
         ),
       ),

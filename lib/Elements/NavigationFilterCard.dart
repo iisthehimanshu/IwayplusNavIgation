@@ -73,24 +73,24 @@ class _NavigatonFilterCardState extends State<NavigatonFilterCard> {
             child: Icon(Icons.man,color: Color(0xff000000),size: 25,),
           ),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: EdgeInsets.only(top: 12,left: 10),
+                margin: EdgeInsets.only(top: 12,left: 18),
                 alignment: Alignment.topLeft,
                 child: Text(
-                  truncateString(widget.LandmarkName,15),
+                  truncateString(widget.LandmarkName,20),
                   style: const TextStyle(
                     fontFamily: "Roboto",
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     color: Color(0xff000000),
-                    height: 25/16,
                   ),
                   textAlign: TextAlign.left,
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top:3,bottom: 14,left: 4),
+                margin: EdgeInsets.only(top:3,bottom: 14,left: 18),
                 alignment: Alignment.topLeft,
                 child: Text(
                   truncateString(widget.LandmarksubName,25),
@@ -99,7 +99,6 @@ class _NavigatonFilterCardState extends State<NavigatonFilterCard> {
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xff8d8c8c),
-                    height: 20/14,
                   ),
                   textAlign: TextAlign.left,
                 ),

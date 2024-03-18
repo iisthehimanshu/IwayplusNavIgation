@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -92,24 +94,32 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
             alignment: Alignment.centerRight,
             width: 60,
             child: Container(
-                child: IconButton(
-                    onPressed: (){
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.arrow_back_ios,color: Colors.black,)
+                child: Semantics(
+                  label: 'Back',
+                  child: IconButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back_ios,color: Colors.black,)
+                  ),
                 )
             ),
           ),
           actions: [
-            Container(
-                margin: EdgeInsets.only(right: 20),
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(8.0),
-                //   border: Border.all(
-                //     color: Color(0x204A4545),
-                //   ),
-                // ),
-                child: SvgPicture.asset("assets/BuildingInfoScreen_Share.svg"),
+            Semantics(
+              label: 'Share',
+              child: Container(
+                  margin: EdgeInsets.only(right: 20),
+                  // decoration: BoxDecoration(
+                  //   borderRadius: BorderRadius.circular(8.0),
+                  //   border: Border.all(
+                  //     color: Color(0x204A4545),
+                  //   ),
+                  // ),
+
+                  child: SvgPicture.asset("assets/BuildingInfoScreen_Share.svg"),
+
+              ),
             )
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent
@@ -333,9 +343,12 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                         ),
                                         Spacer(),
                                         IconButton(
-                                          icon: Icon(
-                                            isFavourite? Icons.favorite:
-                                            Icons.favorite_border,size: 24,color: Colors.red,),
+                                          icon: Semantics(
+                                            label: 'Favourite',
+                                            child: Icon(
+                                              isFavourite? Icons.favorite:
+                                              Icons.favorite_border,size: 24,color: Colors.red,),
+                                          ),
                                           onPressed: () async{
                                             if(isFavourite){
                                               await value.delete(currentData.buildingName);
@@ -346,7 +359,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                             }// Add your favorite button onPressed logic here
                                             log('Favouties Database Size ${value.length}');
                                           },
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ],

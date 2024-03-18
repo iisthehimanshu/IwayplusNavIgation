@@ -9,18 +9,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/SignUp.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
+import 'ForgetPassword.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignIn> createState() => _SignInState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignInState extends State<SignIn> {
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
   FocusNode _focusNode2_1 = FocusNode();
@@ -217,9 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Color button1 = new Color(0xff777777);
   Color text1 = new Color(0xff777777);
 
-  Color outlineheaderColor = new Color(0xff24b9b0);
+  Color outlineheaderColor = new Color(0xff49454f);
   Color outlineTextColor = new Color(0xff49454f);
-  Color outlineheaderColorForPass = new Color(0xff24b9b0);
+  Color outlineheaderColorForPass = new Color(0xff49454f);
   Color outlineTextColorForPass = new Color(0xff49454f);
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xff24b9b0);
@@ -545,7 +547,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                         color: Colors.white,
                                         margin: EdgeInsets.fromLTRB(0, 0, 26, 0),
                                         child: TextButton(
-                                          onPressed: () {  },
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ForgetPassword(),
+                                              ),
+                                            );
+                                          },
                                           child: Text(
                                             "Forgot Password?",
                                             style: const TextStyle(
@@ -671,7 +680,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           Container(
                               child: TextButton(
-                                onPressed: () {  },
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SignUp(),
+                                    ),
+                                  );
+                                },
                                 child: Text(
                                   "Sign up",
                                   style: const TextStyle(
@@ -689,46 +705,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
-                    // Spacer(),
-                    // Center(
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       Container(
-                    //         child: Text(
-                    //           "Inclusion Partner  ",
-                    //           style: const TextStyle(
-                    //             fontFamily: "Roboto",
-                    //             fontSize: 12,
-                    //             fontWeight: FontWeight.w400,
-                    //             color: Color(0xff777777),
-                    //             height: 18 / 12,
-                    //           ),
-                    //           textAlign: TextAlign.center,
-                    //         ),
-                    //       ),
-                    //       GestureDetector(
-                    //         onTap: () {
-                    //           // _launchInBrowser(
-                    //           //     Uri.parse('https://www.iwayplus.com/'));
-                    //         },
-                    //         child: Container(
-                    //           child: Text(
-                    //             "Iwayplus Pvt Ltd.",
-                    //             style: const TextStyle(
-                    //                 fontFamily: "Roboto",
-                    //                 fontSize: 12,
-                    //                 fontWeight: FontWeight.w400,
-                    //                 color: Color(0xff777777),
-                    //                 height: 18 / 12,
-                    //                 decoration: TextDecoration.underline),
-                    //             textAlign: TextAlign.center,
-                    //           ),
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // )
                   ],
                 ),
               ),
@@ -754,87 +730,5 @@ String extractPhoneNumber(String countryCode, String fullPhoneNumber) {
   } else {
     // If the fullPhoneNumber doesn't start with the countryCode, return the original fullPhoneNumber
     return fullPhoneNumber;
-  }
-}
-
-
-
-class RegisterPage extends StatefulWidget {
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  String url = 'https://purplefest.esg.co.in/account/registration/';
-  //late final WebViewController controller;
-  @override
-  void initState() {
-    // controller = WebViewController()
-    //   ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    //   ..setNavigationDelegate(
-    //     NavigationDelegate(
-    //       onNavigationRequest: (navigation) {
-    //         if (navigation.url != url) {
-    //           return NavigationDecision.prevent;
-    //         }
-    //         return NavigationDecision.navigate;
-    //       },
-    //     ),
-    //   )
-    //   ..loadRequest(Uri.parse(url));
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xffffffff),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Color(0xff000000)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Container(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Color(0xff777777), backgroundColor: Color(0xffbdbdbd), // Text color
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.circular(4.0), // Button border radius
-              ),
-              elevation: 0,
-            ),
-            onPressed: () async {
-              String currentUrl = url;
-              // Copy the URL to clipboard
-              // You can use any other package for clipboard operations as well
-              // For example, the 'clipboard' package: https://pub.dev/packages/clipboard
-              // Ensure to add it to your pubspec.yaml file.
-              await Clipboard.setData(ClipboardData(text: currentUrl));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('URL copied to clipboard: $currentUrl'),
-                ),
-              );
-            },
-            child: Text(
-              'https://purplefest.esg.co.in/account/registration/',
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 10,
-                fontWeight: FontWeight.w400,
-                color: Color(0xff282828),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          // alignment: Alignment.center,
-        ),
-        actions: [SizedBox(width: 8)],
-      ),
-      // body: WebViewWidget(controller: controller),
-    );
   }
 }

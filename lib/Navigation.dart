@@ -171,11 +171,6 @@ class _NavigationState extends State<Navigation> {
         true;
       }),
     );
-    print("Wilsonchecker $LandmarkItems");
-    print("Wilsonchecker $tags");
-
-
-
     fetchlist();
     filterItems();
   }
@@ -2730,7 +2725,8 @@ class _NavigationState extends State<Navigation> {
           ),
         ));
   }
-  List<String> tags = [];
+  List<String> optionsTags = [];
+  List<String> floorOptionsTags = [];
 
   List<String> options = [
     'Washroom', 'Food & Drinks',
@@ -2739,7 +2735,7 @@ class _NavigationState extends State<Navigation> {
     'Science',
   ];
   List<String> floorOptions = [
-    'All', 'Ground', 'Floor 1',
+    'All', 'Floor 0', 'Floor 1',
     'Floor 2', 'Floor 3'
   ];
   late land landmarkData = new land();
@@ -2756,7 +2752,7 @@ class _NavigationState extends State<Navigation> {
   }
   void filterItems() {
     setState(() {
-      filteredItems = LandmarkItems.where((item) => tags.contains(item.name)).toList();
+      filteredItems = LandmarkItems.where((item) => optionsTags.contains(item.element?.type) && floorOptionsTags.contains('Floor ${item.floor}')).toList();
       log('Wilsonchecker ${filteredItems}');
     });
   }
@@ -2770,6 +2766,11 @@ class _NavigationState extends State<Navigation> {
 
 
   bool _isFilterOpen = false;
+
+  Future<int> getHiveBoxLength() async {
+    final box = await Hive.openBox('Filters'); // Replace 'yourBoxName' with the name of your box
+    return box.length;
+  }
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
@@ -2787,7 +2788,8 @@ class _NavigationState extends State<Navigation> {
     }
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
+    fetchlist();
+    filterItems();
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(
@@ -3404,12 +3406,11 @@ class _NavigationState extends State<Navigation> {
                           textAlign: TextAlign.left,
                         ),
                       ),
-
                       Spacer(),
                       Container(
                         margin: EdgeInsets.only(right: 14,top: 10),
                         child: TextButton(onPressed: () {
-                          tags.clear();
+                          optionsTags.clear();
                         },
                         child: Text(
                             "Clear All",
@@ -3442,30 +3443,41 @@ class _NavigationState extends State<Navigation> {
                       textAlign: TextAlign.start,
                     ),
                   ),
+                  //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                  // FutureBuilder<int>(
+                  //   future: getHiveBoxLength(),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.connectionState != ConnectionState.waiting) {
+                  //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                  //     } else if (snapshot.hasError) {
+                  //       return Text('Error: ${snapshot.error}');
+                  //     } else {
+                  //       return Text('Length of Hive Box: ${snapshot.data}');
+                  //     }
+                  //   },
+                  // ),
+                  //---------------------------------------------------------------------------------------
+
                   Container(
                     child: ValueListenableBuilder(
                       valueListenable: Hive.box('Filters').listenable(),
                       builder: (BuildContext context, value, Widget? child) {
                         //List<dynamic> aa = []
                         if(value.length!=0){
-                          tags = value.getAt(0);
+                          optionsTags = value.getAt(0);
                           print("tags");
-                          print(tags);
+                          print(optionsTags);
+
                         }
                         return ChipsChoice<String>.multiple(
-                          value: tags,
-                          onChanged: (val){
-                            //value.clear();
+                          value: optionsTags,
+                          onChanged: (val) {
+                            print("Filter change${val}${value.values}");
+                            value.put(0, val);
                             setState(() {
-                              tags = val;
-                              value.putAt(0, val);
+                              optionsTags = val;
                               onTagsChanged();
-                              //filterItems();
                             });
-                            //value.put(val, val);
-                            print("Wilson Checker ${tags}");
-                            // log("Wilson Checker ${tagsBox}");
-                            log("Wilson Checker ${value.getAt(0)}");
                           },
                           choiceItems: C2Choice.listFrom<String, String>(
                             source: options,
@@ -3485,7 +3497,7 @@ class _NavigationState extends State<Navigation> {
                             borderRadius: BorderRadius.all(
                               Radius.circular(7),
                             ),
-
+                            borderStyle:  BorderStyle.solid
                           ),
                           wrapped: false,
                         );
@@ -3512,25 +3524,18 @@ class _NavigationState extends State<Navigation> {
                       valueListenable: Hive.box('Filters').listenable(),
                       builder: (BuildContext context, value, Widget? child) {
                         //List<dynamic> aa = []
-                        if(value.length!=0){
-                          tags = value.getAt(0);
-                          print("tags");
-                          print(tags);
+                        if(value.length==2){
+                          floorOptionsTags = value.getAt(1);
                         }
                         return ChipsChoice<String>.multiple(
-                          value: tags,
-                          onChanged: (val){
-                            //value.clear();
+                          value: floorOptionsTags,
+                          onChanged: (val) {
+                            print("Filter change${val}${value.values}");
+                            value.put(1, val);
                             setState(() {
-                              tags = val;
-                              value.putAt(0, val);
+                              floorOptionsTags = val;
                               onTagsChanged();
-                              //filterItems();
                             });
-                            //value.put(val, val);
-                            print("Wilson Checker ${tags}");
-                            // log("Wilson Checker ${tagsBox}");
-                            log("Wilson Checker ${value.getAt(0)}");
                           },
                           choiceItems: C2Choice.listFrom<String, String>(
                             source: floorOptions,
@@ -3550,7 +3555,6 @@ class _NavigationState extends State<Navigation> {
                             borderRadius: BorderRadius.all(
                               Radius.circular(7),
                             ),
-
                           ),
                           wrapped: false,
                         );
@@ -3561,7 +3565,7 @@ class _NavigationState extends State<Navigation> {
                     margin: EdgeInsets.only(top: 8,left: 16),
                     alignment: Alignment.bottomLeft,
                     child: Text(
-                      "Filter results (16)",
+                      "Filter results ${filteredItems.length}",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,
@@ -3573,7 +3577,8 @@ class _NavigationState extends State<Navigation> {
                     ),
                   ),
                   Container(
-                    height: 200,
+                    margin: EdgeInsets.only(top: 12),
+                    height: screenHeight-410,
                     child: ListView.builder(
                       itemCount: filteredItems.length,
                       itemBuilder: (context, index) {
@@ -3582,7 +3587,6 @@ class _NavigationState extends State<Navigation> {
                           LandmarkDistance: "90 m",
                           LandmarkFloor: "Floor ${item.floor}",
                           LandmarksubName: item.buildingName!,
-
                         );
                       },
                     ),

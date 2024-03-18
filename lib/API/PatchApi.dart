@@ -14,7 +14,7 @@ class patchAPI {
   final String baseUrl = "https://dev.iwayplus.in/secured/patch/get";
 
 
-  Future<patchDataModel> fetchPatchData() async {
+  Future<patchDataModel> fetchPatchData({String? id = null}) async {
     final PatchBox = PatchAPIModelBox.getData();
     // print(buildingAllApi.getStoredString());
     //
@@ -32,7 +32,7 @@ class patchAPI {
     });
 
     final Map<String, dynamic> data = {
-      "id": buildingAllApi.getStoredString()
+      "id": id??buildingAllApi.getStoredString()
     };
 
     final response = await http.post(

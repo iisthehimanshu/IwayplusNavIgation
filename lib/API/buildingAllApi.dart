@@ -75,9 +75,9 @@ class buildingAllApi {
     }
   }
   // Method to set the stored string
-  static void setStoredString(String value) {
+  static Future<void> setStoredString(String value) async {
     selectedID = value;
-    print("Set${selectedID}");
+    return;
   }
 
   // Method to get the stored string

@@ -13,7 +13,7 @@ class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
   String token = "";
 
-  Future<land> fetchLandmarkData() async {
+  Future<land> fetchLandmarkData({String? id = null}) async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
     if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
@@ -30,7 +30,7 @@ class landmarkApi {
     });
 
     final Map<String, dynamic> data = {
-      "id": buildingAllApi.getStoredString(),
+      "id": id??buildingAllApi.getStoredString(),
     };
     final response = await http.post(
       Uri.parse(baseUrl),

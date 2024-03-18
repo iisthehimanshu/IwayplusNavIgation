@@ -14,7 +14,7 @@ class PolyLineApi {
   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
 
 
-  Future<polylinedata> fetchPolyData() async {
+  Future<polylinedata> fetchPolyData({String? id = null}) async {
     final PolyLineBox = PolylineAPIModelBOX.getData();
 
     // if(PolyLineBox.containsKey(buildingAllApi.getStoredString())){
@@ -34,7 +34,7 @@ class PolyLineApi {
     });
 
     final Map<String, dynamic> data = {
-      "id": buildingAllApi.getStoredString(),
+      "id": id??buildingAllApi.getStoredString(),
     };
 
     final response = await http.post(

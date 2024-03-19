@@ -13,20 +13,19 @@ class buildingAllApi {
   String token = "";
   static String selectedID="";
   static String selectedVenue="";
+  static List<String> allBuildingID = [];
 
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
 
-
-
-    if(BuildingAllBox.length!=0){
-      print("BUILDINGALL API DATA FROM DATABASE");
-      print(BuildingAllBox.length);
-      List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
-
-      return buildingList;
-    }
+    // if(BuildingAllBox.length!=0){
+    //   print("BUILDINGALL API DATA FROM DATABASE");
+    //   print(BuildingAllBox.length);
+    //   List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
+    //   List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+    //
+    //   return buildingList;
+    // }
 
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null){
@@ -42,14 +41,33 @@ class buildingAllApi {
       },
     );
     if (response.statusCode == 200) {
-      print("BUILDINGALL API DATA FROM API");
       List<dynamic> responseBody = json.decode(response.body);
       final buildingData = BuildingAllAPIModel(responseBody: responseBody);
-      BuildingAllBox.add(buildingData);
-      buildingData.save();
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      String APITime = responseBody[0]['updatedAt']!;
 
-      return buildingList;
+      if(BuildingAllBox.length==0){
+        print("BUILDINGALL API DATA FROM API");
+        BuildingAllBox.add(buildingData);
+        buildingData.save();
+        List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+        return buildingList;
+      }else{
+        List<dynamic> databaseresponseBody = BuildingAllBox.getAt(0)!.responseBody;
+        String LastUpdatedTime = databaseresponseBody[0]['updatedAt']!;
+        if(APITime == LastUpdatedTime){
+          print("BUILDINGALL API DATA FROM DATABASE");
+          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
+          List<buildingAll> buildingList = databaseresponseBody.map((data) => buildingAll.fromJson(data)).toList();
+          return buildingList;
+        }else{
+          print("BUILDINGALL API DATA FROM DATABASE AND UPDATED");
+          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
+          BuildingAllBox.add(buildingData);
+          buildingData.save();
+          List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+          return buildingList;
+        }
+      }
     } else {
       print(response.statusCode);
       print(response.body);
@@ -57,9 +75,9 @@ class buildingAllApi {
     }
   }
   // Method to set the stored string
-  static void setStoredString(String value) {
+  static Future<void> setStoredString(String value) async {
     selectedID = value;
-    print("Set${selectedID}");
+    return;
   }
 
   // Method to get the stored string
@@ -67,6 +85,15 @@ class buildingAllApi {
     print(selectedID);
     return selectedID;
   }
+
+  static void setStoredAllBuildingID(List<String> value){
+    allBuildingID = value;
+  }
+
+  static List<String> getStoredAllBuildingID(){
+    return allBuildingID;
+  }
+
 
   // Method to set the stored string
   static void setStoredVenue(String value) {

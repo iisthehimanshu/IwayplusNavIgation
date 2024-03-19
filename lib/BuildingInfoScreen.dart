@@ -31,7 +31,7 @@ class BuildingInfoScreen extends StatefulWidget {
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAll> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
-
+  List<String> allBuildingID = [];
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -55,6 +55,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     super.initState();
     print(widget.receivedAllBuildingList);
     apiCall();
+    widget.receivedAllBuildingList!.forEach((element) {
+      allBuildingID.add(element.sId!);
+    });
   }
 
   void apiCall() async{
@@ -244,7 +247,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         buildingName: currentData.buildingName?? "",
                         buildingTag: currentData.venueCategory?? "",
                         buildingId: currentData.sId??"",
-                        buildingFavourite: false,
+                        buildingFavourite: false, allBuildingID: allBuildingID,
                       );
                     },
                     itemCount:widget.receivedAllBuildingList!.length,

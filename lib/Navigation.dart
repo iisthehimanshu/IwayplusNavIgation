@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:device_information/device_information.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -16,6 +17,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
+import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
 import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
@@ -33,6 +35,7 @@ import 'API/PatchApi.dart';
 import 'API/beaconapi.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/beaconData.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -61,15 +64,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Navigation(
-        buildingID: "",
       ),
     );
   }
 }
 
 class Navigation extends StatefulWidget {
-  String buildingID = '';
-  Navigation({required this.buildingID});
+  Navigation();
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -85,8 +86,11 @@ class _NavigationState extends State<Navigation> {
   );
   late GoogleMapController _googleMapController;
   Set<Polygon> patch = Set();
+  Set<Polygon> otherpatch = Set();
   Set<gmap.Polyline> polylines = Set();
+  Set<gmap.Polyline> otherpolylines = Set();
   Set<Polygon> closedpolygons = Set();
+  Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
   Set<Marker> selectedroomMarker = Set();
   Map<int, Set<Marker>> pathMarkers = {};
@@ -98,6 +102,9 @@ class _NavigationState extends State<Navigation> {
   bool _isRoutePanelOpen = false;
   bool _isnavigationPannelOpen = false;
   bool _isreroutePannelOpen = false;
+  bool _isBuildingPannelOpen = true;
+  bool _isFilterPanelOpen = false;
+
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
@@ -125,7 +132,6 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     print("widget.buildingID");
-    print(widget.buildingID);
     flutterTts = FlutterTts();
     handleCompassEvents();
     DefaultAssetBundle.of(context)
@@ -312,6 +318,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void apiCalls() async {
+
     await patchAPI().fetchPatchData().then((value) {
       createPatch(value);
       tools.Data = value;
@@ -376,6 +383,34 @@ class _NavigationState extends State<Navigation> {
         _timer.cancel();
       });
     });
+
+    // buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
+    // for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
+    //   print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
+    //   buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
+    //     await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
+    //       createotherPatch(value);
+    //     });
+    //
+    //     await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
+    //       createotherRooms(value, 0);
+    //     });
+    //
+    //     await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       Map<int, LatLng> coordinates = {};
+    //       for (int i = 0; i < value.landmarks!.length; i++) {
+    //         if (value.landmarks![i].element!.subType == "AR") {
+    //           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+    //               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+    //                   double.parse(value.landmarks![i].properties!.longitude!));
+    //         }
+    //       }
+    //       createotherARPatch(coordinates,value.landmarks![0].buildingID!);
+    //     });
+    //   });
+    // }
   }
 
   Future<void> localizeUser() async {
@@ -485,6 +520,7 @@ class _NavigationState extends State<Navigation> {
             fillColor: Colors.white,
             geodesic: false,
             consumeTapEvents: true,
+            zIndex: -1
           ),
         );
       });
@@ -492,6 +528,51 @@ class _NavigationState extends State<Navigation> {
       try {
         fitPolygonInScreen(patch.first);
       } catch (e) {}
+    }
+  }
+  void createotherPatch(patchDataModel value) async {
+    if (value.patchData!.coordinates!.isNotEmpty) {
+      List<LatLng> polygonPoints = [];
+      double latcenterofmap = 0.0;
+      double lngcenterofmap = 0.0;
+
+      for (int i = 0; i < 4; i++) {
+        latcenterofmap = latcenterofmap +
+            double.parse(value.patchData!.coordinates![i].globalRef!.lat!);
+        lngcenterofmap = lngcenterofmap +
+            double.parse(value.patchData!.coordinates![i].globalRef!.lng!);
+      }
+      latcenterofmap = latcenterofmap / 4;
+      lngcenterofmap = lngcenterofmap / 4;
+
+      for (int i = 0; i < 4; i++) {
+        polygonPoints.add(LatLng(
+            latcenterofmap +
+                1.1 *
+                    (double.parse(
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
+                        latcenterofmap),
+            lngcenterofmap +
+                1.1 *
+                    (double.parse(
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
+                        lngcenterofmap)));
+      }
+      setState(() {
+        otherpatch.add(
+          Polygon(
+            polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
+            points: polygonPoints,
+            strokeWidth: 1,
+            strokeColor: Colors.white,
+            fillColor: Colors.white,
+            geodesic: false,
+            consumeTapEvents: true,
+            zIndex: -1
+          ),
+        );
+      });
+
     }
   }
 
@@ -525,6 +606,41 @@ class _NavigationState extends State<Navigation> {
             fillColor: Colors.white,
             geodesic: false,
             consumeTapEvents: true,
+            zIndex: -1
+          ),
+        );
+      });
+    }
+  }
+  void createotherARPatch(Map<int, LatLng> coordinates,String bid) async {
+    print("HimanshuChecker $bid");
+    if (coordinates.isNotEmpty) {
+      List<LatLng> points = [];
+      List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
+
+      // Sort the list by keys
+      entryList.sort((a, b) => a.key.compareTo(b.key));
+
+      // Create a new LinkedHashMap from the sorted list
+      LinkedHashMap<int, LatLng> sortedCoordinates =
+      LinkedHashMap.fromEntries(entryList);
+
+      // Print the sorted map
+      sortedCoordinates.forEach((key, value) {
+        points.add(value);
+      });
+      setState(() {
+        otherpatch.removeWhere((element) => element.polygonId.value.contains(bid));
+        otherpatch.add(
+          Polygon(
+            polygonId: PolygonId('otherpatch $bid'),
+            points: points,
+            strokeWidth: 1,
+            strokeColor: Colors.white,
+            fillColor: Colors.white,
+            geodesic: false,
+            consumeTapEvents: true,
+            zIndex: -1
           ),
         );
       });
@@ -747,6 +863,7 @@ class _NavigationState extends State<Navigation> {
                         building.selectedLandmarkID = polyArray.id;
                         building.ignoredMarker.clear();
                         building.ignoredMarker.add(polyArray.id!);
+                        _isBuildingPannelOpen = false;
                         _isRoutePanelOpen = false;
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
@@ -766,7 +883,7 @@ class _NavigationState extends State<Navigation> {
                   // Modify the color and opacity based on the selectedRoomId
 
                   strokeColor: Colors.black,
-                  fillColor: Color(0xff7CFC00),
+                  fillColor: Color(0xffc2f1d5),
                   consumeTapEvents: true,
                 ));
               }
@@ -920,6 +1037,231 @@ class _NavigationState extends State<Navigation> {
             }
           } else {
             polylines.add(gmap.Polyline(
+              polylineId: PolylineId(polyArray.id!),
+              points: coordinates,
+              color: Colors.black,
+              width: 1,
+            ));
+          }
+        }
+      }
+    });
+    try {
+      fitPolygonInScreen(patch.first);
+    } catch (e) {}
+  }
+
+
+  void createotherRooms(polylinedata value, int floor) {
+
+    List<PolyArray>? FloorPolyArray = value.polyline!.floors![0].polyArray;
+    for (int j = 0; j < value.polyline!.floors!.length; j++) {
+      if (value.polyline!.floors![j].floor ==
+          tools.numericalToAlphabetical(floor)) {
+        FloorPolyArray = value.polyline!.floors![j].polyArray;
+      }
+    }
+    setState(() {
+      if (FloorPolyArray != null) {
+        for (PolyArray polyArray in FloorPolyArray) {
+          List<LatLng> coordinates = [];
+
+          for (Nodes node in polyArray.nodes!) {
+            //coordinates.add(LatLng(node.lat!,node.lon!));
+            coordinates.add(LatLng(node.lat!,node.lon!));
+          }
+
+          if (polyArray.polygonType == 'Wall' ||
+              polyArray.polygonType == 'undefined') {
+            if (coordinates.length >= 2) {
+              otherpolylines.add(gmap.Polyline(
+                polylineId: PolylineId(polyArray.id!),
+                points: coordinates,
+                color: Colors.black,
+                width: 1,
+              ));
+            }
+          } else if (polyArray.polygonType == 'Room') {
+            if (coordinates.length > 2) {
+              coordinates.add(coordinates.first);
+              otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffE5F9FF),
+                  consumeTapEvents: true,
+                  onTap: () {
+
+                  }));
+            }
+          } else if (polyArray.polygonType == 'Cubicle') {
+            if (polyArray.cubicleName == "Green Area") {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffc2f1d5),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                    polygonId: PolygonId(polyArray.id!),
+                    points: coordinates,
+                    strokeWidth: 1,
+                    // Modify the color and opacity based on the selectedRoomId
+
+                    strokeColor: Colors.black,
+                    fillColor: Color(0xffFFFF00),
+                    consumeTapEvents: true,
+                    onTap: () {
+                      if (building.selectedLandmarkID != polyArray.id) {
+                        building.selectedLandmarkID = polyArray.id;
+                        building.ignoredMarker.clear();
+                        building.ignoredMarker.add(polyArray.id!);
+                        _isRoutePanelOpen = false;
+                        singleroute.clear();
+                        _isLandmarkPanelOpen = true;
+                        addselectedRoomMarker(coordinates);
+                      }
+                    }));
+              }
+            } else if (polyArray.cubicleName == "Male Washroom") {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff0000FF),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName == "Female Washroom") {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFF69B4),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName!.toLowerCase().contains("fire")) {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFF4500),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName!.toLowerCase().contains("water")) {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff00FFFF),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName!.toLowerCase().contains("wall")) {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffCCCCCC),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName == "Restricted Area") {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff800000),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else if (polyArray.cubicleName == "Non Walkable Area") {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
+
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xff333333),
+                  consumeTapEvents: true,
+                ));
+              }
+            } else {
+              if (coordinates.length > 2) {
+                coordinates.add(coordinates.first);
+                otherclosedpolygons.add(Polygon(
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  strokeColor: Colors.black,
+                  fillColor: Colors.black.withOpacity(0.2),
+                ));
+              }
+            }
+          } else if (polyArray.polygonType == "Wall") {
+            if (coordinates.length > 2) {
+              coordinates.add(coordinates.first);
+              otherclosedpolygons.add(Polygon(
+                polygonId: PolygonId(polyArray.id!),
+                points: coordinates,
+                strokeWidth: 1,
+                // Modify the color and opacity based on the selectedRoomId
+
+                strokeColor: Colors.black,
+                fillColor: Color(0xffCCCCCC),
+                consumeTapEvents: true,
+              ));
+            }
+          } else {
+            otherpolylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
               color: Colors.black,
@@ -1212,6 +1554,7 @@ class _NavigationState extends State<Navigation> {
                         onPressed: () {
                           showMarkers();
                           toggleLandmarkPanel();
+                          _isBuildingPannelOpen = true;
                         },
                         icon: Icon(
                           Icons.arrow_back_ios_new,
@@ -1243,6 +1586,7 @@ class _NavigationState extends State<Navigation> {
                         onPressed: () {
                           showMarkers();
                           toggleLandmarkPanel();
+                          _isBuildingPannelOpen = true;
                         },
                         icon: Icon(
                           Icons.cancel_outlined,
@@ -1866,6 +2210,7 @@ class _NavigationState extends State<Navigation> {
                         PathState.sourcePolyID = "";
                         PathState.destinationPolyID = "";
                         singleroute.clear();
+                        _isBuildingPannelOpen = true;
                         setState(() {
                           Marker temp = selectedroomMarker.first;
                           selectedroomMarker.clear();
@@ -2298,6 +2643,7 @@ class _NavigationState extends State<Navigation> {
                         child: IconButton(
                             onPressed: () {
                               showMarkers();
+                              _isBuildingPannelOpen = true;
                               _isRoutePanelOpen = false;
                               selectedroomMarker.clear();
                               pathMarkers.clear();
@@ -2712,6 +3058,800 @@ class _NavigationState extends State<Navigation> {
         ));
   }
 
+  bool _isFilterOpen = false;
+
+  // Widget FILTERPannel() {
+  //   double screenWidth = MediaQuery.of(context).size.width;
+  //   double screenHeight = MediaQuery.of(context).size.height;
+  //   log("Wilson Checker ${landmarkData.landmarkNames}");
+  //   return Visibility(
+  //       visible: _isBuildingPannelOpen,
+  //       child: SlidingUpPanel(
+  //           borderRadius: BorderRadius.all(Radius.circular(24.0)),
+  //           boxShadow: [
+  //             BoxShadow(
+  //               blurRadius: 20.0,
+  //               color: Colors.grey,
+  //             ),
+  //           ],
+  //           minHeight: 155,
+  //           snapPoint: 190/screenHeight,
+  //           maxHeight: screenHeight*0.9,
+  //           panel: Container(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Container(
+  //                   child: ValueListenableBuilder(
+  //                     valueListenable: Hive.box('Filters').listenable(),
+  //                     builder: (BuildContext context, value, Widget? child) {
+  //                       //List<dynamic> aa = []
+  //                       if(value.length!=0){
+  //                         tags = value.getAt(0);
+  //                       }
+  //                       return ChipsChoice<String>.multiple(
+  //                         value: tags,
+  //                         onChanged: (val){
+  //                           //value.clear();
+  //                           setState(() {
+  //                             tags = val;
+  //                             value.putAt(0, val);
+  //                             onTagsChanged();
+  //                           });
+  //                           //value.put(val, val);
+  //                           log("Wilson Checker ${tags}");
+  //                           // log("Wilson Checker ${tagsBox}");
+  //                           log("Wilson Checker ${value.getAt(0)}");
+  //                         },
+  //                         choiceItems: C2Choice.listFrom<String, String>(
+  //                           source: options,
+  //                           value: (i, v) => v,
+  //                           label: (i, v) => v,
+  //                           tooltip: (i, v) => v,
+  //                         ),
+  //                         choiceCheckmark: true,
+  //                         choiceStyle: C2ChipStyle.filled(
+  //                           selectedStyle: const C2ChipStyle(
+  //                               borderRadius: BorderRadius.all(
+  //                                 Radius.circular(20),
+  //                               ),
+  //                               backgroundColor: Colors.yellow
+  //                           ),
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.all(
+  //                             Radius.circular(20),
+  //                           ),
+  //
+  //                         ),
+  //                         wrapped: true,
+  //                       );
+  //                     },
+  //                   ),
+  //                 ),
+  //                 Container(
+  //                   height: 200,
+  //                   child: ListView.builder(
+  //                     itemCount: filteredItems.length,
+  //                     itemBuilder: (context, index) {
+  //                       final item = filteredItems[index];
+  //                       return NavigatonFilterCard(LandmarkName: item.venueName!,
+  //                         LandmarkDistance: "90 m",
+  //                         LandmarkFloor: "Floor ${item.floor}",
+  //                         LandmarksubName: item.buildingName!,
+  //
+  //                       );
+  //                     },
+  //                   ),
+  //                 )
+  //               ],
+  //             ),
+  //           )
+  //       ));
+  // }
+
+  Widget buildingDetailPannel() {
+    buildingAll element = new buildingAll.buildngAllAPIModel();
+    final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+    if(BuildingAllBox.length>0){
+      List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
+      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      buildingList.forEach((Element) {
+        if(Element.sId == buildingAllApi.getStoredString()){
+          setState(() {
+            element = Element;
+          });
+        }
+      });
+    }
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    return Visibility(
+        visible: _isBuildingPannelOpen,
+        child: SlidingUpPanel(
+            borderRadius: BorderRadius.all(Radius.circular(24.0)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            minHeight: 155,
+            snapPoint: 190/screenHeight,
+            maxHeight: screenHeight*0.9,
+          panel: Container(
+            child: !_isFilterOpen?Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 6,
+                        margin: EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Color(0xffd9d9d9),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 16),
+                        padding: EdgeInsets.only(left: 16,right: 16,bottom: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${element.buildingName}",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                height: 27/18,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 4,),
+                            element.workingDays != null && element.workingDays!.length>0 ? Row(
+                              children: [
+                              Text(
+                                "Open ",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff4caf50),
+                                  height: 25/16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                                Text(
+                                  "  Closes ${element.workingDays![0].closingTime}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8d8c8c),
+                                    height: 25/16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                            ],):Container()
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 141,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: Color(0xff24B9B0),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset("assets/ExploreInside.svg"),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Explore Inside",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xffffffff),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8,),
+                            Container(
+                              width: 80,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                  color: Color(0xffffffff),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: Color(0xff000000))
+                              ),
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.call,color: Color(0xff000000),),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Call",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8,),
+                            Container(
+                              width: 92,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                  color: Color(0xffffffff),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: Color(0xff000000))
+                              ),
+                              child: TextButton(
+                                onPressed: (){
+
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.share,color: Color(0xff000000),),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Share",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                          child: Column(
+                            children: [
+                              Container(
+                                padding:EdgeInsets.only(left: 16,right: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Services",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff000000),
+                                        height: 23/16,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    TextButton(onPressed: (){
+                                      setState(() {
+                                        print("Himanshuchecker");
+                                        _isFilterOpen = !_isFilterOpen;
+                                      });
+                                    }, child:Text(
+                                      "See All",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff4a4545),
+                                        height: 20/14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ) )
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(left: 16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/washroomservice.svg"),),
+                                          Text(
+                                            "Washroom",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/foodservice.svg"),),
+                                          Text(
+                                            "Food",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/accservice.svg"),),
+                                          Text(
+                                            "Accessibility",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16,),
+                                    Container(
+                                      child: Column(
+                                        children: [
+                                          Container(width: 61,height: 56,
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                border: Border.all(color: Color(0xffB3B3B3))
+                                            ),child: SvgPicture.asset("assets/exitservice.svg"),),
+                                          Text(
+                                            "Exit",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                        margin: EdgeInsets.only(left: 17),
+                                        child: Text(
+                                          "Information",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff000000),
+                                            height: 23/16,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        )
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0, color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 0.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            width: screenWidth - 100,
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.address}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Container(
+                                    //   margin:
+                                    //   EdgeInsets.only(left: 16, right: 16),
+                                    //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                    //   decoration: BoxDecoration(
+                                    //     border: Border(
+                                    //         bottom: BorderSide(
+                                    //             width: 1.0,
+                                    //             color: Color(0xffebebeb))),
+                                    //   ),
+                                    //   child: Row(
+                                    //     crossAxisAlignment:
+                                    //     CrossAxisAlignment.center,
+                                    //     children: [
+                                    //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                    //       SizedBox(width: 16,),
+                                    //       Container(
+                                    //         margin: EdgeInsets.only(top: 8),
+                                    //         child: RichText(
+                                    //           text: TextSpan(
+                                    //             style: const TextStyle(
+                                    //               fontFamily: "Roboto",
+                                    //               fontSize: 16,
+                                    //               fontWeight: FontWeight.w400,
+                                    //               color: Color(0xff4a4545),
+                                    //               height: 25 / 16,
+                                    //             ),
+                                    //             children: [
+                                    //               TextSpan(
+                                    //                 text:
+                                    //                 "6 Floors",
+                                    //               ),
+                                    //             ],
+                                    //           ),
+                                    //         ),
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    element.phone != null?Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-1.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.phone}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ):Container(),
+                                    element.website != null ? Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-2.svg"),
+                                          SizedBox(width: 16,),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 8),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 25 / 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                    "${element.website}",
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ):Container(),
+                                    element.workingDays != null && element.workingDays!.length>1 ?Container(
+                                      margin:
+                                      EdgeInsets.only(left: 16, right: 16),
+                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                width: 1.0,
+                                                color: Color(0xffebebeb))),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset("assets/Depth 3, Frame 1-3.svg"),
+                                          SizedBox(width: 16,),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                margin: EdgeInsets.only(top: 8),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff4a4545),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                        "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length-1].day}",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(top: 8),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff4a4545),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                        "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length-1].closingTime}",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ) : Container()
+                                  ],
+                                ),
+                              )
+                            ],
+                          )
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ): Container(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 6,
+                        margin: EdgeInsets.only(top: 8,bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Color(0xffd9d9d9),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(left: 17,top: 8),
+                        child: InkWell(
+                          onTap: (){
+                            _isFilterOpen = !_isFilterOpen;
+                          },
+                          child: SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 17,top: 8),
+                        child: Text(
+                          "Filters",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff000000),
+                            height: 26/20,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Spacer(),
+                      Container(
+                        margin: EdgeInsets.only(right: 14,top: 10),
+                        child: TextButton(onPressed: () {  },
+                        child: Text(
+                            "Clear All",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff24b9b0),
+                              height: 20/14,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Services",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Choose Floor",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 16),
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Filter results (16)",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff000000),
+                        height: 23/16,
+                      ),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          )
+        ));
+  }
+
   Set<Marker> getCombinedMarkers() {
     if (user.floor == building.floor) {
       if (_isLandmarkPanelOpen) {
@@ -2945,10 +4085,10 @@ class _NavigationState extends State<Navigation> {
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
-                polygons: patch.union(closedpolygons),
+                polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
                 polylines: singleroute[building.floor] != null
-                    ? polylines.union(singleroute[building.floor]!)
-                    : polylines,
+                    ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
+                    : polylines.union(otherpolylines),
                 markers: getCombinedMarkers(),
                 onTap: (x) {
                   mapState.interaction = true;
@@ -3112,9 +4252,11 @@ class _NavigationState extends State<Navigation> {
                 }
               },
             ),
+
             routeDeatilPannel(),
             navigationPannel(),
-            reroutePannel()
+            reroutePannel(),
+            buildingDetailPannel(),
           ],
         ),
       ),

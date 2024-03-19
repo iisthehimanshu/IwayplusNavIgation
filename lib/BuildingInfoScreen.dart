@@ -288,7 +288,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                       Container(
                                         width: 208,
                                         height: 117,
-                                        padding: EdgeInsets.all(3),
+                                        padding: EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
                                         ),

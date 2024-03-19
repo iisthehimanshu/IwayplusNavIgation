@@ -3090,7 +3090,7 @@ class _NavigationState extends State<Navigation> {
 
   List<String> options = [
     'Washroom', 'Food & Drinks',
-    'Reception', 'Sports', 'Education',
+    'Reception', 'Break Room', 'Education',
     'Fashion', 'Travel', 'Rooms', 'Tech',
     'Science',
   ];
@@ -3107,12 +3107,24 @@ class _NavigationState extends State<Navigation> {
       landmarkData = value;
     });
     LandmarkItems = landmarkData.landmarks!;
+    print("Landmarks");
+    print(LandmarkItems);
 
   }
   void filterItems() {
-    setState(() {
-      filteredItems = LandmarkItems.where((item) => optionsTags.contains(item.element?.type) && floorOptionsTags.contains('Floor ${item.floor}')).toList();
-    });
+    if(optionsTags==null && floorOptionsTags!=null){
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>floorOptionsTags.contains('Floor ${item.floor}')).toList();
+      });
+    }else if(optionsTags!=null && floorOptionsTags==null){
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>optionsTags.contains(item.element?.type) && floorOptionsTags.contains('Floor ${item.floor}')).toList();
+      });
+    }else{
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>optionsTags.contains(item.element?.type)).toList();
+      });
+    }
   }
 
 // Call filterItems() whenever tags change

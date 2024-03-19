@@ -55,7 +55,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
   void apiCall() async  {
     // print('Running api');
-    await Future.delayed(Duration(milliseconds: 1300));
+    //await Future.delayed(Duration(milliseconds: 1300));
     await buildingAllApi().fetchBuildingAllData().then((value) {
       setState(() {
         buildingList = value;

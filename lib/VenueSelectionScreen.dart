@@ -36,6 +36,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   late List<VenueModel> venueList=[];
   late Map<String, List<buildingAll>> venueHashMap = new HashMap();
    // Replace with your actual document ID
+  bool checkedForBuildingAllUpdated = false;
+
 
   @override
   void initState(){
@@ -43,13 +45,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     apiCall();
     print("venueHashMap");
     print(venueHashMap);
-  }
 
-  // void _updateProjectValue() async {
-  //   const String documentId = 'HldgGWE1dCfXbvv6xbQ2';
-  //   DocumentReference documentReference = FirebaseFirestore.instance.collection('Client').doc(documentId);
-  //   await documentReference.update({'project': false});
-  // }
+    if(!checkedForBuildingAllUpdated){
+      print("BUILDING ALL CHECK");
+      buildingAllApi().checkForUpdate();
+      checkedForBuildingAllUpdated = !checkedForBuildingAllUpdated;
+    }
+  }
 
   void apiCall() async  {
     // print('Running api');

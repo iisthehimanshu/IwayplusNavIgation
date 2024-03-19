@@ -252,7 +252,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  height: 198,
+                  height: 208,
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box("Favourites").listenable(),
                     builder: (BuildContext context, Box<dynamic> value, Widget? child) {
@@ -262,108 +262,234 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                           var currentData = widget.receivedAllBuildingList![index];
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
-                            margin: EdgeInsets.all(3),
-                            padding: EdgeInsets.all(0),
-                            width: 218,
-                            child: ListTile(
-                              onTap: (){
-                                print("WilsonChecker");
-                                buildingAllApi.setStoredString(currentData.sId!);
-                                buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Navigation(),
-                                  ),
-                                );
-                              },
-                              title: Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Color(0xffEBEBEB),
+                            width: 208,
+                            child: Container(
+                              child: ListTile(
+                                onTap: (){
+                                  print("WilsonChecker");
+                                  buildingAllApi.setStoredString(currentData.sId!);
+                                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Navigation(),
                                     ),
-                                    borderRadius: BorderRadius.all(Radius.circular(8))
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      width: 188,
-                                      height: 117,
-                                      padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
-                                        child: Image.network(
-                                          // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
-                                          "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
-                                          // You can replace the placeholder image URL with your default image URL
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Image.asset(
-                                              'assets/default-image.jpg', // Replace with the path to your default image asset
-                                              fit: BoxFit.fill,
-                                            );
-                                          },
-                                          fit: BoxFit.fill,
+                                  );
+                                },
+                                title: Container(
+                                  decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                        borderRadius: BorderRadius.all(Radius.circular(8))
+                                    ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 208,
+                                        height: 117,
+                                        padding: EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
+                                          child: Image.network(
+                                            // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
+                                            "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                            // You can replace the placeholder image URL with your default image URL
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Image.asset(
+                                                'assets/default-image.jpg', // Replace with the path to your default image asset
+                                                fit: BoxFit.fill,
+                                              );
+                                            },
+                                            fit: BoxFit.fill,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      Container(
+                                          alignment: Alignment.topLeft,
+                                          margin: EdgeInsets.only(top: 10,left: 8),
+                                          child: Text(
+                                            HelperClass.truncateString(currentData.buildingName!,20),
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff0c141c),
+                                              height: 25/16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                              margin: EdgeInsets.only(left: 8,top: 10),
+                                              child: Text(
+                                                currentData.venueCategory??"",
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              )
+                                          ),
+                                          Spacer(),
+                                          IconButton(
+                                            icon: Semantics(
+                                              label: 'Favourite',
+                                              child: isFavourite? Icon( Icons.favorite,size: 24,color: Colors.red,) :
+                                              Icon(Icons.favorite_border,size: 24,color: Colors.black26,),
+                                            ),
+                                            onPressed: () async{
+                                              if(isFavourite){
+                                                await value.delete(currentData.buildingName);
+                                              }else {
+                                                await value.put(
+                                                    currentData.buildingName,
+                                                    currentData.buildingName);
+                                              }// Add your favorite button onPressed logic here
+                                              log('Favouties Database Size ${value.length}');
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                subtitle: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Container(
-                                        alignment: Alignment.topLeft,
-                                        margin: EdgeInsets.only(top: 0,left: 8),
+                                        margin: EdgeInsets.only(left: 8,top: 10),
                                         child: Text(
-                                          HelperClass.truncateString(currentData.buildingName!,20),
+                                          currentData.venueCategory??"",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
-                                            fontSize: 16,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: Color(0xff0c141c),
-                                            height: 25/16,
+                                            color: Color(0xff4a4545),
+                                            height: 20/14,
                                           ),
                                           textAlign: TextAlign.left,
                                         )
                                     ),
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                            margin: EdgeInsets.only(left: 8,top: 10),
-                                            child: Text(
-                                              currentData.venueCategory??"",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 20/14,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            )
-                                        ),
-                                        Spacer(),
-                                        IconButton(
-                                          icon: Semantics(
-                                            label: 'Favourite',
-                                            child: Icon(
-                                              isFavourite? Icons.favorite:
-                                              Icons.favorite_border,size: 24,color: Colors.red,),
-                                          ),
-                                          onPressed: () async{
-                                            if(isFavourite){
-                                              await value.delete(currentData.buildingName);
-                                            }else {
-                                              await value.put(
-                                                  currentData.buildingName,
-                                                  currentData.buildingName);
-                                            }// Add your favorite button onPressed logic here
-                                            log('Favouties Database Size ${value.length}');
-                                          },
-                                        )
-                                      ],
-                                    ),
+                                    Spacer(),
+                                    IconButton(
+                                      icon: Semantics(
+                                        label: 'Favourite',
+                                        child: Icon(
+                                          isFavourite? Icons.favorite:
+                                          Icons.favorite_border,size: 24,color: Colors.red,),
+                                      ),
+                                      onPressed: () async{
+                                        if(isFavourite){
+                                          await value.delete(currentData.buildingName);
+                                        }else {
+                                          await value.put(
+                                              currentData.buildingName,
+                                              currentData.buildingName);
+                                        }// Add your favorite button onPressed logic here
+                                        log('Favouties Database Size ${value.length}');
+                                      },
+                                    )
                                   ],
                                 ),
+                                // Container(
+                                //   decoration: BoxDecoration(
+                                //       border: Border.all(
+                                //         color: Color(0xffEBEBEB),
+                                //       ),
+                                //       borderRadius: BorderRadius.all(Radius.circular(8))
+                                //   ),
+                                //   child: Column(
+                                //     children: [
+                                //       Container(
+                                //         width: 188,
+                                //         height: 117,
+                                //         padding: EdgeInsets.all(5),
+                                //         decoration: BoxDecoration(
+                                //           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
+                                //         ),
+                                //         child: ClipRRect(
+                                //           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
+                                //           child: Image.network(
+                                //             // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
+                                //             "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                //             // You can replace the placeholder image URL with your default image URL
+                                //             errorBuilder: (context, error, stackTrace) {
+                                //               return Image.asset(
+                                //                 'assets/default-image.jpg', // Replace with the path to your default image asset
+                                //                 fit: BoxFit.fill,
+                                //               );
+                                //             },
+                                //             fit: BoxFit.fill,
+                                //           ),
+                                //         ),
+                                //       ),
+                                //       Container(
+                                //           alignment: Alignment.topLeft,
+                                //           margin: EdgeInsets.only(top: 0,left: 8),
+                                //           child: Text(
+                                //             HelperClass.truncateString(currentData.buildingName!,20),
+                                //             style: const TextStyle(
+                                //               fontFamily: "Roboto",
+                                //               fontSize: 16,
+                                //               fontWeight: FontWeight.w400,
+                                //               color: Color(0xff0c141c),
+                                //               height: 25/16,
+                                //             ),
+                                //             textAlign: TextAlign.left,
+                                //           )
+                                //       ),
+                                //       Row(
+                                //         crossAxisAlignment: CrossAxisAlignment.start,
+                                //         children: [
+                                //           Container(
+                                //               margin: EdgeInsets.only(left: 8,top: 10),
+                                //               child: Text(
+                                //                 currentData.venueCategory??"",
+                                //                 style: const TextStyle(
+                                //                   fontFamily: "Roboto",
+                                //                   fontSize: 14,
+                                //                   fontWeight: FontWeight.w400,
+                                //                   color: Color(0xff4a4545),
+                                //                   height: 20/14,
+                                //                 ),
+                                //                 textAlign: TextAlign.left,
+                                //               )
+                                //           ),
+                                //           Spacer(),
+                                //           IconButton(
+                                //             icon: Semantics(
+                                //               label: 'Favourite',
+                                //               child: Icon(
+                                //                 isFavourite? Icons.favorite:
+                                //                 Icons.favorite_border,size: 24,color: Colors.red,),
+                                //             ),
+                                //             onPressed: () async{
+                                //               if(isFavourite){
+                                //                 await value.delete(currentData.buildingName);
+                                //               }else {
+                                //                 await value.put(
+                                //                     currentData.buildingName,
+                                //                     currentData.buildingName);
+                                //               }// Add your favorite button onPressed logic here
+                                //               log('Favouties Database Size ${value.length}');
+                                //             },
+                                //           )
+                                //         ],
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
+
                               ),
                             ),
                           );

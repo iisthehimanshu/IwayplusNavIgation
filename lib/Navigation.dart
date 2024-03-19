@@ -109,6 +109,9 @@ class _NavigationState extends State<Navigation> {
   bool _isreroutePannelOpen = false;
   bool _isBuildingPannelOpen = true;
   bool _isFilterPanelOpen = false;
+  bool checkedForPolyineUpdated = false;
+  bool checkedForPatchDataUpdated = false;
+  bool checkedForLandmarkDataUpdated = false;
 
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
@@ -343,6 +346,8 @@ class _NavigationState extends State<Navigation> {
       createRooms(value, building.floor);
     });
 
+
+
     building.landmarkdata = landmarkApi().fetchLandmarkData().then((value) {
       Map<int, LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
@@ -418,7 +423,23 @@ class _NavigationState extends State<Navigation> {
     //     });
     //   });
     // }
+    if(!checkedForPolyineUpdated){
+      print("POLYLINE CHECK");
+      PolyLineApi().checkForUpdate();
+      checkedForPolyineUpdated = !checkedForPolyineUpdated;
+    }
+    if(!checkedForPatchDataUpdated){
+      print("PATCHDATA CHECK");
+      patchAPI().checkForUpdate();
+      checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
+    }
+    if(!checkedForLandmarkDataUpdated){
+      print("LANDMARK DATA CHECK");
+      landmarkApi().checkForUpdate();
+      checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
+    }
   }
+
 
   Future<void> localizeUser() async {
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
@@ -3086,13 +3107,11 @@ class _NavigationState extends State<Navigation> {
       landmarkData = value;
     });
     LandmarkItems = landmarkData.landmarks!;
-    print("checking${LandmarkItems}");
 
   }
   void filterItems() {
     setState(() {
       filteredItems = LandmarkItems.where((item) => optionsTags.contains(item.element?.type) && floorOptionsTags.contains('Floor ${item.floor}')).toList();
-      log('Wilsonchecker ${filteredItems}');
     });
   }
 

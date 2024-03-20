@@ -2154,9 +2154,15 @@ class _NavigationState extends State<Navigation> {
     PathState.path[floor] = path;
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
-    directions.forEach((element) {
-      PathState.directions.add(element);
-    });
+    if(PathState.directions.isNotEmpty){
+      for(int i = directions.length ; i>=0 ; i--){
+        PathState.directions.add(directions[i-1]);
+      }
+    }else{
+      directions.forEach((element) {
+        PathState.directions.add(element);
+      });
+    }
 
     await building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(

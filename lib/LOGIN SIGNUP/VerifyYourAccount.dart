@@ -18,8 +18,11 @@ import '../MainScreen.dart';
 
 class VerifyYourAccount extends StatefulWidget {
   final String previousScreen;
+  final String userEmail;
+  final String userName;
+  final String userPasword;
 
-  const VerifyYourAccount({required this.previousScreen});
+  const VerifyYourAccount({required this.previousScreen,this.userEmail='',this.userName='',this.userPasword=''});
 
   @override
   State<VerifyYourAccount> createState() => _VerifyYourAccountState();

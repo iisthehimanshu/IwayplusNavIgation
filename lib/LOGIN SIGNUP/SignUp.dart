@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SendOTPAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/VerifyYourAccount.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
@@ -203,17 +204,6 @@ class _SignUpState extends State<SignUp> {
   //   }
   // }
 
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
 
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
@@ -230,19 +220,23 @@ class _SignUpState extends State<SignUp> {
   Color outlineheaderColorForPass = new Color(0xff49454f);
   Color outlineTextColorForPass = new Color(0xff49454f);
 
-
-
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xff24b9b0);
 
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
+
   void nameFiledListner(){
     if(nameEditingController.text.length>0){
       setState(() {
         outlineheaderColorForName = Color(0xff24b9b0);// Change the button color to green
         outlineTextColorForName = Color(0xff24b9b0);// Change the button color to green
       });
+    }else if(nameEditingController.text.length>0 && mailEditingController.text.length>0 && passEditingController.text.length>0){
+      setState(() {
+        buttonBGColor = Color(0xff24b9b0);
+      });
+
     }else{
       setState(() {
         outlineheaderColorForName = Color(0xff49454f);
@@ -505,7 +499,7 @@ class _SignUpState extends State<SignUp> {
                                             fontFamily: 'Roboto',
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: outlineTextColorForPass,
+                                            color: Color(0xffbdbdbd),
                                           ),
                                           border: InputBorder.none
                                         //contentPadding: EdgeInsets.symmetric(vertical: 8)
@@ -553,9 +547,10 @@ class _SignUpState extends State<SignUp> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',),
+                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmail: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
                                             ),
                                           );
+                                          SendOTPAPI().sendOTP(mailEditingController.text);
                                         },
                                         child: Center(
                                           child:

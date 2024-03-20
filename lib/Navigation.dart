@@ -426,21 +426,21 @@ class _NavigationState extends State<Navigation> {
     //     });
     //   });
     // }
-    if(!checkedForPolyineUpdated){
-      print("POLYLINE CHECK");
-      PolyLineApi().checkForUpdate();
-      checkedForPolyineUpdated = !checkedForPolyineUpdated;
-    }
-    if(!checkedForPatchDataUpdated){
-      print("PATCHDATA CHECK");
-      patchAPI().checkForUpdate();
-      checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
-    }
-    if(!checkedForLandmarkDataUpdated){
-      print("LANDMARK DATA CHECK");
-      landmarkApi().checkForUpdate();
-      checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
-    }
+    // if(!checkedForPolyineUpdated){
+    //   print("POLYLINE CHECK");
+    //   PolyLineApi().checkForUpdate();
+    //   checkedForPolyineUpdated = !checkedForPolyineUpdated;
+    // }
+    // if(!checkedForPatchDataUpdated){
+    //   print("PATCHDATA CHECK");
+    //   patchAPI().checkForUpdate();
+    //   checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
+    // }
+    // if(!checkedForLandmarkDataUpdated){
+    //   print("LANDMARK DATA CHECK");
+    //   landmarkApi().checkForUpdate();
+    //   checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
+    // }
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       if(key != buildingAllApi.getSelectedBuildingID()){
         buildingAllApi.setStoredString(key).then((value)async{
@@ -3169,8 +3169,9 @@ class _NavigationState extends State<Navigation> {
   void fetchlist()async{
     await landmarkApi().fetchLandmarkData().then((value){
       landmarkData = value;
+      LandmarkItems = value.landmarks!;
     });
-    LandmarkItems = landmarkData.landmarks!;
+    //LandmarkItems = landmarkData.landmarks!;
     print("Landmarks");
     print(LandmarkItems);
 

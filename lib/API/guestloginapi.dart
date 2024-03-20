@@ -4,7 +4,7 @@ import '../APIMODELS/guestloginmodel.dart';
 
 class guestApi {
 
-  final String baseUrl = "https://dev.iwayplus.in/api/login/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf";
+  final String baseUrl = "https://dev.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf";
   Future<guestloginmodel> guestlogin() async {
 
     final response = await http.get(

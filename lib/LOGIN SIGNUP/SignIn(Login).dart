@@ -9,6 +9,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/SignUp.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
@@ -25,40 +27,19 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
-  FocusNode _focusNode2_1 = FocusNode();
   FocusNode _focusNode1_1 = FocusNode();
-  bool otpenalbed = false;
-  bool loginapifetching = false;
-  bool loginapifetching2 = false;
 
-  bool subotpclickable = false;
   bool passincorrect = false;
-  bool otpincorrect = false;
-  Random random = Random();
-  // userdata uobj = new userdata();
-  bool ispassempty = true;
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
   TextEditingController phoneEditingController = TextEditingController();
   TextEditingController OTPEditingController = TextEditingController();
   String passvis = 'assets/LoginScreen_PasswordEye.svg';
   bool obsecure = true;
+
   //CountryCode _defaultCountry = CountryCode.fromCountryCode('US');
 
-  Color buttonColor2 = Color(0xffbdbdbd);
-  Color textColor = Color(0xff777777);
-  Color textColor2 = Color(0xff777777);
-  String phoneNumber = '';
-  String code = '';
 
-  String initialCountry = 'IN';
-  // PhoneNumber number = PhoneNumber(isoCode: 'IN');
-  String initialCountry2 = 'IN';
-  // PhoneNumber number2 = PhoneNumber(isoCode: 'IN');
-
-  late StreamSubscription subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
 
 
 
@@ -205,17 +186,6 @@ class _SignInState extends State<SignIn> {
   //   }
   // }
 
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
   Color button1 = new Color(0xff777777);
   Color text1 = new Color(0xff777777);
 
@@ -225,6 +195,7 @@ class _SignInState extends State<SignIn> {
   Color outlineTextColorForPass = new Color(0xff49454f);
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xff24b9b0);
+
 
 
   void emailFieldListner(){
@@ -311,15 +282,8 @@ class _SignInState extends State<SignIn> {
   @override
   void initstate() {
     super.initState();
-    // getConnectivity();
-    //_textFieldListener();
-    _focusNode1.addListener(_onFocusChange);
-    _focusNode2.addListener(_onFocusChange);
-    _focusNode1_1.addListener(_onFocusChange);
-    _focusNode2_1.addListener(_onFocusChange);
+
   }
-
-
 
   void _onFocusChange() {
     if (_focusNode1.hasFocus) {
@@ -333,9 +297,9 @@ class _SignInState extends State<SignIn> {
       });
     }
   }
+
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
@@ -583,7 +547,12 @@ class _SignInState extends State<SignIn> {
                                           elevation: 0,
                                         ),
                                         // onPressed: loginclickable ? login : null,
-                                        onPressed: () {  },
+                                        onPressed: () async {
+                                          SignInAPIModel signInResponse = await SignInAPI().signIN(mailEditingController.text, passEditingController.text);
+                                          print("signInResponse.accessToken");
+                                          print(signInResponse.refreshToken);
+                                          print(signInResponse.accessToken);
+                                        },
                                         child: Center(
                                           child:
                                           // loginapifetching

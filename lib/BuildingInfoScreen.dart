@@ -363,44 +363,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     ],
                                   ),
                                 ),
-                                subtitle: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        margin: EdgeInsets.only(left: 8,top: 10),
-                                        child: Text(
-                                          currentData.venueCategory??"",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff4a4545),
-                                            height: 20/14,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        )
-                                    ),
-                                    Spacer(),
-                                    IconButton(
-                                      icon: Semantics(
-                                        label: 'Favourite',
-                                        child: Icon(
-                                          isFavourite? Icons.favorite:
-                                          Icons.favorite_border,size: 24,color: Colors.red,),
-                                      ),
-                                      onPressed: () async{
-                                        if(isFavourite){
-                                          await value.delete(currentData.buildingName);
-                                        }else {
-                                          await value.put(
-                                              currentData.buildingName,
-                                              currentData.buildingName);
-                                        }// Add your favorite button onPressed logic here
-                                        log('Favouties Database Size ${value.length}');
-                                      },
-                                    )
-                                  ],
-                                ),
                                 // Container(
                                 //   decoration: BoxDecoration(
                                 //       border: Border.all(

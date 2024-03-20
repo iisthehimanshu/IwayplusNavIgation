@@ -6,7 +6,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'LOGIN SIGNUP/LoginScreen.dart';
+import 'LOGIN SIGNUP/SignIn(Login).dart';
 import 'VenueSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -38,7 +38,8 @@ Future<void> main() async {
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
   // await Firebase.initializeApp();
 
-
+  await Hive.openBox('Favourites');
+  await Hive.openBox('Filters');
   runApp(const MyApp());
 }
 
@@ -61,10 +62,10 @@ class _MyAppState extends State<MyApp> {
             return Text(snapshot.error.toString());
           }
           if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.data != null){
-              return LoginScreen();
+            if(snapshot.data == null){
+              return MainScreen(initialIndex: 0);
             }else{
-              return MainScreen(initialIndex: 0,);
+              return MainScreen(initialIndex: 0);
             }
           }
           return Center(child: CircularProgressIndicator(),);

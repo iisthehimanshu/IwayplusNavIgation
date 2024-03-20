@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iwayplusnav/API/PolyLineApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
@@ -42,6 +46,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
+import 'Elements/NavigationFilterCard.dart';
 import 'Elements/SearchNearby.dart';
 import 'Elements/landmarkPannelShimmer.dart';
 import 'MapState.dart';
@@ -107,6 +112,9 @@ class _NavigationState extends State<Navigation> {
   bool _isreroutePannelOpen = false;
   bool _isBuildingPannelOpen = true;
   bool _isFilterPanelOpen = false;
+  bool checkedForPolyineUpdated = false;
+  bool checkedForPatchDataUpdated = false;
+  bool checkedForLandmarkDataUpdated = false;
 
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
@@ -173,6 +181,8 @@ class _NavigationState extends State<Navigation> {
         true;
       }),
     );
+    fetchlist();
+    filterItems();
   }
 
   Future<void> getDeviceManufacturer() async {
@@ -340,6 +350,8 @@ class _NavigationState extends State<Navigation> {
       createRooms(value, building.floor);
     });
 
+
+
     building.landmarkdata = landmarkApi().fetchLandmarkData().then((value) {
       Map<int, LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
@@ -387,7 +399,48 @@ class _NavigationState extends State<Navigation> {
         _timer.cancel();
       });
     });
-
+    // buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
+    // for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
+    //   print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
+    //   buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
+    //     await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
+    //       createotherPatch(value);
+    //     });
+    //
+    //     await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
+    //       createotherRooms(value, 0);
+    //     });
+    //
+    //     await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
+    //       Map<int, LatLng> coordinates = {};
+    //       for (int i = 0; i < value.landmarks!.length; i++) {
+    //         if (value.landmarks![i].element!.subType == "AR") {
+    //           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+    //               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+    //                   double.parse(value.landmarks![i].properties!.longitude!));
+    //         }
+    //       }
+    //       createotherARPatch(coordinates,value.landmarks![0].buildingID!);
+    //     });
+    //   });
+    // }
+    if(!checkedForPolyineUpdated){
+      print("POLYLINE CHECK");
+      PolyLineApi().checkForUpdate();
+      checkedForPolyineUpdated = !checkedForPolyineUpdated;
+    }
+    if(!checkedForPatchDataUpdated){
+      print("PATCHDATA CHECK");
+      patchAPI().checkForUpdate();
+      checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
+    }
+    if(!checkedForLandmarkDataUpdated){
+      print("LANDMARK DATA CHECK");
+      landmarkApi().checkForUpdate();
+      checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
+    }
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       if(key != buildingAllApi.getSelectedBuildingID()){
         buildingAllApi.setStoredString(key).then((value)async{
@@ -420,6 +473,7 @@ class _NavigationState extends State<Navigation> {
     });
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
   }
+
 
   Future<void> localizeUser() async {
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
@@ -3089,97 +3143,62 @@ class _NavigationState extends State<Navigation> {
           ),
         ));
   }
+  List<String> optionsTags = [];
+  List<String> floorOptionsTags = [];
+
+  List<String> options = [
+    'Washroom', 'Food & Drinks',
+    'Reception', 'Break Room', 'Education',
+    'Fashion', 'Travel', 'Rooms', 'Tech',
+    'Science',
+  ];
+  List<String> floorOptions = [
+    'All', 'Floor 0', 'Floor 1',
+    'Floor 2', 'Floor 3'
+  ];
+  late land landmarkData = new land();
+  List<Landmarks> LandmarkItems = [];
+  List<Landmarks> filteredItems = [];
+
+  void fetchlist()async{
+    await landmarkApi().fetchLandmarkData().then((value){
+      landmarkData = value;
+    });
+    LandmarkItems = landmarkData.landmarks!;
+    print("Landmarks");
+    print(LandmarkItems);
+
+  }
+  void filterItems() {
+    if(optionsTags==null && floorOptionsTags!=null){
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>floorOptionsTags.contains('Floor ${item.floor}')).toList();
+      });
+    }else if(optionsTags!=null && floorOptionsTags==null){
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>optionsTags.contains(item.element?.type) && floorOptionsTags.contains('Floor ${item.floor}')).toList();
+      });
+    }else{
+      setState(() {
+        filteredItems = LandmarkItems.where((item) =>optionsTags.contains(item.element?.type)).toList();
+      });
+    }
+  }
+
+// Call filterItems() whenever tags change
+  void onTagsChanged() {
+    setState(() {
+      filterItems();
+    });
+  }
+
 
   bool _isFilterOpen = false;
 
-  // Widget FILTERPannel() {
-  //   double screenWidth = MediaQuery.of(context).size.width;
-  //   double screenHeight = MediaQuery.of(context).size.height;
-  //   log("Wilson Checker ${landmarkData.landmarkNames}");
-  //   return Visibility(
-  //       visible: _isBuildingPannelOpen,
-  //       child: SlidingUpPanel(
-  //           borderRadius: BorderRadius.all(Radius.circular(24.0)),
-  //           boxShadow: [
-  //             BoxShadow(
-  //               blurRadius: 20.0,
-  //               color: Colors.grey,
-  //             ),
-  //           ],
-  //           minHeight: 155,
-  //           snapPoint: 190/screenHeight,
-  //           maxHeight: screenHeight*0.9,
-  //           panel: Container(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Container(
-  //                   child: ValueListenableBuilder(
-  //                     valueListenable: Hive.box('Filters').listenable(),
-  //                     builder: (BuildContext context, value, Widget? child) {
-  //                       //List<dynamic> aa = []
-  //                       if(value.length!=0){
-  //                         tags = value.getAt(0);
-  //                       }
-  //                       return ChipsChoice<String>.multiple(
-  //                         value: tags,
-  //                         onChanged: (val){
-  //                           //value.clear();
-  //                           setState(() {
-  //                             tags = val;
-  //                             value.putAt(0, val);
-  //                             onTagsChanged();
-  //                           });
-  //                           //value.put(val, val);
-  //                           log("Wilson Checker ${tags}");
-  //                           // log("Wilson Checker ${tagsBox}");
-  //                           log("Wilson Checker ${value.getAt(0)}");
-  //                         },
-  //                         choiceItems: C2Choice.listFrom<String, String>(
-  //                           source: options,
-  //                           value: (i, v) => v,
-  //                           label: (i, v) => v,
-  //                           tooltip: (i, v) => v,
-  //                         ),
-  //                         choiceCheckmark: true,
-  //                         choiceStyle: C2ChipStyle.filled(
-  //                           selectedStyle: const C2ChipStyle(
-  //                               borderRadius: BorderRadius.all(
-  //                                 Radius.circular(20),
-  //                               ),
-  //                               backgroundColor: Colors.yellow
-  //                           ),
-  //                           color: Colors.white,
-  //                           borderRadius: BorderRadius.all(
-  //                             Radius.circular(20),
-  //                           ),
-  //
-  //                         ),
-  //                         wrapped: true,
-  //                       );
-  //                     },
-  //                   ),
-  //                 ),
-  //                 Container(
-  //                   height: 200,
-  //                   child: ListView.builder(
-  //                     itemCount: filteredItems.length,
-  //                     itemBuilder: (context, index) {
-  //                       final item = filteredItems[index];
-  //                       return NavigatonFilterCard(LandmarkName: item.venueName!,
-  //                         LandmarkDistance: "90 m",
-  //                         LandmarkFloor: "Floor ${item.floor}",
-  //                         LandmarksubName: item.buildingName!,
-  //
-  //                       );
-  //                     },
-  //                   ),
-  //                 )
-  //               ],
-  //             ),
-  //           )
-  //       ));
-  // }
+  Future<int> getHiveBoxLength() async {
+    final box = await Hive.openBox('Filters'); // Replace 'yourBoxName' with the name of your box
+    return box.length;
+  }
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
@@ -3197,7 +3216,8 @@ class _NavigationState extends State<Navigation> {
     }
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
+    fetchlist();
+    filterItems();
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(
@@ -3406,6 +3426,7 @@ class _NavigationState extends State<Navigation> {
                                     TextButton(onPressed: (){
                                       setState(() {
                                         print("Himanshuchecker");
+                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
                                         _isFilterOpen = !_isFilterOpen;
                                       });
                                     }, child:Text(
@@ -3792,11 +3813,11 @@ class _NavigationState extends State<Navigation> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(left: 17,top: 8),
-                        child: InkWell(
-                          onTap: (){
+                        child: IconButton(
+                          onPressed: (){
                             _isFilterOpen = !_isFilterOpen;
                           },
-                          child: SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
+                          icon : SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
                         ),
                       ),
                       Container(
@@ -3816,7 +3837,10 @@ class _NavigationState extends State<Navigation> {
                       Spacer(),
                       Container(
                         margin: EdgeInsets.only(right: 14,top: 10),
-                        child: TextButton(onPressed: () {  },
+                        child: TextButton(onPressed: () {
+                          optionsTags.clear();
+                          floorOptionsTags.clear();
+                        },
                         child: Text(
                             "Clear All",
                             style: const TextStyle(
@@ -3832,6 +3856,7 @@ class _NavigationState extends State<Navigation> {
                       )
                     ],
                   ),
+
                   Container(
                     margin: EdgeInsets.only(top: 8,left: 16),
                     alignment: Alignment.bottomLeft,
@@ -3845,6 +3870,67 @@ class _NavigationState extends State<Navigation> {
                         height: 23/16,
                       ),
                       textAlign: TextAlign.start,
+                    ),
+                  ),
+                  //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                  // FutureBuilder<int>(
+                  //   future: getHiveBoxLength(),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.connectionState != ConnectionState.waiting) {
+                  //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                  //     } else if (snapshot.hasError) {
+                  //       return Text('Error: ${snapshot.error}');
+                  //     } else {
+                  //       return Text('Length of Hive Box: ${snapshot.data}');
+                  //     }
+                  //   },
+                  // ),
+                  //---------------------------------------------------------------------------------------
+
+                  Container(
+                    child: ValueListenableBuilder(
+                      valueListenable: Hive.box('Filters').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        //List<dynamic> aa = []
+                        if(value.length!=0){
+                          optionsTags = value.getAt(0);
+                          print("tags");
+                          print(optionsTags);
+
+                        }
+                        return ChipsChoice<String>.multiple(
+                          value: optionsTags,
+                          onChanged: (val) {
+                            print("Filter change${val}${value.values}");
+                            value.put(0, val);
+                            setState(() {
+                              optionsTags = val;
+                              onTagsChanged();
+                            });
+                          },
+                          choiceItems: C2Choice.listFrom<String, String>(
+                            source: options,
+                            value: (i, v) => v,
+                            label: (i, v) => v,
+                            tooltip: (i, v) => v,
+                          ),
+                          choiceCheckmark: true,
+                          choiceStyle: C2ChipStyle.filled(
+                            selectedStyle: const C2ChipStyle(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(7),
+                                ),
+                                backgroundColor: Color(0XFFABF9F4)
+                            ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(7),
+                            ),
+                            borderStyle:  BorderStyle.solid
+                          ),
+                          wrapped: false,
+                        );
+                      },
                     ),
                   ),
                   Container(
@@ -3863,10 +3949,52 @@ class _NavigationState extends State<Navigation> {
                     ),
                   ),
                   Container(
+                    child: ValueListenableBuilder(
+                      valueListenable: Hive.box('Filters').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        //List<dynamic> aa = []
+                        if(value.length==2){
+                          floorOptionsTags = value.getAt(1);
+                        }
+                        return ChipsChoice<String>.multiple(
+                          value: floorOptionsTags,
+                          onChanged: (val) {
+                            print("Filter change${val}${value.values}");
+                            value.put(1, val);
+                            setState(() {
+                              floorOptionsTags = val;
+                              onTagsChanged();
+                            });
+                          },
+                          choiceItems: C2Choice.listFrom<String, String>(
+                            source: floorOptions,
+                            value: (i, v) => v,
+                            label: (i, v) => v,
+                            tooltip: (i, v) => v,
+                          ),
+                          choiceCheckmark: true,
+                          choiceStyle: C2ChipStyle.filled(
+                            selectedStyle: const C2ChipStyle(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(7),
+                                ),
+                                backgroundColor: Color(0XFFABF9F4)
+                            ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(7),
+                            ),
+                          ),
+                          wrapped: false,
+                        );
+                      },
+                    ),
+                  ),
+                  Container(
                     margin: EdgeInsets.only(top: 8,left: 16),
                     alignment: Alignment.bottomLeft,
                     child: Text(
-                      "Filter results (16)",
+                      "Filter results ${filteredItems.length}",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,
@@ -3877,6 +4005,21 @@ class _NavigationState extends State<Navigation> {
                       textAlign: TextAlign.start,
                     ),
                   ),
+                  Container(
+                    margin: EdgeInsets.only(top: 12),
+                    height: screenHeight-410,
+                    child: ListView.builder(
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return NavigatonFilterCard(LandmarkName: item.venueName!,
+                          LandmarkDistance: "90 m",
+                          LandmarkFloor: "Floor ${item.floor}",
+                          LandmarksubName: item.buildingName!,
+                        );
+                      },
+                    ),
+                  )
                 ],
               ),
             )
@@ -4312,6 +4455,7 @@ class _NavigationState extends State<Navigation> {
             navigationPannel(),
             reroutePannel(),
             buildingDetailPannel(),
+
           ],
         ),
       ),

@@ -1,11 +1,16 @@
-import 'dart:collection';
+
+import 'dart:developer';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geodesy/geodesy.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'API/BuildingAPI.dart';
@@ -91,24 +96,32 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
             alignment: Alignment.centerRight,
             width: 60,
             child: Container(
-                child: IconButton(
-                    onPressed: (){
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.arrow_back_ios,color: Colors.black,)
+                child: Semantics(
+                  label: 'Back',
+                  child: IconButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back_ios,color: Colors.black,)
+                  ),
                 )
             ),
           ),
           actions: [
-            Container(
-                margin: EdgeInsets.only(right: 20),
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(8.0),
-                //   border: Border.all(
-                //     color: Color(0x204A4545),
-                //   ),
-                // ),
-                child: SvgPicture.asset("assets/BuildingInfoScreen_Share.svg"),
+            Semantics(
+              label: 'Share',
+              child: Container(
+                  margin: EdgeInsets.only(right: 20),
+                  // decoration: BoxDecoration(
+                  //   borderRadius: BorderRadius.circular(8.0),
+                  //   border: Border.all(
+                  //     color: Color(0x204A4545),
+                  //   ),
+                  // ),
+
+                  child: SvgPicture.asset("assets/BuildingInfoScreen_Share.svg"),
+
+              ),
             )
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent
@@ -241,209 +254,261 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  height: 214,
-                  child: ListView.builder(
-                    scrollDirection:Axis.horizontal ,
-                    itemBuilder: (context,index){
-                      var currentData = widget.receivedAllBuildingList![index];
-                      return InsideBuildingCard(
-                        buildingImageURL: currentData.venuePhoto?? "",
-                        buildingName: currentData.buildingName?? "",
-                        buildingTag: currentData.venueCategory?? "",
-                        buildingId: currentData.sId??"",
-                        buildingFavourite: false, allBuildingID: allBuildingID,
+                  height: 208,
+                  child: ValueListenableBuilder(
+                    valueListenable: Hive.box("Favourites").listenable(),
+                    builder: (BuildContext context, Box<dynamic> value, Widget? child) {
+                      return ListView.builder(
+                        scrollDirection:Axis.horizontal ,
+                        itemBuilder: (context,index){
+                          var currentData = widget.receivedAllBuildingList![index];
+                          final isFavourite = value.get(currentData.buildingName)!=null;
+                          return Container(
+                            width: 208,
+                            child: Container(
+                              child: ListTile(
+                                onTap: (){
+                                  print("WilsonChecker");
+                                  buildingAllApi.setStoredString(currentData.sId!);
+                                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Navigation(),
+                                    ),
+                                  );
+                                },
+                                title: Container(
+                                  decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                        borderRadius: BorderRadius.all(Radius.circular(8))
+                                    ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 208,
+                                        height: 117,
+                                        padding: EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
+                                          child: Image.network(
+                                            // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
+                                            "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                            // You can replace the placeholder image URL with your default image URL
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Image.asset(
+                                                'assets/default-image.jpg', // Replace with the path to your default image asset
+                                                fit: BoxFit.fill,
+                                              );
+                                            },
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                          alignment: Alignment.topLeft,
+                                          margin: EdgeInsets.only(top: 10,left: 8),
+                                          child: Text(
+                                            HelperClass.truncateString(currentData.buildingName!,20),
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff0c141c),
+                                              height: 25/16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                              margin: EdgeInsets.only(left: 8,top: 10),
+                                              child: Text(
+                                                currentData.venueCategory??"",
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff4a4545),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              )
+                                          ),
+                                          Spacer(),
+                                          IconButton(
+                                            icon: Semantics(
+                                              label: 'Favourite',
+                                              child: isFavourite? Icon( Icons.favorite,size: 24,color: Colors.red,) :
+                                              Icon(Icons.favorite_border,size: 24,color: Colors.black26,),
+                                            ),
+                                            onPressed: () async{
+                                              if(isFavourite){
+                                                await value.delete(currentData.buildingName);
+                                              }else {
+                                                await value.put(
+                                                    currentData.buildingName,
+                                                    currentData.buildingName);
+                                              }// Add your favorite button onPressed logic here
+                                              log('Favouties Database Size ${value.length}');
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                subtitle: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                        margin: EdgeInsets.only(left: 8,top: 10),
+                                        child: Text(
+                                          currentData.venueCategory??"",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 20/14,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        )
+                                    ),
+                                    Spacer(),
+                                    IconButton(
+                                      icon: Semantics(
+                                        label: 'Favourite',
+                                        child: Icon(
+                                          isFavourite? Icons.favorite:
+                                          Icons.favorite_border,size: 24,color: Colors.red,),
+                                      ),
+                                      onPressed: () async{
+                                        if(isFavourite){
+                                          await value.delete(currentData.buildingName);
+                                        }else {
+                                          await value.put(
+                                              currentData.buildingName,
+                                              currentData.buildingName);
+                                        }// Add your favorite button onPressed logic here
+                                        log('Favouties Database Size ${value.length}');
+                                      },
+                                    )
+                                  ],
+                                ),
+                                // Container(
+                                //   decoration: BoxDecoration(
+                                //       border: Border.all(
+                                //         color: Color(0xffEBEBEB),
+                                //       ),
+                                //       borderRadius: BorderRadius.all(Radius.circular(8))
+                                //   ),
+                                //   child: Column(
+                                //     children: [
+                                //       Container(
+                                //         width: 188,
+                                //         height: 117,
+                                //         padding: EdgeInsets.all(5),
+                                //         decoration: BoxDecoration(
+                                //           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8) ),
+                                //         ),
+                                //         child: ClipRRect(
+                                //           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
+                                //           child: Image.network(
+                                //             // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
+                                //             "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                //             // You can replace the placeholder image URL with your default image URL
+                                //             errorBuilder: (context, error, stackTrace) {
+                                //               return Image.asset(
+                                //                 'assets/default-image.jpg', // Replace with the path to your default image asset
+                                //                 fit: BoxFit.fill,
+                                //               );
+                                //             },
+                                //             fit: BoxFit.fill,
+                                //           ),
+                                //         ),
+                                //       ),
+                                //       Container(
+                                //           alignment: Alignment.topLeft,
+                                //           margin: EdgeInsets.only(top: 0,left: 8),
+                                //           child: Text(
+                                //             HelperClass.truncateString(currentData.buildingName!,20),
+                                //             style: const TextStyle(
+                                //               fontFamily: "Roboto",
+                                //               fontSize: 16,
+                                //               fontWeight: FontWeight.w400,
+                                //               color: Color(0xff0c141c),
+                                //               height: 25/16,
+                                //             ),
+                                //             textAlign: TextAlign.left,
+                                //           )
+                                //       ),
+                                //       Row(
+                                //         crossAxisAlignment: CrossAxisAlignment.start,
+                                //         children: [
+                                //           Container(
+                                //               margin: EdgeInsets.only(left: 8,top: 10),
+                                //               child: Text(
+                                //                 currentData.venueCategory??"",
+                                //                 style: const TextStyle(
+                                //                   fontFamily: "Roboto",
+                                //                   fontSize: 14,
+                                //                   fontWeight: FontWeight.w400,
+                                //                   color: Color(0xff4a4545),
+                                //                   height: 20/14,
+                                //                 ),
+                                //                 textAlign: TextAlign.left,
+                                //               )
+                                //           ),
+                                //           Spacer(),
+                                //           IconButton(
+                                //             icon: Semantics(
+                                //               label: 'Favourite',
+                                //               child: Icon(
+                                //                 isFavourite? Icons.favorite:
+                                //                 Icons.favorite_border,size: 24,color: Colors.red,),
+                                //             ),
+                                //             onPressed: () async{
+                                //               if(isFavourite){
+                                //                 await value.delete(currentData.buildingName);
+                                //               }else {
+                                //                 await value.put(
+                                //                     currentData.buildingName,
+                                //                     currentData.buildingName);
+                                //               }// Add your favorite button onPressed logic here
+                                //               log('Favouties Database Size ${value.length}');
+                                //             },
+                                //           )
+                                //         ],
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
+
+                              ),
+                            ),
+                          );
+                          //   InsideBuildingCard(
+                          //   buildingImageURL: currentData.venuePhoto?? "",
+                          //   buildingName: currentData.buildingName?? "",
+                          //   buildingTag: currentData.venueCategory?? "",
+                          //   buildingId: currentData.sId??"",
+                          //   buildingFavourite: false, allBuildingID: allBuildingID,
+                          // );
+                        },
+                        itemCount:widget.receivedAllBuildingList!.length,
                       );
                     },
-                    itemCount:widget.receivedAllBuildingList!.length,
+
                   ),
                 ),
-                // Container(
-                //   margin: EdgeInsets.only(top: 32,left:16),
-                //   child: Text(
-                //     "This Buildings has",
-                //     style: const TextStyle(
-                //       fontFamily: "Roboto",
-                //       fontSize: 18,
-                //       fontWeight: FontWeight.w400,
-                //       color: Color(0xff000000),
-                //       height: 24/18,
-                //     ),
-                //     textAlign: TextAlign.left,
-                //   ),
-                // ),
-                // Container(
-                //   height: 90,
-                //   padding: EdgeInsets.only(left: 10),
-                //   child: ListView.builder(
-                //     scrollDirection: Axis.horizontal,
-                //       itemCount: widget.receivedAllBuildingList?.length,
-                //       itemBuilder: (BuildContext context, int index) {
-                //         return Padding(
-                //           padding: EdgeInsets.all(8.0), // Adjust the value as needed
-                //           child: Container(
-                //             width: 170,
-                //             decoration: BoxDecoration(
-                //                 border: Border.all(
-                //                   color: Color(0xffEBEBEB),
-                //                 ),
-                //               borderRadius: BorderRadius.circular(8.0), // Adjust the border radius as needed
-                //             ),
-                //             child: Column(
-                //               children: [
-                //                 Container(
-                //                   margin: EdgeInsets.only(left: 12,top: 12),
-                //                   alignment: Alignment.topLeft,
-                //                   child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
-                //                 ),
-                //                 Flexible(
-                //                   child: Container(
-                //                     margin: EdgeInsets.only(left: 12,top: 12),
-                //                     alignment: Alignment.topLeft,
-                //                     child: Text(
-                //                       truncateString("Parking",25),
-                //                       style: const TextStyle(
-                //                         fontFamily: "Roboto",
-                //                         fontSize: 14,
-                //                         fontWeight: FontWeight.w400,
-                //                         color: Color(0xff4a789c),
-                //                         height: 20/14,
-                //                       ),
-                //                       textAlign: TextAlign.left,
-                //                     ),
-                //                   ),
-                //                 ),
-                //               ],
-                //             )
-                //           ),
-                //         );
-                //       }),
-                // ),
-
-                // Container(
-                //   child: Row(
-                //     children: [
-                //       Container(
-                //           child: Expanded(
-                //             child: Container(
-                //               margin: EdgeInsets.all(16),
-                //               padding: EdgeInsets.all(8),
-                //               height: 70,
-                //               decoration: BoxDecoration(
-                //                   color: Colors.white,
-                //                   border: Border.all(
-                //                     color: Color(0xffEBEBEB),
-                //                   ),
-                //                   borderRadius: BorderRadius.all(Radius.circular(8))
-                //               ),
-                //               child: Column(
-                //                 children: [
-                //                   Container(
-                //                     alignment: Alignment.topLeft,
-                //                     child: SvgPicture.asset("assets/BuildingInfoScreen_ParkingLogo.svg",width: 24),
-                //                   ),
-                //                   Container(
-                //                     alignment: Alignment.topLeft,
-                //                     margin: EdgeInsets.only(top: 10,),
-                //                     child: Text(
-                //                       "Parking",
-                //                       style: const TextStyle(
-                //                         fontFamily: "Roboto",
-                //                         fontSize: 14,
-                //                         fontWeight: FontWeight.w400,
-                //                         color: Color(0xff4a789c),
-                //                         height: 20/14,
-                //                       ),
-                //                       textAlign: TextAlign.left,
-                //                     ),
-                //                   ),
-                //                 ],
-                //               )
-                //             )
-                //           )
-                //       ),
-                //       Container(
-                //           child: Expanded(
-                //               child: Container(
-                //                   margin: EdgeInsets.all(16),
-                //                   padding: EdgeInsets.all(8),
-                //                   height: 70,
-                //                   decoration: BoxDecoration(
-                //                       color: Colors.white,
-                //                       border: Border.all(
-                //                         color: Color(0xffEBEBEB),
-                //                       ),
-                //                       borderRadius: BorderRadius.all(Radius.circular(8))
-                //                   ),
-                //                   child: Column(
-                //                     children: [
-                //                       Container(
-                //                         alignment: Alignment.topLeft,
-                //                         child: SvgPicture.asset("assets/BuildingInfoScreen_ElevatorLogo.svg",width: 22),
-                //                       ),
-                //                       Container(
-                //                         alignment: Alignment.topLeft,
-                //                         margin: EdgeInsets.only(top: 8,),
-                //                         child: Text(
-                //                           "Elevator",
-                //                           style: const TextStyle(
-                //                             fontFamily: "Roboto",
-                //                             fontSize: 14,
-                //                             fontWeight: FontWeight.w400,
-                //                             color: Color(0xff4a789c),
-                //                             height: 20/14,
-                //                           ),
-                //                           textAlign: TextAlign.left,
-                //                         ),
-                //                       ),
-                //                     ],
-                //                   )
-                //               )
-                //           )
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // Row(
-                //   children: [
-                //     Expanded(
-                //         child: Container(
-                //             height: 55,
-                //             margin: EdgeInsets.only(left: 16,right: 16,top: 8),
-                //             decoration: BoxDecoration(
-                //                 color: Colors.white,
-                //                 border: Border.all(
-                //                   color: Color(0xffEBEBEB),
-                //                 ),
-                //                 borderRadius: BorderRadius.all(Radius.circular(8))
-                //             ),
-                //             child: Row(
-                //               children: [
-                //                 Container(
-                //                   margin: EdgeInsets.only(left: 8),
-                //                   alignment: Alignment.center,
-                //                   child: SvgPicture.asset("assets/BuildingInfoScreen_AccesibilityLogo.svg",width: 24),
-                //                 ),
-                //                 Container(
-                //                   alignment: Alignment.center,
-                //                   margin: EdgeInsets.only(left: 12),
-                //                   child: Text(
-                //                     "Accessible Pathways",
-                //                     style: const TextStyle(
-                //                       fontFamily: "Roboto",
-                //                       fontSize: 14,
-                //                       fontWeight: FontWeight.w400,
-                //                       color: Color(0xff4a789c),
-                //                       height: 20/14,
-                //                     ),
-                //                     textAlign: TextAlign.left,
-                //                   ),
-                //                 ),
-                //               ],
-                //             )
-                //         )
-                //     ),
-                //   ],
-                // ),
                 Container(
                   margin: EdgeInsets.only(top: 32,left:16),
                   child: Text(

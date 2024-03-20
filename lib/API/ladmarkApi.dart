@@ -64,6 +64,46 @@ class landmarkApi {
 
     if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
+      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      return land.fromJson(responseBody);
+    }
+
+    await guestApi().guestlogin().then((value){
+      if(value.accessToken != null){
+        token = value.accessToken!;
+      }
+    });
+
+    final Map<String, dynamic> data = {
+      "id": id??buildingAllApi.getStoredString(),
+    };
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      body: json.encode(data),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token
+      },
+    );
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseBody = json.decode(response.body);
+      final landmarkData = LandMarkApiModel(responseBody: responseBody);
+      LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+      landmarkData.save();
+      return land.fromJson(responseBody);
+    } else {
+      print(response.statusCode);
+      print(response.body);
+      throw Exception('Failed to load data');
+    }
+  }
+}
+
+  Future<land> fetchLandmarkData({String? id = null}) async {
+    final LandMarkBox = LandMarkApiModelBox.getData();
+
+    if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
+      print("LANDMARK DATA FORM DATABASE ");
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       print(LandMarkBox.keys);
       print(LandMarkBox.get(buildingAllApi.getStoredString())?.responseBody.toString());

@@ -40,6 +40,7 @@ Future<void> main() async {
 
   await Hive.openBox('Favourites');
   await Hive.openBox('Filters');
+  await Hive.openBox('SignInDatabase');
   runApp(const MyApp());
 }
 

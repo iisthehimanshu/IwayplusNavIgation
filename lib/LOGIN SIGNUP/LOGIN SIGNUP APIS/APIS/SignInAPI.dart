@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
@@ -7,7 +8,7 @@ class SignInAPI{
 
   final String baseUrl = "https://dev.iwayplus.in/auth/signin";
 
-  Future<SignInAPIModel> signIN(String username, String password) async {
+  Future<SignInAPIModel?> signIN(String username, String password) async {
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
@@ -25,14 +26,15 @@ class SignInAPI{
     print("Response body is ${response.statusCode}");
     if (response.statusCode == 200) {
       //print("Response body is $responseBody");
-
       try {
-
         Map<String, dynamic> responseBody = json.decode(response.body);
 
         // Now use the decoded data to create a SignInAPIModel instance
         SignInAPIModel signInResponse = SignInAPIModel.fromJson(responseBody);
-
+        var signInBox = Hive.box('SignInDatabase');
+        // Put data into the box
+        signInBox.put('signInResponse', signInResponse);
+        print("Sign in details saved to database");
         // Use signInResponse as needed
         print("Sign in successful: $signInResponse");
 
@@ -44,7 +46,8 @@ class SignInAPI{
       }
     } else {
       print("Code is ${response.statusCode}");
-      throw Exception('Failed to load data');
+
+      return null;
     }
   }
 }

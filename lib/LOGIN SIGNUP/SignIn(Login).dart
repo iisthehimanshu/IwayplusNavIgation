@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/SignUp.dart';
@@ -32,8 +33,6 @@ class _SignInState extends State<SignIn> {
   bool passincorrect = false;
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
-  TextEditingController phoneEditingController = TextEditingController();
-  TextEditingController OTPEditingController = TextEditingController();
   String passvis = 'assets/LoginScreen_PasswordEye.svg';
   bool obsecure = true;
 
@@ -285,18 +284,7 @@ class _SignInState extends State<SignIn> {
 
   }
 
-  void _onFocusChange() {
-    if (_focusNode1.hasFocus) {
-      setState(() {
-        phoneEditingController.clear();
-      });
-    } else if (_focusNode2.hasFocus || _focusNode1_1.hasFocus) {
-      setState(() {
-        mailEditingController.clear();
-        passEditingController.clear();
-      });
-    }
-  }
+
 
   @override
   void dispose() {
@@ -548,10 +536,24 @@ class _SignInState extends State<SignIn> {
                                         ),
                                         // onPressed: loginclickable ? login : null,
                                         onPressed: () async {
-                                          SignInAPIModel signInResponse = await SignInAPI().signIN(mailEditingController.text, passEditingController.text);
+                                          if(mailEditingController.text.length==0 && passEditingController.text.length==0){
+                                            return HelperClass.showToast("Enter details");
+                                          }
+                                          SignInAPIModel? signInResponse = await SignInAPI().signIN(mailEditingController.text, passEditingController.text);
                                           print("signInResponse.accessToken");
-                                          print(signInResponse.refreshToken);
-                                          print(signInResponse.accessToken);
+                                          print(signInResponse?.refreshToken);
+                                          print(signInResponse?.accessToken);
+                                          if(signInResponse == null){
+                                            HelperClass.showToast("Incorrect Details");
+                                          }else{
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => MainScreen(initialIndex: 0,),
+                                              ),
+                                            );
+                                            HelperClass.showToast("Sign in successful");
+                                          }
                                         },
                                         child: Center(
                                           child:

@@ -17,8 +17,9 @@ class UserState{
   pathState pathobj = pathState();
   List<int> path = [];
   bool initialallyLocalised = false;
+  String Bid ;
 
-  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
+  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
   Future<void> move()async {
     List<int> transitionvalue = tools.eightcelltransition(this.theta);

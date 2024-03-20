@@ -39,6 +39,33 @@ class land {
     }
     return data;
   }
+
+  void mergeLandmarks(List<Landmarks>? landmarksList) {
+    if (landmarksList != null) {
+      landmarks ??= [];
+      landmarks!.addAll(landmarksList);
+      // Update landmarksMap and landmarksNameMap accordingly
+      if (landmarksMap == null) {
+        landmarksMap = {};
+      }
+      if (landmarksNameMap == null) {
+        landmarksNameMap = {};
+      }
+      for (var landmark in landmarksList) {
+        if (landmark.properties!.polyId != null) {
+          landmarksMap![landmark.properties!.polyId!] = landmark;
+        }
+        if (landmark.name != null) {
+          landmarkNames ??= [];
+          landmarkNames!.add(landmark.name!);
+          if (landmark.properties!.polyId != null) {
+            landmarksNameMap![landmark.name!] = landmark.properties!.polyId!;
+          }
+        }
+      }
+      print("Himanshuchecker ${landmarksMap!.length}");
+    }
+  }
 }
 
 

@@ -74,6 +74,12 @@ class Polyline {
     data['polylineMap'] = this.polylineMap?.map((key, value) => MapEntry(key, value.toJson()));
     return data;
   }
+  void mergePolyline(List<Floors>? floorsList) {
+    if (floorsList != null) {
+      floors ??= [];
+      floors!.addAll(floorsList);
+    }
+  }
 }
 
 class Floors {

@@ -1,4 +1,6 @@
+import 'dart:collection';
 import 'dart:convert';
+import 'package:geodesy/geodesy.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
@@ -12,8 +14,9 @@ class buildingAllApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
   String token = "";
   static String selectedID="";
+  static String selectedBuildingID="";
   static String selectedVenue="";
-  static List<String> allBuildingID = [];
+  static HashMap<String,LatLng> allBuildingID = new HashMap();
 
   void checkForUpdate() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
@@ -108,11 +111,11 @@ class buildingAllApi {
     return selectedID;
   }
 
-  static void setStoredAllBuildingID(List<String> value){
+  static void setStoredAllBuildingID(HashMap<String,LatLng> value){
     allBuildingID = value;
   }
 
-  static List<String> getStoredAllBuildingID(){
+  static HashMap<String,LatLng> getStoredAllBuildingID(){
     return allBuildingID;
   }
 
@@ -121,6 +124,15 @@ class buildingAllApi {
   static void setStoredVenue(String value) {
     selectedVenue = value;
     //print("Set${selectedID}");
+  }
+
+  static void setSelectedBuildingID(String value)async{
+    selectedBuildingID = value;
+    return;
+  }
+
+  static String getSelectedBuildingID() {
+    return selectedBuildingID;
   }
 
   // Method to get the stored string

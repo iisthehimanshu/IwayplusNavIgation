@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
+import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
 import 'package:iwayplusnav/Elements/SearchNearby.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +23,7 @@ class DestinationSearchPage extends StatefulWidget {
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
-  late land landmarkData;
+  land landmarkData = land();
 
   List<Widget> searchResults = [];
 
@@ -74,8 +76,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void fetchlist()async{
-    await landmarkApi().fetchLandmarkData().then((value){
-      landmarkData = value;
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
+      await landmarkApi().fetchLandmarkData(id: key).then((value){
+        landmarkData.mergeLandmarks(value.landmarks);
+      });
     });
   }
 

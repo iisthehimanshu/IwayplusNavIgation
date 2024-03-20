@@ -13,6 +13,8 @@ class pathState {
   List<Map<String, int>> directions = [];
   int numCols = 0;
   int index = 0;
+  String sourceBid = "";
+  String destinationBid = "";
 
   // Default constructor without arguments
   pathState();
@@ -27,6 +29,10 @@ class pathState {
     String tempPolyID = sourcePolyID;
     sourcePolyID = destinationPolyID;
     destinationPolyID = tempPolyID;
+
+    String tempsourceBid = sourceBid;
+    sourceBid = destinationBid;
+    destinationBid = tempsourceBid;
 
     String tempName = sourceName;
     sourceName = destinationName;

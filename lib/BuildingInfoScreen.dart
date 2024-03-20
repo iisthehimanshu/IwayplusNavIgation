@@ -1,6 +1,9 @@
+import 'dart:collection';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
@@ -31,7 +34,7 @@ class BuildingInfoScreen extends StatefulWidget {
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAll> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
-  List<String> allBuildingID = [];
+  HashMap<String,LatLng> allBuildingID = new HashMap();
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -56,7 +59,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(widget.receivedAllBuildingList);
     apiCall();
     widget.receivedAllBuildingList!.forEach((element) {
-      allBuildingID.add(element.sId!);
+      LatLng kk = LatLng(element.coordinates![0], element.coordinates![1]);
+      allBuildingID[element.sId!] = kk;
     });
   }
 

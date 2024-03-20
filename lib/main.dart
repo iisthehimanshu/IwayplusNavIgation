@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
             return Text(snapshot.error.toString());
           }
           if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.data == null){
+            if(snapshot.data != null){
               return LoginScreen();
             }else{
               return MainScreen(initialIndex: 0,);

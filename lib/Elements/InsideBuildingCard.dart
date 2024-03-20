@@ -1,5 +1,8 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 import 'package:iwayplusnav/BuildingInfoScreen.dart';
 import 'package:iwayplusnav/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
@@ -16,7 +19,7 @@ class InsideBuildingCard extends StatefulWidget {
   String buildingTag;
   String buildingId;
   bool buildingFavourite;
-  List<String> allBuildingID ;
+  HashMap<String,LatLng> allBuildingID ;
 
   InsideBuildingCard(
       {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite, required this.allBuildingID});
@@ -64,6 +67,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
           GestureDetector(
             onTap: (){
               buildingAllApi.setStoredString(widget.buildingId);
+              buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
               Navigator.push(
                 context,
@@ -100,6 +104,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
           GestureDetector(
             onTap: (){
               buildingAllApi.setStoredString(widget.buildingId);
+              buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
               Navigator.push(
                 context,
@@ -128,6 +133,8 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               GestureDetector(
                 onTap: (){
                   buildingAllApi.setStoredString(widget.buildingId);
+                  buildingAllApi.setSelectedBuildingID(widget.buildingId);
+
                   buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
                   Navigator.push(
                     context,

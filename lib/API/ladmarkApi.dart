@@ -13,18 +13,21 @@ class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
   String token = "";
 
+
   Future<land> fetchLandmarkData({String? id = null}) async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
     if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
-      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       print(LandMarkBox.keys);
       print(LandMarkBox.get(buildingAllApi.getStoredString())?.responseBody.toString());
       buildingAllApi.getStoredString();
      // print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
     }
+
+
 
     await guestApi().guestlogin().then((value){
       if(value.accessToken != null){
@@ -35,6 +38,8 @@ class landmarkApi {
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
     };
+
+    print("calling api for id : ${data["id"]}");
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),

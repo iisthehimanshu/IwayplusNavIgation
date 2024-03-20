@@ -45,7 +45,6 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
   bool ispassempty = true;
 
   TextEditingController phoneEditingController = TextEditingController();
-  TextEditingController OTPEditingController = TextEditingController();
   String passvis = 'assets/LoginScreen_PasswordEye.svg';
   bool obsecure = true;
   //CountryCode _defaultCountry = CountryCode.fromCountryCode('US');
@@ -65,23 +64,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
-
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
-
-  TextEditingController passEditingController = TextEditingController();
-  TextEditingController mailEditingController = TextEditingController();
-  TextEditingController nameEditingController = TextEditingController();
-  FocusNode nameFocusNode = FocusNode();
+  TextEditingController OTPEditingController = TextEditingController();
 
 
   Color button1 = new Color(0xff777777);
@@ -100,24 +83,10 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
 
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
-  void nameFiledListner(){
-    if(nameEditingController.text.length>0){
-      setState(() {
-        outlineheaderColorForName = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColorForName = Color(0xff24b9b0);// Change the button color to green
-      });
-    }else{
-      setState(() {
-        outlineheaderColorForName = Color(0xff49454f);
-        outlineTextColorForName = Color(0xff49454f);
-        buttonBGColor = Color(0xffbdbdbd);
-      });
-    }
-  }
 
-  void emailFieldListner(){
-    if(mailEditingController.text.length>0){
-      if(passEditingController.text.length>0){
+  void OTPFieldListner(){
+    if(OTPEditingController.text.length>0){
+      if(OTPEditingController.text.length>0){
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
@@ -135,57 +104,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
       });
     }
   }
-  void passwordFieldListner(){
-    if(passEditingController.text.length>0){
-      if(mailEditingController.text.length>0){
-        setState(() {
-          buttonBGColor = Color(0xff24b9b0);
-          loginclickable = true;
-        });
-      }
-      setState(() {
-        outlineheaderColorForPass = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColorForPass = Color(0xff24b9b0);// Change the button color to green
-      });
-    }else{
-      setState(() {
-        outlineheaderColorForPass = Color(0xff49454f);
-        outlineTextColorForPass = Color(0xff49454f);
-        buttonBGColor = Color(0xffbdbdbd);
-      });
-    }
-  }
-  void signINButtonControler(){
-    setState(() {
-      buttonBGColor = Color(0xff24b9b0);
-    });
-  }
 
-  signInWithGoogle() async{
-    GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
-    GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
-
-    AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken
-    );
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    print('Google user name ${userCredential.user?.displayName}');
-
-    if(userCredential.user != null){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
-    }
-  }
-
-
-  void showpassword() {
-    setState(() {
-      obsecure = !obsecure;
-      obsecure
-          ? passvis = "assets/passnotvis.svg"
-          : passvis = "assets/passvis.svg";
-    });
-  }
 
   @override
   void initstate() {
@@ -205,8 +124,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
       });
     } else if (_focusNode2.hasFocus || _focusNode1_1.hasFocus) {
       setState(() {
-        mailEditingController.clear();
-        passEditingController.clear();
+        OTPEditingController.clear();
       });
     }
   }
@@ -301,7 +219,11 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                         child: Expanded(
                                           child: TextFormField(
                                             focusNode: _focusNode1,
-                                            controller: mailEditingController,
+                                            keyboardType: TextInputType.number, // Set keyboard type to number
+                                            inputFormatters: <TextInputFormatter>[
+                                              FilteringTextInputFormatter.digitsOnly // Allow only digits
+                                            ],
+                                            controller: OTPEditingController,
                                             decoration: InputDecoration(
                                                 hintText: 'OTP',
                                                 hintStyle: TextStyle(
@@ -314,7 +236,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                               //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                             ),
                                             onChanged: (value) {
-                                              emailFieldListner();
+                                              OTPFieldListner();
                                               outlineheaderColorForPass = new Color(0xff49454f);
                                               outlineheaderColorForName = new Color(0xff49454f);
                                             },
@@ -377,6 +299,8 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                                     builder: (context) => CreateNewPassword(),
                                                   ),
                                                 );
+                                              }else{
+
                                               }
                                             },
                                           child: Center(

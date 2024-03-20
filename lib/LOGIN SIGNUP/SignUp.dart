@@ -221,22 +221,22 @@ class _SignUpState extends State<SignUp> {
   Color outlineTextColorForPass = new Color(0xff49454f);
 
   bool loginclickable = false;
-  Color buttonBGColor = new Color(0xff24b9b0);
+  Color buttonBGColor = new Color(0xff49454f);
 
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
 
   void nameFiledListner(){
     if(nameEditingController.text.length>0){
+      if(mailEditingController.text.length>0 && passEditingController.text.length>0){
+        setState(() {
+          buttonBGColor = Color(0xff24b9b0);
+        });
+      }
       setState(() {
         outlineheaderColorForName = Color(0xff24b9b0);// Change the button color to green
         outlineTextColorForName = Color(0xff24b9b0);// Change the button color to green
       });
-    }else if(nameEditingController.text.length>0 && mailEditingController.text.length>0 && passEditingController.text.length>0){
-      setState(() {
-        buttonBGColor = Color(0xff24b9b0);
-      });
-
     }else{
       setState(() {
         outlineheaderColorForName = Color(0xff49454f);
@@ -248,7 +248,7 @@ class _SignUpState extends State<SignUp> {
 
   void emailFieldListner(){
     if(mailEditingController.text.length>0){
-      if(passEditingController.text.length>0){
+      if(passEditingController.text.length>0 && nameEditingController.text.length>0){
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
@@ -266,9 +266,10 @@ class _SignUpState extends State<SignUp> {
       });
     }
   }
+
   void passwordFieldListner(){
     if(passEditingController.text.length>0){
-      if(mailEditingController.text.length>0){
+      if(mailEditingController.text.length>0 && nameEditingController.text.length>0){
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
@@ -286,28 +287,6 @@ class _SignUpState extends State<SignUp> {
       });
     }
   }
-  void signINButtonControler(){
-    setState(() {
-      buttonBGColor = Color(0xff24b9b0);
-    });
-  }
-
-  signInWithGoogle() async{
-    GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
-    GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
-
-    AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken
-    );
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    print('Google user name ${userCredential.user?.displayName}');
-
-    if(userCredential.user != null){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
-    }
-  }
-
 
   void showpassword() {
     setState(() {
@@ -515,7 +494,20 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                   ),),
                               ),
-                              Container(
+                              passEditingController.text.length<8? Container(
+                                margin: EdgeInsets.only(left: 32,top: 4),
+                                child: Text(
+                                  "8 characters password required.",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xffB3261E),
+                                    height: 16/12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ) : Container(
                                 margin: EdgeInsets.only(left: 32,top: 4),
                                 child: Text(
                                   "8 characters password required.",
@@ -528,7 +520,7 @@ class _SignUpState extends State<SignUp> {
                                   ),
                                   textAlign: TextAlign.left,
                                 ),
-                              ),
+                              ) ,
                               Container(
                                   margin: EdgeInsets.only(top: 20,right: 16,left: 16),
                                   child: SizedBox(

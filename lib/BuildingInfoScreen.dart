@@ -1,4 +1,5 @@
 
+import 'dart:collection';
 import 'dart:developer';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
@@ -357,7 +359,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                                     currentData.buildingName,
                                                     currentData.buildingName);
                                               }// Add your favorite button onPressed logic here
-                                              log('Favouties Database Size ${value.length}');
+                                              //log('Favouties Database Size ${value.length}');
                                             },
                                           )
                                         ],

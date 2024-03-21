@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwayplusnav/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
@@ -9,6 +12,8 @@ class SignInAPI{
   final String baseUrl = "https://dev.iwayplus.in/auth/signin";
 
   Future<SignInAPIModel?> signIN(String username, String password) async {
+    final signindataBox = FavouriteDataBaseModelBox.getData();
+
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
@@ -27,18 +32,29 @@ class SignInAPI{
     if (response.statusCode == 200) {
       //print("Response body is $responseBody");
       try {
-        Map<String, dynamic> responseBody = json.decode(response.body);
+        Map<String, dynamic>  responseBody = json.decode(response.body);
+        SignInAPIModel ss = new SignInAPIModel();
+        ss.accessToken = responseBody["accessToken"];
+        ss.refreshToken = responseBody["refreshToken"];
+        ss.payload?.userId = responseBody["payload"]["userId"];
+        ss.payload?.roles = responseBody["payload"]["roles"];
 
+        FavouriteDataBaseModel signInResponse = FavouriteDataBaseModel(signInAPIModel: ss);
         // Now use the decoded data to create a SignInAPIModel instance
-        SignInAPIModel signInResponse = SignInAPIModel.fromJson(responseBody);
+        signindataBox.add(signInResponse);
+        signInResponse.save();
+
+
         var signInBox = Hive.box('SignInDatabase');
         // Put data into the box
-        signInBox.put('signInResponse', signInResponse);
+        signInBox.putAt(0, signInResponse);
+
+        //signInResponse.save();
         print("Sign in details saved to database");
         // Use signInResponse as needed
         print("Sign in successful: $signInResponse");
 
-        return signInResponse;
+        return ss;
 
       } catch (e) {
         print("Error occurred during data parsing: $e");

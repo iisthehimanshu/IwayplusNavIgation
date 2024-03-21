@@ -10,19 +10,23 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/CreateNewPassword.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/ForgetPassword.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignUpAPI.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/SignUp.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
 
 class VerifyYourAccount extends StatefulWidget {
   final String previousScreen;
-  final String userEmail;
+  final String userEmailOrPhone;
   final String userName;
   final String userPasword;
 
-  const VerifyYourAccount({required this.previousScreen,this.userEmail='',this.userName='',this.userPasword=''});
+  const VerifyYourAccount({required this.previousScreen,this.userEmailOrPhone='',this.userName='',this.userPasword=''});
 
   @override
   State<VerifyYourAccount> createState() => _VerifyYourAccountState();
@@ -291,7 +295,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                             elevation: 0,
                                           ),
                                           // onPressed: loginclickable ? login : null,
-                                          onPressed: () {
+                                          onPressed: () async {
                                               if(widget.previousScreen=='ForgetPassword'){
                                                 Navigator.push(
                                                   context,
@@ -300,7 +304,14 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                                   ),
                                                 );
                                               }else{
-
+                                                  if(await SignUpAPI().signUP(widget.userEmailOrPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
+                                                    Navigator.pushAndRemoveUntil(context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) => MainScreen(initialIndex: 0,)
+                                                      ),(route) => false,
+                                                    );
+                                                  }else{
+                                                  }
                                               }
                                             },
                                           child: Center(

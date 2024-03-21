@@ -383,7 +383,13 @@ class _SignInState extends State<SignIn> {
                                           if(mailEditingController.text.length==0 && passEditingController.text.length==0){
                                             return HelperClass.showToast("Enter details");
                                           }
-                                          SignInAPIModel? signInResponse = await SignInAPI().signIN(CountryCodeSelector().selectedCountryCode+mailEditingController.text, passEditingController.text);
+                                          String phoneNumberOEmail = '';
+                                          if(containsOnlyNumeric(mailEditingController.text)){
+                                            phoneNumberOEmail+=CountryCodeSelector().selectedCountryCode+mailEditingController.text;
+                                          }else{
+                                            phoneNumberOEmail+=mailEditingController.text;
+                                          }
+                                          SignInAPIModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
                                           print("signInResponse.accessToken");
                                           print(signInResponse?.refreshToken);
                                           print(signInResponse?.accessToken);
@@ -393,11 +399,12 @@ class _SignInState extends State<SignIn> {
                                             });
                                             HelperClass.showToast("Incorrect Details");
                                           }else{
-                                            Navigator.pushReplacement(
+                                            Navigator.pushAndRemoveUntil(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) => MainScreen(initialIndex: 0,),
                                               ),
+                                              (route) => false,
                                             );
                                             HelperClass.showToast("Sign in successful");
                                           }

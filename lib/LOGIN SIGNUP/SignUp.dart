@@ -539,7 +539,7 @@ class _SignUpState extends State<SignUp> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmail: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
+                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmailOrPhone: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
                                             ),
                                           );
                                           SendOTPAPI().sendOTP(mailEditingController.text);

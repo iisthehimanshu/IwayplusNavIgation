@@ -18,19 +18,16 @@ class FavouriteDataBaseModelAdapter
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return FavouriteDataBaseModel(
-      venueBuildingName: fields[0] as String,
-      venueBuildingLocation: fields[1] as String,
+      signInAPIModel: fields[0] as SignInAPIModel,
     );
   }
 
   @override
   void write(BinaryWriter writer, FavouriteDataBaseModel obj) {
     writer
-      ..writeByte(2)
-      ..writeByte(0)
-      ..write(obj.venueBuildingName)
       ..writeByte(1)
-      ..write(obj.venueBuildingLocation);
+      ..writeByte(0)
+      ..write(obj.signInAPIModel);
   }
 
   @override

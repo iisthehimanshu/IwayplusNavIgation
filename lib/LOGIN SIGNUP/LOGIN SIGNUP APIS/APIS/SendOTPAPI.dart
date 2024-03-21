@@ -22,17 +22,10 @@ class SendOTPAPI{
       },
     );
 
-    print("Response body is ${response.statusCode}");
-
     if (response.statusCode == 200) {
-      try {
         return HelperClass.showToast("OTP sent successfully");
-      } catch (e) {
-        print("Error occurred during data parsing: $e");
-        throw Exception('Failed to parse data');
-      }
     } else {
-      print("Code is ${response.statusCode}");
+      print("SendOTPAPI--response.statusCode${response.statusCode} ${response.body}");
       return null;
     }
   }

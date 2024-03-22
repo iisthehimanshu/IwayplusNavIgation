@@ -142,7 +142,6 @@ class _NavigationState extends State<Navigation> {
   @override
   void initState() {
     super.initState();
-    print("widget.buildingID");
     flutterTts = FlutterTts();
     handleCompassEvents();
     DefaultAssetBundle.of(context)
@@ -181,8 +180,8 @@ class _NavigationState extends State<Navigation> {
         true;
       }),
     );
-    fetchlist();
-    filterItems();
+    // fetchlist();
+    // filterItems();
   }
 
   Future<void> getDeviceManufacturer() async {
@@ -1588,7 +1587,7 @@ class _NavigationState extends State<Navigation> {
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
         snapshot.data!.landmarksMap![building.selectedLandmarkID] == null) {
-      print(building.selectedLandmarkID);
+      //print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
       showMarkers();
@@ -3167,10 +3166,10 @@ class _NavigationState extends State<Navigation> {
   List<Landmarks> filteredItems = [];
 
   void fetchlist()async{
-    await landmarkApi().fetchLandmarkData().then((value){
-      landmarkData = value;
-      LandmarkItems = value.landmarks!;
-    });
+    // await landmarkApi().fetchLandmarkData().then((value){
+    //   landmarkData = value;
+    //   LandmarkItems = value.landmarks!;
+    // });
     //LandmarkItems = landmarkData.landmarks!;
     print("Landmarks");
     print(LandmarkItems);
@@ -3223,8 +3222,8 @@ class _NavigationState extends State<Navigation> {
     }
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    fetchlist();
-    filterItems();
+    //fetchlist();
+    //filterItems();
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(

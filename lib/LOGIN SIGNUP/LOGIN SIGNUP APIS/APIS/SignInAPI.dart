@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
@@ -12,7 +10,7 @@ class SignInAPI{
   final String baseUrl = "https://dev.iwayplus.in/auth/signin";
 
   Future<SignInAPIModel?> signIN(String username, String password) async {
-    final signindataBox = FavouriteDataBaseModelBox.getData();
+    //final signindataBox = FavouriteDataBaseModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
@@ -41,13 +39,22 @@ class SignInAPI{
 
         FavouriteDataBaseModel signInResponse = FavouriteDataBaseModel(signInAPIModel: ss);
         // Now use the decoded data to create a SignInAPIModel instance
-        signindataBox.add(signInResponse);
-        signInResponse.save();
+        // signindataBox.add(signInResponse);
+        // signInResponse.save();
 
 
         var signInBox = Hive.box('SignInDatabase');
+        List<dynamic> roles = responseBody["payload"]["roles"];
         // Put data into the box
-        signInBox.putAt(0, signInResponse);
+        signInBox.put("accessToken", responseBody["accessToken"]);
+        signInBox.put("refreshToken", responseBody["accessToken"]);
+        signInBox.put("userId", responseBody["payload"]["userId"]);
+        signInBox.put("roles", roles);
+        // print(signInBox.values);
+        // print(signInBox.get("roles"));
+        // if(signInBox.get("roles")=="user"){
+        //   print("True");
+        // }
 
         //signInResponse.save();
         print("Sign in details saved to database");

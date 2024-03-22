@@ -2,11 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:iwayplusnav/BuildingInfoScreen.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPModel.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'VenueSelectionScreen.dart';
@@ -56,11 +57,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var SignInDatabasebox = Hive.box('SignInDatabase');
-    // Retrieve the length of the box
+
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: "IWAYPLUS",
       home: StreamBuilder<User?>(
@@ -71,7 +72,14 @@ class _MyAppState extends State<MyApp> {
           }
           if(snapshot.connectionState == ConnectionState.active){
             if(snapshot.data == null){
-              if(SignInDatabasebox.length==0){
+              var SignInDatabasebox = Hive.box('SignInDatabase');
+              print(SignInDatabasebox.values);
+              //List<dynamic> ss = SignInDatabasebox.get("roles");
+              // print(ss.length);
+              // if(SignInDatabasebox.get("roles")=="[user]"){
+              //   print("True");
+              // }
+              if(!SignInDatabasebox.containsKey("accessToken")){
                 return SignIn();
               }else{
                 return MainScreen(initialIndex: 0);

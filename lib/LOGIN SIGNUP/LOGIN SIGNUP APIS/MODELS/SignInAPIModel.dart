@@ -1,11 +1,11 @@
-class SignInAPIModel {
+class SignInApiModel {
   Payload? payload;
   String? accessToken;
   String? refreshToken;
 
-  SignInAPIModel({this.payload, this.accessToken, this.refreshToken});
+  SignInApiModel({this.payload, this.accessToken, this.refreshToken});
 
-  SignInAPIModel.fromJson(Map<String, dynamic> json) {
+  SignInApiModel.fromJson(Map<String, dynamic> json) {
     payload = json['payload'] != null ? new Payload.fromJson(json['payload']) : null;
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];

@@ -389,7 +389,7 @@ class _SignInState extends State<SignIn> {
                                           }else{
                                             phoneNumberOEmail+=mailEditingController.text;
                                           }
-                                          SignInAPIModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
+                                          SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
                                           print("signInResponse.accessToken");
                                           print(signInResponse?.refreshToken);
                                           print(signInResponse?.accessToken);

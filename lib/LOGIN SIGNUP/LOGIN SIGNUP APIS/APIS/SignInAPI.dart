@@ -3,14 +3,18 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
+
+import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
 
 class SignInAPI{
 
   final String baseUrl = "https://dev.iwayplus.in/auth/signin";
 
-  Future<SignInAPIModel?> signIN(String username, String password) async {
+  Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
+    final SigninBox = SignINAPIModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
@@ -31,13 +35,19 @@ class SignInAPI{
       //print("Response body is $responseBody");
       try {
         Map<String, dynamic>  responseBody = json.decode(response.body);
-        SignInAPIModel ss = new SignInAPIModel();
+        SignInApiModel ss = new SignInApiModel();
         ss.accessToken = responseBody["accessToken"];
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
 
-        FavouriteDataBaseModel signInResponse = FavouriteDataBaseModel(signInAPIModel: ss);
+        final signinData = SignINAPIModel(signInApiModel: ss,);
+        SigninBox.add(signinData);
+        signinData.save();
+        print("printing box length ${SigninBox.length}");
+
+
+
         // Now use the decoded data to create a SignInAPIModel instance
         // signindataBox.add(signInResponse);
         // signInResponse.save();
@@ -59,7 +69,7 @@ class SignInAPI{
         //signInResponse.save();
         print("Sign in details saved to database");
         // Use signInResponse as needed
-        print("Sign in successful: $signInResponse");
+
 
         return ss;
 

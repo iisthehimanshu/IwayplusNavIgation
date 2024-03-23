@@ -9,6 +9,9 @@ import 'package:path_provider/path_provider.dart';
 
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'DATABASE/BOXES/SignINAPIModelBox.dart';
+import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'VenueSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
@@ -39,8 +42,8 @@ Future<void> main() async {
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-
-  //await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+  Hive.registerAdapter(SignINAPIModelAdapter());
+  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
   // await Firebase.initializeApp();
 
   await Hive.openBox('Favourites');
@@ -79,6 +82,11 @@ class _MyAppState extends State<MyApp> {
               // if(SignInDatabasebox.get("roles")=="[user]"){
               //   print("True");
               // }
+              final SigninBox = SignINAPIModelBox.getData();
+              print("SigninBox.length");
+              print(SigninBox.values);
+              print(SigninBox);
+
               if(!SignInDatabasebox.containsKey("accessToken")){
                 return SignIn();
               }else{

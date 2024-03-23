@@ -1,33 +1,32 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'FavouriteDataBase.dart';
+part of 'SignINAPIModel.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FavouriteDataBaseModelAdapter
-    extends TypeAdapter<FavouriteDataBaseModel> {
+class SignINAPIModelAdapter extends TypeAdapter<SignINAPIModel> {
   @override
-  final int typeId = 4;
+  final int typeId = 7;
 
   @override
-  FavouriteDataBaseModel read(BinaryReader reader) {
+  SignINAPIModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return FavouriteDataBaseModel(
-      favouriteDataBaseModel: fields[0] as FavouriteDataBaseModel,
+    return SignINAPIModel(
+      signInApiModel: fields[0] as SignInApiModel,
     );
   }
 
   @override
-  void write(BinaryWriter writer, FavouriteDataBaseModel obj) {
+  void write(BinaryWriter writer, SignINAPIModel obj) {
     writer
       ..writeByte(1)
       ..writeByte(0)
-      ..write(obj.favouriteDataBaseModel);
+      ..write(obj.signInApiModel);
   }
 
   @override
@@ -36,7 +35,7 @@ class FavouriteDataBaseModelAdapter
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FavouriteDataBaseModelAdapter &&
+      other is SignINAPIModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -6,12 +6,8 @@ part 'FavouriteDataBase.g.dart';
 @HiveType(typeId: 4)
 class FavouriteDataBaseModel extends HiveObject{
   @HiveField(0)
-  SignInAPIModel signInAPIModel;
-  // String venueBuildingName="";
-  //
-  // @HiveField(1)
-  // String venueBuildingLocation="";
+  FavouriteDataBaseModel favouriteDataBaseModel;
 
-  FavouriteDataBaseModel({required this.signInAPIModel});
+  FavouriteDataBaseModel({required this.favouriteDataBaseModel});
 
 }

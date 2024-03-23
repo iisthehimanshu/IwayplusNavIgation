@@ -1,12 +1,13 @@
-
 import 'package:hive/hive.dart';
-// part 'SignINAPIModel.g.dart';
 
-@HiveField(7)
+import '../../LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
+part 'SignINAPIModel.g.dart';
+
+@HiveType(typeId: 7)
 class SignINAPIModel extends HiveObject{
   @HiveField(0)
-  String name;
+  SignInApiModel signInApiModel;
 
-  SignINAPIModel({required this.name});
+  SignINAPIModel({required this.signInApiModel});
 
 }

@@ -359,6 +359,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                                     currentData.buildingName,
                                                     currentData.buildingName);
                                               }// Add your favorite button onPressed logic here
+                                              //log('Favouties Database Size ${value.length}');
                                             },
                                           )
                                         ],

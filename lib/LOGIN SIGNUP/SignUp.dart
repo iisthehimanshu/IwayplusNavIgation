@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SendOTPAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/VerifyYourAccount.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
@@ -203,17 +204,6 @@ class _SignUpState extends State<SignUp> {
   //   }
   // }
 
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
 
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
@@ -230,15 +220,19 @@ class _SignUpState extends State<SignUp> {
   Color outlineheaderColorForPass = new Color(0xff49454f);
   Color outlineTextColorForPass = new Color(0xff49454f);
 
-
-
   bool loginclickable = false;
-  Color buttonBGColor = new Color(0xff24b9b0);
+  Color buttonBGColor = new Color(0xff49454f);
 
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
+
   void nameFiledListner(){
     if(nameEditingController.text.length>0){
+      if(mailEditingController.text.length>0 && passEditingController.text.length>0){
+        setState(() {
+          buttonBGColor = Color(0xff24b9b0);
+        });
+      }
       setState(() {
         outlineheaderColorForName = Color(0xff24b9b0);// Change the button color to green
         outlineTextColorForName = Color(0xff24b9b0);// Change the button color to green
@@ -254,7 +248,7 @@ class _SignUpState extends State<SignUp> {
 
   void emailFieldListner(){
     if(mailEditingController.text.length>0){
-      if(passEditingController.text.length>0){
+      if(passEditingController.text.length>0 && nameEditingController.text.length>0){
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
@@ -272,9 +266,10 @@ class _SignUpState extends State<SignUp> {
       });
     }
   }
+
   void passwordFieldListner(){
     if(passEditingController.text.length>0){
-      if(mailEditingController.text.length>0){
+      if(mailEditingController.text.length>0 && nameEditingController.text.length>0){
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
@@ -292,28 +287,6 @@ class _SignUpState extends State<SignUp> {
       });
     }
   }
-  void signINButtonControler(){
-    setState(() {
-      buttonBGColor = Color(0xff24b9b0);
-    });
-  }
-
-  signInWithGoogle() async{
-    GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
-    GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
-
-    AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken
-    );
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    print('Google user name ${userCredential.user?.displayName}');
-
-    if(userCredential.user != null){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
-    }
-  }
-
 
   void showpassword() {
     setState(() {
@@ -505,7 +478,7 @@ class _SignUpState extends State<SignUp> {
                                             fontFamily: 'Roboto',
                                             fontSize: 14,
                                             fontWeight: FontWeight.w400,
-                                            color: outlineTextColorForPass,
+                                            color: Color(0xffbdbdbd),
                                           ),
                                           border: InputBorder.none
                                         //contentPadding: EdgeInsets.symmetric(vertical: 8)
@@ -521,7 +494,20 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                   ),),
                               ),
-                              Container(
+                              passEditingController.text.length<8? Container(
+                                margin: EdgeInsets.only(left: 32,top: 4),
+                                child: Text(
+                                  "8 characters password required.",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xffB3261E),
+                                    height: 16/12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ) : Container(
                                 margin: EdgeInsets.only(left: 32,top: 4),
                                 child: Text(
                                   "8 characters password required.",
@@ -534,7 +520,7 @@ class _SignUpState extends State<SignUp> {
                                   ),
                                   textAlign: TextAlign.left,
                                 ),
-                              ),
+                              ) ,
                               Container(
                                   margin: EdgeInsets.only(top: 20,right: 16,left: 16),
                                   child: SizedBox(
@@ -553,9 +539,10 @@ class _SignUpState extends State<SignUp> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',),
+                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmailOrPhone: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
                                             ),
                                           );
+                                          SendOTPAPI().sendOTP(mailEditingController.text);
                                         },
                                         child: Center(
                                           child:

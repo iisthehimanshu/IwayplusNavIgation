@@ -14,6 +14,7 @@ class landmarkApi {
   String token = "";
 
 
+
   Future<land> fetchLandmarkData({String? id = null}) async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 
@@ -32,6 +33,7 @@ class landmarkApi {
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
     };
+
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
@@ -40,17 +42,51 @@ class landmarkApi {
         'x-access-token': token
       },
     );
+
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
+      String APITime = responseBody['landmarks'][0]['updatedAt']!;
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
+
+      print('LANDMARK DATA FROM API');
+      print(responseBody.containsValue("polylineExist"));
+      // print(LandMarkBox.length);
+      //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
+      //print(demoresponseBody?.responseBody);
       LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+
+      // print(LandMarkBox.length);
+      // print('TESTING LANDMARK API DATABASE OVER');
       landmarkData.save();
+
+
+      //print("object ${responseBody['landmarks'][0].runtimeType}");
       return land.fromJson(responseBody);
+      // if(!LandMarkBox.containsKey(buildingAllApi.getStoredString())){
+      //   print('LANDMARK DATA FROM API');
+      //   LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+      //   landmarkData.save();
+      //   return land.fromJson(responseBody);
+      // }else{
+      //   Map<String, dynamic> databaseresponseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      //   String LastUpdatedTime = databaseresponseBody['landmarks'][0]['updatedAt']!;
+      //   print("APITime");
+      //   if(APITime==LastUpdatedTime){
+      //     print("LANDMARK DATA FROM DATABASE");
+      //     print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
+      //     return land.fromJson(databaseresponseBody);
+      //   }else{
+      //     print("LANDMARK DATA FROM DATABASE AND UPDATED");
+      //     print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
+      //     LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+      //     landmarkData.save();
+      //     return land.fromJson(responseBody);
+      //   }
+      // }
     } else {
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');
     }
   }
-
 }

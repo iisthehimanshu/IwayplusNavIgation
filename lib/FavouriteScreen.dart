@@ -33,7 +33,7 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
     print("favouriteBox.length");
     print(favouriteBox.length);
     favouriteList = List.from(favouriteBox.values);
-    print(favouriteBox.getAt(0)?.venueBuildingLocation);
+    //print(favouriteBox.getAt(0)?.venueBuildingLocation);
     print(favouriteList);
 
   }
@@ -107,8 +107,8 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
                           // );
                         },
                         child: buildingCard(
-                          imageURL: currentData.venueBuildingName ?? "",
-                          Name: currentData.venueBuildingName ?? "",
+                          imageURL:  "",
+                          Name: "",
                           Tag: "",
                           Address: "",
                           Distance: 190,

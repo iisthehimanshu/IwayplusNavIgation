@@ -1,13 +1,13 @@
 import 'package:hive/hive.dart';
+import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
-import '../../LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 part 'SignINAPIModel.g.dart';
 
 @HiveType(typeId: 7)
 class SignINAPIModel extends HiveObject{
   @HiveField(0)
-  SignInApiModel signInApiModel;
+  SignInApiModel signIndata;
 
-  SignINAPIModel({required this.signInApiModel});
+  SignINAPIModel({required this.signIndata});
 
 }

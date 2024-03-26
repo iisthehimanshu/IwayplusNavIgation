@@ -70,6 +70,8 @@ dependencies:
   firebase_core:
   firebase_auth:
   google_sign_in: ^5.4.4
+  fluster: ^1.2.0
+  flutter_cache_manager:
 
 
 

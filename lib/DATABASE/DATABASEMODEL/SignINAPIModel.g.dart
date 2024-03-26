@@ -17,7 +17,7 @@ class SignINAPIModelAdapter extends TypeAdapter<SignINAPIModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return SignINAPIModel(
-      signInApiModel: fields[0] as SignInApiModel,
+      signIndata: fields[0] as SignInApiModel,
     );
   }
 
@@ -26,7 +26,7 @@ class SignINAPIModelAdapter extends TypeAdapter<SignINAPIModel> {
     writer
       ..writeByte(1)
       ..writeByte(0)
-      ..write(obj.signInApiModel);
+      ..write(obj.signIndata);
   }
 
   @override

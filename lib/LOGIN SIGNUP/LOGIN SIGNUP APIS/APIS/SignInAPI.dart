@@ -15,6 +15,7 @@ class SignInAPI{
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
     final SigninBox = SignINAPIModelBox.getData();
+    final box = SignINAPIModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
@@ -35,42 +36,78 @@ class SignInAPI{
       //print("Response body is $responseBody");
       try {
         Map<String, dynamic>  responseBody = json.decode(response.body);
+
+
+        // final landmarkData = LandMarkApiModel(responseBody: responseBody);
+        //
+        //       print('LANDMARK DATA FROM API');
+        //       print(responseBody.containsValue("polylineExist"));
+        //       // print(LandMarkBox.length);
+        //       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
+        //       //print(demoresponseBody?.responseBody);
+        //       LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+        //
+        //       // print(LandMarkBox.length);
+        //       // print('TESTING LANDMARK API DATABASE OVER');
+        //       landmarkData.save();
+        // final signData = Si(responsebody:responseBody);
+        // SignInApiModel gettingSigninData = new SignInApiModel();
+        // gettingSigninData.payload?.roles = responseBody["payload"]["roles"];
+        // gettingSigninData.payload?.userId = responseBody["payload"]["userId"];
+        // gettingSigninData.refreshToken = responseBody["refreshToken"];
+        // gettingSigninData.accessToken = responseBody["accessToken"];
+        //
+        // final signDat = SignINAPIModel(signIndata: gettingSigninData);
+        // SigninBox.add(signDat);
+        // signDat.save();
+        SignInApiModel signInData = SignInApiModel(
+          payload: Payload(userId: '123', roles: ['admin']),
+          accessToken: 'accessToken',
+          refreshToken: 'refreshToken',
+        );
+
+        // Create an instance of SignINAPIModel
+        SignINAPIModel signInAPIModel = SignINAPIModel(signIndata: signInData);
+
+        // Get the Hive box
+
+
+        // Write data to the box
+        box.add(signInAPIModel);
+
+        print('Data saved successfully.');
+        print('Data saved successfully.${box.length}');
+        print("wilsoncheckeer");
+        print(SigninBox.get("signindata"));
+        print(SigninBox.keys);
+        print(SigninBox.values);
+
+
         SignInApiModel ss = new SignInApiModel();
         ss.accessToken = responseBody["accessToken"];
         ss.refreshToken = responseBody["refreshToken"];
-        ss.payload?.userId = responseBody["payload"]["userId"];
-        ss.payload?.roles = responseBody["payload"]["roles"];
+        // ss.payload?.userId = responseBody["payload"]["userId"];
+        // ss.payload?.roles = responseBody["payload"]["roles"];
+        // print("Wilsonchecker");
+        // print(responseBody["accessToken"]);
+        // print(responseBody["refreshToken"]);
+        // print(responseBody["payload"]);
+        Payload payload = new Payload();
+        // payload.roles = responseBody["payload"]["roles"];
+        // payload.userId = responseBody["payload"]["userId"];
 
-        final signinData = SignINAPIModel(signInApiModel: ss,);
-        SigninBox.add(signinData);
-        signinData.save();
+        // final signinData = SignInApiModel(accessToken:responseBody["accessToken"],refreshToken: responseBody["refreshToken"],payload: payload);
+        // SigninBox.add(signinData);
+
         print("printing box length ${SigninBox.length}");
 
-
-
-        // Now use the decoded data to create a SignInAPIModel instance
-        // signindataBox.add(signInResponse);
-        // signInResponse.save();
-
-
         var signInBox = Hive.box('SignInDatabase');
-        List<dynamic> roles = responseBody["payload"]["roles"];
         // Put data into the box
         signInBox.put("accessToken", responseBody["accessToken"]);
         signInBox.put("refreshToken", responseBody["accessToken"]);
-        signInBox.put("userId", responseBody["payload"]["userId"]);
-        signInBox.put("roles", roles);
-        // print(signInBox.values);
-        // print(signInBox.get("roles"));
-        // if(signInBox.get("roles")=="user"){
-        //   print("True");
-        // }
+        //signInBox.put("userId", responseBody["payload"]["userId"]);
 
-        //signInResponse.save();
         print("Sign in details saved to database");
-        // Use signInResponse as needed
-
-
         return ss;
 
       } catch (e) {

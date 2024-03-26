@@ -13,8 +13,6 @@ class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
   String token = "";
 
-
-
   Future<land> fetchLandmarkData({String? id = null}) async {
     final LandMarkBox = LandMarkApiModelBox.getData();
 

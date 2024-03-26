@@ -9,11 +9,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SendOTPAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/VerifyYourAccount.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
+import 'LOGIN SIGNUP APIS/WIDGETS/CountryCodeSelector.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -58,151 +60,6 @@ class _SignUpState extends State<SignUp> {
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
-
-
-
-  // getConnectivity() =>
-  //     subscription = Connectivity().onConnectivityChanged.listen(
-  //           (ConnectivityResult result) async {
-  //         isDeviceConnected = await InternetConnectionChecker().hasConnection;
-  //         if (!isDeviceConnected && isAlertSet == false) {
-  //           showDialogBox();
-  //           setState(() => isAlertSet = true);
-  //         }
-  //       },
-  //     );
-  //
-  // showDialogBox() => showCupertinoDialog<String>(
-  //   context: context,
-  //   builder: (BuildContext context) => CupertinoAlertDialog(
-  //     title: const Text('No Connection'),
-  //     content: const Text('Please check your internet connectivity'),
-  //     actions: <Widget>[
-  //       TextButton(
-  //         onPressed: () async {
-  //           Navigator.pop(context, 'Cancel');
-  //           setState(() => isAlertSet = false);
-  //           isDeviceConnected =
-  //           await InternetConnectionChecker().hasConnection;
-  //           if (!isDeviceConnected && isAlertSet == false) {
-  //             showDialogBox();
-  //             setState(() => isAlertSet = true);
-  //           }
-  //         },
-  //         child: const Text('OK'),
-  //       ),
-  //     ],
-  //   ),
-  // );
-
-
-  // void subotp()async{
-  //   setState(() {
-  //     loginapifetching2 = true;
-  //   });
-  //
-  //   try{
-  //
-  //     if (OTPEditingController.text.length == 4) {
-  //
-  //       await verifyotpapi().verifyotp(phoneEditingController.text, OTPEditingController.text, number2.dialCode.toString()).then((value){
-  //         if(value == 200){
-  //           final fetchedlogindata = loginapi().fetchedData;
-  //           setState(() {
-  //             loginapifetching2 = false;
-  //           });
-  //           if (!fetchedlogindata!.data!.deleted!) {
-  //             if (fetchedlogindata.data!.validateData()) {
-  //               uobj.savedata("UID", {100000 + random.nextInt(900000)}.toString());
-  //               Navigator.pushAndRemoveUntil(
-  //                 context,
-  //                 MaterialPageRoute(builder: (context) => mainscreen(initialIndex: 0,)),
-  //                     (route) => false, // Remove all routes until the new route
-  //               );
-  //             } else {
-  //               Navigator.pushReplacement(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                     builder: (context) => UserProfile(title: "Registration Form")),
-  //               );
-  //             }
-  //           } else {
-  //             setState(() {
-  //               otpincorrect = true;
-  //             });
-  //             print("Wrong credentials");
-  //             showToast("Wrong credentials");
-  //           }
-  //         }else if(value == 201){
-  //           setState(() {
-  //             loginapifetching2 = false;
-  //             otpincorrect = true;
-  //           });
-  //         }
-  //       });
-  //
-  //     }
-  //   }catch(e){
-  //     setState(() {
-  //       loginapifetching2 = false;
-  //       otpincorrect = true;
-  //     });
-  //     print("Error occurred: $e");
-  //     showToast("Failed to load data");
-  //   }
-  // }
-
-  // void login() async {
-  //   setState(() {
-  //     loginapifetching = true;
-  //   });
-  //
-  //   String email = mailEditingController.text;
-  //   String password = passEditingController.text;
-  //   print("$email   $password");
-  //
-  //   try {
-  //     await loginapi().login(email, password);
-  //     final fetchedlogindata = loginapi().fetchedData;
-  //
-  //     setState(() {
-  //       loginapifetching = false;
-  //     });
-  //
-  //     if (!fetchedlogindata!.data!.deleted!) {
-  //       if (fetchedlogindata.data!.validateData()) {
-  //         uobj.savedata("UID", {100000 + random.nextInt(900000)}.toString());
-  //         // Navigator.of(context).push(_createRoute());
-  //
-  //         Navigator.pushAndRemoveUntil(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => mainscreen(initialIndex: 0,)),
-  //               (route) => false, // Remove all routes until the new route
-  //         );
-  //       } else {
-  //
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //               builder: (context) => UserProfile(title: "Registration Form")),
-  //         );
-  //       }
-  //     } else {
-  //       setState(() {
-  //         passincorrect = true;
-  //       });
-  //       print("Wrong credentials");
-  //       showToast("Wrong credentials");
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       loginapifetching = false;
-  //       passincorrect = true;
-  //     });
-  //     print("Error occurred: $e");
-  //     showToast("Failed to load data");
-  //   }
-  // }
 
 
   TextEditingController passEditingController = TextEditingController();
@@ -377,7 +234,6 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                     textAlign: TextAlign.left,
                                   )
-
                               ),
                               Container(
                                 //color: Colors.amberAccent,
@@ -391,27 +247,32 @@ class _SignUpState extends State<SignUp> {
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: TextFormField(
-                                          focusNode: _focusNode1,
-                                          controller: mailEditingController,
-                                          decoration: InputDecoration(
-                                              hintText: 'Email or mobile number',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                      child: Row(
+                                        children: [
+                                          HelperClass().containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                          Expanded(
+                                            child: TextFormField(
+                                              focusNode: _focusNode1,
+                                              controller: mailEditingController,
+                                              decoration: InputDecoration(
+                                                  hintText: 'Email or mobile number',
+                                                  hintStyle: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xffbdbdbd),
+                                                  ),
+                                                  border: InputBorder.none
+                                                //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                               ),
-                                              border: InputBorder.none
-                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                              onChanged: (value) {
+                                                emailFieldListner();
+                                                outlineheaderColorForPass = new Color(0xff49454f);
+                                                outlineheaderColorForName = new Color(0xff49454f);
+                                              },
+                                            ),
                                           ),
-                                          onChanged: (value) {
-                                            emailFieldListner();
-                                            outlineheaderColorForPass = new Color(0xff49454f);
-                                            outlineheaderColorForName = new Color(0xff49454f);
-                                          },
-                                        ),
+                                        ],
                                       ))
                               ),
                               Container(

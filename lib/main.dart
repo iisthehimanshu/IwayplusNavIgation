@@ -82,10 +82,25 @@ class _MyAppState extends State<MyApp> {
               // if(SignInDatabasebox.get("roles")=="[user]"){
               //   print("True");
               // }
-              final SigninBox = SignINAPIModelBox.getData();
+              // final SigninBox = SignINAPIModelBox.getData();
               print("SigninBox.length");
-              print(SigninBox.values);
-              print(SigninBox);
+              // print(SigninBox.length);
+              // print(SigninBox.values);
+              final box = SignINAPIModelBox.getData();
+
+              // Get all the saved SignINAPIModel objects
+              List<SignINAPIModel> savedData = box.values.toList();
+
+              // Iterate over the saved data and print or process as needed
+              savedData.forEach((signINAPIModel) {
+                print('User ID: ${signINAPIModel.signIndata.payload?.userId}');
+                print('Access Token: ${signINAPIModel.signIndata.accessToken}');
+                print('Refresh Token: ${signINAPIModel.signIndata.refreshToken}');
+                print('Roles: ${signINAPIModel.signIndata.payload?.roles}');
+              });
+
+
+
 
               if(!SignInDatabasebox.containsKey("accessToken")){
                 return SignIn();

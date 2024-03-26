@@ -21,6 +21,8 @@ import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import 'DATABASE/BOXES/SignINAPIModelBox.dart';
+import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'HomeNestedSearch.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
@@ -50,6 +52,20 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       print("BUILDING ALL CHECK");
       buildingAllApi().checkForUpdate();
       checkedForBuildingAllUpdated = !checkedForBuildingAllUpdated;
+    }
+    final box = SignINAPIModelBox.getData();
+    List<SignINAPIModel> savedData = box.values.toList();
+
+
+    // Iterate over the saved data and print or process as needed
+    print("savedData");
+    print(savedData);
+
+    for (var signINAPIModel in savedData) {
+      print('User ID: ${signINAPIModel.signIndata.payload?.userId}');
+      print('Access Token: ${signINAPIModel.signIndata.accessToken}');
+      print('Refresh Token: ${signINAPIModel.signIndata.refreshToken}');
+      print('Roles: ${signINAPIModel.signIndata.payload?.roles}');
     }
   }
 

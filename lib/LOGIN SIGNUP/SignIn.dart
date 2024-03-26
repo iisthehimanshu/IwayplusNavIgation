@@ -47,7 +47,9 @@ class _SignInState extends State<SignIn> {
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xff8D8C8C);
 
-
+  bool containsOnlyNumbers(String str) {
+    return RegExp(r'^[0-9]+$').hasMatch(str);
+  }
 
   void emailFieldListner(){
     if(mailEditingController.text.length>0){
@@ -203,7 +205,7 @@ class _SignInState extends State<SignIn> {
                                             ),
                                             child: Row(
                                               children: [
-                                                containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                                HelperClass().containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
                                                 Expanded(
                                                   child: TextFormField(
                                                     focusNode: _focusNode1,
@@ -384,7 +386,7 @@ class _SignInState extends State<SignIn> {
                                             return HelperClass.showToast("Enter details");
                                           }
                                           String phoneNumberOEmail = '';
-                                          if(containsOnlyNumeric(mailEditingController.text)){
+                                          if(HelperClass().containsOnlyNumeric(mailEditingController.text)){
                                             phoneNumberOEmail+=CountryCodeSelector().selectedCountryCode+mailEditingController.text;
                                           }else{
                                             phoneNumberOEmail+=mailEditingController.text;
@@ -539,11 +541,7 @@ class _SignInState extends State<SignIn> {
     );
   }
 }
-bool containsOnlyNumeric(String input) {
-  // Regular expression to match the pattern of numeric characters
-  RegExp regExp = RegExp(r'^[0-9]+$');
-  return regExp.hasMatch(input);
-}
+
 
 String extractPhoneNumber(String countryCode, String fullPhoneNumber) {
   // Check if the fullPhoneNumber starts with the countryCode

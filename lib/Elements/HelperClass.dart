@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class HelperClass{
+
   static String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -9,6 +10,8 @@ class HelperClass{
       return input.substring(0, maxLength - 2) + '..';
     }
   }
+
+
   static void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -19,5 +22,12 @@ class HelperClass{
       textColor: Colors.white,
       fontSize: 16.0,
     );
+  }
+
+
+  bool containsOnlyNumeric(String input) {
+    // Regular expression to match the pattern of numeric characters
+    RegExp regExp = RegExp(r'^[0-9]+$');
+    return regExp.hasMatch(input);
   }
 }

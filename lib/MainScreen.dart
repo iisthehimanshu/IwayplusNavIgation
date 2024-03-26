@@ -6,6 +6,7 @@ import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
 
 import 'FavouriteScreen.dart';
+import 'GoogleMap.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -22,7 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   final screens = [
     VenueSelectionScreen(),
     MapScreen(),
-    VenueSelectionScreen(),
+    GoogleMap(),
     FavouriteScreen(),
   ];
   @override
@@ -52,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if (index==3 || index==2 || index==4){
+            if (index==3 || index==4){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {

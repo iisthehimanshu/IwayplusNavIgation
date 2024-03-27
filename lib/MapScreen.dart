@@ -587,19 +587,19 @@ class _MapScreenState extends State<MapScreen> {
   void createGMAPIconList(){
     for(buildingAll venue in uniqueVenuesList){
       if(venue.venueCategory=='Academic'){
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png',latLng: LatLng(venue.coordinates![0], venue.coordinates![1])));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Hospital') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png',latLng: LatLng(venue.coordinates![0], venue.coordinates![1])));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Tech Park') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png',latLng: LatLng(venue.coordinates![0], venue.coordinates![1])));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Event') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png',latLng: LatLng(venue.coordinates![0], venue.coordinates![1])));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else{
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png',latLng: LatLng(venue.coordinates![0], venue.coordinates![1])));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }
     }

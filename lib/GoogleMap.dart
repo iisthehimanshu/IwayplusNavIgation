@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:fluster/fluster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -25,31 +26,27 @@ class _GoogleMapState extends State<GoogleMap> {
 
   /// Set of displayed markers and cluster markers on the map
   final Set<gmap.Marker> _markers = Set();
+  final Set<Marker> myMarker = Set<Marker>();
+
   List<GMapIconNameModel> GMapIconList = [];
   List<buildingAll> uniqueVenuesList = [];
-  final List<LatLng> GMapLatLngForIcons = <LatLng>[];
+  final List<gmap.LatLng> GMapLatLngForIcons = <gmap.LatLng>[];
 
   void createGMAPIconList(){
     for(buildingAll venue in uniqueVenuesList){
       if(venue.venueCategory=='Academic'){
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png'));
-        GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }else if(venue.venueCategory=='Hospital') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png'));
-        GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }else if(venue.venueCategory=='Tech Park') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png'));
-        GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }else if(venue.venueCategory=='Event') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png'));
-        GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }else{
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png'));
-        GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }
     }
-    print(GMapIconList);
-    print(GMapLatLngForIcons);
+
     packData();
   }
   packData() async{
@@ -142,19 +139,29 @@ class _GoogleMapState extends State<GoogleMap> {
     final List<MapMarker> markers = [];
     final Uint8List iconMarker = await getImagesFromMarker('assets/IT park.png',90);
 
-
-    for (gmap.LatLng markerLocation in _markerLocations) {
+    for (GMapIconNameModel ll in GMapIconList){
+      final Uint8List iconMarker = await getImagesFromMarker(ll.IconAddress,90);
       final gmap.BitmapDescriptor markerImage =
       BitmapDescriptor.fromBytes(iconMarker);
 
       markers.add(
-        MapMarker(
-          id: _markerLocations.indexOf(markerLocation).toString(),
-          position: markerLocation,
-          icon: markerImage,
-        ),
+        MapMarker(id: ll.latLng.toString(), position: ll.latLng,icon: markerImage),
       );
     }
+
+
+    // for (gmap.LatLng markerLocation in _markerLocations) {
+    //   final gmap.BitmapDescriptor markerImage =
+    //   BitmapDescriptor.fromBytes(iconMarker);
+    //
+    //   markers.add(
+    //     MapMarker(
+    //       id: _markerLocations.indexOf(markerLocation).toString(),
+    //       position: markerLocation,
+    //       icon: markerImage,
+    //     ),
+    //   );
+    // }
 
     _clusterManager = await MapHelper.initClusterManager(
       markers,
@@ -186,7 +193,7 @@ class _GoogleMapState extends State<GoogleMap> {
       80,
     );
 
-    _markers
+    myMarker
       ..clear()
       ..addAll(updatedMarkers);
 
@@ -214,10 +221,10 @@ class _GoogleMapState extends State<GoogleMap> {
                 myLocationEnabled: true,
                 zoomControlsEnabled: true,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(21.083482,78.4528499),
+                  target: gmap.LatLng(21.083482,78.4528499),
                   zoom: _currentZoom,
                 ),
-                markers: _markers,
+                markers: myMarker,
                 onMapCreated: (controller) => _onMapCreated(controller),
                 onCameraMove: (position) => _updateMarkers(position.zoom),
               ),

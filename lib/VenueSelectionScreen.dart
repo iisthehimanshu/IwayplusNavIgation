@@ -48,25 +48,12 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     print("venueHashMap");
     print(venueHashMap);
 
-    if(!checkedForBuildingAllUpdated){
-      print("BUILDING ALL CHECK");
-      buildingAllApi().checkForUpdate();
-      checkedForBuildingAllUpdated = !checkedForBuildingAllUpdated;
-    }
-    final box = SignINAPIModelBox.getData();
-    List<SignINAPIModel> savedData = box.values.toList();
+    // if(!checkedForBuildingAllUpdated){
+    //   print("BUILDING ALL CHECK");
+    //   buildingAllApi().checkForUpdate();
+    //   checkedForBuildingAllUpdated = !checkedForBuildingAllUpdated;
+    // }
 
-
-    // Iterate over the saved data and print or process as needed
-    print("savedData");
-    print(savedData);
-
-    for (var signINAPIModel in savedData) {
-      print('User ID: ${signINAPIModel.signIndata.payload?.userId}');
-      print('Access Token: ${signINAPIModel.signIndata.accessToken}');
-      print('Refresh Token: ${signINAPIModel.signIndata.refreshToken}');
-      print('Roles: ${signINAPIModel.signIndata.payload?.roles}');
-    }
   }
 
   void apiCall() async  {

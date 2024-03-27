@@ -42,8 +42,8 @@ Future<void> main() async {
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  Hive.registerAdapter(SignINAPIModelAdapter());
-  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+  // Hive.registerAdapter(SignINAPIModelAdapter());
+  // await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
   // await Firebase.initializeApp();
 
   await Hive.openBox('Favourites');

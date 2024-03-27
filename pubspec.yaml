@@ -47,8 +47,8 @@ dependencies:
   flutter_compass: ^0.8.0
   flutter_svg: ^2.0.9
   path_provider:
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  hive:
+  hive_flutter:
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
 
@@ -70,16 +70,16 @@ dependencies:
   firebase_core:
   firebase_auth:
   google_sign_in: ^5.4.4
+  flutter_cache_manager: ^3.3.1
   fluster: ^1.2.0
-  flutter_cache_manager:
 
 
 
 
 
 dev_dependencies:
-  hive_generator: ^2.0.0
-  build_runner: ^2.3.2
+  build_runner: ^2.4.8
+  hive_generator: ^2.0.1
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1

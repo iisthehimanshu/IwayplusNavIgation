@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -11,6 +12,7 @@ import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'CLUSTERING/MapHelper.dart';
@@ -26,12 +28,53 @@ class _GoogleMapState extends State<GoogleMap> {
 
   /// Set of displayed markers and cluster markers on the map
   final Set<gmap.Marker> _markers = Set();
+
+  final Set<Marker> wilsonMyMarker = Set<Marker>();
+  List<GMapIconNameModel> GMapIconList = [];
+  late List<buildingAll> getting_buildingAllApi_List=[];
+  HashMap<String,gmap.LatLng> idLatLngHashMap = new HashMap();
+  Set<String> uniqueVenueNames = Set<String>();
+  List<buildingAll> uniqueVenuesList = [];
   final Set<Marker> myMarker = Set<Marker>();
 
-  List<GMapIconNameModel> GMapIconList = [];
-  List<buildingAll> uniqueVenuesList = [];
-  final List<gmap.LatLng> GMapLatLngForIcons = <gmap.LatLng>[];
 
+
+
+
+  void apiCall() async {
+    await buildingAllApi().fetchBuildingAllData().then((value) {
+      setState(() {
+        getting_buildingAllApi_List = value;
+      });
+    });
+    print("MAPSCREEN INIT");
+    createVenueListForGMIconList();
+    //buildingAllApi.setStoredVenue("65d8825cdb333f89456d0562");
+
+  }
+
+  void createVenueListForGMIconList(){
+    for (buildingAll venue in getting_buildingAllApi_List) {
+      print("Adding in idLatLngHashMap");
+      print(venue.coordinates![0]);
+      print(venue.coordinates![1]);
+      gmap.LatLng kk = gmap.LatLng(venue.coordinates![0], venue.coordinates![1]);
+      idLatLngHashMap[venue.sId!] = kk;
+
+      if (!uniqueVenueNames.contains(venue.venueName)) {
+        uniqueVenuesList.add(venue);
+        uniqueVenueNames.add(venue.venueName!);
+      }
+    }
+    // Display the filtered list
+    // uniqueVenues.forEach((venue) {
+    //   print('Venue Name: ${venue.venueName}, Building Name: ${venue.venueCategory}, Coordinates: ${venue.coordinates}');
+    //   // Add more properties if needed
+    // });
+    print("idLatLngHashMap.length");
+    print(idLatLngHashMap.length);
+    createGMAPIconList();
+  }
   void createGMAPIconList(){
     for(buildingAll venue in uniqueVenuesList){
       if(venue.venueCategory=='Academic'){
@@ -46,16 +89,17 @@ class _GoogleMapState extends State<GoogleMap> {
         GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png',latLng: gmap.LatLng(venue.coordinates![0], venue.coordinates![1])));
       }
     }
-
+    print(GMapIconList);
+    //print(GMapLatLngForIcons);
     packData();
   }
   packData() async{
     for(int a=0 ; a<GMapIconList.length ; a++){
       final Uint8List iconMarker = await getImagesFromMarker(GMapIconList[a].IconAddress,90);
-      myMarker.add(
+      wilsonMyMarker.add(
         Marker(
             markerId: MarkerId(a.toString()),
-            position: GMapLatLngForIcons[a],
+            position: GMapIconList[a].latLng,
             icon: BitmapDescriptor.fromBytes(iconMarker),
             onTap: (){
               print("Info Window ");
@@ -70,6 +114,8 @@ class _GoogleMapState extends State<GoogleMap> {
       );
     }
   }
+
+
 
 
   /// Minimum zoom at which the markers will cluster
@@ -139,29 +185,29 @@ class _GoogleMapState extends State<GoogleMap> {
     final List<MapMarker> markers = [];
     final Uint8List iconMarker = await getImagesFromMarker('assets/IT park.png',90);
 
-    for (GMapIconNameModel ll in GMapIconList){
-      final Uint8List iconMarker = await getImagesFromMarker(ll.IconAddress,90);
-      final gmap.BitmapDescriptor markerImage =
-      BitmapDescriptor.fromBytes(iconMarker);
-
-      markers.add(
-        MapMarker(id: ll.latLng.toString(), position: ll.latLng,icon: markerImage),
-      );
-    }
-
-
-    // for (gmap.LatLng markerLocation in _markerLocations) {
+    // for (GMapIconNameModel ll in GMapIconList){
+    //   final Uint8List iconMarker = await getImagesFromMarker(ll.IconAddress,90);
     //   final gmap.BitmapDescriptor markerImage =
     //   BitmapDescriptor.fromBytes(iconMarker);
     //
     //   markers.add(
-    //     MapMarker(
-    //       id: _markerLocations.indexOf(markerLocation).toString(),
-    //       position: markerLocation,
-    //       icon: markerImage,
-    //     ),
+    //     MapMarker(id: ll.latLng.toString(), position: ll.latLng,icon: markerImage),
     //   );
     // }
+
+
+    for (gmap.LatLng markerLocation in _markerLocations) {
+      final gmap.BitmapDescriptor markerImage =
+      BitmapDescriptor.fromBytes(iconMarker);
+
+      markers.add(
+        MapMarker(
+          id: _markerLocations.indexOf(markerLocation).toString(),
+          position: markerLocation,
+          icon: markerImage,
+        ),
+      );
+    }
 
     _clusterManager = await MapHelper.initClusterManager(
       markers,
@@ -193,7 +239,9 @@ class _GoogleMapState extends State<GoogleMap> {
       80,
     );
 
-    myMarker
+    wilsonMyMarker..clear()..addAll(updatedMarkers);
+
+    _markers
       ..clear()
       ..addAll(updatedMarkers);
 
@@ -224,7 +272,7 @@ class _GoogleMapState extends State<GoogleMap> {
                   target: gmap.LatLng(21.083482,78.4528499),
                   zoom: _currentZoom,
                 ),
-                markers: myMarker,
+                markers: _markers.union(wilsonMyMarker),
                 onMapCreated: (controller) => _onMapCreated(controller),
                 onCameraMove: (position) => _updateMarkers(position.zoom),
               ),

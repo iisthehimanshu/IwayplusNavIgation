@@ -9,7 +9,9 @@ import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_svg/svg.dart';
@@ -3197,6 +3199,15 @@ class _NavigationState extends State<Navigation> {
       filterItems();
     });
   }
+  final PanelController _panelController = PanelController();
+
+  void _slidePanelUp() {
+    _panelController.open();
+  }
+  void _slidePanelDown() {
+    _panelController.close();
+  }
+
 
 
   bool _isFilterOpen = false;
@@ -3227,6 +3238,7 @@ class _NavigationState extends State<Navigation> {
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(
+            controller: _panelController,
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
             boxShadow: [
               BoxShadow(
@@ -3237,798 +3249,846 @@ class _NavigationState extends State<Navigation> {
             minHeight: element.workingDays != null && element.workingDays!.length>0 ? 155:140,
             snapPoint: element.workingDays != null && element.workingDays!.length>0 ? 190/screenHeight : 175/screenHeight,
             maxHeight: screenHeight*0.9,
-          panel: Container(
-            child: !_isFilterOpen?Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 6,
-                        margin: EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xffd9d9d9),
-                          borderRadius: BorderRadius.circular(5.0),
+          panel: Semantics(
+            sortKey: const OrdinalSortKey(1),
+
+            child: Container(
+              child: !_isFilterOpen?Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 6,
+                          margin: EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: Color(0xffd9d9d9),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 16),
-                        padding: EdgeInsets.only(left: 16,right: 16,bottom: 4),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${element.buildingName}",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 18,
-                                fontWeight: FontWeight.w400,
-                                height: 27/18,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            SizedBox(height: 4,),
-                            element.workingDays != null && element.workingDays!.length>0 ? Row(
-                              children: [
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 16),
+                          padding: EdgeInsets.only(left: 16,right: 16,bottom: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                "Open ",
+                                "${element.buildingName}",
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w400,
-                                  color: Color(0xff4caf50),
-                                  height: 25/16,
+                                  height: 27/18,
                                 ),
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.left,
                               ),
+                              SizedBox(height: 4,),
+                              element.workingDays != null && element.workingDays!.length>0 ? Row(
+                                children: [
                                 Text(
-                                  "  Closes ${element.workingDays![0].closingTime}",
+                                  "Open ",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
+                                    color: Color(0xff4caf50),
                                     height: 25/16,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                            ],):Container()
-                          ],
+                                  Text(
+                                    "  Closes ${element.workingDays![0].closingTime}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8d8c8c),
+                                      height: 25/16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                              ],):Container()
+                            ],
+                          ),
                         ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 142,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: Color(0xff24B9B0),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: TextButton(
-                                onPressed: (){
-
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset("assets/ExploreInside.svg"),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Explore Inside",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xffffffff),
-                                        height: 20/14,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8,),
-                            Container(
-                              width: 83,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                  color: Color(0xffffffff),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  border: Border.all(color: Color(0xff000000))
-                              ),
-                              child: TextButton(
-                                onPressed: (){
-
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.call,color: Color(0xff000000),),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Call",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff000000),
-                                        height: 20/14,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8,),
-                            Container(
-                              width: 95,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                  color: Color(0xffffffff),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  border: Border.all(color: Color(0xff000000))
-                              ),
-                              child: TextButton(
-                                onPressed: (){
-
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.share,color: Color(0xff000000),),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Share",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff000000),
-                                        height: 20/14,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          child: Column(
+                        Container(
+                          padding: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
+                          child: Row(
                             children: [
                               Container(
-                                padding:EdgeInsets.only(left: 16,right: 16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Services",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff000000),
-                                        height: 23/16,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    TextButton(onPressed: (){
-                                      setState(() {
-                                        print("Himanshuchecker");
-                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
-                                        _isFilterOpen = !_isFilterOpen;
-                                      });
-                                    }, child:Text(
-                                      "See All",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff4a4545),
-                                        height: 20/14,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ) )
-                                  ],
+                                width: 142,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff24B9B0),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: TextButton(
+                                  onPressed: (){
+
+                                  },
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SvgPicture.asset("assets/ExploreInside.svg"),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Explore Inside",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xffffffff),
+                                          height: 20/14,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
+                              SizedBox(width: 8,),
                               Container(
-                                padding: EdgeInsets.only(left: 16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      child: Column(
-                                        children: [
-                                          Container(width: 61,height: 56,
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                                                border: Border.all(color: Color(0xffB3B3B3))
-                                            ),child: SvgPicture.asset("assets/washroomservice.svg"),),
-                                          Text(
-                                            "Washroom",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff4a4545),
-                                              height: 20/14,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 16,),
-                                    Container(
-                                      child: Column(
-                                        children: [
-                                          Container(width: 61,height: 56,
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                                                border: Border.all(color: Color(0xffB3B3B3))
-                                            ),child: SvgPicture.asset("assets/foodservice.svg"),),
-                                          Text(
-                                            "Food",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff4a4545),
-                                              height: 20/14,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 16,),
-                                    Container(
-                                      child: Column(
-                                        children: [
-                                          Container(width: 61,height: 56,
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                                                border: Border.all(color: Color(0xffB3B3B3))
-                                            ),child: SvgPicture.asset("assets/accservice.svg"),),
-                                          Text(
-                                            "Accessibility",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff4a4545),
-                                              height: 20/14,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 16,),
-                                    Container(
-                                      child: Column(
-                                        children: [
-                                          Container(width: 61,height: 56,
-                                            padding: EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                                                border: Border.all(color: Color(0xffB3B3B3))
-                                            ),child: SvgPicture.asset("assets/exitservice.svg"),),
-                                          Text(
-                                            "Exit",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff4a4545),
-                                              height: 20/14,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
+                                width: 83,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                    color: Color(0xffffffff),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(color: Color(0xff000000))
+                                ),
+                                child: TextButton(
+                                  onPressed: (){
+
+                                  },
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.call,color: Color(0xff000000),),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Call",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff000000),
+                                          height: 20/14,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                              Container(
-                                margin: EdgeInsets.only(top: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        margin: EdgeInsets.only(left: 17),
-                                        child: Text(
-                                          "Information",
+                              SizedBox(width: 8,),
+                              Semantics(
+                                label: "Share",
+                                onDidGainAccessibilityFocus: _slidePanelUp,
+                                // onDidLoseAccessibilityFocus: _slidePanelDown,
+                                child: Container(
+                                  width: 95,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                      color: Color(0xffffffff),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(color: Color(0xff000000))
+                                  ),
+                                  child: TextButton(
+                                    onPressed: (){
+
+                                    },
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.share,color: Color(0xff000000),),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "Share",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
-                                            fontSize: 16,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                             color: Color(0xff000000),
-                                            height: 23/16,
+                                            height: 20/14,
                                           ),
                                           textAlign: TextAlign.left,
                                         )
+                                      ],
                                     ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 16, right: 16),
-                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                                width: 1.0, color: Color(0xffebebeb))),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset("assets/Depth 3, Frame 0.svg"),
-                                          SizedBox(width: 16,),
-                                          Container(
-                                            width: screenWidth - 100,
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff4a4545),
-                                                  height: 25 / 16,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                    "${element.address}",
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Container(
-                                    //   margin:
-                                    //   EdgeInsets.only(left: 16, right: 16),
-                                    //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    //   decoration: BoxDecoration(
-                                    //     border: Border(
-                                    //         bottom: BorderSide(
-                                    //             width: 1.0,
-                                    //             color: Color(0xffebebeb))),
-                                    //   ),
-                                    //   child: Row(
-                                    //     crossAxisAlignment:
-                                    //     CrossAxisAlignment.center,
-                                    //     children: [
-                                    //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                    //       SizedBox(width: 16,),
-                                    //       Container(
-                                    //         margin: EdgeInsets.only(top: 8),
-                                    //         child: RichText(
-                                    //           text: TextSpan(
-                                    //             style: const TextStyle(
-                                    //               fontFamily: "Roboto",
-                                    //               fontSize: 16,
-                                    //               fontWeight: FontWeight.w400,
-                                    //               color: Color(0xff4a4545),
-                                    //               height: 25 / 16,
-                                    //             ),
-                                    //             children: [
-                                    //               TextSpan(
-                                    //                 text:
-                                    //                 "6 Floors",
-                                    //               ),
-                                    //             ],
-                                    //           ),
-                                    //         ),
-                                    //       ),
-                                    //     ],
-                                    //   ),
-                                    // ),
-                                    element.phone != null?Container(
-                                      margin:
-                                      EdgeInsets.only(left: 16, right: 16),
-                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color: Color(0xffebebeb))),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset("assets/Depth 3, Frame 1-1.svg"),
-                                          SizedBox(width: 16,),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff4a4545),
-                                                  height: 25 / 16,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                    "${element.phone}",
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ):Container(),
-                                    element.website != null ? Container(
-                                      margin:
-                                      EdgeInsets.only(left: 16, right: 16),
-                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color: Color(0xffebebeb))),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset("assets/Depth 3, Frame 1-2.svg"),
-                                          SizedBox(width: 16,),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff4a4545),
-                                                  height: 25 / 16,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                    "${element.website}",
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ):Container(),
-                                    element.workingDays != null && element.workingDays!.length>1 ?Container(
-                                      margin:
-                                      EdgeInsets.only(left: 16, right: 16),
-                                      padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color: Color(0xffebebeb))),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          SvgPicture.asset("assets/Depth 3, Frame 1-3.svg"),
-                                          SizedBox(width: 16,),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                margin: EdgeInsets.only(top: 8),
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Color(0xff4a4545),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    children: [
-                                                      TextSpan(
-                                                        text:
-                                                        "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length-1].day}",
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                margin: EdgeInsets.only(top: 8),
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Color(0xff4a4545),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    children: [
-                                                      TextSpan(
-                                                        text:
-                                                        "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length-1].closingTime}",
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ) : Container()
-                                  ],
+                                  ),
                                 ),
-                              )
+                              ),
                             ],
-                          )
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ): Container(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 6,
-                        margin: EdgeInsets.only(top: 8,bottom: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xffd9d9d9),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(left: 17,top: 8),
-                        child: IconButton(
-                          onPressed: (){
-                            _isFilterOpen = !_isFilterOpen;
-                          },
-                          icon : SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 17,top: 8),
-                        child: Text(
-                          "Filters",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff000000),
-                            height: 26/20,
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ),
-                      Spacer(),
-                      Container(
-                        margin: EdgeInsets.only(right: 14,top: 10),
-                        child: TextButton(onPressed: () {
-                          optionsTags.clear();
-                          floorOptionsTags.clear();
-                        },
-                        child: Text(
-                            "Clear All",
+                        
+                        Semantics(
+                          label:"",
+                          child: Container(
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding:EdgeInsets.only(left: 16,right: 16),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Semantics(
+
+                                          header: true,
+                                          sortKey: const OrdinalSortKey(6),
+                                          child: GestureDetector(
+                                            onTap: _slidePanelUp,
+                                            child: Text(
+                                              "Services",
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 23/16,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                        Semantics(
+                                            label:'Services',
+                                          sortKey: const OrdinalSortKey(7),
+                                          child: TextButton(onPressed: (){
+                                            setState(() {
+                                              print("Himanshuchecker");
+                                              //_isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                              _isFilterOpen = !_isFilterOpen;
+                                            });
+                                          }, child:Text(
+                                            "See All",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff4a4545),
+                                              height: 20/14,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ) ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 16),
+                                    child: Row(
+                                      children: [
+                                        Semantics(
+                                          label: "",
+                                          sortKey: const OrdinalSortKey(1),
+
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Container(width: 61,height: 56,
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                      border: Border.all(color: Color(0xffB3B3B3))
+                                                  ),child: SvgPicture.asset("assets/washroomservice.svg"),),
+                                                Text(
+                                                  "Washroom",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff4a4545),
+                                                    height: 20/14,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 16,),
+
+                                        Semantics(
+                                          label: "",
+                                          header: true,
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Container(width: 61,height: 56,
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                      border: Border.all(color: Color(0xffB3B3B3))
+                                                  ),child: SvgPicture.asset("assets/foodservice.svg"),),
+                                                Text(
+                                                  "Food",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff4a4545),
+                                                    height: 20/14,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 16,),
+                                        Semantics(
+                                          label:"",
+                                          header: true,
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Container(width: 61,height: 56,
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                      border: Border.all(color: Color(0xffB3B3B3))
+                                                  ),child: SvgPicture.asset("assets/accservice.svg"),),
+                                                Text(
+                                                  "Accessibility",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff4a4545),
+                                                    height: 20/14,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 16,),
+                                        Semantics(
+                                          label: "",
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Container(width: 61,height: 56,
+                                                  padding: EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                                                      border: Border.all(color: Color(0xffB3B3B3))
+                                                  ),child: SvgPicture.asset("assets/exitservice.svg"),),
+                                                Text(
+                                                  "Exit",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff4a4545),
+                                                    height: 20/14,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Semantics(
+                                    onDidLoseAccessibilityFocus: _slidePanelDown,
+                                    child: Container(
+                                      margin: EdgeInsets.only(top: 20),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: _slidePanelDown,
+                                            child: Container(
+                                                margin: EdgeInsets.only(left: 17),
+                                                child: Text(
+                                                  "Information",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff000000),
+                                                    height: 23/16,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                )
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.only(left: 16, right: 16),
+                                            padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(
+                                                      width: 1.0, color: Color(0xffebebeb))),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                SvgPicture.asset("assets/Depth 3, Frame 0.svg"),
+                                                SizedBox(width: 16,),
+                                                Container(
+                                                  width: screenWidth - 100,
+                                                  margin: EdgeInsets.only(top: 8),
+                                                  child: RichText(
+                                                    text: TextSpan(
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff4a4545),
+                                                        height: 25 / 16,
+                                                      ),
+                                                      children: [
+                                                        TextSpan(
+                                                          text:
+                                                          "${element.address}",
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Container(
+                                          //   margin:
+                                          //   EdgeInsets.only(left: 16, right: 16),
+                                          //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                          //   decoration: BoxDecoration(
+                                          //     border: Border(
+                                          //         bottom: BorderSide(
+                                          //             width: 1.0,
+                                          //             color: Color(0xffebebeb))),
+                                          //   ),
+                                          //   child: Row(
+                                          //     crossAxisAlignment:
+                                          //     CrossAxisAlignment.center,
+                                          //     children: [
+                                          //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                          //       SizedBox(width: 16,),
+                                          //       Container(
+                                          //         margin: EdgeInsets.only(top: 8),
+                                          //         child: RichText(
+                                          //           text: TextSpan(
+                                          //             style: const TextStyle(
+                                          //               fontFamily: "Roboto",
+                                          //               fontSize: 16,
+                                          //               fontWeight: FontWeight.w400,
+                                          //               color: Color(0xff4a4545),
+                                          //               height: 25 / 16,
+                                          //             ),
+                                          //             children: [
+                                          //               TextSpan(
+                                          //                 text:
+                                          //                 "6 Floors",
+                                          //               ),
+                                          //             ],
+                                          //           ),
+                                          //         ),
+                                          //       ),
+                                          //     ],
+                                          //   ),
+                                          // ),
+                                          element.phone != null?Container(
+                                            margin:
+                                            EdgeInsets.only(left: 16, right: 16),
+                                            padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(
+                                                      width: 1.0,
+                                                      color: Color(0xffebebeb))),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                SvgPicture.asset("assets/Depth 3, Frame 1-1.svg"),
+                                                SizedBox(width: 16,),
+                                                Container(
+                                                  margin: EdgeInsets.only(top: 8),
+                                                  child: RichText(
+                                                    text: TextSpan(
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff4a4545),
+                                                        height: 25 / 16,
+                                                      ),
+                                                      children: [
+                                                        TextSpan(
+                                                          text:
+                                                          "${element.phone}",
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ):Container(),
+                                          element.website != null ? Container(
+                                            margin:
+                                            EdgeInsets.only(left: 16, right: 16),
+                                            padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(
+                                                      width: 1.0,
+                                                      color: Color(0xffebebeb))),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                SvgPicture.asset("assets/Depth 3, Frame 1-2.svg"),
+                                                SizedBox(width: 16,),
+                                                Container(
+                                                  margin: EdgeInsets.only(top: 8),
+                                                  child: RichText(
+                                                    text: TextSpan(
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff4a4545),
+                                                        height: 25 / 16,
+                                                      ),
+                                                      children: [
+                                                        TextSpan(
+                                                          text:
+                                                          "${element.website}",
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ):Container(),
+                                          element.workingDays != null && element.workingDays!.length>1 ?Container(
+                                            margin:
+                                            EdgeInsets.only(left: 16, right: 16),
+                                            padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                  bottom: BorderSide(
+                                                      width: 1.0,
+                                                      color: Color(0xffebebeb))),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                SvgPicture.asset("assets/Depth 3, Frame 1-3.svg"),
+                                                SizedBox(width: 16,),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(
+                                                      margin: EdgeInsets.only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style: const TextStyle(
+                                                            fontFamily: "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xff4a4545),
+                                                            height: 25 / 16,
+                                                          ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length-1].day}",
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets.only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style: const TextStyle(
+                                                            fontFamily: "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xff4a4545),
+                                                            height: 25 / 16,
+                                                          ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length-1].closingTime}",
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ) : Container()
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              )
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ): Container(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 6,
+                          margin: EdgeInsets.only(top: 8,bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Color(0xffd9d9d9),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(left: 17,top: 8),
+                          child: IconButton(
+                            onPressed: (){
+                              _isFilterOpen = !_isFilterOpen;
+                            },
+                            icon : SvgPicture.asset("assets/Navigation_closeIcon.svg",height: 24,),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 17,top: 8),
+                          child: Text(
+                            "Filters",
                             style: const TextStyle(
                               fontFamily: "Roboto",
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff24b9b0),
-                              height: 20/14,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff000000),
+                              height: 26/20,
                             ),
                             textAlign: TextAlign.left,
                           ),
                         ),
-                      )
-                    ],
-                  ),
-
-                  Container(
-                    margin: EdgeInsets.only(top: 8,left: 16),
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      "Services",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff000000),
-                        height: 23/16,
-                      ),
-                      textAlign: TextAlign.start,
-                    ),
-                  ),
-                  //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
-                  // FutureBuilder<int>(
-                  //   future: getHiveBoxLength(),
-                  //   builder: (context, snapshot) {
-                  //     if (snapshot.connectionState != ConnectionState.waiting) {
-                  //       return Text('Error: ${snapshot.error}'); // or any loading indicator
-                  //     } else if (snapshot.hasError) {
-                  //       return Text('Error: ${snapshot.error}');
-                  //     } else {
-                  //       return Text('Length of Hive Box: ${snapshot.data}');
-                  //     }
-                  //   },
-                  // ),
-                  //---------------------------------------------------------------------------------------
-
-                  Container(
-                    child: ValueListenableBuilder(
-                      valueListenable: Hive.box('Filters').listenable(),
-                      builder: (BuildContext context, value, Widget? child) {
-                        //List<dynamic> aa = []
-                        if(value.length!=0){
-                          optionsTags = value.getAt(0);
-                          print("tags");
-                          print(optionsTags);
-
-                        }
-                        return ChipsChoice<String>.multiple(
-                          value: optionsTags,
-                          onChanged: (val) {
-                            print("Filter change${val}${value.values}");
-                            value.put(0, val);
-                            setState(() {
-                              optionsTags = val;
-                              onTagsChanged();
-                            });
+                        Spacer(),
+                        Container(
+                          margin: EdgeInsets.only(right: 14,top: 10),
+                          child: TextButton(onPressed: () {
+                            optionsTags.clear();
+                            floorOptionsTags.clear();
                           },
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: options,
-                            value: (i, v) => v,
-                            label: (i, v) => v,
-                            tooltip: (i, v) => v,
-                          ),
-                          choiceCheckmark: true,
-                          choiceStyle: C2ChipStyle.filled(
-                            selectedStyle: const C2ChipStyle(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(7),
-                                ),
-                                backgroundColor: Color(0XFFABF9F4)
+                          child: Text(
+                              "Clear All",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff24b9b0),
+                                height: 20/14,
+                              ),
+                              textAlign: TextAlign.left,
                             ),
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(7),
-                            ),
-                            borderStyle:  BorderStyle.solid
                           ),
-                          wrapped: false,
-                        );
-                      },
+                        )
+                      ],
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 8,left: 16),
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      "Choose Floor",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff000000),
-                        height: 23/16,
+
+                    Container(
+                      margin: EdgeInsets.only(top: 8,left: 16),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Services",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff000000),
+                          height: 23/16,
+                        ),
+                        textAlign: TextAlign.start,
                       ),
-                      textAlign: TextAlign.start,
                     ),
-                  ),
-                  Container(
-                    child: ValueListenableBuilder(
-                      valueListenable: Hive.box('Filters').listenable(),
-                      builder: (BuildContext context, value, Widget? child) {
-                        //List<dynamic> aa = []
-                        if(value.length==2){
-                          floorOptionsTags = value.getAt(1);
-                        }
-                        return ChipsChoice<String>.multiple(
-                          value: floorOptionsTags,
-                          onChanged: (val) {
-                            print("Filter change${val}${value.values}");
-                            value.put(1, val);
-                            setState(() {
-                              floorOptionsTags = val;
-                              onTagsChanged();
-                            });
-                          },
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: floorOptions,
-                            value: (i, v) => v,
-                            label: (i, v) => v,
-                            tooltip: (i, v) => v,
-                          ),
-                          choiceCheckmark: true,
-                          choiceStyle: C2ChipStyle.filled(
-                            selectedStyle: const C2ChipStyle(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(7),
-                                ),
-                                backgroundColor: Color(0XFFABF9F4)
+                    //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                    // FutureBuilder<int>(
+                    //   future: getHiveBoxLength(),
+                    //   builder: (context, snapshot) {
+                    //     if (snapshot.connectionState != ConnectionState.waiting) {
+                    //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                    //     } else if (snapshot.hasError) {
+                    //       return Text('Error: ${snapshot.error}');
+                    //     } else {
+                    //       return Text('Length of Hive Box: ${snapshot.data}');
+                    //     }
+                    //   },
+                    // ),
+                    //---------------------------------------------------------------------------------------
+
+                    Container(
+                      child: ValueListenableBuilder(
+                        valueListenable: Hive.box('Filters').listenable(),
+                        builder: (BuildContext context, value, Widget? child) {
+                          //List<dynamic> aa = []
+                          if(value.length!=0){
+                            optionsTags = value.getAt(0);
+                            print("tags");
+                            print(optionsTags);
+
+                          }
+                          return ChipsChoice<String>.multiple(
+                            value: optionsTags,
+                            onChanged: (val) {
+                              print("Filter change${val}${value.values}");
+                              value.put(0, val);
+                              setState(() {
+                                optionsTags = val;
+                                onTagsChanged();
+                              });
+                            },
+                            choiceItems: C2Choice.listFrom<String, String>(
+                              source: options,
+                              value: (i, v) => v,
+                              label: (i, v) => v,
+                              tooltip: (i, v) => v,
                             ),
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(7),
+                            choiceCheckmark: true,
+                            choiceStyle: C2ChipStyle.filled(
+                              selectedStyle: const C2ChipStyle(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                  backgroundColor: Color(0XFFABF9F4)
+                              ),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(7),
+                              ),
+                              borderStyle:  BorderStyle.solid
                             ),
-                          ),
-                          wrapped: false,
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 8,left: 16),
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      "Filter results ${filteredItems.length}",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff000000),
-                        height: 23/16,
+                            wrapped: false,
+                          );
+                        },
                       ),
-                      textAlign: TextAlign.start,
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 12),
-                    height: screenHeight-410,
-                    child: ListView.builder(
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return NavigatonFilterCard(LandmarkName: item.venueName!,
-                          LandmarkDistance: "90 m",
-                          LandmarkFloor: "Floor ${item.floor}",
-                          LandmarksubName: item.buildingName!,
-                        );
-                      },
+                    Container(
+                      margin: EdgeInsets.only(top: 8,left: 16),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Choose Floor",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff000000),
+                          height: 23/16,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
-                  )
-                ],
-              ),
-            )
+                    Container(
+                      child: ValueListenableBuilder(
+                        valueListenable: Hive.box('Filters').listenable(),
+                        builder: (BuildContext context, value, Widget? child) {
+                          //List<dynamic> aa = []
+                          if(value.length==2){
+                            floorOptionsTags = value.getAt(1);
+                          }
+                          return ChipsChoice<String>.multiple(
+                            value: floorOptionsTags,
+                            onChanged: (val) {
+                              print("Filter change${val}${value.values}");
+                              value.put(1, val);
+                              setState(() {
+                                floorOptionsTags = val;
+                                onTagsChanged();
+                              });
+                            },
+                            choiceItems: C2Choice.listFrom<String, String>(
+                              source: floorOptions,
+                              value: (i, v) => v,
+                              label: (i, v) => v,
+                              tooltip: (i, v) => v,
+                            ),
+                            choiceCheckmark: true,
+                            choiceStyle: C2ChipStyle.filled(
+                              selectedStyle: const C2ChipStyle(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                  backgroundColor: Color(0XFFABF9F4)
+                              ),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(7),
+                              ),
+                            ),
+                            wrapped: false,
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 8,left: 16),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Filter results ${filteredItems.length}",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff000000),
+                          height: 23/16,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 12),
+                      height: screenHeight-410,
+                      child: ListView.builder(
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          return NavigatonFilterCard(LandmarkName: item.venueName!,
+                            LandmarkDistance: "90 m",
+                            LandmarkFloor: "Floor ${item.floor}",
+                            LandmarksubName: item.buildingName!,
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ),
           )
         ));
   }
@@ -4282,53 +4342,55 @@ class _NavigationState extends State<Navigation> {
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
-              child: GoogleMap(
-                initialCameraPosition: _initialCameraPosition,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                zoomGesturesEnabled: true,
-                polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
-                polylines: singleroute[building.floor] != null
-                    ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
-                    : polylines.union(otherpolylines),
-                markers: getCombinedMarkers(),
-                onTap: (x) {
-                  mapState.interaction = true;
-                },
-                mapType: MapType.normal,
-                buildingsEnabled: false,
-                compassEnabled: true,
-                rotateGesturesEnabled: true,
-                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                onMapCreated: (controller) {
-                  controller.setMapStyle(maptheme);
-                  _googleMapController = controller;
-                  apiCalls();
-                  if (patch.isNotEmpty) {
-                    fitPolygonInScreen(patch.first);
-                  }
-                },
-                onCameraMove: (CameraPosition cameraPosition) {
-                  focusBuildingChecker(cameraPosition);
-                  //mapState.interaction = true;
-                  mapbearing = cameraPosition.bearing;
-                  if (!mapState.interaction) {
-                    mapState.zoom = cameraPosition.zoom;
-                  }
-                  if (true) {
-                    _updateMarkers(cameraPosition.zoom);
-                    //_updateBuilding(cameraPosition.zoom);
-                  }
-                },
-                onCameraIdle: () {
-                  if (!mapState.interaction) {
-                    mapState.interaction2 = true;
-                  }
-                },
-                onCameraMoveStarted: () {
-                  mapState.interaction2 = false;
-                },
+            MergeSemantics(
+              child: Container(
+                child: GoogleMap(
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
+                  polylines: singleroute[building.floor] != null
+                      ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
+                      : polylines.union(otherpolylines),
+                  markers: getCombinedMarkers(),
+                  onTap: (x) {
+                    mapState.interaction = true;
+                  },
+                  mapType: MapType.normal,
+                  buildingsEnabled: false,
+                  compassEnabled: true,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller) {
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    apiCalls();
+                    if (patch.isNotEmpty) {
+                      fitPolygonInScreen(patch.first);
+                    }
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
+                    focusBuildingChecker(cameraPosition);
+                    //mapState.interaction = true;
+                    mapbearing = cameraPosition.bearing;
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    if (true) {
+                      _updateMarkers(cameraPosition.zoom);
+                      //_updateBuilding(cameraPosition.zoom);
+                    }
+                  },
+                  onCameraIdle: () {
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    mapState.interaction2 = false;
+                  },
+                ),
               ),
             ),
             Positioned(
@@ -4373,64 +4435,70 @@ class _NavigationState extends State<Navigation> {
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  SpeedDial(
-                    child: Text(
-                      building.floor == 0 ? 'G' : '${building.floor}',
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff24b9b0),
-                        height: 19 / 16,
-                      ),
-                    ),
-                    activeIcon: Icons.close,
-                    backgroundColor: Colors.white,
-                    children: [
-                      for (int i = 0; i < building.numberOfFloors; i++)
-                        SpeedDialChild(
-                          child: Text(
-                            i == 0 ? 'G' : '${i}',
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              height: 19 / 16,
-                            ),
-                          ),
-                          backgroundColor: pathMarkers[i] == null
-                              ? Colors.white
-                              : Color(0xff24b9b0),
-                          onTap: () {
-                            building.floor = i;
-                            createRooms(building.polyLineData!, building.floor);
-                            if (pathMarkers[i] != null) {
-                              setCameraPosition(pathMarkers[i]!);
-                            }
-                            building.landmarkdata!.then((value) {
-                              createMarkers(value, building.floor);
-                            });
-                          },
+                  Semantics(
+                    sortKey: const OrdinalSortKey(2),
+                    child: SpeedDial(
+                      child: Text(
+                        building.floor == 0 ? 'G' : '${building.floor}',
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff24b9b0),
+                          height: 19 / 16,
                         ),
-                    ],
+                      ),
+                      activeIcon: Icons.close,
+                      backgroundColor: Colors.white,
+                      children: [
+                        for (int i = 0; i < building.numberOfFloors; i++)
+                          SpeedDialChild(
+                            child: Text(
+                              i == 0 ? 'G' : '${i}',
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                height: 19 / 16,
+                              ),
+                            ),
+                            backgroundColor: pathMarkers[i] == null
+                                ? Colors.white
+                                : Color(0xff24b9b0),
+                            onTap: () {
+                              building.floor = i;
+                              createRooms(building.polyLineData!, building.floor);
+                              if (pathMarkers[i] != null) {
+                                setCameraPosition(pathMarkers[i]!);
+                              }
+                              building.landmarkdata!.then((value) {
+                                createMarkers(value, building.floor);
+                              });
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 28.0), // Adjust the height as needed
-                  FloatingActionButton(
-                    onPressed: () {
-                      if (markers.length > 0)
-                        markers[0] = customMarker.rotate(0, markers[0]);
-                      if (user.initialallyLocalised) {
-                        mapState.interaction = !mapState.interaction;
-                      }
-                      mapState.zoom = 21;
-                      fitPolygonInScreen(patch.first);
-                    },
-                    child: Icon(
-                      Icons.my_location_sharp,
-                      color: Colors.black,
+                  Semantics(
+                    sortKey: const OrdinalSortKey(3),
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        if (markers.length > 0)
+                          markers[0] = customMarker.rotate(0, markers[0]);
+                        if (user.initialallyLocalised) {
+                          mapState.interaction = !mapState.interaction;
+                        }
+                        mapState.zoom = 21;
+                        fitPolygonInScreen(patch.first);
+                      },
+                      child: Icon(
+                        Icons.my_location_sharp,
+                        color: Colors.black,
+                      ),
+                      backgroundColor:
+                          Colors.white, // Set the background color of the FAB
                     ),
-                    backgroundColor:
-                        Colors.white, // Set the background color of the FAB
                   ),
                 ],
               ),
@@ -4441,11 +4509,15 @@ class _NavigationState extends State<Navigation> {
                 right: 16,
                 child: _isLandmarkPanelOpen
                     ? Container()
-                    : HomepageSearch(
-                        onVenueClicked: onLandmarkVenueClicked,
-                        fromSourceAndDestinationPage:
-                            fromSourceAndDestinationPage,
-                      )),
+                    : Semantics(
+                      // header: true,
+                      sortKey: const OrdinalSortKey(0),
+                      child: HomepageSearch(
+                          onVenueClicked: onLandmarkVenueClicked,
+                          fromSourceAndDestinationPage:
+                              fromSourceAndDestinationPage,
+                        ),
+                    )),
             FutureBuilder(
               future: building.landmarkdata,
               builder: (context, snapshot) {
@@ -4460,7 +4532,9 @@ class _NavigationState extends State<Navigation> {
             routeDeatilPannel(),
             navigationPannel(),
             reroutePannel(),
-            buildingDetailPannel(),
+            Semantics(
+                
+                child: buildingDetailPannel()),
 
           ],
         ),

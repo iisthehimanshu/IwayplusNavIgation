@@ -843,9 +843,9 @@ class _NavigationState extends State<Navigation> {
     polylines.clear();
     int xdiff = 0;
     int ydiff = 0;
-    if(floor != 0){
-      List<PolyArray> prevFloorLifts = findLift(floor-1, floorData)
-    }
+    // if(floor != 0){
+    //   List<PolyArray> prevFloorLifts = findLift(floor-1, floorData)
+    // }
     List<PolyArray>? FloorPolyArray = value.polyline!.floors![0].polyArray;
     for (int j = 0; j < value.polyline!.floors!.length; j++) {
       if (value.polyline!.floors![j].floor ==

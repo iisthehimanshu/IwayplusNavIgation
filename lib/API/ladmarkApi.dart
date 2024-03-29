@@ -16,11 +16,12 @@ class landmarkApi {
 
 
   Future<land> fetchLandmarkData({String? id = null}) async {
+    print("landmark");
     final LandMarkBox = LandMarkApiModelBox.getData();
 
     if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
-      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return land.fromJson(responseBody);
     }
 

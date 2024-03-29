@@ -346,6 +346,7 @@ class _NavigationState extends State<Navigation> {
     await PolyLineApi().fetchPolyData().then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
+      building.numberOfFloors = value.polyline!.floors!.length;
       createRooms(value, building.floor);
     });
 
@@ -398,59 +399,19 @@ class _NavigationState extends State<Navigation> {
         _timer.cancel();
       });
     });
-    // buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
-    // for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
-    //   print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
-    //   buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
-    //     await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
-    //       createotherPatch(value);
-    //     });
-    //
-    //     await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
-    //       createotherRooms(value, 0);
-    //     });
-    //
-    //     await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       Map<int, LatLng> coordinates = {};
-    //       for (int i = 0; i < value.landmarks!.length; i++) {
-    //         if (value.landmarks![i].element!.subType == "AR") {
-    //           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-    //               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-    //                   double.parse(value.landmarks![i].properties!.longitude!));
-    //         }
-    //       }
-    //       createotherARPatch(coordinates,value.landmarks![0].buildingID!);
-    //     });
-    //   });
-    // }
-    // if(!checkedForPolyineUpdated){
-    //   print("POLYLINE CHECK");
-    //   PolyLineApi().checkForUpdate();
-    //   checkedForPolyineUpdated = !checkedForPolyineUpdated;
-    // }
-    // if(!checkedForPatchDataUpdated){
-    //   print("PATCHDATA CHECK");
-    //   patchAPI().checkForUpdate();
-    //   checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
-    // }
-    // if(!checkedForLandmarkDataUpdated){
-    //   print("LANDMARK DATA CHECK");
-    //   landmarkApi().checkForUpdate();
-    //   checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
-    // }
+
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       if(key != buildingAllApi.getSelectedBuildingID()){
         buildingAllApi.setStoredString(key).then((value)async{
           await patchAPI().fetchPatchData(id: key).then((value) {
-            building.patchData[value.patchData!.buildingID!] = value;
+            //building.patchData[value.patchData!.buildingID!] = value;
             createotherPatch(value);
           });
 
           await PolyLineApi().fetchPolyData(id: key).then((value) {
-            building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
             createotherRooms(value, 0);
+            //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
+
           });
 
           await landmarkApi().fetchLandmarkData(id: key).then((value)async{
@@ -864,20 +825,34 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
+  List<PolyArray> findLift(int floor, Floors floorData ){
+    List<PolyArray> lifts = [];
+    floorData.polyArray!.forEach((element) { 
+      if(element.name!.toLowerCase().contains("lift")){
+        lifts.add(element);
+      }
+    });
+    return lifts;
+  }
+
   void createRooms(polylinedata value, int floor) {
     closedpolygons.clear();
     selectedroomMarker.clear();
     _isLandmarkPanelOpen = false;
     building.selectedLandmarkID = null;
     polylines.clear();
+    int xdiff = 0;
+    int ydiff = 0;
+    if(floor != 0){
+      List<PolyArray> prevFloorLifts = findLift(floor-1, floorData)
+    }
     List<PolyArray>? FloorPolyArray = value.polyline!.floors![0].polyArray;
     for (int j = 0; j < value.polyline!.floors!.length; j++) {
       if (value.polyline!.floors![j].floor ==
-          tools.numericalToAlphabetical(floor) && value.polyline!.buildingID == buildingAllApi.getSelectedBuildingID()) {
+          tools.numericalToAlphabetical(floor)) {
         FloorPolyArray = value.polyline!.floors![j].polyArray;
       }
     }
-    building.numberOfFloors = value.polyline!.floors!.length;
     setState(() {
       if (FloorPolyArray != null) {
         for (PolyArray polyArray in FloorPolyArray) {
@@ -928,6 +903,7 @@ class _NavigationState extends State<Navigation> {
                         _isRoutePanelOpen = false;
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
+                        PathState.directions = [];
                         addselectedRoomMarker(coordinates);
                       }
                     });
@@ -944,33 +920,23 @@ class _NavigationState extends State<Navigation> {
                   // Modify the color and opacity based on the selectedRoomId
 
                   strokeColor: Colors.black,
-                  fillColor: Color(0xffc2f1d5),
+                  fillColor: Color(0xffC2F1D5),
                   consumeTapEvents: true,
                 ));
               }
-            } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+            }else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                    polygonId: PolygonId(polyArray.id!),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                  polygonId: PolygonId(polyArray.id!),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: Color(0xffFFFF00),
-                    consumeTapEvents: true,
-                    onTap: () {
-                      if (building.selectedLandmarkID != polyArray.id) {
-                        building.selectedLandmarkID = polyArray.id;
-                        building.ignoredMarker.clear();
-                        building.ignoredMarker.add(polyArray.id!);
-                        _isRoutePanelOpen = false;
-                        singleroute.clear();
-                        _isLandmarkPanelOpen = true;
-                        addselectedRoomMarker(coordinates);
-                      }
-                    }));
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFFFF00),
+                  consumeTapEvents: true,
+                ));
               }
             } else if (polyArray.cubicleName == "Male Washroom") {
               if (coordinates.length > 2) {
@@ -1096,7 +1062,7 @@ class _NavigationState extends State<Navigation> {
                 consumeTapEvents: true,
               ));
             }
-          } else {
+          }else {
             polylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
@@ -1107,9 +1073,6 @@ class _NavigationState extends State<Navigation> {
         }
       }
     });
-    try {
-      fitPolygonInScreen(patch.first);
-    } catch (e) {}
   }
 
 
@@ -1366,7 +1329,7 @@ class _NavigationState extends State<Navigation> {
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
-      if (landmarks[i].floor == floor) {
+      if (landmarks[i].floor == floor && landmarks[i].buildingID == buildingAllApi.getStoredString()) {
         if (landmarks[i].element!.type == "Rooms" &&
             landmarks[i].element!.subType != "main entry" &&
             landmarks[i].coordinateX != null &&
@@ -2153,15 +2116,9 @@ class _NavigationState extends State<Navigation> {
     PathState.path[floor] = path;
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
-    if(PathState.directions.isNotEmpty){
-      for(int i = directions.length ; i>=0 ; i--){
-        PathState.directions.add(directions[i-1]);
-      }
-    }else{
-      directions.forEach((element) {
-        PathState.directions.add(element);
-      });
-    }
+    directions.forEach((element) {
+      PathState.directions.add(element);
+    });
 
     await building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
@@ -2745,6 +2702,7 @@ class _NavigationState extends State<Navigation> {
                               PathState.sourceBid = "";
                               PathState.destinationBid = "";
                               singleroute.clear();
+                              PathState.directions = [];
                               fitPolygonInScreen(patch.first);
                             },
                             icon: Icon(
@@ -4304,13 +4262,14 @@ class _NavigationState extends State<Navigation> {
                 onMapCreated: (controller) {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
+                  print("tumhari galti hai sb saalo");
                   apiCalls();
                   if (patch.isNotEmpty) {
                     fitPolygonInScreen(patch.first);
                   }
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  focusBuildingChecker(cameraPosition);
+                  //focusBuildingChecker(cameraPosition);
                   //mapState.interaction = true;
                   mapbearing = cameraPosition.bearing;
                   if (!mapState.interaction) {

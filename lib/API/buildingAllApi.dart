@@ -107,7 +107,6 @@ class buildingAllApi {
 
   // Method to get the stored string
   static String getStoredString() {
-    print(selectedID);
     return selectedID;
   }
 
@@ -127,6 +126,7 @@ class buildingAllApi {
   }
 
   static void setSelectedBuildingID(String value)async{
+    print("inside inside set id $value");
     selectedBuildingID = value;
     return;
   }

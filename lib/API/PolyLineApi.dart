@@ -67,12 +67,13 @@ class PolyLineApi {
 
 
   Future<polylinedata> fetchPolyData({String? id = null}) async {
+    print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();
 
     if(PolyLineBox.containsKey(buildingAllApi.getStoredString())){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
-      Map<String, dynamic> responseBody = PolyLineBox.get(buildingAllApi.getStoredString())!.responseBody;
+      Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return polylinedata.fromJson(responseBody);
     }
 

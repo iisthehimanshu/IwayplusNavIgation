@@ -14,6 +14,7 @@ class beaconapi {
   String token = "";
 
   Future<List<beacon>> fetchBeaconData() async {
+    print("beacon");
     final BeaconBox = BeaconAPIModelBOX.getData();
     if(BeaconBox.containsKey(buildingAllApi.getStoredString())){
       print("BEACON DATA FROM DATABASE");

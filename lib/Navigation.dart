@@ -400,34 +400,32 @@ class _NavigationState extends State<Navigation> {
       });
     });
 
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       if(key != buildingAllApi.getSelectedBuildingID()){
-        buildingAllApi.setStoredString(key).then((value)async{
-          await patchAPI().fetchPatchData(id: key).then((value) {
-            //building.patchData[value.patchData!.buildingID!] = value;
-            createotherPatch(value);
+        await patchAPI().fetchPatchData(id: key).then((value) {
+          //building.patchData[value.patchData!.buildingID!] = value;
+          createotherPatch(value);
+        });
+
+        await PolyLineApi().fetchPolyData(id: key).then((value) {
+          createotherRooms(value, 0);
+          //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
+
+        });
+
+        await landmarkApi().fetchLandmarkData(id: key).then((value)async{
+          await building.landmarkdata!.then((Value){
+            //Value.mergeLandmarks(value.landmarks);
           });
-
-          await PolyLineApi().fetchPolyData(id: key).then((value) {
-            createotherRooms(value, 0);
-            //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
-
-          });
-
-          await landmarkApi().fetchLandmarkData(id: key).then((value)async{
-            await building.landmarkdata!.then((Value){
-              Value.mergeLandmarks(value.landmarks);
-            });
-            Map<int, LatLng> coordinates = {};
-            for (int i = 0; i < value.landmarks!.length; i++) {
-              if (value.landmarks![i].element!.subType == "AR") {
-                coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-                    LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-                        double.parse(value.landmarks![i].properties!.longitude!));
-              }
+          Map<int, LatLng> coordinates = {};
+          for (int i = 0; i < value.landmarks!.length; i++) {
+            if (value.landmarks![i].element!.subType == "AR") {
+              coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+                  LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+                      double.parse(value.landmarks![i].properties!.longitude!));
             }
-            createotherARPatch(coordinates,value.landmarks![0].buildingID!);
-          });
+          }
+          createotherARPatch(coordinates,value.landmarks![0].buildingID!);
         });
       }
     });
@@ -2124,7 +2122,7 @@ class _NavigationState extends State<Navigation> {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 20, numCols, floor);
     });
-
+    print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
       List<double> svalue = tools.localtoglobal(sourceX, sourceY);
       List<double> dvalue = tools.localtoglobal(destinationX, destinationY);
@@ -4126,6 +4124,8 @@ class _NavigationState extends State<Navigation> {
   void fromSourceAndDestinationPage(List<String> value) {
     markers.clear();
     building.landmarkdata!.then((land) {
+      print("Himanshuchecker ${land.landmarksMap}");
+      print("Himanshuchecker ${value[0]}");
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {

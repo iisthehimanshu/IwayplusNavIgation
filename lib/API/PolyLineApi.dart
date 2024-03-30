@@ -70,7 +70,7 @@ class PolyLineApi {
     print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();
 
-    if(PolyLineBox.containsKey(buildingAllApi.getStoredString())){
+    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString())){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;

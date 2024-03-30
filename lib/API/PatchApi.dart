@@ -61,7 +61,7 @@ class patchAPI {
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
     print("patch");
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;

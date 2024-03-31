@@ -6,22 +6,21 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 
-class tools{
-
+class tools {
   static List<PDM.Coordinates>? _cachedCordData;
   static List<Point<double>> corners = [];
   static double AngleBetweenBuildingandGlobalNorth = 0.0;
 
-  static patchDataModel Data = patchDataModel();
+  static patchDataModel globalData = patchDataModel();
 
   static Future<void> fetchData() async {
-    await patchAPI().fetchPatchData().then((value){
+    await patchAPI().fetchPatchData().then((value) {
       print("object ${value.patchData!.coordinates.toString()}");
       _cachedCordData = value.patchData!.coordinates;
     });
   }
 
-  static  LatLng calculateRoomCenterinLatLng(List<LatLng> roomCoordinates) {
+  static LatLng calculateRoomCenterinLatLng(List<LatLng> roomCoordinates) {
     double latSum = 0.0;
     double lngSum = 0.0;
 
@@ -35,7 +34,7 @@ class tools{
     return LatLng(latCenter, lngCenter);
   }
 
-  static  List<double> calculateRoomCenterinList(List<LatLng> roomCoordinates) {
+  static List<double> calculateRoomCenterinList(List<LatLng> roomCoordinates) {
     double latSum = 0.0;
     double lngSum = 0.0;
 
@@ -78,12 +77,21 @@ class tools{
     }
   }
 
-  static List<double> localtoglobal(int x, int y,){
-
+  static List<double> localtoglobal(int x, int y,
+      {PDM.patchDataModel? patchData = null}) {
+    PDM.patchDataModel Data = PDM.patchDataModel();
+    if (patchData != null) {
+      Data = patchData;
+    } else {
+      Data = globalData;
+    }
     int floor = 0;
 
-    List<double> diff = [0,0,0,];
-
+    List<double> diff = [
+      0,
+      0,
+      0,
+    ];
 
     // {"coordinates" : patchDataApi().fetchedPatchData!.patchData!.coordinates! } ;
 
@@ -175,31 +183,37 @@ class tools{
     }
 
     double ang = theta + out;
-    double dist = distance(ref[leastLat], localRef) * 0.3048; // to convert to meter
+    double dist =
+        distance(ref[leastLat], localRef) * 0.3048; // to convert to meter
 
     double ver = dist * sin(ang * pi / 180.0);
     double hor = dist * cos(ang * pi / 180.0);
 
-    Map<String, double> finalCoords = obtainCoordinates(ref[leastLat], ver, hor);
+    Map<String, double> finalCoords =
+        obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
 
-  static double getHaversineDistance(Map<String, double> firstLocation, Map<String, double> secondLocation) {
+  static double getHaversineDistance(
+      Map<String, double> firstLocation, Map<String, double> secondLocation) {
     const earthRadius = 6371; // km
-    double diffLat = ((secondLocation["lat"]! - firstLocation["lat"]!) * pi) / 180;
-    double difflon = ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
+    double diffLat =
+        ((secondLocation["lat"]! - firstLocation["lat"]!) * pi) / 180;
+    double difflon =
+        ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-        cos((secondLocation["lat"]! * pi) / 180) *
-        sin(difflon / 2) *
-        sin(difflon / 2) +
+            cos((secondLocation["lat"]! * pi) / 180) *
+            sin(difflon / 2) *
+            sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
     return distance;
   }
 
-  static Map<String, double> obtainCoordinates(Map<String, double> reference, double vertical, double horizontal) {
+  static Map<String, double> obtainCoordinates(
+      Map<String, double> reference, double vertical, double horizontal) {
     const double R = 6378137; // Earth’s radius, sphere
     double dLat = vertical / R;
     double dLon = horizontal / (R * cos((pi * reference["lat"]!) / 180));
@@ -208,9 +222,10 @@ class tools{
     return {"lat": latA, "lon": lonA};
   }
 
-  static double distance(Map<String, double> first, Map<String, double> second) {
-    double dist1 = pow((second["localy"]! - first["localy"]!), 2) as double ;
-    double dist2 = pow((second["localx"]! - first["localx"]!), 2) as double ;
+  static double distance(
+      Map<String, double> first, Map<String, double> second) {
+    double dist1 = pow((second["localy"]! - first["localy"]!), 2) as double;
+    double dist2 = pow((second["localx"]! - first["localx"]!), 2) as double;
     double dist = dist1 + dist2;
     //  pow((second["localy"] - first["localy"]), 2) as double + pow((second["localx"] - first["localx"]), 2) as double ;
     return sqrt(dist);
@@ -240,9 +255,8 @@ class tools{
     } else {
       return "None";
     }
-
   }
-  
+
   static double calculateAngle(List<int> a, List<int> b, List<int> c) {
     double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
     double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
@@ -255,14 +269,16 @@ class tools{
 
     return angle;
   }
-  static List<Map<String,int>> getDirections(List<int> path,int columns) {
-    List<Map<String,int>> directions = [{"Straight":1}];
+
+  static List<Map<String, int>> getDirections(List<int> path, int columns) {
+    List<Map<String, int>> directions = [
+      {"Straight": 1}
+    ];
 
     for (int i = 1; i < path.length - 1; i++) {
       int prev = path[i - 1];
       int current = path[i];
       int next = path[i + 1];
-
 
       // Compare current and next nodes' indices to determine direction
 
@@ -273,50 +289,57 @@ class tools{
       int nextrrow = next % columns;
       int nextrcol = next ~/ columns;
 
-      double angle = calculateAngle([prevrow,prevrcol],[currrow,currcol],[nextrrow,nextrcol]);
+      double angle = calculateAngle(
+          [prevrow, prevrcol], [currrow, currcol], [nextrrow, nextrcol]);
       String dir = angleToClocks(angle);
-      if(directions.isNotEmpty){
-        if(directions.last.keys.first != dir){
-          Map<String,int> innermap = {dir:1};
+      if (directions.isNotEmpty) {
+        if (directions.last.keys.first != dir) {
+          Map<String, int> innermap = {dir: 1};
           directions.add(innermap);
-        }else{
-          directions.last[dir]  = directions.last[dir]! + 1;
+        } else {
+          directions.last[dir] = directions.last[dir]! + 1;
         }
-      }else{
-        Map<String,int> innermap = {dir:1};
+      } else {
+        Map<String, int> innermap = {dir: 1};
         directions.add(innermap);
       }
     }
     String dir = "Straight";
-    if(directions.isNotEmpty){
-      if(directions.last.keys.first != dir){
-        Map<String,int> innermap = {dir:1};
+    if (directions.isNotEmpty) {
+      if (directions.last.keys.first != dir) {
+        Map<String, int> innermap = {dir: 1};
         directions.add(innermap);
-      }else{
-        directions.last[dir]  = directions.last[dir]! + 1;
+      } else {
+        directions.last[dir] = directions.last[dir]! + 1;
       }
-    }else{
-      Map<String,int> innermap = {dir:1};
+    } else {
+      Map<String, int> innermap = {dir: 1};
       directions.add(innermap);
     }
     return directions;
   }
 
-  static List<Landmarks> findNearbyLandmark(List<int>path, Map<String, Landmarks> landmarksMap, int distance, int numCols, int floor){
+  static List<Landmarks> findNearbyLandmark(
+      List<int> path,
+      Map<String, Landmarks> landmarksMap,
+      int distance,
+      int numCols,
+      int floor) {
     print("called");
     List<Landmarks> nearbyLandmarks = [];
-    for(int node in path){
+    for (int node in path) {
       landmarksMap.forEach((key, value) {
-        if(floor == value.floor){
+        if (floor == value.floor) {
           List<int> pCoord = computeCellCoordinates(node, numCols);
           double d = 0.0;
-          if(value.doorX == null){
-            d = calculateDistance(pCoord, [value.coordinateX!,value.coordinateY!]);
-          }else{
-            d = calculateDistance(pCoord, [value.doorX!,value.doorY!]);
+          if (value.doorX == null) {
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+          } else {
+            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
-          if(d<distance){
-            if(!nearbyLandmarks.contains(value)){
+          if (d < distance) {
+            if (!nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }
           }
@@ -329,10 +352,10 @@ class tools{
   static List<int> computeCellCoordinates(int node, int numCols) {
     int row = (node % numCols);
     int col = (node ~/ numCols);
-    return [row,col];
+    return [row, col];
   }
 
-  static double calculateDistance(List<int> p1 , List<int> p2) {
+  static double calculateDistance(List<int> p1, List<int> p2) {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 

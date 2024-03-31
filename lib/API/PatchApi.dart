@@ -89,7 +89,7 @@ class patchAPI {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       final patchData = PatchAPIModel(responseBody: responseBody);
-      PatchBox.put(buildingAllApi.getStoredString(),patchData);
+      PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();
       print("PATCH API DATA FROM API");
       return patchDataModel.fromJson(responseBody);

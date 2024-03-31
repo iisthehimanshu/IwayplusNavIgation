@@ -101,7 +101,7 @@ class PolyLineApi {
       final polyLineData = PolyLineAPIModel(responseBody: responseBody);
 
       print("POLYLINE API DATA FROM API");
-      PolyLineBox.put(buildingAllApi.getStoredString(),polyLineData);
+      PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
       polyLineData.save();
       return polylinedata.fromJson(responseBody);
     } else {

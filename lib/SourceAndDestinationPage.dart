@@ -4,6 +4,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
+import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +22,7 @@ class SourceAndDestinationPage extends StatefulWidget {
 
 class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
 
-  late land landmarkData;
+  land landmarkData = land();
 
   String SourceName = "";
   String DestinationName = "";
@@ -34,7 +35,20 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
   @override
   void initState() {
     super.initState();
-    fetchlist();
+    fetchlist().then((value){
+      setState(() {
+        if(widget.SourceID == ""){
+          SourceName = "Select source";
+        }else{
+          SourceName = landmarkData.landmarksMap![widget.SourceID]!.name!;
+        }
+        if(widget.DestinationID == ""){
+          DestinationName = "Search destination";
+        }else{
+          DestinationName = landmarkData.landmarksMap![widget.DestinationID]!.name!;
+        }
+      });
+    });
     fetchRecents();
     recentResults.add(Container(
       margin: EdgeInsets.only(left:16, right: 16, top: 8),
@@ -74,20 +88,10 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
     ));
   }
 
-  void fetchlist()async{
-    await landmarkApi().fetchLandmarkData().then((value){
-      landmarkData = value;
-      setState(() {
-        if(widget.SourceID == ""){
-          SourceName = "Select source";
-        }else{
-          SourceName = value.landmarksMap![widget.SourceID]!.name!;
-        }
-        if(widget.DestinationID == ""){
-          DestinationName = "Search destination";
-        }else{
-          DestinationName = value.landmarksMap![widget.DestinationID]!.name!;
-        }
+  Future<void> fetchlist()async{
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
+      await landmarkApi().fetchLandmarkData(id: key).then((value){
+        landmarkData.mergeLandmarks(value.landmarks);
       });
     });
   }
@@ -97,7 +101,20 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
     widget.SourceID = widget.DestinationID;
     widget.DestinationID = temp;
 
-    fetchlist();
+    fetchlist().then((value){
+      setState(() {
+        if(widget.SourceID == ""){
+          SourceName = "Select source";
+        }else{
+          SourceName = landmarkData.landmarksMap![widget.SourceID]!.name!;
+        }
+        if(widget.DestinationID == ""){
+          DestinationName = "Search destination";
+        }else{
+          DestinationName = landmarkData.landmarksMap![widget.DestinationID]!.name!;
+        }
+      });
+    });
   }
 
 
@@ -113,13 +130,13 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
       recent = jsonDecode(savedData);
       setState(() {
         for(List<dynamic> value in recent){
-          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2],));
+          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2], bid: value[3],));
         }
       });
     }
   }
 
-  void onVenueClicked(String name, String location, String ID){
+  void onVenueClicked(String name, String location, String ID,String bid){
     fillFromRecent(name, ID);
   }
 
@@ -133,6 +150,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
         DestinationName = name;
       }
       if(widget.SourceID != "" && widget.DestinationID != ""){
+        print("h1");
         Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
       }
 
@@ -174,6 +192,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                   children: [
                     Container(
                       child: IconButton(onPressed: (){
+                        print("h2");
                         Navigator.pop(context);
                       }, icon: Icon(Icons.arrow_back_ios_new,size: 24,)),
                     ),
@@ -207,6 +226,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                                   print(value);
                                   //SourceName = landmarkData.landmarksMap![value]!.name!;
                                   if(widget.SourceID != "" && widget.DestinationID != ""){
+                                    print("h3");
                                     Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
                                   }
                                 });
@@ -239,6 +259,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                                   widget.DestinationID = value;
                                   DestinationName = landmarkData.landmarksMap![value]!.name!;
                                   if(widget.SourceID != "" && widget.DestinationID != ""){
+                                    print("h4");
                                     Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
                                   }
                                 });

@@ -45,15 +45,12 @@ class land {
       landmarks ??= [];
       landmarks!.addAll(landmarksList);
       // Update landmarksMap and landmarksNameMap accordingly
-      if (landmarksMap == null) {
-        landmarksMap = {};
-      }
-      if (landmarksNameMap == null) {
-        landmarksNameMap = {};
-      }
+      landmarksMap ??= {};
+      landmarksNameMap ??= {};
       for (var landmark in landmarksList) {
         if (landmark.properties!.polyId != null) {
           landmarksMap![landmark.properties!.polyId!] = landmark;
+
         }
         if (landmark.name != null) {
           landmarkNames ??= [];

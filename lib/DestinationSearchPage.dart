@@ -83,10 +83,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     });
   }
 
-  void addtoRecents(String name, String location, String ID)async{
+  void addtoRecents(String name, String location, String ID, String bid)async{
     if (!recent.any((element) => element[0] == name && element[1] == location)) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      recent.add([name,location,ID]);
+      recent.add([name,location,ID,bid]);
       await prefs.setString('recents', jsonEncode(recent)).then((value){
         print("saved $name");
       });
@@ -107,7 +107,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           if(searchResults.length<10){
             if(value.name != null && value.element!.subType != "beacons"){
               if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!,));
+                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,));
               }
             }
           }else{
@@ -127,15 +127,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       recent = jsonDecode(savedData);
       setState(() {
         for(List<dynamic> value in recent){
-          recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2],));
-          searchResults = recentResults;
+          if(buildingAllApi.getStoredAllBuildingID()[value[3]] != null){
+            recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2], bid: value[3],));
+            searchResults = recentResults;
+          }
         }
       });
     }
   }
 
-  void onVenueClicked(String name, String location, String ID){
-    addtoRecents(name, location,ID);
+  void onVenueClicked(String name, String location, String ID, String bid){
+    addtoRecents(name, location,ID,bid);
     Navigator.pop(context,ID);
   }
 

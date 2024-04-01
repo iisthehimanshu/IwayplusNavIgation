@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:iwayplusnav/SourceAndDestinationPage.dart';
 
 import '../DestinationSearchPage.dart';
@@ -56,27 +57,31 @@ class _HomepageSearchState extends State<HomepageSearch> {
               ),
             ),
             Expanded(
-              child: InkWell(
-                onTap: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
-                  ).then((value){
-                    widget.onVenueClicked(value);
-                  });
-                },
-                child: Container(
-                    child: Text(
-                  widget.searchText,
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff8e8d8d),
-                    height: 25 / 16,
-                  ),
-                )),
+              child: Semantics(
+                label: "Search Bar",
+                sortKey: const OrdinalSortKey(1),
+                child: InkWell(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
+                    ).then((value){
+                      widget.onVenueClicked(value);
+                    });
+                  },
+                  child: Container(
+                      child: Text(
+                    widget.searchText,
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff8e8d8d),
+                      height: 25 / 16,
+                    ),
+                  )),
+                ),
               ),
             ),
             Container(

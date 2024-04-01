@@ -12,6 +12,7 @@ class BuildingAPI {
   String token = "";
 
   Future<Building> fetchBuildData() async {
+    print("buildingapi");
     // final LandMarkBox = LandMarkApiModelBox.getData();
     //
     // if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){

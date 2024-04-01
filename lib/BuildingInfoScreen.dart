@@ -272,6 +272,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                 onTap: (){
                                   print("WilsonChecker");
                                   buildingAllApi.setStoredString(currentData.sId!);
+                                  buildingAllApi.setSelectedBuildingID(currentData.sId!);
                                   buildingAllApi.setStoredAllBuildingID(allBuildingID);
                                   Navigator.push(
                                     context,

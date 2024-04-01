@@ -14,16 +14,19 @@ class beaconapi {
   String token = "";
 
   Future<List<beacon>> fetchBeaconData() async {
+    print("beacon");
     final BeaconBox = BeaconAPIModelBOX.getData();
     if(BeaconBox.containsKey(buildingAllApi.getStoredString())){
       print("BEACON DATA FROM DATABASE");
-      print(BeaconBox.length);
-      List<dynamic> responseBody = BeaconBox.getAt(0)!.responseBody;
+      print(BeaconBox.keys);
+      print(BeaconBox.values);
+      List<dynamic> responseBody = BeaconBox.get(buildingAllApi.getStoredString())!.responseBody;
       List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
       return beaconList;
     }
 
-    await guestApi().guestlogin().then((value){
+    try{
+      await guestApi().guestlogin().then((value){
       if(value.accessToken != null) {
         token = value.accessToken!;
       }
@@ -44,15 +47,19 @@ class beaconapi {
     if (response.statusCode == 200) {
       print("BEACON DATA FROM API");
       List<dynamic> responseBody = json.decode(response.body);
-      final beaconData = BeaconAPIModel(responseBody: responseBody);
-      BeaconBox.add(beaconData);
-      beaconData.save();
       List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
+
+      final beaconData = BeaconAPIModel(responseBody: responseBody);
+      BeaconBox.put(beaconList[0].buildingID,beaconData);
+      beaconData.save();
 
       return beaconList;
     } else {
       print(Exception);
       throw Exception('Failed to load beacon data');
+    }}catch(e){
+      List<beacon> beaconlist = [];
+      return beaconlist;
     }
   }
 }

@@ -11,6 +11,7 @@ class Building{
   HashMap<int, List<int>> nonWalkable = HashMap();
   Map<int,List<int>> floorDimenssion = Map();
   polylinedata? polyLineData = null;
+  Map<String,polylinedata> polylinedatamap = Map();
   Future<land>? landmarkdata = null;
   List<beacon>? beacondata = null;
   String? selectedLandmarkID = null;

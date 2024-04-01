@@ -59,11 +59,12 @@ class patchAPI {
   }
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+    print("patch");
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
-      Map<String, dynamic> responseBody = PatchBox.get(buildingAllApi.getStoredString())!.responseBody;
+      Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return patchDataModel.fromJson(responseBody);
     }
 
@@ -88,7 +89,7 @@ class patchAPI {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       final patchData = PatchAPIModel(responseBody: responseBody);
-      PatchBox.put(buildingAllApi.getStoredString(),patchData);
+      PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();
       print("PATCH API DATA FROM API");
       return patchDataModel.fromJson(responseBody);

@@ -333,10 +333,10 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls() async {
 
-    await patchAPI().fetchPatchData().then((value) {
+    await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID).then((value) {
       building.patchData[value.patchData!.buildingID!] = value;
       createPatch(value);
-      tools.Data = value;
+      tools.globalData = value;
       for (int i = 0; i < 4; i++) {
         tools.corners.add(math.Point(
             double.parse(value.patchData!.coordinates![i].globalRef!.lat!),
@@ -345,15 +345,18 @@ class _NavigationState extends State<Navigation> {
       tools.angleBetweenBuildingAndNorth();
     });
 
-    await PolyLineApi().fetchPolyData().then((value) {
+    await PolyLineApi().fetchPolyData(id: buildingAllApi.selectedBuildingID).then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
+      building.numberOfFloors = value.polyline!.floors!.length;
+      building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, building.floor);
     });
 
 
 
-    building.landmarkdata = landmarkApi().fetchLandmarkData().then((value) {
+    building.landmarkdata = landmarkApi().fetchLandmarkData(id: buildingAllApi.selectedBuildingID).then((value) {
+      print("Himanshuchecker ids ${value.landmarks![0].name}");
       Map<int, LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
         if (value.landmarks![i].element!.subType == "AR") {
@@ -400,75 +403,36 @@ class _NavigationState extends State<Navigation> {
         _timer.cancel();
       });
     });
-    // buildingAllApi.getStoredAllBuildingID().remove(buildingAllApi.getStoredString());
-    // for(int i = 0 ; i<buildingAllApi.getStoredAllBuildingID().length ; i++){
-    //   print("Himanshuchecker calling api for ${buildingAllApi.getStoredAllBuildingID()[i]}");
-    //   buildingAllApi.setStoredString(buildingAllApi.getStoredAllBuildingID()[i]).then((value)async{
-    //     await patchAPI().fetchPatchData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       print("Himanshuchecker ${value.patchData!.buildingID}   ${value.patchData!.length}");
-    //       createotherPatch(value);
-    //     });
-    //
-    //     await PolyLineApi().fetchPolyData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       print("Himanshuchecker ${value.polyline!.buildingID}   ${value.polyline!.floors!.length}");
-    //       createotherRooms(value, 0);
-    //     });
-    //
-    //     await landmarkApi().fetchLandmarkData(id: buildingAllApi.getStoredAllBuildingID()[i]).then((value) {
-    //       Map<int, LatLng> coordinates = {};
-    //       for (int i = 0; i < value.landmarks!.length; i++) {
-    //         if (value.landmarks![i].element!.subType == "AR") {
-    //           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-    //               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-    //                   double.parse(value.landmarks![i].properties!.longitude!));
-    //         }
-    //       }
-    //       createotherARPatch(coordinates,value.landmarks![0].buildingID!);
-    //     });
-    //   });
-    // }
-    // if(!checkedForPolyineUpdated){
-    //   print("POLYLINE CHECK");
-    //   PolyLineApi().checkForUpdate();
-    //   checkedForPolyineUpdated = !checkedForPolyineUpdated;
-    // }
-    // if(!checkedForPatchDataUpdated){
-    //   print("PATCHDATA CHECK");
-    //   patchAPI().checkForUpdate();
-    //   checkedForPatchDataUpdated = !checkedForPatchDataUpdated;
-    // }
-    // if(!checkedForLandmarkDataUpdated){
-    //   print("LANDMARK DATA CHECK");
-    //   landmarkApi().checkForUpdate();
-    //   checkedForLandmarkDataUpdated = !checkedForLandmarkDataUpdated;
-    // }
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+    print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
+    print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
+    print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       if(key != buildingAllApi.getSelectedBuildingID()){
-        buildingAllApi.setStoredString(key).then((value)async{
-          await patchAPI().fetchPatchData(id: key).then((value) {
-            building.patchData[value.patchData!.buildingID!] = value;
-            createotherPatch(value);
-          });
+        await patchAPI().fetchPatchData(id: key).then((value) {
+          building.patchData[value.patchData!.buildingID!] = value;
+          createotherPatch(value);
+        });
 
-          await PolyLineApi().fetchPolyData(id: key).then((value) {
-            building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
-            createotherRooms(value, 0);
-          });
+        await PolyLineApi().fetchPolyData(id: key).then((value) {
+          createotherRooms(value, 0);
+          building.polylinedatamap[key] = value;
+          //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
 
-          await landmarkApi().fetchLandmarkData(id: key).then((value)async{
-            await building.landmarkdata!.then((Value){
-              Value.mergeLandmarks(value.landmarks);
-            });
-            Map<int, LatLng> coordinates = {};
-            for (int i = 0; i < value.landmarks!.length; i++) {
-              if (value.landmarks![i].element!.subType == "AR") {
-                coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-                    LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-                        double.parse(value.landmarks![i].properties!.longitude!));
-              }
+        });
+
+        await landmarkApi().fetchLandmarkData(id: key).then((value)async{
+          await building.landmarkdata!.then((Value){
+            Value.mergeLandmarks(value.landmarks);
+          });
+          Map<int, LatLng> coordinates = {};
+          for (int i = 0; i < value.landmarks!.length; i++) {
+            if (value.landmarks![i].element!.subType == "AR") {
+              coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+                  LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+                      double.parse(value.landmarks![i].properties!.longitude!));
             }
-            createotherARPatch(coordinates,value.landmarks![0].buildingID!);
-          });
+          }
+          createotherARPatch(coordinates,value.landmarks![0].buildingID!);
         });
       }
     });
@@ -866,20 +830,42 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
+  List<PolyArray> findLift(String floor, List<Floors> floorData ){
+    List<PolyArray> lifts = [];
+    floorData.forEach((Element) {
+      if(Element.floor == floor){
+        Element.polyArray!.forEach((element) {
+          if(element.name!.toLowerCase().contains("lift")){
+            lifts.add(element);
+          }
+        });
+      }
+    });
+    return lifts;
+  }
+
+
   void createRooms(polylinedata value, int floor) {
     closedpolygons.clear();
     selectedroomMarker.clear();
     _isLandmarkPanelOpen = false;
     building.selectedLandmarkID = null;
     polylines.clear();
+    int xdiff = 0;
+    int ydiff = 0;
+
+
+    if(floor != 0){
+      List<PolyArray> prevFloorLifts = findLift(tools.numericalToAlphabetical(floor-1), value.polyline!.floors!);
+      List<PolyArray> currFloorLifts = findLift(tools.numericalToAlphabetical(floor), value.polyline!.floors!);
+    }
     List<PolyArray>? FloorPolyArray = value.polyline!.floors![0].polyArray;
     for (int j = 0; j < value.polyline!.floors!.length; j++) {
       if (value.polyline!.floors![j].floor ==
-          tools.numericalToAlphabetical(floor) && value.polyline!.buildingID == buildingAllApi.getSelectedBuildingID()) {
+          tools.numericalToAlphabetical(floor)) {
         FloorPolyArray = value.polyline!.floors![j].polyArray;
       }
     }
-    building.numberOfFloors = value.polyline!.floors!.length;
     setState(() {
       if (FloorPolyArray != null) {
         for (PolyArray polyArray in FloorPolyArray) {
@@ -888,15 +874,15 @@ class _NavigationState extends State<Navigation> {
           for (Nodes node in polyArray.nodes!) {
             //coordinates.add(LatLng(node.lat!,node.lon!));
             coordinates.add(LatLng(
-                tools.localtoglobal(node.coordx!, node.coordy!)[0],
-                tools.localtoglobal(node.coordx!, node.coordy!)[1]));
+                tools.localtoglobal(node.coordx!, node.coordy!,patchData: building.patchData[value.polyline!.buildingID])[0],
+                tools.localtoglobal(node.coordx!, node.coordy!,patchData: building.patchData[value.polyline!.buildingID])[1]));
           }
 
           if (polyArray.polygonType == 'Wall' ||
               polyArray.polygonType == 'undefined') {
             if (coordinates.length >= 2) {
               polylines.add(gmap.Polyline(
-                polylineId: PolylineId(polyArray.id!),
+                polylineId: PolylineId("${value.polyline!.buildingID!} Line ${polyArray.id!}"),
                 points: coordinates,
                 color: Colors.black,
                 width: 1,
@@ -906,7 +892,7 @@ class _NavigationState extends State<Navigation> {
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
               closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -930,6 +916,7 @@ class _NavigationState extends State<Navigation> {
                         _isRoutePanelOpen = false;
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
+                        PathState.directions = [];
                         addselectedRoomMarker(coordinates);
                       }
                     });
@@ -940,45 +927,35 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
 
                   strokeColor: Colors.black,
-                  fillColor: Color(0xffc2f1d5),
+                  fillColor: Color(0xffC2F1D5),
                   consumeTapEvents: true,
                 ));
               }
-            } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+            }else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                    polygonId: PolygonId(polyArray.id!),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                  points: coordinates,
+                  strokeWidth: 1,
+                  // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: Color(0xffFFFF00),
-                    consumeTapEvents: true,
-                    onTap: () {
-                      if (building.selectedLandmarkID != polyArray.id) {
-                        building.selectedLandmarkID = polyArray.id;
-                        building.ignoredMarker.clear();
-                        building.ignoredMarker.add(polyArray.id!);
-                        _isRoutePanelOpen = false;
-                        singleroute.clear();
-                        _isLandmarkPanelOpen = true;
-                        addselectedRoomMarker(coordinates);
-                      }
-                    }));
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffFFFF00),
+                  consumeTapEvents: true,
+                ));
               }
             } else if (polyArray.cubicleName == "Male Washroom") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -992,7 +969,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1006,7 +983,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1020,7 +997,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1034,7 +1011,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1048,7 +1025,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1062,7 +1039,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   // Modify the color and opacity based on the selectedRoomId
@@ -1076,7 +1053,7 @@ class _NavigationState extends State<Navigation> {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons.add(Polygon(
-                  polygonId: PolygonId(polyArray.id!),
+                  polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
                   strokeWidth: 1,
                   strokeColor: Colors.black,
@@ -1088,7 +1065,7 @@ class _NavigationState extends State<Navigation> {
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
               closedpolygons.add(Polygon(
-                polygonId: PolygonId(polyArray.id!),
+                polygonId: PolygonId("${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                 points: coordinates,
                 strokeWidth: 1,
                 // Modify the color and opacity based on the selectedRoomId
@@ -1098,7 +1075,7 @@ class _NavigationState extends State<Navigation> {
                 consumeTapEvents: true,
               ));
             }
-          } else {
+          }else {
             polylines.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
@@ -1109,9 +1086,6 @@ class _NavigationState extends State<Navigation> {
         }
       }
     });
-    try {
-      fitPolygonInScreen(patch.first);
-    } catch (e) {}
   }
 
 
@@ -1368,7 +1342,7 @@ class _NavigationState extends State<Navigation> {
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
-      if (landmarks[i].floor == floor) {
+      if (landmarks[i].floor == floor && landmarks[i].buildingID == buildingAllApi.getStoredString()) {
         if (landmarks[i].element!.type == "Rooms" &&
             landmarks[i].element!.subType != "main entry" &&
             landmarks[i].coordinateX != null &&
@@ -1845,7 +1819,9 @@ class _NavigationState extends State<Navigation> {
                                                   DestinationID: PathState
                                                       .destinationPolyID,
                                                 ))).then((value) {
-                                      fromSourceAndDestinationPage(value);
+                                                  if(value != null){
+                                                    fromSourceAndDestinationPage(value);
+                                                  }
                                     });
                                   }
                                 },
@@ -2139,12 +2115,67 @@ class _NavigationState extends State<Navigation> {
             commonlifts[0].y1!, PathState.sourceFloor);
       }
     }else{
+      // building.landmarkdata!.then((land)async{
+      //   land.landmarks!.forEach((element)async{
+      //     if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
+      //       if (element.floor == PathState.destinationFloor) {
+      //         await fetchroute(
+      //         element.coordinateX!,
+      //         element.coordinateY!,
+      //         PathState.destinationX,
+      //         PathState.destinationY,
+      //         PathState.destinationFloor,
+      //         bid: PathState.destinationBid);
+      //       } else if (element.floor != PathState.destinationFloor) {
+      //         List<CommonLifts> commonlifts = findCommonLifts(
+      //             element.lifts!,
+      //             landmarksMap[PathState.destinationPolyID]!.lifts!);
+      //         await fetchroute(
+      //         commonlifts[0].x2!,
+      //         commonlifts[0].y2!,
+      //         PathState.destinationX,
+      //         PathState.destinationY,
+      //         PathState.destinationFloor,
+      //         bid: PathState.destinationBid);
+      //         await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!,
+      //         commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
+      //       }
+      //     }
+      //     return;
+      //   });
+      //   land.landmarks!.forEach((element)async{
+      //     if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
+      //       if (PathState.sourceFloor == element.floor) {
+      //         await fetchroute(
+      //             PathState.sourceX,
+      //             PathState.sourceY,
+      //             element.coordinateX!,
+      //             element.coordinateY!,
+      //             element.floor!,bid: PathState.sourceBid);
+      //       } else if (PathState.sourceFloor != element.floor) {
+      //         List<CommonLifts> commonlifts = findCommonLifts(
+      //             landmarksMap[PathState.sourcePolyID]!.lifts!,
+      //             element.lifts!);
+      //         await fetchroute(
+      //             commonlifts[0].x2!,
+      //             commonlifts[0].y2!,
+      //             element.coordinateX!,
+      //             element.coordinateY!,
+      //             element.floor!,bid: PathState.sourceBid);
+      //         await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!,
+      //             commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+      //       }
+      //     }
+      //     return;
+      //   });
+      // });
       print("different building detected");
     }
   }
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX,
-      int destinationY, int floor) async {
+      int destinationY, int floor, {String? bid = null}) async {
+
     int numRows = building.floorDimenssion[floor]![1]; //floor breadth
     int numCols = building.floorDimenssion[floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
@@ -2155,21 +2186,15 @@ class _NavigationState extends State<Navigation> {
     PathState.path[floor] = path;
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
-    if(PathState.directions.isNotEmpty){
-      for(int i = directions.length ; i>=0 ; i--){
-        PathState.directions.add(directions[i-1]);
-      }
-    }else{
-      directions.forEach((element) {
-        PathState.directions.add(element);
-      });
-    }
+    directions.forEach((element) {
+      PathState.directions.add(element);
+    });
 
     await building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 20, numCols, floor);
     });
-
+    print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
       List<double> svalue = tools.localtoglobal(sourceX, sourceY);
       List<double> dvalue = tools.localtoglobal(destinationX, destinationY);
@@ -2202,8 +2227,13 @@ class _NavigationState extends State<Navigation> {
       if (!building.nonWalkable[floor]!.contains(node)) {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
-        List<double> value = tools.localtoglobal(row, col);
-        coordinates.add(LatLng(value[0], value[1]));
+        if(bid != null){
+          List<double> value = tools.localtoglobal(row, col,patchData: building.patchData[bid]);
+          coordinates.add(LatLng(value[0], value[1]));
+        }else{
+          List<double> value = tools.localtoglobal(row, col);
+          coordinates.add(LatLng(value[0], value[1]));
+        }
       }
     }
     setState(() {
@@ -2376,6 +2406,7 @@ class _NavigationState extends State<Navigation> {
                                   builder: (context) => DestinationSearchPage(
                                         hintText: 'Destination location',
                                       ))).then((value) {
+                                        _isBuildingPannelOpen = false;
                             onDestinationVenueClicked(value);
                           });
                         },
@@ -2747,6 +2778,7 @@ class _NavigationState extends State<Navigation> {
                               PathState.sourceBid = "";
                               PathState.destinationBid = "";
                               singleroute.clear();
+                              PathState.directions = [];
                               fitPolygonInScreen(patch.first);
                             },
                             icon: Icon(
@@ -4202,8 +4234,9 @@ class _NavigationState extends State<Navigation> {
     setState(() {
       if (building.selectedLandmarkID != ID) {
         building.landmarkdata!.then((value) {
+          _isBuildingPannelOpen = false;
           building.floor = value.landmarksMap![ID]!.floor!;
-          createRooms(building.polyLineData!, building.floor);
+          createRooms(building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!, building.floor);
           createMarkers(value, building.floor);
           building.selectedLandmarkID = ID;
           _isRoutePanelOpen = false;
@@ -4211,7 +4244,7 @@ class _NavigationState extends State<Navigation> {
           _isLandmarkPanelOpen = true;
           List<double> pvalues = tools.localtoglobal(
               value.landmarksMap![ID]!.coordinateX!,
-              value.landmarksMap![ID]!.coordinateY!);
+              value.landmarksMap![ID]!.coordinateY!,patchData: building.patchData[value.landmarksMap![ID]!.buildingID]);
           LatLng point = LatLng(pvalues[0], pvalues[1]);
           _googleMapController.animateCamera(
             CameraUpdate.newLatLngZoom(
@@ -4228,6 +4261,8 @@ class _NavigationState extends State<Navigation> {
   void fromSourceAndDestinationPage(List<String> value) {
     markers.clear();
     building.landmarkdata!.then((land) {
+      print("Himanshuchecker ${land.landmarksMap}");
+      print("Himanshuchecker ${value[0]}");
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {
@@ -4342,55 +4377,54 @@ class _NavigationState extends State<Navigation> {
       child: Scaffold(
         body: Stack(
           children: [
-            MergeSemantics(
-              child: Container(
-                child: GoogleMap(
-                  initialCameraPosition: _initialCameraPosition,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: true,
-                  polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
-                  polylines: singleroute[building.floor] != null
-                      ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
-                      : polylines.union(otherpolylines),
-                  markers: getCombinedMarkers(),
-                  onTap: (x) {
-                    mapState.interaction = true;
-                  },
-                  mapType: MapType.normal,
-                  buildingsEnabled: false,
-                  compassEnabled: true,
-                  rotateGesturesEnabled: true,
-                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                  onMapCreated: (controller) {
-                    controller.setMapStyle(maptheme);
-                    _googleMapController = controller;
-                    apiCalls();
-                    if (patch.isNotEmpty) {
-                      fitPolygonInScreen(patch.first);
-                    }
-                  },
-                  onCameraMove: (CameraPosition cameraPosition) {
-                    focusBuildingChecker(cameraPosition);
-                    //mapState.interaction = true;
-                    mapbearing = cameraPosition.bearing;
-                    if (!mapState.interaction) {
-                      mapState.zoom = cameraPosition.zoom;
-                    }
-                    if (true) {
-                      _updateMarkers(cameraPosition.zoom);
-                      //_updateBuilding(cameraPosition.zoom);
-                    }
-                  },
-                  onCameraIdle: () {
-                    if (!mapState.interaction) {
-                      mapState.interaction2 = true;
-                    }
-                  },
-                  onCameraMoveStarted: () {
-                    mapState.interaction2 = false;
-                  },
-                ),
+            Container(
+              child: GoogleMap(
+                initialCameraPosition: _initialCameraPosition,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                zoomGesturesEnabled: true,
+                polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
+                polylines: singleroute[building.floor] != null
+                    ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
+                    : polylines.union(otherpolylines),
+                markers: getCombinedMarkers(),
+                onTap: (x) {
+                  mapState.interaction = true;
+                },
+                mapType: MapType.normal,
+                buildingsEnabled: false,
+                compassEnabled: true,
+                rotateGesturesEnabled: true,
+                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                onMapCreated: (controller) {
+                  controller.setMapStyle(maptheme);
+                  _googleMapController = controller;
+                  print("tumhari galti hai sb saalo");
+                  apiCalls();
+                  if (patch.isNotEmpty) {
+                    fitPolygonInScreen(patch.first);
+                  }
+                },
+                onCameraMove: (CameraPosition cameraPosition) {
+                  focusBuildingChecker(cameraPosition);
+                  //mapState.interaction = true;
+                  mapbearing = cameraPosition.bearing;
+                  if (!mapState.interaction) {
+                    mapState.zoom = cameraPosition.zoom;
+                  }
+                  if (true) {
+                    _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                  }
+                },
+                onCameraIdle: () {
+                  if (!mapState.interaction) {
+                    mapState.interaction2 = true;
+                  }
+                },
+                onCameraMoveStarted: () {
+                  mapState.interaction2 = false;
+                },
               ),
             ),
             Positioned(

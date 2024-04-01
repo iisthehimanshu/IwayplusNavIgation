@@ -16,11 +16,14 @@ class landmarkApi {
 
 
   Future<land> fetchLandmarkData({String? id = null}) async {
+    print("landmark");
     final LandMarkBox = LandMarkApiModelBox.getData();
 
-    if(LandMarkBox.containsKey(buildingAllApi.getStoredString())){
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
-      Map<String, dynamic> responseBody = LandMarkBox.get(buildingAllApi.getStoredString())!.responseBody;
+      print(id??buildingAllApi.getStoredString());
+      Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
+      print("Himanshuch ${land.fromJson(responseBody).landmarks![0].buildingName}");
       return land.fromJson(responseBody);
     }
 
@@ -53,7 +56,7 @@ class landmarkApi {
       // print(LandMarkBox.length);
       //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
       //print(demoresponseBody?.responseBody);
-      LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+      LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
 
       // print(LandMarkBox.length);
       // print('TESTING LANDMARK API DATABASE OVER');

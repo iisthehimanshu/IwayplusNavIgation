@@ -255,6 +255,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void checkPermissions() async {
+    speak("Loading maps. Getting your location");
     print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
@@ -399,7 +400,7 @@ class _NavigationState extends State<Navigation> {
       btadapter.startScanning(apibeaconmap);
       late Timer _timer;
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        //localizeUser();
+        localizeUser();
         _timer.cancel();
       });
     });

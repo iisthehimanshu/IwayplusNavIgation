@@ -1,4 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 class directionInstruction extends StatefulWidget {
   String direction;
@@ -90,32 +93,39 @@ class _directionInstructionState extends State<directionInstruction> {
           child:Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.direction,
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff0e0d0d),
-                      height: 25/16,
+              Semantics(
+                label:widget.direction+"${widget.distance} m",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ExcludeSemantics(
+                      child: Text(
+                        widget.direction,
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff0e0d0d),
+                          height: 25/16,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
                     ),
-                    textAlign: TextAlign.left,
-                  ),
-                  Text(
-                    "${widget.distance} m",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff8d8c8c),
-                      height: 20/14,
-                    ),
-                    textAlign: TextAlign.left,
-                  )
-                ],
+                    ExcludeSemantics(
+                      child: Text(
+                        "${widget.distance} m",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff8d8c8c),
+                          height: 20/14,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    )
+                  ],
+                ),
               ),
               Spacer(),
               Container(

@@ -255,7 +255,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void checkPermissions() async {
-    speak("Loading maps. Getting your location");
+
     print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
@@ -398,7 +398,10 @@ class _NavigationState extends State<Navigation> {
         }
       }
       btadapter.startScanning(apibeaconmap);
+      // print("printing bin");
+      // btadapter.printbin();
       late Timer _timer;
+      speak("Finding your location");
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
         _timer.cancel();
@@ -463,6 +466,8 @@ class _NavigationState extends State<Navigation> {
     print("nearestBeacon : $nearestBeacon");
 
     if (apibeaconmap[nearestBeacon] != null) {
+      print("apibeaconmap[nearestBeacon]!.name!");
+      print("${apibeaconmap[nearestBeacon]!.name!}");
       speak(
           "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${apibeaconmap[nearestBeacon]!.name!}");
       List<double> values = tools.localtoglobal(
@@ -501,6 +506,8 @@ class _NavigationState extends State<Navigation> {
           createMarkers(value, building.floor);
         });
       });
+    }else{
+      speak("Unable to find your location");
     }
     btadapter.stopScanning();
   }
@@ -4365,6 +4372,8 @@ class _NavigationState extends State<Navigation> {
     compassSubscription.cancel();
     super.dispose();
   }
+  List<String> scannedDevices = [];
+
 
   @override
   Widget build(BuildContext context) {
@@ -4401,6 +4410,7 @@ class _NavigationState extends State<Navigation> {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
                   print("tumhari galti hai sb saalo");
+                  speak("Loading maps");
                   apiCalls();
                   if (patch.isNotEmpty) {
                     fitPolygonInScreen(patch.first);
@@ -4428,6 +4438,7 @@ class _NavigationState extends State<Navigation> {
                 },
               ),
             ),
+
             Positioned(
               bottom: 150.0, // Adjust the position as needed
               right: 16.0,

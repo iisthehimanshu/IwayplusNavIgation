@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -29,6 +30,7 @@ import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
+import 'package:iwayplusnav/MODELS/FilterInfoModel.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
 import 'package:iwayplusnav/navigationTools.dart';
@@ -332,6 +334,8 @@ class _NavigationState extends State<Navigation> {
     } else {}
   }
 
+  List<FilterInfoModel> landmarkListForFilter= [];
+
   void apiCalls() async {
 
     await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID).then((value) {
@@ -345,6 +349,8 @@ class _NavigationState extends State<Navigation> {
       }
       tools.angleBetweenBuildingAndNorth();
     });
+    
+
 
     await PolyLineApi().fetchPolyData(id: buildingAllApi.selectedBuildingID).then((value) {
       print("object ${value.polyline!.floors!.length}");
@@ -353,13 +359,16 @@ class _NavigationState extends State<Navigation> {
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, building.floor);
     });
-
+  
 
 
     building.landmarkdata = landmarkApi().fetchLandmarkData(id: buildingAllApi.selectedBuildingID).then((value) {
       print("Himanshuchecker ids ${value.landmarks![0].name}");
       Map<int, LatLng> coordinates = {};
       for (int i = 0; i < value.landmarks!.length; i++) {
+        if(value.landmarks![i].floor==3 && value.landmarks![i].properties!.name!=null){
+          landmarkListForFilter.add(FilterInfoModel(LandmarkLat: value.landmarks![i].coordinateX!, LandmarkLong: value.landmarks![i].coordinateY!, LandmarkName: value.landmarks![i].properties!.name??""));
+        }
         if (value.landmarks![i].element!.subType == "AR") {
           coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
               LatLng(double.parse(value.landmarks![i].properties!.latitude!),
@@ -401,7 +410,12 @@ class _NavigationState extends State<Navigation> {
       // print("printing bin");
       // btadapter.printbin();
       late Timer _timer;
-      speak("Finding your location");
+      //please wait
+      //searching your location
+
+      speak("Please wait");
+      speak("Searching your location. .");
+
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
         _timer.cancel();
@@ -444,11 +458,45 @@ class _NavigationState extends State<Navigation> {
   }
 
 
+  double calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadius = 6371; // Radius of the earth in kilometers
+
+    double dLat = degreesToRadians(lat2 - lat1);
+    double dLon = degreesToRadians(lon2 - lon1);
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(degreesToRadians(lat1)) *
+            cos(degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = earthRadius * c; // Distance in kilometers
+
+    return distance;
+  }
+
+  double degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
+  String getRandomString(List<String> stringList) {
+    Random random = Random();
+    int randomIndex = random.nextInt(stringList.length);
+    return stringList[randomIndex];
+  }
+
+
   Future<void> localizeUser() async {
+    List<String> stringList = ['3A-2B-Iwayplus', '3A 2C Dweepi', "3A 2A", '3A 2D', '3A 2I', '3A 2J']; // Your list of strings
+    String nearLocString = getRandomString(stringList);
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
     );
+
+
+
 
     double highestweight = 0;
     String nearestBeacon = "";
@@ -464,12 +512,37 @@ class _NavigationState extends State<Navigation> {
       }
     }
     print("nearestBeacon : $nearestBeacon");
-
     if (apibeaconmap[nearestBeacon] != null) {
       print("apibeaconmap[nearestBeacon]!.name!");
       print("${apibeaconmap[nearestBeacon]!.name!}");
+      double currentBeaconLat = double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+      double currentBeaconLon = double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      double minDistance = 3;
+
+      String nearestLandmarkName = '';
+      // for(int i=0 ; i<7 ; i++){
+      //   print("landmarkListForFilter[i].LandmarkName");
+      //   print(landmarkListForFilter[i].LandmarkName);
+      // }
+
+      for (FilterInfoModel landmark in landmarkListForFilter) {
+
+        // int landmarkLat = int.parse(landmark.LandmarkLat);
+        // int landmarkLon = int.parse(landmark.LandmarkLong);
+        //print("currentBeaconLon-landmarkLon");
+        //print(currentBeaconLon-landmarkLon);
+        List<int> listmarks = [];
+        if(((landmark.LandmarkLat-currentBeaconLat)<minDistance && (landmark.LandmarkLong-currentBeaconLon<minDistance))){
+          nearLocString = ;
+        }
+      }
+
+      print('Nearest landmark: $nearLocString');
+
+
+      print(apibeaconmap);
       speak(
-          "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${apibeaconmap[nearestBeacon]!.name!}");
+          "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${nearLocString}");
       List<double> values = tools.localtoglobal(
           apibeaconmap[nearestBeacon]!.coordinateX!,
           apibeaconmap[nearestBeacon]!.coordinateY!);
@@ -506,6 +579,7 @@ class _NavigationState extends State<Navigation> {
           createMarkers(value, building.floor);
         });
       });
+
     }else{
       speak("Unable to find your location");
     }

@@ -330,8 +330,8 @@ class tools {
     for (int node in path) {
       landmarksMap.forEach((key, value) {
         if (floor == value.floor) {
-          List<int> pCoord = computeCellCoordinates(node, numCols);
-          double d = 0.0;
+          //List<int> pCoord = computeCellCoordinates(node, numCols);
+          //double d = 0.0;
           if (value.doorX == null) {
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);

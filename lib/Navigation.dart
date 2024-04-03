@@ -458,6 +458,7 @@ class _NavigationState extends State<Navigation> {
   }
 
 
+
   double calculateDistance(
       double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371; // Radius of the earth in kilometers
@@ -486,20 +487,16 @@ class _NavigationState extends State<Navigation> {
     return stringList[randomIndex];
   }
 
+  String nearestLandmarkToBeacon="";
 
   Future<void> localizeUser() async {
-    List<String> stringList = ['3A-2B-Iwayplus', '3A 2C Dweepi', "3A 2A", '3A 2D', '3A 2I', '3A 2J']; // Your list of strings
-    String nearLocString = getRandomString(stringList);
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
     );
-
-
-
-
     double highestweight = 0;
     String nearestBeacon = "";
+    List<int> landCords=[];
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {
         btadapter.BIN[i]!.forEach((key, value) {
@@ -513,40 +510,11 @@ class _NavigationState extends State<Navigation> {
     }
     print("nearestBeacon : $nearestBeacon");
     if (apibeaconmap[nearestBeacon] != null) {
-      print("apibeaconmap[nearestBeacon]!.name!");
-      print("${apibeaconmap[nearestBeacon]!.name!}");
-      int  currentBeaconLat = int.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      int  currentBeaconLon = int.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      await building.landmarkdata!.then((value) {
+        nearestLandmarkToBeacon = tools.localizefindNearbyLandmark(apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
+        landCords = tools.localizefindNearbyLandmarkCoordinated(apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
+      });
 
-      beaconCord.add(currentBeaconLon);
-      beaconCord.add(currentBeaconLat);
-
-      double minDistance = 3;
-
-      String nearestLandmarkName = '';
-      // for(int i=0 ; i<7 ; i++){
-      //   print("landmarkListForFilter[i].LandmarkName");
-      //   print(landmarkListForFilter[i].LandmarkName);
-      // }
-
-      // for (FilterInfoModel landmark in landmarkListForFilter) {
-      //
-      //   // int landmarkLat = int.parse(landmark.LandmarkLat);
-      //   // int landmarkLon = int.parse(landmark.LandmarkLong);
-      //   //print("currentBeaconLon-landmarkLon");
-      //   //print(currentBeaconLon-landmarkLon);
-      //   List<int> listmarks = [];
-      //   if(((landmark.LandmarkLat-currentBeaconLat)<minDistance && (landmark.LandmarkLong-currentBeaconLon<minDistance))){
-      //     nearLocString = ;
-      //   }
-      // }
-
-      print('Nearest landmark: $nearLocString');
-
-
-      print(apibeaconmap);
-      speak(
-          "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${nearLocString}");
       List<double> values = tools.localtoglobal(
           apibeaconmap[nearestBeacon]!.coordinateX!,
           apibeaconmap[nearestBeacon]!.coordinateY!);
@@ -562,6 +530,22 @@ class _NavigationState extends State<Navigation> {
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      print("user.coordXuser.coordY");
+      print("${user.coordX}${user.coordY}");
+      List<int> userCords = [];
+      userCords.add(user.coordX);
+      userCords.add(user.coordY);
+      List<int> transitionValue = tools.eightcelltransition(user.theta);
+      int newX = user.coordX + transitionValue[0];
+      int newY = user.coordY + transitionValue[1];
+      List<int> newUserCord = [];
+      newUserCord.add(newX);
+      newUserCord.add(newY);
+      double value = tools.calculateAngle(userCords,newUserCord,landCords);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+      print("finalvalue");
+      print(finalvalue);
+      speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandmarkToBeacon} is on your ${finalvalue}");
       user.lat =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
       user.lng =
@@ -2259,6 +2243,8 @@ class _NavigationState extends State<Navigation> {
     }
   }
   List<int> beaconCord = [];
+  double cordL=0;
+  double cordLt = 0;
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX,
       int destinationY, int floor, {String? bid = null}) async {
@@ -2281,19 +2267,32 @@ class _NavigationState extends State<Navigation> {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 20, numCols, floor);
       print("nearbyLandmarks");
+      List<int> landCoord = [];
+
       for(int i=0 ; i<nearbyLandmarks.length ; i++){
-        print(nearbyLandmarks[i].name);
+        landCoord.add(nearbyLandmarks[i].coordinateX!);
+        landCoord.add(nearbyLandmarks[i].coordinateY!);
+        double distL = calculateDistance(nearbyLandmarks[i].coordinateX! as double, nearbyLandmarks[i].coordinateY! as double, cordL, cordLt);
+        print("${nearbyLandmarks[i].coordinateX!} ${nearbyLandmarks[i].coordinateY!}");
+        print(distL);
+
+        // double dist = calculateDistance(landCoord as double,beaconCord);
+        print(nearbyLandmarks[i].coordinateX!-cordL);
+        if(nearbyLandmarks[i].coordinateX! - cordL < 10){
+          print(nearbyLandmarks[i].coordinateX!-cordL);
+          print(nearbyLandmarks[i].name);
+        }
       }
-      print(nearbyLandmarks);
+      //print(nearbyLandmarks);
 
     });
-    await building.landmarkdata!.then((value) {
-      List<Landmarks> near = tools.localizefindNearbyLandmark(beaconCord,value.landmarksMap!, 20, 3);
-      print("near---");
-      for(int i=0 ; i<near.length ; i++){
-        print(near[i].name);
-      }
-    });
+    // await building.landmarkdata!.then((value) {
+    //   List<Landmarks> near = tools.localizefindNearbyLandmark(0,3,value.landmarksMap!, 3);
+    //   print("near---");
+    //   for(int i=0 ; i<near.length ; i++){
+    //     print(near[i].name);
+    //   }
+    // });
 
     print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {

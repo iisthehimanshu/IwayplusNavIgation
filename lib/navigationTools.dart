@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
@@ -256,6 +257,31 @@ class tools {
       return "None";
     }
   }
+  static String angleToClocksForNearestLandmarkToBeacon(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    if (angle >= 337.5 || angle <= 22.5) {
+      return "Front";
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return "Slight Right";
+    } else if (angle > 67.5 && angle <= 112.5) {
+      return "Right";
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return "Sharp Right";
+    } else if (angle > 157.5 && angle <= 202.5) {
+      return "Back";
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return "Sharp Left";
+    } else if (angle > 247.5 && angle <= 292.5) {
+      return "Left";
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return "Slight Left";
+    } else {
+      return "None";
+    }
+  }
 
   static double calculateAngle(List<int> a, List<int> b, List<int> c) {
     double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
@@ -339,6 +365,8 @@ class tools {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
+            print(value.name);
+            print(d);
             if (!nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }
@@ -348,29 +376,54 @@ class tools {
     }
     return nearbyLandmarks;
   }
-  static List<Landmarks> localizefindNearbyLandmark(List<int> beaconCord, Map<String, Landmarks> landmarksMap, int floor,int numCols) {
+
+  static String localizefindNearbyLandmark(int left,int right, Map<String, Landmarks> landmarksMap, int floor) {
     print("called");
-    List<Landmarks> nearbyLandmarks = [];
-    for (int node in beaconCord) {
-      landmarksMap.forEach((key, value) {
-        if (floor == value.floor) {
-          List<int> pCoord = computeCellCoordinates(node, numCols);
-          double d = 0.0;
-          if (value.doorX == null) {
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-          } else {
-            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
-          }
-          if (d < 10) {
-            if (!nearbyLandmarks.contains(value)) {
-              nearbyLandmarks.add(value);
-            }
+    PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
+    int distance=10;
+    landmarksMap.forEach((key, value) {
+      if (floor == value.floor) {
+        List<int> pCoord = [];
+        pCoord.add(left);
+        pCoord.add(right);
+        double d = 0.0;
+        print(value.name);
+        if (value.doorX != null) {
+          d = calculateDistance(
+              pCoord, [value.doorX!, value.doorY!]);
+          print(d);
+          if (d<distance) {
+            priorityQueue.add(MapEntry(value.name??"", d));
           }
         }
-      });
-    }
-    return nearbyLandmarks;
+      }
+    });
+    MapEntry<String, double> entry = priorityQueue.removeFirst();
+    print("entry.key");
+    String nearestLandmark = entry.key;
+    return nearestLandmark;
+  }
+  static List<int> localizefindNearbyLandmarkCoordinated(int left,int right, Map<String, Landmarks> landmarksMap, int floor) {
+    print("called");
+    int distance=10;
+    List<int> coordinates=[];
+    landmarksMap.forEach((key, value) {
+      if (floor == value.floor) {
+        List<int> pCoord = [];
+        pCoord.add(left);
+        pCoord.add(right);
+        double d = 0.0;
+        if (value.doorX != null) {
+          d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
+          if (d<distance) {
+            coordinates.add(value.doorX!);
+            coordinates.add(value.doorY!);
+          }
+        }
+      }
+    });
+
+    return coordinates;
   }
 
   static List<int> computeCellCoordinates(int node, int numCols) {

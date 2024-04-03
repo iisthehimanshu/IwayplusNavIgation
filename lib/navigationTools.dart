@@ -330,8 +330,8 @@ class tools {
     for (int node in path) {
       landmarksMap.forEach((key, value) {
         if (floor == value.floor) {
-          //List<int> pCoord = computeCellCoordinates(node, numCols);
-          //double d = 0.0;
+          List<int> pCoord = computeCellCoordinates(node, numCols);
+          double d = 0.0;
           if (value.doorX == null) {
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
@@ -339,6 +339,30 @@ class tools {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
+            if (!nearbyLandmarks.contains(value)) {
+              nearbyLandmarks.add(value);
+            }
+          }
+        }
+      });
+    }
+    return nearbyLandmarks;
+  }
+  static List<Landmarks> localizefindNearbyLandmark(List<int> beaconCord, Map<String, Landmarks> landmarksMap, int floor,int numCols) {
+    print("called");
+    List<Landmarks> nearbyLandmarks = [];
+    for (int node in beaconCord) {
+      landmarksMap.forEach((key, value) {
+        if (floor == value.floor) {
+          List<int> pCoord = computeCellCoordinates(node, numCols);
+          double d = 0.0;
+          if (value.doorX == null) {
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+          } else {
+            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
+          }
+          if (d < 10) {
             if (!nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }

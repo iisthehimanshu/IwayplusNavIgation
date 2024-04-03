@@ -515,8 +515,12 @@ class _NavigationState extends State<Navigation> {
     if (apibeaconmap[nearestBeacon] != null) {
       print("apibeaconmap[nearestBeacon]!.name!");
       print("${apibeaconmap[nearestBeacon]!.name!}");
-      double currentBeaconLat = double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      double currentBeaconLon = double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      int  currentBeaconLat = int.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+      int  currentBeaconLon = int.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+      beaconCord.add(currentBeaconLon);
+      beaconCord.add(currentBeaconLat);
+
       double minDistance = 3;
 
       String nearestLandmarkName = '';
@@ -525,17 +529,17 @@ class _NavigationState extends State<Navigation> {
       //   print(landmarkListForFilter[i].LandmarkName);
       // }
 
-      for (FilterInfoModel landmark in landmarkListForFilter) {
-
-        // int landmarkLat = int.parse(landmark.LandmarkLat);
-        // int landmarkLon = int.parse(landmark.LandmarkLong);
-        //print("currentBeaconLon-landmarkLon");
-        //print(currentBeaconLon-landmarkLon);
-        List<int> listmarks = [];
-        if(((landmark.LandmarkLat-currentBeaconLat)<minDistance && (landmark.LandmarkLong-currentBeaconLon<minDistance))){
-          nearLocString = ;
-        }
-      }
+      // for (FilterInfoModel landmark in landmarkListForFilter) {
+      //
+      //   // int landmarkLat = int.parse(landmark.LandmarkLat);
+      //   // int landmarkLon = int.parse(landmark.LandmarkLong);
+      //   //print("currentBeaconLon-landmarkLon");
+      //   //print(currentBeaconLon-landmarkLon);
+      //   List<int> listmarks = [];
+      //   if(((landmark.LandmarkLat-currentBeaconLat)<minDistance && (landmark.LandmarkLong-currentBeaconLon<minDistance))){
+      //     nearLocString = ;
+      //   }
+      // }
 
       print('Nearest landmark: $nearLocString');
 
@@ -2254,6 +2258,7 @@ class _NavigationState extends State<Navigation> {
       print("different building detected");
     }
   }
+  List<int> beaconCord = [];
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX,
       int destinationY, int floor, {String? bid = null}) async {
@@ -2275,7 +2280,21 @@ class _NavigationState extends State<Navigation> {
     await building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 20, numCols, floor);
+      print("nearbyLandmarks");
+      for(int i=0 ; i<nearbyLandmarks.length ; i++){
+        print(nearbyLandmarks[i].name);
+      }
+      print(nearbyLandmarks);
+
     });
+    await building.landmarkdata!.then((value) {
+      List<Landmarks> near = tools.localizefindNearbyLandmark(beaconCord,value.landmarksMap!, 20, 3);
+      print("near---");
+      for(int i=0 ; i<near.length ; i++){
+        print(near[i].name);
+      }
+    });
+
     print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
       List<double> svalue = tools.localtoglobal(sourceX, sourceY);

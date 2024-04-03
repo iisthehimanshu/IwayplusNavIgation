@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
@@ -377,23 +378,25 @@ class tools {
     return nearbyLandmarks;
   }
 
-  static String localizefindNearbyLandmark(int left,int right, Map<String, Landmarks> landmarksMap, int floor) {
+  static String localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap, int floor) {
     print("called");
     PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if (floor == value.floor) {
-        List<int> pCoord = [];
-        pCoord.add(left);
-        pCoord.add(right);
-        double d = 0.0;
-        print(value.name);
-        if (value.doorX != null) {
-          d = calculateDistance(
-              pCoord, [value.doorX!, value.doorY!]);
-          print(d);
-          if (d<distance) {
-            priorityQueue.add(MapEntry(value.name??"", d));
+      if(Beacon.buildingID == value.buildingID){
+        if (floor == value.floor) {
+          List<int> pCoord = [];
+          pCoord.add(Beacon.coordinateX!);
+          pCoord.add(Beacon.coordinateY!);
+          double d = 0.0;
+          print(value.name);
+          if (value.doorX != null) {
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+            print(d);
+            if (d<distance) {
+              priorityQueue.add(MapEntry(value.name??"", d));
+            }
           }
         }
       }
@@ -403,15 +406,15 @@ class tools {
     String nearestLandmark = entry.key;
     return nearestLandmark;
   }
-  static List<int> localizefindNearbyLandmarkCoordinated(int left,int right, Map<String, Landmarks> landmarksMap, int floor) {
+  static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap, int floor) {
     print("called");
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
       if (floor == value.floor) {
         List<int> pCoord = [];
-        pCoord.add(left);
-        pCoord.add(right);
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
         double d = 0.0;
         if (value.doorX != null) {
           d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);

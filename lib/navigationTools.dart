@@ -378,13 +378,13 @@ class tools {
     return nearbyLandmarks;
   }
 
-  static String localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap, int floor) {
+  static String localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
     PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID){
-        if (floor == value.floor) {
+        if (Beacon.floor! == value.floor) {
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
           pCoord.add(Beacon.coordinateY!);
@@ -406,12 +406,12 @@ class tools {
     String nearestLandmark = entry.key;
     return nearestLandmark;
   }
-  static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap, int floor) {
+  static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (floor == value.floor) {
+      if (Beacon.floor! == value.floor) {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);

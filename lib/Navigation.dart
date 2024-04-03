@@ -511,8 +511,8 @@ class _NavigationState extends State<Navigation> {
     print("nearestBeacon : $nearestBeacon");
     if (apibeaconmap[nearestBeacon] != null) {
       await building.landmarkdata!.then((value) {
-        nearestLandmarkToBeacon = tools.localizefindNearbyLandmark(apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
+        nearestLandmarkToBeacon = tools.localizefindNearbyLandmark(apibeaconmap[nearestBeacon]!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
+        landCords = tools.localizefindNearbyLandmarkCoordinated(apibeaconmap[nearestBeacon]!,value.landmarksMap!, apibeaconmap[nearestBeacon]!.floor!);
       });
 
       List<double> values = tools.localtoglobal(

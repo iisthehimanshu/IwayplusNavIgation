@@ -115,7 +115,7 @@ class _NavigationState extends State<Navigation> {
   bool _isRoutePanelOpen = false;
   bool _isnavigationPannelOpen = false;
   bool _isreroutePannelOpen = false;
-  bool _isBuildingPannelOpen = true;
+  bool _isBuildingPannelOpen = false;
   bool _isNearestLandmarkPannelOpen = false;
   bool _isFilterPanelOpen = false;
   bool checkedForPolyineUpdated = false;
@@ -586,9 +586,12 @@ class _NavigationState extends State<Navigation> {
       print("finalvalue");
       print(finalvalue);
       detected = !detected;
+      _isBuildingPannelOpen = true;
       _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
       if(nearestLandInfomation.name==""){
+        print("no beacon found");
+        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
         speak("You are on ${tools.numericalToAlphabetical(
             apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
       }else {
@@ -4284,7 +4287,7 @@ class _NavigationState extends State<Navigation> {
     //fetchlist();
     //filterItems();
     return Visibility(
-        visible: _isNearestLandmarkPannelOpen,
+        visible: _isBuildingPannelOpen,
         child: SlidingUpPanel(
             controller: _panelController,
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
@@ -4294,9 +4297,9 @@ class _NavigationState extends State<Navigation> {
                 color: Colors.grey,
               ),
             ],
-            minHeight: element.workingDays != null && element.workingDays!.length>0 ? 100:140,
+            minHeight: element.workingDays != null && element.workingDays!.length>0 ? 80:140,
             snapPoint: element.workingDays != null && element.workingDays!.length>0 ? 220/screenHeight : 175/screenHeight,
-            maxHeight: element.workingDays != null && element.workingDays!.length>0 ? 100:140,
+            maxHeight: element.workingDays != null && element.workingDays!.length>0 ? 80:140,
             panel: Semantics(
               sortKey: const OrdinalSortKey(1),
               child: Container(
@@ -4342,28 +4345,13 @@ class _NavigationState extends State<Navigation> {
                                 ),
                                 textAlign: TextAlign.left,
                               ),
-                              Text(
-                                "Floor ${nearestLandInfomation.floor},${nearestLandInfomation.buildingName}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff8d8c8c),
-                                  height: 25 / 16,
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-
-                              SizedBox(
-                                height: 8,
-                              ),
                             ],
                           ),
                         ),
                         Spacer(),
                         InkWell(
                           onTap: (){
-                            _isNearestLandmarkPannelOpen=!_isNearestLandmarkPannelOpen;
+                            _isBuildingPannelOpen=false;
                           },
                           child: Container(
                             margin: EdgeInsets.only(right: 20),

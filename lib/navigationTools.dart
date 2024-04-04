@@ -378,9 +378,11 @@ class tools {
     return nearbyLandmarks;
   }
 
-  static String localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
+  static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
-    PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
+
+    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID){
@@ -389,21 +391,37 @@ class tools {
           pCoord.add(Beacon.coordinateX!);
           pCoord.add(Beacon.coordinateY!);
           double d = 0.0;
-          print(value.name);
+
           if (value.doorX != null) {
             d = calculateDistance(
                 pCoord, [value.doorX!, value.doorY!]);
-            print(d);
+            print("distance b/w beacon and location${d}");
+            print(value.name);
             if (d<distance) {
-              priorityQueue.add(MapEntry(value.name??"", d));
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
             }
+          }else{
+            // d = calculateDistance(
+            //     pCoord, [value.coordinateX!, value.coordinateY!]);
+            // print("distance b/w beacon and location${d}");
+            // print(value.name);
+            // if (d<distance) {
+            //   nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+            //   priorityQueue.add(MapEntry(currentLandInfo, d));
+            // }
           }
         }
       }
     });
-    MapEntry<String, double> entry = priorityQueue.removeFirst();
-    print("entry.key");
-    String nearestLandmark = entry.key;
+    nearestLandInfo nearestLandmark=nearestLandInfo("","","","");
+    if(priorityQueue.isNotEmpty){
+      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      print("entry.key");
+      nearestLandmark = entry.key;
+    }else{
+      print(priorityQueue.isEmpty);
+    }
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
@@ -421,6 +439,12 @@ class tools {
           if (d<distance) {
             coordinates.add(value.doorX!);
             coordinates.add(value.doorY!);
+          }
+        }else{
+          d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
+          if (d<distance) {
+            coordinates.add(value.coordinateX!);
+            coordinates.add(value.coordinateY!);
           }
         }
       }
@@ -490,4 +514,11 @@ class tools {
       return [0, 0];
     }
   }
+}
+class nearestLandInfo{
+  String name;
+  String buildingName;
+  String venuename;
+  String floor;
+  nearestLandInfo( this.name, this.buildingName, this.venuename,this.floor);
 }

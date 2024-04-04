@@ -1889,7 +1889,12 @@ class _NavigationState extends State<Navigation> {
                                             building.selectedLandmarkID]!
                                         .floor!;
                                     PathState.sourceBid = user.Bid;
-                                    print("Direction button");
+
+                                    PathState.destinationBid = snapshot
+                                        .data!
+                                        .landmarksMap![
+                                    building.selectedLandmarkID]!
+                                        .buildingID!;
                                     await calculateroute(
                                             snapshot.data!.landmarksMap!)
                                         .then((value) {
@@ -2202,6 +2207,7 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor);
+        print("fetchroute done");
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         List<CommonLifts> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!.lifts!,
@@ -2304,9 +2310,9 @@ class _NavigationState extends State<Navigation> {
       for(int i=0 ; i<nearbyLandmarks.length ; i++){
         landCoord.add(nearbyLandmarks[i].coordinateX!);
         landCoord.add(nearbyLandmarks[i].coordinateY!);
-        double distL = calculateDistance(nearbyLandmarks[i].coordinateX! as double, nearbyLandmarks[i].coordinateY! as double, cordL, cordLt);
-        print("${nearbyLandmarks[i].coordinateX!} ${nearbyLandmarks[i].coordinateY!}");
-        print(distL);
+        //double distL = calculateDistance(nearbyLandmarks[i].coordinateX! as double, nearbyLandmarks[i].coordinateY! as double, cordL, cordLt);
+        // print("${nearbyLandmarks[i].coordinateX!} ${nearbyLandmarks[i].coordinateY!}");
+        // print(distL);
 
         // double dist = calculateDistance(landCoord as double,beaconCord);
         print(nearbyLandmarks[i].coordinateX!-cordL);
@@ -4563,6 +4569,8 @@ class _NavigationState extends State<Navigation> {
         PathState.sourceBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
+        PathState.sourceBid = user.Bid;
+        PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         calculateroute(value.landmarksMap!).then((value) {
           _isRoutePanelOpen = true;
         });
@@ -4586,6 +4594,8 @@ class _NavigationState extends State<Navigation> {
         PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
+        PathState.sourceBid = user.Bid;
+        PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         calculateroute(value.landmarksMap!).then((value) {
           _isRoutePanelOpen = true;
         });

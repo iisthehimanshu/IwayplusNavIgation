@@ -1860,6 +1860,11 @@ class _NavigationState extends State<Navigation> {
                                             building.selectedLandmarkID]!
                                         .floor!;
                                     PathState.sourceBid = user.Bid;
+                                    PathState.destinationBid = snapshot
+                                        .data!
+                                        .landmarksMap![
+                                    building.selectedLandmarkID]!
+                                        .buildingID!;
                                     await calculateroute(
                                             snapshot.data!.landmarksMap!)
                                         .then((value) {
@@ -4407,6 +4412,8 @@ class _NavigationState extends State<Navigation> {
         PathState.sourceBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
+        PathState.sourceBid = user.Bid;
+        PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         calculateroute(value.landmarksMap!).then((value) {
           _isRoutePanelOpen = true;
         });
@@ -4430,6 +4437,8 @@ class _NavigationState extends State<Navigation> {
         PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
+        PathState.sourceBid = user.Bid;
+        PathState.destinationBid = value.landmarksMap![ID]!.buildingID!;
         calculateroute(value.landmarksMap!).then((value) {
           _isRoutePanelOpen = true;
         });

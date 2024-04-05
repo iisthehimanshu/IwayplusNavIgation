@@ -24,7 +24,7 @@ import 'Navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await Firebase.initializeApp();
+  await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
@@ -60,6 +60,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  Future<bool> _isUserAuthenticated() async {
+    // Check if the user is already signed in with Google
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // If the user is signed in, return true
+    if (user != null) {
+      return true;
+    }
+    // If the user is not signed in, return false
+    return false;
+  }
 
 
   @override
@@ -67,9 +78,9 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       title: "IWAYPLUS",
-      home: FutureBuilder(
-        future: Hive.openBox('SignInDatabase'),
-        builder: (BuildContext context, AsyncSnapshot<Box<dynamic>> snapshot) {
+      home: FutureBuilder<bool>(
+        future: _isUserAuthenticated(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           }
@@ -77,16 +88,32 @@ class _MyAppState extends State<MyApp> {
             return Text(snapshot.error.toString());
           }
 
-          final signInDatabaseBox = snapshot.data!;
-          print(signInDatabaseBox.values);
+          final bool isUserAuthenticated = snapshot.data ?? false;
 
-          if (!signInDatabaseBox.containsKey("accessToken")) {
-            return SignIn();
+          if (!isUserAuthenticated) {
+            var SignInDatabasebox = Hive.box('SignInDatabase');
+            print(SignInDatabasebox.values);
+            //List<dynamic> ss = SignInDatabasebox.get("roles");
+            // print(ss.length);
+            // if(SignInDatabasebox.get("roles")=="[user]"){
+            //   print("True");
+            // }
+            final SigninBox = SignINAPIModelBox.getData();
+            print("SigninBox.length");
+            print(SigninBox.values);
+            print(SigninBox);
+
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              return MainScreen(initialIndex: 0);
+            } // Redirect to Sign-In screen if user is not authenticated
           } else {
-            return MainScreen(initialIndex: 0);
+            return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
           }
         },
       ),
+
     );
   }
 }

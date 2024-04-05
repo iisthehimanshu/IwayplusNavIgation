@@ -91,8 +91,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
 
-  int _remainingSeconds = 60; // Initial value set to 60 seconds
-  late Timer _timer;
+
 
 
   void OTPFieldListner(){
@@ -115,27 +114,27 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
       });
     }
   }
+  int timeLeft = 59;
+
 
 
   @override
-  void initstate() {
+  void initState() {
     super.initState();
-    _focusNode1.addListener(_onFocusChange);
-    _focusNode2.addListener(_onFocusChange);
-    _focusNode1_1.addListener(_onFocusChange);
-    _focusNode2_1.addListener(_onFocusChange);
-    // Start the countdown timer
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_remainingSeconds > 0) {
+    startCountDown(); // Call startCountDown() when the widget is initialized
+  }
+  void startCountDown(){
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if(timeLeft>0) {
         setState(() {
-          _remainingSeconds--; // Decrease remaining seconds by 1
+          timeLeft--;
         });
-      } else {
-        _timer.cancel(); // Cancel the timer when countdown finishes
+      }else{
+        timer.cancel();
       }
     });
-
   }
+
   bool isNumeric(String str) {
     if (str == null) {
       return false;
@@ -165,17 +164,14 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
     }
   }
 
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
-  }
+
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     Orientation orientation = MediaQuery.of(context).orientation;
+
     if(isNumeric(widget.userEmailOrPhone)){
       finalSendingEmailORPhone = "+91${widget.userEmailOrPhone}";
     }else{
@@ -212,20 +208,25 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                    margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-                                    width: double.infinity,
-                                    child: Text(
-                                      "Verify Your Account",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 30/24,
+                                GestureDetector(
+                                  onTap: (){
+                                    startCountDown();
+                                  },
+                                  child: Container(
+                                      margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
+                                      width: double.infinity,
+                                      child: Text(
+                                        "Verify Your Account",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xff000000),
+                                          height: 30/24,
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
-                                    )
+                                  ),
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(left: 16,top: 8,right: 16),
@@ -305,7 +306,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                     children: [
                                       Spacer(),
                                       Text(
-                                        "00:59",
+                                        timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 16,
@@ -335,8 +336,6 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                           onPressed: () async {
                                               if(widget.previousScreen=='ForgetPassword' && OTPEditingController.text.length==6){
                                                 print("sending");
-
-
                                                 print(finalSendingEmailORPhone);
                                                 print(widget.userEmailOrPhone);
                                                 print(widget.userName);

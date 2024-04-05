@@ -9,11 +9,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SendOTPAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/VerifyYourAccount.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
+import 'SignIn.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -391,28 +393,31 @@ class _SignUpState extends State<SignUp> {
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: TextFormField(
-                                          focusNode: _focusNode1,
-                                          controller: mailEditingController,
-                                          decoration: InputDecoration(
-                                              hintText: 'Email or mobile number',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
-                                              ),
-                                              border: InputBorder.none
-                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                          ),
-                                          onChanged: (value) {
-                                            emailFieldListner();
-                                            outlineheaderColorForPass = new Color(0xff49454f);
-                                            outlineheaderColorForName = new Color(0xff49454f);
-                                          },
+                                      child: Row(
+                                  children: [
+                                  containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                Expanded(
+                                  child: TextFormField(
+                                    focusNode: _focusNode1,
+                                    controller: mailEditingController,
+                                    decoration: InputDecoration(
+                                        hintText: 'Email or mobile number',
+                                        hintStyle: TextStyle(
+                                          fontFamily: 'Roboto',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xffbdbdbd),
                                         ),
-                                      ))
+                                        border: InputBorder.none
+                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                    ),
+                                    onChanged: (value) {
+                                      emailFieldListner();
+                                    },
+                                  ),
+                                ),
+                                ],
+                              ))
                               ),
                               Container(
                                 //color: Colors.amberAccent,
@@ -536,13 +541,29 @@ class _SignUpState extends State<SignUp> {
                                         ),
                                         // onPressed: loginclickable ? login : null,
                                         onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmailOrPhone: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
-                                            ),
-                                          );
-                                          SendOTPAPI().sendOTP(mailEditingController.text);
+                                          if(mailEditingController.text.isNotEmpty && nameEditingController.text.isNotEmpty && passEditingController.text.isNotEmpty) {
+                                            if(passEditingController.text.length>=8){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    VerifyYourAccount(
+                                                        previousScreen: 'SignUp',
+                                                        userEmailOrPhone: mailEditingController
+                                                            .text,
+                                                        userName: nameEditingController
+                                                            .text,
+                                                        userPasword: passEditingController
+                                                            .text),
+                                              ),
+                                            );
+                                            SendOTPAPI().sendOTP(
+                                                mailEditingController.text);}else{
+                                              HelperClass.showToast("Password should be of 8 characters");
+                                            }
+                                          }else{
+                                            HelperClass.showToast("Please provide all required field");
+                                          }
                                         },
                                         child: Center(
                                           child:

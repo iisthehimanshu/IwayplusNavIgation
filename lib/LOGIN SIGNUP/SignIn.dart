@@ -394,11 +394,14 @@ class _SignInState extends State<SignIn> {
                                           }else{
                                             phoneNumberOEmail+=mailEditingController.text;
                                           }
+                                          print("Signin api info send");
+                                          print(phoneNumberOEmail);
+                                          print(passEditingController.text);
                                           SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
                                           print("signInResponse.accessToken");
                                           print(signInResponse?.refreshToken);
                                           print(signInResponse?.accessToken);
-                                          if(signInResponse?.accessToken == null){
+                                          if(signInResponse == null){
                                             setState(() {
                                               passincorrect = true;
                                             });
@@ -469,6 +472,7 @@ class _SignInState extends State<SignIn> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
                               margin: EdgeInsets.only(left: 76),

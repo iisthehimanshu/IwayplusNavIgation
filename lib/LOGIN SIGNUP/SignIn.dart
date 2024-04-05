@@ -197,7 +197,10 @@ class _SignInState extends State<SignIn> {
                                             padding: EdgeInsets.only(left: 12),
                                             width: double.infinity,
                                             decoration: BoxDecoration(
-                                              border: Border.all(color: outlineheaderColor,width: 2),
+                                              border: Border.all(
+                                                  color: passincorrect
+                                                      ? Colors.redAccent
+                                                      : outlineheaderColorForPass,width: 2),
                                               color: Color(0xfffffff),
                                               borderRadius: BorderRadius.circular(4),
                                             ),
@@ -238,7 +241,9 @@ class _SignInState extends State<SignIn> {
                                           fontFamily: 'Roboto',
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
-                                          color: outlineTextColor,
+                                          color: passincorrect
+                                              ? Colors.redAccent
+                                              : outlineTextColorForPass,
                                         ),
                                       ),
                                     )
@@ -393,11 +398,11 @@ class _SignInState extends State<SignIn> {
                                           print("signInResponse.accessToken");
                                           print(signInResponse?.refreshToken);
                                           print(signInResponse?.accessToken);
-                                          if(signInResponse == null){
+                                          if(signInResponse?.accessToken == null){
                                             setState(() {
                                               passincorrect = true;
                                             });
-                                            HelperClass.showToast("Incorrect Details");
+                                            HelperClass.showToast("Invalid Username or Password");
                                           }else{
                                             Navigator.pushAndRemoveUntil(
                                               context,

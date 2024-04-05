@@ -13,8 +13,6 @@ class SignInAPI{
   final String baseUrl = "https://dev.iwayplus.in/auth/signin";
 
   Future<SignInApiModel?> signIN(String username, String password) async {
-    //final signindataBox = FavouriteDataBaseModelBox.getData();
-    final SigninBox = SignINAPIModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
@@ -29,30 +27,25 @@ class SignInAPI{
       },
     );
 
-    //Map<String, dynamic> responseBody = json.decode(response.body);
     print("Response body is ${response.statusCode}");
     if (response.statusCode == 200) {
-      //print("Response body is $responseBody");
       try {
         Map<String, dynamic>  responseBody = json.decode(response.body);
+        
+        
         SignInApiModel ss = new SignInApiModel();
+        if(responseBody.containsKey("exist") && responseBody["exist"]==false){
+          ss.accessToken = null;
+          ss.refreshToken = null;
+          ss.payload?.userId = null;
+          ss.payload?.roles = null;
+          return ss;
+        }
         ss.accessToken = responseBody["accessToken"];
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
-
-        final signinData = SignINAPIModel(signInApiModel: ss,);
-        SigninBox.add(signinData);
-        signinData.save();
-        print("printing box length ${SigninBox.length}");
-
-
-
-        // Now use the decoded data to create a SignInAPIModel instance
-        // signindataBox.add(signInResponse);
-        // signInResponse.save();
-
-
+        
         var signInBox = Hive.box('SignInDatabase');
         List<dynamic> roles = responseBody["payload"]["roles"];
         // Put data into the box
@@ -60,17 +53,9 @@ class SignInAPI{
         signInBox.put("refreshToken", responseBody["accessToken"]);
         signInBox.put("userId", responseBody["payload"]["userId"]);
         signInBox.put("roles", roles);
-        // print(signInBox.values);
-        // print(signInBox.get("roles"));
-        // if(signInBox.get("roles")=="user"){
-        //   print("True");
-        // }
-
-        //signInResponse.save();
+        
         print("Sign in details saved to database");
-        // Use signInResponse as needed
-
-
+        
         return ss;
 
       } catch (e) {

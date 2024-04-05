@@ -24,7 +24,7 @@ import 'Navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  //await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
@@ -67,42 +67,26 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       title: "IWAYPLUS",
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (BuildContext context, AsyncSnapshot snapshot){
-          if(snapshot.hasError){
+      home: FutureBuilder(
+        future: Hive.openBox('SignInDatabase'),
+        builder: (BuildContext context, AsyncSnapshot<Box<dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
             return Text(snapshot.error.toString());
           }
-          if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.data == null){
-              var SignInDatabasebox = Hive.box('SignInDatabase');
-              print(SignInDatabasebox.values);
-              //List<dynamic> ss = SignInDatabasebox.get("roles");
-              // print(ss.length);
-              // if(SignInDatabasebox.get("roles")=="[user]"){
-              //   print("True");
-              // }
-              final SigninBox = SignINAPIModelBox.getData();
-              print("SigninBox.length");
-              print(SigninBox.values);
-              print(SigninBox);
 
-              if(!SignInDatabasebox.containsKey("accessToken")){
-                return SignIn();
-              }else{
-                return MainScreen(initialIndex: 0);
-              }
-            }else{
-              return MainScreen(initialIndex: 0);
-            }
+          final signInDatabaseBox = snapshot.data!;
+          print(signInDatabaseBox.values);
+
+          if (!signInDatabaseBox.containsKey("accessToken")) {
+            return SignIn();
+          } else {
+            return MainScreen(initialIndex: 0);
           }
-          return Center(child: CircularProgressIndicator(),);
         },
-      )
-
-      //LoginScreen(),
-      // MainScreen(initialIndex: 0,),
-
+      ),
     );
   }
 }

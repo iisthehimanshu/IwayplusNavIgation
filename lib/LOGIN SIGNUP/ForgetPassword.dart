@@ -59,18 +59,6 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
-
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
   TextEditingController nameEditingController = TextEditingController();
@@ -332,7 +320,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => VerifyYourAccount(previousScreen: 'ForgetPassword',),
+                                                builder: (context) => VerifyYourAccount(previousScreen: 'ForgetPassword',userEmailOrPhone: mailEditingController.text,),
                                               ),
                                             );
                                           },

@@ -88,6 +88,10 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
 
+  int _remainingSeconds = 60; // Initial value set to 60 seconds
+  late Timer _timer;
+
+
   void OTPFieldListner(){
     if(OTPEditingController.text.length>0){
       if(OTPEditingController.text.length>0){
@@ -117,6 +121,16 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
     _focusNode2.addListener(_onFocusChange);
     _focusNode1_1.addListener(_onFocusChange);
     _focusNode2_1.addListener(_onFocusChange);
+    // Start the countdown timer
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_remainingSeconds > 0) {
+        setState(() {
+          _remainingSeconds--; // Decrease remaining seconds by 1
+        });
+      } else {
+        _timer.cancel(); // Cancel the timer when countdown finishes
+      }
+    });
   }
 
 
@@ -196,7 +210,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                   child: Flexible(
                                     child: Container(
                                       child: Text(
-                                        "Please enter the verification code we’ve sent you on inwayplus@gmail.com",
+                                        "Please enter the verification code we’ve sent you on ${widget.userEmailOrPhone}",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 16,

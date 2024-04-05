@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>61576302596-dcb89vna6fj3kal7mkqqnkr74chfp7ib.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.61576302596-dcb89vna6fj3kal7mkqqnkr74chfp7ib</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>61576302596-tbj9icj5l9f4sqa44vgklibk80m5ce3i.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAnbE_t9GsO37UjigC3_ccoDDcFC3F8GVQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>61576302596</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.iwaymaps.navigation</string>
+	<key>PROJECT_ID</key>
+	<string>iwaymaps-9af30</string>
+	<key>STORAGE_BUCKET</key>
+	<string>iwaymaps-9af30.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:61576302596:ios:e2d58c0d19917dd714e551</string>
+	<key>DATABASE_URL</key>
+	<string>https://iwaymaps-9af30-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>

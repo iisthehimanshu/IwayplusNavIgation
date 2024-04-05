@@ -35,10 +35,12 @@ class BT{
     startbin();
     print("Scan starting");
     FlutterBluePlus.startScan();
+    print("scanning");
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        //print(result);
+        print("result--");
+        print(result);
         String MacId = "${result.device.remoteId}";
         int Rssi = result.rssi;
 

@@ -31,12 +31,12 @@ class SignUpAPI{
        return true;
       } else {
         print("SignUpAPI--response.statusCode ${responseData['status']} ");
-        HelperClass.showToast(responseData["message"]);
+        //HelperClass.showToast(responseData["message"]);
       }
     } else {
       var responseData = json.decode(response.body);
       print("SignUpAPI--response.statusCode response.body ${response.statusCode} ${response.body}");
-      HelperClass.showToast(responseData["message"]);
+      //HelperClass.showToast(responseData["message"]);
     }
     return false;
   }

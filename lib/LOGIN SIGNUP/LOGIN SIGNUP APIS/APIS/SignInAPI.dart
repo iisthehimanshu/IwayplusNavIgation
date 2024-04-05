@@ -68,4 +68,46 @@ class SignInAPI{
       return null;
     }
   }
+  static Future<int> sendOtpForgetPassword(String user) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
+    request.body = json.encode({"username": "${user}"});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      return 1;
+    } else {
+      print("response.reasonPhrase");
+      print(response.reasonPhrase);
+      return 0;
+    }
+  }
+
+  static Future<int> changePassword(String user, String pass, String otp) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://dev.iwayplus.in/auth/reset-password'));
+    request.body = json.encode({
+      "username": "$user",
+      "password": "$pass",
+      "otp": "$otp"
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      return 1;
+    } else {
+      print("response.reasonPhrase");
+      print(response.reasonPhrase);
+      return 0;
+    }
+  }
+
 }

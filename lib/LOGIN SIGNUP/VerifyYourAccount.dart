@@ -33,6 +33,9 @@ class VerifyYourAccount extends StatefulWidget {
 }
 
 class _VerifyYourAccountState extends State<VerifyYourAccount> {
+  String finalSendingEmailORPhone = "";
+
+
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
   FocusNode _focusNode2_1 = FocusNode();
@@ -131,6 +134,21 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
         _timer.cancel(); // Cancel the timer when countdown finishes
       }
     });
+
+  }
+  bool isNumeric(String str) {
+    if (str == null) {
+      return false;
+    }
+    try {
+      // Try parsing the string into a double
+      double.parse(str);
+      // If parsing succeeds, return true
+      return true;
+    } catch (e) {
+      // If parsing fails, return false
+      return false;
+    }
   }
 
 
@@ -158,6 +176,11 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     Orientation orientation = MediaQuery.of(context).orientation;
+    if(isNumeric(widget.userEmailOrPhone)){
+      finalSendingEmailORPhone = "+91${widget.userEmailOrPhone}";
+    }else{
+      finalSendingEmailORPhone = widget.userEmailOrPhone;
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -210,7 +233,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                   child: Flexible(
                                     child: Container(
                                       child: Text(
-                                        "Please enter the verification code we’ve sent you on ${widget.userEmailOrPhone}",
+                                        "Please enter the verification code we’ve sent you on ${finalSendingEmailORPhone}",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 16,
@@ -310,15 +333,24 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                           ),
                                           // onPressed: loginclickable ? login : null,
                                           onPressed: () async {
-                                              if(widget.previousScreen=='ForgetPassword'){
+                                              if(widget.previousScreen=='ForgetPassword' && OTPEditingController.text.length==6){
+                                                print("sending");
+
+
+                                                print(finalSendingEmailORPhone);
+                                                print(widget.userEmailOrPhone);
+                                                print(widget.userName);
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                    builder: (context) => CreateNewPassword(),
+                                                    builder: (context) => CreateNewPassword(otp: (OTPEditingController.text.isNotEmpty)?OTPEditingController.text:'', user: finalSendingEmailORPhone)
                                                   ),
                                                 );
-                                              }else{
-                                                  if(await SignUpAPI().signUP(widget.userEmailOrPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
+                                              }else if(OTPEditingController.text.isEmpty || OTPEditingController.text.length<6){
+                                                HelperClass.showToast("Enter 6 Digit OTP");
+                                              }
+                                              else{
+                                                  if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
                                                     Navigator.pushAndRemoveUntil(context,
                                                       MaterialPageRoute(
                                                         builder: (context) => MainScreen(initialIndex: 0,)
@@ -330,11 +362,6 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                             },
                                           child: Center(
                                             child:
-                                            // loginapifetching
-                                            //     ? Center(
-                                            //     child: lot.Lottie.asset(
-                                            //         "assets/loader.json"))
-                                            //     :
                                             Text(
                                               'Verify OTP',
                                               style: TextStyle(

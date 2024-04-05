@@ -592,9 +592,11 @@ class _NavigationState extends State<Navigation> {
       if(nearestLandInfomation.name==""){
         print("no beacon found");
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
         speak("You are on ${tools.numericalToAlphabetical(
             apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
       }else {
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
         speak("You are on ${tools.numericalToAlphabetical(
             apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation
             .name} is on your ${finalvalue}");
@@ -2304,29 +2306,29 @@ class _NavigationState extends State<Navigation> {
       PathState.directions.add(element);
     });
 
-    await building.landmarkdata!.then((value) {
-      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-          path, value.landmarksMap!, 20, numCols, floor);
-      print("nearbyLandmarks");
-      List<int> landCoord = [];
-
-      for(int i=0 ; i<nearbyLandmarks.length ; i++){
-        landCoord.add(nearbyLandmarks[i].coordinateX!);
-        landCoord.add(nearbyLandmarks[i].coordinateY!);
-        //double distL = calculateDistance(nearbyLandmarks[i].coordinateX! as double, nearbyLandmarks[i].coordinateY! as double, cordL, cordLt);
-        // print("${nearbyLandmarks[i].coordinateX!} ${nearbyLandmarks[i].coordinateY!}");
-        // print(distL);
-
-        // double dist = calculateDistance(landCoord as double,beaconCord);
-        print(nearbyLandmarks[i].coordinateX!-cordL);
-        if(nearbyLandmarks[i].coordinateX! - cordL < 10){
-          print(nearbyLandmarks[i].coordinateX!-cordL);
-          print(nearbyLandmarks[i].name);
-        }
-      }
-      //print(nearbyLandmarks);
-
-    });
+    // await building.landmarkdata!.then((value) {
+    //   List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
+    //       path, value.landmarksMap!, 20, numCols, floor);
+    //   print("nearbyLandmarks");
+    //   List<int> landCoord = [];
+    //
+    //   for(int i=0 ; i<nearbyLandmarks.length ; i++){
+    //     landCoord.add(nearbyLandmarks[i].coordinateX!);
+    //     landCoord.add(nearbyLandmarks[i].coordinateY!);
+    //     //double distL = calculateDistance(nearbyLandmarks[i].coordinateX! as double, nearbyLandmarks[i].coordinateY! as double, cordL, cordLt);
+    //     // print("${nearbyLandmarks[i].coordinateX!} ${nearbyLandmarks[i].coordinateY!}");
+    //     // print(distL);
+    //
+    //     // double dist = calculateDistance(landCoord as double,beaconCord);
+    //     print(nearbyLandmarks[i].coordinateX!-cordL);
+    //     if(nearbyLandmarks[i].coordinateX! - cordL < 10){
+    //       print(nearbyLandmarks[i].coordinateX!-cordL);
+    //       print(nearbyLandmarks[i].name);
+    //     }
+    //   }
+    //   //print(nearbyLandmarks);
+    //
+    // });
     // await building.landmarkdata!.then((value) {
     //   List<Landmarks> near = tools.localizefindNearbyLandmark(0,3,value.landmarksMap!, 3);
     //   print("near---");
@@ -4264,6 +4266,7 @@ class _NavigationState extends State<Navigation> {
   //         )
   //       ));
   // }
+
   String nearestLandmarkNameForPannel="";
   String nearestAddressForPannel="";
 
@@ -4297,9 +4300,9 @@ class _NavigationState extends State<Navigation> {
                 color: Colors.grey,
               ),
             ],
-            minHeight: element.workingDays != null && element.workingDays!.length>0 ? 80:140,
+            minHeight: 90,
             snapPoint: element.workingDays != null && element.workingDays!.length>0 ? 220/screenHeight : 175/screenHeight,
-            maxHeight: element.workingDays != null && element.workingDays!.length>0 ? 80:140,
+            maxHeight: 90,
             panel: Semantics(
               sortKey: const OrdinalSortKey(1),
               child: Container(
@@ -4335,7 +4338,7 @@ class _NavigationState extends State<Navigation> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                "You are at ${nearestLandInfomation.name}",
+                                "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 18,
@@ -4345,6 +4348,7 @@ class _NavigationState extends State<Navigation> {
                                 ),
                                 textAlign: TextAlign.left,
                               ),
+
                             ],
                           ),
                         ),

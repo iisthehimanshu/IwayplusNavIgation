@@ -235,7 +235,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: Semantics(
+              label: "Back",
+              child: Icon(Icons.arrow_back)),
         ),
       ),
       body: Stack(children: [
@@ -314,28 +316,33 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                               ? CountryCodeSelector()
                                               : Text(""),
                                           Expanded(
-                                            child: TextFormField(
-                                              focusNode: _focusNode1,
-                                              controller: mailEditingController,
-                                              decoration: const InputDecoration(
-                                                  hintText:
-                                                  'Email or mobile number',
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
+                                            child: Semantics(
+                                              label: "Enter Email or mobile number",
+                                              child: ExcludeSemantics(
+                                                child: TextFormField(
+                                                  focusNode: _focusNode1,
+                                                  controller: mailEditingController,
+                                                  decoration: const InputDecoration(
+                                                      hintText:
+                                                      'Email or mobile number',
+                                                      hintStyle: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xffbdbdbd),
+                                                      ),
+                                                      border: InputBorder.none
+                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                   ),
-                                                  border: InputBorder.none
-                                                //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                  onChanged: (value) {
+                                                    emailFieldListner();
+                                                    outlineheaderColorForPass =
+                                                    new Color(0xff49454f);
+                                                    outlineheaderColorForName =
+                                                    new Color(0xff49454f);
+                                                  },
+                                                ),
                                               ),
-                                              onChanged: (value) {
-                                                emailFieldListner();
-                                                outlineheaderColorForPass =
-                                                new Color(0xff49454f);
-                                                outlineheaderColorForName =
-                                                new Color(0xff49454f);
-                                              },
                                             ),
                                           ),
                                         ],

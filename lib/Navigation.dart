@@ -4347,8 +4347,7 @@ class _NavigationState extends State<Navigation> {
                                   height: 25 / 18,
                                 ),
                                 textAlign: TextAlign.left,
-                              ),
-
+                              )
                             ],
                           ),
                         ),

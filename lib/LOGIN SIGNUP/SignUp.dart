@@ -341,7 +341,9 @@ class _SignUpState extends State<SignUp> {
           onPressed: (){
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: Semantics(
+              label: "Back",
+              child: Icon(Icons.arrow_back)),
         ),
       ),
       body: Stack(
@@ -397,23 +399,28 @@ class _SignUpState extends State<SignUp> {
                                   children: [
                                   containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
                                 Expanded(
-                                  child: TextFormField(
-                                    focusNode: _focusNode1,
-                                    controller: mailEditingController,
-                                    decoration: InputDecoration(
-                                        hintText: 'Email or mobile number',
-                                        hintStyle: TextStyle(
-                                          fontFamily: 'Roboto',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xffbdbdbd),
+                                  child: Semantics(
+                                    label: "Enter Email or mobile number",
+                                    child: ExcludeSemantics(
+                                      child: TextFormField(
+                                        focusNode: _focusNode1,
+                                        controller: mailEditingController,
+                                        decoration: InputDecoration(
+                                            hintText: 'Email or mobile number',
+                                            hintStyle: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xffbdbdbd),
+                                            ),
+                                            border: InputBorder.none
+                                          //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                         ),
-                                        border: InputBorder.none
-                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                        onChanged: (value) {
+                                          emailFieldListner();
+                                        },
+                                      ),
                                     ),
-                                    onChanged: (value) {
-                                      emailFieldListner();
-                                    },
                                   ),
                                 ),
                                 ],
@@ -432,27 +439,32 @@ class _SignUpState extends State<SignUp> {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Expanded(
-                                        child: TextFormField(
-                                          focusNode: nameFocusNode,
-                                          controller: nameEditingController,
-                                          decoration: InputDecoration(
-                                              hintText: 'Name',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                        child: Semantics(
+                                          label: "Enter your name",
+                                          child: ExcludeSemantics(
+                                            child: TextFormField(
+                                              focusNode: nameFocusNode,
+                                              controller: nameEditingController,
+                                              decoration: InputDecoration(
+                                                  hintText: 'Name',
+                                                  hintStyle: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xffbdbdbd),
+                                                  ),
+                                                  border: InputBorder.none
+                                                //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                               ),
-                                              border: InputBorder.none
-                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                              onChanged: (value) {
+                                                nameFiledListner();
+                                                setState(() {
+                                                  outlineheaderColorForPass = new Color(0xff49454f);
+                                                  outlineheaderColor = new Color(0xff49454f);
+                                                });
+                                              },
+                                            ),
                                           ),
-                                          onChanged: (value) {
-                                            nameFiledListner();
-                                            setState(() {
-                                              outlineheaderColorForPass = new Color(0xff49454f);
-                                              outlineheaderColor = new Color(0xff49454f);
-                                            });
-                                          },
                                         ),
                                       ))
                               ),
@@ -473,57 +485,66 @@ class _SignUpState extends State<SignUp> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Container(
-                                    child: TextFormField(
-                                      focusNode: _focusNode1_1,
-                                      controller: passEditingController,
-                                      obscureText: obsecure,
-                                      decoration: InputDecoration(
-                                          hintText: 'Password',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Roboto',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xffbdbdbd),
+                                    child: Semantics(
+                                      label: "Enter your password",
+                                      child: ExcludeSemantics(
+                                        child: TextFormField(
+                                          focusNode: _focusNode1_1,
+                                          controller: passEditingController,
+                                          obscureText: obsecure,
+                                          decoration: InputDecoration(
+                                              hintText: 'Password',
+                                              hintStyle: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xffbdbdbd),
+                                              ),
+                                              border: InputBorder.none
+                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                           ),
-                                          border: InputBorder.none
-                                        //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                          onChanged: (value) {
+                                            passwordFieldListner();
+                                            setState(() {
+                                              outlineheaderColorForName = new Color(0xff49454f);
+                                              outlineheaderColor = new Color(0xff49454f);
+                                              passincorrect = false;
+                                            });
+                                          },
+                                        ),
                                       ),
-                                      onChanged: (value) {
-                                        passwordFieldListner();
-                                        setState(() {
-                                          outlineheaderColorForName = new Color(0xff49454f);
-                                          outlineheaderColor = new Color(0xff49454f);
-                                          passincorrect = false;
-                                        });
-                                      },
                                     ),
                                   ),),
                               ),
-                              passEditingController.text.length<8? Container(
-                                margin: EdgeInsets.only(left: 32,top: 4),
-                                child: Text(
-                                  "8 characters password required.",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xffB3261E),
-                                    height: 16/12,
+                              passEditingController.text.length<8? ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xffB3261E),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
                                   ),
-                                  textAlign: TextAlign.left,
                                 ),
-                              ) : Container(
-                                margin: EdgeInsets.only(left: 32,top: 4),
-                                child: Text(
-                                  "8 characters password required.",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff49454f),
-                                    height: 16/12,
+                              ) : ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff49454f),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
                                   ),
-                                  textAlign: TextAlign.left,
                                 ),
                               ) ,
                               Container(

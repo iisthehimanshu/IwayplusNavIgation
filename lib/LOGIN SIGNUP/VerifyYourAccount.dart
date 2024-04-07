@@ -184,7 +184,9 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
           onPressed: (){
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: Semantics(
+              label: "Back",
+              child: Icon(Icons.arrow_back)),
         ),
       ),
       body: Stack(
@@ -208,24 +210,29 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    startCountDown();
-                                  },
-                                  child: Container(
-                                      margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-                                      width: double.infinity,
-                                      child: Text(
-                                        "Verify Your Account",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xff000000),
-                                          height: 30/24,
-                                        ),
-                                        textAlign: TextAlign.left,
+                                Semantics(
+                                  label: "Verify your account, 60 seconds left",
+                                  child: ExcludeSemantics(
+                                    child: GestureDetector(
+                                      onTap: (){
+                                        startCountDown();
+                                      },
+                                      child: Container(
+                                          margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
+                                          width: double.infinity,
+                                          child: Text(
+                                            "Verify Your Account",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xff000000),
+                                              height: 30/24,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
                                       ),
+                                    ),
                                   ),
                                 ),
                                 Container(
@@ -259,44 +266,51 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                           borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Expanded(
-                                          child: TextFormField(
-                                            focusNode: _focusNode1,
-                                            keyboardType: TextInputType.number, // Set keyboard type to number
-                                            inputFormatters: <TextInputFormatter>[
-                                              FilteringTextInputFormatter.digitsOnly // Allow only digits
-                                            ],
-                                            controller: OTPEditingController,
-                                            decoration: InputDecoration(
-                                                hintText: 'OTP',
-                                                hintStyle: TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffbdbdbd),
+                                          child: Semantics(
+                                            label: "Enter 6 digit OTP",
+                                            child: ExcludeSemantics(
+                                              child: TextFormField(
+                                                focusNode: _focusNode1,
+                                                keyboardType: TextInputType.number, // Set keyboard type to number
+                                                inputFormatters: <TextInputFormatter>[
+                                                  FilteringTextInputFormatter.digitsOnly // Allow only digits
+                                                ],
+                                                controller: OTPEditingController,
+                                                decoration: InputDecoration(
+                                                    hintText: 'OTP',
+                                                    hintStyle: TextStyle(
+                                                      fontFamily: 'Roboto',
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xffbdbdbd),
+                                                    ),
+                                                    border: InputBorder.none
+                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                 ),
-                                                border: InputBorder.none
-                                              //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                onChanged: (value) {
+                                                  OTPFieldListner();
+                                                  outlineheaderColorForPass = new Color(0xff49454f);
+                                                  outlineheaderColorForName = new Color(0xff49454f);
+                                                },
+                                              ),
                                             ),
-                                            onChanged: (value) {
-                                              OTPFieldListner();
-                                              outlineheaderColorForPass = new Color(0xff49454f);
-                                              outlineheaderColorForName = new Color(0xff49454f);
-                                            },
                                           ),
                                         ))
                                 ),
-                                Container(
-                                  margin: EdgeInsets.only(left: 32,top: 4),
-                                  child: Text(
-                                    "Enter your 6-digit otp here",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff49454f),
-                                      height: 16/12,
+                                ExcludeSemantics(
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 32,top: 4),
+                                    child: Text(
+                                      "Enter your 6-digit otp here",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff49454f),
+                                        height: 16/12,
+                                      ),
+                                      textAlign: TextAlign.left,
                                     ),
-                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                                 Container(
@@ -349,6 +363,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                                 HelperClass.showToast("Enter 6 Digit OTP");
                                               }
                                               else{
+
                                                   if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
                                                     Navigator.pushAndRemoveUntil(context,
                                                       MaterialPageRoute(
@@ -356,6 +371,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                                       ),(route) => false,
                                                     );
                                                   }else{
+
                                                   }
                                               }
                                             },

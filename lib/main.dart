@@ -21,6 +21,7 @@ import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'MainScreen.dart';
 import 'Navigation.dart';
+import 'dart:io' show Platform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,12 +61,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late String googleSignInUserName='';
   Future<bool> _isUserAuthenticated() async {
     // Check if the user is already signed in with Google
     User? user = FirebaseAuth.instance.currentUser;
 
     // If the user is signed in, return true
     if (user != null) {
+      googleSignInUserName = user.displayName!;
+      print(user.metadata);
+      print(user.emailVerified);
+      print(user.phoneNumber);
+      print(user.photoURL);
+
       return true;
     }
     // If the user is not signed in, return false
@@ -75,6 +83,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    bool isIOS = Platform.isIOS; // Check if the current platform is iOS
+    bool isAndroid = Platform.isAndroid;
+    if(isIOS){
+      print("IOS");
+    }else if(isAndroid){
+      print("Android");
+    }
 
     return MaterialApp(
       title: "IWAYPLUS",
@@ -102,13 +117,17 @@ class _MyAppState extends State<MyApp> {
             print("SigninBox.length");
             print(SigninBox.values);
             print(SigninBox);
+            print(googleSignInUserName);
 
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
             }else{
+
               return MainScreen(initialIndex: 0);
             } // Redirect to Sign-In screen if user is not authenticated
           } else {
+            print("googleSignInUserName");
+            print(googleSignInUserName);
             return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
           }
         },

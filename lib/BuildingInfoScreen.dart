@@ -109,23 +109,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                 )
             ),
           ),
-          actions: [
-            Semantics(
-              label: 'Share',
-              child: Container(
-                  margin: EdgeInsets.only(right: 20),
-                  // decoration: BoxDecoration(
-                  //   borderRadius: BorderRadius.circular(8.0),
-                  //   border: Border.all(
-                  //     color: Color(0x204A4545),
-                  //   ),
-                  // ),
-
-                  child: SvgPicture.asset("assets/BuildingInfoScreen_Share.svg"),
-
-              ),
-            )
-          ],
+          
           backgroundColor: Colors.transparent, // Set the background color to transparent
           elevation: 0,
           flexibleSpace: Container(

@@ -6,14 +6,17 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
 import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/Elements/SearchNearby.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
   String hintText ;
+
   DestinationSearchPage({required this.hintText});
 
   @override
@@ -31,10 +34,24 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   List<dynamic> recent = [];
 
+  TextEditingController _controller = TextEditingController();
+  final SpeechToText speetchText = SpeechToText();
+  bool speechEnabled = false;
+  String wordsSpoken = "";
+  String searchHintString = "";
+  bool topBarIsEmptyOrNot = false;
+
 
   @override
   void initState() {
     super.initState();
+    print("In search page");
+    initSpeech();
+    setState(() {
+      searchHintString = widget.hintText;
+    });
+
+
     fetchlist();
     fetchRecents();
     recentResults.add(Container(
@@ -74,6 +91,59 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       ),
     ));
   }
+
+  void initSpeech() async {
+    speechEnabled = await speetchText.initialize();
+    setState(() {});
+  }
+  void startListening() async {
+    if(await speetchText.hasPermission==false){
+      HelperClass.showToast("Permission not allowed");
+      return;
+    }
+
+    setState(() {
+      searchHintString = "";
+    });
+    await speetchText.listen(onResult: onSpeechResult);
+    if(speetchText.isNotListening){
+      setState(() {
+        searchHintString = widget.hintText;
+      });
+    }
+    print("In initSpeech");
+  }
+
+  void onSpeechResult(result){
+    setState(() {
+      print("Listening from mic");
+      print(result.recognizedWords);
+      setState(() {
+        _controller.text = result.recognizedWords;
+        search(result.recognizedWords);
+        print(_controller.text);
+      });
+      wordsSpoken = "${result.recognizedWords}";
+      if(result.recognizedWords == null){
+        setState(() {
+          searchHintString = widget.hintText;
+        });
+      }
+    });
+    print("In onSpeechResult");
+  }
+
+  void stopListening() async{
+    await speetchText.stop();
+    if(speetchText.isNotListening) {
+      setState(() {
+        searchHintString = widget.hintText;
+      });
+    }
+  }
+
+
+
 
   void fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
@@ -200,8 +270,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         child: Container(
                             child: TextFormField(
                               autofocus: true,
+                              controller: _controller,
                               decoration: InputDecoration(
-                                hintText: "${widget.hintText}"
+                                hintText: "${searchHintString}"
                               ),
                               style: const TextStyle(
                                 fontFamily: "Roboto",
@@ -211,6 +282,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 height: 25/16,
                               ),
                               onChanged: (value){
+                                // setState(() {
+                                //   if(value.length!=0){
+                                //     speechEnabled = false;
+                                //     searchString = widget.hintText;
+                                //   }else{
+                                //     print("Tapped");
+                                //   }
+                                //
+                                // });
+
+
                                 search(value);
                               },
                             )),
@@ -220,7 +302,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         height: 48,
                         child: Center(
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                // if(speechEnabled){
+                                //   searchHintString = "Listening";
+                                // }else{
+                                //   searchHintString = widget.hintText;
+                                // }
+                                speetchText.isListening? stopListening() : startListening();
+                              });
+                            },
                             icon: Icon(
                               Icons.mic_none_sharp,
                               color: Color(0xff8E8C8C),

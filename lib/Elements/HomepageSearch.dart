@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwayplusnav/SourceAndDestinationPage.dart';
 
 import '../DestinationSearchPage.dart';
@@ -99,21 +100,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
               ),
             ),
             Container(
-              width: 40,
-              height: 48,
-              margin: EdgeInsets.only(right: 7),
-              child: Center(
-                child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.qr_code_scanner_sharp,
-                    color: Color(0xff8E8C8C),
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
-            Container(
               height: 48,
               width: 1,
               margin: EdgeInsets.only(right: 4),
@@ -139,11 +125,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                       widget.fromSourceAndDestinationPage(value);
                     });
                   },
-                  icon: Icon(
-                    Icons.directions,
-                    color: Color(0xff24B9B0),
-                    size: 24,
-                  ),
+                  icon: SvgPicture.asset("assets/HomepageSearch_getDirectionIcon.svg"),
                 ),
               ),
             )

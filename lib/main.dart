@@ -73,6 +73,8 @@ class _MyAppState extends State<MyApp> {
       print(user.emailVerified);
       print(user.phoneNumber);
       print(user.photoURL);
+      print(user.tenantId);
+      print(user.refreshToken);
 
       return true;
     }

@@ -145,6 +145,7 @@ class _NavigationState extends State<Navigation> {
 
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
+  List<String> allBuildingList = [];
 
   @override
   void initState() {
@@ -3338,6 +3339,9 @@ class _NavigationState extends State<Navigation> {
     'All', 'Floor 0', 'Floor 1',
     'Floor 2', 'Floor 3'
   ];
+
+
+  List<ImageProvider<Object>> imageList = [];
   late land landmarkData = new land();
   List<Landmarks> LandmarkItems = [];
   List<Landmarks> filteredItems = [];
@@ -4211,6 +4215,13 @@ class _NavigationState extends State<Navigation> {
                               label: (i, v) => v,
                               tooltip: (i, v) => v,
                             ),
+                            choiceLeadingBuilder: (data, i) {
+                              if (data.meta == null) return null;
+                              return CircleAvatar(
+                                maxRadius: 12,
+                                backgroundImage: data.avatarImage,
+                              );
+                            },
                             choiceCheckmark: true,
                             choiceStyle: C2ChipStyle.filled(
                               selectedStyle: const C2ChipStyle(
@@ -4280,6 +4291,7 @@ class _NavigationState extends State<Navigation> {
       buildingList.forEach((Element) {
         if(Element.sId == buildingAllApi.getStoredString()){
           setState(() {
+            allBuildingList.add(Element.sId!);
             element = Element;
           });
         }

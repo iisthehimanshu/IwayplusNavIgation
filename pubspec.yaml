@@ -72,6 +72,7 @@ dependencies:
   cloud_firestore:
   google_sign_in: ^5.4.4
   speech_to_text:
+  fuzzy: <1.0.0
 
 dev_dependencies:
   hive_generator: ^2.0.0

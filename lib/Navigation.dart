@@ -65,6 +65,8 @@ import 'dart:math' as math;
 import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
+import 'package:lottie/lottie.dart' as lott;
+
 
 
 void main() {
@@ -4670,18 +4672,25 @@ class _NavigationState extends State<Navigation> {
     return SafeArea(
       child: isLoading? Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              lott.Lottie.asset(
+                'assets/loding_animation.json', // Path to your Lottie animation
+                width: 500,
+                height: 500,
+              ),
+              // Container(
+              //   child: Text("Loading")
+              // )
+            ],
+          ),
         ),
       )
           :  Scaffold(
         body: Stack(
           children: [
-            Visibility(
-              visible: isLoading,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
             Container(
               child: GoogleMap(
                 padding: EdgeInsets.only(left: 20), // <--- padding added here

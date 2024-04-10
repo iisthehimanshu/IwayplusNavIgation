@@ -1,8 +1,13 @@
 import 'dart:convert';
 
+import 'package:chips_choice/chips_choice.dart';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuzzy/fuzzy.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
 import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
@@ -40,6 +45,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
+  Set<String> cardSet = Set();
 
 
   @override
@@ -54,7 +60,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
     fetchlist();
     fetchRecents();
-    recentResults.add(Container(
+    recentResults.add(
+        Container(
       margin: EdgeInsets.only(left:16, right: 16, top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,7 +184,22 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           if(searchResults.length<10){
             if(value.name != null && value.element!.subType != "beacons"){
               if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,));
+                final nameList = [value.name!.toLowerCase()];
+                final fuse = Fuzzy(
+                  nameList,
+                  options: FuzzyOptions(
+                    findAllMatches: true,
+                    tokenize: true,
+                    threshold: 0.5,
+                  ),
+                );
+                final result = fuse.search(searchText.toLowerCase());
+
+                // print("Wilsonchexker");
+                // print(result);
+                cardSet.add(value.name!);
+
+                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,floor: value.floor.toString(),));
               }
             }
           }else{
@@ -223,6 +245,28 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     );
   }
 
+  List<String> options = [
+    'Washroom', 'Food & Drinks',
+    'Reception', 'Break Room', 'Education',
+    'Fashion', 'Travel', 'Rooms', 'Tech',
+    'Science',
+  ];
+
+  List<String> floorOptions = [
+    'Food & Drinks', 'Washroom', 'Water',
+  ];
+
+  List<IconData> _icons = [
+    Icons.home,
+    Icons.wash_sharp,
+    Icons.school,
+  ];
+  List<String> optionsTags = [];
+  List<String> floorOptionsTags = [];
+  String currentSelectedFilter = "";
+  Color containerBoxColor = Color(0xffA1A1AA);
+
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -230,7 +274,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          padding: EdgeInsets.only(top: 16),
           color: Colors.white,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -238,11 +281,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               Container(
                   width: screenWidth - 32,
                   height: 48,
+                  margin: EdgeInsets.only(top: 16,left: 16,right: 17),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: Colors.white, // You can customize the border color
+                      color: containerBoxColor, // You can customize the border color
                       width: 1.0, // You can customize the border width
                     ),
                   ),
@@ -250,37 +294,40 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Container(
-                        width: 44,
+                        width: 48,
                         height: 48,
-                        margin: EdgeInsets.only(right: 4),
                         child: Center(
                           child: IconButton(
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            icon: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Colors.black,
-                              size: 24,
-                            ),
+                            icon: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg"),
                           ),
                         ),
                       ),
                       Expanded(
                         child: Container(
                             child: TextFormField(
-                              autofocus: true,
+                              autofocus: false,
                               controller: _controller,
                               decoration: InputDecoration(
-                                hintText: "${searchHintString}"
+                                hintText: "${searchHintString}",
+                                border: InputBorder.none, // Remove default border
                               ),
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xff000000),
+                                color: Color(0xff18181b),
                                 height: 25/16,
                               ),
+                              onTap: (){
+                                if(containerBoxColor==Color(0xffA1A1AA)){
+                                  containerBoxColor = Color(0xff24B9B0);
+                                }else{
+                                  containerBoxColor = Color(0xffA1A1AA);
+                                }
+                              },
                               onChanged: (value){
                                 // setState(() {
                                 //   if(value.length!=0){
@@ -292,75 +339,101 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 //
                                 // });
 
-
                                 search(value);
+                                print("Final Set");
+                                print(cardSet);
                               },
                             )),
                       ),
                       Container(
                         width: 40,
                         height: 48,
+                        margin: EdgeInsets.only(right: 12),
                         child: Center(
                           child: IconButton(
                             onPressed: () {
                               setState(() {
-                                // if(speechEnabled){
-                                //   searchHintString = "Listening";
-                                // }else{
-                                //   searchHintString = widget.hintText;
-                                // }
                                 speetchText.isListening? stopListening() : startListening();
                               });
                             },
                             icon: Icon(
                               Icons.mic_none_sharp,
-                              color: Color(0xff8E8C8C),
+                              color: Color(0xff282828),
                               size: 24,
                             ),
                           ),
                         ),
                       ),
-                      EasterEggTrigger(
-                        child: Container(
-                          width: 40,
-                          height: 48,
-                          margin: EdgeInsets.only(right: 7),
-                          child: Center(
-                            child: IconButton(
-                              onPressed: () {
-                                print("no easter egg");
-                              },
-                              icon: Icon(
-                                Icons.qr_code_scanner_sharp,
-                                color: Color(0xff8E8C8C),
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),codes: [
-                          EasterEggTriggers.SwipeDown,
-                        EasterEggTriggers.LongPress,
-                      ],
-                        action: (){
-                          showToast("Why are you doing this");
-                        },
-                      )
-                      ,
                     ],
-                  )),
-              SizedBox(
-                height: 16,
+                  )
               ),
+
               Container(
-                width: screenWidth,
-                height: 1,
-                color: Color(0xffB3B3B3),
+                margin: EdgeInsets.only(left: 10,right: 10),
+                child: ValueListenableBuilder(
+                  valueListenable: Hive.box('Filters').listenable(),
+                  builder: (BuildContext context, value, Widget? child) {
+                    //List<dynamic> aa = []
+                    if(value.length==2){
+                      floorOptionsTags = value.getAt(1);
+                    }
+                    return ChipsChoice<String>.single(
+                      value: currentSelectedFilter,
+                      onChanged: (val) {
+                        print("Destinationpage Filter change${val}${value.values}");
+                        value.put(1, val);
+                        setState(() {
+                          currentSelectedFilter = val;
+                          //onTagsChanged();
+                        });
+                      },
+                      choiceItems: C2Choice.listFrom<String, String>(
+                        source: floorOptions,
+                        value: (i, v) => v,
+                        label: (i, v) => v,
+                        tooltip: (i, v) => v,
+                        meta: (i, v) => _icons[i],
+                        // delete: (i, v) => () {
+                        //   setState(() => options.removeAt(i));
+                        // },
+                      ),
+                      choiceLeadingBuilder: (data, i) {
+                        if (data.meta == null) return null;
+                        return Icon(data.meta as IconData); // Display the icon from the meta property
+                      },
+                      padding: EdgeInsets.only(left: 0,top: 10),
+                      choiceCheckmark: true,
+                      choiceStyle: C2ChipStyle.outlined(
+                        height: 38,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(9),
+                        ),
+                        selectedStyle:  C2ChipStyle.filled(
+                          color: Colors.black
+                        ),
+                        borderWidth: 1,
+
+                      ),
+                      wrapped: false,
+                    );
+                  },
+                ),
               ),
-              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: searchResults,))),
+
+              Flexible(flex:1,
+                  child: SingleChildScrollView(
+                      child: Column(children: searchResults,)
+                  )
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+class SetInfo{
+  String SetInfoLandmarkName;
+  String SetInfoBuildingName;
+  SetInfo({required this.SetInfoBuildingName,required this.SetInfoLandmarkName});
 }

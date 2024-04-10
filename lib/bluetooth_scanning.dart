@@ -33,17 +33,13 @@ class BT{
   void startScanning(HashMap<String, beacon> apibeaconmap)
   {
     startbin();
-    print("Scan starting");
     FlutterBluePlus.startScan();
-    print("scanning");
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        print("result--");
-        print(result);
+
         String MacId = "${result.device.remoteId}";
         int Rssi = result.rssi;
-
         if(apibeaconmap.containsKey(MacId)){
           beacondetail[MacId] = Rssi*-1;
           addtoBin(MacId, Rssi);

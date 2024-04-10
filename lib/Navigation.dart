@@ -150,7 +150,16 @@ class _NavigationState extends State<Navigation> {
   @override
   void initState() {
     super.initState();
+
     flutterTts = FlutterTts();
+    setState(() {
+      isLoading = true;
+      speak("Loading maps");
+    });
+    print("Circular progress bar");
+    apiCalls();
+
+
     handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -339,9 +348,11 @@ class _NavigationState extends State<Navigation> {
   }
 
   List<FilterInfoModel> landmarkListForFilter= [];
+  bool isLoading = false; // Initially set to true to show loader
 
   void apiCalls() async {
 
+    print("working 1");
     await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID).then((value) {
       building.patchData[value.patchData!.buildingID!] = value;
       createPatch(value);
@@ -353,9 +364,7 @@ class _NavigationState extends State<Navigation> {
       }
       tools.angleBetweenBuildingAndNorth();
     });
-    
-
-
+    print("working 2");
     await PolyLineApi().fetchPolyData(id: buildingAllApi.selectedBuildingID).then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
@@ -363,9 +372,9 @@ class _NavigationState extends State<Navigation> {
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, building.floor);
     });
-  
 
 
+    print("working 3");
     building.landmarkdata = landmarkApi().fetchLandmarkData(id: buildingAllApi.selectedBuildingID).then((value) {
       print("Himanshuchecker ids ${value.landmarks![0].name}");
       Map<int, LatLng> coordinates = {};
@@ -399,6 +408,9 @@ class _NavigationState extends State<Navigation> {
       createMarkers(value, building.floor);
       return value;
     });
+    print("working 4");
+    await Future.delayed(Duration(seconds: 3));
+    print("5 seconds over");
 
     await beaconapi().fetchBeaconData().then((value) {
       print("beacondatacheck");
@@ -458,7 +470,14 @@ class _NavigationState extends State<Navigation> {
         });
       }
     });
+
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
+    print("working over");
+    setState(() {
+      isLoading = false;
+    });
+    print("Circular progress stop");
+
   }
 
 
@@ -495,6 +514,7 @@ class _NavigationState extends State<Navigation> {
 
   late nearestLandInfo nearestLandInfomation;
   Future<void> localizeUser() async {
+    print("Beacon searching started");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
@@ -606,6 +626,7 @@ class _NavigationState extends State<Navigation> {
       speak("Unable to find your location");
     }
     btadapter.stopScanning();
+    print("Beacon searching Stoped");
   }
 
   void createPatch(patchDataModel value) async {
@@ -4631,11 +4652,11 @@ class _NavigationState extends State<Navigation> {
       subscription.cancel();
     }
     compassSubscription.cancel();
+    flutterTts.cancelHandler;
     super.dispose();
   }
+
   List<String> scannedDevices = [];
-
-
 
 
   @override
@@ -4647,11 +4668,23 @@ class _NavigationState extends State<Navigation> {
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
     return SafeArea(
-      child: Scaffold(
+      child: isLoading? Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      )
+          :  Scaffold(
         body: Stack(
           children: [
+            Visibility(
+              visible: isLoading,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
             Container(
               child: GoogleMap(
+                padding: EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
@@ -4673,8 +4706,8 @@ class _NavigationState extends State<Navigation> {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
                   print("tumhari galti hai sb saalo");
-                  speak("Loading maps");
-                  apiCalls();
+
+
                   if (patch.isNotEmpty) {
                     fitPolygonInScreen(patch.first);
                   }

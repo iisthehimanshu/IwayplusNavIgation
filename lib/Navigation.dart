@@ -5372,6 +5372,124 @@ class _NavigationState extends State<Navigation> {
                       Colors.white, // Set the background color of the FAB
                     ),
                   ),
+                  SizedBox(height: 28.0), // Adjust the height as needed
+                  FloatingActionButton(
+                    onPressed: () async {
+                      // late Timer _liveTimer;
+                      // if (markers.length > 0)
+                      //   markers[0] = customMarker.rotate(0, markers[0]);
+                      // bool isData=
+
+                      if (user.initialallyLocalised) {
+                        setState(() {
+                          // if (_timer.isActive &&
+                          //     isLiveLocalizing == true) {
+                          //   _timer.cancel();
+                          // }
+                          isLiveLocalizing = !isLiveLocalizing;
+
+                          //_liveTimer.cancel();
+                        });
+                        // if(isData==true){
+
+                        // }
+                        Timer.periodic(
+                            Duration(milliseconds: 6000),
+                                (timer) async {
+                              // setState(() {
+                              //   detected = false;
+                              // });
+
+                              // await beaconapi()
+                              //     .fetchBeaconData()
+                              //     .then((value) async {
+                              //   print("beacondatacheck");
+                              //   print(value.toString());
+                              //   building.beacondata = value;
+                              //   for (int i = 0; i < value.length; i++) {
+                              //     beacon beacons = value[i];
+                              //     if (beacons.properties!.macId !=
+                              //         null) {
+                              //       apibeaconmap[beacons
+                              //           .properties!.macId!] = beacons;
+                              //     }
+                              //   }
+                              print(resBeacons);
+                              btadapter.startScanning(resBeacons);
+
+                              // print("printing bin");
+                              // btadapter.printbin();
+
+                              //please wait
+                              //searching your location
+
+                              // speak("Please wait");
+                              // speak("Searching your location. .");
+                              Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                                realTimeReLocalizeUser(resBeacons)
+                              });
+                              // _timer = Timer.periodic(
+                              //     Duration(milliseconds: 5000),
+                              //     (timer) {
+
+                              //       .then((value) => {
+                              //             btadapter.clear
+                              //           });
+                              //   //_timer.cancel();
+                              // });
+
+                              //     if (isLiveLocalizing == true) {
+                              //   _timer.cancel();
+                              // }
+                              // });
+                            });
+
+                        // await beaconapi()
+                        //     .fetchBeaconData()
+                        //     .then((value) {
+                        //   print("beacondatacheck");
+                        //   print(value.toString());
+                        //   building.beacondata = value;
+                        //   for (int i = 0; i < value.length; i++) {
+                        //     beacon beacons = value[i];
+                        //     if (beacons.properties!.macId !=
+                        //         null) {
+                        //       apibeaconmap[beacons
+                        //           .properties!.macId!] = beacons;
+                        //     }
+                        //   }
+                        //   btadapter.startScanning(apibeaconmap);
+                        //   // print("printing bin");
+                        //   // btadapter.printbin();
+                        //   late Timer _timer;
+                        //   //please wait
+                        //   //searching your location
+
+                        //   speak("Please wait");
+                        //   speak("Searching your location. .");
+
+                        //   _timer = Timer.periodic(
+                        //       Duration(milliseconds: 9000),
+                        //       (timer) {
+                        //     localizeUser();
+                        //     _timer.cancel();
+                        //   });
+                        // });
+
+                        // mapState.interaction = !mapState.interaction;
+                      }
+                      // mapState.zoom = 21;
+                      // fitPolygonInScreen(patch.first);
+                    },
+                    child: Icon(
+                      Icons.location_history_sharp,
+                      color: (isLiveLocalizing)
+                          ? Colors.cyan
+                          : Colors.black,
+                    ),
+                    backgroundColor: Colors
+                        .white, // Set the background color of the FAB
+                  ),
                 ],
               ),
             ),

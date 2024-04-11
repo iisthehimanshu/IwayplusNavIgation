@@ -171,6 +171,7 @@ class _NavigationState extends State<Navigation> {
     checkPermissions();
 
     getDeviceManufacturer();
+    try{
     _streamSubscriptions.add(
       userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
           (UserAccelerometerEvent event) {
@@ -199,6 +200,10 @@ class _NavigationState extends State<Navigation> {
         true;
       }),
     );
+    }catch(E){
+      print("E----");
+      print(E);
+    }
     // fetchlist();
     // filterItems();
   }
@@ -351,7 +356,7 @@ class _NavigationState extends State<Navigation> {
 
   List<FilterInfoModel> landmarkListForFilter= [];
   bool isLoading = false; // Initially set to true to show loader
-
+  bool isBlueToothLoading = false;
   void apiCalls() async {
 
     print("working 1");
@@ -411,8 +416,15 @@ class _NavigationState extends State<Navigation> {
       return value;
     });
     print("working 4");
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 2));
     print("5 seconds over");
+    setState(() {
+
+      isBlueToothLoading = true;
+      print("isBlueToothLoading");
+      print(isBlueToothLoading);
+    });
+
 
     await beaconapi().fetchBeaconData().then((value) {
       print("beacondatacheck");
@@ -475,8 +487,13 @@ class _NavigationState extends State<Navigation> {
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
     print("working over");
+    await Future.delayed(Duration(seconds: 3));
+    print("5 seconds over");
     setState(() {
       isLoading = false;
+      isBlueToothLoading = false;
+      print("isBlueToothLoading");
+      print(isBlueToothLoading);
     });
     print("Circular progress stop");
 
@@ -1924,6 +1941,7 @@ class _NavigationState extends State<Navigation> {
                                         .landmarksMap![
                                     building.selectedLandmarkID]!
                                         .buildingID!;
+
                                     await calculateroute(
                                             snapshot.data!.landmarksMap!)
                                         .then((value) {
@@ -2241,6 +2259,7 @@ class _NavigationState extends State<Navigation> {
         List<CommonLifts> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
+
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
@@ -4670,25 +4689,27 @@ class _NavigationState extends State<Navigation> {
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
     return SafeArea(
-      child: isLoading? Scaffold(
+      child: isLoading && isBlueToothLoading? Scaffold(
         body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              lott.Lottie.asset(
-                'assets/loding_animation.json', // Path to your Lottie animation
-                width: 500,
-                height: 500,
-              ),
-              // Container(
-              //   child: Text("Loading")
-              // )
-            ],
+          child: lott.Lottie.asset(
+            'assets/loading_bluetooth.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
           ),
         ),
       )
-          :  Scaffold(
+          : isLoading?
+      Scaffold(
+        body: Center(
+          child:  lott.Lottie.asset(
+            'assets/loding_animation.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
+          )
+        ),
+      )
+
+      :Scaffold(
         body: Stack(
           children: [
             Container(

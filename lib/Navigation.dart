@@ -558,16 +558,33 @@ class _NavigationState extends State<Navigation> {
 
     print("nearestBeacon : $nearestBeacon");
 
-    if (apibeaconmap[nearestBeacon] != null) {
+    if (apibeaconmap[nearestBeacon] != null){
+      print("Himanshucheck ${apibeaconmap[nearestBeacon]!.floor}");
+
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(apibeaconmap[nearestBeacon]!,value.landmarksMap!);
         landCords = tools.localizefindNearbyLandmarkCoordinated(apibeaconmap[nearestBeacon]!,value.landmarksMap!);
       });
 
+      List<double> values = [];
 
-      List<double> values = tools.localtoglobal(
-          apibeaconmap[nearestBeacon]!.coordinateX!,
-          apibeaconmap[nearestBeacon]!.coordinateY!);
+      if(apibeaconmap[nearestBeacon]!.floor != 0){
+        List<PolyArray> prevFloorLifts = findLift(tools.numericalToAlphabetical(0), building.polyLineData!.polyline!.floors!);
+        List<PolyArray> currFloorLifts = findLift(tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!), building.polyLineData!.polyline!.floors!);
+        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        UserState.xdiff = dvalue[0];
+        UserState.ydiff = dvalue[1];
+        values = tools.localtoglobal(
+            apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      }else{
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+        values = tools.localtoglobal(
+            apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      }
+
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
       mapState.zoom = 21.0;
@@ -979,13 +996,55 @@ class _NavigationState extends State<Navigation> {
     floorData.forEach((Element) {
       if(Element.floor == floor){
         Element.polyArray!.forEach((element) {
-          if(element.name!.toLowerCase().contains("lift")){
+          if(element.cubicleName!.toLowerCase().contains("lift")){
             lifts.add(element);
           }
         });
       }
     });
     return lifts;
+  }
+
+  List<int> findCommonLift(List<PolyArray> list1, List<PolyArray> list2){
+    List<int> diff = [0,0];
+    print("Himanshuchecker");
+    print(list1.length);
+    print(list2.length);
+    for(int i = 0 ; i<list1.length ; i++){
+      for(int y = 0 ; y<list2.length ; y++){
+        PolyArray l1 = list1[i];
+        PolyArray l2 = list2[y];
+        if(l1.cubicleName!.toLowerCase() != "lift" && l2.cubicleName!.toLowerCase() != "lift" && l1.cubicleName == l2.cubicleName){
+          print("i ${l1.cubicleName}");
+          print("y ${l2.cubicleName}");
+          int x1 = 0;
+          int y1 = 0;
+          l1.nodes!.forEach((element) {
+            x1 = x1 + element.coordx!;
+            y1 = y1 + element.coordy!;
+          });
+
+          int x2 = 0;
+          int y2 = 0;
+          l2.nodes!.forEach((element) {
+            x2 = x2 + element.coordx!;
+            y2 = y2 + element.coordy!;
+          });
+
+          x1 = (x1/4).toInt();
+          y1 = (y1/4).toInt();
+          x2 = (x2/4).toInt();
+          y2 = (y2/4).toInt();
+
+          diff = [x2-x1, y2-y1];
+          print("11 ${[x1, y1]}");
+          print("22 ${[x2, y2]}");
+
+
+        }
+      }
+    }
+    return diff;
   }
 
 
@@ -995,13 +1054,18 @@ class _NavigationState extends State<Navigation> {
     _isLandmarkPanelOpen = false;
     building.selectedLandmarkID = null;
     polylines.clear();
-    int xdiff = 0;
-    int ydiff = 0;
 
 
     if(floor != 0){
-      List<PolyArray> prevFloorLifts = findLift(tools.numericalToAlphabetical(floor-1), value.polyline!.floors!);
+      List<PolyArray> prevFloorLifts = findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(tools.numericalToAlphabetical(floor), value.polyline!.floors!);
+      List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+      print("iway $dvalue");
+      UserState.xdiff = dvalue[0];
+      UserState.ydiff = dvalue[1];
+    }else{
+      UserState.xdiff = 0;
+      UserState.ydiff = 0;
     }
     List<PolyArray>? FloorPolyArray = value.polyline!.floors![0].polyArray;
     for (int j = 0; j < value.polyline!.floors!.length; j++) {
@@ -1699,6 +1763,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   PanelController _landmarkPannelController = new PanelController();
+  bool calculatingPath = false;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
@@ -1819,7 +1884,7 @@ class _NavigationState extends State<Navigation> {
               case ConnectionState.done:
                 if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
-                return Container(
+                return !calculatingPath?Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                     color: Colors.white,
@@ -1913,7 +1978,7 @@ class _NavigationState extends State<Navigation> {
                               child: TextButton(
                                 onPressed: () async {
                                   _isNearestLandmarkPannelOpen = false;
-                                  _isLandmarkPanelOpen = false;
+
                                   if (user.coordY != 0 && user.coordX != 0) {
                                     PathState.sourceX = user.coordX;
                                     PathState.sourceY = user.coordY;
@@ -1942,11 +2007,19 @@ class _NavigationState extends State<Navigation> {
                                     building.selectedLandmarkID]!
                                         .buildingID!;
 
-                                    await calculateroute(
-                                            snapshot.data!.landmarksMap!)
-                                        .then((value) {
-                                      _isRoutePanelOpen = true;
+                                    setState(() {
+                                      print("valuechanged");
+                                      calculatingPath = true;
                                     });
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      calculateroute(
+                                          snapshot.data!.landmarksMap!)
+                                          .then((value) {
+                                        _isLandmarkPanelOpen = false;
+                                        _isRoutePanelOpen = true;
+                                      });
+                                    });
+
                                   } else {
                                     PathState.sourceName =
                                         "Choose Starting Point";
@@ -2191,6 +2264,8 @@ class _NavigationState extends State<Navigation> {
                       )
                     ],
                   ),
+                ):Container(
+                  child: Text("Loading"),
                 );
             }
           }(),
@@ -2299,32 +2374,32 @@ class _NavigationState extends State<Navigation> {
       //     }
       //     return;
       //   });
-      //   land.landmarks!.forEach((element)async{
-      //     if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
-      //       if (PathState.sourceFloor == element.floor) {
-      //         await fetchroute(
-      //             PathState.sourceX,
-      //             PathState.sourceY,
-      //             element.coordinateX!,
-      //             element.coordinateY!,
-      //             element.floor!,bid: PathState.sourceBid);
-      //       } else if (PathState.sourceFloor != element.floor) {
-      //         List<CommonLifts> commonlifts = findCommonLifts(
-      //             landmarksMap[PathState.sourcePolyID]!.lifts!,
-      //             element.lifts!);
-      //         await fetchroute(
-      //             commonlifts[0].x2!,
-      //             commonlifts[0].y2!,
-      //             element.coordinateX!,
-      //             element.coordinateY!,
-      //             element.floor!,bid: PathState.sourceBid);
-      //         await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!,
-      //             commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
-      //       }
-      //     }
-      //     return;
-      //   });
-      // });
+        // land.landmarks!.forEach((element)async{
+        //   if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
+        //     if (PathState.sourceFloor == element.floor) {
+        //       await fetchroute(
+        //           PathState.sourceX,
+        //           PathState.sourceY,
+        //           element.coordinateX!,
+        //           element.coordinateY!,
+        //           element.floor!,bid: PathState.sourceBid);
+        //     } else if (PathState.sourceFloor != element.floor) {
+        //       List<CommonLifts> commonlifts = findCommonLifts(
+        //           landmarksMap[PathState.sourcePolyID]!.lifts!,
+        //           element.lifts!);
+        //       await fetchroute(
+        //           commonlifts[0].x2!,
+        //           commonlifts[0].y2!,
+        //           element.coordinateX!,
+        //           element.coordinateY!,
+        //           element.floor!,bid: PathState.sourceBid);
+        //       await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!,
+        //           commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+        //     }
+        //   }
+        //   return;
+        // });
+     // });
       print("different building detected");
     }
   }
@@ -2382,8 +2457,16 @@ class _NavigationState extends State<Navigation> {
 
     print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
-      List<double> svalue = tools.localtoglobal(sourceX, sourceY);
-      List<double> dvalue = tools.localtoglobal(destinationX, destinationY);
+      List<double> svalue = [];
+      List<double> dvalue = [];
+      if(bid != null){
+        svalue = tools.localtoglobal(sourceX, sourceY,patchData: building.patchData[bid]);
+        dvalue = tools.localtoglobal(destinationX, destinationY,patchData: building.patchData[bid]);
+      }else{
+        svalue = tools.localtoglobal(sourceX, sourceY);
+        dvalue = tools.localtoglobal(destinationX, destinationY);
+      }
+
       BitmapDescriptor tealtorch = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(),
         'assets/tealtorch.png',
@@ -2414,6 +2497,7 @@ class _NavigationState extends State<Navigation> {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if(bid != null){
+          print("Himanshubid $bid");
           List<double> value = tools.localtoglobal(row, col,patchData: building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
         }else{
@@ -4856,6 +4940,14 @@ class _NavigationState extends State<Navigation> {
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
                       onPressed: () {
+                        building.floor = user.floor;
+                        createRooms(building.polyLineData!, building.floor);
+                        if (pathMarkers[user.floor] != null) {
+                          setCameraPosition(pathMarkers[user.floor]!);
+                        }
+                        building.landmarkdata!.then((value) {
+                          createMarkers(value, building.floor);
+                        });
                         if (markers.length > 0)
                           markers[0] = customMarker.rotate(0, markers[0]);
                         if (user.initialallyLocalised) {

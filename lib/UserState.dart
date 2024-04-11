@@ -18,6 +18,8 @@ class UserState{
   List<int> path = [];
   bool initialallyLocalised = false;
   String Bid ;
+  static int xdiff = 0;
+  static int ydiff = 0;
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 

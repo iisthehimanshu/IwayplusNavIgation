@@ -2231,7 +2231,8 @@ class _NavigationState extends State<Navigation> {
                                     });
                                   }
                                 },
-                                child:(!calculatingPath)? const Row(
+                                child: (!calculatingPath)
+                                    ? const Row(
                                   //  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -2245,9 +2246,9 @@ class _NavigationState extends State<Navigation> {
                                         color: Colors.black,
                                       ),
                                     )
-
                                   ],
-                                ):Container(
+                                )
+                                    : Container(
                                   height: 24,
                                   width: 24,
                                   child: CircularProgressIndicator(
@@ -2491,6 +2492,9 @@ class _NavigationState extends State<Navigation> {
     return commonLifts;
   }
 
+  int sourceVal=0;
+  int destinationVal=0;
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     singleroute.clear();
     pathMarkers.clear();
@@ -2521,6 +2525,8 @@ class _NavigationState extends State<Navigation> {
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
+
+
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
@@ -2528,6 +2534,22 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationY,
             PathState.destinationFloor);
 
+
+
+        Map<String, int> map = {
+          'Take ${commonlifts[0].name}': -1,
+        };
+        print("test map: ${PathState.sourceFloor}");
+
+        setState(() {
+          sourceVal=PathState.sourceFloor;
+          destinationVal=PathState.destinationFloor;
+        });
+
+
+
+
+        PathState.directions.add(map);
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor);
@@ -2610,6 +2632,7 @@ class _NavigationState extends State<Navigation> {
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
+      print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -2732,12 +2755,18 @@ class _NavigationState extends State<Navigation> {
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
+    print("path keys: ${PathState.directions}");
     for (int i = 0; i < PathState.directions.length; i++) {
+
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
+      } else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
       } else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
@@ -3298,7 +3327,13 @@ class _NavigationState extends State<Navigation> {
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
-      } else {
+      }
+      else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
+      }
+      else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
                 PathState.directions[i].keys.first +

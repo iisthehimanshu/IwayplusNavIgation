@@ -2173,6 +2173,7 @@ class _NavigationState extends State<Navigation> {
                                             calculateroute(snapshot
                                                     .data!.landmarksMap!)
                                                 .then((value) {
+                                                  calculatingPath = false;
                                               _isLandmarkPanelOpen = false;
                                               _isRoutePanelOpen = true;
                                             });
@@ -2509,6 +2510,8 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor);
+
+
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor);
       }
@@ -5263,39 +5266,39 @@ class _NavigationState extends State<Navigation> {
               child: Column(
                 children: [
                   Visibility(
-                    visible: false,
+                    visible: true,
                     child: Container(
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.all(Radius.circular(24))),
                         child: IconButton(
                             onPressed: () {
-                              // bool isvalid = MotionModel.isValidStep(
-                              //     user,
-                              //     building.floorDimenssion[user.floor]![0],
-                              //     building.floorDimenssion[user.floor]![1],
-                              //     building.nonWalkable[user.floor]!,
-                              //     reroute);
-                              // if (isvalid) {
-                              //   user.move().then((value) {
-                              //     setState(() {
-                              //       if (markers.length > 0) {
-                              //         markers[0] = customMarker.move(
-                              //             LatLng(
-                              //                 tools.localtoglobal(
-                              //                     user.showcoordX.toInt(),
-                              //                     user.showcoordY.toInt())[0],
-                              //                 tools.localtoglobal(
-                              //                     user.showcoordX.toInt(),
-                              //                     user.showcoordY.toInt())[1]),
-                              //             markers[0]);
-                              //       }
-                              //     });
-                              //   });
-                              // } else {
-                              //   reroute();
-                              //   showToast("You are out of path");
-                              // }
+                              bool isvalid = MotionModel.isValidStep(
+                                  user,
+                                  building.floorDimenssion[user.floor]![0],
+                                  building.floorDimenssion[user.floor]![1],
+                                  building.nonWalkable[user.floor]!,
+                                  reroute);
+                              if (isvalid) {
+                                user.move().then((value) {
+                                  setState(() {
+                                    if (markers.length > 0) {
+                                      markers[0] = customMarker.move(
+                                          LatLng(
+                                              tools.localtoglobal(
+                                                  user.showcoordX.toInt(),
+                                                  user.showcoordY.toInt())[0],
+                                              tools.localtoglobal(
+                                                  user.showcoordX.toInt(),
+                                                  user.showcoordY.toInt())[1]),
+                                          markers[0]);
+                                    }
+                                  });
+                                });
+                              } else {
+                                reroute();
+                                showToast("You are out of path");
+                              }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),

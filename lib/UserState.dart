@@ -31,12 +31,14 @@ class UserState{
     lat = values[0];
     lng = values[1];
     if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
-      showcoordX = path[pathobj.index++] % pathobj.numCols;
-      showcoordY = path[pathobj.index++] ~/ pathobj.numCols;
+      showcoordX = path[pathobj.index] % pathobj.numCols;
+      showcoordY = path[pathobj.index] ~/ pathobj.numCols;
     }else{
       showcoordX = coordX;
       showcoordY = coordY;
     }
+
+    pathobj.index = pathobj.index + 1;
   }
 
   Future<void> moveToStartofPath()async{
@@ -48,5 +50,14 @@ class UserState{
     lng = values[1];
     showcoordX = path[pathobj.index] % pathobj.numCols;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols;
+  }
+
+  Future<void> reset()async{
+    showcoordX = coordX;
+    showcoordY = coordY;
+    isnavigating = false;
+    pathobj = pathState();
+    path = [];
+
   }
 }

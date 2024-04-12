@@ -2,6 +2,8 @@ class SignInApiModel {
   Payload? payload;
   String? accessToken;
   String? refreshToken;
+  // String? message;
+  // String? exist;
 
   SignInApiModel({this.payload, this.accessToken, this.refreshToken});
 
@@ -9,6 +11,8 @@ class SignInApiModel {
     payload = json['payload'] != null ? new Payload.fromJson(json['payload']) : null;
     accessToken = json['accessToken'];
     refreshToken = json['refreshToken'];
+    // message = json['message'];
+    // exist = json['exist'];
   }
 
   Map<String, dynamic> toJson() {
@@ -18,6 +22,8 @@ class SignInApiModel {
     }
     data['accessToken'] = this.accessToken;
     data['refreshToken'] = this.refreshToken;
+    // data['message'] = this.message;
+    // data['exist'] = this.exist;
     return data;
   }
 }

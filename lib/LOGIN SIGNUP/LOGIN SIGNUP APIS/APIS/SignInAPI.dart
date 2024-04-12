@@ -34,24 +34,25 @@ class SignInAPI{
     if (response.statusCode == 200) {
       //print("Response body is $responseBody");
       try {
-        Map<String, dynamic>  responseBody = json.decode(response.body);
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        print("response body--");
+        print(responseBody);
         SignInApiModel ss = new SignInApiModel();
         ss.accessToken = responseBody["accessToken"];
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
 
-        final signinData = SignINAPIModel(signInApiModel: ss,);
+        final signinData = SignINAPIModel(
+          signInApiModel: ss,
+        );
         SigninBox.add(signinData);
         signinData.save();
         print("printing box length ${SigninBox.length}");
 
-
-
         // Now use the decoded data to create a SignInAPIModel instance
         // signindataBox.add(signInResponse);
         // signInResponse.save();
-
 
         var signInBox = Hive.box('SignInDatabase');
         List<dynamic> roles = responseBody["payload"]["roles"];
@@ -70,9 +71,7 @@ class SignInAPI{
         print("Sign in details saved to database");
         // Use signInResponse as needed
 
-
         return ss;
-
       } catch (e) {
         print("Error occurred during data parsing: $e");
         throw Exception('Failed to parse data');
@@ -83,4 +82,46 @@ class SignInAPI{
       return null;
     }
   }
+  static Future<int> sendOtpForgetPassword(String user) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
+    request.body = json.encode({"username": "${user}"});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      return 1;
+    } else {
+      print("response.reasonPhrase");
+      print(response.reasonPhrase);
+      return 0;
+    }
+  }
+
+  static Future<int> changePassword(String user, String pass, String otp) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request(
+        'POST', Uri.parse('https://dev.iwayplus.in/auth/reset-password'));
+    request.body = json.encode({
+      "username": "$user",
+      "password": "$pass",
+      "otp": "$otp"
+    });
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      return 1;
+    } else {
+      print("response.reasonPhrase");
+      print(response.reasonPhrase);
+      return 0;
+    }
+  }
+
 }

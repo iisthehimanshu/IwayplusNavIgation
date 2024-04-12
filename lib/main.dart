@@ -21,6 +21,7 @@ import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'MainScreen.dart';
 import 'Navigation.dart';
+import 'dart:io' show Platform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,48 +61,79 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late String googleSignInUserName='';
+  Future<bool> _isUserAuthenticated() async {
+    // Check if the user is already signed in with Google
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // If the user is signed in, return true
+    if (user != null) {
+      googleSignInUserName = user.displayName!;
+      print(user.metadata);
+      print(user.emailVerified);
+      print(user.phoneNumber);
+      print(user.photoURL);
+      print(user.tenantId);
+      print(user.refreshToken);
+
+      return true;
+    }
+    // If the user is not signed in, return false
+    return false;
+  }
 
 
   @override
   Widget build(BuildContext context) {
+    bool isIOS = Platform.isIOS; // Check if the current platform is iOS
+    bool isAndroid = Platform.isAndroid;
+    if(isIOS){
+      print("IOS");
+    }else if(isAndroid){
+      print("Android");
+    }
 
     return MaterialApp(
       title: "IWAYPLUS",
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (BuildContext context, AsyncSnapshot snapshot){
-          if(snapshot.hasError){
+      home: FutureBuilder<bool>(
+        future: _isUserAuthenticated(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
             return Text(snapshot.error.toString());
           }
-          if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.data == null){
-              var SignInDatabasebox = Hive.box('SignInDatabase');
-              print(SignInDatabasebox.values);
-              //List<dynamic> ss = SignInDatabasebox.get("roles");
-              // print(ss.length);
-              // if(SignInDatabasebox.get("roles")=="[user]"){
-              //   print("True");
-              // }
-              final SigninBox = SignINAPIModelBox.getData();
-              print("SigninBox.length");
-              print(SigninBox.values);
-              print(SigninBox);
 
-              if(!SignInDatabasebox.containsKey("accessToken")){
-                return SignIn();
-              }else{
-                return MainScreen(initialIndex: 0);
-              }
+          final bool isUserAuthenticated = snapshot.data ?? false;
+
+          if (!isUserAuthenticated) {
+            var SignInDatabasebox = Hive.box('SignInDatabase');
+            print(SignInDatabasebox.values);
+            //List<dynamic> ss = SignInDatabasebox.get("roles");
+            // print(ss.length);
+            // if(SignInDatabasebox.get("roles")=="[user]"){
+            //   print("True");
+            // }
+            final SigninBox = SignINAPIModelBox.getData();
+            print("SigninBox.length");
+            print(SigninBox.values);
+            print(SigninBox);
+            print(googleSignInUserName);
+
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
             }else{
-              return MainScreen(initialIndex: 0);
-            }
-          }
-          return Center(child: CircularProgressIndicator(),);
-        },
-      )
 
-      //LoginScreen(),
-      // MainScreen(initialIndex: 0,),
+              return MainScreen(initialIndex: 0);
+            } // Redirect to Sign-In screen if user is not authenticated
+          } else {
+            print("googleSignInUserName");
+            print(googleSignInUserName);
+            return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
+          }
+        },
+      ),
 
     );
   }

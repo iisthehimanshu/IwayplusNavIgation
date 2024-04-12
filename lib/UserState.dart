@@ -18,6 +18,8 @@ class UserState{
   List<int> path = [];
   bool initialallyLocalised = false;
   String Bid ;
+  static int xdiff = 0;
+  static int ydiff = 0;
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
@@ -29,12 +31,14 @@ class UserState{
     lat = values[0];
     lng = values[1];
     if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
-      showcoordX = path[pathobj.index++] % pathobj.numCols;
-      showcoordY = path[pathobj.index++] ~/ pathobj.numCols;
+      showcoordX = path[pathobj.index] % pathobj.numCols;
+      showcoordY = path[pathobj.index] ~/ pathobj.numCols;
     }else{
       showcoordX = coordX;
       showcoordY = coordY;
     }
+
+    pathobj.index = pathobj.index + 1;
   }
 
   Future<void> moveToStartofPath()async{
@@ -46,5 +50,14 @@ class UserState{
     lng = values[1];
     showcoordX = path[pathobj.index] % pathobj.numCols;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols;
+  }
+
+  Future<void> reset()async{
+    showcoordX = coordX;
+    showcoordY = coordY;
+    isnavigating = false;
+    pathobj = pathState();
+    path = [];
+
   }
 }

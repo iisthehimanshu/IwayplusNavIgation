@@ -10,13 +10,18 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
+import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
+import 'SignIn.dart';
 import 'VerifyYourAccount.dart';
 
 class CreateNewPassword extends StatefulWidget {
-  const CreateNewPassword({super.key});
+  final String otp;
+  final String user;
+  const CreateNewPassword({super.key, required this.otp, required this.user});
 
   @override
   State<CreateNewPassword> createState() => _CreateNewPasswordState();
@@ -73,9 +78,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
 
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
+  TextEditingController confirmmailEditingController = TextEditingController();
   TextEditingController nameEditingController = TextEditingController();
   FocusNode nameFocusNode = FocusNode();
-
 
   Color button1 = new Color(0xff777777);
   Color text1 = new Color(0xff777777);
@@ -86,20 +91,20 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   Color outlineheaderColorForPass = new Color(0xff49454f);
   Color outlineTextColorForPass = new Color(0xff49454f);
 
-
-
   bool loginclickable = false;
-  Color buttonBGColor = new Color(0xff24b9b0);
+  Color buttonBGColor = new Color(0xffbdbdbd);
 
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
-  void nameFiledListner(){
-    if(nameEditingController.text.length>0){
+  void nameFiledListner() {
+    if (nameEditingController.text.length > 0) {
       setState(() {
-        outlineheaderColorForName = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColorForName = Color(0xff24b9b0);// Change the button color to green
+        outlineheaderColorForName =
+            Color(0xff24b9b0); // Change the button color to green
+        outlineTextColorForName =
+            Color(0xff24b9b0); // Change the button color to green
       });
-    }else{
+    } else {
       setState(() {
         outlineheaderColorForName = Color(0xff49454f);
         outlineTextColorForName = Color(0xff49454f);
@@ -108,19 +113,17 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     }
   }
 
-  void emailFieldListner(){
-    if(mailEditingController.text.length>0){
-      if(passEditingController.text.length>0){
-        setState(() {
-          buttonBGColor = Color(0xff24b9b0);
-          loginclickable = true;
-        });
-      }
+  void emailFieldListner() {
+    if (mailEditingController.text.isNotEmpty) {
       setState(() {
-        outlineheaderColor = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColor = Color(0xff24b9b0);// Change the button color to green
+        buttonBGColor = Color(0xff24b9b0);
+        loginclickable = true;
+        outlineheaderColor =
+            Color(0xff24b9b0); // Change the button color to green
+        outlineTextColor =
+            Color(0xff24b9b0); // Change the button color to green
       });
-    }else{
+    } else {
       setState(() {
         outlineheaderColor = Color(0xff49454f);
         outlineTextColor = Color(0xff49454f);
@@ -128,19 +131,41 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
       });
     }
   }
-  void passwordFieldListner(){
-    if(passEditingController.text.length>0){
-      if(mailEditingController.text.length>0){
+
+  void confirmemailFieldListner() {
+    if (mailEditingController.text.isNotEmpty) {
+      setState(() {
+        buttonBGColor = Color(0xff24b9b0);
+        loginclickable = true;
+        outlineheaderColor =
+            Color(0xff24b9b0); // Change the button color to green
+        outlineTextColor =
+            Color(0xff24b9b0); // Change the button color to green
+      });
+    } else {
+      setState(() {
+        outlineheaderColor = Color(0xff49454f);
+        outlineTextColor = Color(0xff49454f);
+        buttonBGColor = Color(0xffbdbdbd);
+      });
+    }
+  }
+
+  void passwordFieldListner() {
+    if (passEditingController.text.length > 0) {
+      if (mailEditingController.text.length > 0) {
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
         });
       }
       setState(() {
-        outlineheaderColorForPass = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColorForPass = Color(0xff24b9b0);// Change the button color to green
+        outlineheaderColorForPass =
+            Color(0xff24b9b0); // Change the button color to green
+        outlineTextColorForPass =
+            Color(0xff24b9b0); // Change the button color to green
       });
-    }else{
+    } else {
       setState(() {
         outlineheaderColorForPass = Color(0xff49454f);
         outlineTextColorForPass = Color(0xff49454f);
@@ -148,28 +173,30 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
       });
     }
   }
-  void signINButtonControler(){
+
+  void signINButtonControler() {
     setState(() {
       buttonBGColor = Color(0xff24b9b0);
     });
   }
 
-  signInWithGoogle() async{
+  signInWithGoogle() async {
     GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
     GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
 
     AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken
-    );
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
     print('Google user name ${userCredential.user?.displayName}');
 
-    if(userCredential.user != null){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
+    if (userCredential.user != null) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MainScreen(
+                initialIndex: 0,
+              )));
     }
   }
-
 
   void showpassword() {
     setState(() {
@@ -188,8 +215,6 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     _focusNode1_1.addListener(_onFocusChange);
     _focusNode2_1.addListener(_onFocusChange);
   }
-
-
 
   void _onFocusChange() {
     if (_focusNode1.hasFocus) {
@@ -210,6 +235,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     super.dispose();
   }
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -218,105 +245,160 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading:IconButton(
-          onPressed: (){
+        leading: IconButton(
+          onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: Semantics(
+              label:"Back",
+              child: Icon(Icons.arrow_back)),
         ),
       ),
-      body: Stack(
-          children: [SafeArea(
-            child: SingleChildScrollView(
-              physics: ScrollPhysics(),
-              child: Container(
-                height: (orientation == Orientation.portrait)
-                    ? screenHeight-37
-                    : screenWidth,
-                decoration: BoxDecoration(
-                  color: Color(0xffffffff),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-                                    width: double.infinity,
-                                    child: Text(
-                                      "Create New Password",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 30/24,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(left: 16,top: 8,right: 16),
-                                  width: screenWidth,
-                                  child: Flexible(
-                                    child: Container(
-                                      child: Text(
-                                        "Please create a new 8 character strong password for your account.",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4c4949),
-
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      )
+      body: Stack(children: [
+        SafeArea(
+          child: SingleChildScrollView(
+            physics: ScrollPhysics(),
+            child: Container(
+              height: (orientation == Orientation.portrait)
+                  ? screenHeight - 37
+                  : screenWidth,
+              decoration: BoxDecoration(
+                color: Color(0xffffffff),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
+                                  width: double.infinity,
+                                  child: const Text(
+                                    "Create New Password",
+                                    style: TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xff000000),
+                                      height: 30 / 24,
                                     ),
-                                  ),
+                                    textAlign: TextAlign.left,
+                                  )),
+                              Container(
+                                margin: EdgeInsets.only(
+                                    left: 16, top: 8, right: 16),
+                                width: screenWidth,
+                                child: Flexible(
+                                  child: Container(
+                                      child: const Text(
+                                    "Please create a new 8 character strong password for your account.",
+                                    style: TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff4c4949),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )),
                                 ),
-                                Container(
+                              ),
+                              Container(
                                   //color: Colors.amberAccent,
-                                    margin: EdgeInsets.only(top: 20,left: 16,right: 16),
-                                    height: 58,
-                                    child: Container(
-                                        padding: EdgeInsets.only(left: 12),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: outlineheaderColor,width: 2),
-                                          color: Color(0xfffffff),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Expanded(
-                                          child: TextFormField(
-                                            focusNode: _focusNode1,
-                                            controller: mailEditingController,
-                                            decoration: InputDecoration(
-                                                hintText: 'New Password',
-                                                hintStyle: TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffbdbdbd),
-                                                ),
-                                                border: InputBorder.none
-                                              //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                  margin: EdgeInsets.only(
+                                      top: 20, left: 16, right: 16),
+                                  height: 58,
+                                  child: Container(
+                                      padding: EdgeInsets.only(left: 12),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: outlineheaderColor,
+                                            width: 2),
+                                        color: Color(0xfffffff),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Expanded(
+                                        child: Semantics(
+                                          label: "Enter new password",
+                                          child: ExcludeSemantics(
+                                            child: TextFormField(
+                                              focusNode: _focusNode1,
+                                              controller: mailEditingController,
+                                              decoration: InputDecoration(
+                                                  hintText: 'New Password',
+                                                  hintStyle: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xffbdbdbd),
+                                                  ),
+                                                  border: InputBorder.none
+                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                  ),
+                                              onChanged: (value) {
+                                                emailFieldListner();
+                                                outlineheaderColorForPass =
+                                                    new Color(0xff49454f);
+                                                outlineheaderColorForName =
+                                                    new Color(0xff49454f);
+                                              },
                                             ),
-                                            onChanged: (value) {
-                                              emailFieldListner();
-                                              outlineheaderColorForPass = new Color(0xff49454f);
-                                              outlineheaderColorForName = new Color(0xff49454f);
-                                            },
                                           ),
-                                        ))
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                        ),
+                                      ))),
+                              Container(
+                                  //color: Colors.amberAccent,
+                                  margin: EdgeInsets.only(
+                                      top: 20, left: 16, right: 16),
+                                  height: 58,
+                                  child: Container(
+                                      padding: EdgeInsets.only(left: 12),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: outlineheaderColor,
+                                            width: 2),
+                                        color: Color(0xfffffff),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Expanded(
+                                        child: Semantics(
+                                          label: "Enter new password again",
+                                          child: ExcludeSemantics(
+                                            child: TextFormField(
+                                              focusNode: _focusNode2,
+                                              controller:
+                                                  confirmmailEditingController,
+                                              decoration: InputDecoration(
+                                                  hintText: 'Confirm Password',
+                                                  hintStyle: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xffbdbdbd),
+                                                  ),
+                                                  border: InputBorder.none
+                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                  ),
+                                              onChanged: (value) {
+                                                confirmemailFieldListner();
+                                                outlineheaderColorForPass =
+                                                    new Color(0xff49454f);
+                                                outlineheaderColorForName =
+                                                    new Color(0xff49454f);
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ))),
+                              ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32, top: 4),
                                   child: Text(
                                     "8 characters password required.",
                                     style: const TextStyle(
@@ -324,59 +406,98 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                       color: Color(0xff49454f),
-                                      height: 16/12,
+                                      height: 16 / 12,
                                     ),
                                     textAlign: TextAlign.left,
                                   ),
                                 ),
-                                Container(
-                                    margin: EdgeInsets.only(top: 32,right: 16,left: 16),
-                                    child: SizedBox(
-                                        height: 48,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Button border radius
-                                            ),
-                                            elevation: 0,
+                              ),
+                              Container(
+                                  margin: EdgeInsets.only(
+                                      top: 32, right: 16, left: 16),
+                                  child: SizedBox(
+                                      height: 48,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Color(0xff777777),
+                                          backgroundColor:
+                                              buttonBGColor, // Text color
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                4.0), // Button border radius
                                           ),
-                                          // onPressed: loginclickable ? login : null,
-                                          onPressed: () {
+                                          elevation: 0,
+                                        ),
+                                        // onPressed: loginclickable ? login : null,
+                                        onPressed: () async {
+                                          setState(() {
+                                            isLoading = true;
+                                          });
+                                          print(widget.user);
+                                          print(widget.otp);
+                                          if (mailEditingController.text.isNotEmpty && confirmmailEditingController.text.isNotEmpty) {
+                                            if(mailEditingController.text == confirmmailEditingController.text){
+                                              print("Verifying");
+                                              print(widget.user);
+                                              print(mailEditingController.text);
+                                              print(widget.otp);
+                                              await SignInAPI.changePassword(widget.user, mailEditingController.text, widget.otp).then((value) => {
+                                                if (value == 1){
+                                                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SignIn(),), (Route<dynamic>route) => false),
+                                                  showToast('Password reset Successfully')
+                                                } else {
+                                                  showToast('Something went wrong')
+                                                }
+                                              });
+                                            }else{
+                                              HelperClass.showToast("Incorrect matching fields");
+                                            }
 
-                                          },
-                                          child: Center(
-                                            child:
-                                            // loginapifetching
-                                            //     ? Center(
-                                            //     child: lot.Lottie.asset(
-                                            //         "assets/loader.json"))
-                                            //     :
-                                            Text(
-                                              'Verify OTP',
-                                              style: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xffffffff),
-                                              ),
-                                            ),
-                                          ),
-                                        ))
-                                )
-                              ],
-                            ),
+                                          } else {
+                                            showToast(
+                                                'dont leave any field empty');
+                                          }
+
+                                          setState(() {
+                                            isLoading = false;
+                                          });
+                                        },
+                                        child: Center(
+                                          child:
+                                              // loginapifetching
+                                              //     ? Center(
+                                              //     child: lot.Lottie.asset(
+                                              //         "assets/loader.json"))
+                                              //     :
+                                              (isLoading)
+                                                  ? const CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                    )
+                                                  : const Text(
+                                                      'Change Password',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color:
+                                                            Color(0xffffffff),
+                                                      ),
+                                                    ),
+                                        ),
+                                      )))
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          )]
-      ),
+          ),
+        )
+      ]),
     );
   }
 }

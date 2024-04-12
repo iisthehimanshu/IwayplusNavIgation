@@ -9,11 +9,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SendOTPAPI.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/VerifyYourAccount.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
+import 'SignIn.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -339,7 +341,9 @@ class _SignUpState extends State<SignUp> {
           onPressed: (){
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: Semantics(
+              label: "Back",
+              child: Icon(Icons.arrow_back)),
         ),
       ),
       body: Stack(
@@ -391,28 +395,36 @@ class _SignUpState extends State<SignUp> {
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: TextFormField(
-                                          focusNode: _focusNode1,
-                                          controller: mailEditingController,
-                                          decoration: InputDecoration(
-                                              hintText: 'Email or mobile number',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
-                                              ),
-                                              border: InputBorder.none
-                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                          ),
-                                          onChanged: (value) {
-                                            emailFieldListner();
-                                            outlineheaderColorForPass = new Color(0xff49454f);
-                                            outlineheaderColorForName = new Color(0xff49454f);
-                                          },
+                                      child: Row(
+                                  children: [
+                                  containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                Expanded(
+                                  child: Semantics(
+                                    label: "Enter Email or mobile number",
+                                    child: ExcludeSemantics(
+                                      child: TextFormField(
+                                        focusNode: _focusNode1,
+                                        controller: mailEditingController,
+                                        decoration: InputDecoration(
+                                            hintText: 'Email or mobile number',
+                                            hintStyle: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xffbdbdbd),
+                                            ),
+                                            border: InputBorder.none
+                                          //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                         ),
-                                      ))
+                                        onChanged: (value) {
+                                          emailFieldListner();
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                ],
+                              ))
                               ),
                               Container(
                                 //color: Colors.amberAccent,
@@ -427,27 +439,32 @@ class _SignUpState extends State<SignUp> {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Expanded(
-                                        child: TextFormField(
-                                          focusNode: nameFocusNode,
-                                          controller: nameEditingController,
-                                          decoration: InputDecoration(
-                                              hintText: 'Name',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                        child: Semantics(
+                                          label: "Enter your name",
+                                          child: ExcludeSemantics(
+                                            child: TextFormField(
+                                              focusNode: nameFocusNode,
+                                              controller: nameEditingController,
+                                              decoration: InputDecoration(
+                                                  hintText: 'Name',
+                                                  hintStyle: TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xffbdbdbd),
+                                                  ),
+                                                  border: InputBorder.none
+                                                //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                               ),
-                                              border: InputBorder.none
-                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                              onChanged: (value) {
+                                                nameFiledListner();
+                                                setState(() {
+                                                  outlineheaderColorForPass = new Color(0xff49454f);
+                                                  outlineheaderColor = new Color(0xff49454f);
+                                                });
+                                              },
+                                            ),
                                           ),
-                                          onChanged: (value) {
-                                            nameFiledListner();
-                                            setState(() {
-                                              outlineheaderColorForPass = new Color(0xff49454f);
-                                              outlineheaderColor = new Color(0xff49454f);
-                                            });
-                                          },
                                         ),
                                       ))
                               ),
@@ -468,57 +485,66 @@ class _SignUpState extends State<SignUp> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Container(
-                                    child: TextFormField(
-                                      focusNode: _focusNode1_1,
-                                      controller: passEditingController,
-                                      obscureText: obsecure,
-                                      decoration: InputDecoration(
-                                          hintText: 'Password',
-                                          hintStyle: TextStyle(
-                                            fontFamily: 'Roboto',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xffbdbdbd),
+                                    child: Semantics(
+                                      label: "Enter your password",
+                                      child: ExcludeSemantics(
+                                        child: TextFormField(
+                                          focusNode: _focusNode1_1,
+                                          controller: passEditingController,
+                                          obscureText: obsecure,
+                                          decoration: InputDecoration(
+                                              hintText: 'Password',
+                                              hintStyle: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xffbdbdbd),
+                                              ),
+                                              border: InputBorder.none
+                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                           ),
-                                          border: InputBorder.none
-                                        //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                          onChanged: (value) {
+                                            passwordFieldListner();
+                                            setState(() {
+                                              outlineheaderColorForName = new Color(0xff49454f);
+                                              outlineheaderColor = new Color(0xff49454f);
+                                              passincorrect = false;
+                                            });
+                                          },
+                                        ),
                                       ),
-                                      onChanged: (value) {
-                                        passwordFieldListner();
-                                        setState(() {
-                                          outlineheaderColorForName = new Color(0xff49454f);
-                                          outlineheaderColor = new Color(0xff49454f);
-                                          passincorrect = false;
-                                        });
-                                      },
                                     ),
                                   ),),
                               ),
-                              passEditingController.text.length<8? Container(
-                                margin: EdgeInsets.only(left: 32,top: 4),
-                                child: Text(
-                                  "8 characters password required.",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xffB3261E),
-                                    height: 16/12,
+                              passEditingController.text.length<8? ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xffB3261E),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
                                   ),
-                                  textAlign: TextAlign.left,
                                 ),
-                              ) : Container(
-                                margin: EdgeInsets.only(left: 32,top: 4),
-                                child: Text(
-                                  "8 characters password required.",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff49454f),
-                                    height: 16/12,
+                              ) : ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff49454f),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
                                   ),
-                                  textAlign: TextAlign.left,
                                 ),
                               ) ,
                               Container(
@@ -536,13 +562,29 @@ class _SignUpState extends State<SignUp> {
                                         ),
                                         // onPressed: loginclickable ? login : null,
                                         onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => VerifyYourAccount(previousScreen: 'SignUp',userEmailOrPhone: mailEditingController.text,userName: nameEditingController.text,userPasword: passEditingController.text),
-                                            ),
-                                          );
-                                          SendOTPAPI().sendOTP(mailEditingController.text);
+                                          if(mailEditingController.text.isNotEmpty && nameEditingController.text.isNotEmpty && passEditingController.text.isNotEmpty) {
+                                            if(passEditingController.text.length>=8){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    VerifyYourAccount(
+                                                        previousScreen: 'SignUp',
+                                                        userEmailOrPhone: mailEditingController
+                                                            .text,
+                                                        userName: nameEditingController
+                                                            .text,
+                                                        userPasword: passEditingController
+                                                            .text),
+                                              ),
+                                            );
+                                            SendOTPAPI().sendOTP(
+                                                mailEditingController.text);}else{
+                                              HelperClass.showToast("Password should be of 8 characters");
+                                            }
+                                          }else{
+                                            HelperClass.showToast("Please provide all required field");
+                                          }
                                         },
                                         child: Center(
                                           child:

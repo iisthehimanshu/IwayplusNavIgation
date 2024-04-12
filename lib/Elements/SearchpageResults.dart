@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
   final String name;
   final String location;
   final String ID;
   final String bid;
-  const SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid});
+  final String floor;
+  // String LandmarkName;
+  // String LandmarkFloor;
+  // String LandmarksubName;
+  // String LandmarkDistance;
+  const SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid,required this.floor});
 
   @override
   State<SearchpageResults> createState() => _SearchpageResultsState();
@@ -18,55 +24,94 @@ class _SearchpageResultsState extends State<SearchpageResults> {
     double screenHeight = MediaQuery.of(context).size.height;
     return InkWell(
       onTap: (){
-       widget.onClicked(widget.name, widget.location, widget.ID,widget.bid);
+        widget.onClicked(widget.name, widget.location, widget.ID,widget.bid);
       },
-      child:Container(
-        padding: EdgeInsets.only(left:4,top: 16,bottom: 16),
-        width: screenWidth-32,
+      child: Container(
+        margin: EdgeInsets.only(top: 10,left: 16,right: 16),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: Colors.grey, // Color of the bottom border
-              width: 1.0, // Width of the bottom border
+            color: Colors.white,
+            border: Border.all(
+              color: Color(0xffEBEBEB),
             ),
-          ),
+            borderRadius: BorderRadius.all(Radius.circular(8))
         ),
         child: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
-              margin: EdgeInsets.only(right: 12),
+              margin: EdgeInsets.only(left: 8,),
+              padding: EdgeInsets.all(7),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xffebebeb), // Color of the circular container
+                color: Color(0xffF5F5F5), // Specify the background color here
               ),
-              child: Icon(Icons.location_on_outlined,color: Colors.black,size: 24,),
+              child: Icon(Icons.man,color: Color(0xff000000),size: 25,),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.name,
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    height: 25/16,
+                Container(
+                  margin: EdgeInsets.only(top: 12,left: 18),
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    HelperClass.truncateString(widget.name,20),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
-                Text(
-                 widget.location,
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff8d8c8c),
-                    height: 20/14,
+                Container(
+                  margin: EdgeInsets.only(top:3,bottom: 14,left: 18),
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    HelperClass.truncateString(widget.location,25),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff8d8c8c),
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
-                )
+                ),
+              ],
+            ),
+            Spacer(),
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 12,left: 8,right:16 ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    HelperClass.truncateString("60 m",15),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff000000),
+                      height: 25/16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top:3,bottom: 14,right:10 ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    HelperClass.truncateString("Floor ${widget.floor}",25),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff8d8c8c),
+                      height: 20/14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ],

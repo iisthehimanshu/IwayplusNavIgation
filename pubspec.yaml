@@ -69,11 +69,12 @@ dependencies:
   lottie: ^2.6.0
   firebase_core:
   firebase_auth:
+  cloud_firestore:
   google_sign_in: ^5.4.4
-
-
-
-
+  speech_to_text:
+  fuzzy: <1.0.0
+  flutter_animator: ^3.2.2
+  vibration: ^1.8.4
 
 dev_dependencies:
   hive_generator: ^2.0.0

@@ -133,46 +133,48 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Container(
-            alignment: Alignment.bottomLeft,
-            child: Text(
-              "Iwayplus",
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xff000000),
+          title: Semantics(
+            label: "Iwayplus",
+            child: Container(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                "Iwayplus",
+                style: const TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xff000000),
+                ),
               ),
             ),
           ),
           centerTitle: true,
-          leading: EasterEggTrigger(
-            child: Semantics(
-              label: "Iwayplus Logo",
+          leading: ExcludeSemantics(
+            child: EasterEggTrigger(
               child: Container(
                 alignment: Alignment.centerRight,
                 width: 60,
                 child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
-              ),
-            ),codes: [
-            EasterEggTriggers.SwipeDown,
-            EasterEggTriggers.LongPress,
-          ],
-            action: (){
-              final BeaconBox = BeaconAPIModelBOX.getData();
-              final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-              final LandMarkBox = LandMarkApiModelBox.getData();
-              final PatchBox = PatchAPIModelBox.getData();
-              final PolyLineBox = PolylineAPIModelBOX.getData();
-
-              BeaconBox.clear();
-              BuildingAllBox.clear();
-              LandMarkBox.clear();
-              PatchBox.clear();
-              PolyLineBox.clear();
-              showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length}");
-
-            },
+              ),codes: [
+              EasterEggTriggers.SwipeDown,
+              EasterEggTriggers.LongPress,
+            ],
+              action: (){
+                final BeaconBox = BeaconAPIModelBOX.getData();
+                final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+                final LandMarkBox = LandMarkApiModelBox.getData();
+                final PatchBox = PatchAPIModelBox.getData();
+                final PolyLineBox = PolylineAPIModelBOX.getData();
+            
+                BeaconBox.clear();
+                BuildingAllBox.clear();
+                LandMarkBox.clear();
+                PatchBox.clear();
+                PolyLineBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length}");
+            
+              },
+            ),
           ),
 
           actions: [
@@ -184,15 +186,14 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
               //     color: Color(0x204A4545),
               //   ),
               // ),
-              child: Semantics(
-                label: 'Search',
-                child: IconButton(
-                  icon: Icon(Icons.search,color: Colors.black,),
-                  color: Color(0xff000000),
-                  onPressed: () {
-                    showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
-                  },
-                ),
+              child: IconButton(
+                icon: Semantics(
+                    label: "Search",
+                    child: Icon(Icons.search,color: Colors.black,)),
+                color: Color(0xff000000),
+                onPressed: () {
+                  showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
+                },
               ))
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent

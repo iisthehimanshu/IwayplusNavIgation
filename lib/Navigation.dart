@@ -2210,8 +2210,95 @@ class _NavigationState extends State<Navigation> {
                                       Icons.directions,
                                       color: Colors.black,
                                     ),
-                                    SizedBox(width: 8),
-                                   Text(
+                                    child: TextButton(
+                                      onPressed: () async {
+                                        _isNearestLandmarkPannelOpen = false;
+
+                                        if (user.coordY != 0 &&
+                                            user.coordX != 0) {
+                                          PathState.sourceX = user.coordX;
+                                          PathState.sourceY = user.coordY;
+                                          PathState.sourceFloor = user.floor;
+                                          PathState.sourcePolyID = user.key;
+                                          print(
+                                              "object ${PathState.sourcePolyID}");
+                                          PathState.sourceName =
+                                              "Your current location";
+                                          PathState.destinationPolyID =
+                                              building.selectedLandmarkID!;
+                                          PathState.destinationName = snapshot
+                                              .data!
+                                              .landmarksMap![
+                                                  building.selectedLandmarkID]!
+                                              .name!;
+                                          PathState.destinationFloor = snapshot
+                                              .data!
+                                              .landmarksMap![
+                                                  building.selectedLandmarkID]!
+                                              .floor!;
+                                          PathState.sourceBid = user.Bid;
+
+                                          PathState.destinationBid = snapshot
+                                              .data!
+                                              .landmarksMap![
+                                                  building.selectedLandmarkID]!
+                                              .buildingID!;
+
+                                          setState(() {
+                                            print("valuechanged");
+                                            calculatingPath = true;
+                                          });
+                                          Future.delayed(Duration(seconds: 1),
+                                              () {
+                                            calculateroute(snapshot
+                                                    .data!.landmarksMap!)
+                                                .then((value) {
+                                                  calculatingPath = false;
+                                              _isLandmarkPanelOpen = false;
+                                              _isRoutePanelOpen = true;
+                                            });
+                                          });
+                                        } else {
+                                          PathState.sourceName =
+                                              "Choose Starting Point";
+                                          PathState.destinationPolyID =
+                                              building.selectedLandmarkID!;
+                                          PathState.destinationName = snapshot
+                                              .data!
+                                              .landmarksMap![
+                                                  building.selectedLandmarkID]!
+                                              .name!;
+                                          PathState.destinationFloor = snapshot
+                                              .data!
+                                              .landmarksMap![
+                                                  building.selectedLandmarkID]!
+                                              .floor!;
+                                          building.selectedLandmarkID = "";
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      SourceAndDestinationPage(
+                                                        DestinationID: PathState
+                                                            .destinationPolyID,
+                                                      ))).then((value) {
+                                            if (value != null) {
+                                              fromSourceAndDestinationPage(
+                                                  value);
+                                            }
+                                          });
+                                        }
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.directions,
+                                            color: Colors.black,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+
                                             "Direction",
                                             style: TextStyle(
                                               color: Colors.black,
@@ -2499,6 +2586,8 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor);
+
+
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor);
       }
@@ -5180,74 +5269,62 @@ class _NavigationState extends State<Navigation> {
                   height: 500,
                 ),
               ),
-            )
-          : isLoading
-              ? Scaffold(
-                  body: Center(
-                      child: lott.Lottie.asset(
-                    'assets/loding_animation.json', // Path to your Lottie animation
-                    width: 500,
-                    height: 500,
-                  )),
-                )
-              : Scaffold(
-                  body: Stack(
-                    children: [
-                      Container(
-                        child: GoogleMap(
-                          padding: EdgeInsets.only(
-                              left: 20), // <--- padding added here
-                          initialCameraPosition: _initialCameraPosition,
-                          myLocationButtonEnabled: false,
-                          zoomControlsEnabled: false,
-                          zoomGesturesEnabled: true,
-                          polygons: patch
-                              .union(closedpolygons)
-                              .union(otherclosedpolygons)
-                              .union(otherpatch),
-                          polylines: singleroute[building.floor] != null
-                              ? polylines
-                                  .union(singleroute[building.floor]!)
-                                  .union(otherpolylines)
-                              : polylines.union(otherpolylines),
-                          markers: getCombinedMarkers(),
-                          onTap: (x) {
-                            mapState.interaction = true;
-                          },
-                          mapType: MapType.normal,
-                          buildingsEnabled: false,
-                          compassEnabled: true,
-                          rotateGesturesEnabled: true,
-                          minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                          onMapCreated: (controller) {
-                            controller.setMapStyle(maptheme);
-                            _googleMapController = controller;
-                            print("tumhari galti hai sb saalo");
+            ),
 
-                            if (patch.isNotEmpty) {
-                              fitPolygonInScreen(patch.first);
-                            }
-                          },
-                          onCameraMove: (CameraPosition cameraPosition) {
-                            focusBuildingChecker(cameraPosition);
-                            //mapState.interaction = true;
-                            mapbearing = cameraPosition.bearing;
-                            if (!mapState.interaction) {
-                              mapState.zoom = cameraPosition.zoom;
-                            }
-                            if (true) {
-                              _updateMarkers(cameraPosition.zoom);
-                              //_updateBuilding(cameraPosition.zoom);
-                            }
-                          },
-                          onCameraIdle: () {
-                            if (!mapState.interaction) {
-                              mapState.interaction2 = true;
-                            }
-                          },
-                          onCameraMoveStarted: () {
-                            mapState.interaction2 = false;
-                          },
+            Positioned(
+              bottom: 150.0, // Adjust the position as needed
+              right: 16.0,
+              child: Column(
+                children: [
+                  Visibility(
+                    visible: true,
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(24))),
+                        child: IconButton(
+                            onPressed: () {
+                              bool isvalid = MotionModel.isValidStep(
+                                  user,
+                                  building.floorDimenssion[user.floor]![0],
+                                  building.floorDimenssion[user.floor]![1],
+                                  building.nonWalkable[user.floor]!,
+                                  reroute);
+                              if (isvalid) {
+                                user.move().then((value) {
+                                  setState(() {
+                                    if (markers.length > 0) {
+                                      markers[0] = customMarker.move(
+                                          LatLng(
+                                              tools.localtoglobal(
+                                                  user.showcoordX.toInt(),
+                                                  user.showcoordY.toInt())[0],
+                                              tools.localtoglobal(
+                                                  user.showcoordX.toInt(),
+                                                  user.showcoordY.toInt())[1]),
+                                          markers[0]);
+                                    }
+                                  });
+                                });
+                              } else {
+                                reroute();
+                                showToast("You are out of path");
+                              }
+                            }, icon: Icon(Icons.directions_walk))),
+                  ),
+                  SizedBox(height: 28.0),
+                  Semantics(
+                    sortKey: const OrdinalSortKey(2),
+                    child: SpeedDial(
+                      child: Text(
+                        building.floor == 0 ? 'G' : '${building.floor}',
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff24b9b0),
+                          height: 19 / 16,
+
                         ),
                       ),
                       Positioned(

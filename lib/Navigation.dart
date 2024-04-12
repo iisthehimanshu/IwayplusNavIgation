@@ -2464,6 +2464,9 @@ class _NavigationState extends State<Navigation> {
     return commonLifts;
   }
 
+  int sourceVal=0;
+  int destinationVal=0;
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     singleroute.clear();
     pathMarkers.clear();
@@ -2506,9 +2509,16 @@ class _NavigationState extends State<Navigation> {
             
 
         Map<String, int> map = {
-          'Take lift ${commonlifts[0].name}': -1,
+          'Take ${commonlifts[0].name}': -1,
         };
-         print("test map: ${map}");
+         print("test map: ${PathState.sourceFloor}");
+
+        setState(() {
+          sourceVal=PathState.sourceFloor;
+          destinationVal=PathState.destinationFloor;
+        });
+
+
 
 
         PathState.directions.add(map);
@@ -2714,10 +2724,10 @@ class _NavigationState extends State<Navigation> {
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
-      } else if (PathState.directions[i].keys.first == "Take") {
+      } else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
         directionWidgets.add(directionInstruction(
-            direction: "PathState.directions[i].keys.toString()",
-            distance: (0).toStringAsFixed(0)));
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
       } else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
@@ -3258,7 +3268,13 @@ class _NavigationState extends State<Navigation> {
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
-      } else {
+      }
+      else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
+      }
+      else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
                 PathState.directions[i].keys.first +

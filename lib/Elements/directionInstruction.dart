@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class directionInstruction extends StatefulWidget {
   String direction;
@@ -17,6 +18,7 @@ class _directionInstructionState extends State<directionInstruction> {
   String distance = "";
   @override
   void initState() {
+
     super.initState();
     setState(() {
       icon = getCustomIcon(widget.direction);
@@ -24,6 +26,7 @@ class _directionInstructionState extends State<directionInstruction> {
   }
 
   Icon getCustomIcon(String direction) {
+    print("direction lift: $direction");
     if (direction == "Go Straight") {
       return Icon(
         Icons.straight,
@@ -72,7 +75,17 @@ class _directionInstructionState extends State<directionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    } else {
+    
+    }
+    // else if(direction.substring(0,4)=="Take"){
+    //   return Icon(
+    //     Icons.abc,
+    //     color: Colors.black,
+    //     size: 32,
+    //   );
+    // }
+
+    else {
       return Icon(
         Icons.check_box_outline_blank,
         color: Colors.black,
@@ -85,7 +98,7 @@ class _directionInstructionState extends State<directionInstruction> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    print("direction lift: $widget.direction");
+
     return Column(
       children: [
         Container(
@@ -114,7 +127,7 @@ class _directionInstructionState extends State<directionInstruction> {
                     ),
                     ExcludeSemantics(
                       child: Text(
-                        "${widget.distance} m",
+                        (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
                         style: const TextStyle(
                           fontFamily: "Roboto",
                           fontSize: 14,
@@ -136,7 +149,10 @@ class _directionInstructionState extends State<directionInstruction> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.black),
                   ),
-                  child: icon)
+                  child: (widget.direction.substring(0,4)=="Take")?Padding(
+                    padding: const EdgeInsets.all(3.5),
+                    child: SvgPicture.asset("assets/elevator.svg"),
+                  ):icon)
             ],
           ),
         ),

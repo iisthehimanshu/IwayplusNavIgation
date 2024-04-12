@@ -300,6 +300,35 @@ class tools {
     return angle;
   }
 
+  static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
+    print("A $a");
+    print("B $b");
+    print("C $c");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+    print(angleInDegrees);
+
+    return angleInDegrees;
+  }
+
   static List<Map<String, int>> getDirections(List<int> path, int columns) {
     List<Map<String, int>> directions = [
       {"Straight": 1}

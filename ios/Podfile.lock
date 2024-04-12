@@ -848,7 +848,7 @@ PODS:
     - Firebase/Auth (= 10.22.0)
     - firebase_core
     - Flutter
-  - firebase_core (2.28.0):
+  - firebase_core (2.27.0):
     - Firebase/CoreOnly (= 10.22.0)
     - Flutter
   - FirebaseAnalytics (10.23.1):
@@ -1211,7 +1211,7 @@ SPEC CHECKSUMS:
   device_information: d652f6dcea86bdc5300ffd495486de1d5047bf4f
   Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
   firebase_auth: 004b1a7d91f8f9f4aaa51ba4a32daea7599a2c53
-  firebase_core: d955499180c3c8ef355adf46b8752c4c01d09e0a
+  firebase_core: 100945864b4aedce3cfef0c62ab864858bf013cf
   FirebaseAnalytics: fd35d51e6da86ef1aa2c3fe1f64ab2482cc01ba5
   FirebaseAppCheckInterop: a1955ce8c30f38f87e7d091630e871e91154d65d
   FirebaseAuth: bbe4c68f958504ba9e54aee181adbdf5b664fbc6

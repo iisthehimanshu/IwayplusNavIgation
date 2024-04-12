@@ -1925,6 +1925,7 @@ class _NavigationState extends State<Navigation> {
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
         snapshot.data!.landmarksMap![building.selectedLandmarkID] == null) {
+      print("object");
       //print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;

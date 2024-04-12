@@ -5273,14 +5273,79 @@ class _NavigationState extends State<Navigation> {
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
     return SafeArea(
-      child: isLoading && isBlueToothLoading
-          ? Scaffold(
-              body: Center(
-                child: lott.Lottie.asset(
-                  'assets/loading_bluetooth.json', // Path to your Lottie animation
-                  width: 500,
-                  height: 500,
-                ),
+      child: isLoading && isBlueToothLoading? Scaffold(
+        body: Center(
+          child: lott.Lottie.asset(
+            'assets/loading_bluetooth.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
+          ),
+        ),
+      )
+          : isLoading?
+      Scaffold(
+        body: Center(
+            child:  lott.Lottie.asset(
+              'assets/loding_animation.json', // Path to your Lottie animation
+              width: 500,
+              height: 500,
+            )
+        ),
+      )
+
+          :Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              child: GoogleMap(
+                padding: EdgeInsets.only(left: 20), // <--- padding added here
+                initialCameraPosition: _initialCameraPosition,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                zoomGesturesEnabled: true,
+                polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
+                polylines: singleroute[building.floor] != null
+                    ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
+                    : polylines.union(otherpolylines),
+                markers: getCombinedMarkers(),
+                onTap: (x) {
+                  mapState.interaction = true;
+                },
+                mapType: MapType.normal,
+                buildingsEnabled: false,
+                compassEnabled: true,
+                rotateGesturesEnabled: true,
+                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                onMapCreated: (controller) {
+                  controller.setMapStyle(maptheme);
+                  _googleMapController = controller;
+                  print("tumhari galti hai sb saalo");
+
+
+                  if (patch.isNotEmpty) {
+                    fitPolygonInScreen(patch.first);
+                  }
+                },
+                onCameraMove: (CameraPosition cameraPosition) {
+                  focusBuildingChecker(cameraPosition);
+                  //mapState.interaction = true;
+                  mapbearing = cameraPosition.bearing;
+                  if (!mapState.interaction) {
+                    mapState.zoom = cameraPosition.zoom;
+                  }
+                  if (true) {
+                    _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                  }
+                },
+                onCameraIdle: () {
+                  if (!mapState.interaction) {
+                    mapState.interaction2 = true;
+                  }
+                },
+                onCameraMoveStarted: () {
+                  mapState.interaction2 = false;
+                },
               ),
             ),
 
@@ -5370,103 +5435,18 @@ class _NavigationState extends State<Navigation> {
                           height: 19 / 16,
                         ),
                       ),
-                      Positioned(
-                        bottom: 150.0, // Adjust the position as needed
-                        right: 16.0,
-                        child: Column(
-                          children: [
-                            Visibility(
-                              visible: true,
-                              child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(24))),
-                                  child: IconButton(
-                                      onPressed: () {
-                                        bool isvalid = MotionModel.isValidStep(
-                                            user,
-                                            building.floorDimenssion[
-                                                user.floor]![0],
-                                            building.floorDimenssion[
-                                                user.floor]![1],
-                                            building.nonWalkable[user.floor]!,
-                                            reroute);
-                                        if (isvalid) {
-                                          user.move().then((value) {
-                                            setState(() {
-                                              if (markers.length > 0) {
-                                                markers[0] = customMarker.move(
-                                                    LatLng(
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[0],
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[1]),
-                                                    markers[0]);
-                                              }
-                                            });
-                                          });
-                                        } else {
-                                          reroute();
-                                          showToast("You are out of path");
-                                        }
-                                      },
-                                      icon: Icon(Icons.directions_walk))),
-                            ),
-                            SizedBox(height: 28.0),
-                            Semantics(
-                              sortKey: const OrdinalSortKey(2),
-                              child: SpeedDial(
-                                child: Text(
-                                  building.floor == 0
-                                      ? 'G'
-                                      : '${building.floor}',
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff24b9b0),
-                                    height: 19 / 16,
-                                  ),
-                                ),
-                                activeIcon: Icons.close,
-                                backgroundColor: Colors.white,
-                                children: [
-                                  for (int i = 0;
-                                      i < building.numberOfFloors;
-                                      i++)
-                                    SpeedDialChild(
-                                      child: Text(
-                                        i == 0 ? 'G' : '${i}',
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          height: 19 / 16,
-                                        ),
-                                      ),
-                                      backgroundColor: pathMarkers[i] == null
-                                          ? Colors.white
-                                          : Color(0xff24b9b0),
-                                      onTap: () {
-                                        building.floor = i;
-                                        createRooms(building.polyLineData!,
-                                            building.floor);
-                                        if (pathMarkers[i] != null) {
-                                          setCameraPosition(pathMarkers[i]!);
-                                        }
-                                        building.landmarkdata!.then((value) {
-                                          createMarkers(value, building.floor);
-                                        });
-                                      },
-                                    ),
-                                ],
+                      activeIcon: Icons.close,
+                      backgroundColor: Colors.white,
+                      children: [
+                        for (int i = 0; i < building.numberOfFloors; i++)
+                          SpeedDialChild(
+                            child: Text(
+                              i == 0 ? 'G' : '${i}',
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                height: 19 / 16,
                               ),
                             ),
                             backgroundColor: pathMarkers[i] == null
@@ -5564,145 +5544,114 @@ class _NavigationState extends State<Navigation> {
                               // print("printing bin");
                               // btadapter.printbin();
 
-                                    //_liveTimer.cancel();
-                                  });
-                                  // if(isData==true){
+                              //please wait
+                              //searching your location
 
-                                  // }
-                                  Timer.periodic(Duration(milliseconds: 6000),
-                                      (timer) async {
-                                    // setState(() {
-                                    //   detected = false;
-                                    // });
+                              // speak("Please wait");
+                              // speak("Searching your location. .");
+                              Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                                realTimeReLocalizeUser(resBeacons)
+                              });
+                              // _timer = Timer.periodic(
+                              //     Duration(milliseconds: 5000),
+                              //     (timer) {
 
-                                    // await beaconapi()
-                                    //     .fetchBeaconData()
-                                    //     .then((value) async {
-                                    //   print("beacondatacheck");
-                                    //   print(value.toString());
-                                    //   building.beacondata = value;
-                                    //   for (int i = 0; i < value.length; i++) {
-                                    //     beacon beacons = value[i];
-                                    //     if (beacons.properties!.macId !=
-                                    //         null) {
-                                    //       apibeaconmap[beacons
-                                    //           .properties!.macId!] = beacons;
-                                    //     }
-                                    //   }
-                                    print(resBeacons);
-                                    btadapter.startScanning(resBeacons);
+                              //       .then((value) => {
+                              //             btadapter.clear
+                              //           });
+                              //   //_timer.cancel();
+                              // });
 
-                                    // print("printing bin");
-                                    // btadapter.printbin();
+                              //     if (isLiveLocalizing == true) {
+                              //   _timer.cancel();
+                              // }
+                              // });
+                            });
 
-                                    //please wait
-                                    //searching your location
+                        // await beaconapi()
+                        //     .fetchBeaconData()
+                        //     .then((value) {
+                        //   print("beacondatacheck");
+                        //   print(value.toString());
+                        //   building.beacondata = value;
+                        //   for (int i = 0; i < value.length; i++) {
+                        //     beacon beacons = value[i];
+                        //     if (beacons.properties!.macId !=
+                        //         null) {
+                        //       apibeaconmap[beacons
+                        //           .properties!.macId!] = beacons;
+                        //     }
+                        //   }
+                        //   btadapter.startScanning(apibeaconmap);
+                        //   // print("printing bin");
+                        //   // btadapter.printbin();
+                        //   late Timer _timer;
+                        //   //please wait
+                        //   //searching your location
 
-                                    // speak("Please wait");
-                                    // speak("Searching your location. .");
-                                    Future.delayed(Duration(milliseconds: 4000))
-                                        .then((value) => {
-                                              realTimeReLocalizeUser(resBeacons)
-                                            });
-                                    // _timer = Timer.periodic(
-                                    //     Duration(milliseconds: 5000),
-                                    //     (timer) {
+                        //   speak("Please wait");
+                        //   speak("Searching your location. .");
 
-                                    //       .then((value) => {
-                                    //             btadapter.clear
-                                    //           });
-                                    //   //_timer.cancel();
-                                    // });
+                        //   _timer = Timer.periodic(
+                        //       Duration(milliseconds: 9000),
+                        //       (timer) {
+                        //     localizeUser();
+                        //     _timer.cancel();
+                        //   });
+                        // });
 
-                                    //     if (isLiveLocalizing == true) {
-                                    //   _timer.cancel();
-                                    // }
-                                    // });
-                                  });
-
-                                  // await beaconapi()
-                                  //     .fetchBeaconData()
-                                  //     .then((value) {
-                                  //   print("beacondatacheck");
-                                  //   print(value.toString());
-                                  //   building.beacondata = value;
-                                  //   for (int i = 0; i < value.length; i++) {
-                                  //     beacon beacons = value[i];
-                                  //     if (beacons.properties!.macId !=
-                                  //         null) {
-                                  //       apibeaconmap[beacons
-                                  //           .properties!.macId!] = beacons;
-                                  //     }
-                                  //   }
-                                  //   btadapter.startScanning(apibeaconmap);
-                                  //   // print("printing bin");
-                                  //   // btadapter.printbin();
-                                  //   late Timer _timer;
-                                  //   //please wait
-                                  //   //searching your location
-
-                                  //   speak("Please wait");
-                                  //   speak("Searching your location. .");
-
-                                  //   _timer = Timer.periodic(
-                                  //       Duration(milliseconds: 9000),
-                                  //       (timer) {
-                                  //     localizeUser();
-                                  //     _timer.cancel();
-                                  //   });
-                                  // });
-
-                                  // mapState.interaction = !mapState.interaction;
-                                }
-                                // mapState.zoom = 21;
-                                // fitPolygonInScreen(patch.first);
-                              },
-                              child: Icon(
-                                Icons.location_history_sharp,
-                                color: (isLiveLocalizing)
-                                    ? Colors.cyan
-                                    : Colors.black,
-                              ),
-                              backgroundColor: Colors
-                                  .white, // Set the background color of the FAB
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                          top: 16,
-                          left: 16,
-                          right: 16,
-                          child: _isLandmarkPanelOpen
-                              ? Container()
-                              : Semantics(
-                                  // header: true,
-                                  sortKey: const OrdinalSortKey(0),
-                                  child: HomepageSearch(
-                                    onVenueClicked: onLandmarkVenueClicked,
-                                    fromSourceAndDestinationPage:
-                                        fromSourceAndDestinationPage,
-                                  ),
-                                )),
-                      FutureBuilder(
-                        future: building.landmarkdata,
-                        builder: (context, snapshot) {
-                          if (_isLandmarkPanelOpen) {
-                            return landmarkdetailpannel(context, snapshot);
-                          } else {
-                            return Container();
-                          }
-                        },
-                      ),
-                      routeDeatilPannel(),
-                      navigationPannel(),
-                      reroutePannel(),
-                      detected
-                          ? Semantics(child: nearestLandmarkpannel())
-                          : Container(),
-                    ],
+                        // mapState.interaction = !mapState.interaction;
+                      }
+                      // mapState.zoom = 21;
+                      // fitPolygonInScreen(patch.first);
+                    },
+                    child: Icon(
+                      Icons.location_history_sharp,
+                      color: (isLiveLocalizing)
+                          ? Colors.cyan
+                          : Colors.black,
+                    ),
+                    backgroundColor: Colors
+                        .white, // Set the background color of the FAB
                   ),
-                ),
+                ],
+              ),
+            ),
+            Positioned(
+                top: 16,
+                left: 16,
+                right: 16,
+                child: _isLandmarkPanelOpen
+                    ? Container()
+                    : Semantics(
+                  // header: true,
+                  sortKey: const OrdinalSortKey(0),
+                  child: HomepageSearch(
+                    onVenueClicked: onLandmarkVenueClicked,
+                    fromSourceAndDestinationPage:
+                    fromSourceAndDestinationPage,
+                  ),
+                )),
+            FutureBuilder(
+              future: building.landmarkdata,
+              builder: (context, snapshot) {
+                if (_isLandmarkPanelOpen) {
+                  return landmarkdetailpannel(context, snapshot);
+                } else {
+                  return Container();
+                }
+              },
+            ),
+
+            routeDeatilPannel(),
+            navigationPannel(),
+            reroutePannel(),
+            detected? Semantics(
+                child: nearestLandmarkpannel()): Container(),
+
+          ],
+        ),
+      ),
     );
   }
 }

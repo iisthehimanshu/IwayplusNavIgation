@@ -30,6 +30,7 @@ import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
+import 'package:iwayplusnav/PolylineTestClass.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
 import 'package:iwayplusnav/navigationTools.dart';
@@ -149,6 +150,7 @@ class _NavigationState extends State<Navigation> {
   @override
   void initState() {
     super.initState();
+    //PolylineTestClass.polylineSet.clear();
 
     flutterTts = FlutterTts();
     setState(() {
@@ -158,7 +160,7 @@ class _NavigationState extends State<Navigation> {
     print("Circular progress bar");
     apiCalls();
 
-    handleCompassEvents();
+    //handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -300,9 +302,9 @@ class _NavigationState extends State<Navigation> {
             _userAccelerometerEvent!.y < -step_threshold) {
           bool isvalid = MotionModel.isValidStep(
               user,
-              building.floorDimenssion[user.floor]![0],
-              building.floorDimenssion[user.floor]![1],
-              building.nonWalkable[user.floor]!,
+              building.floorDimenssion[user.Bid]![user.floor]![0],
+              building.floorDimenssion[user.Bid]![user.floor]![1],
+              building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
             user.move().then((value) {
@@ -410,11 +412,19 @@ class _NavigationState extends State<Navigation> {
             String matched = match.group(0)!;
             allIntegers.add(int.parse(matched));
           }
-          building.nonWalkable[value.landmarks![i].floor!] = allIntegers;
-          building.floorDimenssion[value.landmarks![i].floor!] = [
-            value.landmarks![i].properties!.floorLength!,
-            value.landmarks![i].properties!.floorBreadth!
-          ];
+          Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+          currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+          building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+
+          Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
+          currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
+          building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
+          print("fetch route--  ${building.floorDimenssion}");
+
+          // building.floorDimenssion[value.landmarks![i].floor!] = [
+          //   value.landmarks![i].properties!.floorLength!,
+          //   value.landmarks![i].properties!.floorBreadth!
+          // ];
         }
       }
       createARPatch(coordinates);
@@ -485,6 +495,30 @@ class _NavigationState extends State<Navigation> {
                   LatLng(
                       double.parse(value.landmarks![i].properties!.latitude!),
                       double.parse(value.landmarks![i].properties!.longitude!));
+            }
+            if (value.landmarks![i].element!.type == "Floor") {
+              List<int> allIntegers = [];
+              String jointnonwalkable =
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              RegExp regExp = RegExp(r'\d+');
+              Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
+              for (Match match in matches) {
+                String matched = match.group(0)!;
+                allIntegers.add(int.parse(matched));
+              }
+              Map<int, List<int>> currrentnonWalkable = building.nonWalkable[key] ?? Map();
+              currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+              building.nonWalkable[key] = currrentnonWalkable;
+
+              Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[key] ?? Map();
+              currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
+              building.floorDimenssion[key] = currentfloorDimenssion!;
+              print("fetch route--  ${building.floorDimenssion}");
+
+              // building.floorDimenssion[value.landmarks![i].floor!] = [
+              //   value.landmarks![i].properties!.floorLength!,
+              //   value.landmarks![i].properties!.floorBreadth!
+              // ];
             }
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
@@ -2465,29 +2499,30 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+    print("landmarksMap");
+    print(landmarksMap.keys);
+    print(landmarksMap.values);
+    print(landmarksMap[PathState.destinationPolyID]!.buildingID);
+    print(landmarksMap[PathState.sourcePolyID]!.buildingID);
+
     singleroute.clear();
     pathMarkers.clear();
-    PathState.destinationX =
-    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
-    PathState.destinationY =
-    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    PathState.destinationX = landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    PathState.destinationY = landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
-      PathState.destinationX =
-      landmarksMap[PathState.destinationPolyID]!.doorX!;
-      PathState.destinationY =
-      landmarksMap[PathState.destinationPolyID]!.doorY!;
+      PathState.destinationX = landmarksMap[PathState.destinationPolyID]!.doorX!;
+      PathState.destinationY = landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
-        print("In if statement");
-        print(
-            "${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
+        print("Calculateroute if statement");
+        print("${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
         await fetchroute(
             PathState.sourceX,
             PathState.sourceY,
             PathState.destinationX,
             PathState.destinationY,
-            PathState.destinationFloor);
+            PathState.destinationFloor,bid: PathState.destinationBid);
         print("fetchroute done");
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         List<CommonLifts> commonlifts = findCommonLifts(
@@ -2499,69 +2534,64 @@ class _NavigationState extends State<Navigation> {
             commonlifts[0].y2!,
             PathState.destinationX,
             PathState.destinationY,
-            PathState.destinationFloor);
+            PathState.destinationFloor,
+            bid: PathState.destinationBid);
 
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
-            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor);
+            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.destinationBid);
       }
     } else {
-      print("In else statement");
-      // building.landmarkdata!.then((land)async{
-      //   land.landmarks!.forEach((element)async{
-      //     if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
-      //       if (element.floor == PathState.destinationFloor) {
-      //         await fetchroute(
-      //         element.coordinateX!,
-      //         element.coordinateY!,
-      //         PathState.destinationX,
-      //         PathState.destinationY,
-      //         PathState.destinationFloor,
-      //         bid: PathState.destinationBid);
-      //       } else if (element.floor != PathState.destinationFloor) {
-      //         List<CommonLifts> commonlifts = findCommonLifts(
-      //             element.lifts!,
-      //             landmarksMap[PathState.destinationPolyID]!.lifts!);
-      //         await fetchroute(
-      //         commonlifts[0].x2!,
-      //         commonlifts[0].y2!,
-      //         PathState.destinationX,
-      //         PathState.destinationY,
-      //         PathState.destinationFloor,
-      //         bid: PathState.destinationBid);
-      //         await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!,
-      //         commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
-      //       }
-      //     }
-      //     return;
-      //   });
-      // land.landmarks!.forEach((element)async{
-      //   if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
-      //     if (PathState.sourceFloor == element.floor) {
-      //       await fetchroute(
-      //           PathState.sourceX,
-      //           PathState.sourceY,
-      //           element.coordinateX!,
-      //           element.coordinateY!,
-      //           element.floor!,bid: PathState.sourceBid);
-      //     } else if (PathState.sourceFloor != element.floor) {
-      //       List<CommonLifts> commonlifts = findCommonLifts(
-      //           landmarksMap[PathState.sourcePolyID]!.lifts!,
-      //           element.lifts!);
-      //       await fetchroute(
-      //           commonlifts[0].x2!,
-      //           commonlifts[0].y2!,
-      //           element.coordinateX!,
-      //           element.coordinateY!,
-      //           element.floor!,bid: PathState.sourceBid);
-      //       await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!,
-      //           commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
-      //     }
-      //   }
-      //   return;
-      // });
-      // });
+      print("calculateroute else statement");
+      building.landmarkdata!.then((land)async{
+
+        for(int i = 0 ; i<land.landmarks!.length ; i++){
+          Landmarks element = land.landmarks![i];
+          print("running destination location");
+          if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
+            if (element.floor == PathState.destinationFloor) {
+              await fetchroute(element.coordinateX!, element.coordinateY!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
+              print("running destination location no lift run");
+            } else if (element.floor != PathState.destinationFloor) {
+              List<CommonLifts> commonlifts = findCommonLifts(element.lifts!, landmarksMap[PathState.destinationPolyID]!.lifts!);
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
+              print("running destination location lift run");
+              await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
+              print("running destination location dest run");
+            }
+            break;
+          }
+
+        }
+
+
+        for (int i =0 ; i< land.landmarks!.length ; i++){
+          Landmarks element = land.landmarks![i];
+          print("running source location");
+          if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
+            if (PathState.sourceFloor == element.floor) {
+              await fetchroute(PathState.sourceX, PathState.sourceY, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
+              print("running source location no lift run");
+            } else if (PathState.sourceFloor != element.floor) {
+              List<CommonLifts> commonlifts = findCommonLifts(landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.sourceX, PathState.sourceY, PathState.sourceFloor, bid: PathState.sourceBid);
+              print("running source location lift run");
+              await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x2!, commonlifts[0].y2!, element.floor!,bid: PathState.sourceBid);
+              print("running source location sour run");
+
+              // await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
+              // await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+            }
+            break;
+          }
+        }
+
+        });
       print("different building detected");
+
+      print(PathState.path.keys);
+      print(pathMarkers.keys);
+
     }
   }
 
@@ -2569,15 +2599,17 @@ class _NavigationState extends State<Navigation> {
   double cordL = 0;
   double cordLt = 0;
 
-  Future<List<int>> fetchroute(
-      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid = null}) async {
-    int numRows = building.floorDimenssion[floor]![1]; //floor breadth
-    int numCols = building.floorDimenssion[floor]![0]; //floor length
+  Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX, int destinationY, int floor, {String? bid = null}) async {
+    print("timechecker");
+
+    print("fetch route-- ${building.floorDimenssion[bid]![floor]}");
+    print("fetch route-- $bid");
+    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
+    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
 
-    List<int> path = findPath(numRows, numCols, building.nonWalkable[floor]!,
+    List<int> path = findPath(numRows, numCols, building.nonWalkable[bid]![floor]!,
         sourceIndex, destinationIndex);
     PathState.path[floor] = path;
     PathState.numCols = numCols;
@@ -2619,14 +2651,19 @@ class _NavigationState extends State<Navigation> {
 
     print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
+      print("$bid --  $path");
       List<double> svalue = [];
       List<double> dvalue = [];
       if (bid != null) {
+        print("Himanshucheckerpath in if block ");
+        print("building.patchData[bid]");
+        print(building.patchData[bid]!.patchData!.fileName);
         svalue = tools.localtoglobal(sourceX, sourceY,
             patchData: building.patchData[bid]);
         dvalue = tools.localtoglobal(destinationX, destinationY,
             patchData: building.patchData[bid]);
       } else {
+        print("Himanshucheckerpath in else block ");
         svalue = tools.localtoglobal(sourceX, sourceY);
         dvalue = tools.localtoglobal(destinationX, destinationY);
       }
@@ -2637,27 +2674,31 @@ class _NavigationState extends State<Navigation> {
       );
       Set<Marker> innerMarker = Set();
       innerMarker.add(Marker(
-          markerId: MarkerId("destination"),
+          markerId: MarkerId("destination${bid}"),
           position: LatLng(dvalue[0], dvalue[1]),
           icon: BitmapDescriptor.defaultMarker));
       innerMarker.add(
         Marker(
-          markerId: MarkerId('source'),
+          markerId: MarkerId('source${bid}'),
           position: LatLng(svalue[0], svalue[1]),
           icon: tealtorch,
           anchor: Offset(0.5, 0.5),
         ),
       );
       pathMarkers[floor] = innerMarker;
+      print("pathMarkers[floor]");
+      print(pathMarkers[floor]);
       setCameraPosition(innerMarker);
       print("Path found: $path");
+      print("Path markers: $innerMarker");
+
     } else {
       print("No path found.");
     }
 
     List<LatLng> coordinates = [];
     for (int node in path) {
-      if (!building.nonWalkable[floor]!.contains(node)) {
+      if (!building.nonWalkable[user.Bid]![floor]!.contains(node)) {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
@@ -2673,18 +2714,47 @@ class _NavigationState extends State<Navigation> {
       }
     }
     setState(() {
-      Set<gmap.Polyline> innerset = Set();
-      innerset.add(gmap.Polyline(
-        polylineId: PolylineId("route"),
-        points: coordinates,
-        color: Colors.red,
-        width: 3,
-      ));
-      singleroute[floor] = innerset;
+      if(singleroute.containsKey(floor)){
+        print("contained call $bid");
+        singleroute[floor]?.add(gmap.Polyline(
+          polylineId: PolylineId("$bid"),
+          points: coordinates,
+          color: Colors.red,
+          width: 3,
+        ));
+      }else{
+        print("new call $bid $coordinates");
+
+        singleroute.putIfAbsent(floor, () => Set());
+        singleroute[floor]?.add(gmap.Polyline(
+          polylineId: PolylineId("$bid"),
+          points: coordinates,
+          color: Colors.red,
+          width: 3,
+        ));
+      }
+
+      print("PolylineTestClass.polylineSet");
+      print(PolylineTestClass.polylineSet);
     });
+
+
+    // setState(() {
+    //   Set<gmap.Polyline> innerset = Set();
+    //   innerset.add(gmap.Polyline(
+    //     polylineId: PolylineId("route"),
+    //     points: coordinates,
+    //     color: Colors.red,
+    //     width: 3,
+    //   ));
+    //   singleroute[floor] = innerset;
+    // });
+
+
     print("$floor    $path");
     building.floor = floor;
     createRooms(building.polyLineData!, building.floor);
+    print("path polyline ${singleroute[floor]}");
     return path;
   }
 
@@ -5164,6 +5234,7 @@ class _NavigationState extends State<Navigation> {
 
   List<String> scannedDevices = [];
   late Timer _timer;
+  Set<gmap.Polyline> finalSet = {};
 
   @override
   Widget build(BuildContext context) {
@@ -5173,6 +5244,18 @@ class _NavigationState extends State<Navigation> {
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
+
+    // print("printing building floore ${singleroute.values}");
+    // print("printing building floore ${PolylineTestClass.polylineSet}");
+    // print("printing building floore ${singleroute[building.floor]}");
+    setState(() {
+      singleroute.values.forEach((finalSet.addAll));
+    });
+    // print("printing building floore ${finalSet}");
+
+
+
+
     return SafeArea(
       child: isLoading && isBlueToothLoading? Scaffold(
         body: Center(
@@ -5205,7 +5288,7 @@ class _NavigationState extends State<Navigation> {
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
-                polylines: singleroute[building.floor] != null
+                polylines:singleroute[building.floor] != null
                     ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
                     : polylines.union(otherpolylines),
                 markers: getCombinedMarkers(),
@@ -5265,9 +5348,9 @@ class _NavigationState extends State<Navigation> {
                             onPressed: () {
                               bool isvalid = MotionModel.isValidStep(
                                   user,
-                                  building.floorDimenssion[user.floor]![0],
-                                  building.floorDimenssion[user.floor]![1],
-                                  building.nonWalkable[user.floor]!,
+                                  building.floorDimenssion[user.Bid]![user.floor]![0],
+                                  building.floorDimenssion[user.Bid]![user.floor]![1],
+                                  building.nonWalkable[user.Bid]![user.floor]!,
                                   reroute);
                               if (isvalid) {
                                 user.move().then((value) {
@@ -5341,6 +5424,11 @@ class _NavigationState extends State<Navigation> {
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
                       onPressed: () {
+                        singleroute[0]?.forEach((element) {
+                          print(element.points);
+                          print(element.polylineId.value);
+                        });
+
                         building.floor = user.floor;
                         createRooms(building.polyLineData!, building.floor);
                         if (pathMarkers[user.floor] != null) {

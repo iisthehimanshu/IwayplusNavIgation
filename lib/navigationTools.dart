@@ -79,14 +79,20 @@ class tools {
         return 'Invalid number';
     }
   }
+  static bool gotBhart = false;
 
   static List<double> localtoglobal(int x, int y,
       {PDM.patchDataModel? patchData = null}) {
     x = x - UserState.xdiff;
     y = y - UserState.ydiff;
+    //print("Wilsonlocaltoglobal started");
     PDM.patchDataModel Data = PDM.patchDataModel();
     if (patchData != null) {
       Data = patchData;
+      if(patchData.patchData!.fileName == "004ef3cf-9294-4171-adc0-1554759d5400_IITCampus-BhartiSchool-ground_ground.png"){
+        gotBhart = true;
+      }
+
     } else {
       Data = globalData;
     }

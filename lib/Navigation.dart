@@ -3133,7 +3133,7 @@ class _NavigationState extends State<Navigation> {
                                               building.selectedLandmarkID = null;
                                               _isnavigationPannelOpen = true;
 
-                                              int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                              int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
                                               double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
                                               if(angle != 0){
                                                 speak("Turn "+ tools.angleToClocks(angle));
@@ -3173,7 +3173,7 @@ class _NavigationState extends State<Navigation> {
                                             building.selectedLandmarkID = null;
                                             _isnavigationPannelOpen = true;
 
-                                            int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                            int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
                                             double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
                                             if(angle != 0){
                                               speak("Turn "+ tools.angleToClocks(angle));
@@ -3756,7 +3756,7 @@ class _NavigationState extends State<Navigation> {
                                   building.selectedLandmarkID = null;
                                   _isnavigationPannelOpen = true;
                                   _isreroutePannelOpen = false;
-                                  int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                  int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
                                   double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
                                   if(angle != 0){
                                     speak("Turn "+ tools.angleToClocks(angle));

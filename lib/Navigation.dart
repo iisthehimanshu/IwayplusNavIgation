@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+
 import 'package:vibration/vibration.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
@@ -171,19 +173,19 @@ class _NavigationState extends State<Navigation> {
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-            (UserAccelerometerEvent event) {
-          final now = DateTime.now();
-          setState(() {
-            _userAccelerometerEvent = event;
-            if (_userAccelerometerUpdateTime != null) {
-              final interval = now.difference(_userAccelerometerUpdateTime!);
-              if (interval > _ignoreDuration) {
-                _userAccelerometerLastInterval = interval.inMilliseconds;
-              }
-            }
-          });
-          _userAccelerometerUpdateTime = now;
-        }, onError: (e) {
+                (UserAccelerometerEvent event) {
+              final now = DateTime.now();
+              setState(() {
+                _userAccelerometerEvent = event;
+                if (_userAccelerometerUpdateTime != null) {
+                  final interval = now.difference(_userAccelerometerUpdateTime!);
+                  if (interval > _ignoreDuration) {
+                    _userAccelerometerLastInterval = interval.inMilliseconds;
+                  }
+                }
+              });
+              _userAccelerometerUpdateTime = now;
+            }, onError: (e) {
           showDialog(
               context: context,
               builder: (context) {
@@ -340,7 +342,6 @@ class _NavigationState extends State<Navigation> {
     PathState.sourceFloor = user.floor;
     PathState.sourcePolyID = user.key;
     PathState.sourceName = "Your current location";
-
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(
@@ -353,7 +354,7 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+    await Permission.bluetoothScan.request();
     if (permissionStatus.isGranted) {
       // Permission granted, you can now perform Bluetooth operations
     } else {
@@ -421,7 +422,7 @@ class _NavigationState extends State<Navigation> {
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+          value.landmarks![i].properties!.nonWalkableGrids!.join(',');
           RegExp regExp = RegExp(r'\d+');
           Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
           for (Match match in matches) {
@@ -854,12 +855,12 @@ class _NavigationState extends State<Navigation> {
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -902,12 +903,12 @@ class _NavigationState extends State<Navigation> {
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -939,7 +940,7 @@ class _NavigationState extends State<Navigation> {
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -973,7 +974,7 @@ class _NavigationState extends State<Navigation> {
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -1218,7 +1219,7 @@ class _NavigationState extends State<Navigation> {
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
-          findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
+      findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
           tools.numericalToAlphabetical(floor), value.polyline!.floors!);
       List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -1246,10 +1247,10 @@ class _NavigationState extends State<Navigation> {
             coordinates.add(LatLng(
                 tools.localtoglobal(node.coordx!, node.coordy!,
                     patchData:
-                        building.patchData[value.polyline!.buildingID])[0],
+                    building.patchData[value.polyline!.buildingID])[0],
                 tools.localtoglobal(node.coordx!, node.coordy!,
                     patchData:
-                        building.patchData[value.polyline!.buildingID])[1]));
+                    building.patchData[value.polyline!.buildingID])[1]));
           }
 
           if (polyArray.polygonType == 'Wall' ||
@@ -1738,7 +1739,7 @@ class _NavigationState extends State<Navigation> {
           //   getImagesFromMarker('assets/location_on.png',50),
           // );
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/location_on.png', 55);
+          await getImagesFromMarker('assets/location_on.png', 55);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!);
           Markers.add(Marker(
@@ -1762,10 +1763,10 @@ class _NavigationState extends State<Navigation> {
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/dooricon.png', 65);
+          await getImagesFromMarker('assets/dooricon.png', 65);
           setState(() {
             List<double> value =
-                tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
+            tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
             Markers.add(Marker(
                 markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
@@ -1791,7 +1792,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].name != null &&
             landmarks[i].name!.toLowerCase().contains("lift")) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/entry.png', 75);
+          await getImagesFromMarker('assets/entry.png', 75);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -1821,7 +1822,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/6.png', 65);
+          await getImagesFromMarker('assets/6.png', 65);
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
@@ -1850,7 +1851,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/4.png', 65);
+          await getImagesFromMarker('assets/4.png', 65);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -1880,7 +1881,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/1.png', 90);
+          await getImagesFromMarker('assets/1.png', 90);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -2008,16 +2009,16 @@ class _NavigationState extends State<Navigation> {
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                          .name!,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8e8d8d),
-                        height: 25 / 16,
-                      ),
-                    )),
+                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                              .name!,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8e8d8d),
+                            height: 25 / 16,
+                          ),
+                        )),
                   ),
                   Container(
                     height: 48,
@@ -2164,25 +2165,25 @@ class _NavigationState extends State<Navigation> {
                                     PathState.sourcePolyID = user.key;
                                     print("object ${PathState.sourcePolyID}");
                                     PathState.sourceName =
-                                        "Your current location";
+                                    "Your current location";
                                     PathState.destinationPolyID =
-                                        building.selectedLandmarkID!;
+                                    building.selectedLandmarkID!;
                                     PathState.destinationName = snapshot
                                         .data!
                                         .landmarksMap![
-                                            building.selectedLandmarkID]!
+                                    building.selectedLandmarkID]!
                                         .name!;
                                     PathState.destinationFloor = snapshot
                                         .data!
                                         .landmarksMap![
-                                            building.selectedLandmarkID]!
+                                    building.selectedLandmarkID]!
                                         .floor!;
                                     PathState.sourceBid = user.Bid;
 
                                     PathState.destinationBid = snapshot
                                         .data!
                                         .landmarksMap![
-                                            building.selectedLandmarkID]!
+                                    building.selectedLandmarkID]!
                                         .buildingID!;
 
                                     setState(() {
@@ -2191,7 +2192,7 @@ class _NavigationState extends State<Navigation> {
                                     });
                                     Future.delayed(Duration(seconds: 1), () {
                                       calculateroute(
-                                              snapshot.data!.landmarksMap!)
+                                          snapshot.data!.landmarksMap!)
                                           .then((value) {
                                         calculatingPath = false;
                                         _isLandmarkPanelOpen = false;
@@ -2200,18 +2201,18 @@ class _NavigationState extends State<Navigation> {
                                     });
                                   } else {
                                     PathState.sourceName =
-                                        "Choose Starting Point";
+                                    "Choose Starting Point";
                                     PathState.destinationPolyID =
-                                        building.selectedLandmarkID!;
+                                    building.selectedLandmarkID!;
                                     PathState.destinationName = snapshot
                                         .data!
                                         .landmarksMap![
-                                            building.selectedLandmarkID]!
+                                    building.selectedLandmarkID]!
                                         .name!;
                                     PathState.destinationFloor = snapshot
                                         .data!
                                         .landmarksMap![
-                                            building.selectedLandmarkID]!
+                                    building.selectedLandmarkID]!
                                         .floor!;
                                     building.selectedLandmarkID = "";
                                     Navigator.push(
@@ -2230,28 +2231,28 @@ class _NavigationState extends State<Navigation> {
                                 },
                                 child: (!calculatingPath)
                                     ? const Row(
-                                        //  mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.directions,
-                                            color: Colors.black,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            "Direction",
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    : Container(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
+                                  //  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.directions,
+                                      color: Colors.black,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Direction",
+                                      style: TextStyle(
+                                        color: Colors.black,
                                       ),
+                                    )
+                                  ],
+                                )
+                                    : Container(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -2316,7 +2317,7 @@ class _NavigationState extends State<Navigation> {
                                         children: [
                                           TextSpan(
                                             text:
-                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                           ),
                                         ],
                                       ),
@@ -2326,124 +2327,124 @@ class _NavigationState extends State<Navigation> {
                               ),
                             ),
                             snapshot
-                                        .data!
-                                        .landmarksMap![
-                                            building.selectedLandmarkID]!
-                                        .properties!
-                                        .contactNo !=
-                                    null
+                                .data!
+                                .landmarksMap![
+                            building.selectedLandmarkID]!
+                                .properties!
+                                .contactNo !=
+                                null
                                 ? Container(
-                                    margin:
-                                        EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          width: 1.0,
-                                          color: Color(0xffebebeb),
+                              margin:
+                              EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    width: 1.0,
+                                    color: Color(0xffebebeb),
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 16),
+                                    width: 32,
+                                    height: 32,
+                                    child: Icon(
+                                      Icons.call,
+                                      color: Color(0xff24B9B0),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
                                         ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(right: 16),
-                                          width: 32,
-                                          height: 32,
-                                          child: Icon(
-                                            Icons.call,
-                                            color: Color(0xff24B9B0),
-                                            size: 24,
-                                          ),
-                                        ),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
+                                  ),
+                                ],
+                              ),
+                            )
                                 : Container(),
                             snapshot
-                                            .data!
-                                            .landmarksMap![
-                                                building.selectedLandmarkID]!
-                                            .properties!
-                                            .email !=
-                                        "" &&
-                                    snapshot
-                                            .data!
-                                            .landmarksMap![
-                                                building.selectedLandmarkID]!
-                                            .properties!
-                                            .email !=
-                                        null
+                                .data!
+                                .landmarksMap![
+                            building.selectedLandmarkID]!
+                                .properties!
+                                .email !=
+                                "" &&
+                                snapshot
+                                    .data!
+                                    .landmarksMap![
+                                building.selectedLandmarkID]!
+                                    .properties!
+                                    .email !=
+                                    null
                                 ? Container(
-                                    margin:
-                                        EdgeInsets.only(left: 16, right: 16),
-                                    padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              width: 1.0,
-                                              color: Color(0xffebebeb))),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                            margin: EdgeInsets.only(right: 16),
-                                            width: 32,
-                                            height: 32,
-                                            child: Icon(
-                                              Icons.mail_outline,
-                                              color: Color(0xff24B9B0),
-                                              size: 24,
-                                            )),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          margin: EdgeInsets.only(top: 8),
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff4a4545),
-                                                height: 25 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                              margin:
+                              EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        width: 1.0,
+                                        color: Color(0xffebebeb))),
+                              ),
+                              child: Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(right: 16),
+                                      width: 32,
+                                      height: 32,
+                                      child: Icon(
+                                        Icons.mail_outline,
+                                        color: Color(0xff24B9B0),
+                                        size: 24,
+                                      )),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
                                         ),
-                                      ],
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  )
+                                  ),
+                                ],
+                              ),
+                            )
                                 : Container(),
                           ],
                         ),
@@ -2496,14 +2497,14 @@ class _NavigationState extends State<Navigation> {
     singleroute.clear();
     pathMarkers.clear();
     PathState.destinationX =
-        landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
-        landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
       PathState.destinationX =
-          landmarksMap[PathState.destinationPolyID]!.doorX!;
+      landmarksMap[PathState.destinationPolyID]!.doorX!;
       PathState.destinationY =
-          landmarksMap[PathState.destinationPolyID]!.doorY!;
+      landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
@@ -2522,7 +2523,7 @@ class _NavigationState extends State<Navigation> {
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-       
+
 
         await fetchroute(
             commonlifts[0].x2!,
@@ -2531,12 +2532,12 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationY,
             PathState.destinationFloor);
 
-            
+
 
         Map<String, int> map = {
           'Take ${commonlifts[0].name}': -1,
         };
-         print("test map: ${PathState.sourceFloor}");
+        print("test map: ${PathState.sourceFloor}");
 
         setState(() {
           sourceVal=PathState.sourceFloor;
@@ -2720,7 +2721,7 @@ class _NavigationState extends State<Navigation> {
         if (bid != null) {
           print("Himanshubid $bid");
           List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -2753,7 +2754,7 @@ class _NavigationState extends State<Navigation> {
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
     for (int i = 0; i < PathState.directions.length; i++) {
-  
+
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
@@ -2872,8 +2873,8 @@ class _NavigationState extends State<Navigation> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => DestinationSearchPage(
-                                        hintText: 'Source location',
-                                      ))).then((value) {
+                                    hintText: 'Source location',
+                                  ))).then((value) {
                             onSourceVenueClicked(value);
                           });
                         },
@@ -2903,8 +2904,8 @@ class _NavigationState extends State<Navigation> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => DestinationSearchPage(
-                                        hintText: 'Destination location',
-                                      ))).then((value) {
+                                    hintText: 'Destination location',
+                                  ))).then((value) {
                             _isBuildingPannelOpen = false;
                             onDestinationVenueClicked(value);
                           });
@@ -3039,7 +3040,7 @@ class _NavigationState extends State<Navigation> {
                                       decoration: BoxDecoration(
                                         color: Color(0xff24B9B0),
                                         borderRadius:
-                                            BorderRadius.circular(4.0),
+                                        BorderRadius.circular(4.0),
                                       ),
                                       child: TextButton(
                                         onPressed: ()async{
@@ -3061,6 +3062,7 @@ class _NavigationState extends State<Navigation> {
                                               //pathMarkers.clear();
                                               building.selectedLandmarkID = null;
                                               _isnavigationPannelOpen = true;
+
                                               int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
                                               double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
                                               if(angle != 0){
@@ -3068,6 +3070,7 @@ class _NavigationState extends State<Navigation> {
                                               }else{
 
                                               }
+
                                             });
                                           }else{
                                             user.pathobj = PathState;
@@ -3099,6 +3102,7 @@ class _NavigationState extends State<Navigation> {
                                             //pathMarkers.clear();
                                             building.selectedLandmarkID = null;
                                             _isnavigationPannelOpen = true;
+
                                             int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
                                             double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
                                             if(angle != 0){
@@ -3106,6 +3110,8 @@ class _NavigationState extends State<Navigation> {
                                             }else{
 
                                             }
+
+
                                           }
 
                                         },
@@ -3133,7 +3139,7 @@ class _NavigationState extends State<Navigation> {
                                       margin: EdgeInsets.only(left: 12),
                                       decoration: BoxDecoration(
                                         borderRadius:
-                                            BorderRadius.circular(4.0),
+                                        BorderRadius.circular(4.0),
                                         border: Border.all(color: Colors.black),
                                       ),
                                       child: TextButton(
@@ -3151,23 +3157,23 @@ class _NavigationState extends State<Navigation> {
                                           children: [
                                             Icon(
                                               _routeDetailPannelController
-                                                      .isAttached
+                                                  .isAttached
                                                   ? _routeDetailPannelController
-                                                          .isPanelClosed
-                                                      ? Icons
-                                                          .short_text_outlined
-                                                      : Icons.map_sharp
+                                                  .isPanelClosed
+                                                  ? Icons
+                                                  .short_text_outlined
+                                                  : Icons.map_sharp
                                                   : Icons.short_text_outlined,
                                               color: Colors.black,
                                             ),
                                             SizedBox(width: 8),
                                             Text(
                                               _routeDetailPannelController
-                                                      .isAttached
+                                                  .isAttached
                                                   ? _routeDetailPannelController
-                                                          .isPanelClosed
-                                                      ? "Steps"
-                                                      : "Map"
+                                                  .isPanelClosed
+                                                  ? "Steps"
+                                                  : "Map"
                                                   : "Steps",
                                               style: TextStyle(
                                                 color: Colors.black,
@@ -3189,7 +3195,7 @@ class _NavigationState extends State<Navigation> {
                           ),
                           Container(
                             margin:
-                                EdgeInsets.only(left: 17, top: 12, right: 17),
+                            EdgeInsets.only(left: 17, top: 12, right: 17),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -3214,7 +3220,7 @@ class _NavigationState extends State<Navigation> {
                                       children: [
                                         Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                          CrossAxisAlignment.center,
                                           children: [
                                             Container(
                                               height: 25,
@@ -3251,7 +3257,7 @@ class _NavigationState extends State<Navigation> {
                                         ),
                                         Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                          CrossAxisAlignment.center,
                                           children: [
                                             Container(
                                               height: 25,
@@ -3326,7 +3332,7 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-  Widget navigationPannel() {
+    Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -3588,6 +3594,7 @@ class _NavigationState extends State<Navigation> {
         ));
   }
 
+
   Widget reroutePannel() {
     return Visibility(
         visible: _isreroutePannelOpen,
@@ -3784,13 +3791,13 @@ class _NavigationState extends State<Navigation> {
     } else if (optionsTags != null && floorOptionsTags == null) {
       setState(() {
         filteredItems = LandmarkItems.where((item) =>
-            optionsTags.contains(item.element?.type) &&
+        optionsTags.contains(item.element?.type) &&
             floorOptionsTags.contains('Floor ${item.floor}')).toList();
       });
     } else {
       setState(() {
         filteredItems = LandmarkItems.where(
-            (item) => optionsTags.contains(item.element?.type)).toList();
+                (item) => optionsTags.contains(item.element?.type)).toList();
       });
     }
   }
@@ -3827,7 +3834,7 @@ class _NavigationState extends State<Navigation> {
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -3852,1067 +3859,1067 @@ class _NavigationState extends State<Navigation> {
               ),
             ],
             minHeight:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 155
-                    : 140,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 155
+                : 140,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 190 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 190 / screenHeight
+                : 175 / screenHeight,
             maxHeight: screenHeight * 0.9,
             panel: Semantics(
               sortKey: const OrdinalSortKey(1),
               child: Container(
                   child: !_isFilterOpen
                       ? Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 16),
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, bottom: 4),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${element.buildingName}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 27 / 18,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  element.workingDays != null &&
+                                      element.workingDays!.length > 0
+                                      ? Row(
+                                    children: [
+                                      Text(
+                                        "Open ",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff4caf50),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        "  Closes ${element.workingDays![0].closingTime}",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff8d8c8c),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  )
+                                      : Container()
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Row(
                                 children: [
                                   Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8),
+                                    width: 142,
+                                    height: 42,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Color(0xff24B9B0),
+                                      borderRadius:
+                                      BorderRadius.circular(8.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                              "assets/ExploreInside.svg"),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Explore Inside",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Container(
+                                    width: 83,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                        color: Color(0xffffffff),
+                                        borderRadius:
+                                        BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                            color: Color(0xff000000))),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.call,
+                                            color: Color(0xff000000),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Call",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff000000),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Semantics(
+                                    label: "Share",
+                                    onDidGainAccessibilityFocus:
+                                    _slidePanelUp,
+                                    // onDidLoseAccessibilityFocus: _slidePanelDown,
+                                    child: Container(
+                                      width: 95,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffffffff),
+                                          borderRadius:
+                                          BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                              color: Color(0xff000000))),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.share,
+                                              color: Color(0xff000000),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Share",
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight:
+                                                FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 20 / 14,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16),
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, bottom: 4),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${element.buildingName}",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            height: 27 / 18,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        element.workingDays != null &&
-                                                element.workingDays!.length > 0
-                                            ? Row(
-                                                children: [
-                                                  Text(
-                                                    "Open ",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff4caf50),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  Text(
-                                                    "  Closes ${element.workingDays![0].closingTime}",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff8d8c8c),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              )
-                                            : Container()
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, top: 8, bottom: 8),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 142,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xff24B9B0),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SvgPicture.asset(
-                                                    "assets/ExploreInside.svg"),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Explore Inside",
+                            ),
+                            Semantics(
+                              label: "",
+                              child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Semantics(
+                                              header: true,
+                                              sortKey:
+                                              const OrdinalSortKey(6),
+                                              child: GestureDetector(
+                                                onTap: _slidePanelUp,
+                                                child: Text(
+                                                  "Services",
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xffffffff),
-                                                    height: 20 / 14,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    color: Color(0xff000000),
+                                                    height: 23 / 16,
                                                   ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Container(
-                                          width: 83,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffffffff),
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              border: Border.all(
-                                                  color: Color(0xff000000))),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.call,
-                                                  color: Color(0xff000000),
+                                                  textAlign: TextAlign.center,
                                                 ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Call",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xff000000),
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Semantics(
-                                          label: "Share",
-                                          onDidGainAccessibilityFocus:
-                                              _slidePanelUp,
-                                          // onDidLoseAccessibilityFocus: _slidePanelDown,
-                                          child: Container(
-                                            width: 95,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                                color: Color(0xffffffff),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                border: Border.all(
-                                                    color: Color(0xff000000))),
-                                            child: TextButton(
-                                              onPressed: () {},
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.share,
-                                                    color: Color(0xff000000),
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text(
-                                                    "Share",
+                                            Semantics(
+                                              label: 'Services',
+                                              sortKey:
+                                              const OrdinalSortKey(7),
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      print(
+                                                          "Himanshuchecker");
+                                                      //_isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                                      _isFilterOpen =
+                                                      !_isFilterOpen;
+                                                    });
+                                                  },
+                                                  child: Text(
+                                                    "See All",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
+                                                      FontWeight.w500,
+                                                      color:
+                                                      Color(0xff4a4545),
                                                       height: 20 / 14,
                                                     ),
-                                                    textAlign: TextAlign.left,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  )),
+                                            )
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Semantics(
-                                    label: "",
-                                    child: Container(
-                                        child: Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 16, right: 16),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Semantics(
-                                                header: true,
-                                                sortKey:
-                                                    const OrdinalSortKey(6),
-                                                child: GestureDetector(
-                                                  onTap: _slidePanelUp,
-                                                  child: Text(
-                                                    "Services",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
-                                                      height: 23 / 16,
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 16),
+                                        child: Row(
+                                          children: [
+                                            Semantics(
+                                              label: "",
+                                              sortKey:
+                                              const OrdinalSortKey(1),
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/washroomservice.svg"),
                                                     ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                              ),
-                                              Semantics(
-                                                label: 'Services',
-                                                sortKey:
-                                                    const OrdinalSortKey(7),
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        print(
-                                                            "Himanshuchecker");
-                                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
-                                                        _isFilterOpen =
-                                                            !_isFilterOpen;
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      "See All",
+                                                    Text(
+                                                      "Washroom",
                                                       style: const TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 14,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xff4a4545),
+                                                        Color(0xff4a4545),
                                                         height: 20 / 14,
                                                       ),
                                                       textAlign:
-                                                          TextAlign.center,
-                                                    )),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(left: 16),
-                                          child: Row(
-                                            children: [
-                                              Semantics(
-                                                label: "",
-                                                sortKey:
-                                                    const OrdinalSortKey(1),
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/washroomservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Washroom",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/foodservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Food",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/accservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Accessibility",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/exitservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Exit",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Semantics(
-                                          onDidLoseAccessibilityFocus:
-                                              _slidePanelDown,
-                                          child: Container(
-                                            margin: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: _slidePanelDown,
-                                                  child: Container(
-                                                      margin: EdgeInsets.only(
-                                                          left: 17),
-                                                      child: Text(
-                                                        "Information",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Color(0xff000000),
-                                                          height: 23 / 16,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      )),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      left: 16, right: 16),
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0, 11, 0, 10),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                        bottom: BorderSide(
-                                                            width: 1.0,
-                                                            color: Color(
-                                                                0xffebebeb))),
-                                                  ),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SvgPicture.asset(
-                                                          "assets/Depth 3, Frame 0.svg"),
-                                                      SizedBox(
-                                                        width: 16,
-                                                      ),
-                                                      Container(
-                                                        width:
-                                                            screenWidth - 100,
-                                                        margin: EdgeInsets.only(
-                                                            top: 8),
-                                                        child: RichText(
-                                                          text: TextSpan(
-                                                            style:
-                                                                const TextStyle(
-                                                              fontFamily:
-                                                                  "Roboto",
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
                                                               color: Color(
-                                                                  0xff4a4545),
-                                                              height: 25 / 16,
-                                                            ),
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    "${element.address}",
-                                                              ),
-                                                            ],
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/foodservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Food",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/accservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Accessibility",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/exitservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Exit",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Semantics(
+                                        onDidLoseAccessibilityFocus:
+                                        _slidePanelDown,
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: _slidePanelDown,
+                                                child: Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 17),
+                                                    child: Text(
+                                                      "Information",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                        FontWeight.w500,
+                                                        color:
+                                                        Color(0xff000000),
+                                                        height: 23 / 16,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.left,
+                                                    )),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16, right: 16),
+                                                padding: EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 0.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                      screenWidth - 100,
+                                                      margin: EdgeInsets.only(
+                                                          top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height: 25 / 16,
                                                           ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.address}",
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                // Container(
-                                                //   margin:
-                                                //   EdgeInsets.only(left: 16, right: 16),
-                                                //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                                //   decoration: BoxDecoration(
-                                                //     border: Border(
-                                                //         bottom: BorderSide(
-                                                //             width: 1.0,
-                                                //             color: Color(0xffebebeb))),
-                                                //   ),
-                                                //   child: Row(
-                                                //     crossAxisAlignment:
-                                                //     CrossAxisAlignment.center,
-                                                //     children: [
-                                                //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                                //       SizedBox(width: 16,),
-                                                //       Container(
-                                                //         margin: EdgeInsets.only(top: 8),
-                                                //         child: RichText(
-                                                //           text: TextSpan(
-                                                //             style: const TextStyle(
-                                                //               fontFamily: "Roboto",
-                                                //               fontSize: 16,
-                                                //               fontWeight: FontWeight.w400,
-                                                //               color: Color(0xff4a4545),
-                                                //               height: 25 / 16,
-                                                //             ),
-                                                //             children: [
-                                                //               TextSpan(
-                                                //                 text:
-                                                //                 "6 Floors",
-                                                //               ),
-                                                //             ],
-                                                //           ),
-                                                //         ),
-                                                //       ),
-                                                //     ],
-                                                //   ),
-                                                // ),
-                                                element.phone != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                              ),
+                                              // Container(
+                                              //   margin:
+                                              //   EdgeInsets.only(left: 16, right: 16),
+                                              //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                              //   decoration: BoxDecoration(
+                                              //     border: Border(
+                                              //         bottom: BorderSide(
+                                              //             width: 1.0,
+                                              //             color: Color(0xffebebeb))),
+                                              //   ),
+                                              //   child: Row(
+                                              //     crossAxisAlignment:
+                                              //     CrossAxisAlignment.center,
+                                              //     children: [
+                                              //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                              //       SizedBox(width: 16,),
+                                              //       Container(
+                                              //         margin: EdgeInsets.only(top: 8),
+                                              //         child: RichText(
+                                              //           text: TextSpan(
+                                              //             style: const TextStyle(
+                                              //               fontFamily: "Roboto",
+                                              //               fontSize: 16,
+                                              //               fontWeight: FontWeight.w400,
+                                              //               color: Color(0xff4a4545),
+                                              //               height: 25 / 16,
+                                              //             ),
+                                              //             children: [
+                                              //               TextSpan(
+                                              //                 text:
+                                              //                 "6 Floors",
+                                              //               ),
+                                              //             ],
+                                              //           ),
+                                              //         ),
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
+                                              element.phone != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-1.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-1.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.phone}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.phone}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.website != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.website != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-2.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-2.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.website}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.website}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.workingDays != null &&
-                                                        element.workingDays!
-                                                                .length >
-                                                            1
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-3.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.workingDays != null &&
+                                                  element.workingDays!
+                                                      .length >
+                                                      1
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-3.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
                                                               children: [
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
                                                                 ),
                                                               ],
                                                             ),
-                                                          ],
+                                                          ),
                                                         ),
-                                                      )
-                                                    : Container()
-                                              ],
-                                            ),
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container()
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    )),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8, bottom: 8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        _isFilterOpen = !_isFilterOpen;
-                                      },
-                                      icon: SvgPicture.asset(
-                                        "assets/Navigation_closeIcon.svg",
-                                        height: 24,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: Text(
-                                      "Filters",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 26 / 20,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 14, top: 10),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        optionsTags.clear();
-                                        floorOptionsTags.clear();
-                                      },
-                                      child: Text(
-                                        "Clear All",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff24b9b0),
-                                          height: 20 / 14,
                                         ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                      )
+                                    ],
+                                  )),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                      : Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8, bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
-
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: IconButton(
+                                onPressed: () {
+                                  _isFilterOpen = !_isFilterOpen;
+                                },
+                                icon: SvgPicture.asset(
+                                  "assets/Navigation_closeIcon.svg",
+                                  height: 24,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: Text(
+                                "Filters",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 26 / 20,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              margin: EdgeInsets.only(right: 14, top: 10),
+                              child: TextButton(
+                                onPressed: () {
+                                  optionsTags.clear();
+                                  floorOptionsTags.clear();
+                                },
                                 child: Text(
-                                  "Services",
+                                  "Clear All",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
+                                    color: Color(0xff24b9b0),
+                                    height: 20 / 14,
                                   ),
-                                  textAlign: TextAlign.start,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
-                              //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
-                              // FutureBuilder<int>(
-                              //   future: getHiveBoxLength(),
-                              //   builder: (context, snapshot) {
-                              //     if (snapshot.connectionState != ConnectionState.waiting) {
-                              //       return Text('Error: ${snapshot.error}'); // or any loading indicator
-                              //     } else if (snapshot.hasError) {
-                              //       return Text('Error: ${snapshot.error}');
-                              //     } else {
-                              //       return Text('Length of Hive Box: ${snapshot.data}');
-                              //     }
-                              //   },
-                              // ),
-                              //---------------------------------------------------------------------------------------
+                            )
+                          ],
+                        ),
 
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length != 0) {
-                                      optionsTags = value.getAt(0);
-                                      print("tags");
-                                      print(optionsTags);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: optionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(0, val);
-                                        setState(() {
-                                          optionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: options,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                          selectedStyle: const C2ChipStyle(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(7),
-                                              ),
-                                              backgroundColor:
-                                                  Color(0XFFABF9F4)),
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(7),
-                                          ),
-                                          borderStyle: BorderStyle.solid),
-                                      wrapped: false,
-                                    );
-                                  },
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Services",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                        // FutureBuilder<int>(
+                        //   future: getHiveBoxLength(),
+                        //   builder: (context, snapshot) {
+                        //     if (snapshot.connectionState != ConnectionState.waiting) {
+                        //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else {
+                        //       return Text('Length of Hive Box: ${snapshot.data}');
+                        //     }
+                        //   },
+                        // ),
+                        //---------------------------------------------------------------------------------------
+
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length != 0) {
+                                optionsTags = value.getAt(0);
+                                print("tags");
+                                print(optionsTags);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: optionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(0, val);
+                                  setState(() {
+                                    optionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: options,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
                                 ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Choose Floor",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length == 2) {
-                                      floorOptionsTags = value.getAt(1);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: floorOptionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(1, val);
-                                        setState(() {
-                                          floorOptionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: floorOptions,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceLeadingBuilder: (data, i) {
-                                        if (data.meta == null) return null;
-                                        return CircleAvatar(
-                                          maxRadius: 12,
-                                          backgroundImage: data.avatarImage,
-                                        );
-                                      },
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                        selectedStyle: const C2ChipStyle(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(7),
-                                            ),
-                                            backgroundColor: Color(0XFFABF9F4)),
-                                        color: Colors.white,
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                    selectedStyle: const C2ChipStyle(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(7),
                                         ),
-                                      ),
-                                      wrapped: false,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Filter results ${filteredItems.length}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 12),
-                                height: screenHeight - 410,
-                                child: ListView.builder(
-                                  itemCount: filteredItems.length,
-                                  itemBuilder: (context, index) {
-                                    final item = filteredItems[index];
-                                    return NavigatonFilterCard(
-                                      LandmarkName: item.venueName!,
-                                      LandmarkDistance: "90 m",
-                                      LandmarkFloor: "Floor ${item.floor}",
-                                      LandmarksubName: item.buildingName!,
-                                    );
-                                  },
-                                ),
-                              )
-                            ],
+                                        backgroundColor:
+                                        Color(0XFFABF9F4)),
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(7),
+                                    ),
+                                    borderStyle: BorderStyle.solid),
+                                wrapped: false,
+                              );
+                            },
                           ),
-                        )),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Choose Floor",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length == 2) {
+                                floorOptionsTags = value.getAt(1);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: floorOptionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(1, val);
+                                  setState(() {
+                                    floorOptionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: floorOptions,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
+                                ),
+                                choiceLeadingBuilder: (data, i) {
+                                  if (data.meta == null) return null;
+                                  return CircleAvatar(
+                                    maxRadius: 12,
+                                    backgroundImage: data.avatarImage,
+                                  );
+                                },
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                  selectedStyle: const C2ChipStyle(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(7),
+                                      ),
+                                      backgroundColor: Color(0XFFABF9F4)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                ),
+                                wrapped: false,
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Filter results ${filteredItems.length}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 12),
+                          height: screenHeight - 410,
+                          child: ListView.builder(
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              return NavigatonFilterCard(
+                                LandmarkName: item.venueName!,
+                                LandmarkDistance: "90 m",
+                                LandmarkFloor: "Floor ${item.floor}",
+                                LandmarksubName: item.buildingName!,
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
             )));
   }
 
@@ -4925,7 +4932,7 @@ class _NavigationState extends State<Navigation> {
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -4952,9 +4959,9 @@ class _NavigationState extends State<Navigation> {
           ],
           minHeight: 90,
           snapPoint:
-              element.workingDays != null && element.workingDays!.length > 0
-                  ? 220 / screenHeight
-                  : 175 / screenHeight,
+          element.workingDays != null && element.workingDays!.length > 0
+              ? 220 / screenHeight
+              : 175 / screenHeight,
           maxHeight: 90,
           panel: Semantics(
               sortKey: const OrdinalSortKey(1),
@@ -5036,7 +5043,7 @@ class _NavigationState extends State<Navigation> {
       } else {
         return pathMarkers[building.floor] != null
             ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
-                .union(Markers)
+            .union(Markers)
             : (Set<Marker>.of(markers)).union(Markers);
       }
     } else {
@@ -5151,7 +5158,7 @@ class _NavigationState extends State<Navigation> {
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!,
               patchData:
-                  building.patchData[value.landmarksMap![ID]!.buildingID]);
+              building.patchData[value.landmarksMap![ID]!.buildingID]);
           LatLng point = LatLng(pvalues[0], pvalues[1]);
           _googleMapController.animateCamera(
             CameraUpdate.newLatLngZoom(

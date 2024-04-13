@@ -329,6 +329,7 @@ class tools {
     return angleInDegrees;
   }
 
+
   static double calculateAngleBWUserandPath(UserState user, int node , int cols) {
     List<int> a = [user.showcoordX, user.showcoordY];
     List<int> tval = tools.eightcelltransition(user.theta);
@@ -369,9 +370,6 @@ class tools {
 
     return angleInDegrees;
   }
-
-
-
 
   static List<Map<String, int>> getDirections(List<int> path, int columns) {
     List<Map<String, int>> directions = [

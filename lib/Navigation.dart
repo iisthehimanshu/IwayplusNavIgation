@@ -2622,13 +2622,9 @@ class _NavigationState extends State<Navigation> {
               print("running source location no lift run");
             } else if (PathState.sourceFloor != element.floor) {
               List<CommonLifts> commonlifts = findCommonLifts(landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
-              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.sourceX, PathState.sourceY, PathState.sourceFloor, bid: PathState.sourceBid);
-              print("running source location lift run");
-              await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x2!, commonlifts[0].y2!, element.floor!,bid: PathState.sourceBid);
-              print("running source location sour run");
 
-              // await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
-              // await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
+              await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
             }
             break;
           }
@@ -2656,9 +2652,14 @@ class _NavigationState extends State<Navigation> {
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
+    print("fetch route--- $destinationIndex");
+    print("fetch route---- $sourceIndex");
+    print("fetch route---- $numRows");
+    print("fetch route---- $numCols");
+    print("fetch route---- ${building.nonWalkable[bid]![floor]!}");
 
-    List<int> path = findPath(numRows, numCols, building.nonWalkable[bid]![floor]!,
-        sourceIndex, destinationIndex);
+    List<int> path = findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    print("fetch route- $path");
     PathState.path[floor] = path;
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);

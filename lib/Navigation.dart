@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:vibration/vibration.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
@@ -339,6 +340,7 @@ class _NavigationState extends State<Navigation> {
     PathState.sourceFloor = user.floor;
     PathState.sourcePolyID = user.key;
     PathState.sourceName = "Your current location";
+
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(
@@ -633,11 +635,7 @@ class _NavigationState extends State<Navigation> {
       userCords.add(user.coordX);
       userCords.add(user.coordY);
       List<int> transitionValue = tools.eightcelltransition(user.theta);
-      int newX = user.coordX + transitionValue[0];
-      int newY = user.coordY + transitionValue[1];
-      List<int> newUserCord = [];
-      newUserCord.add(newX);
-      newUserCord.add(newY);
+      List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
 
       user.lat =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -666,12 +664,11 @@ class _NavigationState extends State<Navigation> {
           createMarkers(value, building.floor);
         });
       });
-      print("userCords");
-      print(userCords);
-      print(newUserCord);
-      print(landCords);
-
-      double value = tools.calculateAngle(userCords, newUserCord, landCords);
+      print("usercords $userCords");
+      print("newUserCord $newUserCord");
+      print("landCords $landCords");
+      double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      print("value $value");
 
       print("value----");
       print(value);
@@ -2755,7 +2752,6 @@ class _NavigationState extends State<Navigation> {
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
-        print("path keys: ${PathState.directions}");
     for (int i = 0; i < PathState.directions.length; i++) {
   
       if (PathState.directions[i].keys.first == "Straight") {
@@ -3065,6 +3061,13 @@ class _NavigationState extends State<Navigation> {
                                               //pathMarkers.clear();
                                               building.selectedLandmarkID = null;
                                               _isnavigationPannelOpen = true;
+                                              int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                              double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                              if(angle != 0){
+                                                speak("Turn "+ tools.angleToClocks(angle));
+                                              }else{
+
+                                              }
                                             });
                                           }else{
                                             user.pathobj = PathState;
@@ -3096,6 +3099,13 @@ class _NavigationState extends State<Navigation> {
                                             //pathMarkers.clear();
                                             building.selectedLandmarkID = null;
                                             _isnavigationPannelOpen = true;
+                                            int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                            double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                            if(angle != 0){
+                                              speak("Turn "+ tools.angleToClocks(angle));
+                                            }else{
+
+                                            }
                                           }
 
                                         },
@@ -3357,222 +3367,224 @@ class _NavigationState extends State<Navigation> {
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
     return Visibility(
         visible: _isnavigationPannelOpen,
-        child: SlidingUpPanel(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20.0,
-              color: Colors.grey,
-            ),
-          ],
-          minHeight: 90,
-          maxHeight: screenHeight * 0.9,
-          snapPoint: 0.9,
-          panel: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  height: 90,
-                  padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.keyboard_arrow_up_outlined,
-                            size: 36,
-                            color: Colors.black,
-                          )),
-                      Container(
-                        child: Row(
-                          children: [
-                            SvgPicture.asset("assets/navigationVector.svg"),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "${time.toInt()} min",
-                                      style: const TextStyle(
+        child: Stack(
+          children: [SlidingUpPanel(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            minHeight: 90,
+            maxHeight: screenHeight * 0.9,
+            snapPoint: 0.9,
+            panel: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 90,
+                    padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.keyboard_arrow_up_outlined,
+                              size: 36,
+                              color: Colors.black,
+                            )),
+                        Container(
+                          child: Row(
+                            children: [
+                              SvgPicture.asset("assets/navigationVector.svg"),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${time.toInt()} min",
+                                        style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            height: 26 / 20,
+                                            color: Color(0xffDC6A01)),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      Text(
+                                        " (${distance} m)",
+                                        style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 20,
                                           fontWeight: FontWeight.w700,
                                           height: 26 / 20,
-                                          color: Color(0xffDC6A01)),
-                                      textAlign: TextAlign.left,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    ],
+                                  ),
+                                  Text(
+                                    "ETA- ${newTime.hour}:${newTime.minute}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8d8c8c),
+                                      height: 20 / 14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              _isnavigationPannelOpen = false;
+                              user.reset();
+                              PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+                              selectedroomMarker.clear();
+                              pathMarkers.clear();
+                              PathState.path.clear();
+                              PathState.sourcePolyID = "";
+                              PathState.destinationPolyID = "";
+                              singleroute.clear();
+                              fitPolygonInScreen(patch.first);
+                              setState(() {
+                                if (markers.length > 0) {
+                                  List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                  markers[0] = customMarker.move(
+                                      LatLng(lvalue[0],lvalue[1]),
+                                      markers[0]
+                                  );
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              Icons.cancel_outlined,
+                              size: 24,
+                              color: Colors.black,
+                            ))
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: screenWidth,
+                    height: 1,
+                    color: Color(0xffEBEBEB),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 17, top: 12, right: 17),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Steps",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff000000),
+                            height: 24 / 18,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Container(
+                          height: 522,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: SvgPicture.asset(
+                                          "assets/StartpointVector.svg"),
                                     ),
                                     Text(
-                                      " (${distance} m)",
+                                      "${PathState.sourceName}",
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        height: 26 / 20,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
                                       ),
                                       textAlign: TextAlign.left,
                                     )
                                   ],
                                 ),
-                                Text(
-                                  "ETA- ${newTime.hour}:${newTime.minute}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                )
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
+                                Column(
+                                  children: directionWidgets,
+                                ),
+                                SizedBox(
+                                  height: 22,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: Icon(
+                                        Icons.pin_drop_sharp,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    Text(
+                                      PathState.destinationName,
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
                               ],
-                            )
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            _isnavigationPannelOpen = false;
-                            user.reset();
-                            PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
-                            selectedroomMarker.clear();
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear();
-                            fitPolygonInScreen(patch.first);
-                            setState(() {
-                              if (markers.length > 0) {
-                                List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                markers[0] = customMarker.move(
-                                    LatLng(lvalue[0],lvalue[1]),
-                                    markers[0]
-                                );
-                              }
-                            });
-                          },
-                          icon: Icon(
-                            Icons.cancel_outlined,
-                            size: 24,
-                            color: Colors.black,
-                          ))
-                    ],
-                  ),
-                ),
-                Container(
-                  width: screenWidth,
-                  height: 1,
-                  color: Color(0xffEBEBEB),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 17, top: 12, right: 17),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Steps",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff000000),
-                          height: 24 / 18,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(
-                        height: 22,
-                      ),
-                      Container(
-                        height: 522,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: SvgPicture.asset(
-                                        "assets/StartpointVector.svg"),
-                                  ),
-                                  Text(
-                                    "${PathState.sourceName}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                              Column(
-                                children: directionWidgets,
-                              ),
-                              SizedBox(
-                                height: 22,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: Icon(
-                                      Icons.pin_drop_sharp,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  Text(
-                                    PathState.destinationName,
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
+          ),DirectionHeader(direction: "Go Straight", distance: 2)],
         ));
   }
 
@@ -3667,6 +3679,13 @@ class _NavigationState extends State<Navigation> {
                                   building.selectedLandmarkID = null;
                                   _isnavigationPannelOpen = true;
                                   _isreroutePannelOpen = false;
+                                  int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                  double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                  if(angle != 0){
+                                    speak("Turn "+ tools.angleToClocks(angle));
+                                  }else{
+
+                                  }
                                 });
                               });
                             },
@@ -5621,7 +5640,7 @@ class _NavigationState extends State<Navigation> {
                 top: 16,
                 left: 16,
                 right: 16,
-                child: _isLandmarkPanelOpen
+                child: _isLandmarkPanelOpen || _isRoutePanelOpen || _isnavigationPannelOpen
                     ? Container()
                     : Semantics(
                   // header: true,

@@ -5,6 +5,9 @@ import 'dart:developer';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+
+import 'package:vibration/vibration.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
@@ -333,6 +336,22 @@ class _NavigationState extends State<Navigation> {
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
     _isreroutePannelOpen = true;
+    user.isnavigating = false;
+    PathState.sourceX = user.coordX;
+    PathState.sourceY = user.coordY;
+    user.showcoordX = user.coordX;
+    user.showcoordY = user.coordY;
+    PathState.sourceFloor = user.floor;
+    PathState.sourcePolyID = user.key;
+    PathState.sourceName = "Your current location";
+    setState(() {
+      if (markers.length > 0) {
+        List<double> dvalue = tools.localtoglobal(
+            user.coordX.toInt(),
+            user.coordY.toInt());
+        markers[0] = customMarker.move(LatLng(dvalue[0],dvalue[1]), markers[0]);
+      }
+    });
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -576,6 +595,10 @@ class _NavigationState extends State<Navigation> {
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
     );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
     double highestweight = 0;
     String nearestBeacon = "";
     List<int> landCords = [];
@@ -639,17 +662,15 @@ class _NavigationState extends State<Navigation> {
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      user.showcoordX = user.coordX;
+      user.showcoordY = user.coordY;
       print("user.coordXuser.coordY");
       print("${user.coordX}${user.coordY}");
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
       List<int> transitionValue = tools.eightcelltransition(user.theta);
-      int newX = user.coordX + transitionValue[0];
-      int newY = user.coordY + transitionValue[1];
-      List<int> newUserCord = [];
-      newUserCord.add(newX);
-      newUserCord.add(newY);
+      List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
 
       user.lat =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -666,18 +687,23 @@ class _NavigationState extends State<Navigation> {
           icon: userloc,
           anchor: Offset(0.5, 0.829),
         ));
+        markers.add(Marker(
+          markerId: MarkerId("debug"),
+          position: beaconLocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
         building.floor = apibeaconmap[nearestBeacon]!.floor!;
         createRooms(building.polyLineData!, building.floor);
         building.landmarkdata!.then((value) {
           createMarkers(value, building.floor);
         });
       });
-      print("userCords");
-      print(userCords);
-      print(newUserCord);
-      print(landCords);
-
-      double value = tools.calculateAngle(userCords, newUserCord, landCords);
+      print("usercords $userCords");
+      print("newUserCord $newUserCord");
+      print("landCords $landCords");
+      double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      print("value $value");
 
       print("value----");
       print(value);
@@ -2238,7 +2264,8 @@ class _NavigationState extends State<Navigation> {
                                     });
                                   }
                                 },
-                                child:(!calculatingPath)? const Row(
+                                child: (!calculatingPath)
+                                    ? const Row(
                                   //  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -2252,9 +2279,9 @@ class _NavigationState extends State<Navigation> {
                                         color: Colors.black,
                                       ),
                                     )
-
                                   ],
-                                ):Container(
+                                )
+                                    : Container(
                                   height: 24,
                                   width: 24,
                                   child: CircularProgressIndicator(
@@ -2498,6 +2525,9 @@ class _NavigationState extends State<Navigation> {
     return commonLifts;
   }
 
+  int sourceVal=0;
+  int destinationVal=0;
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     print("landmarksMap");
     print(landmarksMap.keys);
@@ -2529,6 +2559,8 @@ class _NavigationState extends State<Navigation> {
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
+
+
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
@@ -2537,6 +2569,22 @@ class _NavigationState extends State<Navigation> {
             PathState.destinationFloor,
             bid: PathState.destinationBid);
 
+
+
+        Map<String, int> map = {
+          'Take ${commonlifts[0].name}': -1,
+        };
+        print("test map: ${PathState.sourceFloor}");
+
+        setState(() {
+          sourceVal=PathState.sourceFloor;
+          destinationVal=PathState.destinationFloor;
+        });
+
+
+
+
+        PathState.directions.add(map);
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.destinationBid);
@@ -2615,6 +2663,7 @@ class _NavigationState extends State<Navigation> {
     PathState.numCols = numCols;
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
+      print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -2651,7 +2700,16 @@ class _NavigationState extends State<Navigation> {
 
     print("Himanshucheckerpath $path");
     if (path.isNotEmpty) {
-      print("$bid --  $path");
+      if (floor != 0) {
+        List<PolyArray> prevFloorLifts = findLift(tools.numericalToAlphabetical(0), building.polyLineData!.polyline!.floors!);
+        List<PolyArray> currFloorLifts = findLift(tools.numericalToAlphabetical(floor), building.polyLineData!.polyline!.floors!);
+        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        UserState.xdiff = dvalue[0];
+        UserState.ydiff = dvalue[1];
+      } else {
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+      }
       List<double> svalue = [];
       List<double> dvalue = [];
       if (bid != null) {
@@ -2759,17 +2817,23 @@ class _NavigationState extends State<Navigation> {
   }
 
   PanelController _routeDetailPannelController = new PanelController();
+  bool startingNavigation = false;
   Widget routeDeatilPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
     for (int i = 0; i < PathState.directions.length; i++) {
+
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
+      } else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
       } else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
@@ -3049,40 +3113,79 @@ class _NavigationState extends State<Navigation> {
                                         BorderRadius.circular(4.0),
                                       ),
                                       child: TextButton(
-                                        onPressed: () {
-                                          user.pathobj = PathState;
-                                          user.path = PathState.path.values
-                                              .expand((list) => list)
-                                              .toList();
-                                          user.isnavigating = true;
-                                          user
-                                              .moveToStartofPath()
-                                              .then((value) {
-                                            setState(() {
-                                              if (markers.length > 0) {
-                                                markers[0] = customMarker.move(
-                                                    LatLng(
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[0],
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[1]),
-                                                    markers[0]);
+                                        onPressed: ()async{
+                                          if(user.coordX != PathState.sourceX || user.coordY != PathState.sourceY){
+                                            PathState.sourceX = user.coordX;
+                                            PathState.sourceY = user.coordY;
+                                            user.showcoordX = user.coordX;
+                                            user.showcoordY = user.coordY;
+                                            building.landmarkdata!.then((value)async{
+                                              await calculateroute(value.landmarksMap!);
+                                              user.pathobj = PathState;
+                                              user.path = PathState.path.values
+                                                  .expand((list) => list)
+                                                  .toList();
+                                              user.isnavigating = true;
+                                              user.moveToStartofPath();
+                                              _isRoutePanelOpen = false;
+                                              //selectedroomMarker.clear();
+                                              //pathMarkers.clear();
+                                              building.selectedLandmarkID = null;
+                                              _isnavigationPannelOpen = true;
+
+                                              int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                              double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                              if(angle != 0){
+                                                speak("Turn "+ tools.angleToClocks(angle));
+                                              }else{
+
                                               }
+
                                             });
-                                          });
-                                          _isRoutePanelOpen = false;
-                                          //selectedroomMarker.clear();
-                                          //pathMarkers.clear();
-                                          building.selectedLandmarkID = null;
-                                          _isnavigationPannelOpen = true;
+                                          }else{
+                                            user.pathobj = PathState;
+                                            user.path = PathState.path.values
+                                                .expand((list) => list)
+                                                .toList();
+                                            user.isnavigating = true;
+                                            user.moveToStartofPath().then((value) {
+                                              setState(() {
+                                                if (markers.length > 0) {
+                                                  markers[0] = customMarker.move(
+                                                      LatLng(
+                                                          tools.localtoglobal(
+                                                              user.showcoordX
+                                                                  .toInt(),
+                                                              user.showcoordY
+                                                                  .toInt())[0],
+                                                          tools.localtoglobal(
+                                                              user.showcoordX
+                                                                  .toInt(),
+                                                              user.showcoordY
+                                                                  .toInt())[1]),
+                                                      markers[0]);
+                                                }
+                                              });
+                                            });
+                                            _isRoutePanelOpen = false;
+                                            //selectedroomMarker.clear();
+                                            //pathMarkers.clear();
+                                            building.selectedLandmarkID = null;
+                                            _isnavigationPannelOpen = true;
+
+                                            int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                            double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                            if(angle != 0){
+                                              speak("Turn "+ tools.angleToClocks(angle));
+                                            }else{
+
+                                            }
+
+
+                                          }
+
                                         },
-                                        child: Row(
+                                        child: !startingNavigation?Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
@@ -3097,7 +3200,7 @@ class _NavigationState extends State<Navigation> {
                                               ),
                                             ),
                                           ],
-                                        ),
+                                        ):Container(width:24,height:24,child: CircularProgressIndicator(color: Colors.white,)),
                                       ),
                                     ),
                                     Container(
@@ -3299,7 +3402,7 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-  Widget navigationPannel() {
+    Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -3310,7 +3413,13 @@ class _NavigationState extends State<Navigation> {
             direction: "Go " + PathState.directions[i].keys.first,
             distance: (PathState.directions[i].values.first * 0.3048)
                 .toStringAsFixed(0)));
-      } else {
+      }
+      else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
+      }
+      else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
                 PathState.directions[i].keys.first +
@@ -3334,218 +3443,227 @@ class _NavigationState extends State<Navigation> {
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
     return Visibility(
         visible: _isnavigationPannelOpen,
-        child: SlidingUpPanel(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20.0,
-              color: Colors.grey,
-            ),
-          ],
-          minHeight: 90,
-          maxHeight: screenHeight * 0.9,
-          snapPoint: 0.9,
-          panel: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  height: 90,
-                  padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.keyboard_arrow_up_outlined,
-                            size: 36,
-                            color: Colors.black,
-                          )),
-                      Container(
-                        child: Row(
-                          children: [
-                            SvgPicture.asset("assets/navigationVector.svg"),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "${time.toInt()} min",
-                                      style: const TextStyle(
+        child: Stack(
+          children: [SlidingUpPanel(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            minHeight: 90,
+            maxHeight: screenHeight * 0.9,
+            snapPoint: 0.9,
+            panel: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 90,
+                    padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.keyboard_arrow_up_outlined,
+                              size: 36,
+                              color: Colors.black,
+                            )),
+                        Container(
+                          child: Row(
+                            children: [
+                              SvgPicture.asset("assets/navigationVector.svg"),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${time.toInt()} min",
+                                        style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            height: 26 / 20,
+                                            color: Color(0xffDC6A01)),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      Text(
+                                        " (${distance} m)",
+                                        style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 20,
                                           fontWeight: FontWeight.w700,
                                           height: 26 / 20,
-                                          color: Color(0xffDC6A01)),
-                                      textAlign: TextAlign.left,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    ],
+                                  ),
+                                  Text(
+                                    "ETA- ${newTime.hour}:${newTime.minute}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8d8c8c),
+                                      height: 20 / 14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              _isnavigationPannelOpen = false;
+                              user.reset();
+                              PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+                              selectedroomMarker.clear();
+                              pathMarkers.clear();
+                              PathState.path.clear();
+                              PathState.sourcePolyID = "";
+                              PathState.destinationPolyID = "";
+                              singleroute.clear();
+                              fitPolygonInScreen(patch.first);
+                              setState(() {
+                                if (markers.length > 0) {
+                                  List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                  markers[0] = customMarker.move(
+                                      LatLng(lvalue[0],lvalue[1]),
+                                      markers[0]
+                                  );
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              Icons.cancel_outlined,
+                              size: 24,
+                              color: Colors.black,
+                            ))
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: screenWidth,
+                    height: 1,
+                    color: Color(0xffEBEBEB),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 17, top: 12, right: 17),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Steps",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff000000),
+                            height: 24 / 18,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Container(
+                          height: 522,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: SvgPicture.asset(
+                                          "assets/StartpointVector.svg"),
                                     ),
                                     Text(
-                                      " (${distance} m)",
+                                      "${PathState.sourceName}",
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        height: 26 / 20,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
                                       ),
                                       textAlign: TextAlign.left,
                                     )
                                   ],
                                 ),
-                                Text(
-                                  "ETA- ${newTime.hour}:${newTime.minute}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                )
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
+                                Column(
+                                  children: directionWidgets,
+                                ),
+                                SizedBox(
+                                  height: 22,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: Icon(
+                                        Icons.pin_drop_sharp,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    Text(
+                                      PathState.destinationName,
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
                               ],
-                            )
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            _isnavigationPannelOpen = false;
-                            user.isnavigating = false;
-                            user.pathobj = pathState();
-                            user.path = [];
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, 0, 0);
-                            selectedroomMarker.clear();
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear();
-                            fitPolygonInScreen(patch.first);
-                          },
-                          icon: Icon(
-                            Icons.cancel_outlined,
-                            size: 24,
-                            color: Colors.black,
-                          ))
-                    ],
-                  ),
-                ),
-                Container(
-                  width: screenWidth,
-                  height: 1,
-                  color: Color(0xffEBEBEB),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 17, top: 12, right: 17),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Steps",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff000000),
-                          height: 24 / 18,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(
-                        height: 22,
-                      ),
-                      Container(
-                        height: 522,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: SvgPicture.asset(
-                                        "assets/StartpointVector.svg"),
-                                  ),
-                                  Text(
-                                    "${PathState.sourceName}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                              Column(
-                                children: directionWidgets,
-                              ),
-                              SizedBox(
-                                height: 22,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: Icon(
-                                      Icons.pin_drop_sharp,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  Text(
-                                    PathState.destinationName,
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
+          ),DirectionHeader(direction: "Go Straight", distance: 2)],
         ));
   }
+
 
   Widget reroutePannel() {
     return Visibility(
@@ -3608,7 +3726,6 @@ class _NavigationState extends State<Navigation> {
                               user.showcoordY = user.coordY;
                               PathState.sourceFloor = user.floor;
                               PathState.sourcePolyID = user.key;
-                              print("object ${PathState.sourcePolyID}");
                               PathState.sourceName = "Your current location";
                               building.landmarkdata!.then((value) async {
                                 await calculateroute(value.landmarksMap!)
@@ -3639,6 +3756,13 @@ class _NavigationState extends State<Navigation> {
                                   building.selectedLandmarkID = null;
                                   _isnavigationPannelOpen = true;
                                   _isreroutePannelOpen = false;
+                                  int numCols = building.floorDimenssion[PathState.sourceFloor]![0]; //floor length
+                                  double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                  if(angle != 0){
+                                    speak("Turn "+ tools.angleToClocks(angle));
+                                  }else{
+
+                                  }
                                 });
                               });
                             },
@@ -5119,6 +5243,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
+    _isBuildingPannelOpen = false;
     markers.clear();
     building.landmarkdata!.then((land) {
       print("Himanshuchecker ${land.landmarksMap}");
@@ -5355,25 +5480,56 @@ class _NavigationState extends State<Navigation> {
                               if (isvalid) {
                                 user.move().then((value) {
                                   setState(() {
+
                                     if (markers.length > 0) {
+                                      List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
                                       markers[0] = customMarker.move(
-                                          LatLng(
-                                              tools.localtoglobal(
-                                                  user.showcoordX.toInt(),
-                                                  user.showcoordY.toInt())[0],
-                                              tools.localtoglobal(
-                                                  user.showcoordX.toInt(),
-                                                  user.showcoordY.toInt())[1]),
-                                          markers[0]);
+                                          LatLng(lvalue[0],lvalue[1]),
+                                          markers[0]
+                                      );
+
+                                      List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                      markers[1] = customMarker.move(
+                                          LatLng(ldvalue[0],ldvalue[1]),
+                                          markers[1]
+                                      );
                                     }
                                   });
                                 });
                               } else {
-                                reroute();
-                                showToast("You are out of path");
+                                if(user.isnavigating){
+                                  reroute();
+                                  showToast("You are out of path");
+                                }
                               }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
+                  SizedBox(height: 28.0),
+                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                    double? compassHeading = newvalue;
+                    setState(() {
+                      user.theta = compassHeading!;
+                      if (mapState.interaction2) {
+                        mapState.bearing = compassHeading!;
+                        _googleMapController.moveCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: mapState.target,
+                              zoom: mapState.zoom,
+                              bearing: mapState.bearing!,
+                            ),
+                          ),
+                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                        );
+                      } else {
+                        if (markers.length > 0)
+                          markers[0] =
+                              customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+                      }
+                    });
+
+                  }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),
@@ -5424,11 +5580,6 @@ class _NavigationState extends State<Navigation> {
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
                       onPressed: () {
-                        singleroute[0]?.forEach((element) {
-                          print(element.points);
-                          print(element.polylineId.value);
-                        });
-
                         building.floor = user.floor;
                         createRooms(building.polyLineData!, building.floor);
                         if (pathMarkers[user.floor] != null) {
@@ -5578,7 +5729,7 @@ class _NavigationState extends State<Navigation> {
                 top: 16,
                 left: 16,
                 right: 16,
-                child: _isLandmarkPanelOpen
+                child: _isLandmarkPanelOpen || _isRoutePanelOpen || _isnavigationPannelOpen
                     ? Container()
                     : Semantics(
                   // header: true,

@@ -149,6 +149,8 @@ class _NavigationState extends State<Navigation> {
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
   List<String> allBuildingList = [];
+  List<double> accelerationMagnitudes = [];
+  bool isCalibrating = false;
 
   @override
   void initState() {
@@ -160,6 +162,7 @@ class _NavigationState extends State<Navigation> {
       speak("Loading maps");
     });
     print("Circular progress bar");
+    calibrate();
     apiCalls();
 
     //handleCompassEvents();
@@ -208,20 +211,39 @@ class _NavigationState extends State<Navigation> {
     // filterItems();
   }
 
-  void whileNavigationLocalization(){
-    double highestweight = 0;
-    String nearestBeacon = "";
-    List<int> landCords = [];
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if (btadapter.BIN[i]!.isNotEmpty) {
-        btadapter.BIN[i]!.forEach((key, value) {
-          if (value > highestweight) {
-            highestweight = value;
-            nearestBeacon = key;
-          }
-        });
-        break;
-      }
+void calibrate(){
+    setState(() {
+      isCalibrating = true;
+    });
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      double magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      setState(() {
+        accelerationMagnitudes.add(magnitude);
+      });
+    });
+
+    Timer(Duration(seconds: 10), () {
+      calculateThresholds();
+      setState(() {
+        isCalibrating = false;
+      });
+    });
+
+  }
+  void calculateThresholds() {
+    if (accelerationMagnitudes.isNotEmpty) {
+      double mean = accelerationMagnitudes.reduce((a, b) => a + b) / accelerationMagnitudes.length;
+      double variance = accelerationMagnitudes.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) /
+          accelerationMagnitudes.length;
+      double standardDeviation = sqrt(variance);
+      // Adjust multiplier as needed for sensitivity
+      double multiplier = 5;
+      setState(() {
+        peakThreshold = mean + multiplier * standardDeviation;
+        valleyThreshold = mean - multiplier * standardDeviation;
+      });
+
     }
   }
 
@@ -303,7 +325,8 @@ class _NavigationState extends State<Navigation> {
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      onStepCount();
+      pdrstepCount();
+      // onStepCount();
     });
   }
 
@@ -313,6 +336,51 @@ class _NavigationState extends State<Navigation> {
       PDRTimer!.cancel();
     }
   }
+
+  int stepCount = 0;
+  int lastPeakTime = 0;
+  int lastValleyTime = 0;
+  //will have to set according to the device
+  double peakThreshold = 10.111111111;
+  double valleyThreshold = -10.111111111;
+
+  int peakInterval = 300;
+  int valleyInterval = 300;
+  //it is the smoothness factor of the low pass filter.
+  double alpha = 0.4;
+  double filteredX = 0;
+  double filteredY = 0;
+  double filteredZ = 0;
+
+
+  void pdrstepCount(){
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      // Apply low-pass filter
+      filteredX = alpha * filteredX + (1 - alpha) * event.x;
+      filteredY = alpha * filteredY + (1 - alpha) * event.y;
+      filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+      // Compute magnitude of acceleration vector
+      double magnitude = sqrt((filteredX * filteredX +
+          filteredY * filteredY +
+          filteredZ * filteredZ))
+      ;
+      // Detect peak and valley
+      if (magnitude > peakThreshold &&
+          DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
+        setState(() {
+          lastPeakTime = DateTime.now().millisecondsSinceEpoch;
+          stepCount++;
+          print("peakThreshold: ${peakThreshold}");
+        });
+      } else if (magnitude < valleyThreshold &&
+          DateTime.now().millisecondsSinceEpoch - lastValleyTime > valleyInterval) {
+        setState(() {
+          lastValleyTime = DateTime.now().millisecondsSinceEpoch;
+        });
+      }
+    });
+  }
+
 
   void onStepCount() {
     setState(() {
@@ -2720,8 +2788,22 @@ class _NavigationState extends State<Navigation> {
     print("fetch route---- $numCols");
     print("fetch route---- ${building.nonWalkable[bid]![floor]!}");
 
-    List<int> path = findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    print("fetch route- $path");
+    List<int> path = [];
+    //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<Node> rdpPath=findOptimizedPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,4);
+    // Set<int> nonWalkableSet = building.nonWalkable[bid]![floor]!.toSet();
+    // List<int> path=skipConsecutiveTurns(temppath,numRows,numCols,nonWalkableSet);
+   List<int> res=[];
+    for(int i=0;i<rdpPath.length;i++)
+      {
+         path.add(rdpPath[i].index);
+      }
+    
+      //print("rdp* path ${res}");
+    print("A* path ${path}");
+    print("non walkable path ${building.nonWalkable[bid]![floor]!}");
+    
+    //print("fetch route- $path");
     PathState.path[floor] = path;
     if(PathState.numCols == null){
       PathState.numCols = Map();
@@ -2735,7 +2817,7 @@ class _NavigationState extends State<Navigation> {
 
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
-      print("direction elements $element");
+     // print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -5434,6 +5516,7 @@ class _NavigationState extends State<Navigation> {
   List<String> scannedDevices = [];
   late Timer _timer;
   Set<gmap.Polyline> finalSet = {};
+  bool ispdrStart=false;
 
   @override
   Widget build(BuildContext context) {
@@ -5753,37 +5836,6 @@ class _NavigationState extends State<Navigation> {
                               // });
                             });
 
-                        // await beaconapi()
-                        //     .fetchBeaconData()
-                        //     .then((value) {
-                        //   print("beacondatacheck");
-                        //   print(value.toString());
-                        //   building.beacondata = value;
-                        //   for (int i = 0; i < value.length; i++) {
-                        //     beacon beacons = value[i];
-                        //     if (beacons.properties!.macId !=
-                        //         null) {
-                        //       apibeaconmap[beacons
-                        //           .properties!.macId!] = beacons;
-                        //     }
-                        //   }
-                        //   btadapter.startScanning(apibeaconmap);
-                        //   // print("printing bin");
-                        //   // btadapter.printbin();
-                        //   late Timer _timer;
-                        //   //please wait
-                        //   //searching your location
-
-                        //   speak("Please wait");
-                        //   speak("Searching your location. .");
-
-                        //   _timer = Timer.periodic(
-                        //       Duration(milliseconds: 9000),
-                        //       (timer) {
-                        //     localizeUser();
-                        //     _timer.cancel();
-                        //   });
-                        // });
 
                         // mapState.interaction = !mapState.interaction;
                       }
@@ -5799,6 +5851,7 @@ class _NavigationState extends State<Navigation> {
                     backgroundColor: Colors
                         .white, // Set the background color of the FAB
                   ),
+
                 ],
               ),
             ),

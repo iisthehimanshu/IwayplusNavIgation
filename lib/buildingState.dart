@@ -6,8 +6,8 @@ import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 
 class Building{
-  int floor;
-  int numberOfFloors;
+  Map<String,int> floor;
+  Map<String,int> numberOfFloors;
   Map<String,Map<int, List<int>>> nonWalkable = Map();
 
   Map<String,Map<int,List<int>>> floorDimenssion = Map();

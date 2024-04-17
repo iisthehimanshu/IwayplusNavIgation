@@ -20,6 +20,7 @@ class Building{
   Map<String,patchDataModel> patchData = Map();
   bool updateMarkers = true;
   List<String> ignoredMarker = [];
+  static HashMap<String, beacon> apibeaconmap = HashMap();
   Building({required this.floor,required this.numberOfFloors});
 
 }

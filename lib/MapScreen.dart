@@ -48,7 +48,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   String maptheme = "";
-  bs.Building building = bs.Building(floor: 0, numberOfFloors: 1);
+  bs.Building building = bs.Building(floor: Map(), numberOfFloors: Map());
 
   late GoogleMapController _googleMapController;
   static const CameraPosition initialCameraPosition = CameraPosition(
@@ -737,7 +737,6 @@ class _MapScreenState extends State<MapScreen> {
                     //   polylines.clear();
                     //   apiPlycall();
                     // }
-                    print('Close LatLng found in idLatLngHashMap for buildingId: $closestBuildingId');
                   }
                 });
               },

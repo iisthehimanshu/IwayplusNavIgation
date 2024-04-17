@@ -70,6 +70,7 @@ import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
+import '../Elements/DirectionHeader.dart';
 
 void main() {
   runApp(MyApp());
@@ -93,7 +94,6 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   MapState mapState = new MapState();
-
   Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
@@ -131,7 +131,7 @@ class _NavigationState extends State<Navigation> {
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
   UserState user = UserState(
       floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0);
-  pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+  pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
 
   late String manufacturer;
   double step_threshold = 0.6;
@@ -156,7 +156,6 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
-
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
@@ -212,7 +211,7 @@ class _NavigationState extends State<Navigation> {
     // filterItems();
   }
 
-  void calibrate(){
+void calibrate(){
     setState(() {
       isCalibrating = true;
     });
@@ -416,6 +415,173 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  void repaintUser(String nearestBeacon){
+    reroute();
+    paintUser(nearestBeacon);
+  }
+
+  void paintUser(String nearestBeacon)async{
+    print("nearestBeacon : $nearestBeacon");
+    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/userloc0.png',
+    );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
+    List<int> landCords = [];
+    if (apibeaconmap[nearestBeacon] != null) {
+      print("Himanshucheck ${apibeaconmap[nearestBeacon]!.floor}");
+
+      await building.landmarkdata!.then((value) {
+        nearestLandInfomation = tools.localizefindNearbyLandmark(
+            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        landCords = tools.localizefindNearbyLandmarkCoordinated(
+            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+      });
+
+      List<double> values = [];
+
+      if (apibeaconmap[nearestBeacon]!.floor != 0) {
+        List<PolyArray> prevFloorLifts = findLift(
+            tools.numericalToAlphabetical(0),
+            building.polyLineData!.polyline!.floors!);
+        List<PolyArray> currFloorLifts = findLift(
+            tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
+            building.polyLineData!.polyline!.floors!);
+        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        UserState.xdiff = dvalue[0];
+        UserState.ydiff = dvalue[1];
+        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      } else {
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      }
+
+      LatLng beaconLocation = LatLng(values[0], values[1]);
+      mapState.target = LatLng(values[0], values[1]);
+      mapState.zoom = 21.0;
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(values[0], values[1]),
+          20, // Specify your custom zoom level here
+        ),
+      );
+      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
+      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      user.showcoordX = user.coordX;
+      user.showcoordY = user.coordY;
+      print("user.coordXuser.coordY");
+      print("${user.coordX}${user.coordY}");
+      List<int> userCords = [];
+      userCords.add(user.coordX);
+      userCords.add(user.coordY);
+      List<int> transitionValue = tools.eightcelltransition(user.theta);
+      List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
+
+      user.lat =
+          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+      user.lng =
+          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      user.floor = apibeaconmap[nearestBeacon]!.floor!;
+      user.key = apibeaconmap[nearestBeacon]!.sId!;
+      user.initialallyLocalised = true;
+      setState(() {
+        markers.clear();
+        markers.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: beaconLocation,
+          icon: userloc,
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers.add(Marker(
+          markerId: MarkerId("debug"),
+          position: beaconLocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
+        building.floor = apibeaconmap[nearestBeacon]!.floor!;
+        createRooms(building.polyLineData!, building.floor);
+        building.landmarkdata!.then((value) {
+          createMarkers(value, building.floor);
+        });
+      });
+      print("usercords $userCords");
+      print("newUserCord $newUserCord");
+      print("landCords $landCords");
+      double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      print("value $value");
+
+      print("value----");
+      print(value);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+      print("finalvalue");
+      print(finalvalue);
+      detected = !detected;
+      _isBuildingPannelOpen = true;
+      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+      if (nearestLandInfomation.name == "") {
+        print("no beacon found");
+        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
+        nearestLandInfomation.floor =
+            apibeaconmap[nearestBeacon]!.floor!.toString();
+        speak(
+            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+      } else {
+        nearestLandInfomation.floor =
+            apibeaconmap[nearestBeacon]!.floor!.toString();
+        speak(
+            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+      }
+    } else {
+      speak("Unable to find your location");
+    }
+    btadapter.stopScanning();
+    print("Beacon searching Stoped");
+  }
+
+  void moveUser()async{
+    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/userloc0.png',
+    );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
+    LatLng userlocation = LatLng(user.lat, user.lng);
+    mapState.target = LatLng(user.lat, user.lng);
+    mapState.zoom = 21.0;
+    _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(user.lat, user.lng),
+        20, // Specify your custom zoom level here
+      ),
+    );
+
+    setState(() {
+      markers.clear();
+      markers.add(Marker(
+        markerId: MarkerId("UserLocation"),
+        position: userlocation,
+        icon: userloc,
+        anchor: Offset(0.5, 0.829),
+      ));
+      markers.add(Marker(
+        markerId: MarkerId("debug"),
+        position: userlocation,
+        icon: userlocdebug,
+        anchor: Offset(0.5, 0.829),
+      ));
+    });
+  }
+
   void reroute() {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
@@ -438,6 +604,7 @@ class _NavigationState extends State<Navigation> {
       }
     });
   }
+
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
@@ -554,6 +721,7 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[beacons.properties!.macId!] = beacons;
         }
       }
+      Building.apibeaconmap = apibeaconmap;
       btadapter.startScanning(apibeaconmap);
       setState(() {
         resBeacons = apibeaconmap;
@@ -676,23 +844,12 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> localizeUser() async {
     print("Beacon searching started");
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/tealtorch.png',
-    );
     double highestweight = 0;
     String nearestBeacon = "";
-    List<int> landCords = [];
+
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {
         btadapter.BIN[i]!.forEach((key, value) {
-          print("Wilsonchecker");
-          print(value.toString());
-          print(key);
           if (value > highestweight) {
             highestweight = value;
             nearestBeacon = key;
@@ -702,121 +859,9 @@ class _NavigationState extends State<Navigation> {
       }
     }
 
-    print("nearestBeacon : $nearestBeacon");
 
-    if (apibeaconmap[nearestBeacon] != null) {
-      print("Himanshucheck ${apibeaconmap[nearestBeacon]!.floor}");
+    paintUser(nearestBeacon);
 
-      await building.landmarkdata!.then((value) {
-        nearestLandInfomation = tools.localizefindNearbyLandmark(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-      });
-
-      List<double> values = [];
-
-      if (apibeaconmap[nearestBeacon]!.floor != 0) {
-        List<PolyArray> prevFloorLifts = findLift(
-            tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
-        List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
-            building.polyLineData!.polyline!.floors!);
-        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-        UserState.xdiff = dvalue[0];
-        UserState.ydiff = dvalue[1];
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
-      } else {
-        UserState.xdiff = 0;
-        UserState.ydiff = 0;
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
-      }
-
-      LatLng beaconLocation = LatLng(values[0], values[1]);
-      mapState.target = LatLng(values[0], values[1]);
-      mapState.zoom = 21.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(values[0], values[1]),
-          20, // Specify your custom zoom level here
-        ),
-      );
-      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
-      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
-      user.showcoordX = user.coordX;
-      user.showcoordY = user.coordY;
-      print("user.coordXuser.coordY");
-      print("${user.coordX}${user.coordY}");
-      List<int> userCords = [];
-      userCords.add(user.coordX);
-      userCords.add(user.coordY);
-      List<int> transitionValue = tools.eightcelltransition(user.theta);
-      List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
-
-      user.lat =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      user.lng =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
-      user.floor = apibeaconmap[nearestBeacon]!.floor!;
-      user.key = apibeaconmap[nearestBeacon]!.sId!;
-      user.initialallyLocalised = true;
-      setState(() {
-        markers.clear();
-        markers.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: beaconLocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        markers.add(Marker(
-          markerId: MarkerId("debug"),
-          position: beaconLocation,
-          icon: userlocdebug,
-          anchor: Offset(0.5, 0.829),
-        ));
-        building.floor = apibeaconmap[nearestBeacon]!.floor!;
-        createRooms(building.polyLineData!, building.floor);
-        building.landmarkdata!.then((value) {
-          createMarkers(value, building.floor);
-        });
-      });
-      print("usercords $userCords");
-      print("newUserCord $newUserCord");
-      print("landCords $landCords");
-      double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
-      print("value $value");
-
-      print("value----");
-      print(value);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-      print("finalvalue");
-      print(finalvalue);
-      detected = !detected;
-      _isBuildingPannelOpen = true;
-      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
-        print("no beacon found");
-        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
-      } else {
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
-      }
-    } else {
-      speak("Unable to find your location");
-    }
-    btadapter.stopScanning();
-    print("Beacon searching Stoped");
   }
 
   String nearbeacon = 'null';
@@ -2760,7 +2805,16 @@ class _NavigationState extends State<Navigation> {
     
     //print("fetch route- $path");
     PathState.path[floor] = path;
-    PathState.numCols = numCols;
+    if(PathState.numCols == null){
+      PathState.numCols = Map();
+    }
+    if(PathState.numCols![bid!] != null){
+      PathState.numCols![bid]![floor] = numCols;
+    }else{
+      PathState.numCols![bid] = Map();
+      PathState.numCols![bid]![floor] = numCols;
+    }
+
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
      // print("direction elements $element");
@@ -2996,7 +3050,7 @@ class _NavigationState extends State<Navigation> {
                         _isRoutePanelOpen = false;
                         _isLandmarkPanelOpen = true;
                         PathState =
-                            pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+                            pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
                         PathState.path.clear();
                         PathState.sourcePolyID = "";
                         PathState.destinationPolyID = "";
@@ -3235,6 +3289,7 @@ class _NavigationState extends State<Navigation> {
 
                                               int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
                                               double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                              print("1 $angle");
                                               if(angle != 0){
                                                 speak("Turn "+ tools.angleToClocks(angle));
                                               }else{
@@ -3275,6 +3330,7 @@ class _NavigationState extends State<Navigation> {
 
                                             int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
                                             double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                            print("1 $angle");
                                             if(angle != 0){
                                               speak("Turn "+ tools.angleToClocks(angle));
                                             }else{
@@ -3480,7 +3536,7 @@ class _NavigationState extends State<Navigation> {
                               pathMarkers.clear();
                               building.selectedLandmarkID = null;
                               PathState = pathState.withValues(
-                                  -1, -1, -1, -1, -1, -1, 0, 0);
+                                  -1, -1, -1, -1, -1, -1, null, 0);
                               PathState.path.clear();
                               PathState.sourcePolyID = "";
                               PathState.destinationPolyID = "";
@@ -3627,7 +3683,7 @@ class _NavigationState extends State<Navigation> {
                             onPressed: () {
                               _isnavigationPannelOpen = false;
                               user.reset();
-                              PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+                              PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
                               selectedroomMarker.clear();
                               pathMarkers.clear();
                               PathState.path.clear();
@@ -3760,7 +3816,7 @@ class _NavigationState extends State<Navigation> {
                 ],
               ),
             ),
-          ),DirectionHeader(direction: "Go Straight", distance: 2)],
+          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser,)],
         ));
   }
 
@@ -5572,6 +5628,7 @@ class _NavigationState extends State<Navigation> {
                             borderRadius: BorderRadius.all(Radius.circular(24))),
                         child: IconButton(
                             onPressed: () {
+                              print("prev [${user.coordX},${user.coordY}]");
                               bool isvalid = MotionModel.isValidStep(
                                   user,
                                   building.floorDimenssion[user.Bid]![user.floor]![0],
@@ -5597,6 +5654,8 @@ class _NavigationState extends State<Navigation> {
                                     }
                                   });
                                 });
+                                print("next [${user.coordX}${user.coordY}]");
+
                               } else {
                                 if(user.isnavigating){
                                   reroute();

@@ -8,6 +8,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'path.dart';
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -342,9 +343,9 @@ class tools {
     List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
     List<int> c = [node % cols , node ~/cols];
 
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // print("A $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -593,6 +594,55 @@ class tools {
     } else {
       return [0, 0];
     }
+  }
+
+  static List<int> getTurnpoints(List<int> pathNodes,int numCols){
+    List<int> res=[];
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      int currPos = pathNodes[i];
+      int nextPos=pathNodes[i+1];
+      int prevPos=pathNodes[i-1];
+
+      int x1 = (currPos % numCols);
+      int y1 = (currPos ~/ numCols);
+
+      int x2 = (nextPos % numCols);
+      int y2 = (nextPos ~/ numCols);
+
+      int x3 = (prevPos % numCols);
+      int y3 = (prevPos ~/ numCols);
+
+      int prevDeltaX=x1-x3;
+      int prevDeltaY=y1-y3;
+      int nextDeltaX=x2-x1;
+      int nextDeltaY=y2-y1;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        res.add(currPos);
+      }
+
+
+
+    }
+    return res;
+  }
+
+  static int distancebetweennodes(int node1, int node2, int numCols){
+    int x1 = node1 % numCols;
+    int y1 = node1 ~/ numCols;
+
+    int x2 = node2 % numCols;
+    int y2 = node2 ~/ numCols;
+
+    int rowDifference = x2 - x1;
+    int colDifference = y2 - y1;
+    return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
 }
 class nearestLandInfo{

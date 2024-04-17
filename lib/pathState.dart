@@ -11,7 +11,7 @@ class pathState {
   int destinationFloor = 0;
   Map<int, List<int>> path = {};
   List<Map<String, int>> directions = [];
-  int numCols = 0;
+  Map<String,Map<int,int>>? numCols = Map();
   int index = 0;
   String sourceBid = "";
   String destinationBid = "";

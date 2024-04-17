@@ -19,7 +19,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>IPFG</string>
+	<string>Iwaymaps</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -58,13 +58,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>locating the user to the nearest building</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone to enable speech recognition.</string>
+	<string>Permission required to record audio for speech recognition</string>
 	<key>NSMotionUsageDescription</key>
 	<string>This application tracks your steps</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SelectProfilePhoto</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Voice search</string>
+	<string>Permission required to record audio for speech recognition</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -81,11 +81,6 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Permission required to record audio for speech recognition</string>
-	<key>NSMicrophoneUsageDescription</key>
-    <string>Permission required to record audio for speech recognition</string>
-
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UISupportedInterfaceOrientations</key>

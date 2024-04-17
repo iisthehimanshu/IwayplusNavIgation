@@ -496,22 +496,41 @@ void calibrate(){
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        markers.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: beaconLocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        markers.add(Marker(
-          markerId: MarkerId("debug"),
-          position: beaconLocation,
-          icon: userlocdebug,
-          anchor: Offset(0.5, 0.829),
-        ));
-        building.floor = apibeaconmap[nearestBeacon]!.floor!;
-        createRooms(building.polyLineData!, building.floor);
+        if(markers.containsKey(user.Bid)){
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: beaconLocation,
+            icon: userloc,
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: beaconLocation,
+            icon: userlocdebug,
+            anchor: Offset(0.5, 0.829),
+          ));
+        }else{
+          markers.putIfAbsent(user.Bid, () => []);
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: beaconLocation,
+            icon: userloc,
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: beaconLocation,
+            icon: userlocdebug,
+            anchor: Offset(0.5, 0.829),
+          ));
+
+        }
+
+
+        building.floor[apibeaconmap[nearestBeacon]!.buildingID!] = apibeaconmap[nearestBeacon]!.floor!;
+        createRooms(building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
         building.landmarkdata!.then((value) {
-          createMarkers(value, building.floor);
+          createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
       print("usercords $userCords");
@@ -549,6 +568,7 @@ void calibrate(){
     print("Beacon searching Stoped");
   }
 
+
   void moveUser()async{
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
@@ -570,18 +590,35 @@ void calibrate(){
 
     setState(() {
       markers.clear();
-      markers.add(Marker(
-        markerId: MarkerId("UserLocation"),
-        position: userlocation,
-        icon: userloc,
-        anchor: Offset(0.5, 0.829),
-      ));
-      markers.add(Marker(
-        markerId: MarkerId("debug"),
-        position: userlocation,
-        icon: userlocdebug,
-        anchor: Offset(0.5, 0.829),
-      ));
+      if(markers.containsKey(user.Bid)){
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: userlocation,
+          icon: userloc,
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
+      }else{
+        markers.putIfAbsent(user.Bid, () => []);
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: userlocation,
+          icon: userloc,
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
+
+      }
     });
   }
 

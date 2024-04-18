@@ -230,6 +230,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void onVenueClicked(String name, String location, String ID, String bid){
     addtoRecents(name, location,ID,bid);
+    print("id received $ID");
     Navigator.pop(context,ID);
   }
 

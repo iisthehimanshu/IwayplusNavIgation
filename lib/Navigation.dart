@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 
 import 'package:vibration/vibration.dart';
@@ -46,8 +47,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'API/PatchApi.dart';
 import 'API/beaconapi.dart';
 import 'API/ladmarkApi.dart';
+import 'API/outbuildingapi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/buildingAll.dart';
+import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -158,6 +161,7 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
+    StartPDR();
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -165,10 +169,10 @@ class _NavigationState extends State<Navigation> {
       speak("Loading maps");
     });
     print("Circular progress bar");
-    calibrate();
+  //  calibrate();
     apiCalls();
 
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -214,7 +218,7 @@ class _NavigationState extends State<Navigation> {
     // filterItems();
   }
 
-void calibrate(){
+void calibrate()async{
     setState(() {
       isCalibrating = true;
     });
@@ -225,6 +229,8 @@ void calibrate(){
         accelerationMagnitudes.add(magnitude);
       });
     });
+
+
 
     Timer(Duration(seconds: 10), () {
       calculateThresholds();
@@ -337,6 +343,7 @@ void calibrate(){
   void StopPDR() {
     if (PDRTimer != null && PDRTimer!.isActive) {
       PDRTimer!.cancel();
+      pdr.cancel();
     }
   }
 
@@ -355,9 +362,9 @@ void calibrate(){
   double filteredY = 0;
   double filteredZ = 0;
 
-
+late StreamSubscription<AccelerometerEvent> pdr;
   void pdrstepCount(){
-    accelerometerEvents.listen((AccelerometerEvent event) {
+   pdr = accelerometerEvents.listen((AccelerometerEvent event) {
       // Apply low-pass filter
       filteredX = alpha * filteredX + (1 - alpha) * event.x;
       filteredY = alpha * filteredY + (1 - alpha) * event.y;
@@ -1536,6 +1543,7 @@ void calibrate(){
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
                         PathState.directions = [];
+                        interBuildingPath.clear();
                         addselectedRoomMarker(coordinates);
                       }
                     });
@@ -2736,6 +2744,7 @@ void calibrate(){
 
   int sourceVal=0;
   int destinationVal=0;
+  Map<List<String>,Set<gmap.Polyline>> interBuildingPath=new Map();
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     print("landmarksMap");
@@ -2800,12 +2809,20 @@ void calibrate(){
       }
     } else {
       print("calculateroute else statement");
+      double sourceEntrylat = 0;
+      double sourceEntrylng = 0;
+      double destinationEntrylat = 0;
+      double destinationEntrylng = 0;
+
+
       building.landmarkdata!.then((land)async{
 
         for(int i = 0 ; i<land.landmarks!.length ; i++){
           Landmarks element = land.landmarks![i];
           print("running destination location");
           if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
+            destinationEntrylat = double.parse(element.properties!.latitude!);
+            destinationEntrylng= double.parse(element.properties!.longitude!);
             if (element.floor == PathState.destinationFloor) {
               await fetchroute(element.coordinateX!, element.coordinateY!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
               print("running destination location no lift run");
@@ -2820,12 +2837,26 @@ void calibrate(){
           }
 
         }
+        // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
+        // double sourceLat=double.parse(source.properties!.latitude!);
+        // double sourceLng=double.parse(source.properties!.longitude!);
+        //
+        //
+        // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
+        // double destinationLat=double.parse(source.properties!.latitude!);
+        // double destinationLng=double.parse(source.properties!.longitude!);
+
+
+
+
 
 
         for (int i =0 ; i< land.landmarks!.length ; i++){
           Landmarks element = land.landmarks![i];
           print("running source location");
           if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
+            sourceEntrylat= double.parse(element.properties!.latitude!);
+            sourceEntrylng= double.parse(element.properties!.longitude!);
             if (PathState.sourceFloor == element.floor) {
               await fetchroute(PathState.sourceX, PathState.sourceY, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
               print("running source location no lift run");
@@ -2837,6 +2868,28 @@ void calibrate(){
             }
             break;
           }
+        }
+
+
+        OutBuildingModel? buildData= await OutBuildingData.outBuildingData(sourceEntrylat,sourceEntrylng,destinationEntrylat,destinationEntrylng);
+        print("build data: $buildData");
+
+        List<LatLng> coords=[];
+        if(buildData!=null){
+          int len=buildData!.data!.path!.length;
+          for(int i=0;i<len;i++)
+          {
+            coords.add(LatLng(buildData!.data!.path![i].lat!, buildData!.data!.path![i].lng!));
+          }
+
+          List<String> key=[PathState.sourceBid,PathState.destinationBid];
+          interBuildingPath[key]=Set();
+          interBuildingPath[key]!.add(gmap.Polyline(
+            polylineId: PolylineId("InterBuilding"),
+            points: coords,
+            color: Colors.red,
+            width: 3,
+          ));
         }
 
         });
@@ -3637,6 +3690,7 @@ void calibrate(){
                               PathState.destinationBid = "";
                               singleroute.clear();
                               PathState.directions = [];
+                              interBuildingPath.clear();
                               fitPolygonInScreen(patch.first);
                             },
                             icon: Icon(
@@ -5404,6 +5458,9 @@ void calibrate(){
     polylines.forEach((key, value) {
       poly = poly.union(value);
     });
+    interBuildingPath.forEach((key, value) {
+      poly=poly.union(value);
+    });
     return poly;
   }
 
@@ -5782,31 +5839,31 @@ void calibrate(){
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                    double? compassHeading = newvalue;
-                    setState(() {
-                      user.theta = compassHeading!;
-                      if (mapState.interaction2) {
-                        mapState.bearing = compassHeading!;
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: mapState.target,
-                              zoom: mapState.zoom,
-                              bearing: mapState.bearing!,
-                            ),
-                          ),
-                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                        );
-                      } else {
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] =
-                              customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                      }
-                    });
-
-                  }),
+                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                  //
+                  //   double? compassHeading = newvalue;
+                  //   setState(() {
+                  //     user.theta = compassHeading!;
+                  //     if (mapState.interaction2) {
+                  //       mapState.bearing = compassHeading!;
+                  //       _googleMapController.moveCamera(
+                  //         CameraUpdate.newCameraPosition(
+                  //           CameraPosition(
+                  //             target: mapState.target,
+                  //             zoom: mapState.zoom,
+                  //             bearing: mapState.bearing!,
+                  //           ),
+                  //         ),
+                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                  //       );
+                  //     } else {
+                  //       if (markers.length > 0)
+                  //         markers[user.Bid]?[0] =
+                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                  //     }
+                  //   });
+                  //
+                  // }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),
@@ -5900,80 +5957,28 @@ void calibrate(){
                   ),
                   FloatingActionButton(
                     onPressed: () async {
-                      // late Timer _liveTimer;
-                      // if (markers.length > 0)
-                      //   markers[0] = customMarker.rotate(0, markers[0]);
-                      // bool isData=
 
-                      if (user.initialallyLocalised) {
-                        setState(() {
-                          // if (_timer.isActive &&
-                          //     isLiveLocalizing == true) {
-                          //   _timer.cancel();
-                          // }
-                          isLiveLocalizing = !isLiveLocalizing;
-
-                          //_liveTimer.cancel();
-                        });
-                        // if(isData==true){
-
-                        // }
-                        Timer.periodic(
-                            Duration(milliseconds: 6000),
-                                (timer) async {
-                              // setState(() {
-                              //   detected = false;
-                              // });
-
-                              // await beaconapi()
-                              //     .fetchBeaconData()
-                              //     .then((value) async {
-                              //   print("beacondatacheck");
-                              //   print(value.toString());
-                              //   building.beacondata = value;
-                              //   for (int i = 0; i < value.length; i++) {
-                              //     beacon beacons = value[i];
-                              //     if (beacons.properties!.macId !=
-                              //         null) {
-                              //       apibeaconmap[beacons
-                              //           .properties!.macId!] = beacons;
-                              //     }
-                              //   }
-                              print(resBeacons);
-                              btadapter.startScanning(resBeacons);
-
-                              // print("printing bin");
-                              // btadapter.printbin();
-
-                              //please wait
-                              //searching your location
-
-                              // speak("Please wait");
-                              // speak("Searching your location. .");
-                              Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                                //realTimeReLocalizeUser(resBeacons)
-                              });
-                              // _timer = Timer.periodic(
-                              //     Duration(milliseconds: 5000),
-                              //     (timer) {
-
-                              //       .then((value) => {
-                              //             btadapter.clear
-                              //           });
-                              //   //_timer.cancel();
-                              // });
-
-                              //     if (isLiveLocalizing == true) {
-                              //   _timer.cancel();
-                              // }
-                              // });
-                            });
+                  StopPDR();
 
 
-                        // mapState.interaction = !mapState.interaction;
-                      }
-                      // mapState.zoom = 21;
-                      // fitPolygonInScreen(patch.first);
+                      // if (user.initialallyLocalised) {
+                      //   setState(() {
+                      //     isLiveLocalizing = !isLiveLocalizing;
+                      //   });
+                      //
+                      //   Timer.periodic(
+                      //       Duration(milliseconds: 6000),
+                      //           (timer) async {
+                      //         print(resBeacons);
+                      //         btadapter.startScanning(resBeacons);
+                      //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                      //           //realTimeReLocalizeUser(resBeacons)
+                      //         });
+                      //
+                      //       });
+                      //
+                      // }
+
                     },
                     child: Icon(
                       Icons.location_history_sharp,

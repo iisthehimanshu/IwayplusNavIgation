@@ -233,11 +233,12 @@ void calibrate()async{
 
 
     Timer(Duration(seconds: 10), () {
-      calculateThresholds();
+      //calculateThresholds();
       setState(() {
         isCalibrating = false;
       });
     });
+    StartPDR();
 
   }
   void calculateThresholds() {
@@ -351,8 +352,8 @@ void calibrate()async{
   int lastPeakTime = 0;
   int lastValleyTime = 0;
   //will have to set according to the device
-  double peakThreshold = 10.111111111;
-  double valleyThreshold = -10.111111111;
+  double peakThreshold = 11.111111111;
+  double valleyThreshold = -11.111111111;
 
   int peakInterval = 300;
   int valleyInterval = 300;
@@ -380,6 +381,46 @@ late StreamSubscription<AccelerometerEvent> pdr;
         setState(() {
           lastPeakTime = DateTime.now().millisecondsSinceEpoch;
           stepCount++;
+
+          print("prev [${user.coordX},${user.coordY}]");
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              building.floorDimenssion[user.Bid]![user.floor]![0],
+              building.floorDimenssion[user.Bid]![user.floor]![1],
+              building.nonWalkable[user.Bid]![user.floor]!,
+              reroute);
+          if (isvalid) {
+            user.move().then((value) {
+              user.move().then((value){
+                setState(() {
+
+                  if (markers.length > 0) {
+                    List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                    markers[user.Bid]?[0] = customMarker.move(
+                        LatLng(lvalue[0],lvalue[1]),
+                        markers[user.Bid]![0]
+                    );
+
+                    List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                    markers[user.Bid]?[1] = customMarker.move(
+                        LatLng(ldvalue[0],ldvalue[1]),
+                        markers[user.Bid]![1]
+                    );
+                  }
+                });
+              });
+            });
+            print("next [${user.coordX}${user.coordY}]");
+
+          } else {
+            if(user.isnavigating){
+              reroute();
+              showToast("You are out of path");
+            }
+          }
+
+
+
           print("peakThreshold: ${peakThreshold}");
         });
       } else if (magnitude < valleyThreshold &&
@@ -427,10 +468,10 @@ late StreamSubscription<AccelerometerEvent> pdr;
 
   void repaintUser(String nearestBeacon){
     reroute();
-    paintUser(nearestBeacon);
+    paintUser(nearestBeacon,speakTTS: false);
   }
 
-  void paintUser(String nearestBeacon)async{
+  void paintUser(String nearestBeacon, {bool speakTTS = true})async{
     print("nearestBeacon : $nearestBeacon");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
@@ -442,8 +483,6 @@ late StreamSubscription<AccelerometerEvent> pdr;
     );
     List<int> landCords = [];
     if (apibeaconmap[nearestBeacon] != null) {
-      print("Himanshucheck ${apibeaconmap[nearestBeacon]!.floor}");
-
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
@@ -474,20 +513,21 @@ late StreamSubscription<AccelerometerEvent> pdr;
 
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
-      mapState.zoom = 21.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(values[0], values[1]),
-          20, // Specify your custom zoom level here
-        ),
-      );
+      if(speakTTS){
+        mapState.zoom = 21.0;
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(values[0], values[1]),
+            20, // Specify your custom zoom level here
+          ),
+        );
+      }
+
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
-      print("user.coordXuser.coordY");
-      print("${user.coordX}${user.coordY}");
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -540,39 +580,29 @@ late StreamSubscription<AccelerometerEvent> pdr;
           createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
-      print("usercords $userCords");
-      print("newUserCord $newUserCord");
-      print("landCords $landCords");
       double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
-      print("value $value");
-
-      print("value----");
-      print(value);
       String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-      print("finalvalue");
-      print(finalvalue);
+
       detected = !detected;
       _isBuildingPannelOpen = true;
       _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
       if (nearestLandInfomation.name == "") {
-        print("no beacon found");
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
+        if(speakTTS)
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
       } else {
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+        if(speakTTS)
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
       }
     } else {
-      speak("Unable to find your location");
+      if(speakTTS)
+        speak("Unable to find your location");
     }
     btadapter.stopScanning();
-    print("Beacon searching Stoped");
   }
 
 
@@ -650,6 +680,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
         markers[user.Bid]?[0] = customMarker.move(LatLng(dvalue[0],dvalue[1]), markers[user.Bid]![0]);
       }
     });
+    speak("You are going away from the path. Click Reroute to Navigate from here. ");
   }
 
 
@@ -2920,16 +2951,16 @@ late StreamSubscription<AccelerometerEvent> pdr;
     print("fetch route---- $numCols");
     print("fetch route---- ${building.nonWalkable[bid]![floor]!}");
 
-    List<int> path = [];
+    //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    List<Node> rdpPath=findOptimizedPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,4);
+    List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
     // Set<int> nonWalkableSet = building.nonWalkable[bid]![floor]!.toSet();
-    // List<int> path=skipConsecutiveTurns(temppath,numRows,numCols,nonWalkableSet);
-   List<int> res=[];
-    for(int i=0;i<rdpPath.length;i++)
-      {
-         path.add(rdpPath[i].index);
-      }
+   //  // List<int> path=skipConsecutiveTurns(temppath,numRows,numCols,nonWalkableSet);
+   // List<int> res=[];
+   //  for(int i=0;i<rdpPath.length;i++)
+   //    {
+   //       path.add(rdpPath[i].index);
+   //    }
     
       //print("rdp* path ${res}");
     print("A* path ${path}");
@@ -3414,75 +3445,42 @@ late StreamSubscription<AccelerometerEvent> pdr;
                                       ),
                                       child: TextButton(
                                         onPressed: ()async{
-                                          if(user.coordX != PathState.sourceX || user.coordY != PathState.sourceY){
-                                            PathState.sourceX = user.coordX;
-                                            PathState.sourceY = user.coordY;
-                                            user.showcoordX = user.coordX;
-                                            user.showcoordY = user.coordY;
-                                            building.landmarkdata!.then((value)async{
-                                              await calculateroute(value.landmarksMap!);
-                                              user.pathobj = PathState;
-                                              user.path = PathState.path.values
-                                                  .expand((list) => list)
-                                                  .toList();
-                                              user.isnavigating = true;
-                                              user.moveToStartofPath();
-                                              _isRoutePanelOpen = false;
-                                              //selectedroomMarker.clear();
-                                              //pathMarkers.clear();
-                                              building.selectedLandmarkID = null;
-                                              _isnavigationPannelOpen = true;
-
-                                              int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
-                                              double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
-                                              print("1 $angle");
-                                              if(angle != 0){
-                                                speak("Turn "+ tools.angleToClocks(angle));
-                                              }else{
-
+                                          user.pathobj = PathState;
+                                          user.path = PathState.path.values
+                                              .expand((list) => list)
+                                              .toList();
+                                          user.isnavigating = true;
+                                          user.moveToStartofPath().then((value) {
+                                            setState(() {
+                                              if (markers.length > 0) {
+                                                markers[user.Bid]?[0] = customMarker.move(
+                                                    LatLng(
+                                                        tools.localtoglobal(
+                                                            user.showcoordX
+                                                                .toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[0],
+                                                        tools.localtoglobal(
+                                                            user.showcoordX
+                                                                .toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[1]),
+                                                    markers[user.Bid]![0]);
                                               }
-
                                             });
+                                          });
+                                          _isRoutePanelOpen = false;
+                                          //selectedroomMarker.clear();
+                                          //pathMarkers.clear();
+                                          building.selectedLandmarkID = null;
+                                          _isnavigationPannelOpen = true;
+
+                                          int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
+                                          double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                          print("1 $angle");
+                                          if(angle != 0){
+                                            speak("Turn "+ tools.angleToClocks(angle));
                                           }else{
-                                            user.pathobj = PathState;
-                                            user.path = PathState.path.values
-                                                .expand((list) => list)
-                                                .toList();
-                                            user.isnavigating = true;
-                                            user.moveToStartofPath().then((value) {
-                                              setState(() {
-                                                if (markers.length > 0) {
-                                                  markers[user.Bid]?[0] = customMarker.move(
-                                                      LatLng(
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[0],
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[1]),
-                                                      markers[user.Bid]![0]);
-                                                }
-                                              });
-                                            });
-                                            _isRoutePanelOpen = false;
-                                            //selectedroomMarker.clear();
-                                            //pathMarkers.clear();
-                                            building.selectedLandmarkID = null;
-                                            _isnavigationPannelOpen = true;
-
-                                            int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
-                                            double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
-                                            print("1 $angle");
-                                            if(angle != 0){
-                                              speak("Turn "+ tools.angleToClocks(angle));
-                                            }else{
-
-                                            }
-
 
                                           }
 
@@ -5409,8 +5407,6 @@ late StreamSubscription<AccelerometerEvent> pdr;
   }
 
   Set<Marker> getCombinedMarkers() {
-    print("checkingbuildingID");
-    print(buildingAllApi.getStoredString());
     if (user.floor == building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
         Set<Marker> marker = Set();
@@ -5418,10 +5414,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
         selectedroomMarker.forEach((key, value) {
           marker = marker.union(value);
         });
-        print("Set<Marker>.of(markers[user.Bid]??[])");
-        print(selectedroomMarker);
 
-        print(marker);
         // print(Set<Marker>.of(markers[user.Bid]!));
         return (marker.union(Set<Marker>.of(markers[user.Bid]??[])));
       } else {
@@ -5708,8 +5701,6 @@ late StreamSubscription<AccelerometerEvent> pdr;
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("Building floors");
-    print(building.floor);
 
 
     return SafeArea(
@@ -5802,40 +5793,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
                             borderRadius: BorderRadius.all(Radius.circular(24))),
                         child: IconButton(
                             onPressed: () {
-                              print("prev [${user.coordX},${user.coordY}]");
-                              bool isvalid = MotionModel.isValidStep(
-                                  user,
-                                  building.floorDimenssion[user.Bid]![user.floor]![0],
-                                  building.floorDimenssion[user.Bid]![user.floor]![1],
-                                  building.nonWalkable[user.Bid]![user.floor]!,
-                                  reroute);
-                              if (isvalid) {
-                                user.move().then((value) {
-                                  setState(() {
-
-                                    if (markers.length > 0) {
-                                      List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                      markers[user.Bid]?[0] = customMarker.move(
-                                          LatLng(lvalue[0],lvalue[1]),
-                                          markers[user.Bid]![0]
-                                      );
-
-                                      List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                      markers[user.Bid]?[1] = customMarker.move(
-                                          LatLng(ldvalue[0],ldvalue[1]),
-                                          markers[user.Bid]![1]
-                                      );
-                                    }
-                                  });
-                                });
-                                print("next [${user.coordX}${user.coordY}]");
-
-                              } else {
-                                if(user.isnavigating){
-                                  reroute();
-                                  showToast("You are out of path");
-                                }
-                              }
+                              StartPDR();
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
@@ -5955,6 +5913,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
                     },
                     child: Icon(Icons.add)
                   ),
+                  Text(Building.thresh),
                   FloatingActionButton(
                     onPressed: () async {
 

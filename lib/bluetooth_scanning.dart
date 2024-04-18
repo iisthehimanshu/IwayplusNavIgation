@@ -6,6 +6,8 @@ import 'APIMODELS/beaconData.dart';
 
 class BT {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
+  HashMap<String,int> numberOfSample = HashMap();
+  HashMap<String,List<int>> rs = HashMap();
   HashMap<int, double> weight = HashMap();
   HashMap<String, int> beacondetail = HashMap();
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
@@ -19,9 +21,9 @@ class BT {
     BIN[5] = HashMap<String, double>();
     BIN[6] = HashMap<String, double>();
 
-    weight[0] = 8.0;
-    weight[1] = 4.0;
-    weight[2] = 2.0;
+    weight[0] = 10.0;
+    weight[1] = 6.0;
+    weight[2] = 4.0;
     weight[3] = 0.5;
     weight[4] = 0.25;
     weight[5] = 0.15;
@@ -41,6 +43,7 @@ class BT {
         int Rssi = result.rssi;
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
+
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
@@ -57,11 +60,21 @@ class BT {
     for (int i = 0; i < BIN.length; i++) {
       BIN[i]!.clear();
     }
+    numberOfSample.clear();
+    rs.clear();
   }
 
   void addtoBin(String MacId, int rssi) {
+
     int binnumber = 0;
     int Rssi = rssi * -1;
+    if(numberOfSample[MacId] == null){
+      numberOfSample[MacId] = 1;
+      rs[MacId] = [];
+    }
+    numberOfSample[MacId] = numberOfSample[MacId]! + 1;
+    rs[MacId]!.add(rssi);
+
     if (Rssi <= 65) {
       binnumber = 0;
     } else if (Rssi <= 70) {

@@ -23,7 +23,7 @@ class MotionModel{
       return false;
     }
 
-    if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>3){
+    if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>5){
        reroute();
     }
 

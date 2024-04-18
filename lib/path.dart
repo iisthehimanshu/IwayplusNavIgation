@@ -532,8 +532,6 @@ print("turnPointts: ${turnPoints[0].index}");
     }
   }
 
-
-
   return optimizedPath;
 }
 
@@ -565,6 +563,7 @@ List<Node> getTurnpoints(List<Node> pathNodes,int numCols){
     int nextDeltaY=y2-y1;
 
     if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+
       res.add(currPos);
     }
 

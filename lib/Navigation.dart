@@ -6,6 +6,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:flutter_animator/flutter_animator.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 
 import 'package:vibration/vibration.dart';
@@ -149,6 +150,7 @@ class _NavigationState extends State<Navigation> {
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  final pdr = <StreamSubscription<dynamic>>[];
   Duration sensorInterval = Duration(milliseconds: 100);
 
   late StreamSubscription<CompassEvent> compassSubscription;
@@ -161,7 +163,7 @@ class _NavigationState extends State<Navigation> {
   void initState() {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
-    StartPDR();
+   // StartPDR();
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -335,16 +337,27 @@ void calibrate()async{
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      print("calling");
       pdrstepCount();
       // onStepCount();
     });
   }
 
 // Function to stop the timer
-  void StopPDR() {
+  bool isPdrStop=false;
+  void StopPDR() async{
     if (PDRTimer != null && PDRTimer!.isActive) {
-      PDRTimer!.cancel();
-      pdr.cancel();
+
+      setState(() {
+        isPdrStop=true;
+      });
+
+     PDRTimer!.cancel();
+     for (final subscription in pdr) {
+       subscription.cancel();
+     }
+
+
     }
   }
 
@@ -363,9 +376,15 @@ void calibrate()async{
   double filteredY = 0;
   double filteredZ = 0;
 
-late StreamSubscription<AccelerometerEvent> pdr;
+// late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount(){
-   pdr = accelerometerEvents.listen((AccelerometerEvent event) {
+   pdr.add(
+
+       accelerometerEventStream().listen((AccelerometerEvent event) {
+
+     if (pdr == null) {
+       return; // Exit the event listener if subscription is canceled
+     }
       // Apply low-pass filter
       filteredX = alpha * filteredX + (1 - alpha) * event.x;
       filteredY = alpha * filteredY + (1 - alpha) * event.y;
@@ -389,9 +408,9 @@ late StreamSubscription<AccelerometerEvent> pdr;
               building.floorDimenssion[user.Bid]![user.floor]![1],
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
-          if (isvalid) {
+         if (isvalid) {
             user.move().then((value) {
-              user.move().then((value){
+            //  user.move().then((value){
                 setState(() {
 
                   if (markers.length > 0) {
@@ -408,7 +427,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
                     );
                   }
                 });
-              });
+             // });
             });
             print("next [${user.coordX}${user.coordY}]");
 
@@ -429,7 +448,8 @@ late StreamSubscription<AccelerometerEvent> pdr;
           lastValleyTime = DateTime.now().millisecondsSinceEpoch;
         });
       }
-    });
+    })
+   );
   }
 
 
@@ -2935,6 +2955,8 @@ late StreamSubscription<AccelerometerEvent> pdr;
   List<int> beaconCord = [];
   double cordL = 0;
   double cordLt = 0;
+  List<List<int>> getPoints=[];
+  List<int> getnodes=[];
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX, int destinationY, int floor, {String? bid = null}) async {
     print("timechecker");
@@ -2954,6 +2976,40 @@ late StreamSubscription<AccelerometerEvent> pdr;
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
     List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    // print("allTurnPoints ${x1} ,${y1}");
+    //
+    // List<Node> nodes = List.generate(numRows * numCols, (index) {
+    //   int x = index % numCols;
+    //   int y = index ~/ numCols;
+    //   return Node(index, x, y);
+    // });
+    // path.map((index) => nodes[index - 1]).toList();
+    //
+    for(int i=0;i<path.length;i++){
+      int x = path[i] % numCols;
+      int y = path[i] ~/ numCols;
+
+      print("allPathPoints: ${x} ,${y}");
+
+
+    }
+
+
+     List<int> getTurns= tools.getTurnpoints(path, numCols);
+
+
+    print("getTurnsss ${getTurns}");
+
+
+    for(int i=0;i<getTurns.length;i++){
+      int x1 = (getTurns[i]% numCols);
+      int y1 = (getTurns[i] ~/ numCols);
+      print("allTurnPoints ${x1} ,${y1}");
+      getPoints.add([x1,y1]);
+      getnodes.add(getTurns[i]);
+    }
+
+
     // Set<int> nonWalkableSet = building.nonWalkable[bid]![floor]!.toSet();
    //  // List<int> path=skipConsecutiveTurns(temppath,numRows,numCols,nonWalkableSet);
    // List<int> res=[];
@@ -3742,6 +3798,68 @@ late StreamSubscription<AccelerometerEvent> pdr;
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+
+
+    //implement the turn functionality.
+
+    if(user.isnavigating){
+      List<int> a=[user.showcoordX,user.showcoordY];
+      List<int> tval = tools.eightcelltransition(user.theta);
+      print(tval);
+      List<int> b=[user.showcoordX+tval[0],user.showcoordY+tval[1]];
+      int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+
+      int index=user.path.indexOf((user.showcoordY*col)+user.showcoordX);
+      int node = user.path[index+1];
+
+      List<int> c=[node%col , node~/col];
+      int val= tools.calculateAngleSecond(a, b, c).toInt();
+
+      // print("user corrds");
+      // print("${user.showcoordX}+" "+ ${user.showcoordY}");
+
+        print("pointss matchedddd ${getPoints.contains([user.showcoordX, user.showcoordY])}");
+      for(int i=0;i<getPoints.length;i++){
+        print("---length  = ${getPoints.length}");
+        print("--- point  = ${getPoints[i]}");
+        print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+        print("--- val  = $val");
+        print("--- isPDRStop  = $isPdrStop");
+
+        // print("turn corrds");
+        //
+        // print("${getPoints[i].a}, ${getPoints[i].b}");
+        if(isPdrStop &&  val==0){
+
+          print("points unmatchedddd");
+
+          setState(() {
+            isPdrStop=false;
+          });
+          StartPDR();
+          break;
+        }
+        if(getPoints[i][0] == user.showcoordX && getPoints[i][1] == user.showcoordY){
+
+          print("points matchedddd");
+
+          StopPDR();
+          getPoints.removeAt(i);
+          break;
+
+        }
+
+      }
+
+    }
+
+
+
+
+
+
+
+
     return Visibility(
         visible: _isnavigationPannelOpen,
         child: Stack(
@@ -5918,6 +6036,7 @@ late StreamSubscription<AccelerometerEvent> pdr;
                     onPressed: () async {
 
                   StopPDR();
+
 
 
                       // if (user.initialallyLocalised) {

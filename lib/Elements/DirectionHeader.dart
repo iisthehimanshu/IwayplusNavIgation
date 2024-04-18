@@ -41,8 +41,7 @@ class DirectionHeader extends StatefulWidget {
 
 class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
-  BT btadapter = new BT();
-  BT btadapter2 = new BT();
+  BT2 btadapter = new BT2();
   late Timer _timer;
   bool intialized = false;
   @override
@@ -52,9 +51,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
         turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         turnPoints.sort();
-        //btadapter.startScanning(Building.apibeaconmap);
-        _timer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
-          //listenToBin();
+        btadapter.startScanning(Building.apibeaconmap);
+        _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+          listenToBin();
         });
         intialized = !intialized;
       }
@@ -71,31 +70,27 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   void listenToBin(){
     print("listentobin");
-    double highestweight = 3.1;
+    double highestweight = 8;
     String nearestBeacon = "";
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if (btadapter.BIN[i]!.isNotEmpty) {
-        btadapter.BIN[i]!.forEach((key, value) {
-          Building.thresh = "";
-          Building.thresh = Building.thresh + "$key , ${value/(btadapter.numberOfSample[key]??1)} , ${btadapter.numberOfSample[key]}" + "\n";
-          print("$key , ${value/(btadapter.numberOfSample[key]??1)} , ${btadapter.numberOfSample[key]} , ${btadapter.rs[key]}");
-          if (value/(btadapter.numberOfSample[key]??1) >= highestweight) {
-            highestweight = value/(btadapter.numberOfSample[key]??1);
-            nearestBeacon = key;
-          }
-        });
-        break;
-      }
-    }
+    Map<String, double> sumMap = btadapter.calculateAverage();
     btadapter.emptyBin();
+    widget.direction = "";
+    sumMap.forEach((key, value) {
+      setState(() {
+        widget.direction = widget.direction + "\n" + "$key   $value";
+      });
+      print("$key   $value");
+      if(value>=highestweight){
+       highestweight =  value;
+       nearestBeacon = key;
+      }
+    });
 
+    print("$nearestBeacon   $highestweight");
 
 
     if(nearestBeacon !=""){
-      setState(() {
-        widget.direction = Building.apibeaconmap[nearestBeacon]!.name!;
-        widget.distance = Building.apibeaconmap[nearestBeacon]!.floor!;
-      });
+
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
 
@@ -274,7 +269,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-      height: 95,
+      height: 200,
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Color(0xff01544F),
@@ -296,13 +291,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 children: [
                   Text(
                     widget.direction,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w700,
-
-                    ),
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12.0,
+                      ),
                   ),
                   SizedBox(height: 4.0),
                   Text(

@@ -445,8 +445,8 @@ void calibrate()async{
 
           } else {
             if(user.isnavigating){
-              reroute();
-              showToast("You are out of path");
+              // reroute();
+              // showToast("You are out of path");
             }
           }
 
@@ -2988,6 +2988,11 @@ void calibrate()async{
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
     List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<int>temp = [];
+    temp.addAll(path);
+    temp.addAll(PathState.singleListPath);
+    PathState.singleListPath = temp;
+
     // print("allTurnPoints ${x1} ,${y1}");
     //
     // List<Node> nodes = List.generate(numRows * numCols, (index) {
@@ -3567,27 +3572,23 @@ var ptKeys=pt.keys.toList();
                                       ),
                                       child: TextButton(
                                         onPressed: ()async{
+                                          print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
                                           user.pathobj = PathState;
-                                          user.path = PathState.path.values
-                                              .expand((list) => list)
-                                              .toList();
+                                          user.path = PathState.singleListPath;
                                           user.isnavigating = true;
                                           user.moveToStartofPath().then((value) {
                                             setState(() {
                                               if (markers.length > 0) {
+                                                print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                                List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
                                                 markers[user.Bid]?[0] = customMarker.move(
-                                                    LatLng(
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[0],
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[1]),
+                                                    LatLng(val[0], val[1]),
                                                     markers[user.Bid]![0]);
+
+                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                                markers[user.Bid]?[1] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![1]);
                                               }
                                             });
                                           });
@@ -3596,15 +3597,6 @@ var ptKeys=pt.keys.toList();
                                           //pathMarkers.clear();
                                           building.selectedLandmarkID = null;
                                           _isnavigationPannelOpen = true;
-
-                                          int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
-                                          double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
-                                          print("1 $angle");
-                                          if(angle != 0){
-                                            speak("Turn "+ tools.angleToClocks(angle));
-                                          }else{
-
-                                          }
 
                                         },
                                         child: !startingNavigation?Row(
@@ -5980,7 +5972,44 @@ if(user.isnavigating) {
                             borderRadius: BorderRadius.all(Radius.circular(24))),
                         child: IconButton(
                             onPressed: () {
-                              StartPDR();
+
+                              // StartPDR();
+
+                              bool isvalid = MotionModel.isValidStep(
+                                  user,
+                                  building.floorDimenssion[user.Bid]![user.floor]![0],
+                                  building.floorDimenssion[user.Bid]![user.floor]![1],
+                                  building.nonWalkable[user.Bid]![user.floor]!,
+                                  reroute);
+                              if (isvalid) {
+                                user.move().then((value) {
+                                  //  user.move().then((value){
+                                  setState(() {
+
+                                    if (markers.length > 0) {
+                                      List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                      markers[user.Bid]?[0] = customMarker.move(
+                                          LatLng(lvalue[0],lvalue[1]),
+                                          markers[user.Bid]![0]
+                                      );
+
+                                      List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                      markers[user.Bid]?[1] = customMarker.move(
+                                          LatLng(ldvalue[0],ldvalue[1]),
+                                          markers[user.Bid]![1]
+                                      );
+                                    }
+                                  });
+                                  // });
+                                });
+                                print("next [${user.coordX}${user.coordY}]");
+
+                              } else {
+                                if(user.isnavigating){
+                                  reroute();
+                                  showToast("You are out of path");
+                                }
+                              }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),

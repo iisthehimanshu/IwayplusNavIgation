@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -625,6 +626,42 @@ class tools {
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
         res.add(currPos);
+      }
+
+
+
+    }
+    return res;
+  }
+  static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
+    Map<int,int> res=new Map();
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      int currPos = pathNodes[i];
+      int nextPos=pathNodes[i+1];
+      int prevPos=pathNodes[i-1];
+
+      int x1 = (currPos % numCols);
+      int y1 = (currPos ~/ numCols);
+
+      int x2 = (nextPos % numCols);
+      int y2 = (nextPos ~/ numCols);
+
+      int x3 = (prevPos % numCols);
+      int y3 = (prevPos ~/ numCols);
+
+      int prevDeltaX=x1-x3;
+      int prevDeltaY=y1-y3;
+      int nextDeltaX=x2-x1;
+      int nextDeltaY=y2-y1;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        res[i]=currPos;
       }
 
 

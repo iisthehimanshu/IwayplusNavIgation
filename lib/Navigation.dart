@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_animator/flutter_animator.dart';
+import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 
 import 'package:vibration/vibration.dart';
@@ -337,7 +338,7 @@ void calibrate()async{
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      print("calling");
+     // print("calling");
       pdrstepCount();
       // onStepCount();
     });
@@ -409,26 +410,37 @@ void calibrate()async{
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
          if (isvalid) {
-            user.move().then((value) {
-            //  user.move().then((value){
-                setState(() {
 
-                  if (markers.length > 0) {
-                    List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                    markers[user.Bid]?[0] = customMarker.move(
-                        LatLng(lvalue[0],lvalue[1]),
-                        markers[user.Bid]![0]
-                    );
+           if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+             user.move().then((value) {
+               //  user.move().then((value){
+               setState(() {
 
-                    List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                    markers[user.Bid]?[1] = customMarker.move(
-                        LatLng(ldvalue[0],ldvalue[1]),
-                        markers[user.Bid]![1]
-                    );
-                  }
-                });
-             // });
-            });
+                 if (markers.length > 0) {
+                   List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                   markers[user.Bid]?[0] = customMarker.move(
+                       LatLng(lvalue[0],lvalue[1]),
+                       markers[user.Bid]![0]
+                   );
+
+                   List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                   markers[user.Bid]?[1] = customMarker.move(
+                       LatLng(ldvalue[0],ldvalue[1]),
+                       markers[user.Bid]![1]
+                   );
+                 }
+               });
+               // });
+             });
+           }else{
+             StopPDR();
+             setState(() {
+               user.isnavigating=false;
+             });
+             speak("haaan bhaiiii aaaagya");
+
+           }
+
             print("next [${user.coordX}${user.coordY}]");
 
           } else {
@@ -2990,29 +3002,83 @@ void calibrate()async{
     // });
     // path.map((index) => nodes[index - 1]).toList();
     //
-    for(int i=0;i<path.length;i++){
-      int x = path[i] % numCols;
-      int y = path[i] ~/ numCols;
+    // for(int i=0;i<path.length;i++){
+    //   int x = path[i] % numCols;
+    //   int y = path[i] ~/ numCols;
+    //
+    //   print("allPathPoints: ${x} ,${y}");
+    //
+    //
+    // }
 
-      print("allPathPoints: ${x} ,${y}");
 
-
-    }
-
-
-     List<int> getTurns= tools.getTurnpoints(path, numCols);
+     Map<int,int> getTurns= tools.getTurnMap(path, numCols);
 
 
     print("getTurnsss ${getTurns}");
 
-
-    for(int i=0;i<getTurns.length;i++){
-      int x1 = (getTurns[i]% numCols);
-      int y1 = (getTurns[i] ~/ numCols);
-      print("allTurnPoints ${x1} ,${y1}");
-      getPoints.add([x1,y1]);
-      getnodes.add(getTurns[i]);
+    Map<int,int> pt={};
+    var keys=getTurns.keys.toList();
+    for(int i=0;i<keys.length-1;i++){
+      if(keys[i+1]-1==keys[i]){
+        pt[keys[i+1]]=getTurns[keys[i+1]]!;
+      }
     }
+
+var ptKeys=pt.keys.toList();
+    for(int i=0;i<pt.length;i++){
+      int curr=path[ptKeys[i]];
+      int next=path[ptKeys[i]+1];
+      int prev=path[ptKeys[i]-1];
+
+
+      int currX=curr%numCols;
+      int currY=curr~/numCols;
+
+      int nextX=next%numCols;
+      int nextY=next~/numCols;
+
+      int prevX=prev%numCols;
+      int prevY=prev~/numCols;
+
+      if(nextX==currX){
+        currY=prevY;
+        int newIndexY=currY*numCols+currX;
+        path[ptKeys[i]]=newIndexY;
+      }else if(nextY==currY){
+        currX=prevX;
+        int newIndexX=currY*numCols+currX;
+        path[ptKeys[i]]=newIndexX;
+      }
+
+
+    }
+
+
+
+
+
+    // for(int i=0;i<getTurns.length;i++){
+    //   int x1 = (getTurns[i]% numCols);
+    //   int y1 = (getTurns[i] ~/ numCols);
+    //   print("allTurnPoints ${x1} ,${y1}");
+    //   getPoints.add([x1,y1]);
+    //   getnodes.add(getTurns[i]);
+    // }
+    //
+    //
+    // List<int> pt=[];
+    // //here we are checking if there are two consecurtuve turns then we are only considering it as one turn.
+    // for(int i=0;i<getTurns.length;i++){
+    //   if(getTurns[i+1]-1==getTurns[i]){
+    //     pt.add(getTurns[i+1]);
+    //   }
+    // }
+    //
+    // for(int i=0;i<pt.length;i++){
+    //
+    //
+    // }
 
 
     // Set<int> nonWalkableSet = building.nonWalkable[bid]![floor]!.toSet();
@@ -3793,57 +3859,60 @@ void calibrate()async{
 
 
     //implement the turn functionality.
+if(user.isnavigating) {
 
-    if(user.isnavigating){
-      List<int> a=[user.showcoordX,user.showcoordY];
-      List<int> tval = tools.eightcelltransition(user.theta);
-      print(tval);
-      List<int> b=[user.showcoordX+tval[0],user.showcoordY+tval[1]];
-      int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+  int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
-      int index=user.path.indexOf((user.showcoordY*col)+user.showcoordX);
-      int node = user.path[index+1];
 
-      List<int> c=[node%col , node~/col];
-      int val= tools.calculateAngleSecond(a, b, c).toInt();
+  if (MotionModel.reached(user, col)==false) {
+    List<int> a = [user.showcoordX, user.showcoordY];
+    List<int> tval = tools.eightcelltransition(user.theta);
+    print(tval);
+    List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
-      // print("user corrds");
-      // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
-        print("pointss matchedddd ${getPoints.contains([user.showcoordX, user.showcoordY])}");
-      for(int i=0;i<getPoints.length;i++){
-        print("---length  = ${getPoints.length}");
-        print("--- point  = ${getPoints[i]}");
-        print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-        print("--- val  = $val");
-        print("--- isPDRStop  = $isPdrStop");
+    int index = user.path.indexOf((user.showcoordY * col) + user.showcoordX);
 
-        // print("turn corrds");
-        //
-        // print("${getPoints[i].a}, ${getPoints[i].b}");
-        if(isPdrStop &&  val==0){
+    int node = user.path[index + 1];
 
-          print("points unmatchedddd");
+    List<int> c = [node % col, node ~/ col];
+    int val = tools.calculateAngleSecond(a, b, c).toInt();
 
-          setState(() {
-            isPdrStop=false;
-          });
-          StartPDR();
-          break;
-        }
-        if(getPoints[i][0] == user.showcoordX && getPoints[i][1] == user.showcoordY){
+    // print("user corrds");
+    // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
-          print("points matchedddd");
+    print("pointss matchedddd ${getPoints.contains(
+        [user.showcoordX, user.showcoordY])}");
+    for (int i = 0; i < getPoints.length; i++) {
+      print("---length  = ${getPoints.length}");
+      print("--- point  = ${getPoints[i]}");
+      print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+      print("--- val  = $val");
+      print("--- isPDRStop  = $isPdrStop");
 
-          StopPDR();
-          getPoints.removeAt(i);
-          break;
+      // print("turn corrds");
+      //
+      // print("${getPoints[i].a}, ${getPoints[i].b}");
+      if (isPdrStop && val == 0) {
+        print("points unmatchedddd");
 
-        }
-
+        setState(() {
+          isPdrStop = false;
+        });
+        StartPDR();
+        break;
       }
+      if (getPoints[i][0] == user.showcoordX &&
+          getPoints[i][1] == user.showcoordY) {
+        print("points matchedddd");
 
+        StopPDR();
+        getPoints.removeAt(i);
+        break;
+      }
     }
+  }
+}
 
 
 

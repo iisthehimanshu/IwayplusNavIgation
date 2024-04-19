@@ -31,4 +31,19 @@ class MotionModel{
     return true;
   }
 
+  static bool reached(UserState state,int col){
+    int x=0;
+    int y=0;
+    if(state.path.length>0){
+      x=state.path[state.path.length-1]%col ;
+      y=state.path[state.path.length-1]~/col;
+    }
+
+    if(state.showcoordX==x && state.showcoordY==y){
+      return true;
+    }
+    return false;
+  }
+
+
 }

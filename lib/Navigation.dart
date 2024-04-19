@@ -2976,6 +2976,10 @@ void calibrate()async{
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
     List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<int>temp = [];
+    temp.addAll(path);
+    temp.addAll(PathState.singleListPath);
+    PathState.singleListPath = temp;
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3504,9 +3508,7 @@ void calibrate()async{
                                         onPressed: ()async{
                                           print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
                                           user.pathobj = PathState;
-                                          user.path = PathState.path.values
-                                              .expand((list) => list)
-                                              .toList();
+                                          user.path = PathState.singleListPath;
                                           user.isnavigating = true;
                                           user.moveToStartofPath().then((value) {
                                             setState(() {

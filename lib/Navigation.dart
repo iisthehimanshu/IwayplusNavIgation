@@ -3239,7 +3239,7 @@ var ptKeys=pt.keys.toList();
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 3,
+          width: 10,
         ));
       }else{
         print("new call $bid $coordinates");
@@ -3248,7 +3248,7 @@ var ptKeys=pt.keys.toList();
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 3,
+          width: 10,
         ));
       }
 

@@ -61,6 +61,12 @@ class UserState{
     lng = values[1];
     showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+    print("path $path");
+    print("index ${[pathobj.index]}");
+    print("object ${path[pathobj.index]}");
+    print("cols ${pathobj.numCols![Bid]![floor]!}");
+    print("x $showcoordX");
+    print("y $showcoordY");
   }
 
   Future<void> reset()async{

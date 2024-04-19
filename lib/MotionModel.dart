@@ -24,6 +24,7 @@ class MotionModel{
     }
 
     if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>5){
+      print("${user.coordX} ,${user.coordY} ,            ${user.showcoordX},${user.showcoordY}");
        reroute();
     }
 

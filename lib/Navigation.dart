@@ -3518,6 +3518,11 @@ void calibrate()async{
                                                 markers[user.Bid]?[0] = customMarker.move(
                                                     LatLng(val[0], val[1]),
                                                     markers[user.Bid]![0]);
+
+                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                                markers[user.Bid]?[1] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![1]);
                                               }
                                             });
                                           });
@@ -3526,15 +3531,6 @@ void calibrate()async{
                                           //pathMarkers.clear();
                                           building.selectedLandmarkID = null;
                                           _isnavigationPannelOpen = true;
-
-                                          int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
-                                          double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
-                                          print("1 $angle");
-                                          if(angle != 0){
-                                            speak("Turn "+ tools.angleToClocks(angle));
-                                          }else{
-
-                                          }
 
                                         },
                                         child: !startingNavigation?Row(

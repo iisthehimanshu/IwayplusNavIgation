@@ -308,9 +308,9 @@ class tools {
   }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // print("A $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -343,9 +343,9 @@ class tools {
     List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
     List<int> c = [node % cols , node ~/cols];
 
-    // print("A $a");
-    // print("B $b");
-    // print("C $c");
+    print("A $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -640,6 +640,8 @@ class tools {
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
+    print("@@@@@ $x1,$y1");
+    print("&&&&& $x2,$y2");
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();

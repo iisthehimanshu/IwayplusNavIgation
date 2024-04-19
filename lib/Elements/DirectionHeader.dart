@@ -43,20 +43,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
   BT2 btadapter = new BT2();
   late Timer _timer;
-  bool intialized = false;
   @override
   void initState() {
     super.initState();
-    if(!intialized){
-      if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
-        turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-        turnPoints.sort();
-        btadapter.startScanning(Building.apibeaconmap);
-        _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-          listenToBin();
-        });
-        intialized = !intialized;
-      }
+    if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
+      turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      turnPoints.sort();
+      btadapter.startScanning(Building.apibeaconmap);
+      _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+        listenToBin();
+      });
+      int nextTurn = findNextGreater(turnPoints, widget.user.path[widget.user.pathobj.index]);
+      widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      print("angleeeeee $angle");
+      setState(() {
+        widget.direction = tools.angleToClocks(angle);
+        if(widget.direction == "Straight"){
+          widget.direction = "Go Straight";
+          Vibration.vibrate();
+          speak("Go Straight ${widget.distance} meter");
+        }else{
+          widget.direction = "Turn ${widget.direction}, and Go Straight";
+          speak("${widget.direction} ${widget.distance} meter");
+        }
+      });
+
     }
 
 
@@ -69,24 +81,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   void listenToBin(){
-    print("listentobin");
     double highestweight = 8;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
     btadapter.emptyBin();
-    widget.direction = "";
     sumMap.forEach((key, value) {
-      setState(() {
-        widget.direction = widget.direction + "\n" + "$key   $value";
-      });
-      print("$key   $value");
+      //print("$key   $value");
       if(value>=highestweight){
        highestweight =  value;
        nearestBeacon = key;
       }
     });
 
-    print("$nearestBeacon   $highestweight");
+    //print("$nearestBeacon   $highestweight");
 
 
     if(nearestBeacon !=""){
@@ -179,32 +186,29 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
-    // int nextTurn = findNextGreater(turnPoints, widget.user.path[widget.user.pathobj.index]);
-    // widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-    // double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-    // if(!angle.isNaN){
-    //   widget.direction = tools.angleToClocks(angle);
-    //   if(widget.direction == "Straight"){
-    //     widget.direction = "Go Straight";
-    //   }else{
-    //     widget.direction = "Turn ${widget.direction}, and Go Straight";
-    //   }
-    //   if(oldWidget.direction != widget.direction){
-    //
-    //     if(oldWidget.direction == "Go Straight"){
-    //
-    //       Vibration.vibrate();
-    //       speak("${widget.direction} ${widget.distance} meter");
-    //
-    //     }else if(widget.direction == "Go Straight"){
-    //
-    //       Vibration.vibrate();
-    //       speak("Go Straight ${widget.distance} meter");
-    //     }
-    //   }
-    // }else{
-    //
-    // }
+    int nextTurn = findNextGreater(turnPoints, widget.user.path[widget.user.pathobj.index]);
+    widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+    double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+    print("dangleeeee $angle");
+    widget.direction = tools.angleToClocks(angle);
+    if(widget.direction == "Straight"){
+      widget.direction = "Go Straight";
+    }else{
+      widget.direction = "Turn ${widget.direction}, and Go Straight";
+    }
+    if(oldWidget.direction != widget.direction){
+
+      if(oldWidget.direction == "Go Straight"){
+
+        Vibration.vibrate();
+        speak("${widget.direction} ${widget.distance} meter");
+
+      }else if(widget.direction == "Go Straight"){
+
+        Vibration.vibrate();
+        speak("Go Straight ${widget.distance} meter");
+      }
+    }
   }
 
   Icon getCustomIcon(String direction) {

@@ -24,6 +24,12 @@ class UserState{
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
   Future<void> move()async {
+    print("prev----- coord $coordX,$coordY");
+    print("prev----- show $showcoordX,$showcoordY");
+    print("prev----- index ${pathobj.index}");
+    pathobj.index = pathobj.index + 1;
+    print("prev----- index ${pathobj.index}");
+
     List<int> transitionvalue = tools.eightcelltransition(this.theta);
     coordX = coordX + transitionvalue[0];
     coordY = coordY + transitionvalue[1];
@@ -38,7 +44,10 @@ class UserState{
       showcoordY = coordY;
     }
 
-    pathobj.index = pathobj.index + 1;
+    print("curr----- coord $coordX,$coordY");
+    print("curr----- show $showcoordX,$showcoordY");
+    print("curr----- index ${pathobj.index}");
+
   }
 
   Future<void> moveToPointOnPath(int index)async{
@@ -53,14 +62,14 @@ class UserState{
   }
 
   Future<void> moveToStartofPath()async{
-    List<int> transitionvalue = tools.eightcelltransition(this.theta);
-    coordX = coordX + transitionvalue[0];
-    coordY = coordY + transitionvalue[1];
+
+    showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
+    showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+    coordX = showcoordX;
+    coordY = showcoordY;
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
-    showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
-    showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
     print("path $path");
     print("index ${[pathobj.index]}");
     print("object ${path[pathobj.index]}");

@@ -69,7 +69,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   void listenToBin(){
-    print("listentobin");
+   // print("listentobin");
     double highestweight = 8;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();

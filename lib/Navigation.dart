@@ -2971,19 +2971,12 @@ void calibrate()async{
   List<int> getnodes=[];
 
   Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX, int destinationY, int floor, {String? bid = null}) async {
-    print("timechecker");
 
-    print("fetch route-- ${building.floorDimenssion[bid]![floor]}");
-    print("fetch route-- $bid");
     int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-    print("fetch route--- $destinationIndex");
-    print("fetch route---- $sourceIndex");
-    print("fetch route---- $numRows");
-    print("fetch route---- $numCols");
-    print("fetch route---- ${building.nonWalkable[bid]![floor]!}");
+
 
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
@@ -3239,7 +3232,7 @@ var ptKeys=pt.keys.toList();
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 10,
+          width: 3,
         ));
       }else{
         print("new call $bid $coordinates");
@@ -3248,7 +3241,7 @@ var ptKeys=pt.keys.toList();
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 10,
+          width: 3,
         ));
       }
 
@@ -3286,19 +3279,15 @@ var ptKeys=pt.keys.toList();
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
-            distance: (PathState.directions[i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            distance: tools.roundToNextInt(PathState.directions[i].values.first * 0.3048).toString()));
       } else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
         directionWidgets.add(directionInstruction(
             direction: PathState.directions[i].keys.first,
             distance: "Floor $sourceVal -> Floor $destinationVal"));
       } else {
         directionWidgets.add(directionInstruction(
-            direction: "Turn " +
-                PathState.directions[i].keys.first +
-                ", and Go Straight",
-            distance: (PathState.directions[++i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            direction: "Turn " + PathState.directions[i].keys.first + ", and Go Straight",
+            distance: tools.roundToNextInt(PathState.directions[++i].values.first * 0.3048).toString()));
       }
     }
     double time = 0;
@@ -3826,8 +3815,7 @@ var ptKeys=pt.keys.toList();
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
-            distance: (PathState.directions[i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            distance: tools.roundToNextInt(PathState.directions[i].values.first * 0.3048).toString()));
       }
       else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
         directionWidgets.add(directionInstruction(
@@ -3839,8 +3827,7 @@ var ptKeys=pt.keys.toList();
             direction: "Turn " +
                 PathState.directions[i].keys.first +
                 ", and Go Straight",
-            distance: (PathState.directions[++i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            distance: tools.roundToNextInt(PathState.directions[++i].values.first * 0.3048).toString()));
       }
     }
     double time = 0;

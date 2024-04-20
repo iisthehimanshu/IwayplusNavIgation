@@ -428,6 +428,12 @@ class tools {
     return directions;
   }
 
+  static int roundToNextInt(double number) {
+    int rounded = number.round();
+    return number >= 0 ? rounded : rounded - 1;
+  }
+
+
   static List<Landmarks> findNearbyLandmark(
       List<int> path,
       Map<String, Landmarks> landmarksMap,

@@ -48,6 +48,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     super.initState();
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      turnPoints.add(widget.user.path.last);
       turnPoints.sort();
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -65,6 +66,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           speak("Go Straight ${widget.distance} meter");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
+          Vibration.vibrate();
           speak("${widget.direction} ${widget.distance} meter");
         }
       });
@@ -128,6 +130,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.repaint(nearestBeacon);   //away from path
               }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+                Vibration.vibrate();
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();                                 //moved on path
@@ -141,6 +144,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("usercoord ${usercoord}");
             print(nearestBeacon);
           }else{
+            Vibration.vibrate();
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
           }
@@ -201,7 +205,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if(oldWidget.direction == "Go Straight"){
 
         Vibration.vibrate();
-        speak("${widget.direction} ${widget.distance} meter");
+
+        if(nextTurn == turnPoints.last){
+          speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+        }else{
+          speak("${widget.direction} ${widget.distance} meter");
+        }
 
       }else if(widget.direction == "Go Straight"){
 
@@ -273,7 +282,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-      height: 200,
+      height: 95,
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Color(0xff01544F),
@@ -294,11 +303,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.direction,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 12.0,
-                      ),
+                    "${widget.direction}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w700,
+
+                    ),
                   ),
                   SizedBox(height: 4.0),
                   Text(

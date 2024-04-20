@@ -3030,6 +3030,7 @@ var ptKeys=pt.keys.toList();
       int curr=path[ptKeys[i]];
       int next=path[ptKeys[i]+1];
       int prev=path[ptKeys[i]-1];
+      int nextNext=path[ptKeys[i]+2];
 
 
       int currX=curr%numCols;
@@ -3040,6 +3041,12 @@ var ptKeys=pt.keys.toList();
 
       int prevX=prev%numCols;
       int prevY=prev~/numCols;
+
+
+      int nextNextX=nextNext%numCols;
+      int nextNextY=nextNext~/numCols;
+
+
 
       if(nextX==currX){
         currY=prevY;
@@ -3056,38 +3063,6 @@ var ptKeys=pt.keys.toList();
 
 
 
-
-
-    // for(int i=0;i<getTurns.length;i++){
-    //   int x1 = (getTurns[i]% numCols);
-    //   int y1 = (getTurns[i] ~/ numCols);
-    //   print("allTurnPoints ${x1} ,${y1}");
-    //   getPoints.add([x1,y1]);
-    //   getnodes.add(getTurns[i]);
-    // }
-    //
-    //
-    // List<int> pt=[];
-    // //here we are checking if there are two consecurtuve turns then we are only considering it as one turn.
-    // for(int i=0;i<getTurns.length;i++){
-    //   if(getTurns[i+1]-1==getTurns[i]){
-    //     pt.add(getTurns[i+1]);
-    //   }
-    // }
-    //
-    // for(int i=0;i<pt.length;i++){
-    //
-    //
-    // }
-
-
-    // Set<int> nonWalkableSet = building.nonWalkable[bid]![floor]!.toSet();
-   //  // List<int> path=skipConsecutiveTurns(temppath,numRows,numCols,nonWalkableSet);
-   // List<int> res=[];
-   //  for(int i=0;i<rdpPath.length;i++)
-   //    {
-   //       path.add(rdpPath[i].index);
-   //    }
     
       //print("rdp* path ${res}");
     print("A* path ${path}");

@@ -6160,7 +6160,7 @@ if(user.isnavigating) {
             navigationPannel(),
             reroutePannel(),
             detected? Semantics(
-                child: nearestLandmarkpannel()): Container(),
+                child: buildingDetailPannel()): Container(),
 
           ],
         ),

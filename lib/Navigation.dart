@@ -377,8 +377,8 @@ void calibrate()async{
   int lastPeakTime = 0;
   int lastValleyTime = 0;
   //will have to set according to the device
-  double peakThreshold = 11.111111111;
-  double valleyThreshold = -11.111111111;
+  double peakThreshold = 11.1111111;
+  double valleyThreshold = -11.1111111;
 
   int peakInterval = 300;
   int valleyInterval = 300;
@@ -424,32 +424,30 @@ void calibrate()async{
 
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
              user.move().then((value) {
-               //  user.move().then((value){
-               setState(() {
+               user.move().then((value){
+                 setState(() {
 
-                 if (markers.length > 0) {
-                   List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                   markers[user.Bid]?[0] = customMarker.move(
-                       LatLng(lvalue[0],lvalue[1]),
-                       markers[user.Bid]![0]
-                   );
+                   if (markers.length > 0) {
+                     List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                     markers[user.Bid]?[0] = customMarker.move(
+                         LatLng(lvalue[0],lvalue[1]),
+                         markers[user.Bid]![0]
+                     );
 
-                   List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                   markers[user.Bid]?[1] = customMarker.move(
-                       LatLng(ldvalue[0],ldvalue[1]),
-                       markers[user.Bid]![1]
-                   );
-                 }
+                     List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                     markers[user.Bid]?[1] = customMarker.move(
+                         LatLng(ldvalue[0],ldvalue[1]),
+                         markers[user.Bid]![1]
+                     );
+                   }
+                 });
                });
-               // });
              });
            }else{
              StopPDR();
              setState(() {
                user.isnavigating=false;
              });
-             speak("haaan bhaiiii aaaagya");
-
            }
 
             print("next [${user.coordX}${user.coordY}]");
@@ -5955,6 +5953,7 @@ if(user.isnavigating) {
               right: 16.0,
               child: Column(
                 children: [
+                  //Text(Building.thresh),
                   Visibility(
                     visible: true,
                     child: Container(
@@ -5965,53 +5964,53 @@ if(user.isnavigating) {
                             onPressed: () {
 
 
-                              // StartPDR();
+                               StartPDR();
 
-                              bool isvalid = MotionModel.isValidStep(
-                                  user,
-                                  building.floorDimenssion[user.Bid]![user.floor]![0],
-                                  building.floorDimenssion[user.Bid]![user.floor]![1],
-                                  building.nonWalkable[user.Bid]![user.floor]!,
-                                  reroute);
-                              if (isvalid) {
-
-                                if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                                  user.move().then((value) {
-                                    //  user.move().then((value){
-                                    setState(() {
-
-                                      if (markers.length > 0) {
-                                        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                        markers[user.Bid]?[0] = customMarker.move(
-                                            LatLng(lvalue[0],lvalue[1]),
-                                            markers[user.Bid]![0]
-                                        );
-
-                                        List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                        markers[user.Bid]?[1] = customMarker.move(
-                                            LatLng(ldvalue[0],ldvalue[1]),
-                                            markers[user.Bid]![1]
-                                        );
-                                      }
-                                    });
-                                    // });
-                                  });
-                                }else{
-                                  StopPDR();
-                                  setState(() {
-                                    user.isnavigating=false;
-                                  });
-
-                                }
-
-                                print("next [${user.coordX}${user.coordY}]");
-
-                              } else {
-                                if(user.isnavigating){
-                                  // reroute();
-                                  // showToast("You are out of path");
-                                }
-                              }
+                              // bool isvalid = MotionModel.isValidStep(
+                              //     user,
+                              //     building.floorDimenssion[user.Bid]![user.floor]![0],
+                              //     building.floorDimenssion[user.Bid]![user.floor]![1],
+                              //     building.nonWalkable[user.Bid]![user.floor]!,
+                              //     reroute);
+                              // if (isvalid) {
+                              //
+                              //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                              //     user.move().then((value) {
+                              //       //  user.move().then((value){
+                              //       setState(() {
+                              //
+                              //         if (markers.length > 0) {
+                              //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                              //           markers[user.Bid]?[0] = customMarker.move(
+                              //               LatLng(lvalue[0],lvalue[1]),
+                              //               markers[user.Bid]![0]
+                              //           );
+                              //
+                              //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                              //           markers[user.Bid]?[1] = customMarker.move(
+                              //               LatLng(ldvalue[0],ldvalue[1]),
+                              //               markers[user.Bid]![1]
+                              //           );
+                              //         }
+                              //       });
+                              //       // });
+                              //     });
+                              //   }else{
+                              //     StopPDR();
+                              //     setState(() {
+                              //       user.isnavigating=false;
+                              //     });
+                              //
+                              //   }
+                              //
+                              //   print("next [${user.coordX}${user.coordY}]");
+                              //
+                              // } else {
+                              //   if(user.isnavigating){
+                              //     // reroute();
+                              //     // showToast("You are out of path");
+                              //   }
+                              // }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),

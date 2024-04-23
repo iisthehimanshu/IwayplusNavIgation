@@ -237,7 +237,7 @@ class BT2 {
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        String MacId = "${result.device.remoteId}";
+        String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;

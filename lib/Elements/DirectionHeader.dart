@@ -87,9 +87,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     double highestweight = 8;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
+    print("-90-   ${sumMap.length}");
+
+    //Building.thresh = "";
     btadapter.emptyBin();
     sumMap.forEach((key, value) {
-      //print("$key   $value");
+      Building.thresh = Building.thresh + "$key   $value";
+      print("-90-   $key   $value");
       if(value>=highestweight){
        highestweight =  value;
        nearestBeacon = key;

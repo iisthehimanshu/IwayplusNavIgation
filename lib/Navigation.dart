@@ -864,6 +864,9 @@ print("scanningggg starteddddd");
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
+
+
+        print("localize user is calling itself.....");
         _timer.cancel();
       });
     });

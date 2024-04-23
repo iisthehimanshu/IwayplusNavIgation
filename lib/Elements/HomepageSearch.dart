@@ -11,6 +11,8 @@ import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
+import 'HomepageFilter.dart';
+
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
@@ -32,9 +34,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
     'Fashion', 'Travel', 'Rooms', 'Tech',
     'Science',
   ];
-  List<String> floorOptions = [
-    'Food & Drinks', 'Washroom', 'Water',
-  ];
+
   List<IconData> _icons = [
     Icons.home,
     Icons.wash_sharp,
@@ -136,7 +136,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 Container(
                   width: 47,
                   height: 48,
-
                   decoration: BoxDecoration(
                     color: Color(0xff24B9B0),
                     borderRadius: BorderRadius.only(
@@ -166,88 +165,26 @@ class _HomepageSearchState extends State<HomepageSearch> {
               ],
             )),
         Container(
-          margin: EdgeInsets.only(left: 10,right: 10),
-          child: ValueListenableBuilder(
-            valueListenable: Hive.box('Filters').listenable(),
-            builder: (BuildContext context, value, Widget? child) {
-              //List<dynamic> aa = []
-              if(value.length==2){
-                floorOptionsTags = value.getAt(1);
-              }
-              return ChipsChoice<String>.single(
-                value: currentSelectedFilter,
-                onChanged: (val) {
-                  print("Destinationpage Filter change${val}${value.values}");
-                  value.put(1, val);
-                  setState(() {
-                    currentSelectedFilter = val;
-                    //onTagsChanged();
-                    // currentSelectedFilter = value.
-                  });
-
-                },
-
-                choiceItems: C2Choice.listFrom<String, String>(
-                  source: floorOptions,
-                  value: (i, v) => v,
-                  label: (i, v) => v,
-                  tooltip: (i, v) => v,
-                  meta: (i, v) => _icons[i],
-
-                  // delete: (i, v) => () {
-                  //   setState(() => options.removeAt(i));
-                  // },
-                ),
-                choiceLeadingBuilder: (data, i) {
-                  if (data.meta == null) return null;
-                  return Icon(data.meta as IconData); // Display the icon from the meta property
-                },
-                padding: EdgeInsets.only(left: 0,top: 10),
-                choiceCheckmark: true,
-                choiceStyle: C2ChipStyle.outlined(
-                  height: 38,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(9),
-                  ),
-                  selectedStyle:  C2ChipStyle.filled(
-                      color: Colors.black
-                  ),
-                  borderWidth: 1,
-
-                ),
-                wrapped: false,
-              );
+          width: screenWidth,
+          child: ChipsChoice<int>.single(
+            value: vall,
+            onChanged: (val){
+              setState(() => vall = val);
+              print("wilsonchecker");
+              print(val);
             },
+            choiceItems: C2Choice.listFrom<int, String>(
+              source: options,
+              value: (i, v) => i,
+              label: (i, v) => v,
+            ),
+            choiceBuilder: (item, i) {
+              return HomepageFilter(svgPath: '', text: options[i],);
+            },
+            direction: Axis.horizontal,
           ),
         ),
-        // SizedBox(
-        //   width: 500,
-        //   child: Content(
-        //     title: 'Vertical Direction',
-        //     child: ChipsChoice<int>.single(
-        //       value: vall,
-        //       onChanged: (val) => setState(() => vall = val),
-        //       choiceItems: C2Choice.listFrom<int, String>(
-        //         source: options,
-        //         value: (i, v) => i,
-        //         label: (i, v) => v,
-        //       ),
-        //       padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        //       choiceBuilder: (item, i) {
-        //         return CustomChip(
-        //           label: item.label,
-        //           width: double.infinity,
-        //           height: 90,
-        //           color: Colors.black,
-        //           margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-        //           selected: item.selected,
-        //           onSelect: item.select!,
-        //         );
-        //       },
-        //       direction: Axis.horizontal,
-        //     ),
-        //   ),
-        // ),
+
 
       ],
     );

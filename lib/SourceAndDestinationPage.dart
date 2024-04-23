@@ -41,6 +41,8 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
           SourceName = "Select source";
         }else{
           SourceName = landmarkData.landmarksMap![widget.SourceID]!.name!;
+          print("SourceName");
+          print(SourceName);
         }
         if(widget.DestinationID == ""){
           DestinationName = "Search destination";

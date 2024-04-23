@@ -43,7 +43,7 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   flutter_blue_plus: ^1.31.12
   shimmer: ^3.0.0
-  permission_handler: ^11.0.1
+  permission_handler: ^11.3.1
   flutter_tts: ^3.8.5
   flutter_compass: ^0.8.0
   flutter_svg: ^2.0.9

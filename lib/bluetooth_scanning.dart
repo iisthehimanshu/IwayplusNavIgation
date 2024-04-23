@@ -44,7 +44,7 @@ class BT {
       for (ScanResult result in results) {
         String MacId = "${result.device.remoteId}";
         int Rssi = result.rssi;
-        print("mac $MacId    rssi $Rssi");
+        print("mac $result    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 

@@ -93,7 +93,7 @@ class BT {
 
   void strtScanningIos(HashMap<String, beacon> apibeaconmap){
 
-    print(apibeaconmap);
+   // print(apibeaconmap);
 
     startbin();
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
@@ -110,8 +110,10 @@ class BT {
       for (ScanResult result in _scanResults) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
+        // print(result);
+        // print("mac $MacId   rssi $Rssi");
+
         if (apibeaconmap.containsKey(MacId)) {
-        //  print("mac $MacId   rssi $Rssi");
           beacondetail[MacId] = Rssi * -1;
 
           addtoBin(MacId, Rssi);
@@ -134,13 +136,14 @@ class BT {
 
 
 
+
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     _scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
-
     emptyBin();
+
   }
 
   void emptyBin() {

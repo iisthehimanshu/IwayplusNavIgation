@@ -14,9 +14,8 @@ class BT {
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
-  bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
-  late StreamSubscription<bool> _isScanningSubscription;
+
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -137,11 +136,12 @@ class BT {
 
 
 
-  void stopScanning() {
+
+  void stopScanning() async{
+    await FlutterBluePlus.stopScan();
     _scanResultsSubscription.cancel();
-    _systemDevices.clear();
     _scanResults.clear();
-    FlutterBluePlus.stopScan();
+    _systemDevices.clear();
     emptyBin();
 
   }
@@ -204,6 +204,10 @@ class BT2 {
   HashMap<int, double> weight = HashMap();
   HashMap<String, int> beacondetail = HashMap();
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
+  List<BluetoothDevice> _systemDevices = [];
+  List<ScanResult> _scanResults = [];
+  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -264,7 +268,11 @@ class BT2 {
     return sumMap;
   }
 
+
   void stopScanning() {
+    _scanResultsSubscription.cancel();
+    _scanResults.clear();
+    _systemDevices.clear();
     FlutterBluePlus.stopScan();
     emptyBin();
   }
@@ -276,6 +284,33 @@ class BT2 {
     numberOfSample.clear();
     rs.clear();
     Building.thresh = "";
+  }
+
+  void getDevicesList()async{
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+      //print("system devices $_systemDevices");
+
+
+
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+    try {
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+
+
+
+
+    // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+    //   _connectionState = state;
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // });
   }
 
   void addtoBin(String MacId, int rssi) {
@@ -321,6 +356,47 @@ class BT2 {
 
   void printbin() {
     print(BIN);
+  }
+
+  void strtScanningIos(HashMap<String, beacon> apibeaconmap){
+
+    print(apibeaconmap);
+
+    startbin();
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+      _scanResults = results;
+      //  print("scanneed results $_scanResults");
+
+
+
+      getDevicesList();
+
+
+
+
+      for (ScanResult result in _scanResults) {
+        String MacId = "${result.device.platformName}";
+        int Rssi = result.rssi;
+        if (apibeaconmap.containsKey(MacId)) {
+          //  print("mac $MacId   rssi $Rssi");
+          beacondetail[MacId] = Rssi * -1;
+
+          addtoBin(MacId, Rssi);
+          _binController.add(BIN); // Emitting event when BIN changes
+        }
+      }
+
+
+
+
+      // Future.delayed(Duration(seconds: 3));
+
+      //   getDevicesList();
+
+
+    }, onError: (e) {
+      print("Scan Error:, $e");
+    });
   }
 
   void dispose() {

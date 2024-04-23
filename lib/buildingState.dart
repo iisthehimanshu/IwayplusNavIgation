@@ -21,6 +21,7 @@ class Building{
   bool updateMarkers = true;
   List<String> ignoredMarker = [];
   static HashMap<String, beacon> apibeaconmap = HashMap();
+  static String thresh = "";
   Building({required this.floor,required this.numberOfFloors});
 
 }

@@ -532,8 +532,6 @@ print("turnPointts: ${turnPoints[0].index}");
     }
   }
 
-
-
   return optimizedPath;
 }
 
@@ -565,6 +563,7 @@ List<Node> getTurnpoints(List<Node> pathNodes,int numCols){
     int nextDeltaY=y2-y1;
 
     if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+
       res.add(currPos);
     }
 
@@ -726,4 +725,51 @@ double perpendicularDistance(Node point, Node lineStart, Node lineEnd) {
   double dx2 = point.x - ix;
   double dy2 = point.y - iy;
   return sqrt(dx2 * dx2 + dy2 * dy2);
+}
+
+
+List<int> getOptiPath(Map<int,int> getTurns,int numCols,List<int> path){
+  Map<int,int> pt={};
+  var keys=getTurns.keys.toList();
+  for(int i=0;i<keys.length-1;i++){
+    if(keys[i+1]-1==keys[i]){
+      pt[keys[i+1]]=getTurns[keys[i+1]]!;
+    }
+  }
+
+  var ptKeys=pt.keys.toList();
+  for(int i=0;i<pt.length;i++){
+    int curr=path[ptKeys[i]];
+    int next=path[ptKeys[i]+1];
+    int prev=path[ptKeys[i]-1];
+    int nextNext=path[ptKeys[i]+2];
+
+
+    int currX=curr%numCols;
+    int currY=curr~/numCols;
+
+    int nextX=next%numCols;
+    int nextY=next~/numCols;
+
+    int prevX=prev%numCols;
+    int prevY=prev~/numCols;
+
+
+    int nextNextX=nextNext%numCols;
+    int nextNextY=nextNext~/numCols;
+
+
+
+    if(nextX==currX){
+      currY=prevY;
+      int newIndexY=currY*numCols+currX;
+      path[ptKeys[i]]=newIndexY;
+    }else if(nextY==currY){
+      currX=prevX;
+      int newIndexX=currY*numCols+currX;
+      path[ptKeys[i]]=newIndexX;
+    }
+  }
+
+  return path;
 }

@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/MapScreen.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'FavouriteScreen.dart';
 
@@ -28,7 +29,35 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    checkPermission();
     index = widget.initialIndex;
+  }
+  checkPermission()async{
+    await requestLocationPermission();
+  }
+
+  Future<void> requestLocationPermission() async {
+    final status = await Permission.location.request();
+    print(status);
+    if (status.isGranted) {
+      print('location permission granted');
+      requestBluetoothConnectPermission();
+    } else if(status.isPermanentlyDenied) {
+      print('location permission is permanently granted');
+    }else{
+        print("location permission is granted");
+    }
+  }
+
+  Future<void> requestBluetoothConnectPermission() async {
+    final PermissionStatus permissionStatus = await Permission.bluetooth.request();
+    print("permissionStatus    ----   ${permissionStatus}");
+    if (permissionStatus.isGranted) {
+      print("Bluetooth permission is granted");
+      // Permission granted, you can now perform Bluetooth operations
+    } else {
+      // Permission denied, handle accordingly
+    }
   }
 
 

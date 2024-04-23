@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -308,9 +309,9 @@ class tools {
   }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // print("A $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -343,9 +344,9 @@ class tools {
     List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
     List<int> c = [node % cols , node ~/cols];
 
-    // print("A $a");
-    // print("B $b");
-    // print("C $c");
+    print("A $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -426,6 +427,12 @@ class tools {
     }
     return directions;
   }
+
+  static int roundToNextInt(double number) {
+    int rounded = number.round();
+    return number >= 0 ? rounded : rounded - 1;
+  }
+
 
   static List<Landmarks> findNearbyLandmark(
       List<int> path,
@@ -632,6 +639,42 @@ class tools {
     }
     return res;
   }
+  static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
+    Map<int,int> res=new Map();
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      int currPos = pathNodes[i];
+      int nextPos=pathNodes[i+1];
+      int prevPos=pathNodes[i-1];
+
+      int x1 = (currPos % numCols);
+      int y1 = (currPos ~/ numCols);
+
+      int x2 = (nextPos % numCols);
+      int y2 = (nextPos ~/ numCols);
+
+      int x3 = (prevPos % numCols);
+      int y3 = (prevPos ~/ numCols);
+
+      int prevDeltaX=x1-x3;
+      int prevDeltaY=y1-y3;
+      int nextDeltaX=x2-x1;
+      int nextDeltaY=y2-y1;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        res[i]=currPos;
+      }
+
+
+
+    }
+    return res;
+  }
 
   static int distancebetweennodes(int node1, int node2, int numCols){
     int x1 = node1 % numCols;
@@ -640,6 +683,8 @@ class tools {
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
+    print("@@@@@ $x1,$y1");
+    print("&&&&& $x2,$y2");
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();

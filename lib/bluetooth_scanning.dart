@@ -12,6 +12,11 @@ class BT {
   HashMap<int, double> weight = HashMap();
   HashMap<String, int> beacondetail = HashMap();
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
+  List<BluetoothDevice> _systemDevices = [];
+  List<ScanResult> _scanResults = [];
+  bool _isScanning = false;
+  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+  late StreamSubscription<bool> _isScanningSubscription;
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -37,13 +42,17 @@ class BT {
       _binController.stream;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
+
+
+
     startbin();
     FlutterBluePlus.startScan();
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        String MacId = "${result.device.remoteId}";
+        String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
+        // print("mac $result    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -51,6 +60,76 @@ class BT {
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
+    });
+  }
+
+
+  void getDevicesList()async{
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+      //print("system devices $_systemDevices");
+
+
+
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+    try {
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+
+
+
+
+    // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+    //   _connectionState = state;
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // });
+  }
+
+
+  void strtScanningIos(HashMap<String, beacon> apibeaconmap){
+
+    print(apibeaconmap);
+
+    startbin();
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+      _scanResults = results;
+    //  print("scanneed results $_scanResults");
+
+
+
+      getDevicesList();
+
+
+
+
+      for (ScanResult result in _scanResults) {
+        String MacId = "${result.device.platformName}";
+        int Rssi = result.rssi;
+        if (apibeaconmap.containsKey(MacId)) {
+        //  print("mac $MacId   rssi $Rssi");
+          beacondetail[MacId] = Rssi * -1;
+
+          addtoBin(MacId, Rssi);
+          _binController.add(BIN); // Emitting event when BIN changes
+        }
+      }
+
+
+
+
+     // Future.delayed(Duration(seconds: 3));
+
+   //   getDevicesList();
+
+
+    }, onError: (e) {
+      print("Scan Error:, $e");
     });
   }
 

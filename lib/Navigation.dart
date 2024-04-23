@@ -165,6 +165,9 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
    // StartPDR();
+
+
+
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -173,15 +176,22 @@ class _NavigationState extends State<Navigation> {
     });
     print("Circular progress bar");
   //  calibrate();
+
+    //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
       maptheme = value;
     });
     checkPermissions();
+
+
+
+
+
 
     getDeviceManufacturer();
     try {
@@ -717,8 +727,8 @@ void calibrate()async{
 
 
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+    print("permissionStatus    ----   ${permissionStatus}");
     if (permissionStatus.isGranted) {
       print("Bluetooth permission is granted");
       // Permission granted, you can now perform Bluetooth operations
@@ -728,7 +738,7 @@ void calibrate()async{
   }
 
   Future<void> requestLocationPermission() async {
-    final status = await Permission.location.request();
+    final status = await Permission.locationWhenInUse.request();
     if (status.isGranted) {
       print('location permission granted');
     } else {}
@@ -829,12 +839,17 @@ void calibrate()async{
       building.beacondata = value;
       for (int i = 0; i < value.length; i++) {
         beacon beacons = value[i];
-        if (beacons.properties!.macId != null) {
-          apibeaconmap[beacons.properties!.macId!] = beacons;
+        if (beacons.name != null) {
+          apibeaconmap[beacons.name!] = beacons;
         }
       }
       Building.apibeaconmap = apibeaconmap;
-      btadapter.startScanning(apibeaconmap);
+
+print("scanningggg starteddddd");
+
+      btadapter.strtScanningIos(apibeaconmap);
+
+     // btadapter.startScanning(apibeaconmap);
       setState(() {
         resBeacons = apibeaconmap;
       });
@@ -2079,7 +2094,7 @@ void calibrate()async{
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-          await getImagesFromMarker('assets/dooricon.png', 65);
+          await getImagesFromMarker('assets/dooricon.png', 45);
           setState(() {
             List<double> value =
             tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
@@ -5939,6 +5954,7 @@ if(user.isnavigating) {
                         child: IconButton(
                             onPressed: () {
 
+
                               // StartPDR();
 
                               bool isvalid = MotionModel.isValidStep(
@@ -5989,31 +6005,31 @@ if(user.isnavigating) {
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                    double? compassHeading = newvalue;
-                    setState(() {
-                      user.theta = compassHeading!;
-                      if (mapState.interaction2) {
-                        mapState.bearing = compassHeading!;
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: mapState.target,
-                              zoom: mapState.zoom,
-                              bearing: mapState.bearing!,
-                            ),
-                          ),
-                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                        );
-                      } else {
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] =
-                              customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                      }
-                    });
-
-                  }),
+                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                  //
+                  //   double? compassHeading = newvalue;
+                  //   setState(() {
+                  //     user.theta = compassHeading!;
+                  //     if (mapState.interaction2) {
+                  //       mapState.bearing = compassHeading!;
+                  //       _googleMapController.moveCamera(
+                  //         CameraUpdate.newCameraPosition(
+                  //           CameraPosition(
+                  //             target: mapState.target,
+                  //             zoom: mapState.zoom,
+                  //             bearing: mapState.bearing!,
+                  //           ),
+                  //         ),
+                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                  //       );
+                  //     } else {
+                  //       if (markers.length > 0)
+                  //         markers[user.Bid]?[0] =
+                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                  //     }
+                  //   });
+                  //
+                  // }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),
@@ -6063,7 +6079,7 @@ if(user.isnavigating) {
                   Semantics(
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
-                      onPressed: () {
+                      onPressed: () async {
                         building.floor[buildingAllApi.getStoredString()] = user.floor;
                         createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                         if (pathMarkers[user.floor] != null) {

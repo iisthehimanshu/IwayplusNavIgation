@@ -768,6 +768,7 @@
 		};
 /* End XCRemoteSwiftPackageReference section */
 
+
 /* Begin XCSwiftPackageProductDependency section */
 		B5C166D22BCE987900C256E0 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

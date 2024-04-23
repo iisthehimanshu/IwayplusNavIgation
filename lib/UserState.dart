@@ -31,14 +31,25 @@ class UserState{
     lat = values[0];
     lng = values[1];
     if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
-      showcoordX = path[pathobj.index] % pathobj.numCols;
-      showcoordY = path[pathobj.index] ~/ pathobj.numCols;
+      showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
+      showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
     }else{
       showcoordX = coordX;
       showcoordY = coordY;
     }
 
     pathobj.index = pathobj.index + 1;
+  }
+
+  Future<void> moveToPointOnPath(int index)async{
+    showcoordX = path[index] % pathobj.numCols![Bid]![floor]!;
+    showcoordY = path[index] ~/ pathobj.numCols![Bid]![floor]!;
+    coordX = showcoordX;
+    coordY = showcoordY;
+    pathobj.index = index + 1;
+    List<double> values = tools.localtoglobal(coordX, coordY);
+    lat = values[0];
+    lng = values[1];
   }
 
   Future<void> moveToStartofPath()async{
@@ -48,8 +59,8 @@ class UserState{
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
-    showcoordX = path[pathobj.index] % pathobj.numCols;
-    showcoordY = path[pathobj.index] ~/ pathobj.numCols;
+    showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
+    showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
   }
 
   Future<void> reset()async{

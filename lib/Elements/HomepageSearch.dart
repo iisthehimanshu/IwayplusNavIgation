@@ -95,17 +95,17 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         });
                       },
                       child: Container(
-                        margin: EdgeInsets.only(left: 16),
+                          margin: EdgeInsets.only(left: 16),
                           child: Text(
-                        widget.searchText,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8e8d8d),
-                          height: 25 / 16,
-                        ),
-                      )),
+                            widget.searchText,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
+                          )),
                     ),
                   ),
                 ),

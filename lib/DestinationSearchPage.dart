@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -5,6 +6,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -21,8 +23,9 @@ import 'APIMODELS/landmark.dart';
 import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
   String hintText ;
+  String previousFilter;
 
-  DestinationSearchPage({required this.hintText});
+  DestinationSearchPage({this.hintText="",this.previousFilter = ""});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
@@ -40,12 +43,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   List<dynamic> recent = [];
 
   TextEditingController _controller = TextEditingController();
+
   final SpeechToText speetchText = SpeechToText();
   bool speechEnabled = false;
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
-  Set<String> cardSet = Set();
+  // Set<Landmarks> cardSet = Set();
+  HashMap<String,Landmarks> cardSet = HashMap();
 
 
   @override
@@ -53,15 +58,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     super.initState();
     print("In search page");
     initSpeech();
+
+    if(widget.previousFilter!=""){
+      setState(() {
+        _controller.text = widget.previousFilter;
+      });
+    }
     setState(() {
       searchHintString = widget.hintText;
     });
-
-
     fetchlist();
     fetchRecents();
-    recentResults.add(
-        Container(
+    recentResults.add(Container(
       margin: EdgeInsets.only(left:16, right: 16, top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -108,7 +116,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       HelperClass.showToast("Permission not allowed");
       return;
     }
-
     setState(() {
       searchHintString = "";
     });
@@ -118,14 +125,21 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         searchHintString = widget.hintText;
       });
     }
+    HelperClass.showToast("Speak to search");
+    await Future.delayed(Duration(seconds: 5));
+    micColor = Colors.black;
+    setState(() {});
     print("In initSpeech");
   }
 
   void onSpeechResult(result){
     setState(() {
+      print("Listening from mic");
+
+      print(result.recognizedWords);
       setState(() {
         _controller.text = result.recognizedWords;
-        search(result.recognizedWords,DirectlyStartNavigation: true);
+        search(result.recognizedWords);
         print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
@@ -140,15 +154,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void stopListening() async{
     await speetchText.stop();
+    micColor = Colors.black;
+    setState(() {
+
+    });
     if(speetchText.isNotListening) {
       setState(() {
         searchHintString = widget.hintText;
       });
     }
   }
-
-
-
 
   void fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
@@ -174,54 +189,69 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await prefs.remove('recents');
   }
 
-  void search(String searchText, {bool DirectlyStartNavigation = false}){
-    if(!DirectlyStartNavigation){
-      setState(() {
-        searchResults.clear();
-        if(searchText.length>0){
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if(searchResults.length<10){
-              if(value.name != null && value.element!.subType != "beacons"){
-                if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                  final nameList = [value.name!.toLowerCase()];
-                  final fuse = Fuzzy(
-                    nameList,
-                    options: FuzzyOptions(
-                      findAllMatches: true,
-                      tokenize: true,
-                      threshold: 0.5,
-                    ),
-                  );
-                  final result = fuse.search(searchText.toLowerCase());
-
-                  // print("Wilsonchexker");
-                  // print(result);
-                  cardSet.add(value.name!);
-
-                  searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,floor: value.floor.toString(),));
-                }
-              }
-            }else{
-              return;
-            }
-          });
-        }else{
-          searchResults = recentResults;
-        }
-      });
-    }else if(DirectlyStartNavigation){
-      if(searchText.length>0){
+  void search(String searchText){
+    setState(() {
+      searchResults.clear();
+      if(searchText.isNotEmpty){
         landmarkData.landmarksMap!.forEach((key, value) {
-          if(value.name != null && value.element!.subType != "beacons"){
-            if(value.name!.toLowerCase() == searchText.toLowerCase()){
-              onVenueClicked(value.name!, "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", value.properties!.polyId!, value.buildingID!);
-              return;
-            }
-          }
-        });
-      }
-    }
+          if (searchResults.length < 10) {
+            if (value.name != null && value.element!.subType != "beacons") {
+              if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                final nameList = [value.name!.toLowerCase()];
+                final fuse = Fuzzy(
+                  nameList,
+                  options: FuzzyOptions(
+                    findAllMatches: true,
+                    tokenize: true,
+                    threshold: 0.5,
+                  ),
+                );
+                final result = fuse.search(searchText.toLowerCase());
+                print("fuseresult");
+                var rrresult = fuse.search(searchText.toLowerCase());
 
+                print(fuse.options.keys);
+                print(rrresult);
+                print(fuse);
+                print(fuse.list);
+                if(!cardSet.containsKey(value.name)){
+                  cardSet[value.name!] = value;
+                  print(cardSet.keys);
+                }
+
+                // print("Wilsonchexker");
+                // print(result);
+                // searchResults.add(SearchpageResults(name: "${value.name}",
+                //   location: "Floor ${value.floor}, ${value
+                //       .buildingName}, ${value.venueName}",
+                //   onClicked: onVenueClicked,
+                //   ID: value.properties!.polyId!,
+                //   bid: value.buildingID!,
+                //   floor: value.floor.toString(),));
+              }
+            }
+          } else {
+            return;
+          }
+          print("cardSet");
+          print(cardSet);
+        });
+      }else{
+        searchResults = recentResults;
+      }
+      cardSet.values.forEach((element) {
+        searchResults.add(SearchpageResults(name: "${element.name}",
+          location: "Floor ${element.floor}, ${element.buildingName}, ${element.venueName}",
+          onClicked: onVenueClicked,
+          ID: element.properties!.polyId!,
+          bid: element.buildingID!,
+          floor: element.floor.toString(),));
+        // print("cardSet---"); // Do something with each element
+        // print(searchResults.length); // Do something with each element
+
+      });
+
+    });
   }
 
   void fetchRecents()async{
@@ -242,21 +272,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void onVenueClicked(String name, String location, String ID, String bid){
     addtoRecents(name, location,ID,bid);
-    print("id received $ID");
     Navigator.pop(context,ID);
   }
 
-  void showToast(String mssg) {
-    Fluttertoast.showToast(
-      msg: mssg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.grey,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
 
   List<String> options = [
     'Washroom', 'Food & Drinks',
@@ -278,12 +296,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   List<String> floorOptionsTags = [];
   String currentSelectedFilter = "";
   Color containerBoxColor = Color(0xffA1A1AA);
+  Color micColor = Colors.black;
+  bool micselected = false;
 
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    if(_controller.text.isNotEmpty){
+      search(_controller.text);
+    }
+    // if(speetchText.isNotListening){
+    //   micColor = Colors.black;
+    //   print("Not listening");
+    // }else{
+    //   micColor = Color(0xff24B9B0);
+    // }
     return SafeArea(
       child: Scaffold(
         body: Container(
@@ -320,8 +349,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       ),
                       Expanded(
                         child: Container(
-                            child: TextFormField(
-                              autofocus: false,
+                            child: TextField(
+                              autofocus: true,
                               controller: _controller,
                               decoration: InputDecoration(
                                 hintText: "${searchHintString}",
@@ -340,20 +369,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 }else{
                                   containerBoxColor = Color(0xffA1A1AA);
                                 }
-                              },
-                              onChanged: (value){
-                                // setState(() {
-                                //   if(value.length!=0){
-                                //     speechEnabled = false;
-                                //     searchString = widget.hintText;
-                                //   }else{
-                                //     print("Tapped");
-                                //   }
-                                //
-                                // });
-
-                                search(value);
                                 print("Final Set");
+
+                              },
+
+                              onSubmitted: (value){
+                                // print("Final Set");
+                                print(value);
+                                search(value);},
+                              onChanged: (value){
+                                search(value);
+                                // print("Final Set");
                                 print(cardSet);
                               },
                             )),
@@ -361,19 +387,22 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       Container(
                         width: 40,
                         height: 48,
-                        margin: EdgeInsets.only(right: 12),
                         child: Center(
                           child: IconButton(
                             onPressed: () {
                               setState(() {
                                 speetchText.isListening? stopListening() : startListening();
                               });
+                              if(!micselected){
+                                micColor = Color(0xff24B9B0);
+                              }
+                              setState(() {});
                             },
                             icon: Icon(
-                              Icons.mic_none_sharp,
-                              color: Color(0xff282828),
-                              size: 24,
+                              Icons.mic,
+                              color: micColor,
                             ),
+
                           ),
                         ),
                       ),
@@ -422,7 +451,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                           Radius.circular(9),
                         ),
                         selectedStyle:  C2ChipStyle.filled(
-                          color: Colors.black
+                            color: Colors.black
                         ),
                         borderWidth: 1,
 
@@ -443,6 +472,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 class SetInfo{

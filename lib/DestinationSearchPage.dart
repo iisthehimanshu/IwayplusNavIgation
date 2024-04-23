@@ -123,11 +123,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void onSpeechResult(result){
     setState(() {
-      print("Listening from mic");
-      print(result.recognizedWords);
       setState(() {
         _controller.text = result.recognizedWords;
-        search(result.recognizedWords);
+        search(result.recognizedWords,DirectlyStartNavigation: true);
         print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
@@ -176,40 +174,54 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await prefs.remove('recents');
   }
 
-  void search(String searchText){
-    setState(() {
-      searchResults.clear();
+  void search(String searchText, {bool DirectlyStartNavigation = false}){
+    if(!DirectlyStartNavigation){
+      setState(() {
+        searchResults.clear();
+        if(searchText.length>0){
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if(searchResults.length<10){
+              if(value.name != null && value.element!.subType != "beacons"){
+                if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
+                  final nameList = [value.name!.toLowerCase()];
+                  final fuse = Fuzzy(
+                    nameList,
+                    options: FuzzyOptions(
+                      findAllMatches: true,
+                      tokenize: true,
+                      threshold: 0.5,
+                    ),
+                  );
+                  final result = fuse.search(searchText.toLowerCase());
+
+                  // print("Wilsonchexker");
+                  // print(result);
+                  cardSet.add(value.name!);
+
+                  searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,floor: value.floor.toString(),));
+                }
+              }
+            }else{
+              return;
+            }
+          });
+        }else{
+          searchResults = recentResults;
+        }
+      });
+    }else if(DirectlyStartNavigation){
       if(searchText.length>0){
         landmarkData.landmarksMap!.forEach((key, value) {
-          if(searchResults.length<10){
-            if(value.name != null && value.element!.subType != "beacons"){
-              if(value.name!.toLowerCase().contains(searchText.toLowerCase())){
-                final nameList = [value.name!.toLowerCase()];
-                final fuse = Fuzzy(
-                  nameList,
-                  options: FuzzyOptions(
-                    findAllMatches: true,
-                    tokenize: true,
-                    threshold: 0.5,
-                  ),
-                );
-                final result = fuse.search(searchText.toLowerCase());
-
-                // print("Wilsonchexker");
-                // print(result);
-                cardSet.add(value.name!);
-
-                searchResults.add(SearchpageResults(name: "${value.name}", location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", onClicked: onVenueClicked, ID: value.properties!.polyId!, bid: value.buildingID!,floor: value.floor.toString(),));
-              }
+          if(value.name != null && value.element!.subType != "beacons"){
+            if(value.name!.toLowerCase() == searchText.toLowerCase()){
+              onVenueClicked(value.name!, "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}", value.properties!.polyId!, value.buildingID!);
+              return;
             }
-          }else{
-            return;
           }
         });
-      }else{
-        searchResults = recentResults;
       }
-    });
+    }
+
   }
 
   void fetchRecents()async{
@@ -230,6 +242,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void onVenueClicked(String name, String location, String ID, String bid){
     addtoRecents(name, location,ID,bid);
+    print("id received $ID");
     Navigator.pop(context,ID);
   }
 

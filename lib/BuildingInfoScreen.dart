@@ -261,7 +261,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Navigation(),
+                                      builder: (context) =>   Navigation(),
                                     ),
                                   );
                                 },

@@ -2,8 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+
+import 'package:collection/collection.dart';
+import 'package:flutter_animator/flutter_animator.dart';
+import 'package:http/http.dart';
+import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+
 import 'package:vibration/vibration.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
@@ -30,6 +37,7 @@ import 'package:iwayplusnav/APIMODELS/landmark.dart';
 import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/Elements/directionInstruction.dart';
+import 'package:iwayplusnav/PolylineTestClass.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
 import 'package:iwayplusnav/navigationTools.dart';
@@ -42,8 +50,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'API/PatchApi.dart';
 import 'API/beaconapi.dart';
 import 'API/ladmarkApi.dart';
+import 'API/outbuildingapi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/buildingAll.dart';
+import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -66,6 +76,7 @@ import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
+import '../Elements/DirectionHeader.dart';
 
 void main() {
   runApp(MyApp());
@@ -89,7 +100,6 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   MapState mapState = new MapState();
-
   Timer? PDRTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
@@ -99,15 +109,17 @@ class _NavigationState extends State<Navigation> {
   late GoogleMapController _googleMapController;
   Set<Polygon> patch = Set();
   Set<Polygon> otherpatch = Set();
-  Set<gmap.Polyline> polylines = Set();
+  Map<String,Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
-  Set<Polygon> closedpolygons = Set();
+  Map<String,Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
-  Set<Marker> selectedroomMarker = Set();
+  Map<String,Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
-  List<Marker> markers = [];
-  Building building = Building(floor: 0, numberOfFloors: 1);
+  Map<String,List<Marker>> markers = Map();
+
+
+  Building building = Building(floor: Map(), numberOfFloors: Map());
   Map<int, Set<gmap.Polyline>> singleroute = {};
   BT btadapter = new BT();
   bool _isLandmarkPanelOpen = false;
@@ -127,7 +139,7 @@ class _NavigationState extends State<Navigation> {
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
   UserState user = UserState(
       floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0);
-  pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+  pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
 
   late String manufacturer;
   double step_threshold = 0.6;
@@ -140,25 +152,36 @@ class _NavigationState extends State<Navigation> {
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  final pdr = <StreamSubscription<dynamic>>[];
   Duration sensorInterval = Duration(milliseconds: 100);
 
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
   List<String> allBuildingList = [];
+  List<double> accelerationMagnitudes = [];
+  bool isCalibrating = false;
 
   @override
   void initState() {
     super.initState();
+    //PolylineTestClass.polylineSet.clear();
+   // StartPDR();
 
+
+
+    building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
       speak("Loading maps");
     });
     print("Circular progress bar");
+  //  calibrate();
+
+    //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -166,21 +189,26 @@ class _NavigationState extends State<Navigation> {
     });
     checkPermissions();
 
+
+
+
+
+
     getDeviceManufacturer();
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
                 (UserAccelerometerEvent event) {
               final now = DateTime.now();
-              setState(() {
-                _userAccelerometerEvent = event;
-                if (_userAccelerometerUpdateTime != null) {
-                  final interval = now.difference(_userAccelerometerUpdateTime!);
-                  if (interval > _ignoreDuration) {
-                    _userAccelerometerLastInterval = interval.inMilliseconds;
-                  }
-                }
-              });
+              // setState(() {
+              //   _userAccelerometerEvent = event;
+              //   if (_userAccelerometerUpdateTime != null) {
+              //     final interval = now.difference(_userAccelerometerUpdateTime!);
+              //     if (interval > _ignoreDuration) {
+              //       _userAccelerometerLastInterval = interval.inMilliseconds;
+              //     }
+              //   }
+              // });
               _userAccelerometerUpdateTime = now;
             }, onError: (e) {
           showDialog(
@@ -202,6 +230,45 @@ class _NavigationState extends State<Navigation> {
     }
     // fetchlist();
     // filterItems();
+  }
+
+void calibrate()async{
+    setState(() {
+      isCalibrating = true;
+    });
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      double magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      setState(() {
+        accelerationMagnitudes.add(magnitude);
+      });
+    });
+
+
+
+    Timer(Duration(seconds: 10), () {
+      //calculateThresholds();
+      setState(() {
+        isCalibrating = false;
+      });
+    });
+    StartPDR();
+
+  }
+  void calculateThresholds() {
+    if (accelerationMagnitudes.isNotEmpty) {
+      double mean = accelerationMagnitudes.reduce((a, b) => a + b) / accelerationMagnitudes.length;
+      double variance = accelerationMagnitudes.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) /
+          accelerationMagnitudes.length;
+      double standardDeviation = sqrt(variance);
+      // Adjust multiplier as needed for sensitivity
+      double multiplier = 5;
+      setState(() {
+        peakThreshold = mean + multiplier * standardDeviation;
+        valleyThreshold = mean - multiplier * standardDeviation;
+      });
+
+    }
   }
 
   Future<void> getDeviceManufacturer() async {
@@ -247,8 +314,8 @@ class _NavigationState extends State<Navigation> {
           );
         } else {
           if (markers.length > 0)
-            markers[0] =
-                customMarker.rotate(compassHeading! - mapbearing, markers[0]);
+            markers[user.Bid]![0] =
+                customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
         }
       });
     });
@@ -282,16 +349,132 @@ class _NavigationState extends State<Navigation> {
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      onStepCount();
+     // print("calling");
+      pdrstepCount();
+      // onStepCount();
     });
   }
 
 // Function to stop the timer
-  void StopPDR() {
+  bool isPdrStop=false;
+  void StopPDR() async{
     if (PDRTimer != null && PDRTimer!.isActive) {
-      PDRTimer!.cancel();
+
+      setState(() {
+        isPdrStop=true;
+      });
+
+     PDRTimer!.cancel();
+     for (final subscription in pdr) {
+       subscription.cancel();
+     }
+
+
     }
   }
+
+  int stepCount = 0;
+  int lastPeakTime = 0;
+  int lastValleyTime = 0;
+  //will have to set according to the device
+  double peakThreshold = 11.111111111;
+  double valleyThreshold = -11.111111111;
+
+  int peakInterval = 300;
+  int valleyInterval = 300;
+  //it is the smoothness factor of the low pass filter.
+  double alpha = 0.4;
+  double filteredX = 0;
+  double filteredY = 0;
+  double filteredZ = 0;
+
+// late StreamSubscription<AccelerometerEvent>? pdr;
+  void pdrstepCount(){
+   pdr.add(
+
+       accelerometerEventStream().listen((AccelerometerEvent event) {
+
+     if (pdr == null) {
+       return; // Exit the event listener if subscription is canceled
+     }
+      // Apply low-pass filter
+      filteredX = alpha * filteredX + (1 - alpha) * event.x;
+      filteredY = alpha * filteredY + (1 - alpha) * event.y;
+      filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+      // Compute magnitude of acceleration vector
+      double magnitude = sqrt((filteredX * filteredX +
+          filteredY * filteredY +
+          filteredZ * filteredZ))
+      ;
+      // Detect peak and valley
+      if (magnitude > peakThreshold &&
+          DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
+        setState(() {
+          lastPeakTime = DateTime.now().millisecondsSinceEpoch;
+          stepCount++;
+
+          print("prev [${user.coordX},${user.coordY}]");
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              building.floorDimenssion[user.Bid]![user.floor]![0],
+              building.floorDimenssion[user.Bid]![user.floor]![1],
+              building.nonWalkable[user.Bid]![user.floor]!,
+              reroute);
+         if (isvalid) {
+
+           if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+             user.move().then((value) {
+               //  user.move().then((value){
+               setState(() {
+
+                 if (markers.length > 0) {
+                   List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                   markers[user.Bid]?[0] = customMarker.move(
+                       LatLng(lvalue[0],lvalue[1]),
+                       markers[user.Bid]![0]
+                   );
+
+                   List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                   markers[user.Bid]?[1] = customMarker.move(
+                       LatLng(ldvalue[0],ldvalue[1]),
+                       markers[user.Bid]![1]
+                   );
+                 }
+               });
+               // });
+             });
+           }else{
+             StopPDR();
+             setState(() {
+               user.isnavigating=false;
+             });
+             speak("haaan bhaiiii aaaagya");
+
+           }
+
+            print("next [${user.coordX}${user.coordY}]");
+
+          } else {
+            if(user.isnavigating){
+              // reroute();
+              // showToast("You are out of path");
+            }
+          }
+
+
+
+          print("peakThreshold: ${peakThreshold}");
+        });
+      } else if (magnitude < valleyThreshold &&
+          DateTime.now().millisecondsSinceEpoch - lastValleyTime > valleyInterval) {
+        setState(() {
+          lastValleyTime = DateTime.now().millisecondsSinceEpoch;
+        });
+      }
+    })
+   );
+  }
+
 
   void onStepCount() {
     setState(() {
@@ -300,21 +483,21 @@ class _NavigationState extends State<Navigation> {
             _userAccelerometerEvent!.y < -step_threshold) {
           bool isvalid = MotionModel.isValidStep(
               user,
-              building.floorDimenssion[user.floor]![0],
-              building.floorDimenssion[user.floor]![1],
-              building.nonWalkable[user.floor]!,
+              building.floorDimenssion[user.Bid]![user.floor]![0],
+              building.floorDimenssion[user.Bid]![user.floor]![1],
+              building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
             user.move().then((value) {
               setState(() {
                 if (markers.length > 0) {
-                  markers[0] = customMarker.move(
+                  markers[user.Bid]![0] = customMarker.move(
                       LatLng(
                           tools.localtoglobal(user.showcoordX.toInt(),
                               user.showcoordY.toInt())[0],
                           tools.localtoglobal(user.showcoordX.toInt(),
                               user.showcoordY.toInt())[1]),
-                      markers[0]);
+                      markers[user.Bid]![0]);
                 }
               });
             });
@@ -322,6 +505,199 @@ class _NavigationState extends State<Navigation> {
             showToast("You are out of path");
           }
         }
+      }
+    });
+  }
+
+  void repaintUser(String nearestBeacon){
+    reroute();
+    paintUser(nearestBeacon,speakTTS: false);
+  }
+
+  void paintUser(String nearestBeacon, {bool speakTTS = true})async{
+    print("nearestBeacon : $nearestBeacon");
+    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/userloc0.png',
+    );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
+    List<int> landCords = [];
+    if (apibeaconmap[nearestBeacon] != null) {
+      await building.landmarkdata!.then((value) {
+        nearestLandInfomation = tools.localizefindNearbyLandmark(
+            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        landCords = tools.localizefindNearbyLandmarkCoordinated(
+            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+      });
+
+      List<double> values = [];
+
+      if (apibeaconmap[nearestBeacon]!.floor != 0) {
+        List<PolyArray> prevFloorLifts = findLift(
+            tools.numericalToAlphabetical(0),
+            building.polyLineData!.polyline!.floors!);
+        List<PolyArray> currFloorLifts = findLift(
+            tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
+            building.polyLineData!.polyline!.floors!);
+        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        UserState.xdiff = dvalue[0];
+        UserState.ydiff = dvalue[1];
+        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      } else {
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!);
+      }
+
+      LatLng beaconLocation = LatLng(values[0], values[1]);
+      mapState.target = LatLng(values[0], values[1]);
+      if(speakTTS){
+        mapState.zoom = 21.0;
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(values[0], values[1]),
+            20, // Specify your custom zoom level here
+          ),
+        );
+      }
+
+      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
+      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      user.showcoordX = user.coordX;
+      user.showcoordY = user.coordY;
+      List<int> userCords = [];
+      userCords.add(user.coordX);
+      userCords.add(user.coordY);
+      List<int> transitionValue = tools.eightcelltransition(user.theta);
+      List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
+
+      user.lat =
+          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+      user.lng =
+          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+      user.floor = apibeaconmap[nearestBeacon]!.floor!;
+      user.key = apibeaconmap[nearestBeacon]!.sId!;
+      user.initialallyLocalised = true;
+      setState(() {
+        markers.clear();
+        if(markers.containsKey(user.Bid)){
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: beaconLocation,
+            icon: userloc,
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: beaconLocation,
+            icon: userlocdebug,
+            anchor: Offset(0.5, 0.829),
+          ));
+        }else{
+          markers.putIfAbsent(user.Bid, () => []);
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: beaconLocation,
+            icon: userloc,
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: beaconLocation,
+            icon: userlocdebug,
+            anchor: Offset(0.5, 0.829),
+          ));
+
+        }
+
+
+        building.floor[apibeaconmap[nearestBeacon]!.buildingID!] = apibeaconmap[nearestBeacon]!.floor!;
+        createRooms(building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+        building.landmarkdata!.then((value) {
+          createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
+        });
+      });
+      double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+      detected = !detected;
+      _isBuildingPannelOpen = true;
+      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+      if (nearestLandInfomation.name == "") {
+        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
+        if(speakTTS)
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+      } else {
+        nearestLandInfomation.floor =
+            apibeaconmap[nearestBeacon]!.floor!.toString();
+        if(speakTTS)
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+      }
+    } else {
+      if(speakTTS)
+        speak("Unable to find your location");
+    }
+    btadapter.stopScanning();
+  }
+
+
+  void moveUser()async{
+    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/userloc0.png',
+    );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
+    LatLng userlocation = LatLng(user.lat, user.lng);
+    mapState.target = LatLng(user.lat, user.lng);
+    mapState.zoom = 21.0;
+    _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(user.lat, user.lng),
+        20, // Specify your custom zoom level here
+      ),
+    );
+
+    setState(() {
+      markers.clear();
+      if(markers.containsKey(user.Bid)){
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: userlocation,
+          icon: userloc,
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
+      }else{
+        markers.putIfAbsent(user.Bid, () => []);
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: userlocation,
+          icon: userloc,
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: userlocdebug,
+          anchor: Offset(0.5, 0.829),
+        ));
+
       }
     });
   }
@@ -344,15 +720,18 @@ class _NavigationState extends State<Navigation> {
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),
             user.coordY.toInt());
-        markers[0] = customMarker.move(LatLng(dvalue[0],dvalue[1]), markers[0]);
+        markers[user.Bid]?[0] = customMarker.move(LatLng(dvalue[0],dvalue[1]), markers[user.Bid]![0]);
       }
     });
+    speak("You are going away from the path. Click Reroute to Navigate from here. ");
   }
 
+
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+    print("permissionStatus    ----   ${permissionStatus}");
     if (permissionStatus.isGranted) {
+      print("Bluetooth permission is granted");
       // Permission granted, you can now perform Bluetooth operations
     } else {
       // Permission denied, handle accordingly
@@ -360,8 +739,9 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future<void> requestLocationPermission() async {
-    final status = await Permission.location.request();
+    final status = await Permission.locationWhenInUse.request();
     if (status.isGranted) {
+      print('location permission granted');
     } else {}
   }
 
@@ -392,9 +772,9 @@ class _NavigationState extends State<Navigation> {
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
-      building.numberOfFloors = value.polyline!.floors!.length;
+      building.numberOfFloors[buildingAllApi.selectedBuildingID] = value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
-      createRooms(value, building.floor);
+      createRooms(value, 0);
     });
 
     print("working 3");
@@ -426,15 +806,23 @@ class _NavigationState extends State<Navigation> {
             String matched = match.group(0)!;
             allIntegers.add(int.parse(matched));
           }
-          building.nonWalkable[value.landmarks![i].floor!] = allIntegers;
-          building.floorDimenssion[value.landmarks![i].floor!] = [
-            value.landmarks![i].properties!.floorLength!,
-            value.landmarks![i].properties!.floorBreadth!
-          ];
+          Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+          currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+          building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+
+          Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
+          currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
+          building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
+          print("fetch route--  ${building.floorDimenssion}");
+
+          // building.floorDimenssion[value.landmarks![i].floor!] = [
+          //   value.landmarks![i].properties!.floorLength!,
+          //   value.landmarks![i].properties!.floorBreadth!
+          // ];
         }
       }
       createARPatch(coordinates);
-      createMarkers(value, building.floor);
+      createMarkers(value, 0);
       return value;
     });
     print("working 4");
@@ -452,11 +840,23 @@ class _NavigationState extends State<Navigation> {
       building.beacondata = value;
       for (int i = 0; i < value.length; i++) {
         beacon beacons = value[i];
-        if (beacons.properties!.macId != null) {
-          apibeaconmap[beacons.properties!.macId!] = beacons;
+        if (beacons.name != null) {
+          apibeaconmap[beacons.name!] = beacons;
         }
       }
-      btadapter.startScanning(apibeaconmap);
+      Building.apibeaconmap = apibeaconmap;
+
+print("scanningggg starteddddd");
+
+if(Platform.isAndroid){
+  btadapter.startScanning(apibeaconmap);
+}else{
+  btadapter.strtScanningIos(apibeaconmap);
+}
+
+
+
+     // btadapter.startScanning(apibeaconmap);
       setState(() {
         resBeacons = apibeaconmap;
       });
@@ -485,8 +885,9 @@ class _NavigationState extends State<Navigation> {
         });
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
-          createotherRooms(value, 0);
+          createRooms(value, 0);
           building.polylinedatamap[key] = value;
+          building.numberOfFloors[key] = value.polyline!.floors!.length;
           //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
         });
 
@@ -501,6 +902,30 @@ class _NavigationState extends State<Navigation> {
                   LatLng(
                       double.parse(value.landmarks![i].properties!.latitude!),
                       double.parse(value.landmarks![i].properties!.longitude!));
+            }
+            if (value.landmarks![i].element!.type == "Floor") {
+              List<int> allIntegers = [];
+              String jointnonwalkable =
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              RegExp regExp = RegExp(r'\d+');
+              Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
+              for (Match match in matches) {
+                String matched = match.group(0)!;
+                allIntegers.add(int.parse(matched));
+              }
+              Map<int, List<int>> currrentnonWalkable = building.nonWalkable[key] ?? Map();
+              currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+              building.nonWalkable[key] = currrentnonWalkable;
+
+              Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[key] ?? Map();
+              currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
+              building.floorDimenssion[key] = currentfloorDimenssion!;
+              print("fetch route--  ${building.floorDimenssion}");
+
+              // building.floorDimenssion[value.landmarks![i].floor!] = [
+              //   value.landmarks![i].properties!.floorLength!,
+              //   value.landmarks![i].properties!.floorBreadth!
+              // ];
             }
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
@@ -554,23 +979,12 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> localizeUser() async {
     print("Beacon searching started");
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/tealtorch.png',
-    );
     double highestweight = 0;
     String nearestBeacon = "";
-    List<int> landCords = [];
+
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {
         btadapter.BIN[i]!.forEach((key, value) {
-          print("Wilsonchecker");
-          print(value.toString());
-          print(key);
           if (value > highestweight) {
             highestweight = value;
             nearestBeacon = key;
@@ -580,126 +994,8 @@ class _NavigationState extends State<Navigation> {
       }
     }
 
-    print("nearestBeacon : $nearestBeacon");
 
-    if (apibeaconmap[nearestBeacon] != null) {
-      print("Himanshucheck ${apibeaconmap[nearestBeacon]!.floor}");
-
-      await building.landmarkdata!.then((value) {
-        nearestLandInfomation = tools.localizefindNearbyLandmark(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-      });
-
-      List<double> values = [];
-
-      if (apibeaconmap[nearestBeacon]!.floor != 0) {
-        List<PolyArray> prevFloorLifts = findLift(
-            tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
-        List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
-            building.polyLineData!.polyline!.floors!);
-        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-        UserState.xdiff = dvalue[0];
-        UserState.ydiff = dvalue[1];
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
-      } else {
-        UserState.xdiff = 0;
-        UserState.ydiff = 0;
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
-      }
-
-      LatLng beaconLocation = LatLng(values[0], values[1]);
-      mapState.target = LatLng(values[0], values[1]);
-      mapState.zoom = 21.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(values[0], values[1]),
-          20, // Specify your custom zoom level here
-        ),
-      );
-      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
-      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
-      user.showcoordX = user.coordX;
-      user.showcoordY = user.coordY;
-      print("user.coordXuser.coordY");
-      print("${user.coordX}${user.coordY}");
-      List<int> userCords = [];
-      userCords.add(user.coordX);
-      userCords.add(user.coordY);
-      List<int> transitionValue = tools.eightcelltransition(user.theta);
-      int newX = user.coordX + transitionValue[0];
-      int newY = user.coordY + transitionValue[1];
-      List<int> newUserCord = [];
-      newUserCord.add(newX);
-      newUserCord.add(newY);
-
-      user.lat =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      user.lng =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
-      user.floor = apibeaconmap[nearestBeacon]!.floor!;
-      user.key = apibeaconmap[nearestBeacon]!.sId!;
-      user.initialallyLocalised = true;
-      setState(() {
-        markers.clear();
-        markers.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: beaconLocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        markers.add(Marker(
-          markerId: MarkerId("debug"),
-          position: beaconLocation,
-          icon: userlocdebug,
-          anchor: Offset(0.5, 0.829),
-        ));
-        building.floor = apibeaconmap[nearestBeacon]!.floor!;
-        createRooms(building.polyLineData!, building.floor);
-        building.landmarkdata!.then((value) {
-          createMarkers(value, building.floor);
-        });
-      });
-      print("userCords");
-      print(userCords);
-      print(newUserCord);
-      print(landCords);
-
-      double value = tools.calculateAngle(userCords, newUserCord, landCords);
-
-      print("value----");
-      print(value);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-      print("finalvalue");
-      print(finalvalue);
-      detected = !detected;
-      _isBuildingPannelOpen = true;
-      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
-        print("no beacon found");
-        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
-      } else {
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
-      }
-    } else {
-      speak("Unable to find your location");
-    }
-    btadapter.stopScanning();
-    print("Beacon searching Stoped");
+    paintUser(nearestBeacon);
   }
 
   String nearbeacon = 'null';
@@ -784,16 +1080,16 @@ class _NavigationState extends State<Navigation> {
       setState(() {
         print("hehe: $beaconLocation");
         markers.clear();
-        markers.add(Marker(
+        markers[user.Bid]?.add(Marker(
           markerId: MarkerId("UserLocation"),
           position: beaconLocation,
           icon: userloc,
           anchor: Offset(0.5, 0.829),
         ));
-        building.floor = apibeaconmap[nearestBeacon]!.floor!;
-        createRooms(building.polyLineData!, building.floor);
+        building.floor[apibeaconmap[nearestBeacon]!.buildingID!] = apibeaconmap[nearestBeacon]!.floor!;
+        createRooms(building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
         building.landmarkdata!.then((value) {
-          createMarkers(value, building.floor);
+          createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
       print("userCords");
@@ -1003,7 +1299,8 @@ class _NavigationState extends State<Navigation> {
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
     setState(() {
-      selectedroomMarker.add(
+      if(selectedroomMarker.containsKey(buildingAllApi.getStoredString())){
+      selectedroomMarker[buildingAllApi.getStoredString()]?.add(
         Marker(
             markerId: MarkerId('selectedroomMarker'),
             position: calculateRoomCenter(polygonPoints),
@@ -1012,19 +1309,43 @@ class _NavigationState extends State<Navigation> {
               print("infowindowcheck");
             }),
       );
+      }else{
+        selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+          Marker(
+              markerId: MarkerId('selectedroomMarker'),
+              position: calculateRoomCenter(polygonPoints),
+              icon: BitmapDescriptor.defaultMarker,
+              onTap: () {
+                print("infowindowcheck");
+              }),
+        );
+      }
     });
   }
 
   Future<void> addselectedMarker(LatLng Point) async {
     selectedroomMarker.clear(); // Clear existing markers
+
     setState(() {
-      selectedroomMarker.add(
-        Marker(
-          markerId: MarkerId('selectedroomMarker'),
-          position: Point,
-          icon: BitmapDescriptor.defaultMarker,
-        ),
-      );
+      if(selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+          Marker(
+            markerId: MarkerId('selectedroomMarker'),
+            position: Point,
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        );
+      }else{
+        selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+          Marker(
+            markerId: MarkerId('selectedroomMarker'),
+            position: Point,
+            icon: BitmapDescriptor.defaultMarker,
+          ),
+        );
+      }
     });
   }
 
@@ -1093,8 +1414,7 @@ class _NavigationState extends State<Navigation> {
     return polygonPoints;
   }
 
-  void setCameraPosition(Set<Marker> selectedroomMarker1,
-      {Set<Marker>? selectedroomMarker2 = null}) {
+  void setCameraPosition(Set<Marker> selectedroomMarker1, {Set<Marker>? selectedroomMarker2 = null}) {
     double minLat = double.infinity;
     double minLng = double.infinity;
     double maxLat = double.negativeInfinity;
@@ -1213,11 +1533,18 @@ class _NavigationState extends State<Navigation> {
   }
 
   void createRooms(polylinedata value, int floor) {
-    closedpolygons.clear();
+    if(closedpolygons[buildingAllApi.getStoredString()] == null){
+      closedpolygons[buildingAllApi.getStoredString()] = Set();
+    }
+    print("closepolygon id");
+    print(buildingAllApi.getStoredString());
+    print(closedpolygons[buildingAllApi.getStoredString()]);
+    closedpolygons[value.polyline!.buildingID!]?.clear();
+    print("createroomschecker ${closedpolygons[buildingAllApi.getStoredString()]}");
     selectedroomMarker.clear();
     _isLandmarkPanelOpen = false;
     building.selectedLandmarkID = null;
-    polylines.clear();
+    polylines[value.polyline!.buildingID!]?.clear();
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
@@ -1254,11 +1581,18 @@ class _NavigationState extends State<Navigation> {
                     patchData:
                     building.patchData[value.polyline!.buildingID])[1]));
           }
+          if(!closedpolygons.containsKey(value.polyline!.buildingID!)) {
+            closedpolygons.putIfAbsent(
+                value.polyline!.buildingID!, () => Set<Polygon>());
+          }
+          if(!polylines.containsKey(value.polyline!.buildingID!)){
+            polylines.putIfAbsent(value.polyline!.buildingID!, () => Set<gmap.Polyline>());
+          }
 
           if (polyArray.polygonType == 'Wall' ||
               polyArray.polygonType == 'undefined') {
             if (coordinates.length >= 2) {
-              polylines.add(gmap.Polyline(
+              polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
                 polylineId: PolylineId(
                     "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
                 points: coordinates,
@@ -1269,7 +1603,7 @@ class _NavigationState extends State<Navigation> {
           } else if (polyArray.polygonType == 'Room') {
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
-              closedpolygons.add(Polygon(
+              closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                   points: coordinates,
@@ -1296,6 +1630,7 @@ class _NavigationState extends State<Navigation> {
                         singleroute.clear();
                         _isLandmarkPanelOpen = true;
                         PathState.directions = [];
+                        interBuildingPath.clear();
                         addselectedRoomMarker(coordinates);
                       }
                     });
@@ -1305,7 +1640,7 @@ class _NavigationState extends State<Navigation> {
             if (polyArray.cubicleName == "Green Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1316,11 +1651,12 @@ class _NavigationState extends State<Navigation> {
                   fillColor: Color(0xffC2F1D5),
                   consumeTapEvents: true,
                 ));
+
               }
             } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1335,7 +1671,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName == "Male Washroom") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1350,7 +1686,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName == "Female Washroom") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1365,7 +1701,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName!.toLowerCase().contains("fire")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1380,7 +1716,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName!.toLowerCase().contains("water")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1395,7 +1731,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName!.toLowerCase().contains("wall")) {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1410,7 +1746,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName == "Restricted Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1425,7 +1761,7 @@ class _NavigationState extends State<Navigation> {
             } else if (polyArray.cubicleName == "Non Walkable Area") {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1440,7 +1776,7 @@ class _NavigationState extends State<Navigation> {
             } else {
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
-                closedpolygons.add(Polygon(
+                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                   polygonId: PolygonId(
                       "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                   points: coordinates,
@@ -1453,20 +1789,19 @@ class _NavigationState extends State<Navigation> {
           } else if (polyArray.polygonType == "Wall") {
             if (coordinates.length > 2) {
               coordinates.add(coordinates.first);
-              closedpolygons.add(Polygon(
+              closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                 polygonId: PolygonId(
                     "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                 points: coordinates,
                 strokeWidth: 1,
                 // Modify the color and opacity based on the selectedRoomId
-
                 strokeColor: Colors.black,
                 fillColor: Color(0xffCCCCCC),
                 consumeTapEvents: true,
               ));
             }
           } else {
-            polylines.add(gmap.Polyline(
+            polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
               polylineId: PolylineId(polyArray.id!),
               points: coordinates,
               color: Colors.black,
@@ -1744,6 +2079,7 @@ class _NavigationState extends State<Navigation> {
           await getImagesFromMarker('assets/location_on.png', 55);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+
           Markers.add(Marker(
               markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
               position: LatLng(value[0], value[1]),
@@ -1765,7 +2101,7 @@ class _NavigationState extends State<Navigation> {
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-          await getImagesFromMarker('assets/dooricon.png', 65);
+          await getImagesFromMarker('assets/dooricon.png', 45);
           setState(() {
             List<double> value =
             tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
@@ -1953,6 +2289,7 @@ class _NavigationState extends State<Navigation> {
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
         snapshot.data!.landmarksMap![building.selectedLandmarkID] == null) {
+      print("object");
       //print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
@@ -2231,7 +2568,8 @@ class _NavigationState extends State<Navigation> {
                                     });
                                   }
                                 },
-                                child:(!calculatingPath)? const Row(
+                                child: (!calculatingPath)
+                                    ? const Row(
                                   //  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -2245,9 +2583,9 @@ class _NavigationState extends State<Navigation> {
                                         color: Colors.black,
                                       ),
                                     )
-
                                   ],
-                                ):Container(
+                                )
+                                    : Container(
                                   height: 24,
                                   width: 24,
                                   child: CircularProgressIndicator(
@@ -2491,125 +2829,253 @@ class _NavigationState extends State<Navigation> {
     return commonLifts;
   }
 
+  int sourceVal=0;
+  int destinationVal=0;
+  Map<List<String>,Set<gmap.Polyline>> interBuildingPath=new Map();
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+    print("landmarksMap");
+    print(landmarksMap.keys);
+    print(landmarksMap.values);
+    print(landmarksMap[PathState.destinationPolyID]!.buildingID);
+    print(landmarksMap[PathState.sourcePolyID]!.buildingID);
+
     singleroute.clear();
     pathMarkers.clear();
-    PathState.destinationX =
-    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
-    PathState.destinationY =
-    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    PathState.destinationX = landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    PathState.destinationY = landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
-      PathState.destinationX =
-      landmarksMap[PathState.destinationPolyID]!.doorX!;
-      PathState.destinationY =
-      landmarksMap[PathState.destinationPolyID]!.doorY!;
+      PathState.destinationX = landmarksMap[PathState.destinationPolyID]!.doorX!;
+      PathState.destinationY = landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
-        print("In if statement");
-        print(
-            "${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
+        print("Calculateroute if statement");
+        print("${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
         await fetchroute(
             PathState.sourceX,
             PathState.sourceY,
             PathState.destinationX,
             PathState.destinationY,
-            PathState.destinationFloor);
+            PathState.destinationFloor,bid: PathState.destinationBid);
         print("fetchroute done");
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         List<CommonLifts> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
+        print(commonlifts);
+
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
             PathState.destinationX,
             PathState.destinationY,
-            PathState.destinationFloor);
+            PathState.destinationFloor,
+            bid: PathState.destinationBid);
 
+
+
+        Map<String, int> map = {
+          'Take ${commonlifts[0].name}': -1,
+        };
+        print("test map: ${PathState.sourceFloor}");
+
+        setState(() {
+          sourceVal=PathState.sourceFloor;
+          destinationVal=PathState.destinationFloor;
+        });
+
+
+
+
+        PathState.directions.add(map);
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
-            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor);
+            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.destinationBid);
       }
+
+
+
     } else {
-      print("In else statement");
-      // building.landmarkdata!.then((land)async{
-      //   land.landmarks!.forEach((element)async{
-      //     if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
-      //       if (element.floor == PathState.destinationFloor) {
-      //         await fetchroute(
-      //         element.coordinateX!,
-      //         element.coordinateY!,
-      //         PathState.destinationX,
-      //         PathState.destinationY,
-      //         PathState.destinationFloor,
-      //         bid: PathState.destinationBid);
-      //       } else if (element.floor != PathState.destinationFloor) {
-      //         List<CommonLifts> commonlifts = findCommonLifts(
-      //             element.lifts!,
-      //             landmarksMap[PathState.destinationPolyID]!.lifts!);
-      //         await fetchroute(
-      //         commonlifts[0].x2!,
-      //         commonlifts[0].y2!,
-      //         PathState.destinationX,
-      //         PathState.destinationY,
-      //         PathState.destinationFloor,
-      //         bid: PathState.destinationBid);
-      //         await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!,
-      //         commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
-      //       }
-      //     }
-      //     return;
-      //   });
-      // land.landmarks!.forEach((element)async{
-      //   if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
-      //     if (PathState.sourceFloor == element.floor) {
-      //       await fetchroute(
-      //           PathState.sourceX,
-      //           PathState.sourceY,
-      //           element.coordinateX!,
-      //           element.coordinateY!,
-      //           element.floor!,bid: PathState.sourceBid);
-      //     } else if (PathState.sourceFloor != element.floor) {
-      //       List<CommonLifts> commonlifts = findCommonLifts(
-      //           landmarksMap[PathState.sourcePolyID]!.lifts!,
-      //           element.lifts!);
-      //       await fetchroute(
-      //           commonlifts[0].x2!,
-      //           commonlifts[0].y2!,
-      //           element.coordinateX!,
-      //           element.coordinateY!,
-      //           element.floor!,bid: PathState.sourceBid);
-      //       await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!,
-      //           commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
-      //     }
-      //   }
-      //   return;
-      // });
-      // });
+      print("calculateroute else statement");
+      double sourceEntrylat = 0;
+      double sourceEntrylng = 0;
+      double destinationEntrylat = 0;
+      double destinationEntrylng = 0;
+
+
+      building.landmarkdata!.then((land)async{
+
+        for(int i = 0 ; i<land.landmarks!.length ; i++){
+          Landmarks element = land.landmarks![i];
+          print("running destination location");
+          if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.destinationBid){
+            destinationEntrylat = double.parse(element.properties!.latitude!);
+            destinationEntrylng= double.parse(element.properties!.longitude!);
+            if (element.floor == PathState.destinationFloor) {
+              await fetchroute(element.coordinateX!, element.coordinateY!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
+              print("running destination location no lift run");
+            } else if (element.floor != PathState.destinationFloor) {
+              List<CommonLifts> commonlifts = findCommonLifts(element.lifts!, landmarksMap[PathState.destinationPolyID]!.lifts!);
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
+              print("running destination location lift run");
+              await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
+              print("running destination location dest run");
+            }
+            break;
+          }
+
+        }
+        // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
+        // double sourceLat=double.parse(source.properties!.latitude!);
+        // double sourceLng=double.parse(source.properties!.longitude!);
+        //
+        //
+        // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
+        // double destinationLat=double.parse(source.properties!.latitude!);
+        // double destinationLng=double.parse(source.properties!.longitude!);
+
+
+
+
+
+
+        for (int i =0 ; i< land.landmarks!.length ; i++){
+          Landmarks element = land.landmarks![i];
+          print("running source location");
+          if(element.element!.subType != null && element.element!.subType!.toLowerCase().contains("entry") && element.buildingID == PathState.sourceBid){
+            sourceEntrylat= double.parse(element.properties!.latitude!);
+            sourceEntrylng= double.parse(element.properties!.longitude!);
+            if (PathState.sourceFloor == element.floor) {
+              await fetchroute(PathState.sourceX, PathState.sourceY, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
+              print("running source location no lift run");
+            } else if (PathState.sourceFloor != element.floor) {
+              List<CommonLifts> commonlifts = findCommonLifts(landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
+
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
+              await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+            }
+            break;
+          }
+        }
+
+
+        OutBuildingModel? buildData= await OutBuildingData.outBuildingData(sourceEntrylat,sourceEntrylng,destinationEntrylat,destinationEntrylng);
+        print("build data: $buildData");
+
+        List<LatLng> coords=[];
+        if(buildData!=null){
+          int len=buildData!.data!.path!.length;
+          for(int i=0;i<len;i++)
+          {
+            coords.add(LatLng(buildData!.data!.path![i].lat!, buildData!.data!.path![i].lng!));
+          }
+
+          List<String> key=[PathState.sourceBid,PathState.destinationBid];
+          interBuildingPath[key]=Set();
+          interBuildingPath[key]!.add(gmap.Polyline(
+            polylineId: PolylineId("InterBuilding"),
+            points: coords,
+            color: Colors.red,
+            width: 3,
+          ));
+        }
+
+        });
       print("different building detected");
+
+      print(PathState.path.keys);
+      print(pathMarkers.keys);
+
+    }
+
+    double time = 0;
+    double distance = 0;
+    DateTime currentTime = DateTime.now();
+    if (PathState.path.isNotEmpty) {
+      PathState.path.forEach((key, value) {
+        time = time + value.length / 120;
+        distance = distance + value.length;
+      });
+      time = time.ceil().toDouble();
+
+      distance = distance * 0.3048;
+      distance = double.parse(distance.toStringAsFixed(1));
+      speak("${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
     }
   }
 
   List<int> beaconCord = [];
   double cordL = 0;
   double cordLt = 0;
+  List<List<int>> getPoints=[];
+  List<int> getnodes=[];
 
-  Future<List<int>> fetchroute(
-      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid = null}) async {
-    int numRows = building.floorDimenssion[floor]![1]; //floor breadth
-    int numCols = building.floorDimenssion[floor]![0]; //floor length
+  Future<List<int>> fetchroute(int sourceX, int sourceY, int destinationX, int destinationY, int floor, {String? bid = null}) async {
+
+    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
+    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
 
-    List<int> path = findPath(numRows, numCols, building.nonWalkable[floor]!,
-        sourceIndex, destinationIndex);
+
+    //List<int> path = [];
+    //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<int>temp = [];
+    temp.addAll(path);
+    temp.addAll(PathState.singleListPath);
+    PathState.singleListPath = temp;
+
+    // print("allTurnPoints ${x1} ,${y1}");
+    //
+    // List<Node> nodes = List.generate(numRows * numCols, (index) {
+    //   int x = index % numCols;
+    //   int y = index ~/ numCols;
+    //   return Node(index, x, y);
+    // });
+    // path.map((index) => nodes[index - 1]).toList();
+    //
+    // for(int i=0;i<path.length;i++){
+    //   int x = path[i] % numCols;
+    //   int y = path[i] ~/ numCols;
+    //
+    //   print("allPathPoints: ${x} ,${y}");
+    //
+    //
+    // }
+
+
+     Map<int,int> getTurns= tools.getTurnMap(path, numCols);
+
+
+    print("getTurnsss ${getTurns}");
+
+
+    path=getOptiPath(getTurns, numCols, path);
+
+
+    
+      //print("rdp* path ${res}");
+    print("A* path ${path}");
+    print("non walkable path ${building.nonWalkable[bid]![floor]!}");
+    
+    //print("fetch route- $path");
     PathState.path[floor] = path;
-    PathState.numCols = numCols;
+    if(PathState.numCols == null){
+      PathState.numCols = Map();
+    }
+    if(PathState.numCols![bid!] != null){
+      PathState.numCols![bid]![floor] = numCols;
+    }else{
+      PathState.numCols![bid] = Map();
+      PathState.numCols![bid]![floor] = numCols;
+    }
+
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
+     // print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -2659,11 +3125,15 @@ class _NavigationState extends State<Navigation> {
       List<double> svalue = [];
       List<double> dvalue = [];
       if (bid != null) {
+        print("Himanshucheckerpath in if block ");
+        print("building.patchData[bid]");
+        print(building.patchData[bid]!.patchData!.fileName);
         svalue = tools.localtoglobal(sourceX, sourceY,
             patchData: building.patchData[bid]);
         dvalue = tools.localtoglobal(destinationX, destinationY,
             patchData: building.patchData[bid]);
       } else {
+        print("Himanshucheckerpath in else block ");
         svalue = tools.localtoglobal(sourceX, sourceY);
         dvalue = tools.localtoglobal(destinationX, destinationY);
       }
@@ -2673,28 +3143,49 @@ class _NavigationState extends State<Navigation> {
         'assets/tealtorch.png',
       );
       Set<Marker> innerMarker = Set();
+
       innerMarker.add(Marker(
-          markerId: MarkerId("destination"),
+          markerId: MarkerId("destination${bid}"),
           position: LatLng(dvalue[0], dvalue[1]),
           icon: BitmapDescriptor.defaultMarker));
-      // innerMarker.add(
-      //   Marker(
-      //     markerId: MarkerId('source'),
-      //     position: LatLng(svalue[0], svalue[1]),
-      //     icon: tealtorch,
-      //     anchor: Offset(0.5, 0.5),
-      //   ),
-      // );
-      pathMarkers[floor] = innerMarker;
+      innerMarker.add(
+        Marker(
+          markerId: MarkerId('source${bid}'),
+          position: LatLng(svalue[0], svalue[1]),
+          icon: tealtorch,
+          anchor: Offset(0.5, 0.5),
+        ),
+      );
+      print("pathMarkers[floor]");
+      //print(innerMarker);
+
+      print(pathMarkers.keys);
+      print(pathMarkers.values.length);
+      pathMarkers[floor]= innerMarker;
+
+
+      // for (Marker marker in innerMarker) {
+      //   pathMarkers[floor]?.add(marker);
+      // }
+
+
+
+      print(pathMarkers[floor]);
       setCameraPosition(innerMarker);
       print("Path found: $path");
+      print("Path markers: $innerMarker");
+
     } else {
       print("No path found.");
     }
 
     List<LatLng> coordinates = [];
+
     for (int node in path) {
-      if (!building.nonWalkable[floor]!.contains(node)) {
+      print("Bharti debug");
+      print(user.Bid);
+      print(buildingAllApi.getStoredString());
+      if (!building.nonWalkable[bid]![floor]!.contains(node)) {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
@@ -2710,18 +3201,44 @@ class _NavigationState extends State<Navigation> {
       }
     }
     setState(() {
-      Set<gmap.Polyline> innerset = Set();
-      innerset.add(gmap.Polyline(
-        polylineId: PolylineId("route"),
-        points: coordinates,
-        color: Colors.red,
-        width: 3,
-      ));
-      singleroute[floor] = innerset;
+      if(singleroute.containsKey(floor)){
+        print("contained call $bid");
+        singleroute[floor]?.add(gmap.Polyline(
+          polylineId: PolylineId("$bid"),
+          points: coordinates,
+          color: Colors.red,
+          width: 5,
+        ));
+      }else{
+        print("new call $bid $coordinates");
+        singleroute.putIfAbsent(floor, () => Set());
+        singleroute[floor]?.add(gmap.Polyline(
+          polylineId: PolylineId("$bid"),
+          points: coordinates,
+          color: Colors.red,
+          width: 5,
+        ));
+      }
+
     });
+
+
+    // setState(() {
+    //   Set<gmap.Polyline> innerset = Set();
+    //   innerset.add(gmap.Polyline(
+    //     polylineId: PolylineId("route"),
+    //     points: coordinates,
+    //     color: Colors.red,
+    //     width: 3,
+    //   ));
+    //   singleroute[floor] = innerset;
+    // });
+
+
     print("$floor    $path");
-    building.floor = floor;
-    createRooms(building.polyLineData!, building.floor);
+    building.floor[bid!] = floor;
+    createRooms(building.polyLineData!, floor);
+    print("path polyline ${singleroute[floor]}");
     return path;
   }
 
@@ -2733,18 +3250,19 @@ class _NavigationState extends State<Navigation> {
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
     for (int i = 0; i < PathState.directions.length; i++) {
+
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
-            distance: (PathState.directions[i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            distance: tools.roundToNextInt(PathState.directions[i].values.first * 0.3048).toString()));
+      } else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
       } else {
         directionWidgets.add(directionInstruction(
-            direction: "Turn " +
-                PathState.directions[i].keys.first +
-                ", and Go Straight",
-            distance: (PathState.directions[++i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            direction: "Turn " + PathState.directions[i].keys.first + ", and Go Straight",
+            distance: tools.roundToNextInt(PathState.directions[++i].values.first * 0.3048).toString()));
       }
     }
     double time = 0;
@@ -2761,6 +3279,8 @@ class _NavigationState extends State<Navigation> {
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+    
+
     return Visibility(
       visible: _isRoutePanelOpen,
       child: Stack(
@@ -2800,16 +3320,16 @@ class _NavigationState extends State<Navigation> {
                         _isRoutePanelOpen = false;
                         _isLandmarkPanelOpen = true;
                         PathState =
-                            pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
+                            pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
                         PathState.path.clear();
                         PathState.sourcePolyID = "";
                         PathState.destinationPolyID = "";
                         singleroute.clear();
                         _isBuildingPannelOpen = true;
                         setState(() {
-                          Marker temp = selectedroomMarker.first;
+                          Marker? temp = selectedroomMarker[buildingAllApi.getStoredString()]?.first;
                           selectedroomMarker.clear();
-                          selectedroomMarker.add(temp);
+                          selectedroomMarker[buildingAllApi.getStoredString()]?.add(temp!);
                           pathMarkers.clear();
                         });
                       },
@@ -3018,56 +3538,31 @@ class _NavigationState extends State<Navigation> {
                                       ),
                                       child: TextButton(
                                         onPressed: ()async{
-                                          if(user.coordX != PathState.sourceX || user.coordY != PathState.sourceY){
-                                            PathState.sourceX = user.coordX;
-                                            PathState.sourceY = user.coordY;
-                                            user.showcoordX = user.coordX;
-                                            user.showcoordY = user.coordY;
-                                            building.landmarkdata!.then((value)async{
-                                              await calculateroute(value.landmarksMap!);
-                                              user.pathobj = PathState;
-                                              user.path = PathState.path.values
-                                                  .expand((list) => list)
-                                                  .toList();
-                                              user.isnavigating = true;
-                                              user.moveToStartofPath();
-                                              _isRoutePanelOpen = false;
-                                              //selectedroomMarker.clear();
-                                              //pathMarkers.clear();
-                                              building.selectedLandmarkID = null;
-                                              _isnavigationPannelOpen = true;
+                                          print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                          user.pathobj = PathState;
+                                          user.path = PathState.singleListPath;
+                                          user.isnavigating = true;
+                                          user.moveToStartofPath().then((value) {
+                                            setState(() {
+                                              if (markers.length > 0) {
+                                                print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                                List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                                markers[user.Bid]?[0] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![0]);
+
+                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                                markers[user.Bid]?[1] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![1]);
+                                              }
                                             });
-                                          }else{
-                                            user.pathobj = PathState;
-                                            user.path = PathState.path.values
-                                                .expand((list) => list)
-                                                .toList();
-                                            user.isnavigating = true;
-                                            user.moveToStartofPath().then((value) {
-                                              setState(() {
-                                                if (markers.length > 0) {
-                                                  markers[0] = customMarker.move(
-                                                      LatLng(
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[0],
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[1]),
-                                                      markers[0]);
-                                                }
-                                              });
-                                            });
-                                            _isRoutePanelOpen = false;
-                                            //selectedroomMarker.clear();
-                                            //pathMarkers.clear();
-                                            building.selectedLandmarkID = null;
-                                            _isnavigationPannelOpen = true;
-                                          }
+                                          });
+                                          _isRoutePanelOpen = false;
+                                          //selectedroomMarker.clear();
+                                          //pathMarkers.clear();
+                                          building.selectedLandmarkID = null;
+                                          _isnavigationPannelOpen = true;
 
                                         },
                                         child: !startingNavigation?Row(
@@ -3265,7 +3760,7 @@ class _NavigationState extends State<Navigation> {
                               pathMarkers.clear();
                               building.selectedLandmarkID = null;
                               PathState = pathState.withValues(
-                                  -1, -1, -1, -1, -1, -1, 0, 0);
+                                  -1, -1, -1, -1, -1, -1, null, 0);
                               PathState.path.clear();
                               PathState.sourcePolyID = "";
                               PathState.destinationPolyID = "";
@@ -3273,6 +3768,7 @@ class _NavigationState extends State<Navigation> {
                               PathState.destinationBid = "";
                               singleroute.clear();
                               PathState.directions = [];
+                              interBuildingPath.clear();
                               fitPolygonInScreen(patch.first);
                             },
                             icon: Icon(
@@ -3287,7 +3783,7 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-  Widget navigationPannel() {
+    Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -3296,15 +3792,19 @@ class _NavigationState extends State<Navigation> {
       if (PathState.directions[i].keys.first == "Straight") {
         directionWidgets.add(directionInstruction(
             direction: "Go " + PathState.directions[i].keys.first,
-            distance: (PathState.directions[i].values.first * 0.3048)
-                .toStringAsFixed(0)));
-      } else {
+            distance: tools.roundToNextInt(PathState.directions[i].values.first * 0.3048).toString()));
+      }
+      else if (PathState.directions[i].keys.first.substring(0,4) == "Take") {
+        directionWidgets.add(directionInstruction(
+            direction: PathState.directions[i].keys.first,
+            distance: "Floor $sourceVal -> Floor $destinationVal"));
+      }
+      else {
         directionWidgets.add(directionInstruction(
             direction: "Turn " +
                 PathState.directions[i].keys.first +
                 ", and Go Straight",
-            distance: (PathState.directions[++i].values.first * 0.3048)
-                .toStringAsFixed(0)));
+            distance: tools.roundToNextInt(PathState.directions[++i].values.first * 0.3048).toString()));
       }
     }
     double time = 0;
@@ -3320,226 +3820,294 @@ class _NavigationState extends State<Navigation> {
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+
+
+    //implement the turn functionality.
+if(user.isnavigating) {
+
+  int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+
+
+  if (MotionModel.reached(user, col)==false) {
+    List<int> a = [user.showcoordX, user.showcoordY];
+    List<int> tval = tools.eightcelltransition(user.theta);
+    print(tval);
+    List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
+
+
+    int index = user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+
+    int node = user.path[index + 1];
+
+    List<int> c = [node % col, node ~/ col];
+    int val = tools.calculateAngleSecond(a, b, c).toInt();
+
+    // print("user corrds");
+    // print("${user.showcoordX}+" "+ ${user.showcoordY}");
+
+    print("pointss matchedddd ${getPoints.contains(
+        [user.showcoordX, user.showcoordY])}");
+    for (int i = 0; i < getPoints.length; i++) {
+      print("---length  = ${getPoints.length}");
+      print("--- point  = ${getPoints[i]}");
+      print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+      print("--- val  = $val");
+      print("--- isPDRStop  = $isPdrStop");
+
+      // print("turn corrds");
+      //
+      // print("${getPoints[i].a}, ${getPoints[i].b}");
+      if (isPdrStop && val == 0) {
+        print("points unmatchedddd");
+
+        setState(() {
+          isPdrStop = false;
+        });
+        StartPDR();
+        break;
+      }
+      if (getPoints[i][0] == user.showcoordX &&
+          getPoints[i][1] == user.showcoordY) {
+        print("points matchedddd");
+
+        StopPDR();
+        getPoints.removeAt(i);
+        break;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
     return Visibility(
         visible: _isnavigationPannelOpen,
-        child: SlidingUpPanel(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20.0,
-              color: Colors.grey,
-            ),
-          ],
-          minHeight: 90,
-          maxHeight: screenHeight * 0.9,
-          snapPoint: 0.9,
-          panel: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  height: 90,
-                  padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.keyboard_arrow_up_outlined,
-                            size: 36,
-                            color: Colors.black,
-                          )),
-                      Container(
-                        child: Row(
-                          children: [
-                            SvgPicture.asset("assets/navigationVector.svg"),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "${time.toInt()} min",
-                                      style: const TextStyle(
+        child: Stack(
+          children: [SlidingUpPanel(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            minHeight: 90,
+            maxHeight: screenHeight * 0.9,
+            snapPoint: 0.9,
+            panel: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 90,
+                    padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.keyboard_arrow_up_outlined,
+                              size: 36,
+                              color: Colors.black,
+                            )),
+                        Container(
+                          child: Row(
+                            children: [
+                              SvgPicture.asset("assets/navigationVector.svg"),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "${time.toInt()} min",
+                                        style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            height: 26 / 20,
+                                            color: Color(0xffDC6A01)),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      Text(
+                                        " (${distance} m)",
+                                        style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 20,
                                           fontWeight: FontWeight.w700,
                                           height: 26 / 20,
-                                          color: Color(0xffDC6A01)),
-                                      textAlign: TextAlign.left,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    ],
+                                  ),
+                                  Text(
+                                    "ETA- ${newTime.hour}:${newTime.minute}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8d8c8c),
+                                      height: 20 / 14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              _isnavigationPannelOpen = false;
+                              user.reset();
+                              PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+                              selectedroomMarker.clear();
+                              pathMarkers.clear();
+                              PathState.path.clear();
+                              PathState.sourcePolyID = "";
+                              PathState.destinationPolyID = "";
+                              singleroute.clear();
+                              fitPolygonInScreen(patch.first);
+                              setState(() {
+                                if (markers.length > 0) {
+                                  List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                  markers[user.Bid]?[0] = customMarker.move(
+                                      LatLng(lvalue[0],lvalue[1]),
+                                      markers[user.Bid]![0]
+                                  );
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              Icons.cancel_outlined,
+                              size: 24,
+                              color: Colors.black,
+                            ))
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: screenWidth,
+                    height: 1,
+                    color: Color(0xffEBEBEB),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 17, top: 12, right: 17),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Steps",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff000000),
+                            height: 24 / 18,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Container(
+                          height: 522,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: SvgPicture.asset(
+                                          "assets/StartpointVector.svg"),
                                     ),
                                     Text(
-                                      " (${distance} m)",
+                                      "${PathState.sourceName}",
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        height: 26 / 20,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
                                       ),
                                       textAlign: TextAlign.left,
                                     )
                                   ],
                                 ),
-                                Text(
-                                  "ETA- ${newTime.hour}:${newTime.minute}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                )
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
+                                Column(
+                                  children: directionWidgets,
+                                ),
+                                SizedBox(
+                                  height: 22,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 25,
+                                      margin: EdgeInsets.only(right: 8),
+                                      child: Icon(
+                                        Icons.pin_drop_sharp,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    Text(
+                                      PathState.destinationName,
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff0e0d0d),
+                                        height: 25 / 16,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  width: screenHeight,
+                                  height: 1,
+                                  color: Color(0xffEBEBEB),
+                                ),
                               ],
-                            )
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            _isnavigationPannelOpen = false;
-                            user.reset();
-                            PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, 0, 0);
-                            selectedroomMarker.clear();
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear();
-                            fitPolygonInScreen(patch.first);
-                            setState(() {
-                              if (markers.length > 0) {
-                                List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                markers[0] = customMarker.move(
-                                    LatLng(lvalue[0],lvalue[1]),
-                                    markers[0]
-                                );
-                              }
-                            });
-                          },
-                          icon: Icon(
-                            Icons.cancel_outlined,
-                            size: 24,
-                            color: Colors.black,
-                          ))
-                    ],
-                  ),
-                ),
-                Container(
-                  width: screenWidth,
-                  height: 1,
-                  color: Color(0xffEBEBEB),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 17, top: 12, right: 17),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Steps",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff000000),
-                          height: 24 / 18,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(
-                        height: 22,
-                      ),
-                      Container(
-                        height: 522,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: SvgPicture.asset(
-                                        "assets/StartpointVector.svg"),
-                                  ),
-                                  Text(
-                                    "${PathState.sourceName}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                              Column(
-                                children: directionWidgets,
-                              ),
-                              SizedBox(
-                                height: 22,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 25,
-                                    margin: EdgeInsets.only(right: 8),
-                                    child: Icon(
-                                      Icons.pin_drop_sharp,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  Text(
-                                    PathState.destinationName,
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff0e0d0d),
-                                      height: 25 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Container(
-                                width: screenHeight,
-                                height: 1,
-                                color: Color(0xffEBEBEB),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
+          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,)],
         ));
   }
+
 
   Widget reroutePannel() {
     return Visibility(
@@ -3615,7 +4183,7 @@ class _NavigationState extends State<Navigation> {
                                   user.moveToStartofPath().then((value) {
                                     setState(() {
                                       if (markers.length > 0) {
-                                        markers[0] = customMarker.move(
+                                        markers[user.Bid]?[0] = customMarker.move(
                                             LatLng(
                                                 tools.localtoglobal(
                                                     user.showcoordX.toInt(),
@@ -3624,7 +4192,7 @@ class _NavigationState extends State<Navigation> {
                                                     user.showcoordX.toInt(),
                                                     user.showcoordY
                                                         .toInt())[1]),
-                                            markers[0]);
+                                            markers[user.Bid]![0]);
                                       }
                                     });
                                   });
@@ -3632,6 +4200,13 @@ class _NavigationState extends State<Navigation> {
                                   building.selectedLandmarkID = null;
                                   _isnavigationPannelOpen = true;
                                   _isreroutePannelOpen = false;
+                                  int numCols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]; //floor length
+                                  double angle = tools.calculateAngleBWUserandPath(user, PathState.path[PathState.sourceFloor]![1], numCols);
+                                  if(angle != 0){
+                                    speak("Turn "+ tools.angleToClocks(angle));
+                                  }else{
+
+                                  }
                                 });
                               });
                             },
@@ -4975,26 +5550,56 @@ class _NavigationState extends State<Navigation> {
   }
 
   Set<Marker> getCombinedMarkers() {
-    if (user.floor == building.floor) {
+    if (user.floor == building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
-        return (selectedroomMarker.union(Set<Marker>.of(markers)))
-            .union(Markers);
+        Set<Marker> marker = Set();
+
+        selectedroomMarker.forEach((key, value) {
+          marker = marker.union(value);
+        });
+
+        // print(Set<Marker>.of(markers[user.Bid]!));
+        return (marker.union(Set<Marker>.of(markers[user.Bid]??[])));
       } else {
-        return pathMarkers[building.floor] != null
-            ? (pathMarkers[building.floor]!.union(Set<Marker>.of(markers)))
+        return pathMarkers[building.floor[buildingAllApi.getStoredString()]] != null
+            ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!.union(Set<Marker>.of(markers[user.Bid]??[])))
             .union(Markers)
-            : (Set<Marker>.of(markers)).union(Markers);
+            : (Set<Marker>.of(markers[user.Bid]??[])).union(Markers);
       }
     } else {
       if (_isLandmarkPanelOpen) {
-        return (selectedroomMarker).union(Markers);
+        Set<Marker> marker = Set();
+        selectedroomMarker.forEach((key, value) {
+          marker = marker.union(value);
+        });
+        return marker.union(Markers);
       } else {
-        return pathMarkers[building.floor] != null
-            ? (pathMarkers[building.floor]!).union(Markers)
+        return pathMarkers[building.floor[buildingAllApi.getStoredString()]] != null
+            ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!).union(Markers)
             : Markers;
       }
     }
   }
+
+  Set<Polygon> getCombinedPolygons(){
+    Set<Polygon> polygons = Set();
+    closedpolygons.forEach((key, value) {
+      polygons = polygons.union(value);
+    });
+    return polygons;
+  }
+
+  Set<gmap.Polyline> getCombinedPolylines(){
+    Set<gmap.Polyline> poly = Set();
+    polylines.forEach((key, value) {
+      poly = poly.union(value);
+    });
+    interBuildingPath.forEach((key, value) {
+      poly=poly.union(value);
+    });
+    return poly;
+  }
+
 
   void _updateMarkers(double zoom) {
     print(zoom);
@@ -5061,7 +5666,7 @@ class _NavigationState extends State<Navigation> {
     Set<Polygon> updatedpatchPolygon = Set();
     Set<gmap.Polyline> updatedpolyline = Set();
     setState(() {
-      closedpolygons.forEach((polygon) {
+      closedpolygons[buildingAllApi.getStoredString()]?.forEach((polygon) {
         Polygon _polygon = polygon.copyWith(visibleParam: zoom > 16.0);
         updatedclosedPolygon.add(_polygon);
       });
@@ -5069,30 +5674,50 @@ class _NavigationState extends State<Navigation> {
         Polygon _polygon = polygon.copyWith(visibleParam: zoom > 16.0);
         updatedpatchPolygon.add(_polygon);
       });
-      polylines.forEach((polyline) {
+      polylines[buildingAllApi.getStoredString()]!.forEach((polyline) {
         gmap.Polyline _polyline = polyline.copyWith(visibleParam: zoom > 16.0);
         updatedpolyline.add(_polyline);
       });
-      closedpolygons = updatedclosedPolygon;
+      closedpolygons[buildingAllApi.getStoredString()] = updatedclosedPolygon;
       patch = updatedpatchPolygon;
-      polylines = updatedpolyline;
+      polylines[buildingAllApi.getStoredString()] = updatedpolyline;
     });
   }
 
-  void onLandmarkVenueClicked(String ID) {
+  void closeNavigation(){
+    _isnavigationPannelOpen = false;
+    user.reset();
+    PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+    selectedroomMarker.clear();
+    pathMarkers.clear();
+    PathState.path.clear();
+    PathState.sourcePolyID = "";
+    PathState.destinationPolyID = "";
+    singleroute.clear();
+    fitPolygonInScreen(patch.first);
+    // setState(() {
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+        markers[user.Bid]?[0] = customMarker.move(
+            LatLng(lvalue[0],lvalue[1]),
+            markers[user.Bid]![0]
+        );
+      }
+    // });
+  }
+
+  void onLandmarkVenueClicked(String ID , {bool DirectlyStartNavigation = false}) {
     setState(() {
       if (building.selectedLandmarkID != ID) {
         building.landmarkdata!.then((value) {
           _isBuildingPannelOpen = false;
-          building.floor = value.landmarksMap![ID]!.floor!;
-          createRooms(
-              building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-              building.floor);
-          createMarkers(value, building.floor);
+          building.floor[value.landmarksMap![ID]!.buildingID!] = value.landmarksMap![ID]!.floor!;
+          createRooms(building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!, building.floor[value.landmarksMap![ID]!.buildingID!]!);
+          createMarkers(value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
           building.selectedLandmarkID = ID;
-          _isRoutePanelOpen = false;
           singleroute.clear();
-          _isLandmarkPanelOpen = true;
+          _isRoutePanelOpen = DirectlyStartNavigation;
+          _isLandmarkPanelOpen = !DirectlyStartNavigation;
           List<double> pvalues = tools.localtoglobal(
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!,
@@ -5109,6 +5734,10 @@ class _NavigationState extends State<Navigation> {
         });
       }
     });
+
+    if(DirectlyStartNavigation){
+
+    }
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
@@ -5208,8 +5837,6 @@ class _NavigationState extends State<Navigation> {
       if (distance < distanceThreshold) {
         closestBuildingId = key;
         buildingAllApi.setStoredString(key);
-        print(
-            'Close LatLng found in idLatLngHashMap for buildingId: $closestBuildingId');
       }
     });
   }
@@ -5229,6 +5856,10 @@ class _NavigationState extends State<Navigation> {
   List<String> scannedDevices = [];
   late Timer _timer;
 
+  Set<gmap.Polyline> finalSet = {};
+  bool ispdrStart=false;
+
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -5237,6 +5868,8 @@ class _NavigationState extends State<Navigation> {
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
+
+
     return SafeArea(
       child: isLoading && isBlueToothLoading? Scaffold(
         body: Center(
@@ -5268,10 +5901,10 @@ class _NavigationState extends State<Navigation> {
                 myLocationButtonEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
-                polygons: patch.union(closedpolygons).union(otherclosedpolygons).union(otherpatch),
-                polylines: singleroute[building.floor] != null
-                    ? polylines.union(singleroute[building.floor]!).union(otherpolylines)
-                    : polylines.union(otherpolylines),
+                polygons: patch.union(getCombinedPolygons()).union(otherpatch),
+                polylines:singleroute[building.floor[buildingAllApi.getStoredString()]] != null
+                    ? getCombinedPolylines().union(singleroute[building.floor[buildingAllApi.getStoredString()]]!)
+                    : getCombinedPolylines(),
                 markers: getCombinedMarkers(),
                 onTap: (x) {
                   mapState.interaction = true;
@@ -5293,7 +5926,7 @@ class _NavigationState extends State<Navigation> {
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
                   focusBuildingChecker(cameraPosition);
-                  //mapState.interaction = true;
+                  mapState.interaction = true;
                   mapbearing = cameraPosition.bearing;
                   if (!mapState.interaction) {
                     mapState.zoom = cameraPosition.zoom;
@@ -5327,71 +5960,89 @@ class _NavigationState extends State<Navigation> {
                             borderRadius: BorderRadius.all(Radius.circular(24))),
                         child: IconButton(
                             onPressed: () {
+
+
+                              // StartPDR();
+
                               bool isvalid = MotionModel.isValidStep(
                                   user,
-                                  building.floorDimenssion[user.floor]![0],
-                                  building.floorDimenssion[user.floor]![1],
-                                  building.nonWalkable[user.floor]!,
+                                  building.floorDimenssion[user.Bid]![user.floor]![0],
+                                  building.floorDimenssion[user.Bid]![user.floor]![1],
+                                  building.nonWalkable[user.Bid]![user.floor]!,
                                   reroute);
                               if (isvalid) {
-                                user.move().then((value) {
-                                  setState(() {
 
-                                    if (markers.length > 0) {
-                                      List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                      markers[0] = customMarker.move(
-                                          LatLng(lvalue[0],lvalue[1]),
-                                          markers[0]
-                                      );
+                                if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                                  user.move().then((value) {
+                                    //  user.move().then((value){
+                                    setState(() {
 
-                                      List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                      markers[1] = customMarker.move(
-                                          LatLng(ldvalue[0],ldvalue[1]),
-                                          markers[1]
-                                      );
-                                    }
+                                      if (markers.length > 0) {
+                                        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                        markers[user.Bid]?[0] = customMarker.move(
+                                            LatLng(lvalue[0],lvalue[1]),
+                                            markers[user.Bid]![0]
+                                        );
+
+                                        List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                        markers[user.Bid]?[1] = customMarker.move(
+                                            LatLng(ldvalue[0],ldvalue[1]),
+                                            markers[user.Bid]![1]
+                                        );
+                                      }
+                                    });
+                                    // });
                                   });
-                                });
+                                }else{
+                                  StopPDR();
+                                  setState(() {
+                                    user.isnavigating=false;
+                                  });
+
+                                }
+
+                                print("next [${user.coordX}${user.coordY}]");
+
                               } else {
                                 if(user.isnavigating){
-                                  reroute();
-                                  showToast("You are out of path");
+                                  // reroute();
+                                  // showToast("You are out of path");
                                 }
                               }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                    double? compassHeading = newvalue;
-                    setState(() {
-                      user.theta = compassHeading!;
-                      if (mapState.interaction2) {
-                        mapState.bearing = compassHeading!;
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: mapState.target,
-                              zoom: mapState.zoom,
-                              bearing: mapState.bearing!,
-                            ),
-                          ),
-                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                        );
-                      } else {
-                        if (markers.length > 0)
-                          markers[0] =
-                              customMarker.rotate(compassHeading! - mapbearing, markers[0]);
-                      }
-                    });
-
-                  }),
+                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                  //
+                  //   double? compassHeading = newvalue;
+                  //   setState(() {
+                  //     user.theta = compassHeading!;
+                  //     if (mapState.interaction2) {
+                  //       mapState.bearing = compassHeading!;
+                  //       _googleMapController.moveCamera(
+                  //         CameraUpdate.newCameraPosition(
+                  //           CameraPosition(
+                  //             target: mapState.target,
+                  //             zoom: mapState.zoom,
+                  //             bearing: mapState.bearing!,
+                  //           ),
+                  //         ),
+                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                  //       );
+                  //     } else {
+                  //       if (markers.length > 0)
+                  //         markers[user.Bid]?[0] =
+                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                  //     }
+                  //   });
+                  //
+                  // }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),
                     child: SpeedDial(
                       child: Text(
-                        building.floor == 0 ? 'G' : '${building.floor}',
+                        building.floor == 0 ? 'G' : '${building.floor[buildingAllApi.getStoredString()]}',
                         style: const TextStyle(
                           fontFamily: "Roboto",
                           fontSize: 16,
@@ -5403,7 +6054,7 @@ class _NavigationState extends State<Navigation> {
                       activeIcon: Icons.close,
                       backgroundColor: Colors.white,
                       children: [
-                        for (int i = 0; i < building.numberOfFloors; i++)
+                        for (int i = 0; i < building.numberOfFloors[buildingAllApi.getStoredString()]!; i++)
                           SpeedDialChild(
                             child: Text(
                               i == 0 ? 'G' : '${i}',
@@ -5418,13 +6069,13 @@ class _NavigationState extends State<Navigation> {
                                 ? Colors.white
                                 : Color(0xff24b9b0),
                             onTap: () {
-                              building.floor = i;
-                              createRooms(building.polyLineData!, building.floor);
+                              building.floor[buildingAllApi.getStoredString()] = i;
+                              createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!, building.floor[buildingAllApi.getStoredString()]!);
                               if (pathMarkers[i] != null) {
-                                setCameraPosition(pathMarkers[i]!);
+                                //setCameraPosition(pathMarkers[i]!);
                               }
                               building.landmarkdata!.then((value) {
-                                createMarkers(value, building.floor);
+                                createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
                               });
                             },
                           ),
@@ -5435,18 +6086,17 @@ class _NavigationState extends State<Navigation> {
                   Semantics(
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
-                      onPressed: () {
-                        Vibration.vibrate();
-                        building.floor = user.floor;
-                        createRooms(building.polyLineData!, building.floor);
+                      onPressed: () async {
+                        building.floor[buildingAllApi.getStoredString()] = user.floor;
+                        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                         if (pathMarkers[user.floor] != null) {
                           setCameraPosition(pathMarkers[user.floor]!);
                         }
                         building.landmarkdata!.then((value) {
-                          createMarkers(value, building.floor);
+                          createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
                         });
                         if (markers.length > 0)
-                          markers[0] = customMarker.rotate(0, markers[0]);
+                          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
                         if (user.initialallyLocalised) {
                           mapState.interaction = !mapState.interaction;
                         }
@@ -5463,112 +6113,46 @@ class _NavigationState extends State<Navigation> {
                   ),
                   SizedBox(height: 28.0), // Adjust the height as needed
                   FloatingActionButton(
+                    onPressed: (){
+                      print("checkingBuildingfloor");
+                      //building.floor == 0 ? 'G' : '${building.floor}',
+                      print(building.floor);
+                      int firstKey = building.floor.values.first;
+                      print(firstKey);
+                      print(singleroute[building.floor.values.first]);
+
+                      print(singleroute.keys);
+                      print(singleroute.values);
+                      print(building.floor[buildingAllApi.getStoredString()]);
+                      print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                    },
+                    child: Icon(Icons.add)
+                  ),
+                  FloatingActionButton(
                     onPressed: () async {
-                      // late Timer _liveTimer;
-                      // if (markers.length > 0)
-                      //   markers[0] = customMarker.rotate(0, markers[0]);
-                      // bool isData=
 
-                      if (user.initialallyLocalised) {
-                        setState(() {
-                          // if (_timer.isActive &&
-                          //     isLiveLocalizing == true) {
-                          //   _timer.cancel();
-                          // }
-                          isLiveLocalizing = !isLiveLocalizing;
+                  StopPDR();
 
-                          //_liveTimer.cancel();
-                        });
-                        // if(isData==true){
 
-                        // }
-                        Timer.periodic(
-                            Duration(milliseconds: 6000),
-                                (timer) async {
-                              // setState(() {
-                              //   detected = false;
-                              // });
 
-                              // await beaconapi()
-                              //     .fetchBeaconData()
-                              //     .then((value) async {
-                              //   print("beacondatacheck");
-                              //   print(value.toString());
-                              //   building.beacondata = value;
-                              //   for (int i = 0; i < value.length; i++) {
-                              //     beacon beacons = value[i];
-                              //     if (beacons.properties!.macId !=
-                              //         null) {
-                              //       apibeaconmap[beacons
-                              //           .properties!.macId!] = beacons;
-                              //     }
-                              //   }
-                              print(resBeacons);
-                              btadapter.startScanning(resBeacons);
+                      // if (user.initialallyLocalised) {
+                      //   setState(() {
+                      //     isLiveLocalizing = !isLiveLocalizing;
+                      //   });
+                      //
+                      //   Timer.periodic(
+                      //       Duration(milliseconds: 6000),
+                      //           (timer) async {
+                      //         print(resBeacons);
+                      //         btadapter.startScanning(resBeacons);
+                      //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                      //           //realTimeReLocalizeUser(resBeacons)
+                      //         });
+                      //
+                      //       });
+                      //
+                      // }
 
-                              // print("printing bin");
-                              // btadapter.printbin();
-
-                              //please wait
-                              //searching your location
-
-                              // speak("Please wait");
-                              // speak("Searching your location. .");
-                              Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                                realTimeReLocalizeUser(resBeacons)
-                              });
-                              // _timer = Timer.periodic(
-                              //     Duration(milliseconds: 5000),
-                              //     (timer) {
-
-                              //       .then((value) => {
-                              //             btadapter.clear
-                              //           });
-                              //   //_timer.cancel();
-                              // });
-
-                              //     if (isLiveLocalizing == true) {
-                              //   _timer.cancel();
-                              // }
-                              // });
-                            });
-
-                        // await beaconapi()
-                        //     .fetchBeaconData()
-                        //     .then((value) {
-                        //   print("beacondatacheck");
-                        //   print(value.toString());
-                        //   building.beacondata = value;
-                        //   for (int i = 0; i < value.length; i++) {
-                        //     beacon beacons = value[i];
-                        //     if (beacons.properties!.macId !=
-                        //         null) {
-                        //       apibeaconmap[beacons
-                        //           .properties!.macId!] = beacons;
-                        //     }
-                        //   }
-                        //   btadapter.startScanning(apibeaconmap);
-                        //   // print("printing bin");
-                        //   // btadapter.printbin();
-                        //   late Timer _timer;
-                        //   //please wait
-                        //   //searching your location
-
-                        //   speak("Please wait");
-                        //   speak("Searching your location. .");
-
-                        //   _timer = Timer.periodic(
-                        //       Duration(milliseconds: 9000),
-                        //       (timer) {
-                        //     localizeUser();
-                        //     _timer.cancel();
-                        //   });
-                        // });
-
-                        // mapState.interaction = !mapState.interaction;
-                      }
-                      // mapState.zoom = 21;
-                      // fitPolygonInScreen(patch.first);
                     },
                     child: Icon(
                       Icons.location_history_sharp,
@@ -5579,6 +6163,7 @@ class _NavigationState extends State<Navigation> {
                     backgroundColor: Colors
                         .white, // Set the background color of the FAB
                   ),
+
                 ],
               ),
             ),
@@ -5586,7 +6171,7 @@ class _NavigationState extends State<Navigation> {
                 top: 16,
                 left: 16,
                 right: 16,
-                child: _isLandmarkPanelOpen
+                child: _isLandmarkPanelOpen || _isRoutePanelOpen || _isnavigationPannelOpen
                     ? Container()
                     : Semantics(
                   // header: true,
@@ -5612,7 +6197,7 @@ class _NavigationState extends State<Navigation> {
             navigationPannel(),
             reroutePannel(),
             detected? Semantics(
-                child: nearestLandmarkpannel()): Container(),
+                child: buildingDetailPannel()): Container(),
 
           ],
         ),

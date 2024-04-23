@@ -10,8 +10,9 @@ class pathState {
   int sourceFloor = 0;
   int destinationFloor = 0;
   Map<int, List<int>> path = {};
+  List<int> singleListPath = [];
   List<Map<String, int>> directions = [];
-  int numCols = 0;
+  Map<String,Map<int,int>>? numCols = Map();
   int index = 0;
   String sourceBid = "";
   String destinationBid = "";

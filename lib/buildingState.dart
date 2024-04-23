@@ -6,10 +6,12 @@ import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 
 class Building{
-  int floor;
-  int numberOfFloors;
-  HashMap<int, List<int>> nonWalkable = HashMap();
-  Map<int,List<int>> floorDimenssion = Map();
+  Map<String,int> floor;
+  Map<String,int> numberOfFloors;
+  Map<String,Map<int, List<int>>> nonWalkable = Map();
+
+  Map<String,Map<int,List<int>>> floorDimenssion = Map();
+
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
   Future<land>? landmarkdata = null;
@@ -18,6 +20,8 @@ class Building{
   Map<String,patchDataModel> patchData = Map();
   bool updateMarkers = true;
   List<String> ignoredMarker = [];
+  static HashMap<String, beacon> apibeaconmap = HashMap();
+  static String thresh = "";
   Building({required this.floor,required this.numberOfFloors});
 
 }

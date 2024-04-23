@@ -29,7 +29,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
       padding: EdgeInsets.all(8),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: widget.selected ? Colors.black : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.all(Radius.circular(10)),
         boxShadow: [
           BoxShadow(
@@ -42,16 +42,12 @@ class _HomepageFilterState extends State<HomepageFilter> {
       child: InkWell(
         borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
         onTap: () {
-          setState(() {
-            widget.selected = !widget.selected;
-          });
-          widget.onSelect(widget.selected);
-          widget.selected ? print("black") : print("white");
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
-          // );
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
+          );
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

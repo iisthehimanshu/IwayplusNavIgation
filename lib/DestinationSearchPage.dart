@@ -20,7 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
-import 'Elements/DestinationPageFilter.dart';
+import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
@@ -59,7 +59,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   void initState() {
     super.initState();
     print("In search page");
-    initSpeech();
+    for(int i=0 ; i<optionListForUI.length ; i++){
+      if(optionListForUI[i].toLowerCase() == widget.previousFilter.toLowerCase()){
+        vall = i;
+      }
+    }
+
+
 
     if(widget.previousFilter!=""){
       setState(() {
@@ -198,8 +204,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     'reception', 'lift',
   ];
   List<String> optionListForUI = [
-    'Washroom', 'entry',
-    'reception', 'lift',
+    'Washroom', 'Entry',
+    'Reception', 'Lift',
   ];
 
   Set<String> optionListItemBuildingName = {};
@@ -207,74 +213,70 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void search(String searchText){
     setState(() {
-      if(optionList.contains(searchText.toLowerCase())){
-        category = true;
-
-        landmarkData.landmarksMap!.forEach((key, value) {
-          if (searcCategoryhResults.length < 10) {
-            if (value.name != null && value.element!.subType != "beacons") {
-              if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
-                optionListItemBuildingName.add(value.buildingName!);
-                searcCategoryhResults.clear();
-                optionListItemBuildingName.forEach((element) {
-                  searcCategoryhResults.add(SearchpageCategoryResults(name: searchText, buildingName: element,));
-                });
+      if(searchText.isNotEmpty){
+        if(optionList.contains(searchText.toLowerCase())){
+          category = true;
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (searcCategoryhResults.length < 10) {
+              if (value.name != null && value.element!.subType != "beacons") {
+                if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                  optionListItemBuildingName.add(value.buildingName!);
+                  searcCategoryhResults.clear();
+                  optionListItemBuildingName.forEach((element) {
+                    searcCategoryhResults.add(SearchpageCategoryResults(name: searchText, buildingName: element,));
+                  });
+                }
               }
+            } else {
+              return;
             }
-          } else {
-            return;
-          }
-        });
-      }else{
-        category = false;
-        searchResults.clear();
-        landmarkData.landmarksMap!.forEach((key, value) {
-          if (searchResults.length < 10) {
-            if (value.name != null && value.element!.subType != "beacons") {
-              if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
-                final nameList = [value.name!.toLowerCase()];
-                final fuse = Fuzzy(
-                  nameList,
-                  options: FuzzyOptions(
-                    findAllMatches: true,
-                    tokenize: true,
-                    threshold: 0.5,
-                  ),
-                );
-                final result = fuse.search(searchText.toLowerCase());
-                // Assuming `result` is a List<FuseResult<dynamic>>
-                result.forEach((fuseResult) {
-                  // Access the item property of the result to get the matched value
-                  String matchedName = fuseResult.item;
+          });
+        }else{
+          category = false;
+          searchResults.clear();
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (searchResults.length < 10) {
+              if (value.name != null && value.element!.subType != "beacons") {
+                if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                  final nameList = [value.name!.toLowerCase()];
+                  final fuse = Fuzzy(
+                    nameList,
+                    options: FuzzyOptions(
+                      findAllMatches: true,
+                      tokenize: true,
+                      threshold: 0.5,
+                    ),
+                  );
+                  final result = fuse.search(searchText.toLowerCase());
+                  // Assuming `result` is a List<FuseResult<dynamic>>
+                  result.forEach((fuseResult) {
+                    // Access the item property of the result to get the matched value
+                    String matchedName = fuseResult.item;
 
-                  // Access the score of the match
-                  double score = fuseResult.score;
+                    // Access the score of the match
+                    double score = fuseResult.score;
 
-                  // Do something with the matchedName or score
-                  score==0.0? print('Matched Name: $matchedName, Score: $score'): print("");
+                    // Do something with the matchedName or score
+                    score==0.0? print('Matched Name: $matchedName, Score: $score'): print("");
 
-                });
-                searchResults.add(SearchpageResults(name: "${value.name}",
-                  location: "Floor ${value.floor}, ${value
-                      .buildingName}, ${value.venueName}",
-                  onClicked: onVenueClicked,
-                  ID: value.properties!.polyId!,
-                  bid: value.buildingID!,
-                  floor: value.floor.toString(),));
+                  });
+                  searchResults.add(SearchpageResults(name: "${value.name}",
+                    location: "Floor ${value.floor}, ${value
+                        .buildingName}, ${value.venueName}",
+                    onClicked: onVenueClicked,
+                    ID: value.properties!.polyId!,
+                    bid: value.buildingID!,
+                    floor: value.floor.toString(),));
+                }
               }
+            } else {
+              return;
             }
-          } else {
-            return;
-          }
 
-        });
+          });
+        }
       }
-
-
     });
-
-    print("optionListItemBuildingName");
-    print(optionListItemBuildingName);
   }
 
   void fetchRecents()async{
@@ -299,16 +301,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
 
-  List<String> options = [
-    'Washroom', 'Food & Drinks',
-    'Reception', 'Break Room', 'Education',
-    'Fashion', 'Travel', 'Rooms', 'Tech',
-    'Science',
-  ];
 
-  List<String> floorOptions = [
-    'Food & Drinks', 'Washroom', 'Water',
-  ];
 
   List<IconData> _icons = [
     Icons.home,
@@ -321,7 +314,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Color containerBoxColor = Color(0xffA1A1AA);
   Color micColor = Colors.black;
   bool micselected = false;
-  int vall = 0;
+  int vall = -1;
 
 
   @override
@@ -330,7 +323,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     double screenHeight = MediaQuery.of(context).size.height;
     if(_controller.text.isNotEmpty){
       search(_controller.text);
+    }else{
+      searchResults = [];
+      searcCategoryhResults = [];
     }
+
     // if(speetchText.isNotListening){
     //   micColor = Colors.black;
     //   print("Not listening");
@@ -415,8 +412,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         child: Center(
                           child: _controller.text.isNotEmpty? IconButton(onPressed: (){
                             _controller.text = "";
+                            setState(() {
+                              vall = -1;
+                              search(_controller.text);
+                            });
                           }, icon: Icon(Icons.close)) : IconButton(
                             onPressed: () {
+                              initSpeech();
                               setState(() {
                                 speetchText.isListening? stopListening() : startListening();
                               });
@@ -445,14 +447,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     setState(() => vall = val);
                     print("wilsonchecker");
                     print(val);
+                    _controller.text = optionListForUI[val];
                   },
                   choiceItems: C2Choice.listFrom<int, String>(
-                    source: options,
+                    source: optionListForUI,
                     value: (i, v) => i,
                     label: (i, v) => v,
                   ),
                   choiceBuilder: (item, i) {
-                    return DestinationPageChipsWidget(svgPath: '', text: options[i], onSelect: (bool selected) {  },);
+                    return DestinationPageChipsWidget(svgPath: '',
+                      text: optionListForUI[i],
+                      onSelect: item.select!,selected: item.selected,);
                   },
                   direction: Axis.horizontal,
                 ),

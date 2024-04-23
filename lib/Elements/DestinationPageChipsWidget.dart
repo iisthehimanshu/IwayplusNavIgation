@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../DestinationSearchPage.dart';
@@ -24,7 +25,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
 class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
       padding: EdgeInsets.all(8),
       clipBehavior: Clip.antiAlias,
@@ -39,6 +40,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
           ),
         ],
       ),
+      duration: Duration(milliseconds: 600),
       child: InkWell(
         borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
         onTap: () {
@@ -58,22 +60,27 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 4),
-              child: Icon(Icons.wallet_giftcard_outlined, size: 18),
+              child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
             ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),
               child: Text(
                 widget.text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: "Roboto",
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xff49454f),
+                  color: widget.selected? Colors.white : Color(0xff49454f) ,
                   height: 20 / 14,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
+            widget.selected? Container(
+              margin: EdgeInsets.only(left: 4),
+              child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+            ) : Container()
+
 
             // Icon displayed when active is true
           ],

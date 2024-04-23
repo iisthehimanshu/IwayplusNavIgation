@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
+
+import '../FloorSelectionPage.dart';
 class SearchpageCategoryResults extends StatefulWidget {
   final String name;
   final String buildingName;
@@ -18,6 +20,12 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     double screenHeight = MediaQuery.of(context).size.height;
     return InkWell(
       onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FloorSelectionPage(filterName: widget.name, filterBuildingName: widget.buildingName,),
+          ),
+        );
 
       },
       child: Container(

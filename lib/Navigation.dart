@@ -717,8 +717,8 @@ void calibrate()async{
 
 
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+    print("permissionStatus    ----   ${permissionStatus}");
     if (permissionStatus.isGranted) {
       print("Bluetooth permission is granted");
       // Permission granted, you can now perform Bluetooth operations
@@ -728,7 +728,7 @@ void calibrate()async{
   }
 
   Future<void> requestLocationPermission() async {
-    final status = await Permission.location.request();
+    final status = await Permission.locationWhenInUse.request();
     if (status.isGranted) {
       print('location permission granted');
     } else {}
@@ -6031,22 +6031,24 @@ if(user.isnavigating) {
                   Semantics(
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
-                      onPressed: () {
-                        building.floor[buildingAllApi.getStoredString()] = user.floor;
-                        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
-                        if (pathMarkers[user.floor] != null) {
-                          setCameraPosition(pathMarkers[user.floor]!);
-                        }
-                        building.landmarkdata!.then((value) {
-                          createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
-                        });
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
-                        if (user.initialallyLocalised) {
-                          mapState.interaction = !mapState.interaction;
-                        }
-                        mapState.zoom = 21;
-                        fitPolygonInScreen(patch.first);
+                      onPressed: () async {
+                        final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+                        print(permissionStatus);
+                        // building.floor[buildingAllApi.getStoredString()] = user.floor;
+                        // createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+                        // if (pathMarkers[user.floor] != null) {
+                        //   setCameraPosition(pathMarkers[user.floor]!);
+                        // }
+                        // building.landmarkdata!.then((value) {
+                        //   createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
+                        // });
+                        // if (markers.length > 0)
+                        //   markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+                        // if (user.initialallyLocalised) {
+                        //   mapState.interaction = !mapState.interaction;
+                        // }
+                        // mapState.zoom = 21;
+                        // fitPolygonInScreen(patch.first);
                       },
                       child: Icon(
                         Icons.my_location_sharp,

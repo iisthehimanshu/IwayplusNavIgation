@@ -2842,7 +2842,7 @@ void calibrate()async{
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-
+        print(commonlifts);
 
         await fetchroute(
             commonlifts[0].x2!,
@@ -2872,6 +2872,9 @@ void calibrate()async{
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.destinationBid);
       }
+
+
+
     } else {
       print("calculateroute else statement");
       double sourceEntrylat = 0;
@@ -2964,6 +2967,21 @@ void calibrate()async{
       print(pathMarkers.keys);
 
     }
+
+    double time = 0;
+    double distance = 0;
+    DateTime currentTime = DateTime.now();
+    if (PathState.path.isNotEmpty) {
+      PathState.path.forEach((key, value) {
+        time = time + value.length / 120;
+        distance = distance + value.length;
+      });
+      time = time.ceil().toDouble();
+
+      distance = distance * 0.3048;
+      distance = double.parse(distance.toStringAsFixed(1));
+      speak("${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
+    }
   }
 
   List<int> beaconCord = [];
@@ -3013,7 +3031,7 @@ void calibrate()async{
     print("getTurnsss ${getTurns}");
 
 
-   path=getOptiPath(getTurns, numCols, path);
+    path=getOptiPath(getTurns, numCols, path);
 
 
     
@@ -3167,7 +3185,7 @@ void calibrate()async{
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 3,
+          width: 5,
         ));
       }else{
         print("new call $bid $coordinates");
@@ -3176,7 +3194,7 @@ void calibrate()async{
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 3,
+          width: 5,
         ));
       }
 
@@ -3239,6 +3257,8 @@ void calibrate()async{
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+    
+
     return Visibility(
       visible: _isRoutePanelOpen,
       child: Stack(
@@ -5642,20 +5662,18 @@ if(user.isnavigating) {
     });
   }
 
-  void onLandmarkVenueClicked(String ID) {
+  void onLandmarkVenueClicked(String ID , {bool DirectlyStartNavigation = false}) {
     setState(() {
       if (building.selectedLandmarkID != ID) {
         building.landmarkdata!.then((value) {
           _isBuildingPannelOpen = false;
           building.floor[value.landmarksMap![ID]!.buildingID!] = value.landmarksMap![ID]!.floor!;
-          createRooms(
-              building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-              building.floor[value.landmarksMap![ID]!.buildingID!]!);
+          createRooms(building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!, building.floor[value.landmarksMap![ID]!.buildingID!]!);
           createMarkers(value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
           building.selectedLandmarkID = ID;
-          _isRoutePanelOpen = false;
           singleroute.clear();
-          _isLandmarkPanelOpen = true;
+          _isRoutePanelOpen = DirectlyStartNavigation;
+          _isLandmarkPanelOpen = !DirectlyStartNavigation;
           List<double> pvalues = tools.localtoglobal(
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!,
@@ -5672,6 +5690,10 @@ if(user.isnavigating) {
         });
       }
     });
+
+    if(DirectlyStartNavigation){
+
+    }
   }
 
   void fromSourceAndDestinationPage(List<String> value) {

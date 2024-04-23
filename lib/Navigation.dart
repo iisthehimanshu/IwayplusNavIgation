@@ -4097,7 +4097,7 @@ if(user.isnavigating) {
                 ],
               ),
             ),
-          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser,)],
+          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,)],
         ));
   }
 
@@ -5677,6 +5677,28 @@ if(user.isnavigating) {
     });
   }
 
+  void closeNavigation(){
+    _isnavigationPannelOpen = false;
+    user.reset();
+    PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+    selectedroomMarker.clear();
+    pathMarkers.clear();
+    PathState.path.clear();
+    PathState.sourcePolyID = "";
+    PathState.destinationPolyID = "";
+    singleroute.clear();
+    fitPolygonInScreen(patch.first);
+    // setState(() {
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+        markers[user.Bid]?[0] = customMarker.move(
+            LatLng(lvalue[0],lvalue[1]),
+            markers[user.Bid]![0]
+        );
+      }
+    // });
+  }
+
   void onLandmarkVenueClicked(String ID , {bool DirectlyStartNavigation = false}) {
     setState(() {
       if (building.selectedLandmarkID != ID) {
@@ -5932,43 +5954,54 @@ if(user.isnavigating) {
                         child: IconButton(
                             onPressed: () {
 
-                               StartPDR();
 
-                              // bool isvalid = MotionModel.isValidStep(
-                              //     user,
-                              //     building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //     building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //     building.nonWalkable[user.Bid]![user.floor]!,
-                              //     reroute);
-                              // if (isvalid) {
-                              //   user.move().then((value) {
-                              //     //  user.move().then((value){
-                              //     setState(() {
-                              //
-                              //       if (markers.length > 0) {
-                              //         List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                              //         markers[user.Bid]?[0] = customMarker.move(
-                              //             LatLng(lvalue[0],lvalue[1]),
-                              //             markers[user.Bid]![0]
-                              //         );
-                              //
-                              //         List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                              //         markers[user.Bid]?[1] = customMarker.move(
-                              //             LatLng(ldvalue[0],ldvalue[1]),
-                              //             markers[user.Bid]![1]
-                              //         );
-                              //       }
-                              //     });
-                              //     // });
-                              //   });
-                              //   print("next [${user.coordX}${user.coordY}]");
-                              //
-                              // } else {
-                              //   if(user.isnavigating){
-                              //     reroute();
-                              //     showToast("You are out of path");
-                              //   }
-                              // }
+                              // StartPDR();
+
+                              bool isvalid = MotionModel.isValidStep(
+                                  user,
+                                  building.floorDimenssion[user.Bid]![user.floor]![0],
+                                  building.floorDimenssion[user.Bid]![user.floor]![1],
+                                  building.nonWalkable[user.Bid]![user.floor]!,
+                                  reroute);
+                              if (isvalid) {
+
+                                if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                                  user.move().then((value) {
+                                    //  user.move().then((value){
+                                    setState(() {
+
+                                      if (markers.length > 0) {
+                                        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                        markers[user.Bid]?[0] = customMarker.move(
+                                            LatLng(lvalue[0],lvalue[1]),
+                                            markers[user.Bid]![0]
+                                        );
+
+                                        List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                        markers[user.Bid]?[1] = customMarker.move(
+                                            LatLng(ldvalue[0],ldvalue[1]),
+                                            markers[user.Bid]![1]
+                                        );
+                                      }
+                                    });
+                                    // });
+                                  });
+                                }else{
+                                  StopPDR();
+                                  setState(() {
+                                    user.isnavigating=false;
+                                  });
+
+                                }
+
+                                print("next [${user.coordX}${user.coordY}]");
+
+                              } else {
+                                if(user.isnavigating){
+                                  // reroute();
+                                  // showToast("You are out of path");
+                                }
+                              }
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),

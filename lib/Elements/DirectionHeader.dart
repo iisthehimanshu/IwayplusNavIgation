@@ -18,9 +18,10 @@ class DirectionHeader extends StatefulWidget {
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
   final Function() moveUser;
+  final Function() closeNavigation;
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation}){
     try{
       // double angle = tools.calculateAngleBWUserandPath(
       //     user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
@@ -53,7 +54,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
         listenToBin();
       });
-      int nextTurn = findNextGreater(turnPoints, widget.user.path[widget.user.pathobj.index]);
+      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
+      int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("angleeeeee $angle");
@@ -173,50 +175,71 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     await flutterTts.speak(msg);
   }
 
-  int findNextGreater(List<int> numbers, int target) {
+  int findNextTurn(List<int> turns, List<int> path) {
     // Iterate through the sorted list
-    for (int i = 0; i < numbers.length; i++) {
-      // If the current number is greater than the target, return it
-      if (numbers[i] > target) {
-        return numbers[i];
+    for (int i = 0; i < path.length; i++) {
+      for(int j = 0; j< turns.length; j++){
+        if(path[i] == turns[j]){
+          return path[i];
+        }
       }
     }
 
     // If no number is greater than the target, return null
-    return target;
+    if(path.length >= widget.user.pathobj.index){
+      return path[widget.user.pathobj.index];
+    }else{
+      return 0;
+    }
   }
 
   @override
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
-    int nextTurn = findNextGreater(turnPoints, widget.user.path[widget.user.pathobj.index]);
-    widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-    double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-    print("dangleeeee $angle");
-    widget.direction = tools.angleToClocks(angle);
-    if(widget.direction == "Straight"){
-      widget.direction = "Go Straight";
+    if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+      speak("You have reached ${widget.user.pathobj.destinationName}");
+      widget.closeNavigation();
     }else{
-      widget.direction = "Turn ${widget.direction}, and Go Straight";
-    }
-    if(oldWidget.direction != widget.direction){
+      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
+      int nextTurn = findNextTurn(turnPoints, remainingPath);
+      widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-      if(oldWidget.direction == "Go Straight"){
+      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      print("dangleeeee $angle");
+      widget.direction = tools.angleToClocks(angle);
+      if(widget.direction == "Straight"){
+        widget.direction = "Go Straight";
+      }else{
+        widget.direction = "Turn ${widget.direction}, and Go Straight";
+      }
 
-        Vibration.vibrate();
+      if(nextTurn == turnPoints.last && widget.distance == 5){
+        double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
+      }
 
-        if(nextTurn == turnPoints.last){
-          speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-        }else{
+      if(oldWidget.direction != widget.direction){
+
+        if(oldWidget.direction == "Go Straight"){
+
+          Vibration.vibrate();
+
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
+
           speak("${widget.direction} ${widget.distance} meter");
+
+        }else if(widget.direction == "Go Straight"){
+
+          Vibration.vibrate();
+          speak("Go Straight ${widget.distance} meter");
         }
-
-      }else if(widget.direction == "Go Straight"){
-
-        Vibration.vibrate();
-        speak("Go Straight ${widget.distance} meter");
       }
     }
+
   }
 
   Icon getCustomIcon(String direction) {

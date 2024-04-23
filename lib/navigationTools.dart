@@ -269,6 +269,34 @@ class tools {
       return "None";
     }
   }
+
+  static String angleToClocks2(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    if (angle >= 337.5 || angle <= 22.5) {
+      return "on your front";
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return "on your Slight Right";
+    } else if (angle > 67.5 && angle <= 112.5) {
+      return "on your Right";
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return "on your Sharp Right";
+    } else if (angle > 157.5 && angle <= 202.5) {
+      return "on your back";
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return "on your Sharp Left";
+    } else if (angle > 247.5 && angle <= 292.5) {
+      return "on your Left";
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return "on your Slight Left";
+    } else {
+      return "on your None";
+    }
+  }
+
+
   static String angleToClocksForNearestLandmarkToBeacon(double angle) {
     if (angle < 0) {
       angle = angle + 360;
@@ -343,6 +371,46 @@ class tools {
     List<int> tval = tools.eightcelltransition(user.theta);
     List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
     List<int> c = [node % cols , node ~/cols];
+
+    print("A $a");
+    print("B $b");
+    print("C $c");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the cross product of the two vectors
+    double crossProduct = ab[0] * ac[1].toDouble() - ab[1] * ac[0].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Check the sign of the cross product to determine the orientation
+    if (crossProduct < 0) {
+      angleInRadians = 2 * pi - angleInRadians;
+    }
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+
+    return angleInDegrees;
+  }
+
+  static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
+
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
 
     print("A $a");
     print("B $b");

@@ -4,13 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../DestinationSearchPage.dart';
 import '../SourceAndDestinationPage.dart';
 
-class HomepageFilter extends StatefulWidget {
+class DestinationPageChipsWidget extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
   final Function(bool selected) onSelect;
 
-  HomepageFilter({
+  DestinationPageChipsWidget({
     required this.svgPath,
     required this.text,
     this.selected = false,
@@ -18,10 +18,10 @@ class HomepageFilter extends StatefulWidget {
   });
 
   @override
-  _HomepageFilterState createState() => _HomepageFilterState();
+  _DestinationPageChipsWidgetState createState() => _DestinationPageChipsWidgetState();
 }
 
-class _HomepageFilterState extends State<HomepageFilter> {
+class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -20,6 +20,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
+import 'Elements/DestinationPageFilter.dart';
+import 'Elements/HomepageFilter.dart';
+import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
   String hintText ;
@@ -49,8 +52,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
-  // Set<Landmarks> cardSet = Set();
-  HashMap<String,Landmarks> cardSet = HashMap();
+
 
 
   @override
@@ -188,11 +190,44 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('recents');
   }
+  bool category = false;
+  Set<String> cardSet = Set();
+  // HashMap<String,Landmarks> cardSet = HashMap();
+  List<String> optionList = [
+    'washroom', 'entry',
+    'reception', 'lift',
+  ];
+  List<String> optionListForUI = [
+    'Washroom', 'entry',
+    'reception', 'lift',
+  ];
+
+  Set<String> optionListItemBuildingName = {};
+  List<Widget> searcCategoryhResults = [];
 
   void search(String searchText){
     setState(() {
-      searchResults.clear();
-      if(searchText.isNotEmpty){
+      if(optionList.contains(searchText.toLowerCase())){
+        category = true;
+
+        landmarkData.landmarksMap!.forEach((key, value) {
+          if (searcCategoryhResults.length < 10) {
+            if (value.name != null && value.element!.subType != "beacons") {
+              if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                optionListItemBuildingName.add(value.buildingName!);
+                searcCategoryhResults.clear();
+                optionListItemBuildingName.forEach((element) {
+                  searcCategoryhResults.add(SearchpageCategoryResults(name: searchText, buildingName: element,));
+                });
+              }
+            }
+          } else {
+            return;
+          }
+        });
+      }else{
+        category = false;
+        searchResults.clear();
         landmarkData.landmarksMap!.forEach((key, value) {
           if (searchResults.length < 10) {
             if (value.name != null && value.element!.subType != "beacons") {
@@ -207,51 +242,39 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   ),
                 );
                 final result = fuse.search(searchText.toLowerCase());
-                print("fuseresult");
-                var rrresult = fuse.search(searchText.toLowerCase());
+                // Assuming `result` is a List<FuseResult<dynamic>>
+                result.forEach((fuseResult) {
+                  // Access the item property of the result to get the matched value
+                  String matchedName = fuseResult.item;
 
-                print(fuse.options.keys);
-                print(rrresult);
-                print(fuse);
-                print(fuse.list);
-                if(!cardSet.containsKey(value.name)){
-                  cardSet[value.name!] = value;
-                  print(cardSet.keys);
-                }
+                  // Access the score of the match
+                  double score = fuseResult.score;
 
-                // print("Wilsonchexker");
-                // print(result);
-                // searchResults.add(SearchpageResults(name: "${value.name}",
-                //   location: "Floor ${value.floor}, ${value
-                //       .buildingName}, ${value.venueName}",
-                //   onClicked: onVenueClicked,
-                //   ID: value.properties!.polyId!,
-                //   bid: value.buildingID!,
-                //   floor: value.floor.toString(),));
+                  // Do something with the matchedName or score
+                  score==0.0? print('Matched Name: $matchedName, Score: $score'): print("");
+
+                });
+                searchResults.add(SearchpageResults(name: "${value.name}",
+                  location: "Floor ${value.floor}, ${value
+                      .buildingName}, ${value.venueName}",
+                  onClicked: onVenueClicked,
+                  ID: value.properties!.polyId!,
+                  bid: value.buildingID!,
+                  floor: value.floor.toString(),));
               }
             }
           } else {
             return;
           }
-          print("cardSet");
-          print(cardSet);
-        });
-      }else{
-        searchResults = recentResults;
-      }
-      cardSet.values.forEach((element) {
-        searchResults.add(SearchpageResults(name: "${element.name}",
-          location: "Floor ${element.floor}, ${element.buildingName}, ${element.venueName}",
-          onClicked: onVenueClicked,
-          ID: element.properties!.polyId!,
-          bid: element.buildingID!,
-          floor: element.floor.toString(),));
-        // print("cardSet---"); // Do something with each element
-        // print(searchResults.length); // Do something with each element
 
-      });
+        });
+      }
+
 
     });
+
+    print("optionListItemBuildingName");
+    print(optionListItemBuildingName);
   }
 
   void fetchRecents()async{
@@ -298,6 +321,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Color containerBoxColor = Color(0xffA1A1AA);
   Color micColor = Colors.black;
   bool micselected = false;
+  int vall = 0;
 
 
   @override
@@ -385,10 +409,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                             )),
                       ),
                       Container(
+                        margin: EdgeInsets.only(right: 6),
                         width: 40,
                         height: 48,
                         child: Center(
-                          child: IconButton(
+                          child: _controller.text.isNotEmpty? IconButton(onPressed: (){
+                            _controller.text = "";
+                          }, icon: Icon(Icons.close)) : IconButton(
                             onPressed: () {
                               setState(() {
                                 speetchText.isListening? stopListening() : startListening();
@@ -411,60 +438,29 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               ),
 
               Container(
-                margin: EdgeInsets.only(left: 10,right: 10),
-                child: ValueListenableBuilder(
-                  valueListenable: Hive.box('Filters').listenable(),
-                  builder: (BuildContext context, value, Widget? child) {
-                    //List<dynamic> aa = []
-                    if(value.length==2){
-                      floorOptionsTags = value.getAt(1);
-                    }
-                    return ChipsChoice<String>.single(
-                      value: currentSelectedFilter,
-                      onChanged: (val) {
-                        print("Destinationpage Filter change${val}${value.values}");
-                        value.put(1, val);
-                        setState(() {
-                          currentSelectedFilter = val;
-                          //onTagsChanged();
-                        });
-                      },
-                      choiceItems: C2Choice.listFrom<String, String>(
-                        source: floorOptions,
-                        value: (i, v) => v,
-                        label: (i, v) => v,
-                        tooltip: (i, v) => v,
-                        meta: (i, v) => _icons[i],
-                        // delete: (i, v) => () {
-                        //   setState(() => options.removeAt(i));
-                        // },
-                      ),
-                      choiceLeadingBuilder: (data, i) {
-                        if (data.meta == null) return null;
-                        return Icon(data.meta as IconData); // Display the icon from the meta property
-                      },
-                      padding: EdgeInsets.only(left: 0,top: 10),
-                      choiceCheckmark: true,
-                      choiceStyle: C2ChipStyle.outlined(
-                        height: 38,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(9),
-                        ),
-                        selectedStyle:  C2ChipStyle.filled(
-                            color: Colors.black
-                        ),
-                        borderWidth: 1,
-
-                      ),
-                      wrapped: false,
-                    );
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: vall,
+                  onChanged: (val){
+                    setState(() => vall = val);
+                    print("wilsonchecker");
+                    print(val);
                   },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: options,
+                    value: (i, v) => i,
+                    label: (i, v) => v,
+                  ),
+                  choiceBuilder: (item, i) {
+                    return DestinationPageChipsWidget(svgPath: '', text: options[i], onSelect: (bool selected) {  },);
+                  },
+                  direction: Axis.horizontal,
                 ),
               ),
 
               Flexible(flex:1,
                   child: SingleChildScrollView(
-                      child: Column(children: searchResults,)
+                      child: Column(children: category? searcCategoryhResults: searchResults,)
                   )
               ),
             ],

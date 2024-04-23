@@ -29,10 +29,8 @@ class _HomepageSearchState extends State<HomepageSearch> {
   List<String> floorOptionsTags = [];
 
   List<String> options = [
-    'Washroom', 'Food & Drinks',
-    'Reception', 'Break Room', 'Education',
-    'Fashion', 'Travel', 'Rooms', 'Tech',
-    'Science',
+    'Washroom', 'Entry',
+    'Reception', 'Lift',
   ];
 
   List<IconData> _icons = [
@@ -179,7 +177,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
               label: (i, v) => v,
             ),
             choiceBuilder: (item, i) {
-              return HomepageFilter(svgPath: '', text: options[i],);
+              return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  },);
             },
             direction: Axis.horizontal,
           ),

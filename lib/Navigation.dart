@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -847,7 +848,13 @@ void calibrate()async{
 
 print("scanningggg starteddddd");
 
-      btadapter.strtScanningIos(apibeaconmap);
+if(Platform.isAndroid){
+  btadapter.startScanning(apibeaconmap);
+}else{
+  btadapter.strtScanningIos(apibeaconmap);
+}
+
+
 
      // btadapter.startScanning(apibeaconmap);
       setState(() {

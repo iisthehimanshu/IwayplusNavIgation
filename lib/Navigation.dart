@@ -91,9 +91,9 @@ class MyApp extends StatelessWidget {
 }
 
 class Navigation extends StatefulWidget {
-  //String directLandID = "";
+  String directLandID = "";
 
-  Navigation();
+  Navigation({this.directLandID = ''});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -167,9 +167,7 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
    // StartPDR();
-   //  if(widget.directLandID.isNotEmpty){
-   //    onLandmarkVenueClicked(widget.directLandID);
-   //  }
+
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -640,6 +638,11 @@ void calibrate()async{
         speak("Unable to find your location");
     }
     btadapter.stopScanning();
+    if(widget.directLandID.isNotEmpty){
+      print("checkdirectLandID");
+      onLandmarkVenueClicked(widget.directLandID);
+    }
+
   }
 
 
@@ -927,6 +930,7 @@ void calibrate()async{
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

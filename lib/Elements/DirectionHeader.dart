@@ -87,7 +87,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     super.dispose();
   }
 
-  void listenToBin(){
+  bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
@@ -125,6 +125,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             double d = tools.calculateDistance(beaconcoord, usercoord);
             if(d < 5){
               //near to user so nothing to do
+              return true;
             }else{
               int distanceFromPath = 100000000;
               int? indexOnPath = null;
@@ -143,13 +144,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
               if(distanceFromPath>5){
                 _timer.cancel();
-                widget.repaint(nearestBeacon);   //away from path
+                widget.repaint(nearestBeacon);
+                return false;//away from path
               }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 Vibration.vibrate();
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
                 widget.user.moveToPointOnPath(indexOnPath!);
-                widget.moveUser();                                 //moved on path
+                widget.moveUser();
+                return true; //moved on path
               }
             }
 
@@ -163,6 +166,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             Vibration.vibrate();
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
+            return true;
           }
 
         }
@@ -172,13 +176,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print(nearestBeacon);
         _timer.cancel();
         widget.repaint(nearestBeacon);
+        return false;
       }
     }
-
-
-
-
-
+    return false;
   }
 
 

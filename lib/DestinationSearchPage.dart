@@ -256,6 +256,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           category = false;
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
+
             if (searchResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
                 if (value.name!

@@ -12,6 +12,10 @@ class BT {
   HashMap<int, double> weight = HashMap();
   HashMap<String, int> beacondetail = HashMap();
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
+  List<BluetoothDevice> _systemDevices = [];
+  List<ScanResult> _scanResults = [];
+  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -22,7 +26,7 @@ class BT {
     BIN[5] = HashMap<String, double>();
     BIN[6] = HashMap<String, double>();
 
-    weight[0] = 10.0;
+    weight[0] = 12.0;
     weight[1] = 6.0;
     weight[2] = 4.0;
     weight[3] = 0.5;
@@ -37,15 +41,17 @@ class BT {
       _binController.stream;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
+
+
+
     startbin();
     FlutterBluePlus.startScan();
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        String MacId = "${result.device.remoteId}";
+        String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
-
-        print("mac $result    rssi $Rssi");
+        // print("mac $result    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -57,10 +63,87 @@ class BT {
   }
 
 
+  void getDevicesList()async{
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+      //print("system devices $_systemDevices");
 
-  void stopScanning() {
-    FlutterBluePlus.stopScan();
+
+
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+    try {
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+
+
+
+
+    // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+    //   _connectionState = state;
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // });
+  }
+
+
+  void strtScanningIos(HashMap<String, beacon> apibeaconmap){
+
+   // print(apibeaconmap);
+
+    startbin();
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+      _scanResults = results;
+    //  print("scanneed results $_scanResults");
+
+
+
+      getDevicesList();
+
+
+
+
+      for (ScanResult result in _scanResults) {
+        String MacId = "${result.device.platformName}";
+        int Rssi = result.rssi;
+        // print(result);
+        // print("mac $MacId   rssi $Rssi");
+
+        if (apibeaconmap.containsKey(MacId)) {
+          beacondetail[MacId] = Rssi * -1;
+
+          addtoBin(MacId, Rssi);
+          _binController.add(BIN); // Emitting event when BIN changes
+        }
+      }
+
+
+
+
+     // Future.delayed(Duration(seconds: 3));
+
+   //   getDevicesList();
+
+
+    }, onError: (e) {
+      print("Scan Error:, $e");
+    });
+  }
+
+
+
+
+  void stopScanning() async{
+    await FlutterBluePlus.stopScan();
+    //_scanResultsSubscription.cancel();
+    _scanResults.clear();
+    _systemDevices.clear();
     emptyBin();
+
   }
 
   void emptyBin() {
@@ -122,6 +205,10 @@ class BT2 {
   HashMap<int, double> weight = HashMap();
   HashMap<String, int> beacondetail = HashMap();
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
+  List<BluetoothDevice> _systemDevices = [];
+  List<ScanResult> _scanResults = [];
+  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -151,8 +238,9 @@ class BT2 {
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        String MacId = "${result.device.remoteId}";
+        String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
+        print("${result.device.remoteId}     $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -182,10 +270,14 @@ class BT2 {
     return sumMap;
   }
 
-  void stopScanning() {
-    FlutterBluePlus.stopScan();
-    emptyBin();
-  }
+
+  // void stopScanning() {
+  //   _scanResultsSubscription.cancel();
+  //   _scanResults.clear();
+  //   _systemDevices.clear();
+  //   FlutterBluePlus.stopScan();
+  //   emptyBin();
+  // }
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
@@ -194,6 +286,33 @@ class BT2 {
     numberOfSample.clear();
     rs.clear();
     Building.thresh = "";
+  }
+
+  void getDevicesList()async{
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+      //print("system devices $_systemDevices");
+
+
+
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+    try {
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    } catch (e) {
+      print("System Devices Error: $e");
+    }
+
+
+
+
+    // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+    //   _connectionState = state;
+    //   if (mounted) {
+    //     setState(() {});
+    //   }
+    // });
   }
 
   void addtoBin(String MacId, int rssi) {
@@ -239,6 +358,47 @@ class BT2 {
 
   void printbin() {
     print(BIN);
+  }
+
+  void strtScanningIos(HashMap<String, beacon> apibeaconmap){
+
+    print(apibeaconmap);
+
+    startbin();
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+      _scanResults = results;
+      //  print("scanneed results $_scanResults");
+
+
+
+      getDevicesList();
+
+
+
+
+      for (ScanResult result in _scanResults) {
+        String MacId = "${result.device.platformName}";
+        int Rssi = result.rssi;
+        if (apibeaconmap.containsKey(MacId)) {
+          //  print("mac $MacId   rssi $Rssi");
+          beacondetail[MacId] = Rssi * -1;
+
+          addtoBin(MacId, Rssi);
+          _binController.add(BIN); // Emitting event when BIN changes
+        }
+      }
+
+
+
+
+      // Future.delayed(Duration(seconds: 3));
+
+      //   getDevicesList();
+
+
+    }, onError: (e) {
+      print("Scan Error:, $e");
+    });
   }
 
   void dispose() {

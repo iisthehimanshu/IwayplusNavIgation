@@ -91,6 +91,8 @@ class MyApp extends StatelessWidget {
 }
 
 class Navigation extends StatefulWidget {
+  //String directLandID = "";
+
   Navigation();
 
   @override
@@ -165,6 +167,9 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
    // StartPDR();
+   //  if(widget.directLandID.isNotEmpty){
+   //    onLandmarkVenueClicked(widget.directLandID);
+   //  }
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -6032,8 +6037,7 @@ if(user.isnavigating) {
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
                       onPressed: () async {
-                        final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
-                        print(permissionStatus);
+                        onLandmarkVenueClicked("0a8bdc2-b0b2-662a-ae5-bff7bff350c0");
                         // building.floor[buildingAllApi.getStoredString()] = user.floor;
                         // createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                         // if (pathMarkers[user.floor] != null) {

@@ -50,6 +50,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
     print("Running init");
   }
 
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -177,7 +178,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
               label: (i, v) => v,
             ),
             choiceBuilder: (item, i) {
-              return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  },);
+              return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked,);
             },
             direction: Axis.horizontal,
           ),

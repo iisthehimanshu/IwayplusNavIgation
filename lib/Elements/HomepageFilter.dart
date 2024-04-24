@@ -5,6 +5,7 @@ import '../DestinationSearchPage.dart';
 import '../SourceAndDestinationPage.dart';
 
 class HomepageFilter extends StatefulWidget {
+  final Function(String ID) onClicked;
   final String svgPath;
   final String text;
   bool selected;
@@ -15,6 +16,7 @@ class HomepageFilter extends StatefulWidget {
     required this.text,
     this.selected = false,
     required this.onSelect,
+    required this.onClicked
   });
 
   @override
@@ -47,7 +49,9 @@ class _HomepageFilterState extends State<HomepageFilter> {
               context,
               MaterialPageRoute(
                   builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
-          );
+          ).then((value){
+            widget.onClicked(value);
+          });
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

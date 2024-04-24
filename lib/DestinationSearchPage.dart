@@ -24,19 +24,18 @@ import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+
 class DestinationSearchPage extends StatefulWidget {
-  String hintText ;
+  String hintText;
   String previousFilter;
 
-  DestinationSearchPage({this.hintText="",this.previousFilter = ""});
+  DestinationSearchPage({this.hintText = "", this.previousFilter = ""});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
 }
 
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
-
-
   land landmarkData = land();
 
   List<Widget> searchResults = [];
@@ -53,21 +52,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
 
-
-
   @override
   void initState() {
     super.initState();
     print("In search page");
-    for(int i=0 ; i<optionListForUI.length ; i++){
-      if(optionListForUI[i].toLowerCase() == widget.previousFilter.toLowerCase()){
+    for (int i = 0; i < optionListForUI.length; i++) {
+      if (optionListForUI[i].toLowerCase() ==
+          widget.previousFilter.toLowerCase()) {
         vall = i;
       }
     }
 
-
-
-    if(widget.previousFilter!=""){
+    if (widget.previousFilter != "") {
       setState(() {
         _controller.text = widget.previousFilter;
       });
@@ -75,10 +71,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     setState(() {
       searchHintString = widget.hintText;
     });
-    fetchlist();
+    fetchandBuild();
     fetchRecents();
     recentResults.add(Container(
-      margin: EdgeInsets.only(left:16, right: 16, top: 8),
+      margin: EdgeInsets.only(left: 16, right: 16, top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -89,27 +85,29 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: Color(0xff000000),
-              height: 23/16,
+              height: 23 / 16,
             ),
             textAlign: TextAlign.left,
           ),
-          TextButton(onPressed: (){
-            clearAllRecents();
-            recent.clear();
-            setState(() {
-              recentResults.clear();
-            });
-          }, child: Text(
-            "Clear all",
-            style: const TextStyle(
-              fontFamily: "Roboto",
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Color(0xff24b9b0),
-              height: 25/16,
-            ),
-            textAlign: TextAlign.left,
-          ))
+          TextButton(
+              onPressed: () {
+                clearAllRecents();
+                recent.clear();
+                setState(() {
+                  recentResults.clear();
+                });
+              },
+              child: Text(
+                "Clear all",
+                style: const TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xff24b9b0),
+                  height: 25 / 16,
+                ),
+                textAlign: TextAlign.left,
+              ))
         ],
       ),
     ));
@@ -119,8 +117,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     speechEnabled = await speetchText.initialize();
     setState(() {});
   }
+
   void startListening() async {
-    if(await speetchText.hasPermission==false){
+    if (await speetchText.hasPermission == false) {
       HelperClass.showToast("Permission not allowed");
       return;
     }
@@ -128,7 +127,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchHintString = "";
     });
     await speetchText.listen(onResult: onSpeechResult);
-    if(speetchText.isNotListening){
+    if (speetchText.isNotListening) {
       setState(() {
         searchHintString = widget.hintText;
       });
@@ -140,7 +139,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     print("In initSpeech");
   }
 
-  void onSpeechResult(result){
+  void onSpeechResult(result) {
     setState(() {
       print("Listening from mic");
 
@@ -151,7 +150,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
-      if(result.recognizedWords == null){
+      if (result.recognizedWords == null) {
         setState(() {
           searchHintString = widget.hintText;
         });
@@ -160,70 +159,92 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     print("In onSpeechResult");
   }
 
-  void stopListening() async{
+  void stopListening() async {
     await speetchText.stop();
     micColor = Colors.black;
-    setState(() {
-
-    });
-    if(speetchText.isNotListening) {
+    setState(() {});
+    if (speetchText.isNotListening) {
       setState(() {
         searchHintString = widget.hintText;
       });
     }
   }
 
-  void fetchlist()async{
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
-      await landmarkApi().fetchLandmarkData(id: key).then((value){
+  void fetchandBuild() async {
+    await fetchlist();
+    setState(() {
+      if (_controller.text.isNotEmpty) {
+        search(_controller.text);
+      } else {
+        searchResults = [];
+        searcCategoryhResults = [];
+        vall = -1;
+      }
+    });
+  }
+
+  Future<void> fetchlist() async {
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+      await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
       });
     });
   }
 
-  void addtoRecents(String name, String location, String ID, String bid)async{
-    if (!recent.any((element) => element[0] == name && element[1] == location)) {
+  void addtoRecents(String name, String location, String ID, String bid) async {
+    if (!recent
+        .any((element) => element[0] == name && element[1] == location)) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      recent.add([name,location,ID,bid]);
-      await prefs.setString('recents', jsonEncode(recent)).then((value){
+      recent.add([name, location, ID, bid]);
+      await prefs.setString('recents', jsonEncode(recent)).then((value) {
         print("saved $name");
       });
     }
-
   }
 
-  void clearAllRecents()async{
+  void clearAllRecents() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('recents');
   }
+
   bool category = false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
   List<String> optionList = [
-    'washroom', 'entry',
-    'reception', 'lift',
+    'washroom',
+    'entry',
+    'reception',
+    'lift',
   ];
   List<String> optionListForUI = [
-    'Washroom', 'Entry',
-    'Reception', 'Lift',
+    'Washroom',
+    'Entry',
+    'Reception',
+    'Lift',
   ];
 
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
 
-  void search(String searchText){
+  void search(String searchText) {
     setState(() {
-      if(searchText.isNotEmpty){
-        if(optionList.contains(searchText.toLowerCase())){
+      if (searchText.isNotEmpty) {
+        if (optionList.contains(searchText.toLowerCase())) {
           category = true;
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
-                if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                if (value.name!
+                    .toLowerCase()
+                    .contains(searchText.toLowerCase())) {
                   optionListItemBuildingName.add(value.buildingName!);
                   searcCategoryhResults.clear();
                   optionListItemBuildingName.forEach((element) {
-                    searcCategoryhResults.add(SearchpageCategoryResults(name: searchText, buildingName: element,));
+                    searcCategoryhResults.add(SearchpageCategoryResults(
+                      name: searchText,
+                      buildingName: element,
+                      onClicked: onVenueClicked,
+                    ));
                   });
                 }
               }
@@ -231,13 +252,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               return;
             }
           });
-        }else{
+        } else {
           category = false;
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
-                if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
+                if (value.name!
+                    .toLowerCase()
+                    .contains(searchText.toLowerCase())) {
                   final nameList = [value.name!.toLowerCase()];
                   final fuse = Fuzzy(
                     nameList,
@@ -257,51 +280,55 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     double score = fuseResult.score;
 
                     // Do something with the matchedName or score
-                    score==0.0? print('Matched Name: $matchedName, Score: $score'): print("");
-
+                    score == 0.0
+                        ? print('Matched Name: $matchedName, Score: $score')
+                        : print("");
                   });
-                  searchResults.add(SearchpageResults(name: "${value.name}",
-                    location: "Floor ${value.floor}, ${value
-                        .buildingName}, ${value.venueName}",
+                  searchResults.add(SearchpageResults(
+                    name: "${value.name}",
+                    location:
+                        "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor.toString(),));
+                    floor: value.floor.toString(),
+                  ));
                 }
               }
             } else {
               return;
             }
-
           });
         }
       }
     });
   }
 
-  void fetchRecents()async{
+  void onVenueClicked(String name, String location, String ID, String bid) {
+    Navigator.pop(context, ID);
+  }
+
+  void fetchRecents() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedData = prefs.getString('recents');
-    if(savedData != null){
+    if (savedData != null) {
       recent = jsonDecode(savedData);
       setState(() {
-        for(List<dynamic> value in recent){
-          if(buildingAllApi.getStoredAllBuildingID()[value[3]] != null){
-            recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2], bid: value[3],));
+        for (List<dynamic> value in recent) {
+          if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
+            recentResults.add(SearchpageRecents(
+              name: value[0],
+              location: value[1],
+              onVenueClicked: onVenueClicked,
+              ID: value[2],
+              bid: value[3],
+            ));
             searchResults = recentResults;
           }
         }
       });
     }
   }
-
-  void onVenueClicked(String name, String location, String ID, String bid){
-    addtoRecents(name, location,ID,bid);
-    Navigator.pop(context,ID);
-  }
-
-
-
 
   List<IconData> _icons = [
     Icons.home,
@@ -316,17 +343,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   bool micselected = false;
   int vall = -1;
 
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    if(_controller.text.isNotEmpty){
-      search(_controller.text);
-    }else{
-      searchResults = [];
-      searcCategoryhResults = [];
-    }
 
     // if(speetchText.isNotListening){
     //   micColor = Colors.black;
@@ -344,12 +364,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               Container(
                   width: screenWidth - 32,
                   height: 48,
-                  margin: EdgeInsets.only(top: 16,left: 16,right: 17),
+                  margin: EdgeInsets.only(top: 16, left: 16, right: 17),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: containerBoxColor, // You can customize the border color
+                      color:
+                          containerBoxColor, // You can customize the border color
                       width: 1.0, // You can customize the border width
                     ),
                   ),
@@ -364,86 +385,89 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            icon: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg"),
+                            icon: SvgPicture.asset(
+                                "assets/DestinationSearchPage_BackIcon.svg"),
                           ),
                         ),
                       ),
                       Expanded(
                         child: Container(
                             child: TextField(
-                              autofocus: true,
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: "${searchHintString}",
-                                border: InputBorder.none, // Remove default border
-                              ),
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff18181b),
-                                height: 25/16,
-                              ),
-                              onTap: (){
-                                if(containerBoxColor==Color(0xffA1A1AA)){
-                                  containerBoxColor = Color(0xff24B9B0);
-                                }else{
-                                  containerBoxColor = Color(0xffA1A1AA);
-                                }
-                                print("Final Set");
-
-                              },
-
-                              onSubmitted: (value){
-                                // print("Final Set");
-                                print(value);
-                                search(value);},
-                              onChanged: (value){
-                                search(value);
-                                // print("Final Set");
-                                print(cardSet);
-                              },
-                            )),
+                          autofocus: true,
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: "${searchHintString}",
+                            border: InputBorder.none, // Remove default border
+                          ),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff18181b),
+                            height: 25 / 16,
+                          ),
+                          onTap: () {
+                            if (containerBoxColor == Color(0xffA1A1AA)) {
+                              containerBoxColor = Color(0xff24B9B0);
+                            } else {
+                              containerBoxColor = Color(0xffA1A1AA);
+                            }
+                            print("Final Set");
+                          },
+                          onSubmitted: (value) {
+                            // print("Final Set");
+                            print(value);
+                            search(value);
+                          },
+                          onChanged: (value) {
+                            search(value);
+                            // print("Final Set");
+                            print(cardSet);
+                          },
+                        )),
                       ),
                       Container(
                         margin: EdgeInsets.only(right: 6),
                         width: 40,
                         height: 48,
                         child: Center(
-                          child: _controller.text.isNotEmpty? IconButton(onPressed: (){
-                            _controller.text = "";
-                            setState(() {
-                              vall = -1;
-                              search(_controller.text);
-                            });
-                          }, icon: Icon(Icons.close)) : IconButton(
-                            onPressed: () {
-                              initSpeech();
-                              setState(() {
-                                speetchText.isListening? stopListening() : startListening();
-                              });
-                              if(!micselected){
-                                micColor = Color(0xff24B9B0);
-                              }
-                              setState(() {});
-                            },
-                            icon: Icon(
-                              Icons.mic,
-                              color: micColor,
-                            ),
-
-                          ),
+                          child: _controller.text.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    _controller.text = "";
+                                    setState(() {
+                                      vall = -1;
+                                      search(_controller.text);
+                                    });
+                                  },
+                                  icon: Icon(Icons.close))
+                              : IconButton(
+                                  onPressed: () {
+                                    initSpeech();
+                                    setState(() {
+                                      speetchText.isListening
+                                          ? stopListening()
+                                          : startListening();
+                                    });
+                                    if (!micselected) {
+                                      micColor = Color(0xff24B9B0);
+                                    }
+                                    setState(() {});
+                                  },
+                                  icon: Icon(
+                                    Icons.mic,
+                                    color: micColor,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
-                  )
-              ),
-
+                  )),
               Container(
                 width: screenWidth,
                 child: ChipsChoice<int>.single(
                   value: vall,
-                  onChanged: (val){
+                  onChanged: (val) {
                     setState(() => vall = val);
                     print("wilsonchecker");
                     print(val);
@@ -455,19 +479,31 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     label: (i, v) => v,
                   ),
                   choiceBuilder: (item, i) {
-                    return DestinationPageChipsWidget(svgPath: '',
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
                       text: optionListForUI[i],
-                      onSelect: item.select!,selected: item.selected,);
+                      onSelect: item.select!,
+                      selected: item.selected,
+                      onTap: (String Text) {
+                        if (Text.isNotEmpty) {
+                          search(Text);
+                        } else {
+                          searchResults = [];
+                          searcCategoryhResults = [];
+                          vall = -1;
+                        }
+                      },
+                    );
                   },
                   direction: Axis.horizontal,
                 ),
               ),
-
-              Flexible(flex:1,
+              Flexible(
+                  flex: 1,
                   child: SingleChildScrollView(
-                      child: Column(children: category? searcCategoryhResults: searchResults,)
-                  )
-              ),
+                      child: Column(
+                    children: category ? searcCategoryhResults : searchResults,
+                  ))),
             ],
           ),
         ),
@@ -481,8 +517,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     super.dispose();
   }
 }
-class SetInfo{
+
+class SetInfo {
   String SetInfoLandmarkName;
   String SetInfoBuildingName;
-  SetInfo({required this.SetInfoBuildingName,required this.SetInfoLandmarkName});
+  SetInfo(
+      {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
 }

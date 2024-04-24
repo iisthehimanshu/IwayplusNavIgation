@@ -27,8 +27,9 @@ import 'Elements/SearchpageResults.dart';
 class FloorSelectionPage extends StatefulWidget {
   String filterName ;
   String filterBuildingName;
+  List<String> floors;
 
-  FloorSelectionPage({required this.filterName,required this.filterBuildingName});
+  FloorSelectionPage({required this.filterName,required this.filterBuildingName,required this.floors});
 
   @override
   State<FloorSelectionPage> createState() => _FloorSelectionPageState();
@@ -56,8 +57,14 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   @override
   void initState() {
     super.initState();
+    if(widget.floors.isEmpty){
+      widget.floors.add("");
+    }
+
     optionListForUI.add(widget.filterName);
     optionListForUI.add(widget.filterBuildingName);
+    print("Floorselection");
+    print(widget.floors);
 
 
     if(widget.filterName!=""){
@@ -68,11 +75,18 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     setState(() {
       searchHintString = widget.filterName;
     });
-    fetchlist();
+    fetchandBuild();
   }
 
 
-  void fetchlist()async{
+  void fetchandBuild()async{
+    await fetchlist();
+    if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
+      search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
+    }
+  }
+
+  Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
         landmarkData.mergeLandmarks(value.landmarks);
@@ -93,7 +107,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
 
-  List<int> floors = [];
+  List<int> checkfloors = [];
 
   void search(String filterText,String buildingText,List<int> floor){
     setState(() {
@@ -160,7 +174,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   }
 
   void onVenueClicked(String name, String location, String ID, String bid){
-    Navigator.pop(context,ID);
+    Navigator.pop(context,[name,location,ID,bid]);
   }
 
 
@@ -186,9 +200,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
-      search(widget.filterName, widget.filterBuildingName,floors);
-    }
+
     // if(speetchText.isNotListening){
     //   micColor = Colors.black;
     //   print("Not listening");
@@ -295,13 +307,14 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     // print(val);
                     print("Floor check");
                     print(val);
-                    floors.clear();
-                      floors.add(val);
-                    search(widget.filterName, widget.filterBuildingName, floors);
+                    checkfloors.clear();
+                    checkfloors.add(int.parse(widget.floors[val]));
+                    print(checkfloors);
+                    search(widget.filterName, widget.filterBuildingName, checkfloors);
                     print(searchResults);
                   },
                   choiceItems: C2Choice.listFrom<int, String>(
-                    source: floorOptionList,
+                    source: widget.floors,
                     value: (i, v) => i,
                     label: (i, v) => v,
                   ),
@@ -320,7 +333,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       //
                       // },
                       onSelect: item.select!,selected: item.selected,
-                      floorNo: i.toString(),
+                      floorNo: widget.floors![i].toString(),
                       // selected: selVal,
 
                     );
@@ -451,7 +464,7 @@ class _FloorWidgetForFloorSelectionPageState extends State<FloorWidgetForFloorSe
       padding: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 8),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: widget.selected ? Colors.black : Colors.white,
+        color: widget.selected ? Color(0xff24B9B0) : Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(

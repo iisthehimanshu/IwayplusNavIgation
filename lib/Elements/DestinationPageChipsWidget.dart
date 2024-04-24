@@ -10,12 +10,14 @@ class DestinationPageChipsWidget extends StatefulWidget {
   final String text;
   bool selected;
   final Function(bool selected) onSelect;
+  final Function(String Text) onTap;
 
   DestinationPageChipsWidget({
     required this.svgPath,
     required this.text,
     this.selected = false,
     required this.onSelect,
+    required this.onTap
   });
 
   @override
@@ -47,6 +49,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
           setState(() {
             widget.selected = !widget.selected;
           });
+          widget.onTap(widget.text);
           widget.onSelect(widget.selected);
           widget.selected ? print("black") : print("white");
           // Navigator.push(

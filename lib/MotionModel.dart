@@ -40,8 +40,10 @@ class MotionModel{
     }
 
     if(state.showcoordX==x && state.showcoordY==y){
+      print("true");
       return true;
     }
+    print("falsse");
     return false;
   }
 

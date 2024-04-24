@@ -3963,7 +3963,7 @@ if(user.isnavigating) {
       }
       if (getPoints[i][0] == user.showcoordX &&
           getPoints[i][1] == user.showcoordY) {
-        print("points matchedddd");
+        print("points matchedddddddd");
         setState(() {
           isMoveStep1=true;
         });

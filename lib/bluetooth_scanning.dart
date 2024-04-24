@@ -26,7 +26,7 @@ class BT {
     BIN[5] = HashMap<String, double>();
     BIN[6] = HashMap<String, double>();
 
-    weight[0] = 10.0;
+    weight[0] = 12.0;
     weight[1] = 6.0;
     weight[2] = 4.0;
     weight[3] = 0.5;
@@ -139,7 +139,7 @@ class BT {
 
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
-    _scanResultsSubscription.cancel();
+    //_scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
     emptyBin();
@@ -239,6 +239,7 @@ class BT2 {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
+        print("${result.device.remoteId}     $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -269,13 +270,13 @@ class BT2 {
   }
 
 
-  void stopScanning() {
-    _scanResultsSubscription.cancel();
-    _scanResults.clear();
-    _systemDevices.clear();
-    FlutterBluePlus.stopScan();
-    emptyBin();
-  }
+  // void stopScanning() {
+  //   _scanResultsSubscription.cancel();
+  //   _scanResults.clear();
+  //   _systemDevices.clear();
+  //   FlutterBluePlus.stopScan();
+  //   emptyBin();
+  // }
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {

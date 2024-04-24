@@ -181,7 +181,7 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    handleCompassEvents();
+    //handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -3846,20 +3846,20 @@ if(user.isnavigating) {
     // print("user corrds");
     // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
-    print("pointss matchedddd ${getPoints.contains(
-        [user.showcoordX, user.showcoordY])}");
+    // print("pointss matchedddd ${getPoints.contains(
+    //     [user.showcoordX, user.showcoordY])}");
     for (int i = 0; i < getPoints.length; i++) {
-      print("---length  = ${getPoints.length}");
-      print("--- point  = ${getPoints[i]}");
-      print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-      print("--- val  = $val");
-      print("--- isPDRStop  = $isPdrStop");
+      // print("---length  = ${getPoints.length}");
+      // print("--- point  = ${getPoints[i]}");
+      // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+      // print("--- val  = $val");
+      // print("--- isPDRStop  = $isPdrStop");
 
       // print("turn corrds");
       //
       // print("${getPoints[i].a}, ${getPoints[i].b}");
       if (isPdrStop && val == 0) {
-        print("points unmatchedddd");
+       // print("points unmatchedddd");
 
         setState(() {
           isPdrStop = false;
@@ -3869,7 +3869,7 @@ if(user.isnavigating) {
       }
       if (getPoints[i][0] == user.showcoordX &&
           getPoints[i][1] == user.showcoordY) {
-        print("points matchedddd");
+        //print("points matchedddd");
 
         StopPDR();
         getPoints.removeAt(i);
@@ -6014,31 +6014,31 @@ if(user.isnavigating) {
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                  //
-                  //   double? compassHeading = newvalue;
-                  //   setState(() {
-                  //     user.theta = compassHeading!;
-                  //     if (mapState.interaction2) {
-                  //       mapState.bearing = compassHeading!;
-                  //       _googleMapController.moveCamera(
-                  //         CameraUpdate.newCameraPosition(
-                  //           CameraPosition(
-                  //             target: mapState.target,
-                  //             zoom: mapState.zoom,
-                  //             bearing: mapState.bearing!,
-                  //           ),
-                  //         ),
-                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                  //       );
-                  //     } else {
-                  //       if (markers.length > 0)
-                  //         markers[user.Bid]?[0] =
-                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                  //     }
-                  //   });
-                  //
-                  // }),
+                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                    double? compassHeading = newvalue;
+                    setState(() {
+                      user.theta = compassHeading!;
+                      if (mapState.interaction2) {
+                        mapState.bearing = compassHeading!;
+                        _googleMapController.moveCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: mapState.target,
+                              zoom: mapState.zoom,
+                              bearing: mapState.bearing!,
+                            ),
+                          ),
+                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                        );
+                      } else {
+                        if (markers.length > 0)
+                          markers[user.Bid]?[0] =
+                              customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                      }
+                    });
+
+                  }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),

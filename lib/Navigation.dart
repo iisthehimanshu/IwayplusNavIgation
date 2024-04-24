@@ -460,29 +460,29 @@ void calibrate()async{
          if (isvalid) {
 
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-             if(!isMoveStep1){
-               user.move().then((value) {
-
-                 user.move().then((value){
-                   setState(() {
-
-                     if (markers.length > 0) {
-                       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                       markers[user.Bid]?[0] = customMarker.move(
-                           LatLng(lvalue[0],lvalue[1]),
-                           markers[user.Bid]![0]
-                       );
-
-                       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                       markers[user.Bid]?[1] = customMarker.move(
-                           LatLng(ldvalue[0],ldvalue[1]),
-                           markers[user.Bid]![1]
-                       );
-                     }
-                   });
-                 });
-               });
-             }else{
+           //  if(!isMoveStep1){
+           //     user.move().then((value) {
+           //
+           //       user.move().then((value){
+           //         setState(() {
+           //
+           //           if (markers.length > 0) {
+           //             List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+           //             markers[user.Bid]?[0] = customMarker.move(
+           //                 LatLng(lvalue[0],lvalue[1]),
+           //                 markers[user.Bid]![0]
+           //             );
+           //
+           //             List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+           //             markers[user.Bid]?[1] = customMarker.move(
+           //                 LatLng(ldvalue[0],ldvalue[1]),
+           //                 markers[user.Bid]![1]
+           //             );
+           //           }
+           //         });
+           //       });
+           //     });
+            // }else{
 
                user.move().then((value){
                  setState(() {
@@ -501,11 +501,11 @@ void calibrate()async{
                      );
 
                    }
-                   isMoveStep1=false;
+                   //isMoveStep1=false;
                  });
                });
 
-             }
+            // }
 
            }else{
              StopPDR();
@@ -3123,6 +3123,32 @@ if(Platform.isAndroid){
     path=getOptiPath(getTurns, numCols, path);
 
 
+
+
+    List<int> turns=tools.getTurnpoints(path, numCols);
+
+    for(int i=0;i<turns.length;i++){
+      int x = turns[i] % numCols;
+      int y = turns[i] ~/ numCols;
+
+      getPoints.add([x,y]);
+
+
+    }
+    getPoints.add([destinationX,destinationY]);
+
+    for(int i=0;i<getTurns.length;i++){
+      int x = path[i] % numCols;
+      int y = path[i] ~/ numCols;
+
+      print("allPathPoints: ${x} ,${y}");
+
+
+    }
+
+
+
+
     
       //print("rdp* path ${res}");
     print("A* path ${path}");
@@ -3917,17 +3943,17 @@ if(user.isnavigating) {
     // print("pointss matchedddd ${getPoints.contains(
     //     [user.showcoordX, user.showcoordY])}");
     for (int i = 0; i < getPoints.length; i++) {
-      // print("---length  = ${getPoints.length}");
-      // print("--- point  = ${getPoints[i]}");
-      // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-      // print("--- val  = $val");
-      // print("--- isPDRStop  = $isPdrStop");
+      print("---length  = ${getPoints.length}");
+      print("--- point  = ${getPoints[i]}");
+      print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+      print("--- val  = $val");
+      print("--- isPDRStop  = $isPdrStop");
 
-      // print("turn corrds");
-      //
-      // print("${getPoints[i].a}, ${getPoints[i].b}");
+      print("turn corrds");
+
+      print("${getPoints[i][0]}, ${getPoints[i][1]}");
       if (isPdrStop && val == 0) {
-       // print("points unmatchedddd");
+        print("points unmatchedddd");
 
         setState(() {
           isPdrStop = false;
@@ -3937,7 +3963,7 @@ if(user.isnavigating) {
       }
       if (getPoints[i][0] == user.showcoordX &&
           getPoints[i][1] == user.showcoordY) {
-        //print("points matchedddd");
+        print("points matchedddd");
         setState(() {
           isMoveStep1=true;
         });

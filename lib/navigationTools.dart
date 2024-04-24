@@ -751,8 +751,8 @@ class tools {
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
-    print("@@@@@ $x1,$y1");
-    print("&&&&& $x2,$y2");
+    // print("@@@@@ $x1,$y1");
+    // print("&&&&& $x2,$y2");
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();

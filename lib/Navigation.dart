@@ -179,7 +179,7 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -460,7 +460,30 @@ void calibrate()async{
          if (isvalid) {
 
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-             user.move().then((value) {
+             if(!isMoveStep1){
+               user.move().then((value) {
+
+                 user.move().then((value){
+                   setState(() {
+
+                     if (markers.length > 0) {
+                       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                       markers[user.Bid]?[0] = customMarker.move(
+                           LatLng(lvalue[0],lvalue[1]),
+                           markers[user.Bid]![0]
+                       );
+
+                       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                       markers[user.Bid]?[1] = customMarker.move(
+                           LatLng(ldvalue[0],ldvalue[1]),
+                           markers[user.Bid]![1]
+                       );
+                     }
+                   });
+                 });
+               });
+             }else{
+
                user.move().then((value){
                  setState(() {
 
@@ -476,10 +499,14 @@ void calibrate()async{
                          LatLng(ldvalue[0],ldvalue[1]),
                          markers[user.Bid]![1]
                      );
+
                    }
+                   isMoveStep1=false;
                  });
                });
-             });
+
+             }
+
            }else{
              StopPDR();
              setState(() {
@@ -2902,6 +2929,8 @@ if(Platform.isAndroid){
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
+        showToast("run the script");
+
         print(commonlifts);
 
         await fetchroute(
@@ -3821,6 +3850,8 @@ if(Platform.isAndroid){
     );
   }
 
+  bool isMoveStep1=false;
+
     Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3907,6 +3938,9 @@ if(user.isnavigating) {
       if (getPoints[i][0] == user.showcoordX &&
           getPoints[i][1] == user.showcoordY) {
         //print("points matchedddd");
+        setState(() {
+          isMoveStep1=true;
+        });
 
         StopPDR();
         getPoints.removeAt(i);
@@ -6054,31 +6088,31 @@ if(user.isnavigating) {
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                    double? compassHeading = newvalue;
-                    setState(() {
-                      user.theta = compassHeading!;
-                      if (mapState.interaction2) {
-                        mapState.bearing = compassHeading!;
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: mapState.target,
-                              zoom: mapState.zoom,
-                              bearing: mapState.bearing!,
-                            ),
-                          ),
-                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                        );
-                      } else {
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] =
-                              customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                      }
-                    });
-
-                  }),
+                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                  //
+                  //   double? compassHeading = newvalue;
+                  //   setState(() {
+                  //     user.theta = compassHeading!;
+                  //     if (mapState.interaction2) {
+                  //       mapState.bearing = compassHeading!;
+                  //       _googleMapController.moveCamera(
+                  //         CameraUpdate.newCameraPosition(
+                  //           CameraPosition(
+                  //             target: mapState.target,
+                  //             zoom: mapState.zoom,
+                  //             bearing: mapState.bearing!,
+                  //           ),
+                  //         ),
+                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                  //       );
+                  //     } else {
+                  //       if (markers.length > 0)
+                  //         markers[user.Bid]?[0] =
+                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                  //     }
+                  //   });
+                  //
+                  // }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),

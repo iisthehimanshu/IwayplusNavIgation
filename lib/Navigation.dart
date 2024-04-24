@@ -166,9 +166,7 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
    // StartPDR();
-
-
-
+    setPdrThreshold();
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -294,6 +292,44 @@ void calibrate()async{
       throw (e);
     }
   }
+  Future<void> setPdrThreshold() async {
+    try {
+      manufacturer = await DeviceInformation.deviceManufacturer;
+      String deviceModel=await DeviceInformation.deviceModel;
+
+      if (manufacturer.toLowerCase().contains("samsung")) {
+        print("manufacture $manufacturer $step_threshold");
+        if(deviceModel.startsWith("A",3)){
+          // print(await DeviceInformation.deviceModel);
+          peakThreshold=10.7;
+          valleyThreshold=-10.7;
+        }else if(deviceModel.startsWith("M",3)){
+          peakThreshold=11.0;
+          valleyThreshold=-11.0;
+        }else{
+          peakThreshold=11.111111;
+          valleyThreshold=-11.111111;
+        }
+      } else if (manufacturer.toLowerCase().contains("oneplus")) {
+        print("manufacture $manufacturer $step_threshold");
+        // step_threshold = 0.7;
+      } else if (manufacturer.toLowerCase().contains("realme")) {
+        print("manufacture $manufacturer $step_threshold");
+        peakThreshold=11.0;
+        valleyThreshold=-11.0;
+      } else if (manufacturer.toLowerCase().contains("redmi")) {
+        print("manufacture $manufacturer $step_threshold");
+        peakThreshold=11.3;
+        valleyThreshold=-11.3;
+      } else if (manufacturer.toLowerCase().contains("google")) {
+        print("manufacture $manufacturer $step_threshold");
+        peakThreshold=11.111111;
+        valleyThreshold=-11.111111;
+      }
+    } catch (e) {
+      throw (e);
+    }
+  }
 
   void handleCompassEvents() {
     compassSubscription = FlutterCompass.events!.listen((event) {
@@ -390,6 +426,7 @@ void calibrate()async{
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount(){
+    print(peakThreshold);
    pdr.add(
 
        accelerometerEventStream().listen((AccelerometerEvent event) {
@@ -5964,7 +6001,8 @@ if(user.isnavigating) {
                             onPressed: () {
 
 
-                               StartPDR();
+
+                              StartPDR();
 
                               // bool isvalid = MotionModel.isValidStep(
                               //     user,
@@ -6010,7 +6048,9 @@ if(user.isnavigating) {
                               //     // reroute();
                               //     // showToast("You are out of path");
                               //   }
-                              // }
+
+                              //}
+
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),

@@ -16,6 +16,7 @@ class pathState {
   int index = 0;
   String sourceBid = "";
   String destinationBid = "";
+  Map<String,Map<int,int>> connections = {};
 
   // Default constructor without arguments
   pathState();

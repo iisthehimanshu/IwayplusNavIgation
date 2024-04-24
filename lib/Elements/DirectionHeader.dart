@@ -46,7 +46,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   late Timer _timer;
   int c = 0;
   int d = 0;
-  bool isScanning=false;
   @override
   void initState() {
     super.initState();
@@ -56,11 +55,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
         c++;
-        isScanning=listenToBin();
-
-        if(isScanning){
-          btadapter.strtScanningIos(Building.apibeaconmap);
-        }
+        listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);

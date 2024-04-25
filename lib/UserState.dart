@@ -36,6 +36,8 @@ class UserState{
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
+
+
     if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
       showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
       showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;

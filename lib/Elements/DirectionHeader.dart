@@ -53,7 +53,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       turnPoints.add(widget.user.path.last);
       btadapter.startScanning(Building.apibeaconmap);
-      _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         listenToBin();
 
@@ -72,7 +72,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
           Vibration.vibrate();
-          speak("${widget.direction} ${widget.distance} meter");
+          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
         }
       });
 
@@ -94,7 +94,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     print("-90-   ${sumMap.length}");
     widget.direction = "";
 
-    //Building.thresh = "";
     btadapter.emptyBin();
     d++;
     sumMap.forEach((key, value) {
@@ -106,8 +105,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("-90-   $key   $value");
 
       if(value>highestweight){
-       highestweight =  value;
-       nearestBeacon = key;
+        highestweight =  value;
+        nearestBeacon = key;
       }
     });
 
@@ -119,7 +118,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
 
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >7){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);
@@ -216,6 +215,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   //     speak("You have reached ${widget.user.pathobj.destinationName}");
   //     widget.closeNavigation();
   //   }else{
+  //
+  //     widget.user.pathobj.connections.forEach((key, value) {
+  //       value.forEach((inkey, invalue) {
+  //         if(widget.user.path[widget.user.pathobj.index] == invalue){
+  //           widget.direction = "You have reached ";
+  //         }
+  //       });
+  //     });
+  //
+  //
+  //
+  //
   //     List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
   //     int nextTurn = findNextTurn(turnPoints, remainingPath);
   //     widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -245,12 +256,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   //         //   speak("${widget.direction} ${widget.distance} meter");
   //         // }
   //
-  //         speak("${widget.direction} ${widget.distance} meter");
+  //         speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
   //
   //       }else if(widget.direction == "Go Straight"){
   //
   //         Vibration.vibrate();
-  //         speak("Go Straight ${widget.distance} meter");
+  //         speak("Go Straight ${(widget.distance/2).toInt()} steps");
   //       }
   //     }
   //   }
@@ -319,7 +330,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-      height: 175,
+      height: 95,
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Color(0xff01544F),
@@ -343,7 +354,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     "${widget.direction}",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 18,
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.w700,
 
@@ -352,7 +363,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   SizedBox(height: 4.0),
                   Text(
 
-                    '${widget.distance} m',
+                    '${(widget.distance/2).toInt()} steps',
                     style: TextStyle(
 
                       color: Colors.white,
@@ -367,30 +378,30 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ),
 
               Spacer(),
-              Text("$c"),
-              Text("$d",style: TextStyle(
-                color: Colors.red
-              ),),
-              ElevatedButton(onPressed: (){
-                _timer.cancel();
-                _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
-                c++;
-                listenToBin();
-
-              });}, child: Icon(Icons.start))
-
-              // Container(
+              // Text("$c"),
+              // Text("$d",style: TextStyle(
+              //   color: Colors.red
+              // ),),
+              // ElevatedButton(onPressed: (){
+              //   _timer.cancel();
+              //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+              //   c++;
+              //   listenToBin();
               //
-              //     decoration: BoxDecoration(
-              //       color: Colors.white,
-              //       border: Border.all(
-              //         color: Colors.white,
-              //         width: 1.0,
-              //       ),
-              //       borderRadius: BorderRadius.circular(28.0),
-              //     ),
-              //
-              //     child: getCustomIcon(widget.direction)),
+              // });}, child: Icon(Icons.start))
+
+              Container(
+
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(28.0),
+                  ),
+
+                  child: getCustomIcon(widget.direction)),
 
             ],
           ),

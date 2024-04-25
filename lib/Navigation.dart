@@ -462,6 +462,22 @@ void calibrate()async{
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
              user.move().then((value) {
                bool moveOneMore = true;
+               bool moveOneLift=true;
+               Map<String,Map<int,int>> liftLoc= user.pathobj.connections;
+               liftLoc.forEach((key, value) {
+                 if(user.Bid==key){
+                   Map<int,int> liftCoords=value;
+                   liftCoords.forEach((key, value) {
+                     if(user.floor==key){
+                       if(user.path[user.pathobj.index]==value){
+                         setState(() {
+                           moveOneLift=false;
+                         });
+                       }
+                     }
+                   });
+                 }
+               });
                for(int j = 0 ; j<getPoints.length; j++){
                  print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
                  print("user point ${user.showcoordX},${user.showcoordY}");
@@ -471,7 +487,7 @@ void calibrate()async{
                    break;
                  }
                }
-               if(moveOneMore){
+               if(moveOneMore || moveOneLift){
                  print("moving one more");
                  user.move().then((value){
                    setState(() {
@@ -3165,6 +3181,9 @@ if(Platform.isAndroid){
 
     List<int> turns=tools.getTurnpoints(path, numCols);
 
+
+print("turns ${turns}");
+
     for(int i=0;i<turns.length;i++){
       int x = turns[i] % numCols;
       int y = turns[i] ~/ numCols;
@@ -3173,16 +3192,112 @@ if(Platform.isAndroid){
 
 
     }
+
+
+    for(int i=0;i<getPoints.length-1;i++){
+      if(getPoints[i][0]!=getPoints[i+1][0] && getPoints[i][1]!=getPoints[i+1][1]){
+        int dist=tools.calculateDistance(getPoints[i], getPoints[i+1]).toInt();
+        if(dist<=10){
+          print("dist $dist");
+
+          //points of prev turn
+          int index1= getPoints[i][0]+getPoints[i][1]*numCols;
+          int ind1=path.indexOf(index1);
+          int prev=path[ind1-1];
+
+
+          int currX=index1%numCols;
+          int currY=index1~/numCols;
+
+          int prevX=prev%numCols;
+          int prevY=prev~/numCols;
+
+          //straight line eqautaion1
+          //y-prevY=(currY-prevY)/(currX-prevX)*(x-prevX);
+
+
+
+
+
+
+
+
+
+
+
+          //points of next turn;
+          int index2= getPoints[i+1][0]+getPoints[i+1][1]*numCols;
+          int ind2=path.indexOf(index2);
+          int next=path[ind2+1];
+
+
+
+          int nextX=index2%numCols;
+          int nextY=index2~/numCols;
+
+          int nextNextX=next%numCols;
+          int nextNextY=next~/numCols;
+
+
+
+
+          int ind3=path.indexOf(index1-1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          // int currX=path[ind1]%numCols;
+          // int currY=path[ind1]~/numCols;
+          //
+          // int nextX=path[ind2]%numCols;
+          // int nextY=path[ind2]~/numCols;
+          //
+          // int prevX=path[ind3]%numCols;
+          // int prevY=path[ind3]~/numCols;
+
+
+
+          // if(nextX==currX){
+          //   currY=prevY;
+          //   int newIndexY=currY*numCols+currX;
+          //   path[ind1]=newIndexY;
+          // }else if(nextY==currY){
+          //   currX=prevX;
+          //   int newIndexX=currY*numCols+currX;
+          //   path[ind1]=newIndexX;
+          // }
+
+          print("${ind1}  ${ind2}  ${ind3}");
+
+           //path=getOptiPath(getTurns, numCols, path);
+        }
+      }
+    }
+
+    print(getPoints);
     getPoints.add([destinationX,destinationY]);
 
-    for(int i=0;i<getTurns.length;i++){
-      int x = path[i] % numCols;
-      int y = path[i] ~/ numCols;
-
-      print("allPathPoints: ${x} ,${y}");
-
-
-    }
+    // for(int i=0;i<getTurns.length;i++){
+    //   int x = path[i] % numCols;
+    //   int y = path[i] ~/ numCols;
+    //
+    //   print("allPathPoints: ${x} ,${y}");
+    //
+    //
+    // }
 
 
 
@@ -3913,7 +4028,7 @@ if(Platform.isAndroid){
       ),
     );
   }
-
+bool isLift=false;
     Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -4009,6 +4124,53 @@ if(user.isnavigating) {
       }
     }
   }
+
+
+
+  //lift logic
+  if(isLift==false){
+
+
+
+
+    // int currentLocX=user.showcoordX;
+    // int currentLocY=user.showcoordY;
+
+    //string is our building id,and its value is a map of key floor number and its lifts node.
+    Map<String,Map<int,int>> liftLoc= user.pathobj.connections;
+    liftLoc.forEach((key, value) {
+      if(user.Bid==key){
+        print("current building ${user.Bid}");
+        Map<int,int> liftCoords=value;
+        liftCoords.forEach((key, value) {
+
+          if(user.floor==key){
+            print("current floor ${user.floor}");
+            if(user.path[user.pathobj.index]==value){
+              print("lift locs matched ${value}");
+              //your are now inside the lift.
+              StopPDR();
+              speak("you are inside the lift");
+              setState(() {
+                isLift=true;
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+print("is relocalise ${UserState.isRelocalizeAroundLift}");
+  if(isLift && UserState.isRelocalizeAroundLift==true){
+      StartPDR();
+      UserState.isRelocalizeAroundLift=false;
+        }
+
+
+
+
+
 }
 
 
@@ -4237,8 +4399,7 @@ if(user.isnavigating) {
                 ],
               ),
             ),
-          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,)],
-        ));
+          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,isRelocalize: false,)],));
   }
 
 
@@ -6097,54 +6258,54 @@ if(user.isnavigating) {
 
 
 
-                              StartPDR();
-
-                              // bool isvalid = MotionModel.isValidStep(
-                              //     user,
-                              //     building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //     building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //     building.nonWalkable[user.Bid]![user.floor]!,
-                              //     reroute);
-                              // if (isvalid) {
-                              //
-                              //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                              //     user.move().then((value) {
-                              //       //  user.move().then((value){
-                              //       setState(() {
-                              //
-                              //         if (markers.length > 0) {
-                              //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                              //           markers[user.Bid]?[0] = customMarker.move(
-                              //               LatLng(lvalue[0],lvalue[1]),
-                              //               markers[user.Bid]![0]
-                              //           );
-                              //
-                              //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                              //           markers[user.Bid]?[1] = customMarker.move(
-                              //               LatLng(ldvalue[0],ldvalue[1]),
-                              //               markers[user.Bid]![1]
-                              //           );
-                              //         }
-                              //       });
-                              //       // });
-                              //     });
-                              //   }else{
-                              //     StopPDR();
-                              //     setState(() {
-                              //       user.isnavigating=false;
-                              //     });
-                              //
-                              //   }
-                              //
-                              //   print("next [${user.coordX}${user.coordY}]");
-                              //
-                              // } else {
-                              //   if(user.isnavigating){
-                              //     // reroute();
-                              //     // showToast("You are out of path");
-                              //   }
-                              //
-                              // }
+                             StartPDR();
+                             //
+                             //  bool isvalid = MotionModel.isValidStep(
+                             //      user,
+                             //      building.floorDimenssion[user.Bid]![user.floor]![0],
+                             //      building.floorDimenssion[user.Bid]![user.floor]![1],
+                             //      building.nonWalkable[user.Bid]![user.floor]!,
+                             //      reroute);
+                             //  if (isvalid) {
+                             //
+                             //    if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                             //      user.move().then((value) {
+                             //        //  user.move().then((value){
+                             //        setState(() {
+                             //
+                             //          if (markers.length > 0) {
+                             //            List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                             //            markers[user.Bid]?[0] = customMarker.move(
+                             //                LatLng(lvalue[0],lvalue[1]),
+                             //                markers[user.Bid]![0]
+                             //            );
+                             //
+                             //            List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                             //            markers[user.Bid]?[1] = customMarker.move(
+                             //                LatLng(ldvalue[0],ldvalue[1]),
+                             //                markers[user.Bid]![1]
+                             //            );
+                             //          }
+                             //        });
+                             //        // });
+                             //      });
+                             //    }else{
+                             //      StopPDR();
+                             //      setState(() {
+                             //        user.isnavigating=false;
+                             //      });
+                             //
+                             //    }
+                             //
+                             //    print("next [${user.coordX}${user.coordY}]");
+                             //
+                             //  } else {
+                             //    if(user.isnavigating){
+                             //      // reroute();
+                             //      // showToast("You are out of path");
+                             //    }
+                             //
+                             //  }
 
                             }, icon: Icon(Icons.directions_walk))),
                   ),

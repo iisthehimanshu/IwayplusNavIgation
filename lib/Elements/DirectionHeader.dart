@@ -13,6 +13,7 @@ import '../buildingState.dart';
 class DirectionHeader extends StatefulWidget {
   String direction;
   int distance;
+  bool isRelocalize;
   UserState user;
   final Function(String nearestBeacon) paint;
   final Function(String nearestBeacon) repaint;
@@ -21,7 +22,7 @@ class DirectionHeader extends StatefulWidget {
   final Function() closeNavigation;
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize}){
     try{
       // double angle = tools.calculateAngleBWUserandPath(
       //     user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
@@ -55,14 +56,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
-        listenToBin();
+        // print("listen to bin :${listenToBin()}");
+        // UserState.isRelocalizeAroundLift=listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      print("angleeeeee $angle");
+      print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){

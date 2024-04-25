@@ -179,7 +179,7 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    //handleCompassEvents();
+    handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -461,7 +461,38 @@ void calibrate()async{
 
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
              user.move().then((value) {
-               user.move().then((value){
+               bool moveOneMore = true;
+               for(int j = 0 ; j<getPoints.length; j++){
+                 print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
+                 print("user point ${user.showcoordX},${user.showcoordY}");
+                 if(getPoints[j][0] == user.showcoordX && getPoints[j][1] == user.showcoordY){
+                   print("turned it false");
+                   moveOneMore =false;
+                   break;
+                 }
+               }
+               if(moveOneMore){
+                 print("moving one more");
+                 user.move().then((value){
+                   setState(() {
+
+                     if (markers.length > 0) {
+                       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                       markers[user.Bid]?[0] = customMarker.move(
+                           LatLng(lvalue[0],lvalue[1]),
+                           markers[user.Bid]![0]
+                       );
+
+                       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                       markers[user.Bid]?[1] = customMarker.move(
+                           LatLng(ldvalue[0],ldvalue[1]),
+                           markers[user.Bid]![1]
+                       );
+                     }
+                   });
+                 });
+               }else{
+                 print("rendering here");
                  setState(() {
 
                    if (markers.length > 0) {
@@ -478,7 +509,8 @@ void calibrate()async{
                      );
                    }
                  });
-               });
+               }
+
              });
            }else{
              StopPDR();
@@ -3120,7 +3152,7 @@ if(Platform.isAndroid){
     // }
 
 
-     Map<int,int> getTurns= tools.getTurnMap(path, numCols);
+    Map<int,int> getTurns= tools.getTurnMap(path, numCols);
 
 
     print("getTurnsss ${getTurns}");
@@ -3129,11 +3161,37 @@ if(Platform.isAndroid){
     path=getOptiPath(getTurns, numCols, path);
 
 
-    
-      //print("rdp* path ${res}");
+
+
+    List<int> turns=tools.getTurnpoints(path, numCols);
+
+    for(int i=0;i<turns.length;i++){
+      int x = turns[i] % numCols;
+      int y = turns[i] ~/ numCols;
+
+      getPoints.add([x,y]);
+
+
+    }
+    getPoints.add([destinationX,destinationY]);
+
+    for(int i=0;i<getTurns.length;i++){
+      int x = path[i] % numCols;
+      int y = path[i] ~/ numCols;
+
+      print("allPathPoints: ${x} ,${y}");
+
+
+    }
+
+
+
+
+
+    //print("rdp* path ${res}");
     print("A* path ${path}");
     print("non walkable path ${building.nonWalkable[bid]![floor]!}");
-    
+
     //print("fetch route- $path");
     PathState.path[floor] = path;
     if(PathState.numCols == null){
@@ -3148,7 +3206,7 @@ if(Platform.isAndroid){
 
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
-     // print("direction elements $element");
+      // print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -3943,9 +4001,7 @@ if(user.isnavigating) {
           getPoints[i][1] == user.showcoordY) {
 
         print("points matchedddddddd");
-        setState(() {
-          isMoveStep1=true;
-        });
+
 
         StopPDR();
         getPoints.removeAt(i);
@@ -6041,83 +6097,83 @@ if(user.isnavigating) {
 
 
 
-                              //StartPDR();
+                              StartPDR();
 
-                              bool isvalid = MotionModel.isValidStep(
-                                  user,
-                                  building.floorDimenssion[user.Bid]![user.floor]![0],
-                                  building.floorDimenssion[user.Bid]![user.floor]![1],
-                                  building.nonWalkable[user.Bid]![user.floor]!,
-                                  reroute);
-                              if (isvalid) {
-
-                                if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                                  user.move().then((value) {
-                                    //  user.move().then((value){
-                                    setState(() {
-
-                                      if (markers.length > 0) {
-                                        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                        markers[user.Bid]?[0] = customMarker.move(
-                                            LatLng(lvalue[0],lvalue[1]),
-                                            markers[user.Bid]![0]
-                                        );
-
-                                        List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                        markers[user.Bid]?[1] = customMarker.move(
-                                            LatLng(ldvalue[0],ldvalue[1]),
-                                            markers[user.Bid]![1]
-                                        );
-                                      }
-                                    });
-                                    // });
-                                  });
-                                }else{
-                                  StopPDR();
-                                  setState(() {
-                                    user.isnavigating=false;
-                                  });
-
-                                }
-
-                                print("next [${user.coordX}${user.coordY}]");
-
-                              } else {
-                                if(user.isnavigating){
-                                  // reroute();
-                                  // showToast("You are out of path");
-                                }
-
-                              }
+                              // bool isvalid = MotionModel.isValidStep(
+                              //     user,
+                              //     building.floorDimenssion[user.Bid]![user.floor]![0],
+                              //     building.floorDimenssion[user.Bid]![user.floor]![1],
+                              //     building.nonWalkable[user.Bid]![user.floor]!,
+                              //     reroute);
+                              // if (isvalid) {
+                              //
+                              //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                              //     user.move().then((value) {
+                              //       //  user.move().then((value){
+                              //       setState(() {
+                              //
+                              //         if (markers.length > 0) {
+                              //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                              //           markers[user.Bid]?[0] = customMarker.move(
+                              //               LatLng(lvalue[0],lvalue[1]),
+                              //               markers[user.Bid]![0]
+                              //           );
+                              //
+                              //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                              //           markers[user.Bid]?[1] = customMarker.move(
+                              //               LatLng(ldvalue[0],ldvalue[1]),
+                              //               markers[user.Bid]![1]
+                              //           );
+                              //         }
+                              //       });
+                              //       // });
+                              //     });
+                              //   }else{
+                              //     StopPDR();
+                              //     setState(() {
+                              //       user.isnavigating=false;
+                              //     });
+                              //
+                              //   }
+                              //
+                              //   print("next [${user.coordX}${user.coordY}]");
+                              //
+                              // } else {
+                              //   if(user.isnavigating){
+                              //     // reroute();
+                              //     // showToast("You are out of path");
+                              //   }
+                              //
+                              // }
 
                             }, icon: Icon(Icons.directions_walk))),
                   ),
                   SizedBox(height: 28.0),
-                  Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                    double? compassHeading = newvalue;
-                    setState(() {
-                      user.theta = compassHeading!;
-                      if (mapState.interaction2) {
-                        mapState.bearing = compassHeading!;
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: mapState.target,
-                              zoom: mapState.zoom,
-                              bearing: mapState.bearing!,
-                            ),
-                          ),
-                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                        );
-                      } else {
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] =
-                              customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                      }
-                    });
-
-                  }),
+                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                  //
+                  //   double? compassHeading = newvalue;
+                  //   setState(() {
+                  //     user.theta = compassHeading!;
+                  //     if (mapState.interaction2) {
+                  //       mapState.bearing = compassHeading!;
+                  //       _googleMapController.moveCamera(
+                  //         CameraUpdate.newCameraPosition(
+                  //           CameraPosition(
+                  //             target: mapState.target,
+                  //             zoom: mapState.zoom,
+                  //             bearing: mapState.bearing!,
+                  //           ),
+                  //         ),
+                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                  //       );
+                  //     } else {
+                  //       if (markers.length > 0)
+                  //         markers[user.Bid]?[0] =
+                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                  //     }
+                  //   });
+                  //
+                  // }),
                   SizedBox(height: 28.0),
                   Semantics(
                     sortKey: const OrdinalSortKey(2),

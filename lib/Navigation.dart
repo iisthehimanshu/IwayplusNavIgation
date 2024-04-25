@@ -463,9 +463,19 @@ void calibrate()async{
          if (isvalid) {
 
            if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-             if(!isMoveStep1){
-               user.move().then((value) {
-
+             user.move().then((value) {
+               bool moveOneMore = true;
+               for(int j = 0 ; j<getPoints.length; j++){
+                 print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
+                 print("user point ${user.showcoordX},${user.showcoordY}");
+                 if(getPoints[j][0] == user.showcoordX && getPoints[j][1] == user.showcoordY){
+                   print("turned it false");
+                   moveOneMore =false;
+                   break;
+                 }
+               }
+               if(moveOneMore){
+                 print("moving one more");
                  user.move().then((value){
                    setState(() {
 
@@ -484,10 +494,8 @@ void calibrate()async{
                      }
                    });
                  });
-               });
-             }else{
-
-               user.move().then((value){
+               }else{
+                 print("rendering here");
                  setState(() {
 
                    if (markers.length > 0) {
@@ -502,14 +510,11 @@ void calibrate()async{
                          LatLng(ldvalue[0],ldvalue[1]),
                          markers[user.Bid]![1]
                      );
-
                    }
-                   isMoveStep1=false;
                  });
-               });
+               }
 
-             }
-
+             });
            }else{
              StopPDR();
              setState(() {
@@ -1696,6 +1701,21 @@ if(Platform.isAndroid){
                     );
                     setState(() {
                       if (building.selectedLandmarkID != polyArray.id) {
+
+                        user.reset();
+                        PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+                        pathMarkers.clear();
+                        PathState.path.clear();
+                        PathState.sourcePolyID = "";
+                        PathState.destinationPolyID = "";
+                        singleroute.clear();
+
+
+
+
+
+                        user.isnavigating = false;
+                        _isnavigationPannelOpen = false;
                         building.selectedLandmarkID = polyArray.id;
                         building.ignoredMarker.clear();
                         building.ignoredMarker.add(polyArray.id!);
@@ -2938,9 +2958,7 @@ if(Platform.isAndroid){
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-        showToast("run the script");
 
-        print(commonlifts);
 
         await fetchroute(
             commonlifts[0].x2!,
@@ -2949,8 +2967,6 @@ if(Platform.isAndroid){
             PathState.destinationY,
             PathState.destinationFloor,
             bid: PathState.destinationBid);
-
-
 
         Map<String, int> map = {
           'Take ${commonlifts[0].name}': -1,
@@ -2967,8 +2983,20 @@ if(Platform.isAndroid){
 
         PathState.directions.add(map);
 
-        await fetchroute(PathState.sourceX, PathState.sourceY,
-            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.destinationBid);
+        await fetchroute(
+            PathState.sourceX,
+            PathState.sourceY,
+            commonlifts[0].x1!,
+            commonlifts[0].y1!,
+            PathState.sourceFloor,
+            bid: PathState.destinationBid);
+
+
+        PathState.connections[PathState.destinationBid] = {
+          PathState.sourceFloor:calculateindex(commonlifts[0].x1!, commonlifts[0].y1!, building.floorDimenssion[PathState.destinationBid]![PathState.sourceFloor]![0]),
+          PathState.destinationFloor:calculateindex(commonlifts[0].x2!, commonlifts[0].y2!, building.floorDimenssion[PathState.destinationBid]![PathState.destinationFloor]![0])
+        };
+
       }
 
 
@@ -2993,11 +3021,15 @@ if(Platform.isAndroid){
               await fetchroute(element.coordinateX!, element.coordinateY!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
               print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
+
               List<CommonLifts> commonlifts = findCommonLifts(element.lifts!, landmarksMap[PathState.destinationPolyID]!.lifts!);
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, PathState.destinationX, PathState.destinationY, PathState.destinationFloor, bid: PathState.destinationBid);
-              print("running destination location lift run");
               await fetchroute(element.coordinateX!, element.coordinateY!, commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,bid: PathState.destinationBid);
-              print("running destination location dest run");
+
+              PathState.connections[PathState.destinationBid] = {
+                element.floor!:calculateindex(commonlifts[0].x1!, commonlifts[0].y1!, building.floorDimenssion[PathState.destinationBid]![element.floor!]![0]),
+                PathState.destinationFloor:calculateindex(commonlifts[0].x2!, commonlifts[0].y2!, building.floorDimenssion[PathState.destinationBid]![PathState.destinationFloor]![0])
+              };
             }
             break;
           }
@@ -3031,6 +3063,12 @@ if(Platform.isAndroid){
 
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!, element.coordinateX!, element.coordinateY!, element.floor!,bid: PathState.sourceBid);
               await fetchroute(PathState.sourceX, PathState.sourceY, commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,bid: PathState.sourceBid);
+
+
+              PathState.connections[PathState.sourceBid] = {
+                PathState.sourceFloor :calculateindex(commonlifts[0].x1!, commonlifts[0].y1!, building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0]),
+                element.floor! :calculateindex(commonlifts[0].x2!, commonlifts[0].y2!, building.floorDimenssion[PathState.sourceBid]![element.floor!]![0])
+              };
             }
             break;
           }
@@ -3123,7 +3161,7 @@ if(Platform.isAndroid){
     // }
 
 
-     Map<int,int> getTurns= tools.getTurnMap(path, numCols);
+    Map<int,int> getTurns= tools.getTurnMap(path, numCols);
 
 
     print("getTurnsss ${getTurns}");
@@ -3132,11 +3170,37 @@ if(Platform.isAndroid){
     path=getOptiPath(getTurns, numCols, path);
 
 
-    
-      //print("rdp* path ${res}");
+
+
+    List<int> turns=tools.getTurnpoints(path, numCols);
+
+    for(int i=0;i<turns.length;i++){
+      int x = turns[i] % numCols;
+      int y = turns[i] ~/ numCols;
+
+      getPoints.add([x,y]);
+
+
+    }
+    getPoints.add([destinationX,destinationY]);
+
+    for(int i=0;i<getTurns.length;i++){
+      int x = path[i] % numCols;
+      int y = path[i] ~/ numCols;
+
+      print("allPathPoints: ${x} ,${y}");
+
+
+    }
+
+
+
+
+
+    //print("rdp* path ${res}");
     print("A* path ${path}");
     print("non walkable path ${building.nonWalkable[bid]![floor]!}");
-    
+
     //print("fetch route- $path");
     PathState.path[floor] = path;
     if(PathState.numCols == null){
@@ -3151,7 +3215,7 @@ if(Platform.isAndroid){
 
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
-     // print("direction elements $element");
+      // print("direction elements $element");
       PathState.directions.add(element);
     });
 
@@ -3859,8 +3923,6 @@ if(Platform.isAndroid){
     );
   }
 
-  bool isMoveStep1=false;
-
     Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3946,10 +4008,9 @@ if(user.isnavigating) {
       }
       if (getPoints[i][0] == user.showcoordX &&
           getPoints[i][1] == user.showcoordY) {
-        //print("points matchedddd");
-        setState(() {
-          isMoveStep1=true;
-        });
+
+        print("points matchedddddddd");
+
 
         StopPDR();
         getPoints.removeAt(i);
@@ -6091,8 +6152,8 @@ if(user.isnavigating) {
                               //     // reroute();
                               //     // showToast("You are out of path");
                               //   }
-
-                              //}
+                              //
+                              // }
 
                             }, icon: Icon(Icons.directions_walk))),
                   ),
@@ -6172,6 +6233,7 @@ if(user.isnavigating) {
                     sortKey: const OrdinalSortKey(3),
                     child: FloatingActionButton(
                       onPressed: () async {
+                        //print(PathState.connections);
                         building.floor[buildingAllApi.getStoredString()] = user.floor;
                         createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                         if (pathMarkers[user.floor] != null) {
@@ -6283,7 +6345,7 @@ if(user.isnavigating) {
             navigationPannel(),
             reroutePannel(),
             detected? Semantics(
-                child: buildingDetailPannel()): Container(),
+                child: nearestLandmarkpannel()): Container(),
 
           ],
         ),

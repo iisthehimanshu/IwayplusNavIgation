@@ -28,8 +28,9 @@ import 'Elements/SearchpageResults.dart';
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
+  bool voiceInputEnabled;
 
-  DestinationSearchPage({this.hintText = "", this.previousFilter = ""});
+  DestinationSearchPage({this.hintText = "", this.previousFilter = "",required this.voiceInputEnabled});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
@@ -61,6 +62,21 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           widget.previousFilter.toLowerCase()) {
         vall = i;
       }
+    }
+    if(widget.voiceInputEnabled){
+      initSpeech();
+      setState(() {
+        speetchText.isListening
+            ? stopListening()
+            : startListening();
+      });
+      if (!micselected) {
+        micColor = Color(0xff24B9B0);
+      }
+
+      setState(() {
+      });
+
     }
 
     if (widget.previousFilter != "") {
@@ -176,6 +192,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       if (_controller.text.isNotEmpty) {
         search(_controller.text);
       } else {
+        print("Filter cleared");
         searchResults = [];
         searcCategoryhResults = [];
         vall = -1;
@@ -382,12 +399,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         width: 48,
                         height: 48,
                         child: Center(
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: SvgPicture.asset(
-                                "assets/DestinationSearchPage_BackIcon.svg"),
+                          child: FocusScope(
+                            autofocus: true,
+                            child: Focus(
+                              child: Semantics(
+                                label: "Back",
+                                child: IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Semantics(
+                                    excludeSemantics: true,
+                                    child: SvgPicture.asset(
+                                        "assets/DestinationSearchPage_BackIcon.svg"),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -439,9 +467,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     setState(() {
                                       vall = -1;
                                       search(_controller.text);
+                                      recentResults = [];
+                                      searcCategoryhResults = [];
                                     });
                                   },
-                                  icon: Icon(Icons.close))
+                                  icon: Semantics(label:"Close",child: Icon(Icons.close)))
                               : IconButton(
                                   onPressed: () {
                                     initSpeech();
@@ -453,11 +483,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     if (!micselected) {
                                       micColor = Color(0xff24B9B0);
                                     }
-                                    setState(() {});
+
+
+                                    setState(() {
+
+                                    });
                                   },
-                                  icon: Icon(
-                                    Icons.mic,
-                                    color: micColor,
+                                  icon: Semantics(
+                                    label: "Voice Search",
+                                    child: Icon(
+                                      Icons.mic,
+                                      color: micColor,
+                                    ),
                                   ),
                                 ),
                         ),

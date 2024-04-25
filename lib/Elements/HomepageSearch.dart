@@ -80,31 +80,36 @@ class _HomepageSearchState extends State<HomepageSearch> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Semantics(
-                    label: "Search Bar",
-                    sortKey: const OrdinalSortKey(1),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
-                        ).then((value){
-                          widget.onVenueClicked(value);
-                        });
-                      },
-                      child: Container(
-                          margin: EdgeInsets.only(left: 16),
-                          child: Text(
-                            widget.searchText,
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff8e8d8d),
-                              height: 25 / 16,
-                            ),
-                          )),
+                  child: FocusScope(
+                    autofocus: true,
+                    child: Focus(
+                      child: Semantics(
+                        sortKey: const OrdinalSortKey(0),
+                        label: "Search Bar",
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                            ).then((value){
+                              widget.onVenueClicked(value);
+                            });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16),
+                              child: Text(
+                                widget.searchText,
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff8e8d8d),
+                                  height: 25 / 16,
+                                ),
+                              )),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -118,15 +123,19 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
+                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                         ).then((value){
                           widget.onVenueClicked(value);
                         });
                       },
-                      icon: Icon(
-                        Icons.mic_none_sharp,
-                        color: Color(0xff8E8C8C),
-                        size: 24,
+                      icon: Semantics(
+                        label: "Voice search",
+                        sortKey: const OrdinalSortKey(1),
+                        child: Icon(
+                          Icons.mic_none_sharp,
+                          color: Color(0xff8E8C8C),
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -156,8 +165,11 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         });
                       },
 
-                      icon: SvgPicture.asset(
-                          "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                      icon: Semantics(
+                        label: "Get Direction",
+                        child: SvgPicture.asset(
+                            "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                      ),
                     ),
                   ),
                 )
@@ -183,8 +195,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
             direction: Axis.horizontal,
           ),
         ),
-
-
       ],
     );
   }

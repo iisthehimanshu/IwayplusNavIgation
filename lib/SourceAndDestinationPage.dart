@@ -196,7 +196,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                       child: IconButton(onPressed: (){
                         print("h2");
                         Navigator.pop(context);
-                      }, icon: Icon(Icons.arrow_back_ios_new,size: 24,)),
+                      }, icon: Semantics(label:"Back",child: Icon(Icons.arrow_back_ios_new,size: 24,))),
                     ),
                     Expanded(
                       child: Column(
@@ -221,7 +221,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => DestinationSearchPage(hintText: 'Source location',))
+                                      builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
                               ).then((value){
                                 setState(() {
                                   widget.SourceID = value;
@@ -255,7 +255,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
+                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                               ).then((value){
                                 setState(() {
                                   widget.DestinationID = value;
@@ -274,7 +274,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                     Container(
                       child: IconButton(onPressed: (){
                         swap();
-                      }, icon: Icon(Icons.swap_vert_circle_outlined,size: 24,)),
+                      }, icon: Semantics(label: "Swap Directions",child: Icon(Icons.swap_vert_circle_outlined,size: 24,))),
                     ),
                   ],
                 ),

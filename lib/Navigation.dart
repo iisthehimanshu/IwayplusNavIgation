@@ -7,6 +7,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
@@ -2399,80 +2400,89 @@ if(Platform.isAndroid){
           left: 16,
           top: 16,
           right: 16,
-          child: Container(
-              width: screenWidth - 32,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: Colors.white, // You can customize the border color
-                  width: 1.0, // You can customize the border width
+          child: Semantics(
+            sortKey: const OrdinalSortKey(1),
+            child: Container(
+                width: screenWidth - 32,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: Colors.white, // You can customize the border color
+                    width: 1.0, // You can customize the border width
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey, // Shadow color
+                      offset: Offset(0, 2), // Offset of the shadow
+                      blurRadius: 4, // Spread of the shadow
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey, // Shadow color
-                    offset: Offset(0, 2), // Offset of the shadow
-                    blurRadius: 4, // Spread of the shadow
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 48,
-                    margin: EdgeInsets.only(right: 4),
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          showMarkers();
-                          toggleLandmarkPanel();
-                          _isBuildingPannelOpen = true;
-                        },
-                        icon: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.black,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                        child: Text(
-                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                              .name!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 48,
+                      margin: EdgeInsets.only(right: 4),
+                      child: Center(
+                        child: IconButton(
+                          onPressed: () {
+                            showMarkers();
+                            toggleLandmarkPanel();
+                            _isBuildingPannelOpen = true;
+                          },
+                          icon: Semantics(
+                            label: "Back",
+                            child: Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
-                        )),
-                  ),
-                  Container(
-                    height: 48,
-                    width: 47,
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          showMarkers();
-                          toggleLandmarkPanel();
-                          _isBuildingPannelOpen = true;
-                        },
-                        icon: Icon(
-                          Icons.cancel_outlined,
-                          color: Colors.black,
-                          size: 24,
                         ),
                       ),
                     ),
-                  )
-                ],
-              )),
+                    Expanded(
+                      child: Container(
+                          child: Text(
+                            snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                .name!,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
+                          )),
+                    ),
+                    Container(
+                      height: 48,
+                      width: 47,
+                      child: Center(
+                        child: IconButton(
+                          onPressed: () {
+                            showMarkers();
+                            toggleLandmarkPanel();
+                            _isBuildingPannelOpen = true;
+                          },
+                          icon: Semantics(
+                            label: "Close",
+                            child: Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.black,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )),
+          ),
         ),
         SlidingUpPanel(
           controller: _landmarkPannelController,
@@ -2495,394 +2505,396 @@ if(Platform.isAndroid){
                 return landmarkPannelShimmer();
               case ConnectionState.done:
                 if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 6,
-                            margin: EdgeInsets.only(top: 8),
-                            decoration: BoxDecoration(
-                              color: Color(0xffd9d9d9),
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 20),
-                        padding: EdgeInsets.only(left: 17, top: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                return Semantics(
+                  sortKey: const OrdinalSortKey(0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              snapshot
-                                  .data!
-                                  .landmarksMap![building.selectedLandmarkID]!
-                                  .name!,
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff292929),
-                                height: 25 / 18,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff8d8c8c),
-                                height: 25 / 16,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.start,
-                            //   children: [
-                            //     Text(
-                            //       "1 min ",
-                            //       style: const TextStyle(
-                            //         color: Color(0xffDC6A01),
-                            //         fontFamily: "Roboto",
-                            //         fontSize: 16,
-                            //         fontWeight: FontWeight.w400,
-                            //         height: 25 / 16,
-                            //       ),
-                            //       textAlign: TextAlign.left,
-                            //     ),
-                            //     Text(
-                            //       "(60 m)",
-                            //       style: const TextStyle(
-                            //         fontFamily: "Roboto",
-                            //         fontSize: 16,
-                            //         fontWeight: FontWeight.w400,
-                            //         height: 25 / 16,
-                            //       ),
-                            //       textAlign: TextAlign.left,
-                            //     )
-                            //   ],
-                            // ),
-                            SizedBox(
-                              height: 8,
-                            ),
                             Container(
-                              width: 114,
-                              height: 40,
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8),
                               decoration: BoxDecoration(
-                                color: Color(0xff24B9B0),
-                                borderRadius: BorderRadius.circular(4.0),
-                              ),
-                              child: TextButton(
-                                onPressed: () async {
-                                  _isNearestLandmarkPannelOpen = false;
-
-                                  if (user.coordY != 0 && user.coordX != 0) {
-                                    PathState.sourceX = user.coordX;
-                                    PathState.sourceY = user.coordY;
-                                    PathState.sourceFloor = user.floor;
-                                    PathState.sourcePolyID = user.key;
-                                    print("object ${PathState.sourcePolyID}");
-                                    PathState.sourceName =
-                                    "Your current location";
-                                    PathState.destinationPolyID =
-                                    building.selectedLandmarkID!;
-                                    PathState.destinationName = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                    building.selectedLandmarkID]!
-                                        .name!;
-                                    PathState.destinationFloor = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                    building.selectedLandmarkID]!
-                                        .floor!;
-                                    PathState.sourceBid = user.Bid;
-
-                                    PathState.destinationBid = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                    building.selectedLandmarkID]!
-                                        .buildingID!;
-
-                                    setState(() {
-                                      print("valuechanged");
-                                      calculatingPath = true;
-                                    });
-                                    Future.delayed(Duration(seconds: 1), () {
-                                      calculateroute(
-                                          snapshot.data!.landmarksMap!)
-                                          .then((value) {
-                                        calculatingPath = false;
-                                        _isLandmarkPanelOpen = false;
-                                        _isRoutePanelOpen = true;
-                                      });
-                                    });
-                                  } else {
-                                    PathState.sourceName =
-                                    "Choose Starting Point";
-                                    PathState.destinationPolyID =
-                                    building.selectedLandmarkID!;
-                                    PathState.destinationName = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                    building.selectedLandmarkID]!
-                                        .name!;
-                                    PathState.destinationFloor = snapshot
-                                        .data!
-                                        .landmarksMap![
-                                    building.selectedLandmarkID]!
-                                        .floor!;
-                                    building.selectedLandmarkID = "";
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                SourceAndDestinationPage(
-                                                  DestinationID: PathState
-                                                      .destinationPolyID,
-                                                ))).then((value) {
-                                      if (value != null) {
-                                        fromSourceAndDestinationPage(value);
-                                      }
-                                    });
-                                  }
-                                },
-                                child: (!calculatingPath)
-                                    ? const Row(
-                                  //  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.directions,
-                                      color: Colors.black,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Direction",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    )
-                                  ],
-                                )
-                                    : Container(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Container(
-                        height: 1,
-                        width: screenWidth,
-                        color: Color(0xffebebeb),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(left: 17),
-                              child: Text(
-                                "Information",
+                        Container(
+                          margin: EdgeInsets.only(bottom: 20),
+                          padding: EdgeInsets.only(left: 17, top: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                snapshot
+                                    .data!
+                                    .landmarksMap![building.selectedLandmarkID]!
+                                    .name!,
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xff282828),
-                                  height: 24 / 18,
+                                  color: Color(0xff292929),
+                                  height: 25 / 18,
                                 ),
                                 textAlign: TextAlign.left,
                               ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        width: 1.0, color: Color(0xffebebeb))),
+                              Text(
+                                "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff8d8c8c),
+                                  height: 25 / 16,
+                                ),
+                                textAlign: TextAlign.left,
                               ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      margin: EdgeInsets.only(right: 16),
-                                      width: 32,
-                                      height: 32,
-                                      child: Icon(
-                                        Icons.location_on_outlined,
-                                        color: Color(0xff24B9B0),
-                                        size: 24,
-                                      )),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
-                                          ),
-                                        ],
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.start,
+                              //   children: [
+                              //     Text(
+                              //       "1 min ",
+                              //       style: const TextStyle(
+                              //         color: Color(0xffDC6A01),
+                              //         fontFamily: "Roboto",
+                              //         fontSize: 16,
+                              //         fontWeight: FontWeight.w400,
+                              //         height: 25 / 16,
+                              //       ),
+                              //       textAlign: TextAlign.left,
+                              //     ),
+                              //     Text(
+                              //       "(60 m)",
+                              //       style: const TextStyle(
+                              //         fontFamily: "Roboto",
+                              //         fontSize: 16,
+                              //         fontWeight: FontWeight.w400,
+                              //         height: 25 / 16,
+                              //       ),
+                              //       textAlign: TextAlign.left,
+                              //     )
+                              //   ],
+                              // ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Container(
+                                width: 114,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff24B9B0),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: TextButton(
+                                  onPressed: () async {
+                                    _isNearestLandmarkPannelOpen = false;
+
+                                    if (user.coordY != 0 && user.coordX != 0) {
+                                      PathState.sourceX = user.coordX;
+                                      PathState.sourceY = user.coordY;
+                                      PathState.sourceFloor = user.floor;
+                                      PathState.sourcePolyID = user.key;
+                                      print("object ${PathState.sourcePolyID}");
+                                      PathState.sourceName =
+                                      "Your current location";
+                                      PathState.destinationPolyID =
+                                      building.selectedLandmarkID!;
+                                      PathState.destinationName = snapshot
+                                          .data!
+                                          .landmarksMap![
+                                      building.selectedLandmarkID]!
+                                          .name!;
+                                      PathState.destinationFloor = snapshot
+                                          .data!
+                                          .landmarksMap![
+                                      building.selectedLandmarkID]!
+                                          .floor!;
+                                      PathState.sourceBid = user.Bid;
+
+                                      PathState.destinationBid = snapshot
+                                          .data!
+                                          .landmarksMap![
+                                      building.selectedLandmarkID]!
+                                          .buildingID!;
+
+                                      setState(() {
+                                        print("valuechanged");
+                                        calculatingPath = true;
+                                      });
+                                      Future.delayed(Duration(seconds: 1), () {
+                                        calculateroute(
+                                            snapshot.data!.landmarksMap!)
+                                            .then((value) {
+                                          calculatingPath = false;
+                                          _isLandmarkPanelOpen = false;
+                                          _isRoutePanelOpen = true;
+                                        });
+                                      });
+                                    } else {
+                                      PathState.sourceName =
+                                      "Choose Starting Point";
+                                      PathState.destinationPolyID =
+                                      building.selectedLandmarkID!;
+                                      PathState.destinationName = snapshot
+                                          .data!
+                                          .landmarksMap![
+                                      building.selectedLandmarkID]!
+                                          .name!;
+                                      PathState.destinationFloor = snapshot
+                                          .data!
+                                          .landmarksMap![
+                                      building.selectedLandmarkID]!
+                                          .floor!;
+                                      building.selectedLandmarkID = "";
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SourceAndDestinationPage(
+                                                    DestinationID: PathState
+                                                        .destinationPolyID,
+                                                  ))).then((value) {
+                                        if (value != null) {
+                                          fromSourceAndDestinationPage(value);
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: (!calculatingPath)
+                                      ? const Row(
+                                    //  mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.directions,
+                                        color: Colors.black,
                                       ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Direction",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                      : Container(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            snapshot
-                                .data!
-                                .landmarksMap![
-                            building.selectedLandmarkID]!
-                                .properties!
-                                .contactNo !=
-                                null
-                                ? Container(
-                              margin:
-                              EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    width: 1.0,
-                                    color: Color(0xffebebeb),
                                   ),
                                 ),
                               ),
-                              child: Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 16),
-                                    width: 32,
-                                    height: 32,
-                                    child: Icon(
-                                      Icons.call,
-                                      color: Color(0xff24B9B0),
-                                      size: 24,
-                                    ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 1,
+                          width: screenWidth,
+                          color: Color(0xffebebeb),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(left: 17),
+                                child: Text(
+                                  "Information",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff282828),
+                                    height: 24 / 18,
                                   ),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 16, right: 16),
+                                padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          width: 1.0, color: Color(0xffebebeb))),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                        margin: EdgeInsets.only(right: 16),
+                                        width: 32,
+                                        height: 32,
+                                        child: Icon(
+                                          Icons.location_on_outlined,
+                                          color: Color(0xff24B9B0),
+                                          size: 24,
+                                        )),
+                                    Container(
+                                      width: screenWidth - 100,
+                                      margin: EdgeInsets.only(top: 8),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 25 / 16,
                                           ),
-                                        ],
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            )
-                                : Container(),
-                            snapshot
-                                .data!
-                                .landmarksMap![
-                            building.selectedLandmarkID]!
-                                .properties!
-                                .email !=
-                                "" &&
-                                snapshot
-                                    .data!
-                                    .landmarksMap![
-                                building.selectedLandmarkID]!
-                                    .properties!
-                                    .email !=
-                                    null
-                                ? Container(
-                              margin:
-                              EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
+                              snapshot
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .properties!
+                                  .contactNo !=
+                                  null
+                                  ? Container(
+                                margin:
+                                EdgeInsets.only(left: 16, right: 16),
+                                padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
                                     bottom: BorderSide(
-                                        width: 1.0,
-                                        color: Color(0xffebebeb))),
-                              ),
-                              child: Row(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                children: [
-                                  Container(
+                                      width: 1.0,
+                                      color: Color(0xffebebeb),
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
                                       margin: EdgeInsets.only(right: 16),
                                       width: 32,
                                       height: 32,
                                       child: Icon(
-                                        Icons.mail_outline,
+                                        Icons.call,
                                         color: Color(0xff24B9B0),
                                         size: 24,
-                                      )),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                            "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                          ),
-                                        ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            )
-                                : Container(),
-                          ],
-                        ),
-                      )
-                    ],
+                                    Container(
+                                      width: screenWidth - 100,
+                                      margin: EdgeInsets.only(top: 8),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 25 / 16,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  : Container(),
+                              snapshot
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .properties!
+                                  .email !=
+                                  "" &&
+                                  snapshot
+                                      .data!
+                                      .landmarksMap![
+                                  building.selectedLandmarkID]!
+                                      .properties!
+                                      .email !=
+                                      null
+                                  ? Container(
+                                margin:
+                                EdgeInsets.only(left: 16, right: 16),
+                                padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          width: 1.0,
+                                          color: Color(0xffebebeb))),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                        margin: EdgeInsets.only(right: 16),
+                                        width: 32,
+                                        height: 32,
+                                        child: Icon(
+                                          Icons.mail_outline,
+                                          color: Color(0xff24B9B0),
+                                          size: 24,
+                                        )),
+                                    Container(
+                                      width: screenWidth - 100,
+                                      margin: EdgeInsets.only(top: 8),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 25 / 16,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  : Container(),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 );
             }
@@ -3382,9 +3394,23 @@ if(Platform.isAndroid){
     return path;
   }
 
+  void closeRoutePannel(){
+    _routeDetailPannelController.close();
+  }
+  void openRoutePannel(){
+    _routeDetailPannelController.open();
+  }
+
+
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
+    setState(() {
+      semanticShouldBeExcluded = true;
+    });
+
+    print("shouldBeOpened");
+    print(semanticShouldBeExcluded);
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -3442,131 +3468,144 @@ if(Platform.isAndroid){
                 ),
               ],
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  child: IconButton(
-                      onPressed: () {
-                        showMarkers();
-                        List<double> mvalues = tools.localtoglobal(
-                            PathState.destinationX, PathState.destinationY);
-                        _googleMapController.animateCamera(
-                          CameraUpdate.newLatLngZoom(
-                            LatLng(mvalues[0], mvalues[1]),
-                            20, // Specify your custom zoom level here
-                          ),
-                        );
-                        _isRoutePanelOpen = false;
-                        _isLandmarkPanelOpen = true;
-                        PathState =
-                            pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
-                        PathState.path.clear();
-                        PathState.sourcePolyID = "";
-                        PathState.destinationPolyID = "";
-                        singleroute.clear();
-                        _isBuildingPannelOpen = true;
-                        setState(() {
-                          Marker? temp = selectedroomMarker[buildingAllApi.getStoredString()]?.first;
-                          selectedroomMarker.clear();
-                          selectedroomMarker[buildingAllApi.getStoredString()]?.add(temp!);
-                          pathMarkers.clear();
-                        });
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 24,
-                      )),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      InkWell(
-                        child: Container(
-                          height: 40,
-                          width: double.infinity,
-                          margin: EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: Color(0xffE2E2E2)),
-                          ),
-                          padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                          child: Text(
-                            PathState.sourceName,
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff24b9b0),
+            child: Semantics(
+              sortKey: const OrdinalSortKey(5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    child: IconButton(
+                        onPressed: () {
+                          showMarkers();
+                          List<double> mvalues = tools.localtoglobal(
+                              PathState.destinationX, PathState.destinationY);
+                          _googleMapController.animateCamera(
+                            CameraUpdate.newLatLngZoom(
+                              LatLng(mvalues[0], mvalues[1]),
+                              20, // Specify your custom zoom level here
                             ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(
-                                    hintText: 'Source location',
-                                  ))).then((value) {
-                            onSourceVenueClicked(value);
-                          });
-                        },
-                      ),
-                      InkWell(
-                        child: Container(
-                          height: 40,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: Color(0xffE2E2E2)),
-                          ),
-                          padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                          child: Text(
-                            PathState.destinationName,
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff282828),
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(
-                                    hintText: 'Destination location',
-                                  ))).then((value) {
-                            _isBuildingPannelOpen = false;
-                            onDestinationVenueClicked(value);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          PathState.swap();
+                          );
+                          _isRoutePanelOpen = false;
+                          _isLandmarkPanelOpen = true;
+                          PathState =
+                              pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
                           PathState.path.clear();
-                          pathMarkers.clear();
-                          PathState.directions.clear();
-                          building.landmarkdata!.then((value) {
-                            calculateroute(value.landmarksMap!);
+                          PathState.sourcePolyID = "";
+                          PathState.destinationPolyID = "";
+                          singleroute.clear();
+                          _isBuildingPannelOpen = true;
+                          setState(() {
+                            Marker? temp = selectedroomMarker[buildingAllApi.getStoredString()]?.first;
+                            selectedroomMarker.clear();
+                            selectedroomMarker[buildingAllApi.getStoredString()]?.add(temp!);
+                            pathMarkers.clear();
                           });
-                        });
-                      },
-                      icon: Icon(
-                        Icons.swap_vert_circle_outlined,
-                        size: 24,
-                      )),
-                ),
-              ],
+                        },
+                        icon: Semantics(
+                          label: "Back",
+                          onDidGainAccessibilityFocus: closeRoutePannel,
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 24,
+                          ),
+                        )),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        InkWell(
+                          child: Container(
+                            height: 40,
+                            width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0),
+                              border: Border.all(color: Color(0xffE2E2E2)),
+                            ),
+                            padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            child: Text(
+                              PathState.sourceName,
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff24b9b0),
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(
+                                      hintText: 'Source location',voiceInputEnabled: false,
+                                    ))).then((value) {
+                              onSourceVenueClicked(value);
+                            });
+                          },
+                        ),
+                        InkWell(
+                          child: Container(
+                            height: 40,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0),
+                              border: Border.all(color: Color(0xffE2E2E2)),
+                            ),
+                            padding: EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            child: Semantics(
+                              onDidGainAccessibilityFocus: closeRoutePannel,
+                              child: Text(
+                                PathState.destinationName,
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff282828),
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(
+                                      hintText: 'Destination location',voiceInputEnabled: false,
+                                    ))).then((value) {
+                              _isBuildingPannelOpen = false;
+                              onDestinationVenueClicked(value);
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            PathState.swap();
+                            PathState.path.clear();
+                            pathMarkers.clear();
+                            PathState.directions.clear();
+                            building.landmarkdata!.then((value) {
+                              calculateroute(value.landmarksMap!);
+                            });
+                          });
+                        },
+                        icon: Semantics(
+                          label: "Swap location",
+                          child: Icon(
+                            Icons.swap_vert_circle_outlined,
+                            size: 24,
+                          ),
+                        )),
+                  ),
+                ],
+              ),
             ),
           ),
           Visibility(
@@ -3583,344 +3622,387 @@ if(Platform.isAndroid){
                 minHeight: 163,
                 maxHeight: screenHeight * 0.9,
                 snapPoint: 0.9,
-                panel: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 38,
-                                height: 6,
-                                margin: EdgeInsets.only(top: 8),
-                                decoration: BoxDecoration(
-                                  color: Color(0xffd9d9d9),
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(bottom: 20),
-                            padding: EdgeInsets.only(left: 17, top: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${time.toInt()} min ",
-                                      style: const TextStyle(
-                                        color: Color(0xffDC6A01),
-                                        fontFamily: "Roboto",
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        height: 24 / 18,
-                                      ),
-                                      textAlign: TextAlign.left,
+                panel: Semantics(
+                  sortKey: const OrdinalSortKey(0),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                          color: Colors.white,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Semantics(
+                              excludeSemantics: true,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 38,
+                                    height: 6,
+                                    margin: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffd9d9d9),
+                                      borderRadius: BorderRadius.circular(5.0),
                                     ),
-                                    Text(
-                                      "(${distance} m)",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        height: 24 / 18,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
-                                ),
-                                // Text(
-                                //   "via",
-                                //   style: const TextStyle(
-                                //     fontFamily: "Roboto",
-                                //     fontSize: 16,
-                                //     fontWeight: FontWeight.w400,
-                                //     color: Color(0xff4a4545),
-                                //     height: 25 / 16,
-                                //   ),
-                                //   textAlign: TextAlign.left,
-                                // ),
-                                // Text(
-                                //   "ETA- ${newTime.hour}:${newTime.minute}",
-                                //   style: const TextStyle(
-                                //     fontFamily: "Roboto",
-                                //     fontSize: 14,
-                                //     fontWeight: FontWeight.w400,
-                                //     color: Color(0xff8d8c8c),
-                                //     height: 20 / 14,
-                                //   ),
-                                //   textAlign: TextAlign.left,
-                                // ),
-                                SizedBox(
-                                  height: 8,
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 108,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xff24B9B0),
-                                        borderRadius:
-                                        BorderRadius.circular(4.0),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: ()async{
-                                          print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
-                                          user.pathobj = PathState;
-                                          user.path = PathState.singleListPath;
-                                          user.isnavigating = true;
-                                          user.moveToStartofPath().then((value) {
-                                            setState(() {
-                                              if (markers.length > 0) {
-                                                print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
-                                                List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                                markers[user.Bid]?[0] = customMarker.move(
-                                                    LatLng(val[0], val[1]),
-                                                    markers[user.Bid]![0]);
-
-                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                                markers[user.Bid]?[1] = customMarker.move(
-                                                    LatLng(val[0], val[1]),
-                                                    markers[user.Bid]![1]);
-                                              }
-                                            });
-                                          });
-                                          _isRoutePanelOpen = false;
-                                          //selectedroomMarker.clear();
-                                          //pathMarkers.clear();
-                                          building.selectedLandmarkID = null;
-                                          _isnavigationPannelOpen = true;
-
-                                        },
-                                        child: !startingNavigation?Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.assistant_navigation,
-                                              color: Colors.black,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              "Start",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ):Container(width:24,height:24,child: CircularProgressIndicator(color: Colors.white,)),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 95,
-                                      height: 40,
-                                      margin: EdgeInsets.only(left: 12),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.circular(4.0),
-                                        border: Border.all(color: Colors.black),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: () {
-                                          if (_routeDetailPannelController
-                                              .isPanelOpen) {
-                                            _routeDetailPannelController
-                                                .close();
-                                          } else {
-                                            _routeDetailPannelController.open();
-                                          }
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              _routeDetailPannelController
-                                                  .isAttached
-                                                  ? _routeDetailPannelController
-                                                  .isPanelClosed
-                                                  ? Icons
-                                                  .short_text_outlined
-                                                  : Icons.map_sharp
-                                                  : Icons.short_text_outlined,
-                                              color: Colors.black,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              _routeDetailPannelController
-                                                  .isAttached
-                                                  ? _routeDetailPannelController
-                                                  .isPanelClosed
-                                                  ? "Steps"
-                                                  : "Map"
-                                                  : "Steps",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: screenWidth,
-                            height: 1,
-                            color: Color(0xffEBEBEB),
-                          ),
-                          Container(
-                            margin:
-                            EdgeInsets.only(left: 17, top: 12, right: 17),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Steps",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 24 / 18,
                                   ),
-                                  textAlign: TextAlign.left,
-                                ),
-                                SizedBox(
-                                  height: 22,
-                                ),
-                                Container(
-                                  height: 522,
-                                  child: SingleChildScrollView(
-                                    child: Column(
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 20),
+                              padding: EdgeInsets.only(left: 17, top: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Semantics(
+                                    label: "Your destination is ${distance}m away ",
+                                    sortKey: const OrdinalSortKey(1),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              height: 25,
-                                              margin: EdgeInsets.only(right: 8),
-                                              child: SvgPicture.asset(
-                                                  "assets/StartpointVector.svg"),
+                                        Semantics(
+                                          excludeSemantics: true,
+                                          child: Text(
+                                            "${time.toInt()} min ",
+                                            style: const TextStyle(
+                                              color: Color(0xffDC6A01),
+                                              fontFamily: "Roboto",
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                              height: 24 / 18,
                                             ),
-                                            Text(
-                                              "${PathState.sourceName}",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff0e0d0d),
-                                                height: 25 / 16,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            )
-                                          ],
+                                            textAlign: TextAlign.left,
+                                          ),
                                         ),
-                                        SizedBox(
-                                          height: 15,
+                                        Semantics(
+                                          excludeSemantics: true,
+                                          child: Text(
+                                            "(${distance} m)",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                              height: 24 / 18,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
                                         ),
-                                        Container(
-                                          width: screenHeight,
-                                          height: 1,
-                                          color: Color(0xffEBEBEB),
-                                        ),
-                                        Column(
-                                          children: directionWidgets,
-                                        ),
-                                        SizedBox(
-                                          height: 22,
-                                        ),
-                                        Row(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              height: 25,
-                                              margin: EdgeInsets.only(right: 8),
+                                        Spacer(),
+                                        IconButton(
+                                            onPressed: () {
+                                              showMarkers();
+                                              _isBuildingPannelOpen = true;
+                                              _isRoutePanelOpen = false;
+                                              selectedroomMarker.clear();
+                                              pathMarkers.clear();
+                                              building.selectedLandmarkID = null;
+                                              PathState = pathState.withValues(
+                                                  -1, -1, -1, -1, -1, -1, null, 0);
+                                              PathState.path.clear();
+                                              PathState.sourcePolyID = "";
+                                              PathState.destinationPolyID = "";
+                                              PathState.sourceBid = "";
+                                              PathState.destinationBid = "";
+                                              singleroute.clear();
+                                              PathState.directions = [];
+                                              interBuildingPath.clear();
+                                              fitPolygonInScreen(patch.first);
+                                            },
+                                            icon: Semantics(
+                                              label: "Close",
                                               child: Icon(
-                                                Icons.pin_drop_sharp,
-                                                size: 24,
+                                                Icons.cancel_outlined,
+                                                size: 25,
                                               ),
-                                            ),
-                                            Text(
-                                              PathState.destinationName,
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff0e0d0d),
-                                                height: 25 / 16,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Container(
-                                          width: screenHeight,
-                                          height: 1,
-                                          color: Color(0xffEBEBEB),
-                                        ),
+                                            ))
                                       ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  // Text(
+                                  //   "via",
+                                  //   style: const TextStyle(
+                                  //     fontFamily: "Roboto",
+                                  //     fontSize: 16,
+                                  //     fontWeight: FontWeight.w400,
+                                  //     color: Color(0xff4a4545),
+                                  //     height: 25 / 16,
+                                  //   ),
+                                  //   textAlign: TextAlign.left,
+                                  // ),
+                                  // Text(
+                                  //   "ETA- ${newTime.hour}:${newTime.minute}",
+                                  //   style: const TextStyle(
+                                  //     fontFamily: "Roboto",
+                                  //     fontSize: 14,
+                                  //     fontWeight: FontWeight.w400,
+                                  //     color: Color(0xff8d8c8c),
+                                  //     height: 20 / 14,
+                                  //   ),
+                                  //   textAlign: TextAlign.left,
+                                  // ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Semantics(
+                                        sortKey: const OrdinalSortKey(2),
+
+                                        child: Container(
+                                          width: 108,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Color(0xff24B9B0),
+                                            borderRadius:
+                                            BorderRadius.circular(4.0),
+                                          ),
+                                          child: TextButton(
+                                            onPressed: ()async{
+
+                                              print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                              user.pathobj = PathState;
+                                              user.path = PathState.singleListPath;
+                                              user.isnavigating = true;
+                                              user.moveToStartofPath().then((value) {
+                                                setState(() {
+                                                  if (markers.length > 0) {
+                                                    print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                                    List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                                    markers[user.Bid]?[0] = customMarker.move(
+                                                        LatLng(val[0], val[1]),
+                                                        markers[user.Bid]![0]);
+
+                                                    val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                                    markers[user.Bid]?[1] = customMarker.move(
+                                                        LatLng(val[0], val[1]),
+                                                        markers[user.Bid]![1]);
+                                                  }
+                                                });
+                                              });
+                                              _isRoutePanelOpen = false;
+                                              //selectedroomMarker.clear();
+                                              //pathMarkers.clear();
+                                              building.selectedLandmarkID = null;
+                                              _isnavigationPannelOpen = true;
+
+                                            },
+                                            child: !startingNavigation?Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.assistant_navigation,
+                                                  color: Colors.black,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  "Start",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ):Container(width:24,height:24,child: CircularProgressIndicator(color: Colors.white,)),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 95,
+                                        height: 40,
+                                        margin: EdgeInsets.only(left: 12),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(4.0),
+                                          border: Border.all(color: Colors.black),
+                                        ),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            if (_routeDetailPannelController
+                                                .isPanelOpen) {
+                                              _routeDetailPannelController
+                                                  .close();
+                                            } else {
+                                              _routeDetailPannelController.open();
+                                            }
+                                          },
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                _routeDetailPannelController
+                                                    .isAttached
+                                                    ? _routeDetailPannelController
+                                                    .isPanelClosed
+                                                    ? Icons
+                                                    .short_text_outlined
+                                                    : Icons.map_sharp
+                                                    : Icons.short_text_outlined,
+                                                color: Colors.black,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Semantics(
+                                                sortKey: const OrdinalSortKey(2),
+                                                onDidGainAccessibilityFocus: openRoutePannel,
+                                                child: Text(
+                                                  _routeDetailPannelController
+                                                      .isAttached
+                                                      ? _routeDetailPannelController
+                                                      .isPanelClosed
+                                                      ? "Steps"
+                                                      : "Map"
+                                                      : "Steps",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          )
-                        ],
+                            Container(
+                              margin:
+                              EdgeInsets.only(left: 17, top: 12, right: 17),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    child: Semantics(
+                                      excludeSemantics: true,
+                                      child: Text(
+                                        "Steps",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff000000),
+                                          height: 24 / 18,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 22,
+                                  ),
+                                  Semantics(
+                                    sortKey: const OrdinalSortKey(3),
+                                    child: Container(
+                                      height: 522,
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Semantics(
+                                              excludeSemantics: false,
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    height: 25,
+                                                    margin: EdgeInsets.only(right: 8),
+                                                    child: SvgPicture.asset(
+                                                        "assets/StartpointVector.svg"),
+                                                  ),
+                                                  Semantics(
+                                                    label: "Steps preview,    You are heading from",
+                                                    child: Text(
+                                                      "${PathState.sourceName}",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff0e0d0d),
+                                                        height: 25 / 16,
+                                                      ),
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Container(
+                                              width: screenHeight,
+                                              height: 1,
+                                              color: Color(0xffEBEBEB),
+                                            ),
+                                            Column(
+                                              children: directionWidgets,
+                                            ),
+                                            SizedBox(
+                                              height: 22,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  height: 25,
+                                                  margin: EdgeInsets.only(right: 8),
+                                                  child: Icon(
+                                                    Icons.pin_drop_sharp,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                                Semantics(
+                                                  label: "Your are heading towards ",
+                                                  child: Text(
+                                                    PathState.destinationName,
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff0e0d0d),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Container(
+                                              width: screenHeight,
+                                              height: 1,
+                                              color: Color(0xffEBEBEB),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    Positioned(
-                        top: 13,
-                        right: 15,
-                        child: IconButton(
-                            onPressed: () {
-                              showMarkers();
-                              _isBuildingPannelOpen = true;
-                              _isRoutePanelOpen = false;
-                              selectedroomMarker.clear();
-                              pathMarkers.clear();
-                              building.selectedLandmarkID = null;
-                              PathState = pathState.withValues(
-                                  -1, -1, -1, -1, -1, -1, null, 0);
-                              PathState.path.clear();
-                              PathState.sourcePolyID = "";
-                              PathState.destinationPolyID = "";
-                              PathState.sourceBid = "";
-                              PathState.destinationBid = "";
-                              singleroute.clear();
-                              PathState.directions = [];
-                              interBuildingPath.clear();
-                              fitPolygonInScreen(patch.first);
-                            },
-                            icon: Icon(
-                              Icons.cancel_outlined,
-                              size: 25,
-                            )))
-                  ],
+                    ],
+                  ),
                 )),
           ),
         ],
       ),
     );
+  }
+  void shouldBeOpenedVarChangeFunc(){
+    setState(() {
+      semanticShouldBeExcluded = true;
+    });
   }
 
     Widget navigationPannel() {
@@ -4030,7 +4112,8 @@ if(user.isnavigating) {
     return Visibility(
         visible: _isnavigationPannelOpen,
         child: Stack(
-          children: [SlidingUpPanel(
+          children: [
+            SlidingUpPanel(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24), topRight: Radius.circular(24)),
             boxShadow: [
@@ -4054,7 +4137,12 @@ if(user.isnavigating) {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                _isnavigationPannelOpen = true;
+                              });
+
+                            },
                             icon: Icon(
                               Icons.keyboard_arrow_up_outlined,
                               size: 36,
@@ -4131,10 +4219,14 @@ if(user.isnavigating) {
                                 }
                               });
                             },
-                            icon: Icon(
-                              Icons.cancel_outlined,
-                              size: 24,
-                              color: Colors.black,
+                            icon: Semantics(
+                              label: "Close",
+                              onDidGainAccessibilityFocus: shouldBeOpenedVarChangeFunc,
+                              child: Icon(
+                                Icons.cancel_outlined,
+                                size: 24,
+                                color: Colors.black,
+                              ),
                             ))
                       ],
                     ),
@@ -4149,16 +4241,20 @@ if(user.isnavigating) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Steps",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xff000000),
-                            height: 24 / 18,
+                        Semantics(
+                          label: "Steps",
+                          excludeSemantics: false,
+                          child: Text(
+                            "Steps",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 24 / 18,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
                         SizedBox(
                           height: 22,
@@ -4246,7 +4342,8 @@ if(user.isnavigating) {
                 ],
               ),
             ),
-          ),DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,)],
+          ),
+            DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation,)],
         ));
   }
 
@@ -4524,7 +4621,7 @@ if(user.isnavigating) {
                 : 175 / screenHeight,
             maxHeight: screenHeight * 0.9,
             panel: Semantics(
-              sortKey: const OrdinalSortKey(1),
+
               child: Container(
                   child: !_isFilterOpen
                       ? Container(
@@ -4745,8 +4842,6 @@ if(user.isnavigating) {
                                           children: [
                                             Semantics(
                                               header: true,
-                                              sortKey:
-                                              const OrdinalSortKey(6),
                                               child: GestureDetector(
                                                 onTap: _slidePanelUp,
                                                 child: Text(
@@ -4765,8 +4860,6 @@ if(user.isnavigating) {
                                             ),
                                             Semantics(
                                               label: 'Services',
-                                              sortKey:
-                                              const OrdinalSortKey(7),
                                               child: TextButton(
                                                   onPressed: () {
                                                     setState(() {
@@ -4801,8 +4894,6 @@ if(user.isnavigating) {
                                           children: [
                                             Semantics(
                                               label: "",
-                                              sortKey:
-                                              const OrdinalSortKey(1),
                                               child: Container(
                                                 child: Column(
                                                   children: [
@@ -5619,75 +5710,73 @@ if(user.isnavigating) {
               ? 220 / screenHeight
               : 175 / screenHeight,
           maxHeight: 90,
-          panel: Semantics(
-              sortKey: const OrdinalSortKey(1),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+          panel: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(16.0)),
+              color: Colors.white,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 6,
-                          margin: EdgeInsets.only(top: 8),
-                          decoration: BoxDecoration(
-                            color: Color(0xffd9d9d9),
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(bottom: 20),
-                          padding: EdgeInsets.only(left: 17, top: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff292929),
-                                  height: 25 / 18,
-                                ),
-                                textAlign: TextAlign.left,
-                              )
-                            ],
-                          ),
-                        ),
-                        Spacer(),
-                        InkWell(
-                          onTap: () {
-                            _isBuildingPannelOpen = false;
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(right: 20),
-                            alignment: Alignment.topCenter,
-                            child: SvgPicture.asset("assets/closeicon.svg"),
-                          ),
-                        ),
-                      ],
-                    ),
                     Container(
-                      height: 1,
-                      width: screenWidth,
-                      color: Color(0xffebebeb),
+                      width: 38,
+                      height: 6,
+                      margin: EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Color(0xffd9d9d9),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                     ),
                   ],
                 ),
-              )),
+                Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.only(left: 17, top: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff292929),
+                              height: 25 / 18,
+                            ),
+                            textAlign: TextAlign.left,
+                          )
+                        ],
+                      ),
+                    ),
+                    Spacer(),
+                    InkWell(
+                      onTap: () {
+                        _isBuildingPannelOpen = false;
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 20),
+                        alignment: Alignment.topCenter,
+                        child: SvgPicture.asset("assets/closeicon.svg"),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  height: 1,
+                  width: screenWidth,
+                  color: Color(0xffebebeb),
+                ),
+              ],
+            ),
+          ),
         ));
   }
 
@@ -6000,356 +6089,365 @@ if(user.isnavigating) {
 
   Set<gmap.Polyline> finalSet = {};
   bool ispdrStart=false;
+  bool semanticShouldBeExcluded = false;
 
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidthPixels = MediaQuery.of(context).size.width *
-        MediaQuery.of(context).devicePixelRatio;
-    double screenHeightPixel = MediaQuery.of(context).size.height *
-        MediaQuery.of(context).devicePixelRatio;
-
+    double screenWidthPixels = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
+    double screenHeightPixel = MediaQuery.of(context).size.height * MediaQuery.of(context).devicePixelRatio;
 
     return SafeArea(
-      child: isLoading && isBlueToothLoading? Scaffold(
-        body: Center(
-          child: lott.Lottie.asset(
-            'assets/loading_bluetooth.json', // Path to your Lottie animation
-            width: 500,
-            height: 500,
-          ),
-        ),
-      )
-          : isLoading?
-      Scaffold(
-        body: Center(
-            child:  lott.Lottie.asset(
-              'assets/loding_animation.json', // Path to your Lottie animation
-              width: 500,
-              height: 500,
-            )
-        ),
-      )
-
-          :Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              child: GoogleMap(
-                padding: EdgeInsets.only(left: 20), // <--- padding added here
-                initialCameraPosition: _initialCameraPosition,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                zoomGesturesEnabled: true,
-                polygons: patch.union(getCombinedPolygons()).union(otherpatch),
-                polylines:singleroute[building.floor[buildingAllApi.getStoredString()]] != null
-                    ? getCombinedPolylines().union(singleroute[building.floor[buildingAllApi.getStoredString()]]!)
-                    : getCombinedPolylines(),
-                markers: getCombinedMarkers(),
-                onTap: (x) {
-                  mapState.interaction = true;
-                },
-                mapType: MapType.normal,
-                buildingsEnabled: false,
-                compassEnabled: true,
-                rotateGesturesEnabled: true,
-                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                onMapCreated: (controller) {
-                  controller.setMapStyle(maptheme);
-                  _googleMapController = controller;
-                  print("tumhari galti hai sb saalo");
-
-
-                  if (patch.isNotEmpty) {
-                    fitPolygonInScreen(patch.first);
-                  }
-                },
-                onCameraMove: (CameraPosition cameraPosition) {
-                  focusBuildingChecker(cameraPosition);
-                  mapState.interaction = true;
-                  mapbearing = cameraPosition.bearing;
-                  if (!mapState.interaction) {
-                    mapState.zoom = cameraPosition.zoom;
-                  }
-                  if (true) {
-                    _updateMarkers(cameraPosition.zoom);
-                    //_updateBuilding(cameraPosition.zoom);
-                  }
-                },
-                onCameraIdle: () {
-                  if (!mapState.interaction) {
-                    mapState.interaction2 = true;
-                  }
-                },
-                onCameraMoveStarted: () {
-                  mapState.interaction2 = false;
-                },
-              ),
-            ),
-
-            Positioned(
-              bottom: 150.0, // Adjust the position as needed
-              right: 16.0,
-              child: Column(
-                children: [
-                  //Text(Building.thresh),
-                  Visibility(
-                    visible: true,
-                    child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(24))),
-                        child: IconButton(
-                            onPressed: () {
-
-
-
-                              StartPDR();
-
-                              // bool isvalid = MotionModel.isValidStep(
-                              //     user,
-                              //     building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //     building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //     building.nonWalkable[user.Bid]![user.floor]!,
-                              //     reroute);
-                              // if (isvalid) {
-                              //
-                              //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                              //     user.move().then((value) {
-                              //       //  user.move().then((value){
-                              //       setState(() {
-                              //
-                              //         if (markers.length > 0) {
-                              //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                              //           markers[user.Bid]?[0] = customMarker.move(
-                              //               LatLng(lvalue[0],lvalue[1]),
-                              //               markers[user.Bid]![0]
-                              //           );
-                              //
-                              //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                              //           markers[user.Bid]?[1] = customMarker.move(
-                              //               LatLng(ldvalue[0],ldvalue[1]),
-                              //               markers[user.Bid]![1]
-                              //           );
-                              //         }
-                              //       });
-                              //       // });
-                              //     });
-                              //   }else{
-                              //     StopPDR();
-                              //     setState(() {
-                              //       user.isnavigating=false;
-                              //     });
-                              //
-                              //   }
-                              //
-                              //   print("next [${user.coordX}${user.coordY}]");
-                              //
-                              // } else {
-                              //   if(user.isnavigating){
-                              //     // reroute();
-                              //     // showToast("You are out of path");
-                              //   }
-                              //
-                              // }
-
-                            }, icon: Icon(Icons.directions_walk))),
-                  ),
-                  SizedBox(height: 28.0),
-                  // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                  //
-                  //   double? compassHeading = newvalue;
-                  //   setState(() {
-                  //     user.theta = compassHeading!;
-                  //     if (mapState.interaction2) {
-                  //       mapState.bearing = compassHeading!;
-                  //       _googleMapController.moveCamera(
-                  //         CameraUpdate.newCameraPosition(
-                  //           CameraPosition(
-                  //             target: mapState.target,
-                  //             zoom: mapState.zoom,
-                  //             bearing: mapState.bearing!,
-                  //           ),
-                  //         ),
-                  //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                  //       );
-                  //     } else {
-                  //       if (markers.length > 0)
-                  //         markers[user.Bid]?[0] =
-                  //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                  //     }
-                  //   });
-                  //
-                  // }),
-                  SizedBox(height: 28.0),
-                  Semantics(
-                    sortKey: const OrdinalSortKey(2),
-                    child: SpeedDial(
-                      child: Text(
-                        building.floor == 0 ? 'G' : '${building.floor[buildingAllApi.getStoredString()]}',
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff24b9b0),
-                          height: 19 / 16,
-                        ),
+      child: isLoading && isBlueToothLoading?
+          Scaffold(
+            body: Center(
+                    child: lott.Lottie.asset(
+                        'assets/loading_bluetooth.json', // Path to your Lottie animation
+                        width: 500,
+                        height: 500,
                       ),
-                      activeIcon: Icons.close,
-                      backgroundColor: Colors.white,
-                      children: [
-                        for (int i = 0; i < building.numberOfFloors[buildingAllApi.getStoredString()]!; i++)
-                          SpeedDialChild(
-                            child: Text(
-                              i == 0 ? 'G' : '${i}',
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                height: 19 / 16,
-                              ),
-                            ),
-                            backgroundColor: pathMarkers[i] == null
-                                ? Colors.white
-                                : Color(0xff24b9b0),
-                            onTap: () {
-                              building.floor[buildingAllApi.getStoredString()] = i;
-                              createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!, building.floor[buildingAllApi.getStoredString()]!);
-                              if (pathMarkers[i] != null) {
-                                //setCameraPosition(pathMarkers[i]!);
+                    ),
+          )
+          : isLoading?
+          Scaffold(
+            body: Center(
+                child:  lott.Lottie.asset(
+                  'assets/loding_animation.json', // Path to your Lottie animation
+                  width: 500,
+                  height: 500,
+                )
+            ),
+          )
+          :Scaffold(
+              body: Stack(
+                    children: [
+                      detected? Semantics(
+                          excludeSemantics: true,
+                          child: nearestLandmarkpannel()): Semantics(excludeSemantics: true, child: Container()),
+                      Semantics(
+                        excludeSemantics: true,
+                        child: Container(
+                          child: GoogleMap(
+                            padding: EdgeInsets.only(left: 20), // <--- padding added here
+                            initialCameraPosition: _initialCameraPosition,
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            zoomGesturesEnabled: true,
+                            polygons: patch.union(getCombinedPolygons()).union(otherpatch),
+                            polylines:singleroute[building.floor[buildingAllApi.getStoredString()]] != null
+                                ? getCombinedPolylines().union(singleroute[building.floor[buildingAllApi.getStoredString()]]!)
+                                : getCombinedPolylines(),
+                            markers: getCombinedMarkers(),
+                            onTap: (x) {
+                              mapState.interaction = true;
+                            },
+                            mapType: MapType.normal,
+                            buildingsEnabled: false,
+                            compassEnabled: true,
+                            rotateGesturesEnabled: true,
+                            minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                            onMapCreated: (controller) {
+                              controller.setMapStyle(maptheme);
+                              _googleMapController = controller;
+                              print("tumhari galti hai sb saalo");
+
+
+                              if (patch.isNotEmpty) {
+                                fitPolygonInScreen(patch.first);
                               }
-                              building.landmarkdata!.then((value) {
-                                createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
-                              });
+                            },
+                            onCameraMove: (CameraPosition cameraPosition) {
+                              focusBuildingChecker(cameraPosition);
+                              mapState.interaction = true;
+                              mapbearing = cameraPosition.bearing;
+                              if (!mapState.interaction) {
+                                mapState.zoom = cameraPosition.zoom;
+                              }
+                              if (true) {
+                                _updateMarkers(cameraPosition.zoom);
+                                //_updateBuilding(cameraPosition.zoom);
+                              }
+                            },
+                            onCameraIdle: () {
+                              if (!mapState.interaction) {
+                                mapState.interaction2 = true;
+                              }
+                            },
+                            onCameraMoveStarted: () {
+                              mapState.interaction2 = false;
                             },
                           ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 28.0), // Adjust the height as needed
-                  Semantics(
-                    sortKey: const OrdinalSortKey(3),
-                    child: FloatingActionButton(
-                      onPressed: () async {
-                        //print(PathState.connections);
-                        building.floor[buildingAllApi.getStoredString()] = user.floor;
-                        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
-                        if (pathMarkers[user.floor] != null) {
-                          setCameraPosition(pathMarkers[user.floor]!);
-                        }
-                        building.landmarkdata!.then((value) {
-                          createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
-                        });
-                        if (markers.length > 0)
-                          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
-                        if (user.initialallyLocalised) {
-                          mapState.interaction = !mapState.interaction;
-                        }
-                        mapState.zoom = 21;
-                        fitPolygonInScreen(patch.first);
-
-                      },
-                      child: Icon(
-                        Icons.my_location_sharp,
-                        color: Colors.black,
+                        ),
                       ),
-                      backgroundColor:
-                      Colors.white, // Set the background color of the FAB
-                    ),
-                  ),
-                  SizedBox(height: 28.0), // Adjust the height as needed
-                  FloatingActionButton(
-                    onPressed: (){
-                      print("checkingBuildingfloor");
-                      //building.floor == 0 ? 'G' : '${building.floor}',
-                      print(building.floor);
-                      int firstKey = building.floor.values.first;
-                      print(firstKey);
-                      print(singleroute[building.floor.values.first]);
+                      //debug----
+                      Positioned(
+                        bottom: 150.0, // Adjust the position as needed
+                        right: 16.0,
+                        child: Semantics(
+                          excludeSemantics: semanticShouldBeExcluded,
+                          child: Column(
+                            children: [
+                              //Text(Building.thresh),
+                              // Visibility(
+                              //   visible: true,
+                              //   child: Container(
+                              //       decoration: BoxDecoration(
+                              //           color: Colors.white,
+                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
+                              //       child: IconButton(
+                              //           onPressed: () {
+                              //
+                              //             StartPDR();
+                              //
+                              //             // bool isvalid = MotionModel.isValidStep(
+                              //             //     user,
+                              //             //     building.floorDimenssion[user.Bid]![user.floor]![0],
+                              //             //     building.floorDimenssion[user.Bid]![user.floor]![1],
+                              //             //     building.nonWalkable[user.Bid]![user.floor]!,
+                              //             //     reroute);
+                              //             // if (isvalid) {
+                              //             //
+                              //             //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                              //             //     user.move().then((value) {
+                              //             //       //  user.move().then((value){
+                              //             //       setState(() {
+                              //             //
+                              //             //         if (markers.length > 0) {
+                              //             //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                              //             //           markers[user.Bid]?[0] = customMarker.move(
+                              //             //               LatLng(lvalue[0],lvalue[1]),
+                              //             //               markers[user.Bid]![0]
+                              //             //           );
+                              //             //
+                              //             //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                              //             //           markers[user.Bid]?[1] = customMarker.move(
+                              //             //               LatLng(ldvalue[0],ldvalue[1]),
+                              //             //               markers[user.Bid]![1]
+                              //             //           );
+                              //             //         }
+                              //             //       });
+                              //             //       // });
+                              //             //     });
+                              //             //   }else{
+                              //             //     StopPDR();
+                              //             //     setState(() {
+                              //             //       user.isnavigating=false;
+                              //             //     });
+                              //             //
+                              //             //   }
+                              //             //
+                              //             //   print("next [${user.coordX}${user.coordY}]");
+                              //             //
+                              //             // } else {
+                              //             //   if(user.isnavigating){
+                              //             //     // reroute();
+                              //             //     // showToast("You are out of path");
+                              //             //   }
+                              //             //
+                              //             // }
+                              //
+                              //           }, icon: Icon(Icons.directions_walk))),
+                              // ),
+                              SizedBox(height: 28.0),
+                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                              //
+                              //   double? compassHeading = newvalue;
+                              //   setState(() {
+                              //     user.theta = compassHeading!;
+                              //     if (mapState.interaction2) {
+                              //       mapState.bearing = compassHeading!;
+                              //       _googleMapController.moveCamera(
+                              //         CameraUpdate.newCameraPosition(
+                              //           CameraPosition(
+                              //             target: mapState.target,
+                              //             zoom: mapState.zoom,
+                              //             bearing: mapState.bearing!,
+                              //           ),
+                              //         ),
+                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              //       );
+                              //     } else {
+                              //       if (markers.length > 0)
+                              //         markers[user.Bid]?[0] =
+                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                              //     }
+                              //   });
+                              //
+                              // }),
+                              SizedBox(height: 28.0),
+                              Semantics(
+                                label: "Change floor",
 
-                      print(singleroute.keys);
-                      print(singleroute.values);
-                      print(building.floor[buildingAllApi.getStoredString()]);
-                      print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                    },
-                    child: Icon(Icons.add)
-                  ),
-                  FloatingActionButton(
-                    onPressed: () async {
+                                child: SpeedDial(
+                                  child: Text(
+                                    building.floor == 0 ? 'G' : '${building.floor[buildingAllApi.getStoredString()]}',
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff24b9b0),
+                                      height: 19 / 16,
+                                    ),
+                                  ),
+                                  activeIcon: Icons.close,
+                                  backgroundColor: Colors.white,
+                                  children: [
+                                    for (int i = 0; i < building.numberOfFloors[buildingAllApi.getStoredString()]!; i++)
+                                      SpeedDialChild(
+                                        child: Text(
+                                          i == 0 ? 'G' : '${i}',
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            height: 19 / 16,
+                                          ),
+                                        ),
+                                        backgroundColor: pathMarkers[i] == null
+                                            ? Colors.white
+                                            : Color(0xff24b9b0),
+                                        onTap: () {
+                                          building.floor[buildingAllApi.getStoredString()] = i;
+                                          createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!, building.floor[buildingAllApi.getStoredString()]!);
+                                          if (pathMarkers[i] != null) {
+                                            //setCameraPosition(pathMarkers[i]!);
+                                          }
+                                          building.landmarkdata!.then((value) {
+                                            createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
+                                          });
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 28.0), // Adjust the height as needed
+                              Semantics(
+                                child: FloatingActionButton(
+                                  onPressed: () async {
+                                    //print(PathState.connections);
+                                    building.floor[buildingAllApi.getStoredString()] = user.floor;
+                                    createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+                                    if (pathMarkers[user.floor] != null) {
+                                      setCameraPosition(pathMarkers[user.floor]!);
+                                    }
+                                    building.landmarkdata!.then((value) {
+                                      createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
+                                    });
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+                                    if (user.initialallyLocalised) {
+                                      mapState.interaction = !mapState.interaction;
+                                    }
+                                    mapState.zoom = 21;
+                                    fitPolygonInScreen(patch.first);
 
-                  StopPDR();
+                                  },
+                                  child: Icon(
+                                    Icons.my_location_sharp,
+                                    color: Colors.black,
+                                  ),
+                                  backgroundColor:
+                                  Colors.white, // Set the background color of the FAB
+                                ),
+                              ),
+                              SizedBox(height: 28.0), // Adjust the height as needed
+                              // FloatingActionButton(
+                              //   onPressed: (){
+                              //     print("checkingBuildingfloor");
+                              //     //building.floor == 0 ? 'G' : '${building.floor}',
+                              //     print(building.floor);
+                              //     int firstKey = building.floor.values.first;
+                              //     print(firstKey);
+                              //     print(singleroute[building.floor.values.first]);
+                              //
+                              //     print(singleroute.keys);
+                              //     print(singleroute.values);
+                              //     print(building.floor[buildingAllApi.getStoredString()]);
+                              //     print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                              //   },
+                              //   child: Icon(Icons.add)
+                              // ),
+                              // FloatingActionButton(
+                              //   onPressed: () async {
+                              //
+                              // StopPDR();
+                              //
+                              //
+                              //
+                              //     // if (user.initialallyLocalised) {
+                              //     //   setState(() {
+                              //     //     isLiveLocalizing = !isLiveLocalizing;
+                              //     //   });
+                              //     //
+                              //     //   Timer.periodic(
+                              //     //       Duration(milliseconds: 6000),
+                              //     //           (timer) async {
+                              //     //         print(resBeacons);
+                              //     //         btadapter.startScanning(resBeacons);
+                              //     //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                              //     //           //realTimeReLocalizeUser(resBeacons)
+                              //     //         });
+                              //     //
+                              //     //       });
+                              //     //
+                              //     // }
+                              //
+                              //   },
+                              //   child: Icon(
+                              //     Icons.location_history_sharp,
+                              //     color: (isLiveLocalizing)
+                              //         ? Colors.cyan
+                              //         : Colors.black,
+                              //   ),
+                              //   backgroundColor: Colors
+                              //       .white, // Set the background color of the FAB
+                              // ),
+
+                            ],
+                          ),
+                        ),
+                      ),
+                      //-------
+                      Positioned(
+                          top: 16,
+                          left: 16,
+                          right: 16,
+                          child: _isLandmarkPanelOpen || _isRoutePanelOpen || _isnavigationPannelOpen
+                              ? Semantics(excludeSemantics: true,child: Container())
+                              : FocusScope(
+                            autofocus: true,
+                                child: Focus(
+                                  child: Semantics(
+                                    sortKey: const OrdinalSortKey(0),// header: true,
+                                    child: HomepageSearch(
+                                            onVenueClicked: onLandmarkVenueClicked,
+                                            fromSourceAndDestinationPage:
+                                            fromSourceAndDestinationPage,
+                                          ),
+                                    ),
+                                ),
+                              )
+                      ),
+                      FutureBuilder(
+                        future: building.landmarkdata,
+                        builder: (context, snapshot) {
+                          if (_isLandmarkPanelOpen) {
+                            return landmarkdetailpannel(context, snapshot);
+                          } else {
+                            return Semantics(excludeSemantics: true,child: Container());
+                          }
+                        },
+                      ),
+                      routeDeatilPannel(),
+                      navigationPannel(),
+                      reroutePannel(),
 
 
-
-                      // if (user.initialallyLocalised) {
-                      //   setState(() {
-                      //     isLiveLocalizing = !isLiveLocalizing;
-                      //   });
-                      //
-                      //   Timer.periodic(
-                      //       Duration(milliseconds: 6000),
-                      //           (timer) async {
-                      //         print(resBeacons);
-                      //         btadapter.startScanning(resBeacons);
-                      //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                      //           //realTimeReLocalizeUser(resBeacons)
-                      //         });
-                      //
-                      //       });
-                      //
-                      // }
-
-                    },
-                    child: Icon(
-                      Icons.location_history_sharp,
-                      color: (isLiveLocalizing)
-                          ? Colors.cyan
-                          : Colors.black,
-                    ),
-                    backgroundColor: Colors
-                        .white, // Set the background color of the FAB
-                  ),
-
-                ],
+                  ],
               ),
-            ),
-            Positioned(
-                top: 16,
-                left: 16,
-                right: 16,
-                child: _isLandmarkPanelOpen || _isRoutePanelOpen || _isnavigationPannelOpen
-                    ? Container()
-                    : Semantics(
-                  // header: true,
-                  sortKey: const OrdinalSortKey(0),
-                  child: HomepageSearch(
-                    onVenueClicked: onLandmarkVenueClicked,
-                    fromSourceAndDestinationPage:
-                    fromSourceAndDestinationPage,
-                  ),
-                )),
-            FutureBuilder(
-              future: building.landmarkdata,
-              builder: (context, snapshot) {
-                if (_isLandmarkPanelOpen) {
-                  return landmarkdetailpannel(context, snapshot);
-                } else {
-                  return Container();
-                }
-              },
-            ),
-
-            routeDeatilPannel(),
-            navigationPannel(),
-            reroutePannel(),
-            detected? Semantics(
-                child: nearestLandmarkpannel()): Container(),
-
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

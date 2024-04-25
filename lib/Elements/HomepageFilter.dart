@@ -44,11 +44,10 @@ class _HomepageFilterState extends State<HomepageFilter> {
       child: InkWell(
         borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
         onTap: () {
-
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
+                  builder: (context) => DestinationSearchPage(previousFilter: widget.text,voiceInputEnabled: false,))
           ).then((value){
             widget.onClicked(value);
           });

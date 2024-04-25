@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:chips_choice/chips_choice.dart';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -59,6 +60,22 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     super.initState();
     if(widget.floors.isEmpty){
       widget.floors.add("");
+    }else{
+      setState(() {
+        if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
+          setState(() {
+            tag = 0;
+          });
+          print("Tag=0");
+        }else if(int.parse(widget.floors[0])==-1){
+          tag = -1;
+          print("Tag=-1");
+        }else if(int.parse(widget.floors[0]).isFinite){
+          tag = int.parse(widget.floors[0]);
+          print("Tag=00");
+        }
+      });
+
     }
 
     optionListForUI.add(widget.filterName);
@@ -237,7 +254,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            icon: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg"),
+                            icon: Semantics(label:"Back",child: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg")),
                           ),
                         ),
                       ),
@@ -333,7 +350,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       //
                       // },
                       onSelect: item.select!,selected: item.selected,
-                      floorNo: widget.floors![i].toString(),
+                      floorNo: widget.floors[i].toString(),
                       // selected: selVal,
 
                     );
@@ -399,41 +416,46 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
         ],
       ),
       duration: Duration(milliseconds: 500),
-      child: InkWell(
-        borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
-        onTap: () {
-
-          Navigator.pop(context);
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(left: 4),
-              child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 8, right: 4),
-              child: Text(
-                widget.text,
-                style: TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: widget.selected? Colors.white : Color(0xff49454f) ,
-                  height: 20 / 14,
-                ),
-                textAlign: TextAlign.center,
+      child: Semantics(
+        label: widget.text + "Selected",
+        child: InkWell(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 4),
+                child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 4),
-              child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
-            )
+              Semantics(
+                excludeSemantics: true,
+                child: Container(
+                  margin: EdgeInsets.only(left: 8, right: 4),
+                  child: Text(
+                    widget.text,
+                    style: TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: widget.selected? Colors.white : Color(0xff49454f) ,
+                      height: 20 / 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 4),
+                child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              )
 
 
-            // Icon displayed when active is true
-          ],
+              // Icon displayed when active is true
+            ],
+          ),
         ),
       ),
     );
@@ -475,26 +497,32 @@ class _FloorWidgetForFloorSelectionPageState extends State<FloorWidgetForFloorSe
         ],
       ),
       duration: Duration(milliseconds: 500),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            widget.selected = !widget.selected;
-          });
-          widget.onSelect(widget.selected);
-          widget.selected ? print("black") : print("white");
+      child: Semantics(
+        label: "Filter Floor"+widget.floorNo,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              widget.selected = !widget.selected;
+            });
+            widget.onSelect(widget.selected);
+            widget.selected ? print("black") : print("white");
 
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
-          // );
-        },
-        child: Center(
-          child: Text(
-            widget.floorNo,
-            style: TextStyle(
-              color: widget.selected ? Colors.white : Colors.black,
-              fontSize: 16, // Adjust font size as needed
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
+            // );
+          },
+          child: Center(
+            child: Semantics(
+              excludeSemantics: true,
+              child: Text(
+                widget.floorNo,
+                style: TextStyle(
+                  color: widget.selected ? Colors.white : Colors.black,
+                  fontSize: 16, // Adjust font size as needed
+                ),
+              ),
             ),
           ),
         ),

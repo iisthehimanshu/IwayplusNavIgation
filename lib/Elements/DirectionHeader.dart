@@ -112,7 +112,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = "${widget.direction}$key   $value\n";
       });
 
-      print("-90-   $key   $value");
+      print("p  $key   $value");
 
       if(value>highestweight){
         highestweight =  value;

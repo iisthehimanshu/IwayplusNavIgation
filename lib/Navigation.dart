@@ -596,12 +596,17 @@ void calibrate()async{
       'assets/tealtorch.png',
     );
     List<int> landCords = [];
+    landCords.clear();
     if (apibeaconmap[nearestBeacon] != null) {
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        print("nearestLandInfomation");
+        print(nearestLandInfomation.name);
+
+        landCords = tools.localizefindNearbyLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        print("landCordCheck");
+        print(landCords);
       });
 
       List<double> values = [];
@@ -645,8 +650,13 @@ void calibrate()async{
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
+
       List<int> transitionValue = tools.eightcelltransition(user.theta);
+      print("transitionValue");
+      print(transitionValue);
       List<int> newUserCord = [user.coordX + transitionValue[0], user.coordY + transitionValue[1]];
+      print("newUserCord");
+      print(newUserCord);
 
       user.lat =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -694,7 +704,11 @@ void calibrate()async{
           createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
+      print("usercordinate");
+      print("$userCords $newUserCord $landCords");
       double value = tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      print("value--");
+      print(value);
       String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
       detected = !detected;
@@ -704,13 +718,19 @@ void calibrate()async{
       if (nearestLandInfomation.name == "") {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
         nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
-        if(speakTTS)
+        if(speakTTS && finalvalue.isNotEmpty)
           speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+        else if(speakTTS){
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!}");
+        }
       } else {
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
-        if(speakTTS)
+        if(speakTTS && finalvalue.isNotEmpty)
           speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+        else if(speakTTS){
+          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name}");
+        }
       }
     } else {
       if(speakTTS)
@@ -3409,8 +3429,8 @@ if(Platform.isAndroid){
       semanticShouldBeExcluded = true;
     });
 
-    print("shouldBeOpened");
-    print(semanticShouldBeExcluded);
+    // print("shouldBeOpened");
+    // print(semanticShouldBeExcluded);
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -6190,66 +6210,66 @@ if(user.isnavigating) {
                           child: Column(
                             children: [
                               //Text(Building.thresh),
-                              // Visibility(
-                              //   visible: true,
-                              //   child: Container(
-                              //       decoration: BoxDecoration(
-                              //           color: Colors.white,
-                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
-                              //       child: IconButton(
-                              //           onPressed: () {
-                              //
-                              //             StartPDR();
-                              //
-                              //             // bool isvalid = MotionModel.isValidStep(
-                              //             //     user,
-                              //             //     building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //             //     building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //             //     building.nonWalkable[user.Bid]![user.floor]!,
-                              //             //     reroute);
-                              //             // if (isvalid) {
-                              //             //
-                              //             //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                              //             //     user.move().then((value) {
-                              //             //       //  user.move().then((value){
-                              //             //       setState(() {
-                              //             //
-                              //             //         if (markers.length > 0) {
-                              //             //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                              //             //           markers[user.Bid]?[0] = customMarker.move(
-                              //             //               LatLng(lvalue[0],lvalue[1]),
-                              //             //               markers[user.Bid]![0]
-                              //             //           );
-                              //             //
-                              //             //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                              //             //           markers[user.Bid]?[1] = customMarker.move(
-                              //             //               LatLng(ldvalue[0],ldvalue[1]),
-                              //             //               markers[user.Bid]![1]
-                              //             //           );
-                              //             //         }
-                              //             //       });
-                              //             //       // });
-                              //             //     });
-                              //             //   }else{
-                              //             //     StopPDR();
-                              //             //     setState(() {
-                              //             //       user.isnavigating=false;
-                              //             //     });
-                              //             //
-                              //             //   }
-                              //             //
-                              //             //   print("next [${user.coordX}${user.coordY}]");
-                              //             //
-                              //             // } else {
-                              //             //   if(user.isnavigating){
-                              //             //     // reroute();
-                              //             //     // showToast("You are out of path");
-                              //             //   }
-                              //             //
-                              //             // }
-                              //
-                              //           }, icon: Icon(Icons.directions_walk))),
-                              // ),
+                              Visibility(
+                                visible: true,
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                                    child: IconButton(
+                                        onPressed: () {
+
+                                          StartPDR();
+
+                                          // bool isvalid = MotionModel.isValidStep(
+                                          //     user,
+                                          //     building.floorDimenssion[user.Bid]![user.floor]![0],
+                                          //     building.floorDimenssion[user.Bid]![user.floor]![1],
+                                          //     building.nonWalkable[user.Bid]![user.floor]!,
+                                          //     reroute);
+                                          // if (isvalid) {
+                                          //
+                                          //   if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                                          //     user.move().then((value) {
+                                          //       //  user.move().then((value){
+                                          //       setState(() {
+                                          //
+                                          //         if (markers.length > 0) {
+                                          //           List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                          //           markers[user.Bid]?[0] = customMarker.move(
+                                          //               LatLng(lvalue[0],lvalue[1]),
+                                          //               markers[user.Bid]![0]
+                                          //           );
+                                          //
+                                          //           List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                          //           markers[user.Bid]?[1] = customMarker.move(
+                                          //               LatLng(ldvalue[0],ldvalue[1]),
+                                          //               markers[user.Bid]![1]
+                                          //           );
+                                          //         }
+                                          //       });
+                                          //       // });
+                                          //     });
+                                          //   }else{
+                                          //     StopPDR();
+                                          //     setState(() {
+                                          //       user.isnavigating=false;
+                                          //     });
+                                          //
+                                          //   }
+                                          //
+                                          //   print("next [${user.coordX}${user.coordY}]");
+                                          //
+                                          // } else {
+                                          //   if(user.isnavigating){
+                                          //     // reroute();
+                                          //     // showToast("You are out of path");
+                                          //   }
+                                          //
+                                          // }
+
+                                        }, icon: Icon(Icons.directions_walk))),
+                              ),
                               SizedBox(height: 28.0),
                               // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
                               //

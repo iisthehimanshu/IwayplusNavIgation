@@ -868,7 +868,8 @@ void calibrate()async{
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
-      building.numberOfFloors[buildingAllApi.selectedBuildingID] = value.polyline!.floors!.length;
+      building.numberOfFloors[buildingAllApi.selectedBuildingID] =
+          value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, 0);
     });
@@ -902,13 +903,21 @@ void calibrate()async{
             String matched = match.group(0)!;
             allIntegers.add(int.parse(matched));
           }
-          Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+          Map<int, List<int>> currrentnonWalkable =
+              building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
           currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
-          building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+          building.nonWalkable[value.landmarks![i].buildingID!] =
+              currrentnonWalkable;
 
-          Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
-          currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
-          building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
+          Map<int, List<int>> currentfloorDimenssion =
+              building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
+                  Map();
+          currentfloorDimenssion[value.landmarks![i].floor!] = [
+            value.landmarks![i].properties!.floorLength!,
+            value.landmarks![i].properties!.floorBreadth!
+          ];
+          building.floorDimenssion[buildingAllApi.selectedBuildingID] =
+          currentfloorDimenssion!;
           print("fetch route--  ${building.floorDimenssion}");
 
           // building.floorDimenssion[value.landmarks![i].floor!] = [
@@ -930,49 +939,6 @@ void calibrate()async{
       print(isBlueToothLoading);
     });
 
-    await beaconapi().fetchBeaconData().then((value) {
-      print("beacondatacheck");
-      print(value.toString());
-      building.beacondata = value;
-      for (int i = 0; i < value.length; i++) {
-        beacon beacons = value[i];
-        if (beacons.name != null) {
-          apibeaconmap[beacons.name!] = beacons;
-        }
-      }
-      Building.apibeaconmap = apibeaconmap;
-
-print("scanningggg starteddddd");
-
-if(Platform.isAndroid){
-  btadapter.startScanning(apibeaconmap);
-}else{
-  btadapter.strtScanningIos(apibeaconmap);
-}
-
-
-
-     // btadapter.startScanning(apibeaconmap);
-      setState(() {
-        resBeacons = apibeaconmap;
-      });
-      // print("printing bin");
-      // btadapter.printbin();
-      late Timer _timer;
-      //please wait
-      //searching your location
-
-      speak("Please wait");
-      speak("Searching your location. .");
-
-      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
-
-
-        print("localize user is calling itself.....");
-        _timer.cancel();
-      });
-    });
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
@@ -1012,12 +978,17 @@ if(Platform.isAndroid){
                 String matched = match.group(0)!;
                 allIntegers.add(int.parse(matched));
               }
-              Map<int, List<int>> currrentnonWalkable = building.nonWalkable[key] ?? Map();
+              Map<int, List<int>> currrentnonWalkable =
+                  building.nonWalkable[key] ?? Map();
               currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
               building.nonWalkable[key] = currrentnonWalkable;
 
-              Map<int,List<int>> currentfloorDimenssion = building.floorDimenssion[key] ?? Map();
-              currentfloorDimenssion[value.landmarks![i].floor!] = [value.landmarks![i].properties!.floorLength!, value.landmarks![i].properties!.floorBreadth!];
+              Map<int, List<int>> currentfloorDimenssion =
+                  building.floorDimenssion[key] ?? Map();
+              currentfloorDimenssion[value.landmarks![i].floor!] = [
+                value.landmarks![i].properties!.floorLength!,
+                value.landmarks![i].properties!.floorBreadth!
+              ];
               building.floorDimenssion[key] = currentfloorDimenssion!;
               print("fetch route--  ${building.floorDimenssion}");
 
@@ -1028,6 +999,47 @@ if(Platform.isAndroid){
             }
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
+        });
+        await beaconapi().fetchBeaconData(id: key).then((value) {
+          print("beacondatacheck");
+
+          building.beacondata = value;
+          for (int i = 0; i < value.length; i++) {
+            print(value[i].name);
+            beacon beacons = value[i];
+            if (beacons.name != null) {
+              apibeaconmap[beacons.name!] = beacons;
+            }
+          }
+          Building.apibeaconmap = apibeaconmap;
+
+          print("scanningggg starteddddd");
+
+          if (Platform.isAndroid) {
+            btadapter.startScanning(apibeaconmap);
+          } else {
+            btadapter.strtScanningIos(apibeaconmap);
+          }
+
+          // btadapter.startScanning(apibeaconmap);
+          setState(() {
+            resBeacons = apibeaconmap;
+          });
+          // print("printing bin");
+          // btadapter.printbin();
+          late Timer _timer;
+          //please wait
+          //searching your location
+
+          speak("Please wait");
+          speak("Searching your location. .");
+
+          _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
+            localizeUser();
+
+            print("localize user is calling itself.....");
+            _timer.cancel();
+          });
         });
       }
     });
@@ -1043,7 +1055,6 @@ if(Platform.isAndroid){
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
-
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -1093,6 +1104,7 @@ if(Platform.isAndroid){
         break;
       }
     }
+
 
 
     paintUser(nearestBeacon);
@@ -3426,7 +3438,7 @@ if(Platform.isAndroid){
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
     setState(() {
-      semanticShouldBeExcluded = true;
+      semanticShouldBeExcluded = false;
     });
 
     // print("shouldBeOpened");
@@ -4021,7 +4033,7 @@ if(Platform.isAndroid){
   }
   void shouldBeOpenedVarChangeFunc(){
     setState(() {
-      semanticShouldBeExcluded = true;
+      semanticShouldBeExcluded = false;
     });
   }
 

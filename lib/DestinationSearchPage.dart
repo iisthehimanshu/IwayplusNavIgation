@@ -91,40 +91,43 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     fetchRecents();
     recentResults.add(Container(
       margin: EdgeInsets.only(left: 16, right: 16, top: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Recent Searches",
-            style: const TextStyle(
-              fontFamily: "Roboto",
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color(0xff000000),
-              height: 23 / 16,
+      child: Semantics(
+        excludeSemantics: true,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Recent Searches",
+              style: const TextStyle(
+                fontFamily: "Roboto",
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xff000000),
+                height: 23 / 16,
+              ),
+              textAlign: TextAlign.left,
             ),
-            textAlign: TextAlign.left,
-          ),
-          TextButton(
-              onPressed: () {
-                clearAllRecents();
-                recent.clear();
-                setState(() {
-                  recentResults.clear();
-                });
-              },
-              child: Text(
-                "Clear all",
-                style: const TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xff24b9b0),
-                  height: 25 / 16,
-                ),
-                textAlign: TextAlign.left,
-              ))
-        ],
+            TextButton(
+                onPressed: () {
+                  clearAllRecents();
+                  recent.clear();
+                  setState(() {
+                    recentResults.clear();
+                  });
+                },
+                child: Text(
+                  "Clear all",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xff24b9b0),
+                    height: 25 / 16,
+                  ),
+                  textAlign: TextAlign.left,
+                ))
+          ],
+        ),
       ),
     ));
   }

@@ -210,65 +210,65 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-  // @override
-  // void didUpdateWidget(DirectionHeader oldWidget){
-  //   super.didUpdateWidget(oldWidget);
-  //   if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
-  //     speak("You have reached ${widget.user.pathobj.destinationName}");
-  //     widget.closeNavigation();
-  //   }else{
-  //
-  //     widget.user.pathobj.connections.forEach((key, value) {
-  //       value.forEach((inkey, invalue) {
-  //         if(widget.user.path[widget.user.pathobj.index] == invalue){
-  //           widget.direction = "You have reached ";
-  //         }
-  //       });
-  //     });
-  //
-  //
-  //
-  //
-  //     List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-  //     int nextTurn = findNextTurn(turnPoints, remainingPath);
-  //     widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-  //
-  //     double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-  //     widget.direction = tools.angleToClocks(angle);
-  //     if(widget.direction == "Straight"){
-  //       widget.direction = "Go Straight";
-  //     }else{
-  //       widget.direction = "Turn ${widget.direction}, and Go Straight";
-  //     }
-  //
-  //     if(nextTurn == turnPoints.last && widget.distance == 5){
-  //       double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-  //       speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
-  //     }
-  //
-  //     if(oldWidget.direction != widget.direction){
-  //
-  //       if(oldWidget.direction == "Go Straight"){
-  //
-  //         Vibration.vibrate();
-  //
-  //         // if(nextTurn == turnPoints.last){
-  //         //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-  //         // }else{
-  //         //   speak("${widget.direction} ${widget.distance} meter");
-  //         // }
-  //
-  //         speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
-  //
-  //       }else if(widget.direction == "Go Straight"){
-  //
-  //         Vibration.vibrate();
-  //         speak("Go Straight ${(widget.distance/2).toInt()} steps");
-  //       }
-  //     }
-  //   }
-  //
-  // }
+  @override
+  void didUpdateWidget(DirectionHeader oldWidget){
+    super.didUpdateWidget(oldWidget);
+    if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+      speak("You have reached ${widget.user.pathobj.destinationName}");
+      widget.closeNavigation();
+    }else{
+
+      widget.user.pathobj.connections.forEach((key, value) {
+        value.forEach((inkey, invalue) {
+          if(widget.user.path[widget.user.pathobj.index] == invalue){
+            widget.direction = "You have reached ";
+          }
+        });
+      });
+
+
+
+
+      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
+      int nextTurn = findNextTurn(turnPoints, remainingPath);
+      widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+
+      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      widget.direction = tools.angleToClocks(angle);
+      if(widget.direction == "Straight"){
+        widget.direction = "Go Straight";
+      }else{
+        widget.direction = "Turn ${widget.direction}, and Go Straight";
+      }
+
+      if(nextTurn == turnPoints.last && widget.distance == 5){
+        double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
+      }
+
+      if(oldWidget.direction != widget.direction){
+
+        if(oldWidget.direction == "Go Straight"){
+
+          // Vibration.vibrate();
+
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
+
+          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
+
+        }else if(widget.direction == "Go Straight"){
+
+          // Vibration.vibrate();
+          speak("Go Straight ${(widget.distance/2).toInt()} steps");
+        }
+      }
+    }
+
+  }
 
   Icon getCustomIcon(String direction) {
     if(direction == "Go Straight"){

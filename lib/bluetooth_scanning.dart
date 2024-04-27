@@ -165,6 +165,9 @@ class BT {
     numberOfSample[MacId] = numberOfSample[MacId]! + 1;
     rs[MacId]!.add(rssi);
 
+
+    print("of beacon ${rs}");
+
     if (Rssi <= 65) {
       binnumber = 0;
     } else if (Rssi <= 70) {
@@ -187,7 +190,11 @@ class BT {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
 
+    print("number of sample---${numberOfSample[MacId]}");
+
   }
+
+
 
   void printbin() {
     print(BIN);

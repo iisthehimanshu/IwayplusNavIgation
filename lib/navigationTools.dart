@@ -292,19 +292,13 @@ class tools {
     } else if (angle > 292.5 && angle <= 337.5) {
       return "on your Slight Left";
     } else {
-      print("angle--");
-      print(angle);
       return "on your None";
     }
   }
 
 
   static String angleToClocksForNearestLandmarkToBeacon(double angle) {
-    print("checkingAngle");
-    print(angle);
-
     if (angle < 0) {
-      print("angleiszero");
       angle = angle + 360;
     }
 
@@ -325,8 +319,6 @@ class tools {
     } else if (angle > 292.5 && angle <= 337.5) {
       return "Slight Left";
     } else {
-      print("angle");
-      print(angle);
       return "None";
     }
   }
@@ -547,35 +539,33 @@ class tools {
     print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=20;
+    int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID){
-        print("Beacon.floor!");
-        print("${Beacon.floor!} ${value.element!.subType}");
-        if (Beacon.floor! == value.floor && value.element!.subType != 'beacons') {
+        if (Beacon.floor! == value.floor) {
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
           pCoord.add(Beacon.coordinateY!);
           double d = 0.0;
 
           if (value.doorX != null) {
-            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
-            //print("distance b/w beacon and location${d} ");
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+            print("distance b/w beacon and location${d}");
+            print(value.name);
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
               priorityQueue.add(MapEntry(currentLandInfo, d));
-              print("distance b/w beacon and location  ${value.name}${d}");
-              print(value.name);
             }
           }else{
-            d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
-            //print("distance b/w beacon and location${d}");
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName!,value.venueName!,value.floor!.toString());
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-              print("distance b/w beacon and location  ${value.name} ${d}");
-              print(value.name);
-            }
+            // d = calculateDistance(
+            //     pCoord, [value.coordinateX!, value.coordinateY!]);
+            // print("distance b/w beacon and location${d}");
+            // print(value.name);
+            // if (d<distance) {
+            //   nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+            //   priorityQueue.add(MapEntry(currentLandInfo, d));
+            // }
           }
         }
       }
@@ -584,49 +574,37 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
-      print(priorityQueue.length);
       nearestLandmark = entry.key;
-      print(nearestLandmark);
     }else{
       print(priorityQueue.isEmpty);
     }
     return nearestLandmark;
   }
-
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
-    int distance=20;
+    int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-
-      if (Beacon.floor! == value.floor && value.element!.subType != 'beacons') {
+      if (Beacon.floor! == value.floor) {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);
         double d = 0.0;
-        print("coordinates--");
-        if (value.doorX != null && value.doorY!=null) {
+        if (value.doorX != null) {
           d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           if (d<distance) {
             coordinates.add(value.doorX!);
-            print(coordinates);
             coordinates.add(value.doorY!);
-            print(coordinates);
           }
-
         }else{
           d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
           if (d<distance) {
             coordinates.add(value.coordinateX!);
-            print(coordinates);
             coordinates.add(value.coordinateY!);
-            print(coordinates);
           }
         }
       }
     });
-
-    print(coordinates);
 
     return coordinates;
   }
@@ -785,7 +763,5 @@ class nearestLandInfo{
   String buildingName;
   String venuename;
   String floor;
-
-
   nearestLandInfo( this.name, this.buildingName, this.venuename,this.floor);
 }

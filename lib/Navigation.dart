@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 
 import 'package:vibration/vibration.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -713,16 +714,26 @@ void calibrate()async{
       _isBuildingPannelOpen = true;
       _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
+      if (nearestLandInfomation.name.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
         nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!.toString();
-        if(speakTTS)
-          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+        if(speakTTS) {
+          if(finalvalue=="None"){
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!}");
+          }else {
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+          }
+        }
       } else {
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
-        if(speakTTS)
-          speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+        if(speakTTS) {
+          if(finalvalue == "None"){
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name}");
+          }else {
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+          }
+        }
       }
     } else {
       if(speakTTS)
@@ -1090,7 +1101,7 @@ if(Platform.isAndroid){
 
   Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
-    print("Beacon searching started");
+    print("Beacon searching started from realTimeReLocalizeUser");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
@@ -1098,14 +1109,22 @@ if(Platform.isAndroid){
     double highestweight = 0;
     String nearestBeacon = "";
     List<int> landCords = [];
+    List<int> currentBinFilled = [];
+    PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
+
+
 
     for (int i = 0; i < btadapter.BIN.length; i++) {
+
       if (btadapter.BIN[i]!.isNotEmpty) {
+        currentBinFilled.add(i);
         btadapter.BIN[i]!.forEach((key, value) {
           print("Wilsonchecker");
           print(value.toString());
           print(key);
+
           if (value > highestweight) {
+            priorityQueue.add(MapEntry(key, value));
             highestweight = value;
             nearestBeacon = key;
           }
@@ -1113,105 +1132,113 @@ if(Platform.isAndroid){
         break;
       }
     }
-    setState(() {
-      nearbeacon = nearestBeacon;
-      weight = highestweight.toString();
-    });
-    // btadapter.emptyBin();
-
-    print("nearestBeacon : $nearestBeacon");
-
-    if (apibeaconmap[nearestBeacon] != null) {
-      await building.landmarkdata!.then((value) {
-        nearestLandInfomation = tools.localizefindNearbyLandmark(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-      });
-
-      List<double> values = tools.localtoglobal(
-          apibeaconmap[nearestBeacon]!.coordinateX!,
-          apibeaconmap[nearestBeacon]!.coordinateY!);
-      LatLng beaconLocation = LatLng(values[0], values[1]);
-      mapState.target = LatLng(values[0], values[1]);
-      mapState.zoom = 21.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(values[0], values[1]),
-          20, // Specify your custom zoom level here
-        ),
-      );
-      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
-      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
-      print("user.coordXuser.coordY");
-      print("${user.coordX}${user.coordY}");
-      List<int> userCords = [];
-      userCords.add(user.coordX);
-      userCords.add(user.coordY);
-      List<int> transitionValue = tools.eightcelltransition(user.theta);
-      int newX = user.coordX + transitionValue[0];
-      int newY = user.coordY + transitionValue[1];
-      List<int> newUserCord = [];
-      newUserCord.add(newX);
-      newUserCord.add(newY);
-
-      user.lat =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      user.lng =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
-      user.floor = apibeaconmap[nearestBeacon]!.floor!;
-      user.key = apibeaconmap[nearestBeacon]!.sId!;
-      user.initialallyLocalised = true;
-      setState(() {
-        print("hehe: $beaconLocation");
-        markers.clear();
-        markers[user.Bid]?.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: beaconLocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        building.floor[apibeaconmap[nearestBeacon]!.buildingID!] = apibeaconmap[nearestBeacon]!.floor!;
-        createRooms(building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
-        building.landmarkdata!.then((value) {
-          createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
-        });
-      });
-      print("userCords");
-      print(userCords);
-      print(newUserCord);
-      print(landCords);
-
-      double value = tools.calculateAngle(userCords, newUserCord, landCords);
-
-      print("value----");
-      print(value);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-      print("finalvalue");
-      print(finalvalue);
-      detected = true;
-      _isBuildingPannelOpen = true;
-      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
-        print("no beacon found");
-        nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
-      } else {
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
-        speak(
-            "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
-      }
-    } else {
-      speak("Unable to find your location");
-    }
-    btadapter.stopScanning();
-    print("Beacon searching Stoped");
+    print("currentBinFilled");
+    print(currentBinFilled);
+    MapEntry<String, double> entry = priorityQueue.removeFirst();
+    List<MapEntry<String, double>> entry1 = priorityQueue.toList();
+    print(entry.key);
+    print(entry.value);
+    entry1.forEach((element) {element.value;});
+    paintUser(nearestBeacon);
+    // setState(() {
+    //   nearbeacon = nearestBeacon;
+    //   weight = highestweight.toString();
+    // });
+    // // btadapter.emptyBin();
+    //
+    // print("nearestBeacon : $nearestBeacon");
+    //
+    // if (apibeaconmap[nearestBeacon] != null) {
+    //   await building.landmarkdata!.then((value) {
+    //     nearestLandInfomation = tools.localizefindNearbyLandmark(
+    //         apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+    //     landCords = tools.localizefindNearbyLandmarkCoordinated(
+    //         apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+    //   });
+    //
+    //   List<double> values = tools.localtoglobal(
+    //       apibeaconmap[nearestBeacon]!.coordinateX!,
+    //       apibeaconmap[nearestBeacon]!.coordinateY!);
+    //   LatLng beaconLocation = LatLng(values[0], values[1]);
+    //   mapState.target = LatLng(values[0], values[1]);
+    //   mapState.zoom = 21.0;
+    //   _googleMapController.animateCamera(
+    //     CameraUpdate.newLatLngZoom(
+    //       LatLng(values[0], values[1]),
+    //       20, // Specify your custom zoom level here
+    //     ),
+    //   );
+    //   user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
+    //   user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+    //   user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+    //   print("user.coordXuser.coordY");
+    //   print("${user.coordX}${user.coordY}");
+    //   List<int> userCords = [];
+    //   userCords.add(user.coordX);
+    //   userCords.add(user.coordY);
+    //   List<int> transitionValue = tools.eightcelltransition(user.theta);
+    //   int newX = user.coordX + transitionValue[0];
+    //   int newY = user.coordY + transitionValue[1];
+    //   List<int> newUserCord = [];
+    //   newUserCord.add(newX);
+    //   newUserCord.add(newY);
+    //
+    //   user.lat =
+    //       double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+    //   user.lng =
+    //       double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+    //   user.floor = apibeaconmap[nearestBeacon]!.floor!;
+    //   user.key = apibeaconmap[nearestBeacon]!.sId!;
+    //   user.initialallyLocalised = true;
+    //   setState(() {
+    //     print("hehe: $beaconLocation");
+    //     markers.clear();
+    //     markers[user.Bid]?.add(Marker(
+    //       markerId: MarkerId("UserLocation"),
+    //       position: beaconLocation,
+    //       icon: userloc,
+    //       anchor: Offset(0.5, 0.829),
+    //     ));
+    //     building.floor[apibeaconmap[nearestBeacon]!.buildingID!] = apibeaconmap[nearestBeacon]!.floor!;
+    //     createRooms(building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+    //     building.landmarkdata!.then((value) {
+    //       createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
+    //     });
+    //   });
+    //   print("userCords");
+    //   print(userCords);
+    //   print(newUserCord);
+    //   print(landCords);
+    //
+    //   double value = tools.calculateAngle(userCords, newUserCord, landCords);
+    //
+    //   print("value----");
+    //   print(value);
+    //   String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+    //   print("finalvalue");
+    //   print(finalvalue);
+    //   detected = true;
+    //   _isBuildingPannelOpen = true;
+    //   _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+    //   nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+    //   if (nearestLandInfomation.name == "") {
+    //     print("no beacon found");
+    //     nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
+    //     nearestLandInfomation.floor =
+    //         apibeaconmap[nearestBeacon]!.floor!.toString();
+    //     speak(
+    //         "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+    //   } else {
+    //     nearestLandInfomation.floor =
+    //         apibeaconmap[nearestBeacon]!.floor!.toString();
+    //     speak(
+    //         "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+    //   }
+    // } else {
+    //   speak("Unable to find your location");
+    // }
+    // btadapter.stopScanning();
+    // print("Beacon searching Stoped");
   }
 
   void createPatch(patchDataModel value) async {
@@ -6430,27 +6457,26 @@ print("is relocalise ${UserState.isRelocalizeAroundLift}");
                   FloatingActionButton(
                     onPressed: () async {
 
-                  StopPDR();
+                  //StopPDR();
 
+                      if (user.initialallyLocalised) {
+                        setState(() {
+                          isLiveLocalizing = !isLiveLocalizing;
+                        });
+                        HelperClass.showToast("realTimeReLocalizeUser started");
 
+                        Timer.periodic(
+                            Duration(milliseconds: 7000),
+                                (timer) async {
+                              print(resBeacons);
+                              btadapter.startScanning(resBeacons);
+                              Future.delayed(Duration(milliseconds: 5000)).then((value) => {
+                                realTimeReLocalizeUser(resBeacons)
+                              });
 
-                      // if (user.initialallyLocalised) {
-                      //   setState(() {
-                      //     isLiveLocalizing = !isLiveLocalizing;
-                      //   });
-                      //
-                      //   Timer.periodic(
-                      //       Duration(milliseconds: 6000),
-                      //           (timer) async {
-                      //         print(resBeacons);
-                      //         btadapter.startScanning(resBeacons);
-                      //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                      //           //realTimeReLocalizeUser(resBeacons)
-                      //         });
-                      //
-                      //       });
-                      //
-                      // }
+                            });
+
+                      }
 
                     },
                     child: Icon(

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:vibration/vibration.dart';
+
 import 'package:iwayplusnav/navigationTools.dart';
 
 import '../UserState.dart';
@@ -69,11 +69,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
-          Vibration.vibrate();
+          
           speak("Go Straight ${widget.distance} meter");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
-          Vibration.vibrate();
+         
           speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
         }
       });
@@ -149,7 +149,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 return false;//away from path
               }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                Vibration.vibrate();
+              
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
@@ -164,7 +164,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("usercoord ${usercoord}");
             print(nearestBeacon);
           }else{
-            Vibration.vibrate();
+           
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
             return true;

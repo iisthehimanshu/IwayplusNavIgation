@@ -489,9 +489,9 @@ List<Node> findOptimizedPath(
   );
 
   List<Node> nodes = List.generate(numRows * numCols, (index) {
-    int x = index % numCols + 1;
-    int y = index ~/ numCols + 1;
-    return Node(index + 1, x, y);
+    int x = index % numCols;
+    int y = index ~/ numCols;
+    return Node(index, x, y);
   });
 
   List<Node> pathNodes = pathIndices.map((index) => nodes[index - 1]).toList();
@@ -702,6 +702,39 @@ List<Node> rdp(List<Node> points, double epsilon, Set<int> nonWalkableIndices) {
 
   return result;
 }
+
+List<int> getIntersectionPoints( int currX,
+          int currY,
+          int prevX,
+          int prevY, int nextX,
+          int nextY,
+          int nextNextX,
+          int nextNextY){
+  
+    double x1 = currX+0.0, y1 = currY+0.0;
+    double x2 = prevX+0.0, y2 = prevY+0.0;
+    double x3 = nextX+0.0, y3 = nextY+0.0;
+    double x4 = nextNextX+0.0, y4 = nextNextY+0.0;
+
+    double determinant = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    if (determinant == 0) {
+      // Lines are parallel, no intersection
+      return [];
+    }
+
+    double intersectionX =
+        ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) /
+            determinant;
+    double intersectionY =
+        ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) /
+            determinant;
+
+    return [intersectionX.toInt(),intersectionY.toInt()];
+  }
+
+  
+
 
 
 

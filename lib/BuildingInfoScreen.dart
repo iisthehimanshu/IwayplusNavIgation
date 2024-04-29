@@ -83,6 +83,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     }
     print(dd.length);
   }
+  var currentData;
 
 
 
@@ -247,7 +248,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                       return ListView.builder(
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
-                          var currentData = widget.receivedAllBuildingList![index];
+                          currentData = widget.receivedAllBuildingList![index];
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
                             width: 208,
@@ -608,6 +609,17 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ),
+                IconButton(onPressed: (){
+                  buildingAllApi.setStoredString(currentData.sId!);
+                  buildingAllApi.setSelectedBuildingID(currentData.sId!);
+                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>   Navigation(directLandID: "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",),
+                    ),
+                  );
+                }, icon: Icon(Icons.accessibility_outlined),)
                 // Flexible(
                 //   child: Container(
                 //     child: Text(

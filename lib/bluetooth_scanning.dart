@@ -197,6 +197,7 @@ class BT {
 
 
   void printbin() {
+    print("BIN");
     print(BIN);
   }
 

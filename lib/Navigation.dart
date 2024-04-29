@@ -3339,9 +3339,6 @@ class _NavigationState extends State<Navigation> {
               y1 = y1 - 1;
             }
 
-            // for (int i = ind1; i <= ind2; i++) {
-            //   print("turn path Nodes:::: ${path[i]}");
-            // }
             if (isNonWalkablePoint == false) {
               path.removeRange(ind1, ind2 + 1);
 

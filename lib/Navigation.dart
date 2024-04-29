@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
@@ -181,7 +182,8 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-   handleCompassEvents();
+    handleCompassEvents();
+
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -526,6 +528,7 @@ class _NavigationState extends State<Navigation> {
                 }
               });
             } else {
+              print("reached destination");
               StopPDR();
               setState(() {
                 user.isnavigating = false;
@@ -710,8 +713,9 @@ class _NavigationState extends State<Navigation> {
       _isBuildingPannelOpen = true;
       _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
+      if (nearestLandInfomation.name.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
+
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
 
@@ -736,15 +740,24 @@ class _NavigationState extends State<Navigation> {
         mapState.zoom = 21;
         fitPolygonInScreen(patch.first);
 
-        if (speakTTS)
-          speak(
-              "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+        if(speakTTS) {
+          if(finalvalue=="None"){
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!}");
+          }else {
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
+          }
+        }
       } else {
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
-        if (speakTTS)
-          speak(
-              "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+        if(speakTTS) {
+          if(finalvalue == "None"){
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name}");
+          }else {
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+          }
+        }
+
       }
     } else {
       if (speakTTS) speak("Unable to find your location");
@@ -1187,7 +1200,7 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
-    print("Beacon searching started");
+    print("Beacon searching started from realTimeReLocalizeUser");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
       'assets/userloc0.png',
@@ -1195,14 +1208,22 @@ class _NavigationState extends State<Navigation> {
     double highestweight = 0;
     String nearestBeacon = "";
     List<int> landCords = [];
+    List<int> currentBinFilled = [];
+    PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
+
+
 
     for (int i = 0; i < btadapter.BIN.length; i++) {
+
       if (btadapter.BIN[i]!.isNotEmpty) {
+        currentBinFilled.add(i);
         btadapter.BIN[i]!.forEach((key, value) {
           print("Wilsonchecker");
           print(value.toString());
           print(key);
+
           if (value > highestweight) {
+            priorityQueue.add(MapEntry(key, value));
             highestweight = value;
             nearestBeacon = key;
           }
@@ -1210,6 +1231,15 @@ class _NavigationState extends State<Navigation> {
         break;
       }
     }
+    print("currentBinFilled");
+    print(currentBinFilled);
+    MapEntry<String, double> entry = priorityQueue.removeFirst();
+    List<MapEntry<String, double>> entry1 = priorityQueue.toList();
+    print(entry.key);
+    print(entry.value);
+    entry1.forEach((element) {element.value;});
+    paintUser(nearestBeacon);
+
     setState(() {
       nearbeacon = nearestBeacon;
       weight = highestweight.toString();
@@ -3430,6 +3460,7 @@ class _NavigationState extends State<Navigation> {
 
             if (isNonWalkablePoint == false) {
               path.removeRange(ind1, ind2 + 1);
+
 
               int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
 
@@ -6463,6 +6494,7 @@ class _NavigationState extends State<Navigation> {
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
+
                         child: Semantics(
                           excludeSemantics: semanticShouldBeExcluded,
                           child: Column(
@@ -6629,6 +6661,7 @@ class _NavigationState extends State<Navigation> {
                                   backgroundColor:
                                   Colors.white, // Set the background color of the FAB
                                 ),
+
                               ),
                               SizedBox(height: 28.0), // Adjust the height as needed
                               // FloatingActionButton(
@@ -6721,11 +6754,67 @@ class _NavigationState extends State<Navigation> {
                       routeDeatilPannel(),
                       navigationPannel(),
                       reroutePannel(),
+                      detected
+                          ? Semantics(child: nearestLandmarkpannel())
+                          : Container(),
+                      SizedBox(height: 28.0), // Adjust the height as needed
+                      FloatingActionButton(
+                          onPressed: (){
+                            print("checkingBuildingfloor");
+                            //building.floor == 0 ? 'G' : '${building.floor}',
+                            print(building.floor);
+                            int firstKey = building.floor.values.first;
+                            print(firstKey);
+                            print(singleroute[building.floor.values.first]);
+
+                            print(singleroute.keys);
+                            print(singleroute.values);
+                            print(building.floor[buildingAllApi.getStoredString()]);
+                            print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                          },
+                          child: Icon(Icons.add)
+                      ),
+                      FloatingActionButton(
+                        onPressed: () async {
+
+                          //StopPDR();
+
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              isLiveLocalizing = !isLiveLocalizing;
+                            });
+                            HelperClass.showToast("realTimeReLocalizeUser started");
+
+                            Timer.periodic(
+                                Duration(milliseconds: 7000),
+                                    (timer) async {
+                                  print(resBeacons);
+                                  btadapter.startScanning(resBeacons);
+                                  Future.delayed(Duration(milliseconds: 5000)).then((value) => {
+                                    realTimeReLocalizeUser(resBeacons)
+                                  });
+
+                                });
+
+                          }
+
+                        },
+                        child: Icon(
+                          Icons.location_history_sharp,
+                          color: (isLiveLocalizing)
+                              ? Colors.cyan
+                              : Colors.black,
+                        ),
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
+                      ),
+                    ],
+                  ),
 
 
-                  ],
+
               ),
-          ),
+
     );
 
   }

@@ -14,6 +14,7 @@ class guestApi {
       Map<String, dynamic> responseBody = json.decode(response.body);
       return guestloginmodel.fromJson(responseBody);
     } else {
+      print("API Exception");
       print(response.statusCode);
       throw Exception('Failed to load data');
     }

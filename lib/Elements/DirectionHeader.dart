@@ -257,6 +257,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         if(oldWidget.direction == "Go Straight"){
 
+
          // Vibration.vibrate();
 
           // if(nextTurn == turnPoints.last){
@@ -268,6 +269,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
 
         }else if(widget.direction == "Go Straight"){
+
 
 
           //Vibration.vibrate();

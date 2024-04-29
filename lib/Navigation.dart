@@ -1173,6 +1173,8 @@ class _NavigationState extends State<Navigation> {
       }
     }
 
+    print(nearestBeacon);
+
     setState(() {
       nearestLandmarkToBeacon = nearestBeacon;
       nearestLandmarkToMacid = highestweight.toString();
@@ -3333,29 +3335,10 @@ class _NavigationState extends State<Navigation> {
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
     List<int> path = findPath(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    List<int> temp = [];
-    temp.addAll(path);
-    temp.addAll(PathState.singleListPath);
-    PathState.singleListPath = temp;
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
 
-    // print("allTurnPoints ${x1} ,${y1}");
-    //
-    // List<Node> nodes = List.generate(numRows * numCols, (index) {
-    //   int x = index % numCols;
-    //   int y = index ~/ numCols;
-    //   return Node(index, x, y);
-    // });
-    // path.map((index) => nodes[index - 1]).toList();
-    //
-    // for(int i=0;i<path.length;i++){
-    //   int x = path[i] % numCols;
-    //   int y = path[i] ~/ numCols;
-    //
-    //   print("allPathPoints: ${x} ,${y}");
-    //
-    //
-    // }
+
+
+    //optimizing path and turns code
 
     Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -3363,7 +3346,7 @@ class _NavigationState extends State<Navigation> {
 
     path = getOptiPath(getTurns, numCols, path);
 
-    print("pathhh-----${path}");
+    print("pathhh-----${path.length}");
 
     List<int> turns = tools.getTurnpoints(path, numCols);
 
@@ -3375,12 +3358,13 @@ class _NavigationState extends State<Navigation> {
 
       getPoints.add([x, y]);
     }
+    print("before optimizing pathh :${getPoints}");
 //optimizing turnsss
     for (int i = 0; i < getPoints.length - 1; i++) {
       if (getPoints[i][0] != getPoints[i + 1][0] &&
           getPoints[i][1] != getPoints[i + 1][1]) {
         int dist =
-            tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
+        tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
         if (dist <= 15) {
           print("dist $dist");
 
@@ -3459,7 +3443,7 @@ class _NavigationState extends State<Navigation> {
             }
 
             if (isNonWalkablePoint == false) {
-              path.removeRange(ind1, ind2 + 1);
+              path.removeRange(ind1, ind2);
 
 
               int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
@@ -3467,14 +3451,14 @@ class _NavigationState extends State<Navigation> {
               print("points---- ${newIndex}");
 
               path[ind1] = newIndex;
-          
+
               getPoints[i] = [
                 intersectPoints[0],
                 intersectPoints[1]
               ];
 
               getPoints.removeAt(i+1);
-              
+
             }
           }
 
@@ -3488,9 +3472,48 @@ class _NavigationState extends State<Navigation> {
         }
       }
     }
-
     print("getPointsUpdatdd ${getPoints}");
+    print("getPointsUpdatdd ${path.length}");
     getPoints.add([destinationX, destinationY]);
+
+    List<int> tu = tools.getTurnpoints(path, numCols);
+    Map<int,int> turnIndexes=tools.getTurnMap(path, numCols);
+List<List<int>> tempturns=[];
+
+    for (int i = 0; i < turns.length; i++) {
+      int x = turns[i] % numCols;
+      int y = turns[i] ~/ numCols;
+
+      tempturns.add([x, y]);
+    }
+    print("turnssss ${tempturns}");
+    print("turnssss ${turnIndexes}");
+
+    List<int> temp = [];
+    temp.addAll(path);
+    temp.addAll(PathState.singleListPath);
+    PathState.singleListPath = temp;
+    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
+
+    // print("allTurnPoints ${x1} ,${y1}");
+    //
+    // List<Node> nodes = List.generate(numRows * numCols, (index) {
+    //   int x = index % numCols;
+    //   int y = index ~/ numCols;
+    //   return Node(index, x, y);
+    // });
+    // path.map((index) => nodes[index - 1]).toList();
+    //
+    // for(int i=0;i<path.length;i++){
+    //   int x = path[i] % numCols;
+    //   int y = path[i] ~/ numCols;
+    //
+    //   print("allPathPoints: ${x} ,${y}");
+    //
+    //
+    // }
+
+
 
     // path = findOptimizedPath(numRows,numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,3);
 
@@ -3518,6 +3541,8 @@ class _NavigationState extends State<Navigation> {
       PathState.numCols![bid] = Map();
       PathState.numCols![bid]![floor] = numCols;
     }
+
+
 
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
@@ -4368,17 +4393,17 @@ class _NavigationState extends State<Navigation> {
         // print("pointss matchedddd ${getPoints.contains(
         //     [user.showcoordX, user.showcoordY])}");
         for (int i = 0; i < getPoints.length; i++) {
-          // print("---length  = ${getPoints.length}");
-          // print("--- point  = ${getPoints[i]}");
-          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          // print("--- val  = $val");
-          // print("--- isPDRStop  = $isPdrStop");
+          print("---length  = ${getPoints.length}");
+          print("--- point  = ${getPoints[i]}");
+          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          print("--- val  = $val");
+          print("--- isPDRStop  = $isPdrStop");
 
-          // print("turn corrds");
-          //
-          // print("${getPoints[i].a}, ${getPoints[i].b}");
+          print("turn corrds");
+
+          print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            // print("points unmatchedddd");
+             print("points unmatchedddd");
 
             setState(() {
               isPdrStop = false;

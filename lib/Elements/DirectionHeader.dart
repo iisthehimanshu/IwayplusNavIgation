@@ -54,6 +54,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      print("direction header:: ${turnPoints}");
       turnPoints.add(widget.user.path.last);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {

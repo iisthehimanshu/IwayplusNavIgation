@@ -711,14 +711,18 @@ class _NavigationState extends State<Navigation> {
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
 
-        //focus on users current location
+        //updating user pointer
+
         building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+        createRooms(building.polyLineData!,
+            building.floor[buildingAllApi.getStoredString()]!);
         if (pathMarkers[user.floor] != null) {
           setCameraPosition(pathMarkers[user.floor]!);
         }
         building.landmarkdata!.then((value) {
-          createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
+
+          createMarkers(
+              value, building.floor[buildingAllApi.getStoredString()]!);
         });
         if (markers.length > 0)
           markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
@@ -727,9 +731,6 @@ class _NavigationState extends State<Navigation> {
         }
         mapState.zoom = 21;
         fitPolygonInScreen(patch.first);
-
-
-
 
         if (speakTTS)
           speak(
@@ -3257,6 +3258,7 @@ class _NavigationState extends State<Navigation> {
     temp.addAll(path);
     temp.addAll(PathState.singleListPath);
     PathState.singleListPath = temp;
+    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3294,7 +3296,7 @@ class _NavigationState extends State<Navigation> {
 
       getPoints.add([x, y]);
     }
-
+//optimizing turnsss
     for (int i = 0; i < getPoints.length - 1; i++) {
       if (getPoints[i][0] != getPoints[i + 1][0] &&
           getPoints[i][1] != getPoints[i + 1][1]) {
@@ -3338,37 +3340,67 @@ class _NavigationState extends State<Navigation> {
               currX, currY, prevX, prevY, nextX, nextY, nextNextX, nextNextY);
 
           if (intersectPoints.isNotEmpty) {
-           for(int i=ind1;i<=ind2;i++){
-            print("turn path Nodes:::: ${path[i]}");
-           }
-            path.removeRange(ind1, ind2 + 1);
+            //non walkabkle check
 
-            int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+            //first along the x plane
 
-            print("points---- ${newIndex}");
-            path[ind1] = newIndex;
+            //intersecting points
+            int x1 = intersectPoints[0];
+            int y1 = intersectPoints[1];
+
+            //next point
+            int x2 = nextX;
+            int y2 = nextY;
+
+            bool isNonWalkablePoint = false;
+
+            while (x1 <= x2) {
+              int pointIndex = x1 + y1 * numCols;
+              print("point indexess------${pointIndex}");
+              if (building.nonWalkable[bid]![floor]!.contains(pointIndex)) {
+                isNonWalkablePoint = true;
+                break;
+              }
+              x1 = x1 + 1;
+            }
+
+            //along the y-axis
+
+            //next point
+            int x3 = currX;
+            int y3 = currY;
+
+            while (y1 >= y3) {
+              int pointIndex = x3 + y1 * numCols;
+              if (building.nonWalkable[bid]![floor]!.contains(pointIndex)) {
+                isNonWalkablePoint = true;
+                break;
+              }
+              y1 = y1 - 1;
+            }
+
+            if (isNonWalkablePoint == false) {
+              path.removeRange(ind1, ind2 + 1);
+
+              int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+
+              print("points---- ${newIndex}");
+
+              path[ind1] = newIndex;
+          
+              getPoints[i] = [
+                intersectPoints[0],
+                intersectPoints[1]
+              ];
+
+              getPoints.removeAt(i+1);
+              
+            }
           }
 
           print("intersection points ${intersectPoints}");
 
-          // int currX=path[ind1]%numCols;
-          // int currY=path[ind1]~/numCols;
-          //
-          // int nextX=path[ind2]%numCols;
-          // int nextY=path[ind2]~/numCols;
-          //
-          // int prevX=path[ind3]%numCols;
-          // int prevY=path[ind3]~/numCols;
 
-          // if(nextX==currX){
-          //   currY=prevY;
-          //   int newIndexY=currY*numCols+currX;
-          //   path[ind1]=newIndexY;
-          // }else if(nextY==currY){
-          //   currX=prevX;
-          //   int newIndexX=currY*numCols+currX;
-          //   path[ind1]=newIndexX;
-          // }
 
           print("${ind1}  ${ind2}  ${ind3}");
 
@@ -3377,7 +3409,7 @@ class _NavigationState extends State<Navigation> {
       }
     }
 
-    print(getPoints);
+    print("getPointsUpdatdd ${getPoints}");
     getPoints.add([destinationX, destinationY]);
 
     // path = findOptimizedPath(numRows,numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,3);
@@ -6533,6 +6565,213 @@ class _NavigationState extends State<Navigation> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   height: 19 / 16,
+                      ),
+                      Center(
+                          child: Text(
+                              "${nearestLandmarkToBeacon}::::::::${nearestLandmarkToMacid}",
+                              style:
+                                  TextStyle(fontSize: 20, color: Colors.red))),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Positioned(
+                        top: 100,
+                        child: Center(
+                            child: Text("${testBIn}",
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.red))),
+                      ),
+                      Positioned(
+                        bottom: 150.0, // Adjust the position as needed
+                        right: 16.0,
+                        child: Column(
+                          children: [
+                            //Text(Building.thresh),
+                            Visibility(
+                              visible: true,
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(24))),
+                                  child: IconButton(
+                                      onPressed: () {
+                                        StartPDR();
+                                        //
+                                        //  bool isvalid = MotionModel.isValidStep(
+                                        //      user,
+                                        //      building.floorDimenssion[user.Bid]![user.floor]![0],
+                                        //      building.floorDimenssion[user.Bid]![user.floor]![1],
+                                        //      building.nonWalkable[user.Bid]![user.floor]!,
+                                        //      reroute);
+                                        //  if (isvalid) {
+                                        //
+                                        //    if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                                        //      user.move().then((value) {
+                                        //        //  user.move().then((value){
+                                        //        setState(() {
+                                        //
+                                        //          if (markers.length > 0) {
+                                        //            List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                        //            markers[user.Bid]?[0] = customMarker.move(
+                                        //                LatLng(lvalue[0],lvalue[1]),
+                                        //                markers[user.Bid]![0]
+                                        //            );
+                                        //
+                                        //            List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                        //            markers[user.Bid]?[1] = customMarker.move(
+                                        //                LatLng(ldvalue[0],ldvalue[1]),
+                                        //                markers[user.Bid]![1]
+                                        //            );
+                                        //          }
+                                        //        });
+                                        //        // });
+                                        //      });
+                                        //    }else{
+                                        //      StopPDR();
+                                        //      setState(() {
+                                        //        user.isnavigating=false;
+                                        //      });
+                                        //
+                                        //    }
+                                        //
+                                        //    print("next [${user.coordX}${user.coordY}]");
+                                        //
+                                        //  } else {
+                                        //    if(user.isnavigating){
+                                        //      // reroute();
+                                        //      // showToast("You are out of path");
+                                        //    }
+                                        //
+                                        //  }
+                                      },
+                                      icon: Icon(Icons.directions_walk))),
+                            ),
+                            SizedBox(height: 28.0),
+                            Slider(
+                                value: user.theta,
+                                min: -180,
+                                max: 180,
+                                onChanged: (newvalue) {
+                                  double? compassHeading = newvalue;
+                                  setState(() {
+                                    user.theta = compassHeading!;
+                                    if (mapState.interaction2) {
+                                      mapState.bearing = compassHeading!;
+                                      _googleMapController.moveCamera(
+                                        CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                            target: mapState.target,
+                                            zoom: mapState.zoom,
+                                            bearing: mapState.bearing!,
+                                          ),
+                                        ),
+                                        //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                      );
+                                    } else {
+                                      if (markers.length > 0)
+                                        markers[user.Bid]?[0] =
+                                            customMarker.rotate(
+                                                compassHeading! - mapbearing,
+                                                markers[user.Bid]![0]);
+                                    }
+                                  });
+                                }),
+                            SizedBox(height: 28.0),
+                            Semantics(
+                              sortKey: const OrdinalSortKey(2),
+                              child: SpeedDial(
+                                child: Text(
+                                  building.floor == 0
+                                      ? 'G'
+                                      : '${building.floor[buildingAllApi.getStoredString()]}',
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff24b9b0),
+                                    height: 19 / 16,
+                                  ),
+                                ),
+                                activeIcon: Icons.close,
+                                backgroundColor: Colors.white,
+                                children: [
+                                  for (int i = 0;
+                                      i <
+                                          building.numberOfFloors[buildingAllApi
+                                              .getStoredString()]!;
+                                      i++)
+                                    SpeedDialChild(
+                                      child: Text(
+                                        i == 0 ? 'G' : '${i}',
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          height: 19 / 16,
+                                        ),
+                                      ),
+                                      backgroundColor: pathMarkers[i] == null
+                                          ? Colors.white
+                                          : Color(0xff24b9b0),
+                                      onTap: () {
+                                        building.floor[buildingAllApi
+                                            .getStoredString()] = i;
+                                        createRooms(
+                                            building.polylinedatamap[
+                                                buildingAllApi
+                                                    .getStoredString()]!,
+                                            building.floor[buildingAllApi
+                                                .getStoredString()]!);
+                                        if (pathMarkers[i] != null) {
+                                          //setCameraPosition(pathMarkers[i]!);
+                                        }
+                                        building.landmarkdata!.then((value) {
+                                          createMarkers(
+                                              value,
+                                              building.floor[buildingAllApi
+                                                  .getStoredString()]!);
+                                        });
+                                      },
+                                    ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                                height: 28.0), // Adjust the height as needed
+                            Semantics(
+                              sortKey: const OrdinalSortKey(3),
+                              child: FloatingActionButton(
+                                onPressed: () async {
+                                  //print(PathState.connections);
+                                  building.floor[buildingAllApi
+                                      .getStoredString()] = user.floor;
+                                  createRooms(
+                                      building.polyLineData!,
+                                      building.floor[
+                                          buildingAllApi.getStoredString()]!);
+                                  if (pathMarkers[user.floor] != null) {
+                                    setCameraPosition(pathMarkers[user.floor]!);
+                                  }
+                                  building.landmarkdata!.then((value) {
+                                    createMarkers(
+                                        value,
+                                        building.floor[
+                                            buildingAllApi.getStoredString()]!);
+                                  });
+                                  if (markers.length > 0)
+                                    markers[user.Bid]?[0] = customMarker.rotate(
+                                        0, markers[user.Bid]![0]);
+                                  if (user.initialallyLocalised) {
+                                    mapState.interaction =
+                                        !mapState.interaction;
+                                  }
+                                  mapState.zoom = 21;
+                                  fitPolygonInScreen(patch.first);
+                                },
+                                child: Icon(
+                                  Icons.my_location_sharp,
+                                  color: Colors.black,
                                 ),
                               ),
                               backgroundColor: pathMarkers[i] == null

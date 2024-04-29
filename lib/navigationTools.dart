@@ -543,9 +543,9 @@ class tools {
     print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=10;
+    int distance=30;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID){
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
         if (Beacon.floor! == value.floor) {
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
@@ -562,14 +562,14 @@ class tools {
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }else{
-            // d = calculateDistance(
-            //     pCoord, [value.coordinateX!, value.coordinateY!]);
-            // print("distance b/w beacon and location${d}");
-            // print(value.name);
-            // if (d<distance) {
-            //   nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
-            //   priorityQueue.add(MapEntry(currentLandInfo, d));
-            // }
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+            print("distance b/w beacon and location${d}");
+            print(value.name);
+            if (d<distance) {
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
+            }
           }
         }
       }
@@ -578,18 +578,19 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
+      print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
-      print(priorityQueue.isEmpty);
+      print("priorityQueue.isEmpty");
     }
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
-    int distance=10;
+    int distance=30;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (Beacon.floor! == value.floor) {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);

@@ -177,7 +177,7 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-  //  handleCompassEvents();
+    //  handleCompassEvents();
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -703,6 +703,26 @@ class _NavigationState extends State<Navigation> {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
         nearestLandInfomation.floor =
             apibeaconmap[nearestBeacon]!.floor!.toString();
+        //updating user pointer
+
+        building.floor[buildingAllApi.getStoredString()] = user.floor;
+        createRooms(building.polyLineData!,
+            building.floor[buildingAllApi.getStoredString()]!);
+        if (pathMarkers[user.floor] != null) {
+          setCameraPosition(pathMarkers[user.floor]!);
+        }
+        building.landmarkdata!.then((value) {
+          createMarkers(
+              value, building.floor[buildingAllApi.getStoredString()]!);
+        });
+        if (markers.length > 0)
+          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+        if (user.initialallyLocalised) {
+          mapState.interaction = !mapState.interaction;
+        }
+        mapState.zoom = 21;
+        fitPolygonInScreen(patch.first);
+
         if (speakTTS)
           speak(
               "You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
@@ -3198,6 +3218,7 @@ class _NavigationState extends State<Navigation> {
     temp.addAll(path);
     temp.addAll(PathState.singleListPath);
     PathState.singleListPath = temp;
+    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3235,7 +3256,7 @@ class _NavigationState extends State<Navigation> {
 
       getPoints.add([x, y]);
     }
-
+//optimizing turnsss
     for (int i = 0; i < getPoints.length - 1; i++) {
       if (getPoints[i][0] != getPoints[i + 1][0] &&
           getPoints[i][1] != getPoints[i + 1][1]) {
@@ -3279,37 +3300,70 @@ class _NavigationState extends State<Navigation> {
               currX, currY, prevX, prevY, nextX, nextY, nextNextX, nextNextY);
 
           if (intersectPoints.isNotEmpty) {
-           for(int i=ind1;i<=ind2;i++){
-            print("turn path Nodes:::: ${path[i]}");
-           }
-            path.removeRange(ind1, ind2 + 1);
+            //non walkabkle check
 
-            int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+            //first along the x plane
 
-            print("points---- ${newIndex}");
-            path[ind1] = newIndex;
+            //intersecting points
+            int x1 = intersectPoints[0];
+            int y1 = intersectPoints[1];
+
+            //next point
+            int x2 = nextX;
+            int y2 = nextY;
+
+            bool isNonWalkablePoint = false;
+
+            while (x1 <= x2) {
+              int pointIndex = x1 + y1 * numCols;
+              print("point indexess------${pointIndex}");
+              if (building.nonWalkable[bid]![floor]!.contains(pointIndex)) {
+                isNonWalkablePoint = true;
+                break;
+              }
+              x1 = x1 + 1;
+            }
+
+            //along the y-axis
+
+            //next point
+            int x3 = currX;
+            int y3 = currY;
+
+            while (y1 >= y3) {
+              int pointIndex = x3 + y1 * numCols;
+              if (building.nonWalkable[bid]![floor]!.contains(pointIndex)) {
+                isNonWalkablePoint = true;
+                break;
+              }
+              y1 = y1 - 1;
+            }
+
+            // for (int i = ind1; i <= ind2; i++) {
+            //   print("turn path Nodes:::: ${path[i]}");
+            // }
+            if (isNonWalkablePoint == false) {
+              path.removeRange(ind1, ind2 + 1);
+
+              int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+
+              print("points---- ${newIndex}");
+
+              path[ind1] = newIndex;
+          
+              getPoints[i] = [
+                intersectPoints[0],
+                intersectPoints[1]
+              ];
+
+              getPoints.removeAt(i+1);
+              
+            }
           }
 
           print("intersection points ${intersectPoints}");
 
-          // int currX=path[ind1]%numCols;
-          // int currY=path[ind1]~/numCols;
-          //
-          // int nextX=path[ind2]%numCols;
-          // int nextY=path[ind2]~/numCols;
-          //
-          // int prevX=path[ind3]%numCols;
-          // int prevY=path[ind3]~/numCols;
 
-          // if(nextX==currX){
-          //   currY=prevY;
-          //   int newIndexY=currY*numCols+currX;
-          //   path[ind1]=newIndexY;
-          // }else if(nextY==currY){
-          //   currX=prevX;
-          //   int newIndexX=currY*numCols+currX;
-          //   path[ind1]=newIndexX;
-          // }
 
           print("${ind1}  ${ind2}  ${ind3}");
 
@@ -3318,7 +3372,7 @@ class _NavigationState extends State<Navigation> {
       }
     }
 
-    print(getPoints);
+    print("getPointsUpdatdd ${getPoints}");
     getPoints.add([destinationX, destinationY]);
 
     // path = findOptimizedPath(numRows,numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,3);
@@ -4156,7 +4210,7 @@ class _NavigationState extends State<Navigation> {
           //
           // print("${getPoints[i].a}, ${getPoints[i].b}");
           if (isPdrStop && val == 0) {
-            // print("points unmatchedddd");
+            print("points unmatchedddd");
 
             setState(() {
               isPdrStop = false;
@@ -6383,31 +6437,35 @@ class _NavigationState extends State<Navigation> {
                                       icon: Icon(Icons.directions_walk))),
                             ),
                             SizedBox(height: 28.0),
-                            Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                            
-                              double? compassHeading = newvalue;
-                              setState(() {
-                                user.theta = compassHeading!;
-                                if (mapState.interaction2) {
-                                  mapState.bearing = compassHeading!;
-                                  _googleMapController.moveCamera(
-                                    CameraUpdate.newCameraPosition(
-                                      CameraPosition(
-                                        target: mapState.target,
-                                        zoom: mapState.zoom,
-                                        bearing: mapState.bearing!,
-                                      ),
-                                    ),
-                                    //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                  );
-                                } else {
-                                  if (markers.length > 0)
-                                    markers[user.Bid]?[0] =
-                                        customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                                }
-                              });
-                            
-                            }),
+                            Slider(
+                                value: user.theta,
+                                min: -180,
+                                max: 180,
+                                onChanged: (newvalue) {
+                                  double? compassHeading = newvalue;
+                                  setState(() {
+                                    user.theta = compassHeading!;
+                                    if (mapState.interaction2) {
+                                      mapState.bearing = compassHeading!;
+                                      _googleMapController.moveCamera(
+                                        CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                            target: mapState.target,
+                                            zoom: mapState.zoom,
+                                            bearing: mapState.bearing!,
+                                          ),
+                                        ),
+                                        //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                      );
+                                    } else {
+                                      if (markers.length > 0)
+                                        markers[user.Bid]?[0] =
+                                            customMarker.rotate(
+                                                compassHeading! - mapbearing,
+                                                markers[user.Bid]![0]);
+                                    }
+                                  });
+                                }),
                             SizedBox(height: 28.0),
                             Semantics(
                               sortKey: const OrdinalSortKey(2),

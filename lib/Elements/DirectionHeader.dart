@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:vibration/vibration.dart';
+
 import 'package:iwayplusnav/navigationTools.dart';
 
 import '../UserState.dart';
@@ -13,6 +13,7 @@ import '../buildingState.dart';
 class DirectionHeader extends StatefulWidget {
   String direction;
   int distance;
+  bool isRelocalize;
   UserState user;
   String getSemanticValue;
   final Function(String nearestBeacon) paint;
@@ -22,10 +23,7 @@ class DirectionHeader extends StatefulWidget {
   final Function() closeNavigation;
 
 
-
-
-
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,this.getSemanticValue=''}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
       double angle = tools.calculateAngleBWUserandPath(
           user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
@@ -60,6 +58,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
+        // print("listen to bin :${listenToBin()}");
         listenToBin();
 
       });
@@ -67,16 +66,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      print("angleeeeee $angle");
+      print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
-          Vibration.vibrate();
+          
           speak("Go Straight ${widget.distance} meter");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
-          Vibration.vibrate();
+         
           speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
           widget.getSemanticValue="${widget.direction} ${(widget.distance/2).toInt()} steps";
         }
@@ -157,7 +156,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 return false;//away from path
               }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                Vibration.vibrate();
+              
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
@@ -172,7 +171,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("usercoord ${usercoord}");
             print(nearestBeacon);
           }else{
-            Vibration.vibrate();
+           
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
             return true;
@@ -258,7 +257,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         if(oldWidget.direction == "Go Straight"){
 
-          Vibration.vibrate();
+         // Vibration.vibrate();
 
           // if(nextTurn == turnPoints.last){
           //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
@@ -270,7 +269,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         }else if(widget.direction == "Go Straight"){
 
-          Vibration.vibrate();
+
+          //Vibration.vibrate();
           speak("Go Straight ${(widget.distance/2).toInt()} steps");
         }
       }
@@ -423,3 +423,30 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     );
   }
 }
+// Positioned(
+//     top: 13,
+//     right: 15,
+//     child: IconButton(
+//         onPressed: () {
+//           showMarkers();
+//           _isBuildingPannelOpen = true;
+//           _isRoutePanelOpen = false;
+//           selectedroomMarker.clear();
+//           pathMarkers.clear();
+//           building.selectedLandmarkID = null;
+//           PathState = pathState.withValues(
+//               -1, -1, -1, -1, -1, -1, null, 0);
+//           PathState.path.clear();
+//           PathState.sourcePolyID = "";
+//           PathState.destinationPolyID = "";
+//           PathState.sourceBid = "";
+//           PathState.destinationBid = "";
+//           singleroute.clear();
+//           PathState.directions = [];
+//           interBuildingPath.clear();
+//           fitPolygonInScreen(patch.first);
+//         },
+//         icon: Icon(
+//           Icons.cancel_outlined,
+//           size: 25,
+//         )))

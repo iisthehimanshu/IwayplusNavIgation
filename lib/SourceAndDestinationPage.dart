@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
@@ -201,19 +204,44 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                     Expanded(
                       child: Column(
                         children: [
-                          InkWell(
-                            child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                              padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
-                              child: Text(
-                                SourceName,
-                                style:  TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
+                          FocusScope(
+                            autofocus: true,
+                            child: Focus(
+                              child: Semantics(
+                                label: "SourceName",
+                                child: InkWell(
+                                  child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    border: Border.all(color: Color(0xffE2E2E2)),
+                                  ),
+                                    padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
+                                    child: Text(
+                                      SourceName,
+                                      style:  TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),),
+                                  onTap: (){
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
+                                    ).then((value){
+                                      setState(() {
+                                        widget.SourceID = value;
+                                        print("dataPOpped:$value");
+                                        SourceName = landmarkData.landmarksMap![value]!.name!;
+                                        if(widget.SourceID != "" && widget.DestinationID != ""){
+                                          print("h3");
+                                          Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                                        }
+                                      });
+                                    });
+                                  },
                                 ),
                                 textAlign: TextAlign.left,
                               ),),
@@ -234,6 +262,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                                 });
                               });
                             },
+
                           ),
                           InkWell(
                             child: Container(height:40,width:double.infinity,decoration: BoxDecoration(

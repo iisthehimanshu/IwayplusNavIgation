@@ -13,6 +13,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/API/ladmarkApi.dart';
 import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
+import 'package:iwayplusnav/Elements/DestinationPageChipsWidget.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/Elements/SearchNearby.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
@@ -22,6 +23,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
+
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
 
@@ -277,6 +279,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
 
+
             if (searchResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
                 if (value.name!
@@ -308,7 +311,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   searchResults.add(SearchpageResults(
                     name: "${value.name}",
                     location:
-                        "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+
+                    "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
@@ -391,7 +395,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color:
-                          containerBoxColor, // You can customize the border color
+                      containerBoxColor, // You can customize the border color
                       width: 1.0, // You can customize the border width
                     ),
                   ),
@@ -425,38 +429,39 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       Expanded(
                         child: Container(
                             child: TextField(
-                          autofocus: true,
-                          controller: _controller,
-                          decoration: InputDecoration(
-                            hintText: "${searchHintString}",
-                            border: InputBorder.none, // Remove default border
-                          ),
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff18181b),
-                            height: 25 / 16,
-                          ),
-                          onTap: () {
-                            if (containerBoxColor == Color(0xffA1A1AA)) {
-                              containerBoxColor = Color(0xff24B9B0);
-                            } else {
-                              containerBoxColor = Color(0xffA1A1AA);
-                            }
-                            print("Final Set");
-                          },
-                          onSubmitted: (value) {
-                            // print("Final Set");
-                            print(value);
-                            search(value);
-                          },
-                          onChanged: (value) {
-                            search(value);
-                            // print("Final Set");
-                            print(cardSet);
-                          },
-                        )),
+
+                              autofocus: true,
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                hintText: "${searchHintString}",
+                                border: InputBorder.none, // Remove default border
+                              ),
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff18181b),
+                                height: 25 / 16,
+                              ),
+                              onTap: () {
+                                if (containerBoxColor == Color(0xffA1A1AA)) {
+                                  containerBoxColor = Color(0xff24B9B0);
+                                } else {
+                                  containerBoxColor = Color(0xffA1A1AA);
+                                }
+                                print("Final Set");
+                              },
+                              onSubmitted: (value) {
+                                // print("Final Set");
+                                print(value);
+                                search(value);
+                              },
+                              onChanged: (value) {
+                                search(value);
+                                // print("Final Set");
+                                print(cardSet);
+                              },
+                            )),
                       ),
                       Container(
                         margin: EdgeInsets.only(right: 6),
@@ -500,6 +505,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     ),
                                   ),
                                 ),
+
                         ),
                       ),
                     ],
@@ -545,6 +551,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       child: Column(
                     children: category ? searcCategoryhResults : searchResults,
                   ))),
+
             ],
           ),
         ),
@@ -565,3 +572,4 @@ class SetInfo {
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
 }
+

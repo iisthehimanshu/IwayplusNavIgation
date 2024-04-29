@@ -15,6 +15,7 @@ class DirectionHeader extends StatefulWidget {
   int distance;
   bool isRelocalize;
   UserState user;
+  String getSemanticValue;
   final Function(String nearestBeacon) paint;
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
@@ -22,16 +23,16 @@ class DirectionHeader extends StatefulWidget {
   final Function() closeNavigation;
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
-      // double angle = tools.calculateAngleBWUserandPath(
-      //     user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
-      // direction = tools.angleToClocks(angle);
-      // if(direction == "Straight"){
-      //   direction = "Go Straight";
-      // }else{
-      //   direction = "Turn ${direction}, and Go Straight";
-      // }
+      double angle = tools.calculateAngleBWUserandPath(
+          user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
+      direction = tools.angleToClocks(angle);
+      if(direction == "Straight"){
+        direction = "Go Straight";
+      }else{
+        direction = "Turn ${direction}, and Go Straight";
+      }
     }catch(e){
 
     }
@@ -50,6 +51,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void initState() {
     super.initState();
+    widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       turnPoints.add(widget.user.path.last);
@@ -75,6 +77,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Turn ${widget.direction}, and Go Straight";
          
           speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
+          widget.getSemanticValue="${widget.direction} ${(widget.distance/2).toInt()} steps";
         }
       });
 
@@ -87,6 +90,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void dispose() {
     _timer.cancel();
     super.dispose();
+  }
+
+  String getgetSemanticValue(){
+    return widget.getSemanticValue;
   }
 
   bool listenToBin(){
@@ -262,6 +269,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         }else if(widget.direction == "Go Straight"){
 
+
           //Vibration.vibrate();
           speak("Go Straight ${(widget.distance/2).toInt()} steps");
         }
@@ -330,86 +338,87 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-      height: 95,
-      padding: EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Color(0xff01544F),
-        border: Border.all(
+    return Semantics(
+      excludeSemantics: true,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+        height: 95,
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
           color: Color(0xff01544F),
-          width: 1.0,
-        ),
-        borderRadius: BorderRadius.circular(4.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${widget.direction}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w700,
-
-                    ),
-                  ),
-                  SizedBox(height: 4.0),
-                  Text(
-
-                    '${(widget.distance/2).toInt()} steps',
-                    style: TextStyle(
-
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-
-                    ),
-                  ),
-
-                ],
-              ),
-
-              Spacer(),
-              // Text("$c"),
-              // Text("$d",style: TextStyle(
-              //   color: Colors.red
-              // ),),
-              // ElevatedButton(onPressed: (){
-              //   _timer.cancel();
-              //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
-              //   c++;
-              //   listenToBin();
-              //
-              // });}, child: Icon(Icons.start))
-
-              Container(
-
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(28.0),
-                  ),
-
-                  child: getCustomIcon(widget.direction)),
-
-            ],
+          border: Border.all(
+            color: Color(0xff01544F),
+            width: 1.0,
           ),
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${widget.direction}",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w700,
+
+                      ),
+                    ),
+                    SizedBox(height: 4.0),
+                    Text(
+
+                      '${(widget.distance/2).toInt()} steps',
+                      style: TextStyle(
+
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+
+                      ),
+                    ),
+
+                  ],
+                ),
+
+                Spacer(),
+                // Text("$c"),
+                // Text("$d",style: TextStyle(
+                //   color: Colors.red
+                // ),),
+                // ElevatedButton(onPressed: (){
+                //   _timer.cancel();
+                //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+                //   c++;
+                //   listenToBin();
+                //
+                // });}, child: Icon(Icons.start))
+
+                Container(
+
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(28.0),
+                    ),
+
+                    child: getCustomIcon(widget.direction)),
+
+              ],
+            ),
 
 
-        ],
+          ],
+        ),
       ),
     );
   }

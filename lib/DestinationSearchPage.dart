@@ -21,6 +21,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
+import 'Elements/DestinationPageChipsWidget.dart';
+import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
@@ -277,6 +279,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
 
+
             if (searchResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
                 if (value.name!
@@ -308,6 +311,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   searchResults.add(SearchpageResults(
                     name: "${value.name}",
                     location:
+
                     "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
@@ -425,6 +429,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       Expanded(
                         child: Container(
                             child: TextField(
+
                               autofocus: true,
                               controller: _controller,
                               decoration: InputDecoration(
@@ -465,41 +470,42 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         child: Center(
                           child: _controller.text.isNotEmpty
                               ? IconButton(
-                              onPressed: () {
-                                _controller.text = "";
-                                setState(() {
-                                  vall = -1;
-                                  search(_controller.text);
-                                  recentResults = [];
-                                  searcCategoryhResults = [];
-                                });
-                              },
-                              icon: Semantics(label:"Close",child: Icon(Icons.close)))
+                                  onPressed: () {
+                                    _controller.text = "";
+                                    setState(() {
+                                      vall = -1;
+                                      search(_controller.text);
+                                      recentResults = [];
+                                      searcCategoryhResults = [];
+                                    });
+                                  },
+                                  icon: Semantics(label:"Close",child: Icon(Icons.close)))
                               : IconButton(
-                            onPressed: () {
-                              initSpeech();
-                              setState(() {
-                                speetchText.isListening
-                                    ? stopListening()
-                                    : startListening();
-                              });
-                              if (!micselected) {
-                                micColor = Color(0xff24B9B0);
-                              }
+                                  onPressed: () {
+                                    initSpeech();
+                                    setState(() {
+                                      speetchText.isListening
+                                          ? stopListening()
+                                          : startListening();
+                                    });
+                                    if (!micselected) {
+                                      micColor = Color(0xff24B9B0);
+                                    }
 
 
-                              setState(() {
+                                    setState(() {
 
-                              });
-                            },
-                            icon: Semantics(
-                              label: "Voice Search",
-                              child: Icon(
-                                Icons.mic,
-                                color: micColor,
-                              ),
-                            ),
-                          ),
+                                    });
+                                  },
+                                  icon: Semantics(
+                                    label: "Voice Search",
+                                    child: Icon(
+                                      Icons.mic,
+                                      color: micColor,
+                                    ),
+                                  ),
+                                ),
+
                         ),
                       ),
                     ],
@@ -543,8 +549,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   flex: 1,
                   child: SingleChildScrollView(
                       child: Column(
-                        children: category ? searcCategoryhResults : searchResults,
-                      ))),
+                    children: category ? searcCategoryhResults : searchResults,
+                  ))),
+
             ],
           ),
         ),
@@ -565,3 +572,4 @@ class SetInfo {
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
 }
+

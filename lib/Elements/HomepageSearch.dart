@@ -12,6 +12,8 @@ import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
+import 'HomepageFilter.dart';
+
 
 
 class HomepageSearch extends StatefulWidget {

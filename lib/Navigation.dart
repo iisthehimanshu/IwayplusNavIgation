@@ -996,11 +996,11 @@ class _NavigationState extends State<Navigation> {
       //please wait
       //searching your location
 
-      speak("Please wait");
-      speak("Searching your location. .");
+      // speak("Please wait");
+      // speak("Searching your location. .");
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
+        //localizeUser();
 
         print("localize user is calling itself.....");
         _timer.cancel();

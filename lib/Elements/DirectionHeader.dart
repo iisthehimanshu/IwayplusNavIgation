@@ -59,7 +59,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         // print("listen to bin :${listenToBin()}");
-        listenToBin();
+        //listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);

@@ -59,7 +59,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         // print("listen to bin :${listenToBin()}");
-        //listenToBin();
+        listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
@@ -100,10 +100,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
+
     print("-90-   ${sumMap.length}");
     widget.direction = "";
 
     btadapter.emptyBin();
+    print("Empty BIn");
     d++;
     sumMap.forEach((key, value) {
 
@@ -414,6 +416,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     ),
 
                     child: getCustomIcon(widget.direction)),
+                Container(
+                  width: 300,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      children: [
+                        Text(btadapter.BIN.keys.toString()),
+                        Text(btadapter.BIN.values.toString())
+                      ],
+                    ),
+                  ),
+                ),
 
               ],
             ),

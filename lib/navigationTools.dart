@@ -543,7 +543,7 @@ class tools {
     print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=30;
+    int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
         if (Beacon.floor! == value.floor) {
@@ -567,7 +567,7 @@ class tools {
             print("distance b/w beacon and location${d}");
             print(value.name);
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
@@ -578,6 +578,7 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
+
       print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
@@ -587,7 +588,7 @@ class tools {
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
-    int distance=30;
+    int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
       if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
@@ -650,13 +651,13 @@ class tools {
   }
 
   static List<int> eightcelltransition(double angle) {
-
-    print("angleee-----${angle}");
-    print(AngleBetweenBuildingandGlobalNorth);
-    angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
     }
+    print("angleee-----${angle}");
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+
     if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
     } else if (angle > 22.5 && angle <= 67.5) {

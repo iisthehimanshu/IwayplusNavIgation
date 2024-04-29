@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:vibration/vibration.dart';
+
 import 'package:iwayplusnav/navigationTools.dart';
 
 import '../UserState.dart';
@@ -13,6 +13,7 @@ import '../buildingState.dart';
 class DirectionHeader extends StatefulWidget {
   String direction;
   int distance;
+  bool isRelocalize;
   UserState user;
   final Function(String nearestBeacon) paint;
   final Function(String nearestBeacon) repaint;
@@ -21,7 +22,7 @@ class DirectionHeader extends StatefulWidget {
   final Function() closeNavigation;
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize}){
     try{
       // double angle = tools.calculateAngleBWUserandPath(
       //     user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
@@ -55,23 +56,24 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
-        listenToBin();
+        // print("listen to bin :${listenToBin()}");
+        // UserState.isRelocalizeAroundLift=listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      print("angleeeeee $angle");
+      print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
-          Vibration.vibrate();
+          
           speak("Go Straight ${widget.distance} meter");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
-          Vibration.vibrate();
+         
           speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
         }
       });
@@ -147,7 +149,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 return false;//away from path
               }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                Vibration.vibrate();
+              
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
@@ -162,7 +164,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("usercoord ${usercoord}");
             print(nearestBeacon);
           }else{
-            Vibration.vibrate();
+           
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
             return true;

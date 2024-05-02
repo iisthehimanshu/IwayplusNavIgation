@@ -3373,18 +3373,8 @@ class _NavigationState extends State<Navigation> {
 
 
 
-    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
-    List<int>temp = [];
-    List<Cell>Celltemp = [];
-    temp.addAll(path);
-    Celltemp.addAll(Cellpath);
-    temp.addAll(PathState.singleListPath);
-    Celltemp.addAll(PathState.singleCellListPath);
-    PathState.singleListPath = temp;
 
-    PathState.singleCellListPath = Celltemp;
 
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
 
 
     // print("allTurnPoints ${x1} ,${y1}");
@@ -3410,7 +3400,7 @@ class _NavigationState extends State<Navigation> {
 
     print("getTurnsss ${getTurns}");
 
-    path = getOptiPath(getTurns, numCols, path);
+    //path = getOptiPath(getTurns, numCols, path);
 
     print("pathhh-----${path.length}");
 
@@ -3575,11 +3565,17 @@ List<List<int>> tempturns=[];
     print("turnssss ${tu}");
     print("turnssss ${turnIndexes}");
 
-    List<int> temp = [];
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    print("cellpath $Cellpath");
+    List<int>temp = [];
+    List<Cell>Celltemp = [];
     temp.addAll(path);
+    Celltemp.addAll(Cellpath);
     temp.addAll(PathState.singleListPath);
+    Celltemp.addAll(PathState.singleCellListPath);
     PathState.singleListPath = temp;
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
+    PathState.singleCellListPath = Celltemp;
+    print("singlecellpath ${PathState.singleCellListPath}");
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3618,6 +3614,7 @@ List<List<int>> tempturns=[];
 
     //print("fetch route- $path");
     PathState.path[floor] = path;
+    PathState.Cellpath[floor] = Cellpath;
     if (PathState.numCols == null) {
       PathState.numCols = Map();
     }
@@ -4171,6 +4168,7 @@ void clearPathVariables(){
                                               user.pathobj = PathState;
                                               user.path = PathState.singleListPath;
                                               user.isnavigating = true;
+                                              user.Cellpath = PathState.singleCellListPath;
                                               user.moveToStartofPath().then((value) {
                                                 setState(() {
                                                   if (markers.length > 0) {
@@ -4195,7 +4193,7 @@ void clearPathVariables(){
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                              //StartPDR();
 
 
                                             },
@@ -4495,7 +4493,7 @@ void clearPathVariables(){
             setState(() {
               isPdrStop = false;
             });
-            StartPDR();
+            //StartPDR();
             break;
           }
           if (getPoints[i][0] == user.showcoordX &&
@@ -4828,9 +4826,8 @@ void clearPathVariables(){
                                   user.path = PathState.path.values
                                       .expand((list) => list)
                                       .toList();
-                                  user.Cellpath = PathState.Cellpath.values
-                                      .expand((list) => list)
-                                      .toList();
+                                  print("singlecellpath ${PathState.singleCellListPath}");
+                                  user.Cellpath = PathState.singleCellListPath;
                                   user.pathobj.index = 0;
                                   user.isnavigating = true;
                                   user.moveToStartofPath().then((value) {
@@ -6619,7 +6616,6 @@ void clearPathVariables(){
                           excludeSemantics: semanticShouldBeExcluded,
                           child: Column(
                             children: [
-                              Text(Building.thresh),
                               Visibility(
                                 visible: true,
                                 child: Container(
@@ -6681,6 +6677,7 @@ void clearPathVariables(){
                                         }, icon: Icon(Icons.directions_walk))),
                               ),
                               SizedBox(height: 28.0),
+                              Text("${user.theta}"),
                               Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
 
                                 double? compassHeading = newvalue;

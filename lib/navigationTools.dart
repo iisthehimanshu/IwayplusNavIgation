@@ -678,6 +678,58 @@ class tools {
     }
   }
 
+
+  static List<int> fourcelltransition(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 315 || angle <= 45) {
+      return [0, -1];
+    } else if (angle > 45 && angle <= 135) {
+      return [1, 0];
+    } else if (angle > 135 && angle <= 225) {
+      return [0,1];
+    } else if (angle > 225 && angle <= 315) {
+      return [-1 , 0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+
+  static List<int> twocelltransitionvertical(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 270 || angle <= 90) {
+      return [0, -1];
+    } else if (angle > 90 && angle <= 270) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 0 || angle <= 180) {
+      return [1,0];
+    } else if (angle > 180 && angle <= 360) {
+      return [-1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+
   static List<int> getTurnpoints(List<int> pathNodes,int numCols){
     List<int> res=[];
 

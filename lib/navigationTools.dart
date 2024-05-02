@@ -714,15 +714,17 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontal(double angle) {
+    print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
     }
+    print("second $angle");
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
-    if (angle >= 0 || angle <= 180) {
-      return [1,0];
-    } else if (angle > 180 && angle <= 360) {
+    if (angle > 180 && angle <= 360) {
       return [-1,0];
+    } else if (angle > 0 && angle <= 180) {
+      return [1,0];
     } else {
       return [0, 0];
     }
@@ -864,6 +866,18 @@ class tools {
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
+
+  static bool allElementsAreSame(List list) {
+    if (list.isEmpty) return true;  // Consider an empty list as having all elements the same.
+    var first = list.first;
+    for (var element in list) {
+      if (element > first) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 class nearestLandInfo{
   String name;

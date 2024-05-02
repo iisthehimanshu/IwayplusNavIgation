@@ -6,7 +6,10 @@ import 'buildingState.dart';
 class MotionModel{
 
   static bool isValidStep(UserState user, int cols, int rows, List<int> nonWalkable, Function reroute){
-    List<int> transitionValue = user.Cellpath[user.pathobj.index+1].move(user.theta);
+    List<int> transitionValue = tools.eightcelltransition(user.theta);
+    if(user.isnavigating){
+      transitionValue = user.Cellpath[user.pathobj.index+1].move(user.theta);
+    }
     int newX = user.coordX + transitionValue[0];
     int newY = user.coordY + transitionValue[1];
     print("$newX, $newY");

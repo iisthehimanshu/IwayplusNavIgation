@@ -587,7 +587,9 @@ class tools {
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
     print("called");
+
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
@@ -679,6 +681,60 @@ class tools {
     }
   }
 
+
+  static List<int> fourcelltransition(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 315 || angle <= 45) {
+      return [0, -1];
+    } else if (angle > 45 && angle <= 135) {
+      return [1, 0];
+    } else if (angle > 135 && angle <= 225) {
+      return [0,1];
+    } else if (angle > 225 && angle <= 315) {
+      return [-1 , 0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+
+  static List<int> twocelltransitionvertical(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 270 || angle <= 90) {
+      return [0, -1];
+    } else if (angle > 90 && angle <= 270) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal(double angle) {
+    print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print("second $angle");
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle > 180 && angle <= 360) {
+      return [-1,0];
+    } else if (angle > 0 && angle <= 180) {
+      return [1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+
   static List<int> getTurnpoints(List<int> pathNodes,int numCols){
     List<int> res=[];
 
@@ -707,13 +763,54 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res.add(currPos);
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res.add(currPos);
+        }
+
       }
 
 
 
     }
     return res;
+  }
+
+  static List<int> generateCompletePath(List<int> turns, int numCols) {
+    List<int> completePath = [];
+
+    // Start with the first point in your path
+    int currentPoint = turns[0];
+    int x = currentPoint % numCols;
+    int y = currentPoint ~/ numCols;
+    completePath.add(x+y*numCols);
+
+    // Connect each turn point with a straight line
+    for (int i = 1; i < turns.length; i++) {
+      int turnPoint = turns[i];
+      int turnX = turnPoint % numCols;
+      int turnY = turnPoint ~/ numCols;
+
+      // Connect straight line from current point to turn point
+      while (x != turnX || y != turnY) {
+        if (x < turnX) {
+          x++;
+        } else if (x > turnX) {
+          x--;
+        }
+        if (y < turnY) {
+          y++;
+        } else if (y > turnY) {
+          y--;
+        }
+        completePath.add(x+y*numCols);
+      }
+    }
+
+    return completePath;
   }
   static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
     Map<int,int> res=new Map();
@@ -743,7 +840,15 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res[i]=currPos;
+
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res[i]=currPos;
+        }
+
       }
 
 
@@ -765,6 +870,18 @@ class tools {
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
+
+  static bool allElementsAreSame(List list) {
+    if (list.isEmpty) return true;  // Consider an empty list as having all elements the same.
+    var first = list.first;
+    for (var element in list) {
+      if (element > first) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 class nearestLandInfo{
   String name;

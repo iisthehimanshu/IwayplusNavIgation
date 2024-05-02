@@ -71,11 +71,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      turnPoints.add(widget.user.path.last);
+      print("direction header:: ${turnPoints}");
+      turnPoints.add(widget.user.path[widget.user.path.length-2]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         // print("listen to bin :${listenToBin()}");
+
         HelperClass.showToast("Bin cleared");
         for (int i = 0; i < btadapter.BIN.length; i++) {
           if(btadapter.BIN[i]!.isNotEmpty){
@@ -264,11 +266,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
+
     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
       speak("You have reached ${widget.user.pathobj.destinationName}");
       widget.closeNavigation();
     }else{
-
       widget.user.pathobj.connections.forEach((key, value) {
         value.forEach((inkey, invalue) {
           if(widget.user.path[widget.user.pathobj.index] == invalue){
@@ -301,8 +303,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         if(oldWidget.direction == "Go Straight"){
 
-
          // Vibration.vibrate();
+
 
           // if(nextTurn == turnPoints.last){
           //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
@@ -317,6 +319,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
           //Vibration.vibrate();
+
           speak("Go Straight ${(widget.distance/2).toInt()} steps");
         }
       }

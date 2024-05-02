@@ -57,6 +57,7 @@ import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'Cell.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
@@ -183,7 +184,8 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
 
-    handleCompassEvents();
+    //handleCompassEvents();
+
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -457,34 +459,8 @@ class _NavigationState extends State<Navigation> {
                     building.floorDimenssion[user.Bid]![user.floor]![0]) ==
                 false) {
               user.move().then((value) {
-                bool moveOneMore = true;
-                bool moveOneLift = true;
-                Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
-                liftLoc.forEach((key, value) {
-                  if (user.Bid == key) {
-                    Map<int, int> liftCoords = value;
-                    liftCoords.forEach((key, value) {
-                      if (user.floor == key) {
-                        if (user.path[user.pathobj.index] == value) {
-                          setState(() {
-                            moveOneLift = false;
-                          });
-                        }
-                      }
-                    });
-                  }
-                });
-                for (int j = 0; j < getPoints.length; j++) {
-                  print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
-                  print("user point ${user.showcoordX},${user.showcoordY}");
-                  if (getPoints[j][0] == user.showcoordX &&
-                      getPoints[j][1] == user.showcoordY) {
-                    print("turned it false");
-                    moveOneMore = false;
-                    break;
-                  }
-                }
-                if (moveOneMore || moveOneLift) {
+
+
                   print("moving one more");
                   bool isvalid = MotionModel.isValidStep(
                       user,
@@ -493,6 +469,41 @@ class _NavigationState extends State<Navigation> {
                       building.nonWalkable[user.Bid]![user.floor]!,
                       reroute);
                   if(isvalid){
+
+                    bool moveOneMore = true;
+                    bool moveOneLift = true;
+                    // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
+                    // liftLoc.forEach((key, value) {
+                    //   if (user.Bid == key) {
+                    //     Map<int, int> liftCoords = value;
+                    //     liftCoords.forEach((key, value) {
+                    //       if (user.floor == key) {
+                    //         if (user.path[user.pathobj.index] == value) {
+                    //           setState(() {
+                    //             moveOneLift = false;
+                    //           });
+                    //         }
+                    //       }
+                    //     });
+                    //   }
+                    // });
+                    for (int j = 0; j < getPoints.length; j++) {
+                      print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
+                      print("user point ${user.showcoordX},${user.showcoordY}");
+                      if (getPoints[j][0] == user.showcoordX &&
+                          getPoints[j][1] == user.showcoordY) {
+                        print("turned it false");
+                        setState(() {
+                          moveOneMore = false;
+                        });
+
+                        break;
+                      }
+                    }
+
+                    if (moveOneMore || moveOneLift) {
+
+
                    user.move().then((value) {
                       setState(() {
                         if (markers.length > 0) {
@@ -511,33 +522,50 @@ class _NavigationState extends State<Navigation> {
                       });
                      });
                   }
-                } else {
-                  print("rendering here");
-                  setState(() {
-                    if (markers.length > 0) {
-                      List<double> lvalue = tools.localtoglobal(
-                          user.showcoordX.toInt(), user.showcoordY.toInt());
-                      markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+                   } else {
+                    print("rendering here");
+                    setState(() {
+                      if (markers.length > 0) {
+                        List<double> lvalue = tools.localtoglobal(
+                            user.showcoordX.toInt(), user.showcoordY.toInt());
+                        markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
-                      List<double> ldvalue = tools.localtoglobal(
-                          user.coordX.toInt(), user.coordY.toInt());
-                      markers[user.Bid]?[1] = customMarker.move(
-                          LatLng(ldvalue[0], ldvalue[1]),
-                          markers[user.Bid]![1]);
-                    }
-                  });
-                }
+                        List<double> ldvalue = tools.localtoglobal(
+                            user.coordX.toInt(), user.coordY.toInt());
+                        markers[user.Bid]?[1] = customMarker.move(
+                            LatLng(ldvalue[0], ldvalue[1]),
+                            markers[user.Bid]![1]);
+                      }
+                    });
+                  }
+
               });
             } else {
-              print("reached destination");
-              StopPDR();
               setState(() {
                 user.isnavigating = false;
               });
+              StopPDR();
+              print("reached destination");
+
+
             }
 
             print("next [${user.coordX}${user.coordY}]");
           } else {
+            print("rendering here");
+              setState(() {
+                if (markers.length > 0) {
+                  List<double> lvalue = tools.localtoglobal(
+                      user.showcoordX.toInt(), user.showcoordY.toInt());
+                  markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+
+                  List<double> ldvalue = tools.localtoglobal(
+                      user.coordX.toInt(), user.coordY.toInt());
+                  markers[user.Bid]?[1] = customMarker.move(
+                      LatLng(ldvalue[0], ldvalue[1]),
+                      markers[user.Bid]![1]);
+                }
+              });
             if (user.isnavigating) {
               // reroute();
               // showToast("You are out of path");
@@ -830,6 +858,8 @@ class _NavigationState extends State<Navigation> {
     _isLandmarkPanelOpen = false;
     _isreroutePannelOpen = true;
     user.isnavigating = false;
+    print("reroute----- coord ${user.coordX},${user.coordY}");
+    print("reroute----- show ${user.showcoordX},${user.showcoordY}");
     PathState.sourceX = user.coordX;
     PathState.sourceY = user.coordY;
     user.showcoordX = user.coordX;
@@ -1183,6 +1213,7 @@ class _NavigationState extends State<Navigation> {
 
     nearestLandmarkToBeacon = nearestBeacon;
     nearestLandmarkToMacid = highestweight.toString();
+
     setState(() {
       testBIn = btadapter.BIN;
       testBIn.forEach((key, value) { currentBinSIze.add(value.length);});
@@ -1229,10 +1260,9 @@ class _NavigationState extends State<Navigation> {
       sumMap=  btadapter.avgMap;
     });
 
+
     print("btadapter.avgMap");
     print(btadapter.avgMap);
-
-
 
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -2560,6 +2590,7 @@ class _NavigationState extends State<Navigation> {
       BuildContext context, AsyncSnapshot<land> snapshot) {
 
     pathMarkers.clear();
+    clearPathVariables();
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -2569,6 +2600,7 @@ class _NavigationState extends State<Navigation> {
       //print(building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
+      _isreroutePannelOpen=false;
       showMarkers();
       selectedroomMarker.clear();
       building.selectedLandmarkID = null;
@@ -3382,13 +3414,19 @@ class _NavigationState extends State<Navigation> {
 
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+
     List<int> path = findPath(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    List<int> temp = [];
-    temp.addAll(path);
-    temp.addAll(PathState.singleListPath);
-    PathState.singleListPath = temp;
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
+
+
+
+    //optimizing path and turns code
+
+
+
+
+
+
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3408,13 +3446,14 @@ class _NavigationState extends State<Navigation> {
     //
     // }
 
+
     Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
     print("getTurnsss ${getTurns}");
 
-    path = getOptiPath(getTurns, numCols, path);
+    //path = getOptiPath(getTurns, numCols, path);
 
-    print("pathhh-----${path}");
+    print("pathhh-----${path.length}");
 
     List<int> turns = tools.getTurnpoints(path, numCols);
 
@@ -3426,18 +3465,22 @@ class _NavigationState extends State<Navigation> {
 
       getPoints.add([x, y]);
     }
+    print("before optimizing pathh :${getPoints}");
 //optimizing turnsss
-    for (int i = 0; i < getPoints.length - 1; i++) {
+    for (int i = 1; i < getPoints.length - 1; i++) {
       if (getPoints[i][0] != getPoints[i + 1][0] &&
           getPoints[i][1] != getPoints[i + 1][1]) {
         int dist =
-            tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
+        tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
         if (dist <= 15) {
           print("dist $dist");
 
           //points of prev turn
           int index1 = getPoints[i][0] + getPoints[i][1] * numCols;
+          print("we are getting ind1 $index1");
           int ind1 = path.indexOf(index1);
+          print("we are getting ind1 $ind1");
+
           int prev = path[ind1 - 1];
 
           int currX = index1 % numCols;
@@ -3453,7 +3496,9 @@ class _NavigationState extends State<Navigation> {
 
           //points of next turn;
           int index2 = getPoints[i + 1][0] + getPoints[i + 1][1] * numCols;
+          print("we are getting ind2 $index2");
           int ind2 = path.indexOf(index2);
+          print("we are getting ind2 $ind2");
           int next = path[ind2 + 1];
 
           int nextX = index2 % numCols;
@@ -3482,7 +3527,10 @@ class _NavigationState extends State<Navigation> {
             int x2 = nextX;
             int y2 = nextY;
 
+
+  
             bool isNonWalkablePoint = false;
+
 
             while (x1 <= x2) {
               int pointIndex = x1 + y1 * numCols;
@@ -3510,7 +3558,7 @@ class _NavigationState extends State<Navigation> {
             }
 
             if (isNonWalkablePoint == false) {
-              path.removeRange(ind1, ind2 + 1);
+              path.removeRange(ind1, ind2);
 
 
               int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
@@ -3518,14 +3566,14 @@ class _NavigationState extends State<Navigation> {
               print("points---- ${newIndex}");
 
               path[ind1] = newIndex;
-          
+
               getPoints[i] = [
                 intersectPoints[0],
                 intersectPoints[1]
               ];
 
               getPoints.removeAt(i+1);
-              
+
             }
           }
 
@@ -3539,9 +3587,66 @@ class _NavigationState extends State<Navigation> {
         }
       }
     }
-
     print("getPointsUpdatdd ${getPoints}");
+    print("getPointsUpdatdd ${path.length}");
     getPoints.add([destinationX, destinationY]);
+
+    List<int> tu =[];
+    tu.add(sourceX+sourceY*numCols);
+    tu.addAll(tools.getTurnpoints(path, numCols));
+    tu.add(destinationX+destinationY*numCols);
+
+    //creating a new array and gearting the path from it.
+    //  path.clear();
+    // //
+     path=tools.generateCompletePath(tu,numCols);
+
+
+
+
+    Map<int,int> turnIndexes=tools.getTurnMap(path, numCols);
+List<List<int>> tempturns=[];
+
+    for (int i = 0; i < turns.length; i++) {
+      int x = turns[i] % numCols;
+      int y = turns[i] ~/ numCols;
+
+      tempturns.add([x, y]);
+    }
+    print("turnssss ${tu}");
+    print("turnssss ${turnIndexes}");
+
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    print("cellpath $Cellpath");
+    List<int>temp = [];
+    List<Cell>Celltemp = [];
+    temp.addAll(path);
+    Celltemp.addAll(Cellpath);
+    temp.addAll(PathState.singleListPath);
+    Celltemp.addAll(PathState.singleCellListPath);
+    PathState.singleListPath = temp;
+    PathState.singleCellListPath = Celltemp;
+    print("singlecellpath ${PathState.singleCellListPath}");
+
+    // print("allTurnPoints ${x1} ,${y1}");
+    //
+    // List<Node> nodes = List.generate(numRows * numCols, (index) {
+    //   int x = index % numCols;
+    //   int y = index ~/ numCols;
+    //   return Node(index, x, y);
+    // });
+    // path.map((index) => nodes[index - 1]).toList();
+    //
+    // for(int i=0;i<path.length;i++){
+    //   int x = path[i] % numCols;
+    //   int y = path[i] ~/ numCols;
+    //
+    //   print("allPathPoints: ${x} ,${y}");
+    //
+    //
+    // }
+
+
 
     // path = findOptimizedPath(numRows,numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,3);
 
@@ -3560,6 +3665,7 @@ class _NavigationState extends State<Navigation> {
 
     //print("fetch route- $path");
     PathState.path[floor] = path;
+    PathState.Cellpath[floor] = Cellpath;
     if (PathState.numCols == null) {
       PathState.numCols = Map();
     }
@@ -3569,6 +3675,8 @@ class _NavigationState extends State<Navigation> {
       PathState.numCols![bid] = Map();
       PathState.numCols![bid]![floor] = numCols;
     }
+
+
 
     List<Map<String, int>> directions = tools.getDirections(path, numCols);
     directions.forEach((element) {
@@ -3742,16 +3850,16 @@ class _NavigationState extends State<Navigation> {
     _routeDetailPannelController.open();
   }
 
-
+void clearPathVariables(){
+    getPoints.clear();
+}
 
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
     setState(() {
-
       semanticShouldBeExcluded = true;
     });
-
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -4053,6 +4161,7 @@ class _NavigationState extends State<Navigation> {
                                               singleroute.clear();
                                               PathState.directions = [];
                                               interBuildingPath.clear();
+                                              clearPathVariables();
                                               fitPolygonInScreen(patch.first);
                                             },
                                             icon: Semantics(
@@ -4110,6 +4219,7 @@ class _NavigationState extends State<Navigation> {
                                               user.pathobj = PathState;
                                               user.path = PathState.singleListPath;
                                               user.isnavigating = true;
+                                              user.Cellpath = PathState.singleCellListPath;
                                               user.moveToStartofPath().then((value) {
                                                 setState(() {
                                                   if (markers.length > 0) {
@@ -4134,7 +4244,7 @@ class _NavigationState extends State<Navigation> {
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                              //StartPDR();
 
 
                                             },
@@ -4417,23 +4527,24 @@ class _NavigationState extends State<Navigation> {
 
         // print("pointss matchedddd ${getPoints.contains(
         //     [user.showcoordX, user.showcoordY])}");
+        print("turn points before navigating ${getPoints}");
         for (int i = 0; i < getPoints.length; i++) {
-          // print("---length  = ${getPoints.length}");
-          // print("--- point  = ${getPoints[i]}");
-          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          // print("--- val  = $val");
-          // print("--- isPDRStop  = $isPdrStop");
+          print("---length  = ${getPoints.length}");
+          print("--- point  = ${getPoints[i]}");
+          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          print("--- val  = $val");
+          print("--- isPDRStop  = $isPdrStop");
 
-          // print("turn corrds");
-          //
-          // print("${getPoints[i].a}, ${getPoints[i].b}");
+          print("turn corrds");
+
+          print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            // print("points unmatchedddd");
+             print("points unmatchedddd");
 
             setState(() {
               isPdrStop = false;
             });
-            StartPDR();
+            //StartPDR();
             break;
           }
           if (getPoints[i][0] == user.showcoordX &&
@@ -4750,6 +4861,8 @@ class _NavigationState extends State<Navigation> {
                           ),
                           child: TextButton(
                             onPressed: () async {
+                              print("pannel----- coord ${user.coordX},${user.coordY}");
+                              print("pannel----- show ${user.showcoordX},${user.showcoordY}");
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               user.showcoordX = user.coordX;
@@ -4764,6 +4877,8 @@ class _NavigationState extends State<Navigation> {
                                   user.path = PathState.path.values
                                       .expand((list) => list)
                                       .toList();
+                                  print("singlecellpath ${PathState.singleCellListPath}");
+                                  user.Cellpath = PathState.singleCellListPath;
                                   user.pathobj.index = 0;
                                   user.isnavigating = true;
                                   user.moveToStartofPath().then((value) {
@@ -4826,7 +4941,9 @@ class _NavigationState extends State<Navigation> {
                               borderRadius: BorderRadius.circular(4.0),
                               border: Border.all(color: Colors.black)),
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+
+                            },
                             child: Text(
                               "Continue",
                               style: const TextStyle(
@@ -6546,10 +6663,12 @@ class _NavigationState extends State<Navigation> {
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
 
+
                         child: Semantics(
                           excludeSemantics: semanticShouldBeExcluded,
                           child: Column(
                             children: [
+
                               //Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
@@ -6613,32 +6732,34 @@ class _NavigationState extends State<Navigation> {
                               // ),
 
 
+
                               SizedBox(height: 28.0),
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
+                              Text("${user.theta}"),
+                              Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                                double? compassHeading = newvalue;
+                                setState(() {
+                                  user.theta = compassHeading!;
+                                  if (mapState.interaction2) {
+                                    mapState.bearing = compassHeading!;
+                                    _googleMapController.moveCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                          target: mapState.target,
+                                          zoom: mapState.zoom,
+                                          bearing: mapState.bearing!,
+                                        ),
+                                      ),
+                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                    );
+                                  } else {
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] =
+                                          customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                                  }
+                                });
+
+                              }),
                               SizedBox(height: 28.0),
                               Semantics(
                                 label: "Change floor",
@@ -6808,11 +6929,13 @@ class _NavigationState extends State<Navigation> {
                                     ),
                                 ),
                               )
+
                       ),
                       FutureBuilder(
                         future: building.landmarkdata,
                         builder: (context, snapshot) {
                           if (_isLandmarkPanelOpen) {
+
                             return landmarkdetailpannel(context, snapshot);
                           } else {
                             return Semantics(excludeSemantics: true,child: Container());

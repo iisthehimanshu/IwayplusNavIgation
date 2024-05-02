@@ -586,8 +586,7 @@ class tools {
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
-    int distance=30;
+    int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
       if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {

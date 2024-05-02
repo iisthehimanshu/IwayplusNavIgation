@@ -1,3 +1,5 @@
+import 'package:iwayplusnav/Cell.dart';
+
 class pathState {
   String sourcePolyID = "";
   String destinationPolyID = "";
@@ -10,7 +12,9 @@ class pathState {
   int sourceFloor = 0;
   int destinationFloor = 0;
   Map<int, List<int>> path = {};
+  Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];
+  List<Cell> singleCellListPath = [];
   List<Map<String, int>> directions = [];
   Map<String,Map<int,int>>? numCols = Map();
   int index = 0;

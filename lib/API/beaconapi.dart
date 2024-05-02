@@ -13,10 +13,10 @@ class beaconapi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/beacons";
   String token = "";
 
-  Future<List<beacon>> fetchBeaconData() async {
+  Future<List<beacon>> fetchBeaconData({String? id = null}) async {
     print("beacon");
     final BeaconBox = BeaconAPIModelBOX.getData();
-    if(BeaconBox.containsKey(buildingAllApi.getStoredString())){
+    if(BeaconBox.containsKey(id??buildingAllApi.getStoredString())){
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);
@@ -32,7 +32,7 @@ class beaconapi {
       }
     });
     final Map<String, dynamic> data = {
-      "buildingId": buildingAllApi.getStoredString(),
+      "buildingId": id??buildingAllApi.getStoredString(),
     };
 
     final response = await http.post(

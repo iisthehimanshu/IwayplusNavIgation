@@ -337,12 +337,16 @@ class tools {
   }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // print("A $a");
-    // print("B $b");
-    // print("C $c");
+    print("A $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+
+    print("ab----${ab}");
+    print("ac-----${ac}");
 
     // Calculate the dot product of the two vectors
     double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
@@ -539,9 +543,9 @@ class tools {
     print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=10;
+    int distance=30;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID){
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
         if (Beacon.floor! == value.floor) {
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
@@ -558,14 +562,14 @@ class tools {
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }else{
-            // d = calculateDistance(
-            //     pCoord, [value.coordinateX!, value.coordinateY!]);
-            // print("distance b/w beacon and location${d}");
-            // print(value.name);
-            // if (d<distance) {
-            //   nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
-            //   priorityQueue.add(MapEntry(currentLandInfo, d));
-            // }
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+            print("distance b/w beacon and location${d}");
+            print(value.name);
+            if (d<distance) {
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
+            }
           }
         }
       }
@@ -574,18 +578,19 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
+      print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
-      print(priorityQueue.isEmpty);
+      print("priorityQueue.isEmpty");
     }
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     print("called");
-    int distance=10;
+    int distance=30;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (Beacon.floor! == value.floor) {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);
@@ -645,11 +650,13 @@ class tools {
   }
 
   static List<int> eightcelltransition(double angle) {
+
+    print("angleee-----${angle}");
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
-    angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
     } else if (angle > 22.5 && angle <= 67.5) {

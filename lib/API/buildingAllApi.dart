@@ -4,6 +4,7 @@ import 'package:geodesy/geodesy.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../APIMODELS/polylinedata.dart';
@@ -96,6 +97,7 @@ class buildingAllApi {
     } else {
       print(response.statusCode);
       print(response.body);
+      HelperClass.showToast("MishorError in BuildingAll API");
       throw Exception('Failed to load data');
     }
   }

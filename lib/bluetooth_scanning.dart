@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:collection/collection.dart';
+
 import '../buildingState.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -7,6 +9,7 @@ import 'APIMODELS/beaconData.dart';
 
 class BT {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
+  Map<String,double> avgMap = Map();
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
   HashMap<int, double> weight = HashMap();
@@ -15,6 +18,13 @@ class BT {
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+
+
+  PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue((a, b) => a.value.compareTo(b.value));
+
+  PriorityQueue<MapEntry<String, double>> returnPQ (){
+    return priorityQueue;
+  }
 
 
   void startbin() {
@@ -33,8 +43,6 @@ class BT {
     weight[4] = 0.25;
     weight[5] = 0.15;
     weight[6] = 0.075;
-
-
   }
 
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
@@ -42,9 +50,8 @@ class BT {
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
-
-
     startbin();
+    calculateAverage();
     FlutterBluePlus.startScan();
 
     FlutterBluePlus.scanResults.listen((results) async {
@@ -54,13 +61,13 @@ class BT {
         // print("mac $result    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
-
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
     });
   }
+
 
 
   void getDevicesList()async{
@@ -89,6 +96,7 @@ class BT {
     //   }
     // });
   }
+
 
 
   void strtScanningIos(HashMap<String, beacon> apibeaconmap){
@@ -143,7 +151,7 @@ class BT {
     _scanResults.clear();
     _systemDevices.clear();
     emptyBin();
-
+    priorityQueue.clear();
   }
 
   void emptyBin() {
@@ -152,6 +160,10 @@ class BT {
     }
     numberOfSample.clear();
     rs.clear();
+    print("avgMap.length");
+    print(avgMap.length);
+    avgMap.clear();
+
   }
 
   void addtoBin(String MacId, int rssi) {
@@ -166,7 +178,9 @@ class BT {
     rs[MacId]!.add(rssi);
 
 
-  //  print("of beacon ${rs}");
+
+    //print("of beacon ${rs}");
+
 
     if (Rssi <= 60) {
       binnumber = 0;
@@ -190,8 +204,28 @@ class BT {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
 
-  //  print("number of sample---${numberOfSample[MacId]}");
 
+    //print("number of sample---${numberOfSample[MacId]}");
+
+  }
+  Map<String, double> calculateAverage(){
+    Map<String, double> sumMap = {};
+
+    // Iterate over each inner map and accumulate the values for each string key
+    BIN.values.forEach((innerMap) {
+      innerMap.forEach((key, value) {
+        sumMap[key] = (sumMap[key] ?? 0.0) + value;
+      });
+    });
+
+
+    // Divide the sum by the number of values for each string key
+    sumMap.forEach((key, sum) {
+      int count = numberOfSample[key]!;
+      sumMap[key] = sum / count;
+    });
+    avgMap = sumMap;
+    return sumMap;
   }
 
 
@@ -271,16 +305,27 @@ static Map<String,Set<int>> map=new HashMap();
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key
+    print("Checking bin");
+    print(BIN.values);
     BIN.values.forEach((innerMap) {
+
       innerMap.forEach((key, value) {
+
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
 
     // Divide the sum by the number of values for each string key
     sumMap.forEach((key, sum) {
-      int count = numberOfSample[key]!;
-      sumMap[key] = sum / count;
+      if(key != "" || key.isNotEmpty || key != "null"){
+        print("numberOfSample[key]");
+        print(numberOfSample[key]);
+        int count = numberOfSample[key]??0;
+        if(count !=0){
+          sumMap[key] = sum / count;
+        }
+      }
+
     });
 
     return sumMap;
@@ -297,11 +342,25 @@ static Map<String,Set<int>> map=new HashMap();
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
-      BIN[i]!.clear();
+      if(BIN[i]!.isNotEmpty){
+        BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
     }
     numberOfSample.clear();
     rs.clear();
     Building.thresh = "";
+
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       key = "";
+    //       value = 0.0;
+    //     });
+    //   }
+    // }
   }
 
   void getDevicesList()async{

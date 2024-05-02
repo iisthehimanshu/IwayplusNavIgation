@@ -706,13 +706,54 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res.add(currPos);
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res.add(currPos);
+        }
+
       }
 
 
 
     }
     return res;
+  }
+
+  static List<int> generateCompletePath(List<int> turns, int numCols) {
+    List<int> completePath = [];
+
+    // Start with the first point in your path
+    int currentPoint = turns[0];
+    int x = currentPoint % numCols;
+    int y = currentPoint ~/ numCols;
+    completePath.add(x+y*numCols);
+
+    // Connect each turn point with a straight line
+    for (int i = 1; i < turns.length; i++) {
+      int turnPoint = turns[i];
+      int turnX = turnPoint % numCols;
+      int turnY = turnPoint ~/ numCols;
+
+      // Connect straight line from current point to turn point
+      while (x != turnX || y != turnY) {
+        if (x < turnX) {
+          x++;
+        } else if (x > turnX) {
+          x--;
+        }
+        if (y < turnY) {
+          y++;
+        } else if (y > turnY) {
+          y--;
+        }
+        completePath.add(x+y*numCols);
+      }
+    }
+
+    return completePath;
   }
   static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
     Map<int,int> res=new Map();
@@ -742,7 +783,15 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res[i]=currPos;
+
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res[i]=currPos;
+        }
+
       }
 
 

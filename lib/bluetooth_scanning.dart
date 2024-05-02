@@ -235,7 +235,7 @@ class BT2 {
     weight[6] = 0.075;
 
   }
-
+static Map<String,Set<int>> map=new HashMap();
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
@@ -245,9 +245,18 @@ class BT2 {
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
+
         String MacId = "${result.device.platformName}";
+
         int Rssi = result.rssi;
-        print("${result.device.remoteId}     $Rssi");
+        if (map.containsKey(MacId)) {
+          // If MAC ID already exists, add RSSI value to its set
+          map[MacId]!.add(Rssi);
+        } else {
+          // If MAC ID doesn't exist, create a new set with the RSSI value
+          map[MacId] = {Rssi};
+        }
+       // print("${result.device.remoteId}     $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 

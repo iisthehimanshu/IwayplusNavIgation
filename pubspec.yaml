@@ -64,6 +64,7 @@ dependencies:
   google_maps: ^6.3.0
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
+  turf: ^0.0.9
 
 
   upgrader:

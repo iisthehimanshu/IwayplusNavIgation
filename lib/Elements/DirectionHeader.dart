@@ -55,12 +55,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("direction header:: ${turnPoints}");
-      turnPoints.add(widget.user.path.last);
+      turnPoints.add(widget.user.path[widget.user.path.length-2]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         // print("listen to bin :${listenToBin()}");
-        //listenToBin();
+       // listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
@@ -221,11 +221,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
+
     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
       speak("You have reached ${widget.user.pathobj.destinationName}");
       widget.closeNavigation();
     }else{
-
       widget.user.pathobj.connections.forEach((key, value) {
         value.forEach((inkey, invalue) {
           if(widget.user.path[widget.user.pathobj.index] == invalue){

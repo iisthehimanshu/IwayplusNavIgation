@@ -849,6 +849,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void reroute() {
+    clearPathVariables();
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -3948,6 +3949,7 @@ void clearPathVariables(){
                     child: IconButton(
                         onPressed: () {
                           setState(() {
+                            clearPathVariables();
                             PathState.swap();
                             PathState.path.clear();
                             pathMarkers.clear();
@@ -4840,29 +4842,31 @@ void clearPathVariables(){
                         SizedBox(
                           width: 12,
                         ),
-                        Container(
-                          width: 92,
-                          height: 36,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(color: Colors.black)),
-                          child: TextButton(
-                            onPressed: () {
-
-                            },
-                            child: Text(
-                              "Continue",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff000000),
-                                height: 20 / 14,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                        )
+                        // Container(
+                        //   width: 92,
+                        //   height: 36,
+                        //   decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(4.0),
+                        //       border: Border.all(color: Colors.black)),
+                        //   // child: TextButton(
+                        //   //   onPressed: () {
+                        //   //
+                        //   //   },
+                        //   //
+                        //   //
+                        //   //   child: Text(
+                        //   //     "Continue",
+                        //   //     style: const TextStyle(
+                        //   //       fontFamily: "Roboto",
+                        //   //       fontSize: 14,
+                        //   //       fontWeight: FontWeight.w400,
+                        //   //       color: Color(0xff000000),
+                        //   //       height: 20 / 14,
+                        //   //     ),
+                        //   //     textAlign: TextAlign.left,
+                        //   //   ),
+                        //   // ),
+                        // )
                       ],
                     )
                   ],

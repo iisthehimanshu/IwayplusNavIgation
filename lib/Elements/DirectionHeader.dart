@@ -105,7 +105,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.direction = "";
 
     btadapter.emptyBin();
-    d++;
+  //  d++;
     sumMap.forEach((key, value) {
 
       setState(() {

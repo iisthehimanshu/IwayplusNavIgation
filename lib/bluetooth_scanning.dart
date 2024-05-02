@@ -166,19 +166,19 @@ class BT {
     rs[MacId]!.add(rssi);
 
 
-    print("of beacon ${rs}");
+  //  print("of beacon ${rs}");
 
-    if (Rssi <= 65) {
+    if (Rssi <= 60) {
       binnumber = 0;
-    } else if (Rssi <= 70) {
+    } else if (Rssi <= 65) {
       binnumber = 1;
-    } else if (Rssi <= 75) {
+    } else if (Rssi <= 70) {
       binnumber = 2;
-    } else if (Rssi <= 80) {
+    } else if (Rssi <= 75) {
       binnumber = 3;
-    } else if (Rssi <= 85) {
+    } else if (Rssi <= 80) {
       binnumber = 4;
-    } else if (Rssi <= 90) {
+    } else if (Rssi <= 85) {
       binnumber = 5;
     } else {
       binnumber = 6;
@@ -190,7 +190,7 @@ class BT {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
 
-    print("number of sample---${numberOfSample[MacId]}");
+  //  print("number of sample---${numberOfSample[MacId]}");
 
   }
 
@@ -235,7 +235,7 @@ class BT2 {
     weight[6] = 0.075;
 
   }
-
+static Map<String,Set<int>> map=new HashMap();
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
@@ -245,9 +245,18 @@ class BT2 {
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
+
         String MacId = "${result.device.platformName}";
+
         int Rssi = result.rssi;
-        print("${result.device.remoteId}     $Rssi");
+        if (map.containsKey(MacId)) {
+          // If MAC ID already exists, add RSSI value to its set
+          map[MacId]!.add(Rssi);
+        } else {
+          // If MAC ID doesn't exist, create a new set with the RSSI value
+          map[MacId] = {Rssi};
+        }
+       // print("${result.device.remoteId}     $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 

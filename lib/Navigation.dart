@@ -57,6 +57,7 @@ import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'Cell.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
@@ -183,6 +184,7 @@ class _NavigationState extends State<Navigation> {
     apiCalls();
 
     handleCompassEvents();
+
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -828,6 +830,8 @@ class _NavigationState extends State<Navigation> {
     _isLandmarkPanelOpen = false;
     _isreroutePannelOpen = true;
     user.isnavigating = false;
+    print("reroute----- coord ${user.coordX},${user.coordY}");
+    print("reroute----- show ${user.showcoordX},${user.showcoordY}");
     PathState.sourceX = user.coordX;
     PathState.sourceY = user.coordY;
     user.showcoordX = user.coordX;
@@ -3331,13 +3335,21 @@ class _NavigationState extends State<Navigation> {
 
     //List<int> path = [];
     //findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    List<int> path = findPath(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    List<int> temp = [];
+
+    List<int> path=findPath(numRows, numCols, building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    List<int>temp = [];
+    List<Cell>Celltemp = [];
     temp.addAll(path);
+    Celltemp.addAll(Cellpath);
     temp.addAll(PathState.singleListPath);
+    Celltemp.addAll(PathState.singleCellListPath);
     PathState.singleListPath = temp;
+
+    PathState.singleCellListPath = Celltemp;
+
     print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
+
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3431,7 +3443,10 @@ class _NavigationState extends State<Navigation> {
             int x2 = nextX;
             int y2 = nextY;
 
+
+  
             bool isNonWalkablePoint = false;
+
 
             while (x1 <= x2) {
               int pointIndex = x1 + y1 * numCols;
@@ -3940,33 +3955,90 @@ class _NavigationState extends State<Navigation> {
                                       color: Color(0xffd9d9d9),
                                       borderRadius: BorderRadius.circular(5.0),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(bottom: 20),
-                              padding: EdgeInsets.only(left: 17, top: 12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Semantics(
-                                    label: "Your destination is ${distance}m away ",
-                                    sortKey: const OrdinalSortKey(1),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Semantics(
-                                          excludeSemantics: true,
-                                          child: Text(
-                                            "${time.toInt()} min ",
-                                            style: const TextStyle(
-                                              color: Color(0xffDC6A01),
-                                              fontFamily: "Roboto",
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              height: 24 / 18,
+
+                                    Text(
+                                      "(${distance} m)",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        height: 24 / 18,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                  ],
+                                ),
+                                // Text(
+                                //   "via",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 16,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff4a4545),
+                                //     height: 25 / 16,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
+                                // Text(
+                                //   "ETA- ${newTime.hour}:${newTime.minute}",
+                                //   style: const TextStyle(
+                                //     fontFamily: "Roboto",
+                                //     fontSize: 14,
+                                //     fontWeight: FontWeight.w400,
+                                //     color: Color(0xff8d8c8c),
+                                //     height: 20 / 14,
+                                //   ),
+                                //   textAlign: TextAlign.left,
+                                // ),
+                                SizedBox(
+                                  height: 8,
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 108,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xff24B9B0),
+                                        borderRadius:
+                                        BorderRadius.circular(4.0),
+                                      ),
+                                      child: TextButton(
+                                        onPressed: ()async{
+                                          print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                          user.pathobj = PathState;
+                                          user.path = PathState.singleListPath;
+                                          user.Cellpath = PathState.singleCellListPath;
+                                          user.isnavigating = true;
+                                          user.moveToStartofPath().then((value) {
+                                            setState(() {
+                                              if (markers.length > 0) {
+                                                print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
+                                                List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                                                markers[user.Bid]?[0] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![0]);
+
+                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                                                markers[user.Bid]?[1] = customMarker.move(
+                                                    LatLng(val[0], val[1]),
+                                                    markers[user.Bid]![1]);
+                                              }
+                                            });
+                                          });
+                                          _isRoutePanelOpen = false;
+                                          //selectedroomMarker.clear();
+                                          //pathMarkers.clear();
+                                          building.selectedLandmarkID = null;
+                                          _isnavigationPannelOpen = true;
+
+                                        },
+                                        child: !startingNavigation?Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.assistant_navigation,
+                                              color: Colors.black,
                                             ),
                                             textAlign: TextAlign.left,
                                           ),
@@ -4700,6 +4772,8 @@ class _NavigationState extends State<Navigation> {
                           ),
                           child: TextButton(
                             onPressed: () async {
+                              print("pannel----- coord ${user.coordX},${user.coordY}");
+                              print("pannel----- show ${user.showcoordX},${user.showcoordY}");
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               user.showcoordX = user.coordX;
@@ -4712,6 +4786,9 @@ class _NavigationState extends State<Navigation> {
                                     .then((value) {
                                   user.pathobj = PathState;
                                   user.path = PathState.path.values
+                                      .expand((list) => list)
+                                      .toList();
+                                  user.Cellpath = PathState.Cellpath.values
                                       .expand((list) => list)
                                       .toList();
                                   user.pathobj.index = 0;
@@ -6495,6 +6572,7 @@ class _NavigationState extends State<Navigation> {
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
 
+
                         child: Semantics(
                           excludeSemantics: semanticShouldBeExcluded,
                           child: Column(
@@ -6740,6 +6818,7 @@ class _NavigationState extends State<Navigation> {
                                     ),
                                 ),
                               )
+
                       ),
                       FutureBuilder(
                         future: building.landmarkdata,

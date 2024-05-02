@@ -228,6 +228,9 @@
 
 import 'dart:math';
 
+import 'Cell.dart';
+import 'navigationTools.dart';
+
 class Node {
   int index;
   int x, y;
@@ -320,6 +323,11 @@ List<int> findPath(
 
   return [];
 }
+
+
+
+
+
 
 // List<int> findPath(
 //     int numRows,
@@ -805,4 +813,78 @@ List<int> getOptiPath(Map<int,int> getTurns,int numCols,List<int> path){
   }
 
   return path;
+}
+
+List<Cell> findCorridorSegments(List<int> path, List<int> nonWalkable, int numCols) {
+  List<Cell> single = [];
+  List<int> turnPoints = tools.getTurnpoints(path, numCols);
+  for(int i = 0; i<path.length;i++){
+    int pos = path[i];
+    int row = pos % numCols;
+    int col = pos ~/ numCols;
+
+    int nextrow = row;
+    int nextcol = col;
+    if(i+1<path.length){
+      nextrow = path[i+1]%numCols;
+      nextcol = path[i+1]~/numCols;
+    }
+
+
+
+    bool northCollision = checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
+    bool southCollision = checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
+    bool eastCollision = checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
+    bool westCollision = checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
+
+    int collisionCount = (northCollision ? 1 : 0) +
+        (southCollision ? 1 : 0) +
+        (eastCollision ? 1 : 0) +
+        (westCollision ? 1 : 0);
+
+    // Check if any two opposite directions collide with non-walkable cells
+
+    if(nextrow != row && nextcol != col){
+      print("$pos with first eight");
+      single.add(Cell(pos, row, col, tools.eightcelltransition));
+    }else if(turnPoints.contains(pos)){
+      print("$pos with first eight");
+      single.add(Cell(pos, row, col, tools.eightcelltransition));
+    }else if ((northCollision && southCollision)) {
+      print("$pos with twoverticle");
+      single.add(Cell(pos,row,col,tools.twocelltransitionvertical));
+    }else if((eastCollision && westCollision)) {
+      print("$pos with twohorizontal");
+      single.add(Cell(pos, row, col, tools.twocelltransitionhorizontal));
+    }else if (collisionCount == 1) {
+      print("$pos with four");
+      single.add(Cell(pos, row, col, tools.fourcelltransition));
+    }else if ((!northCollision && !southCollision) && (!eastCollision && !westCollision)) {
+      print("$pos with four");
+      single.add(Cell(pos, row, col, tools.fourcelltransition));
+    }else{
+      print("$pos with second eight");
+      single.add(Cell(pos, row, col, tools.eightcelltransition));
+    }
+  }
+
+  return single;
+}
+
+bool checkDirection(List<int> nonWalkable, int row, int col, int width, int rowInc, int colInc, int depth) {
+  for (int i = 1; i <= depth; i++) {
+    int newRow = row + i * rowInc;
+    int newCol = col + i * colInc;
+    if(newRow >=0 && newCol >=0){
+      int newIndex = newCol * width + newRow;
+      if(row == 60 && col == 111){
+        print("checking for [$newRow,$newCol]");
+      }
+      if (nonWalkable.contains(newIndex)) {
+        return true;
+      }
+    }
+
+  }
+  return false;
 }

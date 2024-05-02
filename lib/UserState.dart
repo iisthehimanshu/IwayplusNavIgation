@@ -1,5 +1,6 @@
 import 'package:iwayplusnav/pathState.dart';
 
+import 'Cell.dart';
 import 'navigationTools.dart';
 
 
@@ -16,6 +17,7 @@ class UserState{
   int showcoordY;
   pathState pathobj = pathState();
   List<int> path = [];
+  List<Cell> Cellpath = [];
   bool initialallyLocalised = false;
   String Bid ;
   static int xdiff = 0;
@@ -24,33 +26,55 @@ class UserState{
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
-  Future<void> move()async {
-    print("prev----- coord $coordX,$coordY");
-    print("prev----- show $showcoordX,$showcoordY");
-    print("prev----- index ${pathobj.index}");
-    pathobj.index = pathobj.index + 1;
-    print("prev----- index ${pathobj.index}");
+  // Future<void> move()async {
+  //   print("prev----- coord $coordX,$coordY");
+  //   print("prev----- show $showcoordX,$showcoordY");
+  //   print("prev----- index ${pathobj.index}");
+  //   pathobj.index = pathobj.index + 1;
+  //   print("prev----- index ${pathobj.index}");
+  //
+  //   List<int> transitionvalue = tools.eightcelltransition(this.theta);
+  //   coordX = coordX + transitionvalue[0];
+  //   coordY = coordY + transitionvalue[1];
+  //   List<double> values = tools.localtoglobal(coordX, coordY);
+  //   lat = values[0];
+  //   lng = values[1];
+  //
+  //
+  //   if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
+  //     showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
+  //     showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+  //   }else{
+  //     showcoordX = coordX;
+  //     showcoordY = coordY;
+  //   }
+  //
+  //   print("curr----- coord $coordX,$coordY");
+  //   print("curr----- show $showcoordX,$showcoordY");
+  //   print("curr----- index ${pathobj.index}");
+  //
+  // }
 
-    List<int> transitionvalue = tools.eightcelltransition(this.theta);
+  Future<void> move()async{
+    pathobj.index = pathobj.index + 1;
+    print("theta ${this.theta}");
+    List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
     coordX = coordX + transitionvalue[0];
     coordY = coordY + transitionvalue[1];
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
-
-
-    if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
-      showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
-      showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+    if(this.isnavigating && pathobj.Cellpath.isNotEmpty && pathobj.numCols != 0){
+      showcoordX = Cellpath[pathobj.index].x;
+      showcoordY = Cellpath[pathobj.index].y;
     }else{
       showcoordX = coordX;
       showcoordY = coordY;
     }
 
+    print("curr----- tv $transitionvalue");
     print("curr----- coord $coordX,$coordY");
     print("curr----- show $showcoordX,$showcoordY");
-    print("curr----- index ${pathobj.index}");
-
   }
 
   Future<void> moveToPointOnPath(int index)async{

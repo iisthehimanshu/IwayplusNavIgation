@@ -474,23 +474,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
               ],
             ),
-            Container(
-              width: 500,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  children: [
-                    Text("Avg map"),
-                    Text(btadapter.BIN.keys.toString()),
-                    Text(btadapter.BIN.values.toString()),
-
-                    Text(ShowsumMap.toString())
-                  ],
-                ),
-              ),
-            ),
-
-
           ],
         ),
       ),

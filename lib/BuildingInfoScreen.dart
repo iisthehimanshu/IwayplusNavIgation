@@ -255,9 +255,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                             child: Container(
                               child: ListTile(
                                 onTap: (){
-                                  print("WilsonChecker");
-                                  buildingAllApi.setStoredString(currentData.sId!);
-                                  buildingAllApi.setSelectedBuildingID(currentData.sId!);
+                                  buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                  buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                   buildingAllApi.setStoredAllBuildingID(allBuildingID);
                                   Navigator.push(
                                     context,

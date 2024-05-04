@@ -3374,18 +3374,8 @@ class _NavigationState extends State<Navigation> {
 
 
 
-    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
-    List<int>temp = [];
-    List<Cell>Celltemp = [];
-    temp.addAll(path);
-    Celltemp.addAll(Cellpath);
-    temp.addAll(PathState.singleListPath);
-    Celltemp.addAll(PathState.singleCellListPath);
-    PathState.singleListPath = temp;
 
-    PathState.singleCellListPath = Celltemp;
 
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
 
 
     // print("allTurnPoints ${x1} ,${y1}");
@@ -3411,7 +3401,7 @@ class _NavigationState extends State<Navigation> {
 
     print("getTurnsss ${getTurns}");
 
-    path = getOptiPath(getTurns, numCols, path);
+    //path = getOptiPath(getTurns, numCols, path);
 
     print("pathhh-----${path.length}");
 
@@ -3488,7 +3478,7 @@ class _NavigationState extends State<Navigation> {
             int y2 = nextY;
 
 
-  
+
             bool isNonWalkablePoint = false;
 
 
@@ -3559,13 +3549,13 @@ class _NavigationState extends State<Navigation> {
     //creating a new array and gearting the path from it.
     //  path.clear();
     // //
-     path=tools.generateCompletePath(tu,numCols);
+    path=tools.generateCompletePath(tu,numCols);
 
 
 
 
     Map<int,int> turnIndexes=tools.getTurnMap(path, numCols);
-List<List<int>> tempturns=[];
+    List<List<int>> tempturns=[];
 
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
@@ -3576,11 +3566,17 @@ List<List<int>> tempturns=[];
     print("turnssss ${tu}");
     print("turnssss ${turnIndexes}");
 
-    List<int> temp = [];
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    print("cellpath $Cellpath");
+    List<int>temp = [];
+    List<Cell>Celltemp = [];
     temp.addAll(path);
+    Celltemp.addAll(Cellpath);
     temp.addAll(PathState.singleListPath);
+    Celltemp.addAll(PathState.singleCellListPath);
     PathState.singleListPath = temp;
-    print("non walkable---- ${building.nonWalkable[bid]![floor]!}");
+    PathState.singleCellListPath = Celltemp;
+    print("singlecellpath ${PathState.singleCellListPath}");
 
     // print("allTurnPoints ${x1} ,${y1}");
     //
@@ -3619,6 +3615,7 @@ List<List<int>> tempturns=[];
 
     //print("fetch route- $path");
     PathState.path[floor] = path;
+    PathState.Cellpath[floor] = Cellpath;
     if (PathState.numCols == null) {
       PathState.numCols = Map();
     }
@@ -3749,7 +3746,7 @@ List<List<int>> tempturns=[];
         if (bid != null) {
           print("Himanshubid $bid");
           List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -3814,8 +3811,6 @@ void clearPathVariables(){
       semanticShouldBeExcluded = true;
     });
 
-    print("shouldBeOpened");
-    print(semanticShouldBeExcluded);
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
@@ -3992,7 +3987,6 @@ void clearPathVariables(){
                     child: IconButton(
                         onPressed: () {
                           setState(() {
-                            clearPathVariables();
                             PathState.swap();
                             PathState.path.clear();
                             pathMarkers.clear();
@@ -4054,90 +4048,33 @@ void clearPathVariables(){
                                       color: Color(0xffd9d9d9),
                                       borderRadius: BorderRadius.circular(5.0),
                                     ),
-
-                                    Text(
-                                      "(${distance} m)",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        height: 24 / 18,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
-                                ),
-                                // Text(
-                                //   "via",
-                                //   style: const TextStyle(
-                                //     fontFamily: "Roboto",
-                                //     fontSize: 16,
-                                //     fontWeight: FontWeight.w400,
-                                //     color: Color(0xff4a4545),
-                                //     height: 25 / 16,
-                                //   ),
-                                //   textAlign: TextAlign.left,
-                                // ),
-                                // Text(
-                                //   "ETA- ${newTime.hour}:${newTime.minute}",
-                                //   style: const TextStyle(
-                                //     fontFamily: "Roboto",
-                                //     fontSize: 14,
-                                //     fontWeight: FontWeight.w400,
-                                //     color: Color(0xff8d8c8c),
-                                //     height: 20 / 14,
-                                //   ),
-                                //   textAlign: TextAlign.left,
-                                // ),
-                                SizedBox(
-                                  height: 8,
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 108,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xff24B9B0),
-                                        borderRadius:
-                                        BorderRadius.circular(4.0),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: ()async{
-                                          print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
-                                          user.pathobj = PathState;
-                                          user.path = PathState.singleListPath;
-                                          user.Cellpath = PathState.singleCellListPath;
-                                          user.isnavigating = true;
-                                          user.moveToStartofPath().then((value) {
-                                            setState(() {
-                                              if (markers.length > 0) {
-                                                print("checkingshow ${user.showcoordX.toInt()}, ${user.showcoordY.toInt()}");
-                                                List<double> val = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                                                markers[user.Bid]?[0] = customMarker.move(
-                                                    LatLng(val[0], val[1]),
-                                                    markers[user.Bid]![0]);
-
-                                                val = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                                                markers[user.Bid]?[1] = customMarker.move(
-                                                    LatLng(val[0], val[1]),
-                                                    markers[user.Bid]![1]);
-                                              }
-                                            });
-                                          });
-                                          _isRoutePanelOpen = false;
-                                          //selectedroomMarker.clear();
-                                          //pathMarkers.clear();
-                                          building.selectedLandmarkID = null;
-                                          _isnavigationPannelOpen = true;
-
-                                        },
-                                        child: !startingNavigation?Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.assistant_navigation,
-                                              color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 20),
+                              padding: EdgeInsets.only(left: 17, top: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Semantics(
+                                    label: "Your destination is ${distance}m away ",
+                                    sortKey: const OrdinalSortKey(1),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Semantics(
+                                          excludeSemantics: true,
+                                          child: Text(
+                                            "${time.toInt()} min ",
+                                            style: const TextStyle(
+                                              color: Color(0xffDC6A01),
+                                              fontFamily: "Roboto",
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                              height: 24 / 18,
                                             ),
                                             textAlign: TextAlign.left,
                                           ),
@@ -4232,6 +4169,7 @@ void clearPathVariables(){
                                               user.pathobj = PathState;
                                               user.path = PathState.singleListPath;
                                               user.isnavigating = true;
+                                              user.Cellpath = PathState.singleCellListPath;
                                               user.moveToStartofPath().then((value) {
                                                 setState(() {
                                                   if (markers.length > 0) {
@@ -4256,7 +4194,7 @@ void clearPathVariables(){
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                              //StartPDR();
 
 
                                             },

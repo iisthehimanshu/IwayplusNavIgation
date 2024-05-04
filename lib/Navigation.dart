@@ -4244,7 +4244,7 @@ void clearPathVariables(){
 
                                               semanticShouldBeExcluded = false;
 
-                                              //StartPDR();
+                                              StartPDR();
 
 
                                             },
@@ -6559,6 +6559,7 @@ void clearPathVariables(){
     compassSubscription.cancel();
     flutterTts.cancelHandler;
     _timer.cancel();
+    btadapter.stopScanning();
     super.dispose();
 
   }

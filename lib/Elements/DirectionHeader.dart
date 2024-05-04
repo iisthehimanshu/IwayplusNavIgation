@@ -138,6 +138,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.direction = "";
 
 
+
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if(btadapter.BIN[i]!.isNotEmpty){
         btadapter.BIN[i]!.forEach((key, value) {
@@ -151,6 +152,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     Building.thresh = "";
     print("Empty BIn");
     d++;
+
     sumMap.forEach((key, value) {
 
       setState(() {

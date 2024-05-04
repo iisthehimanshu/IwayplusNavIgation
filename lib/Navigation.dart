@@ -852,6 +852,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void reroute() {
+    clearPathVariables();
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -3528,7 +3529,7 @@ class _NavigationState extends State<Navigation> {
             int y2 = nextY;
 
 
-  
+
             bool isNonWalkablePoint = false;
 
 
@@ -3599,13 +3600,13 @@ class _NavigationState extends State<Navigation> {
     //creating a new array and gearting the path from it.
     //  path.clear();
     // //
-     path=tools.generateCompletePath(tu,numCols);
+    path=tools.generateCompletePath(tu,numCols);
 
 
 
 
     Map<int,int> turnIndexes=tools.getTurnMap(path, numCols);
-List<List<int>> tempturns=[];
+    List<List<int>> tempturns=[];
 
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
@@ -3796,7 +3797,7 @@ List<List<int>> tempturns=[];
         if (bid != null) {
           print("Himanshubid $bid");
           List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -4244,7 +4245,7 @@ void clearPathVariables(){
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                              //StartPDR();
 
 
                                             },
@@ -4934,29 +4935,31 @@ void clearPathVariables(){
                         SizedBox(
                           width: 12,
                         ),
-                        Container(
-                          width: 92,
-                          height: 36,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                              border: Border.all(color: Colors.black)),
-                          child: TextButton(
-                            onPressed: () {
-
-                            },
-                            child: Text(
-                              "Continue",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff000000),
-                                height: 20 / 14,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                        )
+                        // Container(
+                        //   width: 92,
+                        //   height: 36,
+                        //   decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(4.0),
+                        //       border: Border.all(color: Colors.black)),
+                        //   // child: TextButton(
+                        //   //   onPressed: () {
+                        //   //
+                        //   //   },
+                        //   //
+                        //   //
+                        //   //   child: Text(
+                        //   //     "Continue",
+                        //   //     style: const TextStyle(
+                        //   //       fontFamily: "Roboto",
+                        //   //       fontSize: 14,
+                        //   //       fontWeight: FontWeight.w400,
+                        //   //       color: Color(0xff000000),
+                        //   //       height: 20 / 14,
+                        //   //     ),
+                        //   //     textAlign: TextAlign.left,
+                        //   //   ),
+                        //   // ),
+                        // )
                       ],
                     )
                   ],

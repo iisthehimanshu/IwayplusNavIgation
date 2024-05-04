@@ -3467,7 +3467,7 @@ class _NavigationState extends State<Navigation> {
     }
     print("before optimizing pathh :${getPoints}");
 //optimizing turnsss
-    for (int i = 1; i < getPoints.length - 1; i++) {
+    for (int i = 0; i < getPoints.length - 1; i++) {
       if (getPoints[i][0] != getPoints[i + 1][0] &&
           getPoints[i][1] != getPoints[i + 1][1]) {
         int dist =
@@ -3944,6 +3944,7 @@ void clearPathVariables(){
                           PathState.destinationPolyID = "";
                           singleroute.clear();
                           _isBuildingPannelOpen = true;
+                          clearPathVariables();
                           setState(() {
                             Marker? temp = selectedroomMarker[buildingAllApi.getStoredString()]?.first;
                             selectedroomMarker.clear();
@@ -4041,6 +4042,7 @@ void clearPathVariables(){
                             PathState.path.clear();
                             pathMarkers.clear();
                             PathState.directions.clear();
+                            clearPathVariables();
                             building.landmarkdata!.then((value) {
                               calculateroute(value.landmarksMap!);
                             });
@@ -4568,7 +4570,7 @@ void clearPathVariables(){
 
 
 
-    return Visibility(
+    return  Visibility(
         visible: _isnavigationPannelOpen,
         child: Stack(
           children: [

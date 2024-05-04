@@ -250,6 +250,24 @@ class Node {
   int get hashCode => index.hashCode;
 }
 
+List<int> findBestPathAmongstBoth(int numRows,
+int numCols,
+List<int> nonWalkableCells,
+int sourceIndex,
+int destinationIndex,){
+  List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
+  Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
+
+  if(p1turns.length<p2turns.length){
+    return p1;
+  }else{
+    return p2.reversed.toList();
+  }
+
+}
+
 List<int> findPath(
     int numRows,
     int numCols,
@@ -257,8 +275,8 @@ List<int> findPath(
     int sourceIndex,
     int destinationIndex,
     ) {
-  sourceIndex -= 1;
-  destinationIndex -= 1;
+  // sourceIndex -= 1;
+  // destinationIndex -= 1;
 
   if (sourceIndex < 0 ||
       sourceIndex >= numRows * numCols ||

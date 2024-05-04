@@ -256,6 +256,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
+                if(value.name!
+                    .toLowerCase() == searchText.toLowerCase()){
+                  optionListItemBuildingName.add(value.buildingName!);
+                  searcCategoryhResults.clear();
+                  optionListItemBuildingName.forEach((element) {
+                    searcCategoryhResults.add(SearchpageCategoryResults(
+                      name: searchText,
+                      buildingName: element,
+                      onClicked: onVenueClicked,
+                    ));
+                  });
+                }
                 if (value.name!
                     .toLowerCase()
                     .contains(searchText.toLowerCase())) {

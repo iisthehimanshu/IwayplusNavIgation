@@ -183,8 +183,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-
-    handleCompassEvents();
+    //handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -3421,6 +3420,7 @@ class _NavigationState extends State<Navigation> {
 
 
 
+
     //optimizing path and turns code
 
 
@@ -3429,23 +3429,22 @@ class _NavigationState extends State<Navigation> {
 
 
 
-    // print("allTurnPoints ${x1} ,${y1}");
-    //
-    // List<Node> nodes = List.generate(numRows * numCols, (index) {
-    //   int x = index % numCols;
-    //   int y = index ~/ numCols;
-    //   return Node(index, x, y);
-    // });
-    // path.map((index) => nodes[index - 1]).toList();
-    //
-    // for(int i=0;i<path.length;i++){
-    //   int x = path[i] % numCols;
-    //   int y = path[i] ~/ numCols;
-    //
-    //   print("allPathPoints: ${x} ,${y}");
-    //
-    //
-    // }
+
+    List<Node> nodes = List.generate(numRows * numCols, (index) {
+      int x = index % numCols;
+      int y = index ~/ numCols;
+      return Node(index, x, y);
+    });
+    path.map((index) => nodes[index - 1]).toList();
+
+    for(int i=0;i<path.length;i++){
+      int x = path[i] % numCols;
+      int y = path[i] ~/ numCols;
+
+      print("allPathPoints: ${x} ,${y}");
+
+
+    }
 
 
     Map<int, int> getTurns = tools.getTurnMap(path, numCols);

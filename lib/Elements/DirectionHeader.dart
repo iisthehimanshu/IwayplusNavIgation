@@ -500,25 +500,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
               ],
             ),
-            Container(
-              alignment: Alignment.center,
-              width: 500,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  children: [
-                    Text("Avg map"),
-
-                    Text(ShowsumMap.toString()),
-
-                  ],
-                ),
-              ),
-            ),
-            Container(
-                child: Text("Closest Beacon ${debugNearestbeacon}")),
-
-
           ],
         ),
       ),

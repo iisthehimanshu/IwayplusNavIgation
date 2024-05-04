@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'Elements/UserCredential.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'VenueSelectionScreen.dart';
@@ -98,7 +100,6 @@ class _MyAppState extends State<MyApp> {
       home:
       //MainScreen()
 
-
       FutureBuilder<bool>(
         future: _isUserAuthenticated(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
@@ -113,22 +114,11 @@ class _MyAppState extends State<MyApp> {
 
           if (!isUserAuthenticated) {
             var SignInDatabasebox = Hive.box('SignInDatabase');
-            print(SignInDatabasebox.values);
-            //List<dynamic> ss = SignInDatabasebox.get("roles");
-            // print(ss.length);
-            // if(SignInDatabasebox.get("roles")=="[user]"){
-            //   print("True");
-            // }
-            final SigninBox = SignINAPIModelBox.getData();
-            print("SigninBox.length");
-            print(SigninBox.values);
-            print(SigninBox);
-            print(googleSignInUserName);
-
+            print("SignInDatabasebox.containsKey(accessToken)");
+            print(SignInDatabasebox.containsKey("accessToken"));
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
             }else{
-
               return MainScreen(initialIndex: 0);
             } // Redirect to Sign-In screen if user is not authenticated
           } else {

@@ -49,8 +49,8 @@ class beacon {
         : null;
     sId = json['_id'];
     buildingID = json['building_ID'];
-    coordinateX = json['coordinateX'];
-    coordinateY = json['coordinateY'];
+    coordinateX = json['coordinateX'].toInt();
+    coordinateY = json['coordinateY'].toInt();
     featureType = json['feature_type'];
     type = json['type'];
     floor = json['floor'];

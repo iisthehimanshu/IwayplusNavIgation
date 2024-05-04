@@ -6,7 +6,9 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
+import '../../../API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
+import '../../../Elements/UserCredential.dart';
 
 class SignInAPI{
 
@@ -42,32 +44,25 @@ class SignInAPI{
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
-
-        final signinData = SignINAPIModel(
-          signInApiModel: ss,
-        );
-        SigninBox.add(signinData);
-        signinData.save();
         print("printing box length ${SigninBox.length}");
 
-        // Now use the decoded data to create a SignInAPIModel instance
-        // signindataBox.add(signInResponse);
-        // signInResponse.save();
-
         var signInBox = Hive.box('SignInDatabase');
-        List<dynamic> roles = responseBody["payload"]["roles"];
-        // Put data into the box
         signInBox.put("accessToken", responseBody["accessToken"]);
-        signInBox.put("refreshToken", responseBody["accessToken"]);
+        signInBox.put("refreshToken", responseBody["refreshToken"]);
         signInBox.put("userId", responseBody["payload"]["userId"]);
+        List<dynamic> roles = responseBody["payload"]["roles"];
+        print(responseBody["payload"]["roles"].runtimeType);
         signInBox.put("roles", roles);
-        // print(signInBox.values);
-        // print(signInBox.get("roles"));
-        // if(signInBox.get("roles")=="user"){
-        //   print("True");
-        // }
 
-        //signInResponse.save();
+        //------STORING USER CREDENTIALS FROM DATABASE----------
+        UserCredentials.setAccessToken(signInBox.get("accessToken"));
+        UserCredentials.setRefreshToken(signInBox.get("refreshToken"));
+        List<dynamic> rolesList = signInBox.get("roles");
+        UserCredentials.setRoles(rolesList);
+        UserCredentials.setUserId(signInBox.get("userId"));
+
+        //--------------------------------------------------------
+
         print("Sign in details saved to database");
         // Use signInResponse as needed
 
@@ -77,8 +72,12 @@ class SignInAPI{
         throw Exception('Failed to parse data');
       }
     } else {
+      if (response.statusCode == 403) {
+        print("In response.statusCode == 403");
+        RefreshTokenAPI.fetchPatchData();
+        return SignInAPI().signIN(username,password);
+      }
       print("Code is ${response.statusCode}");
-
       return null;
     }
   }

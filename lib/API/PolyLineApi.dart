@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwayplusnav/API/RefreshTokenAPI.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
@@ -12,6 +14,8 @@ class PolyLineApi {
   String token = "";
   String buildingID="";
   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+  var signInBox = Hive.box('SignInDatabase');
+
 
   void checkForUpdate({String? id = null}) async {
     final PolyLineBox = PolylineAPIModelBOX.getData();
@@ -69,6 +73,7 @@ class PolyLineApi {
   Future<polylinedata> fetchPolyData({String? id = null}) async {
     print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();
+    token = signInBox.get("accessToken");
 
     if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString())){
       print("POLYLINE API DATA FROM DATABASE");
@@ -78,11 +83,6 @@ class PolyLineApi {
     }
 
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
 
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
@@ -105,6 +105,10 @@ class PolyLineApi {
       polyLineData.save();
       return polylinedata.fromJson(responseBody);
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return PolyLineApi().fetchPolyData();
+      }
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');

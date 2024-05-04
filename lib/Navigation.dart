@@ -4576,6 +4576,7 @@ class _NavigationState extends State<Navigation> {
             setState(() {
               isPdrStop = false;
             });
+
             StartPDR();
             break;
           }

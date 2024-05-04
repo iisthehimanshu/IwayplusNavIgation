@@ -51,7 +51,7 @@ class BT {
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
     startbin();
-    calculateAverage();
+
     FlutterBluePlus.startScan();
 
     FlutterBluePlus.scanResults.listen((results) async {
@@ -66,6 +66,7 @@ class BT {
         }
       }
     });
+    calculateAverage();
   }
 
 

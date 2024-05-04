@@ -90,7 +90,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print("Bin cleared");
         btadapter.numberOfSample.clear();
         btadapter.rs.clear();
-        listenToBin();
+        //listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);

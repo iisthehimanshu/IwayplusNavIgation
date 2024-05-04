@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/API/BuildingAPI.dart';
 import 'package:iwayplusnav/API/buildingAllApi.dart';
@@ -12,10 +13,12 @@ import 'guestloginapi.dart';
 
 class beaconapi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/beacons";
+  var signInBox = Hive.box('SignInDatabase');
   String token = "";
 
   Future<List<beacon>> fetchBeaconData({String? id}) async {
     print("beacon");
+    token = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
     if(BeaconBox.containsKey(id??buildingAllApi.getStoredString())){
       print("BEACON DATA FROM DATABASE");
@@ -26,12 +29,6 @@ class beaconapi {
       return beaconList;
     }
 
-    try{
-      await guestApi().guestlogin().then((value){
-      if(value.accessToken != null) {
-        token = value.accessToken!;
-      }
-    });
     print("Mishor");
     print(id);
     print(buildingAllApi.getStoredString());
@@ -70,12 +67,6 @@ class beaconapi {
       print(Exception);
       throw Exception('Failed to load beacon data');
 
-    }}catch(e){
-      HelperClass.showToast("MishorError in Beacon API");
-      List<beacon> beaconlist = [];
-      print("Mishorcheck");
-      print(e);
-      return beaconlist;
     }
   }
 }

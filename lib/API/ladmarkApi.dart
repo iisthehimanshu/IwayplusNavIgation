@@ -11,14 +11,15 @@ import 'package:hive/hive.dart';
 
 class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
+  var signInBox = Hive.box('SignInDatabase');
   String token = "";
 
 
 
   Future<land> fetchLandmarkData({String? id = null}) async {
     print("landmark");
+    token = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-
     if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
@@ -27,11 +28,6 @@ class landmarkApi {
       return land.fromJson(responseBody);
     }
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
 
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),

@@ -5,6 +5,7 @@ import 'package:iwayplusnav/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../APIMODELS/Building.dart';
 import '../Elements/HelperClass.dart';
+import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
 
@@ -73,7 +74,11 @@ class BuildingAPI {
       BuildingData.save();
       return Building.fromJson(responseBody);
     } else {
-      HelperClass.showToast("MishorError in Building API");
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return BuildingAPI().fetchBuildData();
+      }
+      //HelperClass.showToast("MishorError in Building API");
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');

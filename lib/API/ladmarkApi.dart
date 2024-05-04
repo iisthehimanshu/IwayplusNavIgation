@@ -4,6 +4,7 @@ import 'package:iwayplusnav/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
 import 'package:hive/hive.dart';
@@ -83,6 +84,10 @@ class landmarkApi {
       //   }
       // }
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return landmarkApi().fetchLandmarkData();
+      }
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');

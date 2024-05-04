@@ -8,6 +8,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 
 import '../APIMODELS/beaconData.dart';
+import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
 
@@ -61,6 +62,10 @@ class beaconapi {
 
       return beaconList;
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return beaconapi().fetchBeaconData();
+      }
       HelperClass.showToast("MishorError in Beacon API");
       print(Exception);
       print("Mishorcheck");

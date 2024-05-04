@@ -17,8 +17,8 @@ class RefreshTokenAPI {
   static void fetchPatchData() async {
     var signInBox = Hive.box('SignInDatabase');
     refreshToken = signInBox.get("refreshToken");
-    print("refreshToken");
-    print(refreshToken);
+    // print("refreshToken");
+    // print(refreshToken);
 
     final Map<String, dynamic> data = {
       "refreshToken": refreshToken
@@ -32,8 +32,12 @@ class RefreshTokenAPI {
     );
 
     if (response.statusCode == 200) {
+      print("in refreshTOken");
       Map<String, dynamic> responseBody = json.decode(response.body);
-      print("RefreshTokenAPI");
+
+      String updatedAccessToken = responseBody["accessToken"];
+      signInBox.put('accessToken', updatedAccessToken);
+
       print(responseBody);
       return;
     } else {

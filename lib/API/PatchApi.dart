@@ -7,6 +7,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
 class patchAPI {
@@ -95,6 +96,10 @@ class patchAPI {
       return patchDataModel.fromJson(responseBody);
 
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return patchAPI().fetchPatchData();
+      }
       print(Exception);
       throw Exception('Failed to load data');
     }

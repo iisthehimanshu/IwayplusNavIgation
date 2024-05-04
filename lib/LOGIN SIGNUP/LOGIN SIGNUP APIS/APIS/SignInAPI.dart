@@ -6,6 +6,7 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
+import '../../../API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
 import '../../../Elements/UserCredential.dart';
 
@@ -47,7 +48,7 @@ class SignInAPI{
 
         var signInBox = Hive.box('SignInDatabase');
         signInBox.put("accessToken", responseBody["accessToken"]);
-        signInBox.put("refreshToken", responseBody["accessToken"]);
+        signInBox.put("refreshToken", responseBody["refreshToken"]);
         signInBox.put("userId", responseBody["payload"]["userId"]);
         List<dynamic> roles = responseBody["payload"]["roles"];
         print(responseBody["payload"]["roles"].runtimeType);
@@ -55,7 +56,7 @@ class SignInAPI{
 
         //------STORING USER CREDENTIALS FROM DATABASE----------
         UserCredentials.setAccessToken(signInBox.get("accessToken"));
-        UserCredentials.setRefreshToken(signInBox.get("accessToken"));
+        UserCredentials.setRefreshToken(signInBox.get("refreshToken"));
         List<dynamic> rolesList = signInBox.get("roles");
         UserCredentials.setRoles(rolesList);
         UserCredentials.setUserId(signInBox.get("userId"));
@@ -71,8 +72,12 @@ class SignInAPI{
         throw Exception('Failed to parse data');
       }
     } else {
+      if (response.statusCode == 403) {
+        print("In response.statusCode == 403");
+        RefreshTokenAPI.fetchPatchData();
+        return SignInAPI().signIN(username,password);
+      }
       print("Code is ${response.statusCode}");
-
       return null;
     }
   }

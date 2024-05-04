@@ -10,6 +10,7 @@ import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
 class buildingAllApi {
@@ -25,6 +26,8 @@ class buildingAllApi {
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     token = signInBox.get("accessToken");
+    print("checking wilson");
+    print(token);
 
     if(BuildingAllBox.length!=0){
       print("BUILDINGALL API DATA FROM DATABASE");
@@ -51,10 +54,15 @@ class buildingAllApi {
       return buildingList;
 
     } else {
-      if(response.statusCode == 403){
-        List<dynamic> responseBody = json.decode(response.body);
-        responseBody.contains("message");
-        print(responseBody);
+      print("InbuildingAllApi");
+      print(response.statusCode);
+      if (response.statusCode == 403) {
+        print("In response.statusCode == 403");
+        print(token);
+        RefreshTokenAPI.fetchPatchData();
+        print("newToken");
+        token = signInBox.get("accessToken");
+        return buildingAllApi().fetchBuildingAllData();
       }
       print(response.statusCode);
       print(response.body);

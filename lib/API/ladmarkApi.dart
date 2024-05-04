@@ -4,6 +4,7 @@ import 'package:iwayplusnav/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
 import 'package:hive/hive.dart';
@@ -11,14 +12,15 @@ import 'package:hive/hive.dart';
 
 class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
+  var signInBox = Hive.box('SignInDatabase');
   String token = "";
 
 
 
   Future<land> fetchLandmarkData({String? id = null}) async {
     print("landmark");
+    token = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-
     if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString())){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
@@ -27,11 +29,6 @@ class landmarkApi {
       return land.fromJson(responseBody);
     }
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
 
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
@@ -87,6 +84,10 @@ class landmarkApi {
       //   }
       // }
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return landmarkApi().fetchLandmarkData();
+      }
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');

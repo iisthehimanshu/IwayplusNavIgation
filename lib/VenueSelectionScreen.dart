@@ -8,6 +8,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/API/BuildingAPI.dart';
+import 'package:iwayplusnav/API/RefreshTokenAPI.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/MODELS/VenueModel.dart';
 
@@ -46,17 +47,14 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     print("venueHashMap");
     print(venueHashMap);
 
-    if(!checkedForBuildingAllUpdated){
-      print("BUILDING ALL CHECK");
-      buildingAllApi().checkForUpdate();
-      checkedForBuildingAllUpdated = !checkedForBuildingAllUpdated;
-    }
+
   }
 
   void apiCall() async  {
     // print('Running api');
     //await Future.delayed(Duration(milliseconds: 1300));
     await buildingAllApi().fetchBuildingAllData().then((value) {
+      print(value);
       setState(() {
         buildingList = value;
         newbuildingList = value;
@@ -135,15 +133,20 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
         appBar: AppBar(
           title: Semantics(
             label: "Iwayplus",
-            child: Container(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                "Iwayplus",
-                style: const TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xff000000),
+            child: InkWell(
+              onTap: (){
+                RefreshTokenAPI.fetchPatchData();
+              },
+              child: Container(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  "Iwayplus",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xff000000),
+                  ),
                 ),
               ),
             ),

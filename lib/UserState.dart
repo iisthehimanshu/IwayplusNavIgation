@@ -20,6 +20,7 @@ class UserState{
   List<Cell> Cellpath = [];
   bool initialallyLocalised = false;
   String Bid ;
+  List<int> offPathDistance = [];
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
@@ -56,26 +57,77 @@ class UserState{
   // }
 
   Future<void> move()async{
-    pathobj.index = pathobj.index + 1;
-    print("theta ${this.theta}");
-    List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
-    coordX = coordX + transitionvalue[0];
-    coordY = coordY + transitionvalue[1];
-    List<double> values = tools.localtoglobal(coordX, coordY);
-    lat = values[0];
-    lng = values[1];
-    if(this.isnavigating && pathobj.Cellpath.isNotEmpty && pathobj.numCols != 0){
-      showcoordX = Cellpath[pathobj.index].x;
-      showcoordY = Cellpath[pathobj.index].y;
+    if(isnavigating){
+      checkForMerge();
+      pathobj.index = pathobj.index + 1;
+      print("theta ${this.theta}");
+      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
+      print("movefunction $transitionvalue");
+      coordX = coordX + transitionvalue[0];
+      coordY = coordY + transitionvalue[1];
+      List<double> values = tools.localtoglobal(coordX, coordY);
+      lat = values[0];
+      lng = values[1];
+      print("ch ${pathobj.Cellpath.isNotEmpty}");
+      print("ch1 ${pathobj.numCols}");
+      if(this.isnavigating && pathobj.Cellpath.isNotEmpty && pathobj.numCols != 0){
+        print("first");
+        showcoordX = Cellpath[pathobj.index].x;
+        showcoordY = Cellpath[pathobj.index].y;
+      }else{
+        print("second");
+        showcoordX = coordX;
+        showcoordY = coordY;
+      }
+
+      print("curr----- tv $transitionvalue");
+      print("curr----- coord $coordX,$coordY");
+      print("curr----- show $showcoordX,$showcoordY");
     }else{
-      showcoordX = coordX;
-      showcoordY = coordY;
+      print("prev----- coord $coordX,$coordY");
+      print("prev----- show $showcoordX,$showcoordY");
+      print("prev----- index ${pathobj.index}");
+      pathobj.index = pathobj.index + 1;
+      print("prev----- index ${pathobj.index}");
+
+      List<int> transitionvalue = tools.eightcelltransition(this.theta);
+      coordX = coordX + transitionvalue[0];
+      coordY = coordY + transitionvalue[1];
+      List<double> values = tools.localtoglobal(coordX, coordY);
+      lat = values[0];
+      lng = values[1];
+      if(this.isnavigating && pathobj.path.isNotEmpty && pathobj.numCols != 0){
+        showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
+        showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+      }else{
+        showcoordX = coordX;
+        showcoordY = coordY;
+      }
+
+      print("curr----- coord $coordX,$coordY");
+      print("curr----- show $showcoordX,$showcoordY");
+      print("curr----- index ${pathobj.index}");
     }
 
-    print("curr----- tv $transitionvalue");
-    print("curr----- coord $coordX,$coordY");
-    print("curr----- show $showcoordX,$showcoordY");
+    int d = tools.calculateDistance([coordX,coordY], [showcoordX,showcoordY]).toInt();
+    if(d>0){
+      offPathDistance.add(d);
+    }
   }
+
+  Future<void> checkForMerge()async{
+    if(offPathDistance.length==3){
+      if(tools.allElementsAreSame(offPathDistance)){
+        offPathDistance.clear();
+        coordX = showcoordX;
+        coordY = showcoordY;
+      }else{
+        offPathDistance.removeAt(0);
+      }
+    }
+  }
+
+
 
   Future<void> moveToPointOnPath(int index)async{
     showcoordX = path[index] % pathobj.numCols![Bid]![floor]!;

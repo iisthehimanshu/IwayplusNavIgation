@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 
 import 'package:iwayplusnav/navigationTools.dart';
 
@@ -48,9 +49,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   late Timer _timer;
   int c = 0;
   int d = 0;
+  Map<String, double> ShowsumMap = Map();
+  
   @override
   void initState() {
     super.initState();
+
+    btadapter.emptyBin();
+    for (int i = 0; i < btadapter.BIN.length; i++) {
+      if(btadapter.BIN[i]!.isNotEmpty){
+        btadapter.BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
+    }
+    btadapter.numberOfSample.clear();
+    btadapter.rs.clear();
+    Building.thresh = "";
+
     widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -60,7 +77,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         c++;
         // print("listen to bin :${listenToBin()}");
-       // listenToBin();
+
+        HelperClass.showToast("Bin cleared");
+        for (int i = 0; i < btadapter.BIN.length; i++) {
+          if(btadapter.BIN[i]!.isNotEmpty){
+            btadapter.BIN[i]!.forEach((key, value) {
+              key = "";
+              value = 0.0;
+            });
+          }
+        }
+        print("Bin cleared");
+        btadapter.numberOfSample.clear();
+        btadapter.rs.clear();
+        //listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
@@ -97,15 +127,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return widget.getSemanticValue;
   }
 
+
   bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
-    print("-90-   ${sumMap.length}");
+    
+    print("-90---   ${sumMap.length}");
+    print("checkingavgmap   ${sumMap}");
     widget.direction = "";
 
-    btadapter.emptyBin();
-  //  d++;
+
+
+    for (int i = 0; i < btadapter.BIN.length; i++) {
+      if(btadapter.BIN[i]!.isNotEmpty){
+        btadapter.BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
+    }
+    btadapter.numberOfSample.clear();
+    btadapter.rs.clear();
+    Building.thresh = "";
+    print("Empty BIn");
+    d++;
+
     sumMap.forEach((key, value) {
 
       setState(() {
@@ -417,7 +464,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
                     child: getCustomIcon(widget.direction)),
 
+
               ],
+            ),
+            Container(
+              width: 500,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  children: [
+                    Text("Avg map"),
+                    Text(btadapter.BIN.keys.toString()),
+                    Text(btadapter.BIN.values.toString()),
+
+                    Text(ShowsumMap.toString())
+                  ],
+                ),
+              ),
             ),
 
 

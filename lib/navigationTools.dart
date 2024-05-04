@@ -567,7 +567,7 @@ class tools {
             print("distance b/w beacon and location${d}");
             print(value.name);
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
@@ -578,6 +578,7 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
+
       print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
@@ -586,8 +587,10 @@ class tools {
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
     print("called");
-    int distance=30;
+
+    int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
       if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
@@ -650,13 +653,13 @@ class tools {
   }
 
   static List<int> eightcelltransition(double angle) {
-
-    print("angleee-----${angle}");
-    print(AngleBetweenBuildingandGlobalNorth);
-    angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
     }
+    print("angleee-----${angle}");
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+
     if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
     } else if (angle > 22.5 && angle <= 67.5) {
@@ -715,15 +718,17 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontal(double angle) {
+    print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
     }
+    print("second $angle");
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
-    if (angle >= 0 || angle <= 180) {
-      return [1,0];
-    } else if (angle > 180 && angle <= 360) {
+    if (angle > 180 && angle <= 360) {
       return [-1,0];
+    } else if (angle > 0 && angle <= 180) {
+      return [1,0];
     } else {
       return [0, 0];
     }
@@ -865,6 +870,18 @@ class tools {
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
+
+  static bool allElementsAreSame(List list) {
+    if (list.isEmpty) return true;  // Consider an empty list as having all elements the same.
+    var first = list.first;
+    for (var element in list) {
+      if (element > first) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 class nearestLandInfo{
   String name;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -45,7 +46,7 @@ class DirectionHeader extends StatefulWidget {
 
 class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
-  BT2 btadapter = new BT2();
+  BT btadapter = new BT();
   late Timer _timer;
 
 
@@ -74,16 +75,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("direction header:: ${turnPoints}");
       turnPoints.add(widget.user.path[widget.user.path.length-1]);
       turnPoints.add(widget.user.path[widget.user.path.length-2]);
-
+      btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
 
-        btadapter.startScanning(Building.apibeaconmap);
+
         // print("listen to bin :${listenToBin()}");
 
         // HelperClass.showToast("Bin cleared");
-      Future.delayed(Duration(milliseconds: 3000)).then((value) => {
-      listenToBin()
-      });
+
+      listenToBin();
+
 
 
       });
@@ -125,42 +126,55 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return widget.getSemanticValue;
   }
 
+  Map<String, double> sortMapByValue(Map<String, double> map) {
+    var sortedEntries = map.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
+    return Map.fromEntries(sortedEntries);
+  }
+  String debugNearestbeacon="";
   bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
-   // Map<String, double> sumMap = btadapter.calculateAverage();
-    
+    Map<String, double> sumMap = btadapter.calculateAverage();
+
+    Map<String, double> sortedsumMap = sortMapByValue(sumMap);
+    setState(() {
+      ShowsumMap = sortMapByValue(sortedsumMap);
+    });
+    nearestBeacon = sortedsumMap.entries.first.key;
+
     // print("-90---   ${sumMap.length}");
     // print("checkingavgmap   ${sumMap}");
     widget.direction = "";
 
 
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if (btadapter.BIN[i]!.isNotEmpty) {
-
-        btadapter.BIN[i]!.forEach((key, value) {
-          print("Wilsonchecker");
-          print(value.toString());
-          print(key);
-
-          setState(() {
-                widget.direction = "${widget.direction}$key   $value\n";
-              });
-
-          print("-90-   $key   $value");
-
-          if (value > highestweight) {
-            highestweight = value;
-            //nearestBeacon = key;
-          }
-        });
-        break;
-      }
-    }
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       print("Wilsonchecker");
+    //       print(value.toString());
+    //       print(key);
+    //
+    //       setState(() {
+    //             widget.direction = "${widget.direction}$key   $value\n";
+    //           });
+    //
+    //       print("-90-   $key   $value");
+    //
+    //       if (value > highestweight) {
+    //         highestweight = value;
+    //         //nearestBeacon = key;
+    //       }
+    //     });
+    //     break;
+    //   }
+    // }
 
     // btadapter.emptyBin();
     //
+
     // sumMap.forEach((key, value) {
     //
     //   setState(() {
@@ -174,6 +188,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     nearestBeacon = key;
     //   }
     // });
+    setState(() {
+      debugNearestbeacon = nearestBeacon;
+    });
 
     //print("$nearestBeacon   $highestweight");
 
@@ -241,7 +258,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         return false;
       }
     }
-    btadapter.stopScanning();
+    // btadapter.emptyBin();
+    for (int i = 0; i < btadapter.BIN.length; i++) {
+      if (btadapter.BIN[i]!.isNotEmpty) {
+        btadapter.BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
+    }
+
     return false;
   }
 
@@ -475,20 +501,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ],
             ),
             Container(
+              alignment: Alignment.center,
               width: 500,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Column(
                   children: [
                     Text("Avg map"),
-                    Text(btadapter.BIN.keys.toString()),
-                    Text(btadapter.BIN.values.toString()),
 
-                    Text(ShowsumMap.toString())
+                    Text(ShowsumMap.toString()),
+
                   ],
                 ),
               ),
             ),
+            Container(
+                child: Text("Closest Beacon ${debugNearestbeacon}")),
 
 
           ],

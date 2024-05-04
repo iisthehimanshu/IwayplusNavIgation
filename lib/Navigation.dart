@@ -183,7 +183,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    //handleCompassEvents();
+    handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -3451,7 +3451,7 @@ class _NavigationState extends State<Navigation> {
 
     print("getTurnsss ${getTurns}");
 
-    //path = getOptiPath(getTurns, numCols, path);
+    path = getOptiPath(getTurns, numCols, path);
 
     print("pathhh-----${path.length}");
 
@@ -4546,6 +4546,7 @@ void clearPathVariables(){
             setState(() {
               isPdrStop = false;
             });
+
             StartPDR();
             break;
           }

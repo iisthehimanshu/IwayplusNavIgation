@@ -506,7 +506,7 @@ List<Node> findOptimizedPath(
     ) {
 
 
-  List<int> pathIndices = findPath(
+  List<int> pathIndices = findBestPathAmongstBoth(
     numRows,
     numCols,
     nonWalkableCells,
@@ -669,6 +669,7 @@ List<Node> getTurnpoints(List<Node> pathNodes,int numCols){
 //
 //   return result;
 // }
+
 
 double pointLineDistance( Node point, Node start, Node end) {
 if (start.x == end.x && start.y == end.y) {
@@ -843,6 +844,10 @@ List<Cell> findCorridorSegments(List<int> path, List<int> nonWalkable, int numCo
 
     int nextrow = row;
     int nextcol = col;
+
+    List<double> v = tools.localtoglobal(row, col);
+    double lat = v[0];
+    double lng = v[1];
     if(i+1<path.length){
       nextrow = path[i+1]%numCols;
       nextcol = path[i+1]~/numCols;
@@ -864,25 +869,25 @@ List<Cell> findCorridorSegments(List<int> path, List<int> nonWalkable, int numCo
 
     if(nextrow != row && nextcol != col){
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     }else if(turnPoints.contains(pos)){
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     }else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
-      single.add(Cell(pos,row,col,tools.twocelltransitionvertical));
+      single.add(Cell(pos,row,col,tools.twocelltransitionvertical, lat, lng));
     }else if((eastCollision && westCollision)) {
       print("$pos with twohorizontal");
-      single.add(Cell(pos, row, col, tools.twocelltransitionhorizontal));
+      single.add(Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
     }else if (collisionCount == 1) {
       print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
     }else if ((!northCollision && !southCollision) && (!eastCollision && !westCollision)) {
       print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
     }else{
       print("$pos with second eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     }
   }
 

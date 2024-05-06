@@ -328,7 +328,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor.toString(),
+                    floor: value.floor!,
                     coordX: value.coordinateX!,
                     coordY: value.coordinateY!,
 

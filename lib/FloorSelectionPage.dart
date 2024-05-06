@@ -128,44 +128,45 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   List<int> checkfloors = [];
 
   void search(String filterText,String buildingText,List<int> floor){
-    setState(() {
-      try {
-        if(landmarkData.landmarksMap!.isNotEmpty) {
-          searchResults.clear();
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons") {
-                if(floor.isNotEmpty){
-                  print(value.floor);
-                  if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
-                    searchResults.add(SearchpageResults(name: "${value.name}",
-                      location: "Floor ${value.floor}, ${value
-                          .buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor.toString(),coordX: value.coordinateY!,coordY: value.coordinateY!,));
-                  }
-                }else{
-                  if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase())) {
-                    searchResults.add(SearchpageResults(name: "${value.name}",
-                      location: "Floor ${value.floor}, ${value
-                          .buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor.toString(),coordX: value.coordinateY!,coordY: value.coordinateY!,));
-                  }
-                }
 
+    setState(() {
+      if(landmarkData.landmarksMap!.isNotEmpty) {
+        searchResults.clear();
+        landmarkData.landmarksMap!.forEach((key, value) {
+          if (searchResults.length < 10) {
+            if (value.name != null && value.element!.subType != "beacons") {
+              if(floor.isNotEmpty){
+                print(value.floor);
+                if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
+                  searchResults.add(SearchpageResults(name: "${value.name}",
+                    location: "Floor ${value.floor}, ${value
+                        .buildingName}, ${value.venueName}",
+                    onClicked: onVenueClicked,
+                    ID: value.properties!.polyId!,
+                    bid: value.buildingID!,
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,));
+                }else{
+                  print("NO");
+                }
+              }else{
+                if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase())) {
+                  searchResults.add(SearchpageResults(name: "${value.name}",
+                    location: "Floor ${value.floor}, ${value
+                        .buildingName}, ${value.venueName}",
+                    onClicked: onVenueClicked,
+                    ID: value.properties!.polyId!,
+                    bid: value.buildingID!,
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!));
+                }else{
+                  print("NO-");
+                }
               }
-            } else {
-              return;
+
             }
-          });
-        }
-      }catch(e){
-        print("Error in FloorSelectionPage");
+          } else {
+            return;
+          }
+        });
       }
 
 

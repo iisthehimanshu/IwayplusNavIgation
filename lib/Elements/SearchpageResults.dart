@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/UserState.dart';
+import 'package:iwayplusnav/path.dart';
 
 import '../navigationTools.dart';
 class SearchpageResults extends StatefulWidget {
@@ -9,7 +10,7 @@ class SearchpageResults extends StatefulWidget {
   final String location;
   final String ID;
   final String bid;
-  final String floor;
+  final int floor;
   int coordX;
   int coordY;
   // String LandmarkName;
@@ -33,13 +34,19 @@ class _SearchpageResultsState extends State<SearchpageResults> {
       print("inif");
     }else {
       print("inelse");
+      print(widget.bid);
+      print(UserState.beaconBid);
+
+
       List<int> landCord = [];
       landCord.add(widget.coordX);
       landCord.add(widget.coordY);
       List<int> beacondCord = [];
       beacondCord.add(UserState.BeaconCoordX);
+      print("${UserState.BeaconCoordX} ${UserState.BeaconCoordY} ");
       beacondCord.add(UserState.BeaconCoordY);
-      distance = tools.calculateDistance(landCord, beacondCord);
+      distance = tools.calculateDistance(landCord, beacondCord) * 0.3048;
+      distance = double.parse(distance.toStringAsFixed(1));
     }
   }
 
@@ -107,11 +114,11 @@ class _SearchpageResultsState extends State<SearchpageResults> {
             Spacer(),
             Column(
               children: [
-                Container(
+                distance != 0.0? Container(
                   margin: EdgeInsets.only(top: 12,left: 8,right:16 ),
                   alignment: Alignment.center,
                   child: Text(
-                    HelperClass.truncateString(distance!=0.0? distance.toString() : 0.0.toString(),15),
+                    HelperClass.truncateString(distance.toString(),15)+ " m",
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 16,
@@ -121,7 +128,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                ),
+                ): Container(),
                 Container(
                   margin: EdgeInsets.only(top:3,bottom: 14,right:10 ),
                   alignment: Alignment.center,

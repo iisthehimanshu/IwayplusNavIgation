@@ -834,6 +834,153 @@ List<int> getOptiPath(Map<int,int> getTurns,int numCols,List<int> path){
   return path;
 }
 
+List<int> getFinalOptimizedPath(List<int> path,List<int> nonWalkableCells,int numCols){
+
+  List<List<int>> getPoints = [];
+  Map<int, int> getTurns = tools.getTurnMap(path, numCols);
+
+  print("getTurnsss ${getTurns}");
+
+  path = getOptiPath(getTurns, numCols, path);
+
+  print("pathhh-----${path.length}");
+
+  List<int> turns = tools.getTurnpoints(path, numCols);
+
+  print("turns ${turns}");
+
+  for (int i = 0; i < turns.length; i++) {
+    int x = turns[i] % numCols;
+    int y = turns[i] ~/ numCols;
+
+    getPoints.add([x, y]);
+  }
+  print("before optimizing pathh :${getPoints}");
+//optimizing turnsss
+  for (int i = 0; i < getPoints.length - 1; i++) {
+    if (getPoints[i][0] != getPoints[i + 1][0] &&
+        getPoints[i][1] != getPoints[i + 1][1]) {
+      int dist =
+      tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
+      if (dist <= 15) {
+        print("dist $dist");
+
+        //points of prev turn
+        int index1 = getPoints[i][0] + getPoints[i][1] * numCols;
+        print("we are getting ind1 $index1");
+        int ind1 = path.indexOf(index1);
+        print("we are getting ind1 $ind1");
+
+        int prev = path[ind1 - 1];
+
+        int currX = index1 % numCols;
+        int currY = index1 ~/ numCols;
+
+        int prevX = prev % numCols;
+        int prevY = prev ~/ numCols;
+
+        print("points---- ${index1}---${prev}");
+
+        //straight line eqautaion1
+        //y-prevY=(currY-prevY)/(currX-prevX)*(x-prevX);
+
+        //points of next turn;
+        int index2 = getPoints[i + 1][0] + getPoints[i + 1][1] * numCols;
+        print("we are getting ind2 $index2");
+        int ind2 = path.indexOf(index2);
+        print("we are getting ind2 $ind2");
+        int next = path[ind2 + 1];
+
+        int nextX = index2 % numCols;
+        int nextY = index2 ~/ numCols;
+
+        int nextNextX = next % numCols;
+        int nextNextY = next ~/ numCols;
+
+        print("points---- ${index2}---${next}");
+
+        int ind3 = path.indexOf(index1 - 1);
+
+        List<int> intersectPoints = getIntersectionPoints(
+            currX, currY, prevX, prevY, nextX, nextY, nextNextX, nextNextY);
+
+        if (intersectPoints.isNotEmpty) {
+          //non walkabkle check
+
+          //first along the x plane
+
+          //intersecting points
+          int x1 = intersectPoints[0];
+          int y1 = intersectPoints[1];
+
+          //next point
+          int x2 = nextX;
+          int y2 = nextY;
+
+
+
+          bool isNonWalkablePoint = false;
+
+
+          while (x1 <= x2) {
+            int pointIndex = x1 + y1 * numCols;
+            print("point indexess------${pointIndex}");
+            if (nonWalkableCells.contains(pointIndex)) {
+              isNonWalkablePoint = true;
+              break;
+            }
+            x1 = x1 + 1;
+          }
+
+          //along the y-axis
+
+          //next point
+          int x3 = currX;
+          int y3 = currY;
+
+          while (y1 >= y3) {
+            int pointIndex = x3 + y1 * numCols;
+            if (nonWalkableCells.contains(pointIndex)) {
+              isNonWalkablePoint = true;
+              break;
+            }
+            y1 = y1 - 1;
+          }
+
+          if (isNonWalkablePoint == false) {
+            path.removeRange(ind1, ind2);
+
+
+            int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+
+            print("points---- ${newIndex}");
+
+            path[ind1] = newIndex;
+
+            getPoints[i] = [
+              intersectPoints[0],
+              intersectPoints[1]
+            ];
+
+            getPoints.removeAt(i+1);
+
+          }
+        }
+
+        print("intersection points ${intersectPoints}");
+
+
+
+        print("${ind1}  ${ind2}  ${ind3}");
+
+        //path=getOptiPath(getTurns, numCols, path);
+      }
+    }
+  }
+
+  return path;
+}
+
 List<Cell> findCorridorSegments(List<int> path, List<int> nonWalkable, int numCols) {
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);

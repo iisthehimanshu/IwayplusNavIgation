@@ -198,7 +198,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=0.8){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);

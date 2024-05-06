@@ -21,6 +21,7 @@ class pathState {
   String sourceBid = "";
   String destinationBid = "";
   Map<String,Map<int,int>> connections = {};
+  List<int> beaconCords = [];
 
   // Default constructor without arguments
   pathState();

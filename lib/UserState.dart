@@ -6,8 +6,8 @@ import 'navigationTools.dart';
 
 class UserState{
   int floor;
-  int coordX;
-  int coordY;
+  int coordX ;
+  int coordY ;
   double lat;
   double lng;
   String key;
@@ -24,6 +24,8 @@ class UserState{
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
+  static int BeaconCoordX = 0;
+  static int BeaconCoordY = 0;
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 

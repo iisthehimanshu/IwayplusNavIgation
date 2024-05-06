@@ -640,6 +640,14 @@ class _NavigationState extends State<Navigation> {
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
       });
 
+      List<int> localBeconCord = [];
+      localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
+      localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateY!);
+      UserState.BeaconCoordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+      UserState.BeaconCoordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+
+      pathState().beaconCords = localBeconCord;
+
       List<double> values = [];
 
       if (apibeaconmap[nearestBeacon]!.floor != 0) {
@@ -1195,6 +1203,7 @@ class _NavigationState extends State<Navigation> {
     String nearestBeacon = "";
     print("btadapter.BIN");
     print(btadapter.BIN);
+
 
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {

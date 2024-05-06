@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwayplusnav/UserState.dart';
+
+import '../navigationTools.dart';
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
   final String name;
@@ -7,17 +10,39 @@ class SearchpageResults extends StatefulWidget {
   final String ID;
   final String bid;
   final String floor;
+  int coordX;
+  int coordY;
   // String LandmarkName;
   // String LandmarkFloor;
   // String LandmarksubName;
   // String LandmarkDistance;
-  const SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid,required this.floor});
+  SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid,required this.floor,required this.coordX,required this.coordY});
 
   @override
   State<SearchpageResults> createState() => _SearchpageResultsState();
 }
 
 class _SearchpageResultsState extends State<SearchpageResults> {
+
+  double distance = 0.0;
+  @override
+  void initState(){
+    super.initState();
+    if(widget.coordX == 0 || widget.coordY == 0 || UserState.BeaconCoordX == 0 || UserState.BeaconCoordY==0){
+      distance = 0.0;
+      print("inif");
+    }else {
+      print("inelse");
+      List<int> landCord = [];
+      landCord.add(widget.coordX);
+      landCord.add(widget.coordY);
+      List<int> beacondCord = [];
+      beacondCord.add(UserState.BeaconCoordX);
+      beacondCord.add(UserState.BeaconCoordY);
+      distance = tools.calculateDistance(landCord, beacondCord);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -86,7 +111,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                   margin: EdgeInsets.only(top: 12,left: 8,right:16 ),
                   alignment: Alignment.center,
                   child: Text(
-                    HelperClass.truncateString("60 m",15),
+                    HelperClass.truncateString(distance!=0.0? distance.toString() : 0.0.toString(),15),
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 16,

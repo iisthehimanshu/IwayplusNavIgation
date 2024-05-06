@@ -317,6 +317,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
                     floor: value.floor.toString(),
+                    coordX: value.coordinateX!,
+                    coordY: value.coordinateY!,
+
                   ));
                 }
               }

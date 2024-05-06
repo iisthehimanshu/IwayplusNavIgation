@@ -144,7 +144,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
                       bid: value.buildingID!,
-                      floor: value.floor.toString(),));
+                      floor: value.floor.toString(),coordX: value.coordinateY!,coordY: value.coordinateY!,));
                   }
                 }else{
                   if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase())) {
@@ -154,7 +154,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
                       bid: value.buildingID!,
-                      floor: value.floor.toString(),));
+                      floor: value.floor.toString(),coordX: value.coordinateY!,coordY: value.coordinateY!,));
                   }
                 }
 

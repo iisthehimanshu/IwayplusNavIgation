@@ -6843,52 +6843,40 @@ class _NavigationState extends State<Navigation> {
                                 ),
                               ),
                               SizedBox(height: 28.0), // Adjust the height as needed
-                              Container(
-                                width: 300,
-                                height: 100,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Column(
-                                    children: [
-                                      Text(testBIn.keys.toString()),
-                                      Text(testBIn.values.toString()),
-                                      Text("summap"),
-                                      Text(sortedsumMapfordebug.toString()),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   width: 300,
+                              //   height: 100,
+                              //   child: SingleChildScrollView(
+                              //     scrollDirection: Axis.horizontal,
+                              //     child: Column(
+                              //       children: [
+                              //         Text(testBIn.keys.toString()),
+                              //         Text(testBIn.values.toString()),
+                              //         Text("summap"),
+                              //         Text(sortedsumMapfordebug.toString()),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
-                                    mapState.bearing  = tools.calculateBearing([user.lat,user.lng], [PathState.singleCellListPath[1].lat, PathState.singleCellListPath[1].lng]);
-                                    print("anlge ${mapState.bearing}");
-                                    _googleMapController.moveCamera(
-                                      CameraUpdate.newCameraPosition(
-                                        CameraPosition(
-                                          target: mapState.target,
-                                          zoom: mapState.zoom,
-                                          bearing: mapState.bearing!,
-                                        ),
-                                      ),
-                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                    );
-                                    // //print(PathState.connections);
-                                    // building.floor[buildingAllApi.getStoredString()] = user.floor;
-                                    // createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
-                                    // if (pathMarkers[user.floor] != null) {
-                                    //   setCameraPosition(pathMarkers[user.floor]!);
-                                    // }
-                                    // building.landmarkdata!.then((value) {
-                                    //   createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
-                                    // });
-                                    // if (markers.length > 0)
-                                    //   markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
-                                    // if (user.initialallyLocalised) {
-                                    //   mapState.interaction = !mapState.interaction;
-                                    // }
-                                    // mapState.zoom = 21;
-                                    // fitPolygonInScreen(patch.first);
+                                    //print(PathState.connections);
+                                    building.floor[buildingAllApi.getStoredString()] = user.floor;
+                                    createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+                                    if (pathMarkers[user.floor] != null) {
+                                      setCameraPosition(pathMarkers[user.floor]!);
+                                    }
+                                    building.landmarkdata!.then((value) {
+                                      createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
+                                    });
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+                                    if (user.initialallyLocalised) {
+                                      mapState.interaction = !mapState.interaction;
+                                    }
+                                    mapState.zoom = 21;
+                                    fitPolygonInScreen(patch.first);
 
                                   },
                                   child: Icon(
@@ -6997,71 +6985,71 @@ class _NavigationState extends State<Navigation> {
                           ? Semantics(child: nearestLandmarkpannel())
                           : Container(),
                       SizedBox(height: 28.0), // Adjust the height as needed
-                      FloatingActionButton(
-                          onPressed: (){
-                            print("checkingBuildingfloor");
-                            //building.floor == 0 ? 'G' : '${building.floor}',
-                            print(building.floor);
-                            int firstKey = building.floor.values.first;
-                            print(firstKey);
-                            print(singleroute[building.floor.values.first]);
-
-                            print(singleroute.keys);
-                            print(singleroute.values);
-                            print(building.floor[buildingAllApi.getStoredString()]);
-                            print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                          },
-                          child: Icon(Icons.add)
-                      ),
-                      FloatingActionButton(
-                        onPressed: () async {
-
-                          //StopPDR();
-
-                          if (user.initialallyLocalised) {
-                            setState(() {
-                              isLiveLocalizing = !isLiveLocalizing;
-                            });
-                            HelperClass.showToast("realTimeReLocalizeUser started");
-
-                            Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  print(resBeacons);
-                                  btadapter.startScanning(resBeacons);
-
-
-                                  // setState(() {
-                                  //   sumMap=  btadapter.calculateAverage();
-                                  // });
-
-
-                                  Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-                                    realTimeReLocalizeUser(resBeacons)
-                                    // listenToBin()
-
-
-                                  });
-
-                                  setState(() {
-                                    debugPQ = btadapter.returnPQ();
-
-                                  });
-
-                                });
-
-                          }
-
-                        },
-                        child: Icon(
-                          Icons.location_history_sharp,
-                          color: (isLiveLocalizing)
-                              ? Colors.cyan
-                              : Colors.black,
-                        ),
-                        backgroundColor: Colors
-                            .white, // Set the background color of the FAB
-                      ),
+                      // FloatingActionButton(
+                      //     onPressed: (){
+                      //       print("checkingBuildingfloor");
+                      //       //building.floor == 0 ? 'G' : '${building.floor}',
+                      //       print(building.floor);
+                      //       int firstKey = building.floor.values.first;
+                      //       print(firstKey);
+                      //       print(singleroute[building.floor.values.first]);
+                      //
+                      //       print(singleroute.keys);
+                      //       print(singleroute.values);
+                      //       print(building.floor[buildingAllApi.getStoredString()]);
+                      //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                      //     },
+                      //     child: Icon(Icons.add)
+                      // ),
+                      // FloatingActionButton(
+                      //   onPressed: () async {
+                      //
+                      //     //StopPDR();
+                      //
+                      //     if (user.initialallyLocalised) {
+                      //       setState(() {
+                      //         isLiveLocalizing = !isLiveLocalizing;
+                      //       });
+                      //       HelperClass.showToast("realTimeReLocalizeUser started");
+                      //
+                      //       Timer.periodic(
+                      //           Duration(milliseconds: 5000),
+                      //               (timer) async {
+                      //             print(resBeacons);
+                      //             btadapter.startScanning(resBeacons);
+                      //
+                      //
+                      //             // setState(() {
+                      //             //   sumMap=  btadapter.calculateAverage();
+                      //             // });
+                      //
+                      //
+                      //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+                      //               realTimeReLocalizeUser(resBeacons)
+                      //               // listenToBin()
+                      //
+                      //
+                      //             });
+                      //
+                      //             setState(() {
+                      //               debugPQ = btadapter.returnPQ();
+                      //
+                      //             });
+                      //
+                      //           });
+                      //
+                      //     }
+                      //
+                      //   },
+                      //   child: Icon(
+                      //     Icons.location_history_sharp,
+                      //     color: (isLiveLocalizing)
+                      //         ? Colors.cyan
+                      //         : Colors.black,
+                      //   ),
+                      //   backgroundColor: Colors
+                      //       .white, // Set the background color of the FAB
+                      // ),
                     ],
                   ),
 

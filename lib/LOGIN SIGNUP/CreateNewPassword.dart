@@ -249,9 +249,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Semantics(
-              label:"Back",
-              child: Icon(Icons.arrow_back)),
+          icon: Semantics(label: "Back", child: Icon(Icons.arrow_back)),
         ),
       ),
       body: Stack(children: [
@@ -293,18 +291,22 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                 margin: EdgeInsets.only(
                                     left: 16, top: 8, right: 16),
                                 width: screenWidth,
-                                child: Flexible(
-                                  child: Container(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
                                       child: const Text(
-                                    "Please create a new 8 character strong password for your account.",
-                                    style: TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff4c4949),
+                                        "Please create a new 8 character strong password for your account.",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4c4949),
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
                                     ),
-                                    textAlign: TextAlign.left,
-                                  )),
+                                  ],
                                 ),
                               ),
                               Container(
@@ -322,34 +324,43 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: Semantics(
-                                          label: "Enter new password",
-                                          child: ExcludeSemantics(
-                                            child: TextFormField(
-                                              focusNode: _focusNode1,
-                                              controller: mailEditingController,
-                                              decoration: InputDecoration(
-                                                  hintText: 'New Password',
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
-                                                  ),
-                                                  border: InputBorder.none
-                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                  ),
-                                              onChanged: (value) {
-                                                emailFieldListner();
-                                                outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
-                                                outlineheaderColorForName =
-                                                    new Color(0xff49454f);
-                                              },
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Semantics(
+                                              label: "Enter new password",
+                                              child: ExcludeSemantics(
+                                                child: TextFormField(
+                                                  focusNode: _focusNode1,
+                                                  controller:
+                                                      mailEditingController,
+                                                  decoration: InputDecoration(
+                                                      hintText: 'New Password',
+                                                      hintStyle: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color:
+                                                            Color(0xffbdbdbd),
+                                                      ),
+                                                      border: InputBorder.none
+                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                      ),
+                                                  onChanged: (value) {
+                                                    emailFieldListner();
+                                                    outlineheaderColorForPass =
+                                                        new Color(0xff49454f);
+                                                    outlineheaderColorForName =
+                                                        new Color(0xff49454f);
+                                                  },
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ))),
                               Container(
                                   //color: Colors.amberAccent,
@@ -366,35 +377,44 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: Semantics(
-                                          label: "Enter new password again",
-                                          child: ExcludeSemantics(
-                                            child: TextFormField(
-                                              focusNode: _focusNode2,
-                                              controller:
-                                                  confirmmailEditingController,
-                                              decoration: InputDecoration(
-                                                  hintText: 'Confirm Password',
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
-                                                  ),
-                                                  border: InputBorder.none
-                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                  ),
-                                              onChanged: (value) {
-                                                confirmemailFieldListner();
-                                                outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
-                                                outlineheaderColorForName =
-                                                    new Color(0xff49454f);
-                                              },
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Semantics(
+                                              label: "Enter new password again",
+                                              child: ExcludeSemantics(
+                                                child: TextFormField(
+                                                  focusNode: _focusNode2,
+                                                  controller:
+                                                      confirmmailEditingController,
+                                                  decoration: InputDecoration(
+                                                      hintText:
+                                                          'Confirm Password',
+                                                      hintStyle: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color:
+                                                            Color(0xffbdbdbd),
+                                                      ),
+                                                      border: InputBorder.none
+                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                      ),
+                                                  onChanged: (value) {
+                                                    confirmemailFieldListner();
+                                                    outlineheaderColorForPass =
+                                                        new Color(0xff49454f);
+                                                    outlineheaderColorForName =
+                                                        new Color(0xff49454f);
+                                                  },
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ))),
                               ExcludeSemantics(
                                 child: Container(
@@ -435,24 +455,49 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                           });
                                           print(widget.user);
                                           print(widget.otp);
-                                          if (mailEditingController.text.isNotEmpty && confirmmailEditingController.text.isNotEmpty) {
-                                            if(mailEditingController.text == confirmmailEditingController.text){
+                                          if (mailEditingController
+                                                  .text.isNotEmpty &&
+                                              confirmmailEditingController
+                                                  .text.isNotEmpty) {
+                                            if (mailEditingController.text ==
+                                                confirmmailEditingController
+                                                    .text) {
                                               print("Verifying");
                                               print(widget.user);
                                               print(mailEditingController.text);
                                               print(widget.otp);
-                                              await SignInAPI.changePassword(widget.user, mailEditingController.text, widget.otp).then((value) => {
-                                                if (value == 1){
-                                                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SignIn(),), (Route<dynamic>route) => false),
-                                                  showToast('Password reset Successfully')
-                                                } else {
-                                                  showToast('Something went wrong')
-                                                }
-                                              });
-                                            }else{
-                                              HelperClass.showToast("Incorrect matching fields");
+                                              await SignInAPI.changePassword(
+                                                      widget.user,
+                                                      mailEditingController
+                                                          .text,
+                                                      widget.otp)
+                                                  .then((value) => {
+                                                        if (value == 1)
+                                                          {
+                                                            Navigator
+                                                                .pushAndRemoveUntil(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              const SignIn(),
+                                                                    ),
+                                                                    (Route<dynamic>
+                                                                            route) =>
+                                                                        false),
+                                                            showToast(
+                                                                'Password reset Successfully')
+                                                          }
+                                                        else
+                                                          {
+                                                            showToast(
+                                                                'Something went wrong')
+                                                          }
+                                                      });
+                                            } else {
+                                              HelperClass.showToast(
+                                                  "Incorrect matching fields");
                                             }
-
                                           } else {
                                             showToast(
                                                 'dont leave any field empty');

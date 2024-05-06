@@ -487,6 +487,7 @@ class _NavigationState extends State<Navigation> {
                     //     });
                     //   }
                     // });
+
                     for (int j = 0; j < getPoints.length; j++) {
                       print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
                       print("user point ${user.showcoordX},${user.showcoordY}");
@@ -501,9 +502,9 @@ class _NavigationState extends State<Navigation> {
                       }
                     }
 
-                    if (moveOneMore || moveOneLift) {
+                    if (moveOneMore) {
 
-
+                      print("twice movement");
                    user.move().then((value) {
                       setState(() {
                         if (markers.length > 0) {
@@ -521,23 +522,23 @@ class _NavigationState extends State<Navigation> {
                         }
                       });
                      });
-                  }
-                   } else {
-                    print("rendering here");
-                    setState(() {
-                      if (markers.length > 0) {
-                        List<double> lvalue = tools.localtoglobal(
-                            user.showcoordX.toInt(), user.showcoordY.toInt());
-                        markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+                  }else {
+                      print("rendering here");
+                      setState(() {
+                        if (markers.length > 0) {
+                          List<double> lvalue = tools.localtoglobal(
+                              user.showcoordX.toInt(), user.showcoordY.toInt());
+                          markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
-                        List<double> ldvalue = tools.localtoglobal(
-                            user.coordX.toInt(), user.coordY.toInt());
-                        markers[user.Bid]?[1] = customMarker.move(
-                            LatLng(ldvalue[0], ldvalue[1]),
-                            markers[user.Bid]![1]);
-                      }
-                    });
-                  }
+                          List<double> ldvalue = tools.localtoglobal(
+                              user.coordX.toInt(), user.coordY.toInt());
+                          markers[user.Bid]?[1] = customMarker.move(
+                              LatLng(ldvalue[0], ldvalue[1]),
+                              markers[user.Bid]![1]);
+                        }
+                      });
+                    }
+                   }
 
               });
             } else {
@@ -3514,7 +3515,7 @@ path=getFinalOptimizedPath(path, building.nonWalkable[bid]![floor]!, numCols);
       getPoints.add([x, y]);
     }
     getPoints.add([destinationX, destinationY]);
-
+print("desti points ${destinationX}+ ${destinationY}");
     print("optimized path turns :${getPoints}");
 
 
@@ -4455,10 +4456,12 @@ path=getFinalOptimizedPath(path, building.nonWalkable[bid]![floor]!, numCols);
           if (isPdrStop && val == 0) {
              print("points unmatchedddd");
 
-            setState(() {
-              isPdrStop = false;
-            });
+
             Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+            setState(() {
+            isPdrStop = false;
+            }
+            ),
             StartPDR()
             });
 

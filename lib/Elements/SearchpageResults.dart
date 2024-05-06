@@ -1,23 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwayplusnav/UserState.dart';
+import 'package:iwayplusnav/path.dart';
+
+import '../navigationTools.dart';
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
   final String name;
   final String location;
   final String ID;
   final String bid;
-  final String floor;
+  final int floor;
+  int coordX;
+  int coordY;
   // String LandmarkName;
   // String LandmarkFloor;
   // String LandmarksubName;
   // String LandmarkDistance;
-  const SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid,required this.floor});
+  SearchpageResults({required this.name,required this.location,required this.onClicked,required this.ID,required this.bid,required this.floor,required this.coordX,required this.coordY});
 
   @override
   State<SearchpageResults> createState() => _SearchpageResultsState();
 }
 
 class _SearchpageResultsState extends State<SearchpageResults> {
+
+  double distance = 0.0;
+  @override
+  void initState(){
+    super.initState();
+    if(widget.coordX == 0 || widget.coordY == 0 || UserState.BeaconCoordX == 0 || UserState.BeaconCoordY==0){
+      distance = 0.0;
+      print("inif");
+    }else {
+      print("inelse");
+      print(widget.bid);
+      print(UserState.beaconBid);
+
+
+      List<int> landCord = [];
+      landCord.add(widget.coordX);
+      landCord.add(widget.coordY);
+      List<int> beacondCord = [];
+      beacondCord.add(UserState.BeaconCoordX);
+      print("${UserState.BeaconCoordX} ${UserState.BeaconCoordY} ");
+      beacondCord.add(UserState.BeaconCoordY);
+      distance = tools.calculateDistance(landCord, beacondCord) * 0.3048;
+      distance = double.parse(distance.toStringAsFixed(1));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -82,11 +114,11 @@ class _SearchpageResultsState extends State<SearchpageResults> {
             Spacer(),
             Column(
               children: [
-                Container(
+                distance != 0.0? Container(
                   margin: EdgeInsets.only(top: 12,left: 8,right:16 ),
                   alignment: Alignment.center,
                   child: Text(
-                    HelperClass.truncateString("60 m",15),
+                    HelperClass.truncateString(distance.toString(),15)+ " m",
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 16,
@@ -96,7 +128,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                ),
+                ): Container(),
                 Container(
                   margin: EdgeInsets.only(top:3,bottom: 14,right:10 ),
                   alignment: Alignment.center,

@@ -132,7 +132,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     return Map.fromEntries(sortedEntries);
   }
-  }
   String debugNearestbeacon="";
   Map<String, double> sortedsumMap={};
 

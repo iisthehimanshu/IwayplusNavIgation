@@ -175,7 +175,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // btadapter.emptyBin();
     //
 
-    // sumMap.forEach((key, value) {
+    // sortedsumMap.forEach((key, value) {
     //
     //   setState(() {
     //     widget.direction = "${widget.direction}$key   $value\n";
@@ -498,8 +498,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     child: getCustomIcon(widget.direction)),
 
 
+
               ],
             ),
+            // SizedBox(
+            //   height: 100,
+            // ),
+            // Container(
+            //   width: 300,
+            //   height: 100,
+            //   child: SingleChildScrollView(
+            //     scrollDirection: Axis.horizontal,
+            //     child: Column(
+            //       children: [
+            //         Text(ShowsumMap.values.toString()),
+            //         Text("summap"),
+            //         Text(debugNearestbeacon.toString()),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

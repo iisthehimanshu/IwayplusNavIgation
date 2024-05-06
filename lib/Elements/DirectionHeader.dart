@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -45,10 +46,10 @@ class DirectionHeader extends StatefulWidget {
 
 class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
-  BT2 btadapter = new BT2();
+  BT btadapter = new BT();
   late Timer _timer;
-  int c = 0;
-  int d = 0;
+
+
   Map<String, double> ShowsumMap = Map();
   
   @override
@@ -72,31 +73,29 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("direction header:: ${turnPoints}");
+      turnPoints.add(widget.user.path[widget.user.path.length-1]);
       turnPoints.add(widget.user.path[widget.user.path.length-2]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        c++;
+
+
         // print("listen to bin :${listenToBin()}");
 
-        HelperClass.showToast("Bin cleared");
-        for (int i = 0; i < btadapter.BIN.length; i++) {
-          if(btadapter.BIN[i]!.isNotEmpty){
-            btadapter.BIN[i]!.forEach((key, value) {
-              key = "";
-              value = 0.0;
-            });
-          }
-        }
-        print("Bin cleared");
-        btadapter.numberOfSample.clear();
-        btadapter.rs.clear();
-        //listenToBin();
+        // HelperClass.showToast("Bin cleared");
+
+      listenToBin();
+
+
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = 0.0;
+      if(widget.user.pathobj.index<=widget.user.path.length){
+        angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      }
+
       print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle);
@@ -127,55 +126,79 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return widget.getSemanticValue;
   }
 
+  Map<String, double> sortMapByValue(Map<String, double> map) {
+    var sortedEntries = map.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
+    return Map.fromEntries(sortedEntries);
+  }
+  String debugNearestbeacon="";
   bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
-    
-    print("-90---   ${sumMap.length}");
-    print("checkingavgmap   ${sumMap}");
+
+    Map<String, double> sortedsumMap = sortMapByValue(sumMap);
+    setState(() {
+      ShowsumMap = sortMapByValue(sortedsumMap);
+    });
+    nearestBeacon = sortedsumMap.entries.first.key;
+
+    // print("-90---   ${sumMap.length}");
+    // print("checkingavgmap   ${sumMap}");
     widget.direction = "";
 
 
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       print("Wilsonchecker");
+    //       print(value.toString());
+    //       print(key);
+    //
+    //       setState(() {
+    //             widget.direction = "${widget.direction}$key   $value\n";
+    //           });
+    //
+    //       print("-90-   $key   $value");
+    //
+    //       if (value > highestweight) {
+    //         highestweight = value;
+    //         //nearestBeacon = key;
+    //       }
+    //     });
+    //     break;
+    //   }
+    // }
 
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if(btadapter.BIN[i]!.isNotEmpty){
-        btadapter.BIN[i]!.forEach((key, value) {
-          key = "";
-          value = 0.0;
-        });
-      }
-    }
-    btadapter.numberOfSample.clear();
-    btadapter.rs.clear();
-    Building.thresh = "";
-    print("Empty BIn");
-    d++;
+    // btadapter.emptyBin();
+    //
 
-    sumMap.forEach((key, value) {
-
-      setState(() {
-        widget.direction = "${widget.direction}$key   $value\n";
-      });
-
-      print("-90-   $key   $value");
-
-      if(value>highestweight){
-        highestweight =  value;
-        nearestBeacon = key;
-      }
+    // sumMap.forEach((key, value) {
+    //
+    //   setState(() {
+    //     widget.direction = "${widget.direction}$key   $value\n";
+    //   });
+    //
+    //   print("-90-   $key   $value");
+    //
+    //   if(value>highestweight){
+    //     highestweight =  value;
+    //     nearestBeacon = key;
+    //   }
+    // });
+    setState(() {
+      debugNearestbeacon = nearestBeacon;
     });
 
     //print("$nearestBeacon   $highestweight");
 
 
     if(nearestBeacon !=""){
-
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);
@@ -235,6 +258,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         return false;
       }
     }
+    // btadapter.emptyBin();
+    for (int i = 0; i < btadapter.BIN.length; i++) {
+      if (btadapter.BIN[i]!.isNotEmpty) {
+        btadapter.BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
+    }
+
     return false;
   }
 
@@ -467,23 +500,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
               ],
             ),
-            Container(
-              width: 500,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  children: [
-                    Text("Avg map"),
-                    Text(btadapter.BIN.keys.toString()),
-                    Text(btadapter.BIN.values.toString()),
-
-                    Text(ShowsumMap.toString())
-                  ],
-                ),
-              ),
-            ),
-
-
           ],
         ),
       ),

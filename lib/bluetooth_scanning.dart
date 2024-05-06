@@ -341,6 +341,15 @@ static Map<String,Set<int>> map=new HashMap();
   //   emptyBin();
   // }
 
+
+  void stopScanning() async{
+    await FlutterBluePlus.stopScan();
+    //_scanResultsSubscription.cancel();
+    _scanResults.clear();
+    _systemDevices.clear();
+    emptyBin();
+  }
+
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
       if(BIN[i]!.isNotEmpty){

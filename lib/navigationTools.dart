@@ -336,6 +336,30 @@ class tools {
     return angle;
   }
 
+  static double toRadians(double degree) {
+    return degree * pi / 180.0;
+  }
+
+  static double calculateBearing(List<double> pointA, List<double> pointB) {
+    double lat1 = toRadians(pointA[0]);
+    double lon1 = toRadians(pointA[1]);
+    double lat2 = toRadians(pointB[0]);
+    double lon2 = toRadians(pointB[1]);
+
+    double dLon = lon2 - lon1;
+
+    double x = sin(dLon) * cos(lat2);
+    double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+
+    double bearingRadians = atan2(x, y);
+    double bearingDegrees = bearingRadians * 180.0 / pi;
+    // Normalize the bearing to be within the range 0° to 360°
+    bearingDegrees = (bearingDegrees + 360) % 360;
+
+    return bearingDegrees;
+  }
+
+
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
     print("A $a");
     print("B $b");

@@ -42,6 +42,7 @@ import 'package:iwayplusnav/Elements/directionInstruction.dart';
 import 'package:iwayplusnav/PolylineTestClass.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
+import 'package:iwayplusnav/localizedData.dart';
 import 'package:iwayplusnav/navigationTools.dart';
 import 'package:iwayplusnav/path.dart';
 import 'package:iwayplusnav/pathState.dart';
@@ -645,8 +646,6 @@ class _NavigationState extends State<Navigation> {
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateY!);
       print("check beacon ${apibeaconmap[nearestBeacon]!.coordinateX} ${apibeaconmap[nearestBeacon]!.coordinateY}");
-      UserState.BeaconCoordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      UserState.BeaconCoordY = apibeaconmap[nearestBeacon]!.coordinateY!;
 
       pathState().beaconCords = localBeconCord;
 
@@ -684,11 +683,12 @@ class _NavigationState extends State<Navigation> {
       }
 
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
-      UserState.beaconBid = apibeaconmap[nearestBeacon]!.buildingID!;
-      UserState.beaconFloor = apibeaconmap[nearestBeacon]!.floor!;
+
 
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      localizedData.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+      localizedData.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       List<int> userCords = [];
@@ -705,6 +705,7 @@ class _NavigationState extends State<Navigation> {
       user.lng =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
       user.floor = apibeaconmap[nearestBeacon]!.floor!;
+      localizedData.floor = apibeaconmap[nearestBeacon]!.floor!;
       user.key = apibeaconmap[nearestBeacon]!.sId!;
       user.initialallyLocalised = true;
       setState(() {
@@ -974,21 +975,18 @@ class _NavigationState extends State<Navigation> {
             String matched = match.group(0)!;
             allIntegers.add(int.parse(matched));
           }
-          Map<int, List<int>> currrentnonWalkable =
-              building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+          Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
           currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
-          building.nonWalkable[value.landmarks![i].buildingID!] =
-              currrentnonWalkable;
+          building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+          localizedData.nonWalkable = currrentnonWalkable;
 
-          Map<int, List<int>> currentfloorDimenssion =
-              building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
-                  Map();
+          Map<int, List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
           currentfloorDimenssion[value.landmarks![i].floor!] = [
             value.landmarks![i].properties!.floorLength!,
             value.landmarks![i].properties!.floorBreadth!
           ];
-          building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-          currentfloorDimenssion!;
+          building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
+          localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
           print("fetch route--  ${building.floorDimenssion}");
 

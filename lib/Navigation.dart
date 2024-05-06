@@ -3427,8 +3427,13 @@ class _NavigationState extends State<Navigation> {
 
       distance = distance * 0.3048;
       distance = double.parse(distance.toStringAsFixed(1));
-      speak(
-          "${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
+      if(PathState.destinationName == "Your current location"){
+        speak(
+            "${nearestLandInfomation.name} is $distance meter away. Click Start to Navigate.");
+      }else{
+        speak(
+            "${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
+      }
     }
   }
 

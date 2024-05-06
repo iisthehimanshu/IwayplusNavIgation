@@ -434,38 +434,43 @@ class _SignUpState extends State<SignUp> {
                                       padding: EdgeInsets.only(left: 12),
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: outlineheaderColorForName,width: 2),
+                                        border: Border.all(color: outlineheaderColor,width: 2),
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: Expanded(
-                                        child: Semantics(
-                                          label: "Enter your name",
-                                          child: ExcludeSemantics(
-                                            child: TextFormField(
-                                              focusNode: nameFocusNode,
-                                              controller: nameEditingController,
-                                              decoration: InputDecoration(
-                                                  hintText: 'Name',
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
+                                      child: Row(
+                                        children: [
+                                          containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                          Expanded(
+                                            child: Semantics(
+                                              label: "Enter your name",
+                                              child: ExcludeSemantics(
+                                                child: TextFormField(
+                                                  focusNode: nameFocusNode,
+                                                  controller: nameEditingController,
+                                                  decoration: InputDecoration(
+                                                      hintText: 'Name',
+                                                      hintStyle: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xffbdbdbd),
+                                                      ),
+                                                      border: InputBorder.none
+                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                   ),
-                                                  border: InputBorder.none
-                                                //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                  onChanged: (value) {
+                                                    nameFiledListner();
+                                                    setState(() {
+                                                      outlineheaderColorForPass = new Color(0xff49454f);
+                                                      outlineheaderColor = new Color(0xff49454f);
+                                                    });
+                                                  },
+                                                ),
                                               ),
-                                              onChanged: (value) {
-                                                nameFiledListner();
-                                                setState(() {
-                                                  outlineheaderColorForPass = new Color(0xff49454f);
-                                                  outlineheaderColor = new Color(0xff49454f);
-                                                });
-                                              },
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ))
                               ),
                               Container(

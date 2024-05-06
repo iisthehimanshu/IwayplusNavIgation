@@ -141,7 +141,10 @@ class UserState{
   }
 
   Future<void> moveToStartofPath()async{
-
+    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    if(tools.calculateDistance([Cellpath[0].x,Cellpath[0].y], [turnPoints[0].x,turnPoints[0].y])<5){
+      pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    }
     showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;

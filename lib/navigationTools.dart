@@ -9,6 +9,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'Cell.dart';
 import 'path.dart';
 
 class tools {
@@ -785,6 +786,42 @@ class tools {
       int prevDeltaY=y1-y3;
       int nextDeltaX=x2-x1;
       int nextDeltaY=y2-y1;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res.add(currPos);
+        }
+
+      }
+
+
+
+    }
+    return res;
+  }
+
+  static List<Cell> getCellTurnpoints(List<Cell> pathNodes,int numCols){
+    List<Cell> res=[];
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      Cell currPos = pathNodes[i];
+      Cell nextPos=pathNodes[i+1];
+      Cell prevPos=pathNodes[i-1];
+
+
+      int prevDeltaX=currPos.x-prevPos.x;
+      int prevDeltaY=currPos.y-prevPos.y;
+      int nextDeltaX=nextPos.x-currPos.x;
+      int nextDeltaY=nextPos.y-currPos.y;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
         if(prevDeltaX==0 && nextDeltaX==0){

@@ -68,14 +68,14 @@ class _SearchpageResultsState extends State<SearchpageResults> {
       List<int> p = findPath(numRows, numCols, localizedData.nonWalkable[localizedData.floor]!, sourceIndex, destinationIndex);
 
 
-      numRows = localizedData.currentfloorDimenssion[widget.floor]![1]; //floor breadth
-      numCols = localizedData.currentfloorDimenssion[widget.floor]![0]; //floor length
-      sourceIndex = calculateindex(localizedData.coordX, localizedData.coordY, numCols);
-      destinationIndex = calculateindex(widget.coordX, widget.coordY, numCols);
-      // Simulate a network request or a heavy computation with a delay
-
-      List<int> p = findPath(numRows, numCols, localizedData.nonWalkable[localizedData.floor]!, sourceIndex, destinationIndex);
-      await Future.delayed(const Duration(milliseconds: 500));
+      // numRows = localizedData.currentfloorDimenssion[widget.floor]![1]; //floor breadth
+      // numCols = localizedData.currentfloorDimenssion[widget.floor]![0]; //floor length
+      // sourceIndex = calculateindex(localizedData.coordX, localizedData.coordY, numCols);
+      // destinationIndex = calculateindex(widget.coordX, widget.coordY, numCols);
+      // // Simulate a network request or a heavy computation with a delay
+      //
+      // List<int> p = findPath(numRows, numCols, localizedData.nonWalkable[localizedData.floor]!, sourceIndex, destinationIndex);
+      // await Future.delayed(const Duration(milliseconds: 500));
 
       return (p.length* 0.3048).toInt(); // This is your calculated integer
     }

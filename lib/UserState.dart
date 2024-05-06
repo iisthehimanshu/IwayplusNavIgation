@@ -25,12 +25,6 @@ class UserState{
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
 
-  static int BeaconCoordX = 0;
-  static int BeaconCoordY = 0;
-  static String beaconBid = "";
-  static int beaconFloor=0;
-
-
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
   // Future<void> move()async {
@@ -147,7 +141,10 @@ class UserState{
   }
 
   Future<void> moveToStartofPath()async{
-
+    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    if(tools.calculateDistance([Cellpath[0].x,Cellpath[0].y], [turnPoints[0].x,turnPoints[0].y])<5){
+      pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    }
     showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;

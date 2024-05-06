@@ -92,7 +92,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
-      if(widget.user.pathobj.index<=widget.user.path.length){
+      if(widget.user.pathobj.index<=widget.user.path.length-1){
         angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       }
 
@@ -132,13 +132,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     return Map.fromEntries(sortedEntries);
   }
+  }
   String debugNearestbeacon="";
+  Map<String, double> sortedsumMap={};
+
   bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
 
-    Map<String, double> sortedsumMap = sortMapByValue(sumMap);
+    sortedsumMap = sortMapByValue(sumMap);
     setState(() {
       ShowsumMap = sortMapByValue(sortedsumMap);
     });
@@ -203,9 +206,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);
             if(d < 5){
+
+              print("workingg 1");
               //near to user so nothing to do
               return true;
             }else{
+              print("workingg 2");
               int distanceFromPath = 100000000;
               int? indexOnPath = null;
               int numCols = widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
@@ -221,11 +227,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               });
 
-              if(distanceFromPath>5){
+              if(distanceFromPath>10){
+                print("workingg 3");
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
                 return false;//away from path
               }else{
+                print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               
                 speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
@@ -242,7 +250,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("usercoord ${usercoord}");
             print(nearestBeacon);
           }else{
-           
+            print("workingg 5");
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
             return true;
@@ -250,6 +258,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         }
       }else{
+        print("workingg 6");
         print("listening");
 
         print(nearestBeacon);
@@ -301,6 +310,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
+
+
+
 
     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
       speak("You have reached ${widget.user.pathobj.destinationName}");
@@ -495,7 +507,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       borderRadius: BorderRadius.circular(28.0),
                     ),
 
-                    child: getCustomIcon(widget.direction)),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          getCustomIcon(widget.direction),
+                          SizedBox(height: 50,),
+                          Text("${sortedsumMap}")
+                        ],
+                      ),
+                    )),
 
 
 

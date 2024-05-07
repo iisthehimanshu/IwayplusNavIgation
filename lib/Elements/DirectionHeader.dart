@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -74,8 +78,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("direction header:: ${turnPoints}");
-      turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      turnPoints.add(widget.user.path[widget.user.path.length-2]);
+      print(widget.user.path.length);
+      (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         print("Pathposition");
@@ -95,7 +99,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
-      if(widget.user.pathobj.index<=widget.user.path.length-1){
+      if(widget.user.pathobj.index<widget.user.path.length-1){
         angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       }
 
@@ -199,7 +203,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.0){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
+            print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);
@@ -229,6 +234,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 3");
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
+                widget.reroute;
                 return false;//away from path
               }else{
                 print("workingg 4");
@@ -262,6 +268,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print(nearestBeacon);
         _timer.cancel();
         widget.repaint(nearestBeacon);
+        widget.reroute;
         return false;
       }
     }
@@ -309,10 +316,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
+    print("direction header pointss");
 
-
-
+    print(widget.user.path[widget.user.pathobj.index]);
+    print(turnPoints.last);
     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+
       speak("You have reached ${widget.user.pathobj.destinationName}");
       widget.closeNavigation();
     }else{
@@ -331,7 +340,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(widget.user, widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       widget.direction = tools.angleToClocks(angle);
       if(widget.direction == "Straight"){
         widget.direction = "Go Straight";

@@ -479,21 +479,21 @@ class _NavigationState extends State<Navigation> {
                   bool moveOneMore = true;
                   // bool moveOneLift = true;
                   // bool moveOneDesti=false;
-                  // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
-                  // liftLoc.forEach((key, value) {
-                  //   if (user.Bid == key) {
-                  //     Map<int, int> liftCoords = value;
-                  //     liftCoords.forEach((key, value) {
-                  //       if (user.floor == key) {
-                  //         if (user.path[user.pathobj.index] == value) {
-                  //           setState(() {
-                  //             moveOneLift = false;
-                  //           });
-                  //         }
-                  //       }
-                  //     });
-                  //   }
-                  // });
+                  Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
+                  liftLoc.forEach((key, value) {
+                    if (user.Bid == key) {
+                      Map<int, int> liftCoords = value;
+                      liftCoords.forEach((key, value) {
+                        if (user.floor == key) {
+                          if (user.path[user.pathobj.index] == value) {
+                            setState(() {
+                              moveOneMore = false;
+                            });
+                          }
+                        }
+                      });
+                    }
+                  });
 
                   for (int j = 0; j < getPoints.length; j++) {
                     print("turn point ${getPoints[j][0]},${getPoints[j][1]}");

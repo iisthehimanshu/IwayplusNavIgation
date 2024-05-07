@@ -316,6 +316,8 @@ class _NavigationState extends State<Navigation> {
         }
       } else if (manufacturer.toLowerCase().contains("oneplus")) {
         print("manufacture $manufacturer $step_threshold");
+        peakThreshold = 11.111111;
+        valleyThreshold = -11.111111;
         // step_threshold = 0.7;
       } else if (manufacturer.toLowerCase().contains("realme")) {
         print("manufacture $manufacturer $step_threshold");
@@ -327,6 +329,9 @@ class _NavigationState extends State<Navigation> {
         valleyThreshold = -11.3;
       } else if (manufacturer.toLowerCase().contains("google")) {
         print("manufacture $manufacturer $step_threshold");
+        peakThreshold = 11.111111;
+        valleyThreshold = -11.111111;
+      }else{
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }

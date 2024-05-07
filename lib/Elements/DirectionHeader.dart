@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -73,8 +74,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("direction header:: ${turnPoints}");
-      turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      turnPoints.add(widget.user.path[widget.user.path.length-2]);
+      print(widget.user.path.length);
+      (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
 
@@ -92,7 +93,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
-      if(widget.user.pathobj.index<=widget.user.path.length-1){
+      if(widget.user.pathobj.index<widget.user.path.length-1){
         angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       }
 
@@ -310,10 +311,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
+    print("direction header pointss");
 
-
-
+    print(widget.user.path[widget.user.pathobj.index]);
+    print(turnPoints.last);
     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+
       speak("You have reached ${widget.user.pathobj.destinationName}");
       widget.closeNavigation();
     }else{

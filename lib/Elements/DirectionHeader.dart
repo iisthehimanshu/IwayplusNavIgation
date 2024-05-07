@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -78,13 +82,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-
+        print("Pathposition");
+      print(widget.user.path);
 
         // print("listen to bin :${listenToBin()}");
 
         // HelperClass.showToast("Bin cleared");
-
-      listenToBin();
+        if(widget.user.pathobj.index>3) {
+          listenToBin();
+        }
 
 
 
@@ -127,12 +133,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return widget.getSemanticValue;
   }
 
-  Map<String, double> sortMapByValue(Map<String, double> map) {
-    var sortedEntries = map.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
-    return Map.fromEntries(sortedEntries);
-  }
   String debugNearestbeacon="";
   Map<String, double> sortedsumMap={};
 
@@ -141,9 +142,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
 
-    sortedsumMap = sortMapByValue(sumMap);
+    sortedsumMap = HelperClass().sortMapByValue(sumMap);
     setState(() {
-      ShowsumMap = sortMapByValue(sortedsumMap);
+      ShowsumMap = HelperClass().sortMapByValue(sortedsumMap);
     });
     nearestBeacon = sortedsumMap.entries.first.key;
     highestweight = sortedsumMap.entries.first.value;
@@ -442,110 +443,97 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     return Semantics(
       excludeSemantics: true,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-        height: 95,
-        padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Color(0xff01544F),
-          border: Border.all(
-            color: Color(0xff01544F),
-            width: 1.0,
-          ),
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+            height: 95,
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Color(0xff01544F),
+              border: Border.all(
+                color: Color(0xff01544F),
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(
-                      "${widget.direction}",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w700,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${widget.direction}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w700,
 
-                      ),
+                          ),
+                        ),
+                        SizedBox(height: 4.0),
+                        Text(
+
+                          '${(widget.distance/2).toInt()} steps',
+                          style: TextStyle(
+
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+
+                          ),
+                        ),
+
+                      ],
                     ),
-                    SizedBox(height: 4.0),
-                    Text(
 
-                      '${(widget.distance/2).toInt()} steps',
-                      style: TextStyle(
+                    Spacer(),
+                    // Text("$c"),
+                    // Text("$d",style: TextStyle(
+                    //   color: Colors.red
+                    // ),),
+                    // ElevatedButton(onPressed: (){
+                    //   _timer.cancel();
+                    //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+                    //   c++;
+                    //   listenToBin();
+                    //
+                    // });}, child: Icon(Icons.start))
 
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w400,
 
-                      ),
-                    ),
+
 
                   ],
                 ),
 
-                Spacer(),
-                // Text("$c"),
-                // Text("$d",style: TextStyle(
-                //   color: Colors.red
-                // ),),
-                // ElevatedButton(onPressed: (){
-                //   _timer.cancel();
-                //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
-                //   c++;
-                //   listenToBin();
-                //
-                // });}, child: Icon(Icons.start))
-
-                Container(
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(28.0),
-                    ),
-
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          getCustomIcon(widget.direction),
-                          SizedBox(height: 50,),
-                          Text("${sortedsumMap}")
-                        ],
-                      ),
-                    )),
-
-
-
               ],
             ),
-            // SizedBox(
-            //   height: 100,
-            // ),
-            // Container(
-            //   width: 300,
-            //   height: 100,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       children: [
-            //         Text(ShowsumMap.values.toString()),
-            //         Text("summap"),
-            //         Text(debugNearestbeacon.toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-          ],
-        ),
+          ),
+          SizedBox(
+            height: 100,
+          ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                  Text(ShowsumMap.values.toString()),
+                  Text(debugNearestbeacon.toString()),
+                  Text("current idx"+widget.user.pathobj.index.toString()),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

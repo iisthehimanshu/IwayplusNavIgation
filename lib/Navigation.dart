@@ -96,6 +96,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Navigation extends StatefulWidget {
+
   String directLandID = "";
 
   Navigation({this.directLandID = ''});

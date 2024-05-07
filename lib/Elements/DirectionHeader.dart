@@ -201,7 +201,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.0){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
+            print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
             double d = tools.calculateDistance(beaconcoord, usercoord);
@@ -231,6 +232,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 3");
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
+                widget.reroute;
                 return false;//away from path
               }else{
                 print("workingg 4");
@@ -264,6 +266,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print(nearestBeacon);
         _timer.cancel();
         widget.repaint(nearestBeacon);
+        widget.reroute;
         return false;
       }
     }
@@ -333,7 +336,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-      double angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(widget.user, widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       widget.direction = tools.angleToClocks(angle);
       if(widget.direction == "Straight"){
         widget.direction = "Go Straight";

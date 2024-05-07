@@ -4636,6 +4636,11 @@ class _NavigationState extends State<Navigation> {
                             onPressed: () async {
                               print("pannel----- coord ${user.coordX},${user.coordY}");
                               print("pannel----- show ${user.showcoordX},${user.showcoordY}");
+                              Map<String, double> sumMap = HelperClass().sortMapByValue(btadapter.calculateAverage());
+                              print("Reroute new Beacon");
+                              print(sumMap.keys.first);
+
+
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               user.showcoordX = user.coordX;

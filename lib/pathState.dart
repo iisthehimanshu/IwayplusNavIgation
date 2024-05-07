@@ -15,6 +15,7 @@ class pathState {
   Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];
   List<Cell> singleCellListPath = [];
+  List<Cell> CellTurnPoints = [];
   List<Map<String, int>> directions = [];
   Map<String,Map<int,int>>? numCols = Map();
   int index = 0;

@@ -436,15 +436,16 @@ class tools {
     return angleInDegrees;
   }
 
-  static double calculateAngleBWUserandCellPath(UserState user, Cell node , int cols) {
-    List<int> a = [user.showcoordX, user.showcoordY];
-    List<int> tval = node.move(user.theta);
-    List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
+  static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
+    List<int> a = [user.x, user.y];
+    List<int> tval = user.move(theta);
+    List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    print("AA $a");
+    print("BB $b");
+    print("CC $c");
+    print("DD ${node.move.toString()}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -870,6 +871,8 @@ class tools {
         }else if(prevDeltaY==0 && nextDeltaY==0){
 
         }else{
+
+
           res.add(currPos);
         }
 

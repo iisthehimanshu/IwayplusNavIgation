@@ -28,17 +28,14 @@ class Polyline {
   String? createdAt;
   String? updatedAt;
   int? iV;
-  Map<String, PolyArray>? polylineMap; // New property
 
-  Polyline({
-    this.sId,
-    this.buildingID,
-    this.floors,
-    this.createdAt,
-    this.updatedAt,
-    this.iV,
-    this.polylineMap,
-  });
+  Polyline(
+      {this.sId,
+        this.buildingID,
+        this.floors,
+        this.createdAt,
+        this.updatedAt,
+        this.iV});
 
   Polyline.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
@@ -46,14 +43,7 @@ class Polyline {
     if (json['floors'] != null) {
       floors = <Floors>[];
       json['floors'].forEach((v) {
-        Floors floor = Floors.fromJson(v);
-        floors!.add(floor);
-
-        // Combine polylineMap from each floor into the parent polylineMap
-        if (floor.polylineMap != null) {
-          polylineMap ??= {};
-          polylineMap!.addAll(floor.polylineMap!);
-        }
+        floors!.add(new Floors.fromJson(v));
       });
     }
     createdAt = json['createdAt'];
@@ -71,34 +61,23 @@ class Polyline {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
-    data['polylineMap'] = this.polylineMap?.map((key, value) => MapEntry(key, value.toJson()));
     return data;
-  }
-  void mergePolyline(List<Floors>? floorsList) {
-    if (floorsList != null) {
-      floors ??= [];
-      floors!.addAll(floorsList);
-    }
   }
 }
 
 class Floors {
   String? floor;
   List<PolyArray>? polyArray;
-  Map<String,PolyArray>? polylineMap;
   String? sId;
 
-  Floors({this.floor, this.polyArray, this.sId, this.polylineMap});
+  Floors({this.floor, this.polyArray, this.sId});
 
   Floors.fromJson(Map<dynamic, dynamic> json) {
     floor = json['floor'];
-    polylineMap = {};
     if (json['poly_array'] != null) {
       polyArray = <PolyArray>[];
       json['poly_array'].forEach((v) {
-        PolyArray _PolyArray = PolyArray.fromJson(v);
-        polyArray!.add(_PolyArray);
-        polylineMap![_PolyArray.id!] = _PolyArray;
+        polyArray!.add(new PolyArray.fromJson(v));
       });
     }
     sId = json['_id'];
@@ -116,6 +95,8 @@ class Floors {
 }
 
 class PolyArray {
+  String? walkableType;
+  String? visibilityType;
   String? contact;
   String? cubicleContact;
   String? cubicleName;
@@ -124,12 +105,17 @@ class PolyArray {
   String? id;
   String? name;
   List<Nodes>? nodes;
+  List<double>? centroid;
   String? polygonType;
   String? wallNature;
+  String? cubicleHeight;
+  String? cubicleColor;
   String? sId;
 
   PolyArray(
-      {this.contact,
+      {this.walkableType,
+        this.visibilityType,
+        this.contact,
         this.cubicleContact,
         this.cubicleName,
         this.floor,
@@ -137,11 +123,16 @@ class PolyArray {
         this.id,
         this.name,
         this.nodes,
+        this.centroid,
         this.polygonType,
         this.wallNature,
+        this.cubicleHeight,
+        this.cubicleColor,
         this.sId});
 
   PolyArray.fromJson(Map<dynamic, dynamic> json) {
+    walkableType = json['walkableType'];
+    visibilityType = json['visibilityType'];
     contact = json['contact'];
     cubicleContact = json['cubicleContact'];
     cubicleName = json['cubicleName'];
@@ -155,13 +146,18 @@ class PolyArray {
         nodes!.add(new Nodes.fromJson(v));
       });
     }
+    centroid = json['centroid'].cast<double>();
     polygonType = json['polygonType'];
     wallNature = json['wallNature'];
+    cubicleHeight = json['cubicleHeight'];
+    cubicleColor = json['cubicleColor'];
     sId = json['_id'];
   }
 
   Map<dynamic, dynamic> toJson() {
     final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+    data['walkableType'] = this.walkableType;
+    data['visibilityType'] = this.visibilityType;
     data['contact'] = this.contact;
     data['cubicleContact'] = this.cubicleContact;
     data['cubicleName'] = this.cubicleName;
@@ -172,8 +168,11 @@ class PolyArray {
     if (this.nodes != null) {
       data['nodes'] = this.nodes!.map((v) => v.toJson()).toList();
     }
+    data['centroid'] = this.centroid;
     data['polygonType'] = this.polygonType;
     data['wallNature'] = this.wallNature;
+    data['cubicleHeight'] = this.cubicleHeight;
+    data['cubicleColor'] = this.cubicleColor;
     data['_id'] = this.sId;
     return data;
   }

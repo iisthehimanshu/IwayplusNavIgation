@@ -507,6 +507,7 @@ class _NavigationState extends State<Navigation> {
                       break;
                     }
                   }
+
                   print("destii cooords");
 
                   if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
@@ -515,6 +516,7 @@ class _NavigationState extends State<Navigation> {
                       moveOneMore=false;
                     });
                   }
+
 
                   if (moveOneMore) {
 
@@ -537,7 +539,7 @@ class _NavigationState extends State<Navigation> {
                       });
                     });
                   }else {
-                    print("one movement");
+
                     print("rendering here");
                     setState(() {
                       if (markers.length > 0) {
@@ -987,21 +989,22 @@ class _NavigationState extends State<Navigation> {
             String matched = match.group(0)!;
             allIntegers.add(int.parse(matched));
           }
-          Map<int, List<int>> currrentnonWalkable =
-              building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+          Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
           currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
-          building.nonWalkable[value.landmarks![i].buildingID!] =
-              currrentnonWalkable;
 
-          Map<int, List<int>> currentfloorDimenssion =
-              building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
-                  Map();
+          building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+          localizedData.nonWalkable = currrentnonWalkable;
+
+
+          Map<int, List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
           currentfloorDimenssion[value.landmarks![i].floor!] = [
             value.landmarks![i].properties!.floorLength!,
             value.landmarks![i].properties!.floorBreadth!
           ];
-          building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-          currentfloorDimenssion!;
+
+          building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
+          localizedData.currentfloorDimenssion = currentfloorDimenssion;
+
 
           print("fetch route--  ${building.floorDimenssion}");
 
@@ -4327,6 +4330,7 @@ class _NavigationState extends State<Navigation> {
 
             Future.delayed(Duration(milliseconds: 1500)).then((value) => {
 
+
               StartPDR()
             });
 
@@ -4335,6 +4339,7 @@ class _NavigationState extends State<Navigation> {
               isPdrStop = false;
             }
             );
+
 
             break;
           }
@@ -4654,6 +4659,13 @@ class _NavigationState extends State<Navigation> {
                             onPressed: () async {
                               print("pannel----- coord ${user.coordX},${user.coordY}");
                               print("pannel----- show ${user.showcoordX},${user.showcoordY}");
+
+                              Map<String, double> sumMap = HelperClass().sortMapByValue(btadapter.calculateAverage());
+                              print("Reroute new Beacon");
+                              print(sumMap.keys.first);
+
+
+
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               user.showcoordX = user.coordX;
@@ -4925,10 +4937,12 @@ class _NavigationState extends State<Navigation> {
                                       height: 27 / 18,
                                     ),
                                     textAlign: TextAlign.left,
+
                                   ),
                                   SizedBox(
                                     height: 4,
                                   ),
+
                                   element.workingDays != null &&
                                       element.workingDays!.length > 0
                                       ? Row(
@@ -6183,7 +6197,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void closeNavigation() {
-    StopPDR();
     _isnavigationPannelOpen = false;
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
@@ -6194,8 +6207,7 @@ class _NavigationState extends State<Navigation> {
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    user.isnavigating=false;
-
+    StopPDR();
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
@@ -6532,7 +6544,9 @@ class _NavigationState extends State<Navigation> {
 
 
                     SizedBox(height: 28.0),
-                    Text("${user.theta}"),
+
+                    // Text("${user.theta}"),
+
                     // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
                     //
                     //   double? compassHeading = newvalue;
@@ -6628,6 +6642,7 @@ class _NavigationState extends State<Navigation> {
                           createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                           if (pathMarkers[user.floor] != null) {
                             setCameraPosition(pathMarkers[user.floor]!);
+
                           }
                           building.landmarkdata!.then((value) {
                             createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
@@ -6637,6 +6652,7 @@ class _NavigationState extends State<Navigation> {
                           if (user.initialallyLocalised) {
                             mapState.interaction = !mapState.interaction;
                           }
+
                           mapState.zoom = 21;
                           fitPolygonInScreen(patch.first);
 
@@ -6763,6 +6779,7 @@ class _NavigationState extends State<Navigation> {
             //     },
             //     child: Icon(Icons.add)
             // ),
+
             // FloatingActionButton(
             //   onPressed: () async {
             //
@@ -6812,6 +6829,7 @@ class _NavigationState extends State<Navigation> {
             //   backgroundColor: Colors
             //       .white, // Set the background color of the FAB
             // ),
+
           ],
         ),
 

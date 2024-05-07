@@ -25,12 +25,6 @@ class UserState{
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
 
-  static int BeaconCoordX = 0;
-  static int BeaconCoordY = 0;
-  static String beaconBid = "";
-  static int beaconFloor=0;
-
-
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
   // Future<void> move()async {

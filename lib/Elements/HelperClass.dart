@@ -20,4 +20,10 @@ class HelperClass{
       fontSize: 16.0,
     );
   }
+  Map<String, double> sortMapByValue(Map<String, double> map) {
+    var sortedEntries = map.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+
+    return Map.fromEntries(sortedEntries);
+  }
 }

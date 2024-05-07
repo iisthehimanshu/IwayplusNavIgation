@@ -6695,21 +6695,21 @@ class _NavigationState extends State<Navigation> {
                     ),
                     SizedBox(
                         height: 28.0), // Adjust the height as needed
-                    // Container(
-                    //   width: 300,
-                    //   height: 100,
-                    //   child: SingleChildScrollView(
-                    //     scrollDirection: Axis.horizontal,
-                    //     child: Column(
-                    //       children: [
-                    //         Text(testBIn.keys.toString()),
-                    //         Text(testBIn.values.toString()),
-                    //         Text("summap"),
-                    //         Text(sortedsumMapfordebug.toString()),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                    Container(
+                      width: 300,
+                      height: 100,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Column(
+                          children: [
+                            Text(testBIn.keys.toString()),
+                            Text(testBIn.values.toString()),
+                            Text("summap"),
+                            Text(sortedsumMapfordebug.toString()),
+                          ],
+                        ),
+                      ),
+                    ),
                     Semantics(
                       child: FloatingActionButton(
                         onPressed: () async {

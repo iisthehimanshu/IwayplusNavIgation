@@ -32,8 +32,8 @@ class DirectionHeader extends StatefulWidget {
 
   DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
-      double angle = tools.calculateAngleBWUserandPath(
-          user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(
+          user, user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!);
       direction = tools.angleToClocks(angle);
       if(direction == "Straight"){
         direction = "Go Straight";

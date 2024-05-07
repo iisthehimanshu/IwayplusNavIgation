@@ -13,6 +13,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';

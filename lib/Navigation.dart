@@ -187,6 +187,7 @@ class _NavigationState extends State<Navigation> {
     apiCalls();
     handleCompassEvents();
 
+
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -495,9 +496,57 @@ class _NavigationState extends State<Navigation> {
                         moveOneMore = false;
                       });
 
-                      break;
+
+
+                  print("moving one more");
+                  bool isvalid = MotionModel.isValidStep(
+                      user,
+                      building.floorDimenssion[user.Bid]![user.floor]![0],
+                      building.floorDimenssion[user.Bid]![user.floor]![1],
+                      building.nonWalkable[user.Bid]![user.floor]!,
+                      reroute);
+                  if(isvalid){
+
+                    bool moveOneMore = true;
+                    // bool moveOneLift = true;
+                    // bool moveOneDesti=false;
+                    // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
+                    // liftLoc.forEach((key, value) {
+                    //   if (user.Bid == key) {
+                    //     Map<int, int> liftCoords = value;
+                    //     liftCoords.forEach((key, value) {
+                    //       if (user.floor == key) {
+                    //         if (user.path[user.pathobj.index] == value) {
+                    //           setState(() {
+                    //             moveOneLift = false;
+                    //           });
+                    //         }
+                    //       }
+                    //     });
+                    //   }
+                    // });
+
+                    for (int j = 0; j < getPoints.length; j++) {
+                      print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
+                      print("user point ${user.showcoordX},${user.showcoordY}");
+                      if (getPoints[j][0] == user.showcoordX &&
+                          getPoints[j][1] == user.showcoordY) {
+                        print("turned it false");
+                        setState(() {
+                          moveOneMore = false;
+                        });
+
+                        break;
+                      }
                     }
-                  }
+                    print("destii cooords");
+
+                    if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
+                      print("destiiii cordsss matchess");
+                      setState(() {
+                        moveOneMore=false;
+                      });
+                    }
 
                   if (moveOneMore) {
                     print("twice movement");
@@ -517,22 +566,25 @@ class _NavigationState extends State<Navigation> {
                               markers[user.Bid]![1]);
                         }
                       });
-                    });
-                  }
-                } else {
-                  print("rendering here");
-                  setState(() {
-                    if (markers.length > 0) {
-                      List<double> lvalue = tools.localtoglobal(
-                          user.showcoordX.toInt(), user.showcoordY.toInt());
-                      markers[user.Bid]?[0] = customMarker.move(
-                          LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
-                      List<double> ldvalue = tools.localtoglobal(
-                          user.coordX.toInt(), user.coordY.toInt());
-                      markers[user.Bid]?[1] = customMarker.move(
-                          LatLng(ldvalue[0], ldvalue[1]),
-                          markers[user.Bid]![1]);
+                     });
+                  }else {
+                      print("one movement");
+                      print("rendering here");
+                      setState(() {
+                        if (markers.length > 0) {
+                          List<double> lvalue = tools.localtoglobal(
+                              user.showcoordX.toInt(), user.showcoordY.toInt());
+                          markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+
+                          List<double> ldvalue = tools.localtoglobal(
+                              user.coordX.toInt(), user.coordY.toInt());
+                          markers[user.Bid]?[1] = customMarker.move(
+                              LatLng(ldvalue[0], ldvalue[1]),
+                              markers[user.Bid]![1]);
+                        }
+                      });
+
                     }
                   });
                 }
@@ -4392,14 +4444,25 @@ class _NavigationState extends State<Navigation> {
 
           print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            print("points unmatchedddd");
-            setState(() {
-              isPdrStop = false;
+
+             print("points unmatchedddd");
+
+
+            Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+
+            StartPDR()
+
             });
             StartPDR();
             // Future.delayed(Duration(milliseconds: 1500)).then((value) => {
             //
             // });
+
+
+             setState(() {
+               isPdrStop = false;
+             }
+             );
 
             break;
           }
@@ -6254,6 +6317,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   void closeNavigation() {
+    StopPDR();
     _isnavigationPannelOpen = false;
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
@@ -6264,7 +6328,8 @@ class _NavigationState extends State<Navigation> {
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    StopPDR();
+    user.isnavigating=false;
+
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
@@ -6605,8 +6670,10 @@ class _NavigationState extends State<Navigation> {
                               //           }, icon: Icon(Icons.directions_walk))),
                               // ),
 
+
                               SizedBox(height: 28.0),
                               // Text("${user.theta}"),
+
                               // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
                               //
                               //   double? compassHeading = newvalue;

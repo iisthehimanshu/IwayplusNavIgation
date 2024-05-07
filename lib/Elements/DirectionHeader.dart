@@ -80,21 +80,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("direction header:: ${turnPoints}");
       print(widget.user.path.length);
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      btadapter.startScanning(Building.apibeaconmap);
-      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        print("Pathposition");
-      print(widget.user.path);
-
-        // print("listen to bin :${listenToBin()}");
-
-        // HelperClass.showToast("Bin cleared");
-        if(widget.user.pathobj.index>3) {
-          listenToBin();
-        }
-
-
-
-      });
+      // btadapter.startScanning(Building.apibeaconmap);
+      // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+      //   print("Pathposition");
+      // print(widget.user.path);
+      //
+      //   // print("listen to bin :${listenToBin()}");
+      //
+      //   // HelperClass.showToast("Bin cleared");
+      //   if(widget.user.pathobj.index>3) {
+      //     listenToBin();
+      //   }
+      //
+      //
+      //
+      // });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -113,8 +113,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
          
-          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
-          widget.getSemanticValue="${widget.direction} ${(widget.distance/2).toInt()} steps";
+          speak("${widget.direction} ${(widget.distance/2).ceil()} steps");
+          widget.getSemanticValue="${widget.direction} ${(widget.distance/2).ceil()} steps";
         }
       });
 
@@ -348,9 +348,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = "Turn ${widget.direction}, and Go Straight";
       }
 
-      if(nextTurn == turnPoints.last && widget.distance == 5){
+      if(nextTurn == turnPoints.last && widget.distance == 7){
         double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
+      }else if(nextTurn != turnPoints.last && widget.distance == 10){
+        speak("Approaching turn");
       }
 
       if(oldWidget.direction != widget.direction){
@@ -366,7 +368,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
+          speak("${widget.direction} ${(widget.distance/2).ceil()} steps");
 
         }else if(widget.direction == "Go Straight"){
 
@@ -374,7 +376,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           //Vibration.vibrate();
 
-          speak("Go Straight ${(widget.distance/2).toInt()} steps");
+          speak("Go Straight ${(widget.distance/2).ceil()} steps");
         }
       }
     }
@@ -478,7 +480,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                         SizedBox(height: 4.0),
                         Text(
 
-                          '${(widget.distance/2).toInt()} steps',
+                          '${(widget.distance/2).ceil()} steps',
                           style: TextStyle(
 
                             color: Colors.white,

@@ -438,7 +438,7 @@ class tools {
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
-    List<int> tval = node.move(theta);
+    List<int> tval = user.move(theta);
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 

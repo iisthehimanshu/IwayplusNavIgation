@@ -433,7 +433,6 @@ class _NavigationState extends State<Navigation> {
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    print(peakThreshold);
     pdr.add(accelerometerEventStream().listen((AccelerometerEvent event) {
       if (pdr == null) {
         return; // Exit the event listener if subscription is canceled
@@ -4790,12 +4789,8 @@ class _NavigationState extends State<Navigation> {
                           ),
                           child: TextButton(
                             onPressed: () async {
-                              print("pannel----- coord ${user.coordX},${user.coordY}");
-                              print("pannel----- show ${user.showcoordX},${user.showcoordY}");
 
-                              Map<String, double> sumMap = HelperClass().sortMapByValue(btadapter.calculateAverage());
-                              print("Reroute new Beacon");
-                              print(sumMap.keys.first);
+
 
 
 
@@ -4813,7 +4808,6 @@ class _NavigationState extends State<Navigation> {
                                   user.path = PathState.path.values
                                       .expand((list) => list)
                                       .toList();
-                                  print("singlecellpath ${PathState.singleCellListPath}");
                                   user.Cellpath = PathState.singleCellListPath;
                                   user.pathobj.index = 0;
                                   user.isnavigating = true;
@@ -4851,6 +4845,33 @@ class _NavigationState extends State<Navigation> {
                                   if (angle != 0) {
                                     speak("Turn " + tools.angleToClocks(angle));
                                   } else {}
+
+                                  mapState.tilt = 50;
+
+
+                                  mapState.bearing =
+                                      tools.calculateBearing([
+                                        user.lat,
+                                        user.lng
+                                      ], [
+                                        PathState
+                                            .singleCellListPath[
+                                        user.pathobj.index + 1]
+                                            .lat,
+                                        PathState
+                                            .singleCellListPath[
+                                        user.pathobj.index + 1]
+                                            .lng
+                                      ]);
+                                  _googleMapController
+                                      .animateCamera(CameraUpdate
+                                      .newCameraPosition(
+                                    CameraPosition(
+                                        target: mapState.target,
+                                        zoom: mapState.zoom,
+                                        bearing: mapState.bearing!,
+                                        tilt: mapState.tilt),
+                                  ));
                                 });
                               });
                             },

@@ -42,7 +42,6 @@ import 'package:iwayplusnav/Elements/directionInstruction.dart';
 import 'package:iwayplusnav/PolylineTestClass.dart';
 import 'package:iwayplusnav/UserState.dart';
 import 'package:iwayplusnav/buildingState.dart';
-import 'package:iwayplusnav/localizedData.dart';
 import 'package:iwayplusnav/navigationTools.dart';
 import 'package:iwayplusnav/path.dart';
 import 'package:iwayplusnav/pathState.dart';
@@ -317,6 +316,8 @@ class _NavigationState extends State<Navigation> {
         }
       } else if (manufacturer.toLowerCase().contains("oneplus")) {
         print("manufacture $manufacturer $step_threshold");
+        peakThreshold = 11.111111;
+        valleyThreshold = -11.111111;
         // step_threshold = 0.7;
       } else if (manufacturer.toLowerCase().contains("realme")) {
         print("manufacture $manufacturer $step_threshold");
@@ -328,6 +329,9 @@ class _NavigationState extends State<Navigation> {
         valleyThreshold = -11.3;
       } else if (manufacturer.toLowerCase().contains("google")) {
         print("manufacture $manufacturer $step_threshold");
+        peakThreshold = 11.111111;
+        valleyThreshold = -11.111111;
+      }else{
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }
@@ -472,7 +476,8 @@ class _NavigationState extends State<Navigation> {
                 if(isvalid){
 
                   bool moveOneMore = true;
-                  bool moveOneLift = true;
+                  // bool moveOneLift = true;
+                  // bool moveOneDesti=false;
                   // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
                   // liftLoc.forEach((key, value) {
                   //   if (user.Bid == key) {
@@ -503,6 +508,16 @@ class _NavigationState extends State<Navigation> {
                     }
                   }
 
+                  print("destii cooords");
+
+                  if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
+                    print("destiiii cordsss matchess");
+                    setState(() {
+                      moveOneMore=false;
+                    });
+                  }
+
+
                   if (moveOneMore) {
 
                     print("twice movement");
@@ -524,6 +539,7 @@ class _NavigationState extends State<Navigation> {
                       });
                     });
                   }else {
+
                     print("rendering here");
                     setState(() {
                       if (markers.length > 0) {
@@ -647,6 +663,7 @@ class _NavigationState extends State<Navigation> {
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateY!);
       print("check beacon ${apibeaconmap[nearestBeacon]!.coordinateX} ${apibeaconmap[nearestBeacon]!.coordinateY}");
 
+
       pathState().beaconCords = localBeconCord;
 
       List<double> values = [];
@@ -687,8 +704,6 @@ class _NavigationState extends State<Navigation> {
 
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
-      localizedData.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      localizedData.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       List<int> userCords = [];
@@ -705,7 +720,6 @@ class _NavigationState extends State<Navigation> {
       user.lng =
           double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
       user.floor = apibeaconmap[nearestBeacon]!.floor!;
-      localizedData.floor = apibeaconmap[nearestBeacon]!.floor!;
       user.key = apibeaconmap[nearestBeacon]!.sId!;
       user.initialallyLocalised = true;
       setState(() {
@@ -977,16 +991,20 @@ class _NavigationState extends State<Navigation> {
           }
           Map<int, List<int>> currrentnonWalkable = building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
           currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+
           building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
           localizedData.nonWalkable = currrentnonWalkable;
+
 
           Map<int, List<int>> currentfloorDimenssion = building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? Map();
           currentfloorDimenssion[value.landmarks![i].floor!] = [
             value.landmarks![i].properties!.floorLength!,
             value.landmarks![i].properties!.floorBreadth!
           ];
+
           building.floorDimenssion[buildingAllApi.selectedBuildingID] = currentfloorDimenssion!;
           localizedData.currentfloorDimenssion = currentfloorDimenssion;
+
 
           print("fetch route--  ${building.floorDimenssion}");
 
@@ -4311,12 +4329,17 @@ class _NavigationState extends State<Navigation> {
 
 
             Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-              setState(() {
-                isPdrStop = false;
-              }
-              ),
+
+
               StartPDR()
             });
+
+
+            setState(() {
+              isPdrStop = false;
+            }
+            );
+
 
             break;
           }
@@ -4636,9 +4659,11 @@ class _NavigationState extends State<Navigation> {
                             onPressed: () async {
                               print("pannel----- coord ${user.coordX},${user.coordY}");
                               print("pannel----- show ${user.showcoordX},${user.showcoordY}");
+
                               Map<String, double> sumMap = HelperClass().sortMapByValue(btadapter.calculateAverage());
                               print("Reroute new Beacon");
                               print(sumMap.keys.first);
+
 
 
                               PathState.sourceX = user.coordX;
@@ -4912,10 +4937,12 @@ class _NavigationState extends State<Navigation> {
                                       height: 27 / 18,
                                     ),
                                     textAlign: TextAlign.left,
+
                                   ),
                                   SizedBox(
                                     height: 4,
                                   ),
+
                                   element.workingDays != null &&
                                       element.workingDays!.length > 0
                                       ? Row(
@@ -6517,7 +6544,9 @@ class _NavigationState extends State<Navigation> {
 
 
                     SizedBox(height: 28.0),
+
                     // Text("${user.theta}"),
+
                     // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
                     //
                     //   double? compassHeading = newvalue;
@@ -6613,6 +6642,7 @@ class _NavigationState extends State<Navigation> {
                           createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
                           if (pathMarkers[user.floor] != null) {
                             setCameraPosition(pathMarkers[user.floor]!);
+
                           }
                           building.landmarkdata!.then((value) {
                             createMarkers(value, building.floor[buildingAllApi.getStoredString()]!);
@@ -6622,6 +6652,7 @@ class _NavigationState extends State<Navigation> {
                           if (user.initialallyLocalised) {
                             mapState.interaction = !mapState.interaction;
                           }
+
                           mapState.zoom = 21;
                           fitPolygonInScreen(patch.first);
 
@@ -6748,54 +6779,57 @@ class _NavigationState extends State<Navigation> {
             //     },
             //     child: Icon(Icons.add)
             // ),
-            FloatingActionButton(
-              onPressed: () async {
 
-                //StopPDR();
+            // FloatingActionButton(
+            //   onPressed: () async {
+            //
+            //     //StopPDR();
+            //
+            //     if (user.initialallyLocalised) {
+            //       setState(() {
+            //         isLiveLocalizing = !isLiveLocalizing;
+            //       });
+            //       HelperClass.showToast("realTimeReLocalizeUser started");
+            //
+            //       Timer.periodic(
+            //           Duration(milliseconds: 5000),
+            //               (timer) async {
+            //             print(resBeacons);
+            //             btadapter.startScanning(resBeacons);
+            //
+            //
+            //             // setState(() {
+            //             //   sumMap=  btadapter.calculateAverage();
+            //             // });
+            //
+            //
+            //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+            //               realTimeReLocalizeUser(resBeacons)
+            //               // listenToBin()
+            //
+            //
+            //             });
+            //
+            //             setState(() {
+            //               debugPQ = btadapter.returnPQ();
+            //
+            //             });
+            //
+            //           });
+            //
+            //     }
+            //
+            //   },
+            //   child: Icon(
+            //     Icons.location_history_sharp,
+            //     color: (isLiveLocalizing)
+            //         ? Colors.cyan
+            //         : Colors.black,
+            //   ),
+            //   backgroundColor: Colors
+            //       .white, // Set the background color of the FAB
+            // ),
 
-                if (user.initialallyLocalised) {
-                  setState(() {
-                    isLiveLocalizing = !isLiveLocalizing;
-                  });
-                  HelperClass.showToast("realTimeReLocalizeUser started");
-
-                  Timer.periodic(
-                      Duration(milliseconds: 5000),
-                          (timer) async {
-                        print(resBeacons);
-                        btadapter.startScanning(resBeacons);
-
-
-                        // setState(() {
-                        //   sumMap=  btadapter.calculateAverage();
-                        // });
-
-
-                        Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-                          realTimeReLocalizeUser(resBeacons)
-                          // listenToBin()
-
-                        });
-
-                        setState(() {
-                          debugPQ = btadapter.returnPQ();
-
-                        });
-
-                      });
-
-                }
-
-              },
-              child: Icon(
-                Icons.location_history_sharp,
-                color: (isLiveLocalizing)
-                    ? Colors.cyan
-                    : Colors.black,
-              ),
-              backgroundColor: Colors
-                  .white, // Set the background color of the FAB
-            ),
           ],
         ),
 

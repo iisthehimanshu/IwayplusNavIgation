@@ -33,7 +33,7 @@ class DirectionHeader extends StatefulWidget {
   DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
-          user, user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!);
+          user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
       direction = tools.angleToClocks(angle);
       if(direction == "Straight"){
         direction = "Go Straight";
@@ -340,7 +340,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-      double angle = tools.calculateAngleBWUserandCellPath(widget.user, widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
       widget.direction = tools.angleToClocks(angle);
       if(widget.direction == "Straight"){
         widget.direction = "Go Straight";

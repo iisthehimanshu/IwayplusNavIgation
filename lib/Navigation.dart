@@ -96,7 +96,6 @@ class MyApp extends StatelessWidget {
 }
 
 class Navigation extends StatefulWidget {
-
   String directLandID = "";
 
   Navigation({this.directLandID = ''});
@@ -188,7 +187,6 @@ class _NavigationState extends State<Navigation> {
     apiCalls();
     handleCompassEvents();
 
-
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
@@ -200,19 +198,19 @@ class _NavigationState extends State<Navigation> {
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-            (UserAccelerometerEvent event) {
-          final now = DateTime.now();
-          // setState(() {
-          //   _userAccelerometerEvent = event;
-          //   if (_userAccelerometerUpdateTime != null) {
-          //     final interval = now.difference(_userAccelerometerUpdateTime!);
-          //     if (interval > _ignoreDuration) {
-          //       _userAccelerometerLastInterval = interval.inMilliseconds;
-          //     }
-          //   }
-          // });
-          _userAccelerometerUpdateTime = now;
-        }, onError: (e) {
+                (UserAccelerometerEvent event) {
+              final now = DateTime.now();
+              // setState(() {
+              //   _userAccelerometerEvent = event;
+              //   if (_userAccelerometerUpdateTime != null) {
+              //     final interval = now.difference(_userAccelerometerUpdateTime!);
+              //     if (interval > _ignoreDuration) {
+              //       _userAccelerometerLastInterval = interval.inMilliseconds;
+              //     }
+              //   }
+              // });
+              _userAccelerometerUpdateTime = now;
+            }, onError: (e) {
           showDialog(
               context: context,
               builder: (context) {
@@ -241,7 +239,7 @@ class _NavigationState extends State<Navigation> {
 
     accelerometerEvents.listen((AccelerometerEvent event) {
       double magnitude =
-          sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       setState(() {
         accelerationMagnitudes.add(magnitude);
       });
@@ -261,8 +259,8 @@ class _NavigationState extends State<Navigation> {
       double mean = accelerationMagnitudes.reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double variance = accelerationMagnitudes
-              .map((x) => (x - mean) * (x - mean))
-              .reduce((a, b) => a + b) /
+          .map((x) => (x - mean) * (x - mean))
+          .reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double standardDeviation = sqrt(variance);
       // Adjust multiplier as needed for sensitivity
@@ -458,7 +456,7 @@ class _NavigationState extends State<Navigation> {
               reroute);
           if (isvalid) {
             if (MotionModel.reached(user,
-                    building.floorDimenssion[user.Bid]![user.floor]![0]) ==
+                building.floorDimenssion[user.Bid]![user.floor]![0]) ==
                 false) {
               user.move().then((value) {
                 print("moving one more");
@@ -497,57 +495,9 @@ class _NavigationState extends State<Navigation> {
                         moveOneMore = false;
                       });
 
-
-
-                  print("moving one more");
-                  bool isvalid = MotionModel.isValidStep(
-                      user,
-                      building.floorDimenssion[user.Bid]![user.floor]![0],
-                      building.floorDimenssion[user.Bid]![user.floor]![1],
-                      building.nonWalkable[user.Bid]![user.floor]!,
-                      reroute);
-                  if(isvalid){
-
-                    bool moveOneMore = true;
-                    // bool moveOneLift = true;
-                    // bool moveOneDesti=false;
-                    // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
-                    // liftLoc.forEach((key, value) {
-                    //   if (user.Bid == key) {
-                    //     Map<int, int> liftCoords = value;
-                    //     liftCoords.forEach((key, value) {
-                    //       if (user.floor == key) {
-                    //         if (user.path[user.pathobj.index] == value) {
-                    //           setState(() {
-                    //             moveOneLift = false;
-                    //           });
-                    //         }
-                    //       }
-                    //     });
-                    //   }
-                    // });
-
-                    for (int j = 0; j < getPoints.length; j++) {
-                      print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
-                      print("user point ${user.showcoordX},${user.showcoordY}");
-                      if (getPoints[j][0] == user.showcoordX &&
-                          getPoints[j][1] == user.showcoordY) {
-                        print("turned it false");
-                        setState(() {
-                          moveOneMore = false;
-                        });
-
-                        break;
-                      }
+                      break;
                     }
-                    print("destii cooords");
-
-                    if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
-                      print("destiiii cordsss matchess");
-                      setState(() {
-                        moveOneMore=false;
-                      });
-                    }
+                  }
 
                   if (moveOneMore) {
                     print("twice movement");
@@ -567,25 +517,22 @@ class _NavigationState extends State<Navigation> {
                               markers[user.Bid]![1]);
                         }
                       });
+                    });
+                  }
+                } else {
+                  print("rendering here");
+                  setState(() {
+                    if (markers.length > 0) {
+                      List<double> lvalue = tools.localtoglobal(
+                          user.showcoordX.toInt(), user.showcoordY.toInt());
+                      markers[user.Bid]?[0] = customMarker.move(
+                          LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
-                     });
-                  }else {
-                      print("one movement");
-                      print("rendering here");
-                      setState(() {
-                        if (markers.length > 0) {
-                          List<double> lvalue = tools.localtoglobal(
-                              user.showcoordX.toInt(), user.showcoordY.toInt());
-                          markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
-
-                          List<double> ldvalue = tools.localtoglobal(
-                              user.coordX.toInt(), user.coordY.toInt());
-                          markers[user.Bid]?[1] = customMarker.move(
-                              LatLng(ldvalue[0], ldvalue[1]),
-                              markers[user.Bid]![1]);
-                        }
-                      });
-
+                      List<double> ldvalue = tools.localtoglobal(
+                          user.coordX.toInt(), user.coordY.toInt());
+                      markers[user.Bid]?[1] = customMarker.move(
+                          LatLng(ldvalue[0], ldvalue[1]),
+                          markers[user.Bid]![1]);
                     }
                   });
                 }
@@ -787,7 +734,7 @@ class _NavigationState extends State<Navigation> {
         }
 
         building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
-            apibeaconmap[nearestBeacon]!.floor!;
+        apibeaconmap[nearestBeacon]!.floor!;
         createRooms(
             building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
         building.landmarkdata!.then((value) {
@@ -795,7 +742,7 @@ class _NavigationState extends State<Navigation> {
         });
       });
       double value =
-          tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      tools.calculateAngleSecond(userCords, newUserCord, landCords);
       String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
       detected = !detected;
@@ -931,7 +878,7 @@ class _NavigationState extends State<Navigation> {
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+        tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
@@ -942,7 +889,7 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+    await Permission.bluetoothScan.request();
     print("permissionStatus    ----   ${permissionStatus}");
     if (permissionStatus.isGranted) {
       print("Bluetooth permission is granted");
@@ -1015,7 +962,7 @@ class _NavigationState extends State<Navigation> {
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+          value.landmarks![i].properties!.nonWalkableGrids!.join(',');
           RegExp regExp = RegExp(r'\d+');
           Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
           for (Match match in matches) {
@@ -1037,7 +984,7 @@ class _NavigationState extends State<Navigation> {
             value.landmarks![i].properties!.floorBreadth!
           ];
           building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-              currentfloorDimenssion!;
+          currentfloorDimenssion!;
           localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
           print("fetch route--  ${building.floorDimenssion}");
@@ -1134,7 +1081,7 @@ class _NavigationState extends State<Navigation> {
             if (value.landmarks![i].element!.type == "Floor") {
               List<int> allIntegers = [];
               String jointnonwalkable =
-                  value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
               RegExp regExp = RegExp(r'\d+');
               Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
               for (Match match in matches) {
@@ -1423,7 +1370,7 @@ class _NavigationState extends State<Navigation> {
               anchor: Offset(0.5, 0.829),
             ));
             building.floor[apibeaconmap[firstValue]!.buildingID!] =
-                apibeaconmap[firstValue]!.floor!;
+            apibeaconmap[firstValue]!.floor!;
             createRooms(
                 building.polyLineData!, apibeaconmap[firstValue]!.floor!);
             building.landmarkdata!.then((value) {
@@ -1436,12 +1383,12 @@ class _NavigationState extends State<Navigation> {
           print(landCords);
 
           double value =
-              tools.calculateAngle(userCords, newUserCord, landCords);
+          tools.calculateAngle(userCords, newUserCord, landCords);
 
           print("value----");
           print(value);
           String finalvalue =
-              tools.angleToClocksForNearestLandmarkToBeacon(value);
+          tools.angleToClocksForNearestLandmarkToBeacon(value);
           print("finalvalue");
           print(finalvalue);
           detected = true;
@@ -1498,12 +1445,12 @@ class _NavigationState extends State<Navigation> {
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -1546,12 +1493,12 @@ class _NavigationState extends State<Navigation> {
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -1583,7 +1530,7 @@ class _NavigationState extends State<Navigation> {
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -1617,7 +1564,7 @@ class _NavigationState extends State<Navigation> {
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -1938,7 +1885,7 @@ class _NavigationState extends State<Navigation> {
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
-          findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
+      findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
           tools.numericalToAlphabetical(floor), value.polyline!.floors!);
       List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -1969,10 +1916,10 @@ class _NavigationState extends State<Navigation> {
             coordinates.add(LatLng(
                 tools.localtoglobal(node.coordx!, node.coordy!,
                     patchData:
-                        building.patchData[value.polyline!.buildingID])[0],
+                    building.patchData[value.polyline!.buildingID])[0],
                 tools.localtoglobal(node.coordx!, node.coordy!,
                     patchData:
-                        building.patchData[value.polyline!.buildingID])[1]));
+                    building.patchData[value.polyline!.buildingID])[1]));
           }
           if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
             closedpolygons.putIfAbsent(
@@ -2484,7 +2431,7 @@ class _NavigationState extends State<Navigation> {
           //   getImagesFromMarker('assets/location_on.png',50),
           // );
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/location_on.png', 55);
+          await getImagesFromMarker('assets/location_on.png', 55);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!);
 
@@ -2509,10 +2456,10 @@ class _NavigationState extends State<Navigation> {
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/dooricon.png', 45);
+          await getImagesFromMarker('assets/dooricon.png', 45);
           setState(() {
             List<double> value =
-                tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
+            tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
             Markers.add(Marker(
                 markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
@@ -2538,7 +2485,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].name != null &&
             landmarks[i].name!.toLowerCase().contains("lift")) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/entry.png', 75);
+          await getImagesFromMarker('assets/entry.png', 75);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -2568,7 +2515,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/6.png', 65);
+          await getImagesFromMarker('assets/6.png', 65);
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
@@ -2597,7 +2544,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/4.png', 65);
+          await getImagesFromMarker('assets/4.png', 65);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -2627,7 +2574,7 @@ class _NavigationState extends State<Navigation> {
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/1.png', 90);
+          await getImagesFromMarker('assets/1.png', 90);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -2763,16 +2710,16 @@ class _NavigationState extends State<Navigation> {
                     Expanded(
                       child: Container(
                           child: Text(
-                        snapshot.data!
-                            .landmarksMap![building.selectedLandmarkID]!.name!,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8e8d8d),
-                          height: 25 / 16,
-                        ),
-                      )),
+                            snapshot.data!
+                                .landmarksMap![building.selectedLandmarkID]!.name!,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
+                          )),
                     ),
                     Container(
                       height: 48,
@@ -2925,25 +2872,25 @@ class _NavigationState extends State<Navigation> {
                                       PathState.sourcePolyID = user.key;
                                       print("object ${PathState.sourcePolyID}");
                                       PathState.sourceName =
-                                          "Your current location";
+                                      "Your current location";
                                       PathState.destinationPolyID =
-                                          building.selectedLandmarkID!;
+                                      building.selectedLandmarkID!;
                                       PathState.destinationName = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                      building.selectedLandmarkID]!
                                           .name!;
                                       PathState.destinationFloor = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                      building.selectedLandmarkID]!
                                           .floor!;
                                       PathState.sourceBid = user.Bid;
 
                                       PathState.destinationBid = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                      building.selectedLandmarkID]!
                                           .buildingID!;
 
                                       setState(() {
@@ -2952,7 +2899,7 @@ class _NavigationState extends State<Navigation> {
                                       });
                                       Future.delayed(Duration(seconds: 1), () {
                                         calculateroute(
-                                                snapshot.data!.landmarksMap!)
+                                            snapshot.data!.landmarksMap!)
                                             .then((value) {
                                           calculatingPath = false;
                                           _isLandmarkPanelOpen = false;
@@ -2961,18 +2908,18 @@ class _NavigationState extends State<Navigation> {
                                       });
                                     } else {
                                       PathState.sourceName =
-                                          "Choose Starting Point";
+                                      "Choose Starting Point";
                                       PathState.destinationPolyID =
-                                          building.selectedLandmarkID!;
+                                      building.selectedLandmarkID!;
                                       PathState.destinationName = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                      building.selectedLandmarkID]!
                                           .name!;
                                       PathState.destinationFloor = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                      building.selectedLandmarkID]!
                                           .floor!;
                                       building.selectedLandmarkID = "";
                                       Navigator.push(
@@ -2991,28 +2938,28 @@ class _NavigationState extends State<Navigation> {
                                   },
                                   child: (!calculatingPath)
                                       ? const Row(
-                                          //  mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.directions,
-                                              color: Colors.black,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              "Direction",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                            )
-                                          ],
-                                        )
-                                      : Container(
-                                          height: 24,
-                                          width: 24,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                          ),
+                                    //  mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.directions,
+                                        color: Colors.black,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        "Direction",
+                                        style: TextStyle(
+                                          color: Colors.black,
                                         ),
+                                      )
+                                    ],
+                                  )
+                                      : Container(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -3078,7 +3025,7 @@ class _NavigationState extends State<Navigation> {
                                           children: [
                                             TextSpan(
                                               text:
-                                                  "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                             ),
                                           ],
                                         ),
@@ -3088,127 +3035,127 @@ class _NavigationState extends State<Navigation> {
                                 ),
                               ),
                               snapshot
-                                          .data!
-                                          .landmarksMap![
-                                              building.selectedLandmarkID]!
-                                          .properties!
-                                          .contactNo !=
-                                      null
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .properties!
+                                  .contactNo !=
+                                  null
                                   ? Container(
-                                      margin:
-                                          EdgeInsets.only(left: 16, right: 16),
-                                      padding:
-                                          EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            width: 1.0,
-                                            color: Color(0xffebebeb),
+                                margin:
+                                EdgeInsets.only(left: 16, right: 16),
+                                padding:
+                                EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      width: 1.0,
+                                      color: Color(0xffebebeb),
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      margin: EdgeInsets.only(right: 16),
+                                      width: 32,
+                                      height: 32,
+                                      child: Icon(
+                                        Icons.call,
+                                        color: Color(0xff24B9B0),
+                                        size: 24,
+                                      ),
+                                    ),
+                                    Container(
+                                      width: screenWidth - 100,
+                                      margin: EdgeInsets.only(top: 8),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 25 / 16,
                                           ),
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(right: 16),
-                                            width: 32,
-                                            height: 32,
-                                            child: Icon(
-                                              Icons.call,
-                                              color: Color(0xff24B9B0),
-                                              size: 24,
-                                            ),
-                                          ),
-                                          Container(
-                                            width: screenWidth - 100,
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff4a4545),
-                                                  height: 25 / 16,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                        "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
+                                    ),
+                                  ],
+                                ),
+                              )
                                   : Container(),
                               snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  building.selectedLandmarkID]!
-                                              .properties!
-                                              .email !=
-                                          "" &&
-                                      snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  building.selectedLandmarkID]!
-                                              .properties!
-                                              .email !=
-                                          null
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .properties!
+                                  .email !=
+                                  "" &&
+                                  snapshot
+                                      .data!
+                                      .landmarksMap![
+                                  building.selectedLandmarkID]!
+                                      .properties!
+                                      .email !=
+                                      null
                                   ? Container(
-                                      margin:
-                                          EdgeInsets.only(left: 16, right: 16),
-                                      padding:
-                                          EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color: Color(0xffebebeb))),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                              margin:
-                                                  EdgeInsets.only(right: 16),
-                                              width: 32,
-                                              height: 32,
-                                              child: Icon(
-                                                Icons.mail_outline,
-                                                color: Color(0xff24B9B0),
-                                                size: 24,
-                                              )),
-                                          Container(
-                                            width: screenWidth - 100,
-                                            margin: EdgeInsets.only(top: 8),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff4a4545),
-                                                  height: 25 / 16,
-                                                ),
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                        "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                margin:
+                                EdgeInsets.only(left: 16, right: 16),
+                                padding:
+                                EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: BorderSide(
+                                          width: 1.0,
+                                          color: Color(0xffebebeb))),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                        margin:
+                                        EdgeInsets.only(right: 16),
+                                        width: 32,
+                                        height: 32,
+                                        child: Icon(
+                                          Icons.mail_outline,
+                                          color: Color(0xff24B9B0),
+                                          size: 24,
+                                        )),
+                                    Container(
+                                      width: screenWidth - 100,
+                                      margin: EdgeInsets.only(top: 8),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff4a4545),
+                                            height: 25 / 16,
                                           ),
-                                        ],
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                              "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    )
+                                    ),
+                                  ],
+                                ),
+                              )
                                   : Container(),
                             ],
                           ),
@@ -3269,14 +3216,14 @@ class _NavigationState extends State<Navigation> {
     singleroute.clear();
     pathMarkers.clear();
     PathState.destinationX =
-        landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
-        landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
       PathState.destinationX =
-          landmarksMap[PathState.destinationPolyID]!.doorX!;
+      landmarksMap[PathState.destinationPolyID]!.doorX!;
       PathState.destinationY =
-          landmarksMap[PathState.destinationPolyID]!.doorY!;
+      landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
@@ -3338,12 +3285,12 @@ class _NavigationState extends State<Navigation> {
               commonlifts[0].x1!,
               commonlifts[0].y1!,
               building.floorDimenssion[PathState.destinationBid]![
-                  PathState.sourceFloor]![0]),
+              PathState.sourceFloor]![0]),
           PathState.destinationFloor: calculateindex(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
               building.floorDimenssion[PathState.destinationBid]![
-                  PathState.destinationFloor]![0])
+              PathState.destinationFloor]![0])
         };
       }
     } else {
@@ -3390,12 +3337,12 @@ class _NavigationState extends State<Navigation> {
                     commonlifts[0].x1!,
                     commonlifts[0].y1!,
                     building.floorDimenssion[PathState.destinationBid]![
-                        element.floor!]![0]),
+                    element.floor!]![0]),
                 PathState.destinationFloor: calculateindex(
                     commonlifts[0].x2!,
                     commonlifts[0].y2!,
                     building.floorDimenssion[PathState.destinationBid]![
-                        PathState.destinationFloor]![0])
+                    PathState.destinationFloor]![0])
               };
             }
             break;
@@ -3439,12 +3386,12 @@ class _NavigationState extends State<Navigation> {
                     commonlifts[0].x1!,
                     commonlifts[0].y1!,
                     building.floorDimenssion[PathState.sourceBid]![
-                        PathState.sourceFloor]![0]),
+                    PathState.sourceFloor]![0]),
                 element.floor!: calculateindex(
                     commonlifts[0].x2!,
                     commonlifts[0].y2!,
                     building.floorDimenssion[PathState.sourceBid]![
-                        element.floor!]![0])
+                    element.floor!]![0])
               };
             }
             break;
@@ -3530,7 +3477,7 @@ class _NavigationState extends State<Navigation> {
     getPoints.add([destinationX, destinationY]);
 
     List<Cell> Cellpath =
-        findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
     temp.addAll(path);
@@ -3624,7 +3571,7 @@ class _NavigationState extends State<Navigation> {
         if (bid != null) {
           print("Himanshubid $bid");
           List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -3779,7 +3726,7 @@ class _NavigationState extends State<Navigation> {
                           clearPathVariables();
                           setState(() {
                             Marker? temp = selectedroomMarker[
-                                    buildingAllApi.getStoredString()]
+                            buildingAllApi.getStoredString()]
                                 ?.first;
                             selectedroomMarker.clear();
                             selectedroomMarker[buildingAllApi.getStoredString()]
@@ -3809,7 +3756,7 @@ class _NavigationState extends State<Navigation> {
                               border: Border.all(color: Color(0xffE2E2E2)),
                             ),
                             padding:
-                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
                             child: Text(
                               PathState.sourceName,
                               style: const TextStyle(
@@ -3826,9 +3773,9 @@ class _NavigationState extends State<Navigation> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(
-                                          hintText: 'Source location',
-                                          voiceInputEnabled: false,
-                                        ))).then((value) {
+                                      hintText: 'Source location',
+                                      voiceInputEnabled: false,
+                                    ))).then((value) {
                               onSourceVenueClicked(value);
                             });
                           },
@@ -3842,7 +3789,7 @@ class _NavigationState extends State<Navigation> {
                               border: Border.all(color: Color(0xffE2E2E2)),
                             ),
                             padding:
-                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
                             child: Semantics(
                               onDidGainAccessibilityFocus: closeRoutePannel,
                               child: Text(
@@ -3862,9 +3809,9 @@ class _NavigationState extends State<Navigation> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(
-                                          hintText: 'Destination location',
-                                          voiceInputEnabled: false,
-                                        ))).then((value) {
+                                      hintText: 'Destination location',
+                                      voiceInputEnabled: false,
+                                    ))).then((value) {
                               _isBuildingPannelOpen = false;
                               onDestinationVenueClicked(value);
                             });
@@ -3952,11 +3899,11 @@ class _NavigationState extends State<Navigation> {
                                 children: [
                                   Semantics(
                                     label:
-                                        "Your destination is ${distance}m away ",
+                                    "Your destination is ${distance}m away ",
                                     sortKey: const OrdinalSortKey(1),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      MainAxisAlignment.start,
                                       children: [
                                         Semantics(
                                           excludeSemantics: true,
@@ -3994,7 +3941,7 @@ class _NavigationState extends State<Navigation> {
                                               selectedroomMarker.clear();
                                               pathMarkers.clear();
                                               building.selectedLandmarkID =
-                                                  null;
+                                              null;
                                               PathState = pathState.withValues(
                                                   -1,
                                                   -1,
@@ -4060,7 +4007,7 @@ class _NavigationState extends State<Navigation> {
                                           decoration: BoxDecoration(
                                             color: Color(0xff24B9B0),
                                             borderRadius:
-                                                BorderRadius.circular(4.0),
+                                            BorderRadius.circular(4.0),
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
@@ -4076,17 +4023,17 @@ class _NavigationState extends State<Navigation> {
                                                 setState(() {
                                                   if (markers.length > 0) {
                                                     List<double> val =
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt());
+                                                    tools.localtoglobal(
+                                                        user.showcoordX
+                                                            .toInt(),
+                                                        user.showcoordY
+                                                            .toInt());
                                                     markers[user.Bid]?[0] =
                                                         customMarker.move(
                                                             LatLng(
                                                                 val[0], val[1]),
                                                             markers[user.Bid]![
-                                                                0]);
+                                                            0]);
 
                                                     val = tools.localtoglobal(
                                                         user.coordX.toInt(),
@@ -4096,13 +4043,13 @@ class _NavigationState extends State<Navigation> {
                                                             LatLng(
                                                                 val[0], val[1]),
                                                             markers[user.Bid]![
-                                                                1]);
+                                                            1]);
                                                   }
                                                 });
                                               });
                                               _isRoutePanelOpen = false;
                                               building.selectedLandmarkID =
-                                                  null;
+                                              null;
                                               _isnavigationPannelOpen = true;
 
                                               semanticShouldBeExcluded = false;
@@ -4111,21 +4058,21 @@ class _NavigationState extends State<Navigation> {
                                               mapState.tilt = 50;
                                               mapState.bearing =
                                                   tools.calculateBearing([
-                                                user.lat,
-                                                user.lng
-                                              ], [
-                                                PathState
-                                                    .singleCellListPath[
-                                                        user.pathobj.index + 1]
-                                                    .lat,
-                                                PathState
-                                                    .singleCellListPath[
-                                                        user.pathobj.index + 1]
-                                                    .lng
-                                              ]);
+                                                    user.lat,
+                                                    user.lng
+                                                  ], [
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj.index + 1]
+                                                        .lat,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj.index + 1]
+                                                        .lng
+                                                  ]);
                                               _googleMapController
                                                   .animateCamera(CameraUpdate
-                                                      .newCameraPosition(
+                                                  .newCameraPosition(
                                                 CameraPosition(
                                                     target: mapState.target,
                                                     zoom: mapState.zoom,
@@ -4135,30 +4082,30 @@ class _NavigationState extends State<Navigation> {
                                             },
                                             child: !startingNavigation
                                                 ? Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .assistant_navigation,
-                                                        color: Colors.black,
-                                                      ),
-                                                      SizedBox(width: 8),
-                                                      Text(
-                                                        "Start",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
+                                              mainAxisSize:
+                                              MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .assistant_navigation,
+                                                  color: Colors.black,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  "Start",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                                 : Container(
-                                                    width: 24,
-                                                    height: 24,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      color: Colors.white,
-                                                    )),
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                )),
                                           ),
                                         ),
                                       ),
@@ -4168,9 +4115,9 @@ class _NavigationState extends State<Navigation> {
                                         margin: EdgeInsets.only(left: 12),
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(4.0),
+                                          BorderRadius.circular(4.0),
                                           border:
-                                              Border.all(color: Colors.black),
+                                          Border.all(color: Colors.black),
                                         ),
                                         child: TextButton(
                                           onPressed: () {
@@ -4188,28 +4135,28 @@ class _NavigationState extends State<Navigation> {
                                             children: [
                                               Icon(
                                                 _routeDetailPannelController
-                                                        .isAttached
+                                                    .isAttached
                                                     ? _routeDetailPannelController
-                                                            .isPanelClosed
-                                                        ? Icons
-                                                            .short_text_outlined
-                                                        : Icons.map_sharp
+                                                    .isPanelClosed
+                                                    ? Icons
+                                                    .short_text_outlined
+                                                    : Icons.map_sharp
                                                     : Icons.short_text_outlined,
                                                 color: Colors.black,
                                               ),
                                               SizedBox(width: 8),
                                               Semantics(
                                                 sortKey:
-                                                    const OrdinalSortKey(2),
+                                                const OrdinalSortKey(2),
                                                 onDidGainAccessibilityFocus:
-                                                    openRoutePannel,
+                                                openRoutePannel,
                                                 child: Text(
                                                   _routeDetailPannelController
-                                                          .isAttached
+                                                      .isAttached
                                                       ? _routeDetailPannelController
-                                                              .isPanelClosed
-                                                          ? "Steps"
-                                                          : "Map"
+                                                      .isPanelClosed
+                                                      ? "Steps"
+                                                      : "Map"
                                                       : "Steps",
                                                   style: TextStyle(
                                                     color: Colors.black,
@@ -4227,7 +4174,7 @@ class _NavigationState extends State<Navigation> {
                             ),
                             Container(
                               margin:
-                                  EdgeInsets.only(left: 17, top: 12, right: 17),
+                              EdgeInsets.only(left: 17, top: 12, right: 17),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -4261,7 +4208,7 @@ class _NavigationState extends State<Navigation> {
                                               excludeSemantics: false,
                                               child: Row(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
+                                                CrossAxisAlignment.center,
                                                 children: [
                                                   Container(
                                                     height: 25,
@@ -4272,16 +4219,16 @@ class _NavigationState extends State<Navigation> {
                                                   ),
                                                   Semantics(
                                                     label:
-                                                        "Steps preview,    You are heading from",
+                                                    "Steps preview,    You are heading from",
                                                     child: Text(
                                                       "${PathState.sourceName}",
                                                       style: const TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 16,
                                                         fontWeight:
-                                                            FontWeight.w400,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xff0e0d0d),
+                                                        Color(0xff0e0d0d),
                                                         height: 25 / 16,
                                                       ),
                                                       textAlign: TextAlign.left,
@@ -4306,12 +4253,12 @@ class _NavigationState extends State<Navigation> {
                                             ),
                                             Row(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                               children: [
                                                 Container(
                                                   height: 25,
                                                   margin:
-                                                      EdgeInsets.only(right: 8),
+                                                  EdgeInsets.only(right: 8),
                                                   child: Icon(
                                                     Icons.pin_drop_sharp,
                                                     size: 24,
@@ -4319,14 +4266,14 @@ class _NavigationState extends State<Navigation> {
                                                 ),
                                                 Semantics(
                                                   label:
-                                                      "Your are heading towards ",
+                                                  "Your are heading towards ",
                                                   child: Text(
                                                     PathState.destinationName,
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 16,
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xff0e0d0d),
                                                       height: 25 / 16,
                                                     ),
@@ -4421,7 +4368,7 @@ class _NavigationState extends State<Navigation> {
         List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
         int index =
-            user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+        user.path.indexOf((user.showcoordY * col) + user.showcoordX);
 
         int node = user.path[index + 1];
 
@@ -4445,25 +4392,14 @@ class _NavigationState extends State<Navigation> {
 
           print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-
-             print("points unmatchedddd");
-
-
-            Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-
-            StartPDR()
-
+            print("points unmatchedddd");
+            setState(() {
+              isPdrStop = false;
             });
             StartPDR();
             // Future.delayed(Duration(milliseconds: 1500)).then((value) => {
             //
             // });
-
-
-             setState(() {
-               isPdrStop = false;
-             }
-             );
 
             break;
           }
@@ -4593,7 +4529,7 @@ class _NavigationState extends State<Navigation> {
                               icon: Semantics(
                                 label: "Close",
                                 onDidGainAccessibilityFocus:
-                                    shouldBeOpenedVarChangeFunc,
+                                shouldBeOpenedVarChangeFunc,
                                 child: Icon(
                                   Icons.cancel_outlined,
                                   size: 24,
@@ -4638,7 +4574,7 @@ class _NavigationState extends State<Navigation> {
                                 children: [
                                   Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    CrossAxisAlignment.center,
                                     children: [
                                       Container(
                                         height: 25,
@@ -4675,7 +4611,7 @@ class _NavigationState extends State<Navigation> {
                                   ),
                                   Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    CrossAxisAlignment.center,
                                     children: [
                                       Container(
                                         height: 25,
@@ -4785,13 +4721,10 @@ class _NavigationState extends State<Navigation> {
                           ),
                           child: TextButton(
                             onPressed: () async {
-
-                              print("pannel----- coord ${user.coordX},${user.coordY}");
-                              print("pannel----- show ${user.showcoordX},${user.showcoordY}");
-                              Map<String, double> sumMap = HelperClass().sortMapByValue(btadapter.calculateAverage());
-                              print("Reroute new Beacon");
-                              print(sumMap.keys.first);
-
+                              print(
+                                  "pannel----- coord ${user.coordX},${user.coordY}");
+                              print(
+                                  "pannel----- show ${user.showcoordX},${user.showcoordY}");
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               user.showcoordX = user.coordX;
@@ -4834,14 +4767,14 @@ class _NavigationState extends State<Navigation> {
                                   _isnavigationPannelOpen = true;
                                   _isreroutePannelOpen = false;
                                   int numCols = building.floorDimenssion[
-                                          PathState.sourceBid]![
-                                      PathState.sourceFloor]![0]; //floor length
+                                  PathState.sourceBid]![
+                                  PathState.sourceFloor]![0]; //floor length
                                   double angle =
-                                      tools.calculateAngleBWUserandPath(
-                                          user,
-                                          PathState
-                                              .path[PathState.sourceFloor]![1],
-                                          numCols);
+                                  tools.calculateAngleBWUserandPath(
+                                      user,
+                                      PathState
+                                          .path[PathState.sourceFloor]![1],
+                                      numCols);
                                   if (angle != 0) {
                                     speak("Turn " + tools.angleToClocks(angle));
                                   } else {}
@@ -4947,13 +4880,13 @@ class _NavigationState extends State<Navigation> {
     } else if (optionsTags != null && floorOptionsTags == null) {
       setState(() {
         filteredItems = LandmarkItems.where((item) =>
-            optionsTags.contains(item.element?.type) &&
+        optionsTags.contains(item.element?.type) &&
             floorOptionsTags.contains('Floor ${item.floor}')).toList();
       });
     } else {
       setState(() {
         filteredItems = LandmarkItems.where(
-            (item) => optionsTags.contains(item.element?.type)).toList();
+                (item) => optionsTags.contains(item.element?.type)).toList();
       });
     }
   }
@@ -4990,7 +4923,7 @@ class _NavigationState extends State<Navigation> {
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -5015,1060 +4948,1060 @@ class _NavigationState extends State<Navigation> {
               ),
             ],
             minHeight:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 155
-                    : 140,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 155
+                : 140,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 190 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 190 / screenHeight
+                : 175 / screenHeight,
             maxHeight: screenHeight * 0.9,
             panel: Semantics(
               child: Container(
                   child: !_isFilterOpen
                       ? Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 16),
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, bottom: 4),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${element.buildingName}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 27 / 18,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  element.workingDays != null &&
+                                      element.workingDays!.length > 0
+                                      ? Row(
+                                    children: [
+                                      Text(
+                                        "Open ",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff4caf50),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        "  Closes ${element.workingDays![0].closingTime}",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff8d8c8c),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  )
+                                      : Container()
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Row(
                                 children: [
                                   Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8),
+                                    width: 142,
+                                    height: 42,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Color(0xff24B9B0),
+                                      borderRadius:
+                                      BorderRadius.circular(8.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                              "assets/ExploreInside.svg"),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Explore Inside",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Container(
+                                    width: 83,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                        color: Color(0xffffffff),
+                                        borderRadius:
+                                        BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                            color: Color(0xff000000))),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.call,
+                                            color: Color(0xff000000),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Call",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff000000),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Semantics(
+                                    label: "Share",
+                                    onDidGainAccessibilityFocus:
+                                    _slidePanelUp,
+                                    // onDidLoseAccessibilityFocus: _slidePanelDown,
+                                    child: Container(
+                                      width: 95,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffffffff),
+                                          borderRadius:
+                                          BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                              color: Color(0xff000000))),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.share,
+                                              color: Color(0xff000000),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Share",
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight:
+                                                FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 20 / 14,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16),
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, bottom: 4),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${element.buildingName}",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            height: 27 / 18,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        element.workingDays != null &&
-                                                element.workingDays!.length > 0
-                                            ? Row(
-                                                children: [
-                                                  Text(
-                                                    "Open ",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff4caf50),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  Text(
-                                                    "  Closes ${element.workingDays![0].closingTime}",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff8d8c8c),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              )
-                                            : Container()
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, top: 8, bottom: 8),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 142,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xff24B9B0),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SvgPicture.asset(
-                                                    "assets/ExploreInside.svg"),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Explore Inside",
+                            ),
+                            Semantics(
+                              label: "",
+                              child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Semantics(
+                                              header: true,
+                                              child: GestureDetector(
+                                                onTap: _slidePanelUp,
+                                                child: Text(
+                                                  "Services",
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xffffffff),
-                                                    height: 20 / 14,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    color: Color(0xff000000),
+                                                    height: 23 / 16,
                                                   ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Container(
-                                          width: 83,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffffffff),
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              border: Border.all(
-                                                  color: Color(0xff000000))),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.call,
-                                                  color: Color(0xff000000),
+                                                  textAlign: TextAlign.center,
                                                 ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Call",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xff000000),
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Semantics(
-                                          label: "Share",
-                                          onDidGainAccessibilityFocus:
-                                              _slidePanelUp,
-                                          // onDidLoseAccessibilityFocus: _slidePanelDown,
-                                          child: Container(
-                                            width: 95,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                                color: Color(0xffffffff),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                border: Border.all(
-                                                    color: Color(0xff000000))),
-                                            child: TextButton(
-                                              onPressed: () {},
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.share,
-                                                    color: Color(0xff000000),
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text(
-                                                    "Share",
+                                            Semantics(
+                                              label: 'Services',
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      print(
+                                                          "Himanshuchecker");
+                                                      //_isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                                      _isFilterOpen =
+                                                      !_isFilterOpen;
+                                                    });
+                                                  },
+                                                  child: Text(
+                                                    "See All",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
+                                                      FontWeight.w500,
+                                                      color:
+                                                      Color(0xff4a4545),
                                                       height: 20 / 14,
                                                     ),
-                                                    textAlign: TextAlign.left,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  )),
+                                            )
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Semantics(
-                                    label: "",
-                                    child: Container(
-                                        child: Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 16, right: 16),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Semantics(
-                                                header: true,
-                                                child: GestureDetector(
-                                                  onTap: _slidePanelUp,
-                                                  child: Text(
-                                                    "Services",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
-                                                      height: 23 / 16,
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 16),
+                                        child: Row(
+                                          children: [
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/washroomservice.svg"),
                                                     ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                              ),
-                                              Semantics(
-                                                label: 'Services',
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        print(
-                                                            "Himanshuchecker");
-                                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
-                                                        _isFilterOpen =
-                                                            !_isFilterOpen;
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      "See All",
+                                                    Text(
+                                                      "Washroom",
                                                       style: const TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 14,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xff4a4545),
+                                                        Color(0xff4a4545),
                                                         height: 20 / 14,
                                                       ),
                                                       textAlign:
-                                                          TextAlign.center,
-                                                    )),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(left: 16),
-                                          child: Row(
-                                            children: [
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/washroomservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Washroom",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/foodservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Food",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/accservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Accessibility",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/exitservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Exit",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Semantics(
-                                          onDidLoseAccessibilityFocus:
-                                              _slidePanelDown,
-                                          child: Container(
-                                            margin: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: _slidePanelDown,
-                                                  child: Container(
-                                                      margin: EdgeInsets.only(
-                                                          left: 17),
-                                                      child: Text(
-                                                        "Information",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Color(0xff000000),
-                                                          height: 23 / 16,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      )),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      left: 16, right: 16),
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0, 11, 0, 10),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                        bottom: BorderSide(
-                                                            width: 1.0,
-                                                            color: Color(
-                                                                0xffebebeb))),
-                                                  ),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SvgPicture.asset(
-                                                          "assets/Depth 3, Frame 0.svg"),
-                                                      SizedBox(
-                                                        width: 16,
-                                                      ),
-                                                      Container(
-                                                        width:
-                                                            screenWidth - 100,
-                                                        margin: EdgeInsets.only(
-                                                            top: 8),
-                                                        child: RichText(
-                                                          text: TextSpan(
-                                                            style:
-                                                                const TextStyle(
-                                                              fontFamily:
-                                                                  "Roboto",
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
                                                               color: Color(
-                                                                  0xff4a4545),
-                                                              height: 25 / 16,
-                                                            ),
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    "${element.address}",
-                                                              ),
-                                                            ],
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/foodservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Food",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/accservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Accessibility",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/exitservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Exit",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Semantics(
+                                        onDidLoseAccessibilityFocus:
+                                        _slidePanelDown,
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: _slidePanelDown,
+                                                child: Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 17),
+                                                    child: Text(
+                                                      "Information",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                        FontWeight.w500,
+                                                        color:
+                                                        Color(0xff000000),
+                                                        height: 23 / 16,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.left,
+                                                    )),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16, right: 16),
+                                                padding: EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 0.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                      screenWidth - 100,
+                                                      margin: EdgeInsets.only(
+                                                          top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height: 25 / 16,
                                                           ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.address}",
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                // Container(
-                                                //   margin:
-                                                //   EdgeInsets.only(left: 16, right: 16),
-                                                //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                                //   decoration: BoxDecoration(
-                                                //     border: Border(
-                                                //         bottom: BorderSide(
-                                                //             width: 1.0,
-                                                //             color: Color(0xffebebeb))),
-                                                //   ),
-                                                //   child: Row(
-                                                //     crossAxisAlignment:
-                                                //     CrossAxisAlignment.center,
-                                                //     children: [
-                                                //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                                //       SizedBox(width: 16,),
-                                                //       Container(
-                                                //         margin: EdgeInsets.only(top: 8),
-                                                //         child: RichText(
-                                                //           text: TextSpan(
-                                                //             style: const TextStyle(
-                                                //               fontFamily: "Roboto",
-                                                //               fontSize: 16,
-                                                //               fontWeight: FontWeight.w400,
-                                                //               color: Color(0xff4a4545),
-                                                //               height: 25 / 16,
-                                                //             ),
-                                                //             children: [
-                                                //               TextSpan(
-                                                //                 text:
-                                                //                 "6 Floors",
-                                                //               ),
-                                                //             ],
-                                                //           ),
-                                                //         ),
-                                                //       ),
-                                                //     ],
-                                                //   ),
-                                                // ),
-                                                element.phone != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                              ),
+                                              // Container(
+                                              //   margin:
+                                              //   EdgeInsets.only(left: 16, right: 16),
+                                              //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                              //   decoration: BoxDecoration(
+                                              //     border: Border(
+                                              //         bottom: BorderSide(
+                                              //             width: 1.0,
+                                              //             color: Color(0xffebebeb))),
+                                              //   ),
+                                              //   child: Row(
+                                              //     crossAxisAlignment:
+                                              //     CrossAxisAlignment.center,
+                                              //     children: [
+                                              //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                              //       SizedBox(width: 16,),
+                                              //       Container(
+                                              //         margin: EdgeInsets.only(top: 8),
+                                              //         child: RichText(
+                                              //           text: TextSpan(
+                                              //             style: const TextStyle(
+                                              //               fontFamily: "Roboto",
+                                              //               fontSize: 16,
+                                              //               fontWeight: FontWeight.w400,
+                                              //               color: Color(0xff4a4545),
+                                              //               height: 25 / 16,
+                                              //             ),
+                                              //             children: [
+                                              //               TextSpan(
+                                              //                 text:
+                                              //                 "6 Floors",
+                                              //               ),
+                                              //             ],
+                                              //           ),
+                                              //         ),
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
+                                              element.phone != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-1.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-1.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.phone}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.phone}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.website != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.website != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-2.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-2.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.website}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.website}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.workingDays != null &&
-                                                        element.workingDays!
-                                                                .length >
-                                                            1
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-3.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.workingDays != null &&
+                                                  element.workingDays!
+                                                      .length >
+                                                      1
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-3.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
                                                               children: [
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
                                                                 ),
                                                               ],
                                                             ),
-                                                          ],
+                                                          ),
                                                         ),
-                                                      )
-                                                    : Container()
-                                              ],
-                                            ),
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container()
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    )),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8, bottom: 8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        _isFilterOpen = !_isFilterOpen;
-                                      },
-                                      icon: SvgPicture.asset(
-                                        "assets/Navigation_closeIcon.svg",
-                                        height: 24,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: Text(
-                                      "Filters",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 26 / 20,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 14, top: 10),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        optionsTags.clear();
-                                        floorOptionsTags.clear();
-                                      },
-                                      child: Text(
-                                        "Clear All",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff24b9b0),
-                                          height: 20 / 14,
                                         ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                      )
+                                    ],
+                                  )),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                      : Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8, bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
-
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: IconButton(
+                                onPressed: () {
+                                  _isFilterOpen = !_isFilterOpen;
+                                },
+                                icon: SvgPicture.asset(
+                                  "assets/Navigation_closeIcon.svg",
+                                  height: 24,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: Text(
+                                "Filters",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 26 / 20,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              margin: EdgeInsets.only(right: 14, top: 10),
+                              child: TextButton(
+                                onPressed: () {
+                                  optionsTags.clear();
+                                  floorOptionsTags.clear();
+                                },
                                 child: Text(
-                                  "Services",
+                                  "Clear All",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
+                                    color: Color(0xff24b9b0),
+                                    height: 20 / 14,
                                   ),
-                                  textAlign: TextAlign.start,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
-                              //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
-                              // FutureBuilder<int>(
-                              //   future: getHiveBoxLength(),
-                              //   builder: (context, snapshot) {
-                              //     if (snapshot.connectionState != ConnectionState.waiting) {
-                              //       return Text('Error: ${snapshot.error}'); // or any loading indicator
-                              //     } else if (snapshot.hasError) {
-                              //       return Text('Error: ${snapshot.error}');
-                              //     } else {
-                              //       return Text('Length of Hive Box: ${snapshot.data}');
-                              //     }
-                              //   },
-                              // ),
-                              //---------------------------------------------------------------------------------------
+                            )
+                          ],
+                        ),
 
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length != 0) {
-                                      optionsTags = value.getAt(0);
-                                      print("tags");
-                                      print(optionsTags);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: optionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(0, val);
-                                        setState(() {
-                                          optionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: options,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                          selectedStyle: const C2ChipStyle(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(7),
-                                              ),
-                                              backgroundColor:
-                                                  Color(0XFFABF9F4)),
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(7),
-                                          ),
-                                          borderStyle: BorderStyle.solid),
-                                      wrapped: false,
-                                    );
-                                  },
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Services",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                        // FutureBuilder<int>(
+                        //   future: getHiveBoxLength(),
+                        //   builder: (context, snapshot) {
+                        //     if (snapshot.connectionState != ConnectionState.waiting) {
+                        //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else {
+                        //       return Text('Length of Hive Box: ${snapshot.data}');
+                        //     }
+                        //   },
+                        // ),
+                        //---------------------------------------------------------------------------------------
+
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length != 0) {
+                                optionsTags = value.getAt(0);
+                                print("tags");
+                                print(optionsTags);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: optionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(0, val);
+                                  setState(() {
+                                    optionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: options,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
                                 ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Choose Floor",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length == 2) {
-                                      floorOptionsTags = value.getAt(1);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: floorOptionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(1, val);
-                                        setState(() {
-                                          floorOptionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: floorOptions,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceLeadingBuilder: (data, i) {
-                                        if (data.meta == null) return null;
-                                        return CircleAvatar(
-                                          maxRadius: 12,
-                                          backgroundImage: data.avatarImage,
-                                        );
-                                      },
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                        selectedStyle: const C2ChipStyle(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(7),
-                                            ),
-                                            backgroundColor: Color(0XFFABF9F4)),
-                                        color: Colors.white,
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                    selectedStyle: const C2ChipStyle(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(7),
                                         ),
-                                      ),
-                                      wrapped: false,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Filter results ${filteredItems.length}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 12),
-                                height: screenHeight - 410,
-                                child: ListView.builder(
-                                  itemCount: filteredItems.length,
-                                  itemBuilder: (context, index) {
-                                    final item = filteredItems[index];
-                                    return NavigatonFilterCard(
-                                      LandmarkName: item.venueName!,
-                                      LandmarkDistance: "90 m",
-                                      LandmarkFloor: "Floor ${item.floor}",
-                                      LandmarksubName: item.buildingName!,
-                                    );
-                                  },
-                                ),
-                              )
-                            ],
+                                        backgroundColor:
+                                        Color(0XFFABF9F4)),
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(7),
+                                    ),
+                                    borderStyle: BorderStyle.solid),
+                                wrapped: false,
+                              );
+                            },
                           ),
-                        )),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Choose Floor",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length == 2) {
+                                floorOptionsTags = value.getAt(1);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: floorOptionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(1, val);
+                                  setState(() {
+                                    floorOptionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: floorOptions,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
+                                ),
+                                choiceLeadingBuilder: (data, i) {
+                                  if (data.meta == null) return null;
+                                  return CircleAvatar(
+                                    maxRadius: 12,
+                                    backgroundImage: data.avatarImage,
+                                  );
+                                },
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                  selectedStyle: const C2ChipStyle(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(7),
+                                      ),
+                                      backgroundColor: Color(0XFFABF9F4)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                ),
+                                wrapped: false,
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Filter results ${filteredItems.length}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 12),
+                          height: screenHeight - 410,
+                          child: ListView.builder(
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              return NavigatonFilterCard(
+                                LandmarkName: item.venueName!,
+                                LandmarkDistance: "90 m",
+                                LandmarkFloor: "Floor ${item.floor}",
+                                LandmarksubName: item.buildingName!,
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
             )));
   }
 
@@ -6081,7 +6014,7 @@ class _NavigationState extends State<Navigation> {
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6108,9 +6041,9 @@ class _NavigationState extends State<Navigation> {
           ],
           minHeight: 90,
           snapPoint:
-              element.workingDays != null && element.workingDays!.length > 0
-                  ? 220 / screenHeight
-                  : 175 / screenHeight,
+          element.workingDays != null && element.workingDays!.length > 0
+              ? 220 / screenHeight
+              : 175 / screenHeight,
           maxHeight: 90,
           panel: Container(
             decoration: BoxDecoration(
@@ -6195,10 +6128,10 @@ class _NavigationState extends State<Navigation> {
         return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
-                    .union(Set<Marker>.of(markers[user.Bid] ?? [])))
-                .union(Markers)
+            .union(Set<Marker>.of(markers[user.Bid] ?? [])))
+            .union(Markers)
             : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers);
       }
     } else {
@@ -6210,9 +6143,9 @@ class _NavigationState extends State<Navigation> {
         return marker.union(Markers);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!)
-                .union(Markers)
+            .union(Markers)
             : Markers;
       }
     }
@@ -6321,7 +6254,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void closeNavigation() {
-    StopPDR();
     _isnavigationPannelOpen = false;
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
@@ -6332,12 +6264,11 @@ class _NavigationState extends State<Navigation> {
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    user.isnavigating=false;
-
+    StopPDR();
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
-          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+      tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
@@ -6351,7 +6282,7 @@ class _NavigationState extends State<Navigation> {
         building.landmarkdata!.then((value) {
           _isBuildingPannelOpen = false;
           building.floor[value.landmarksMap![ID]!.buildingID!] =
-              value.landmarksMap![ID]!.floor!;
+          value.landmarksMap![ID]!.floor!;
           createRooms(
               building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
               building.floor[value.landmarksMap![ID]!.buildingID!]!);
@@ -6365,7 +6296,7 @@ class _NavigationState extends State<Navigation> {
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!,
               patchData:
-                  building.patchData[value.landmarksMap![ID]!.buildingID]);
+              building.patchData[value.landmarksMap![ID]!.buildingID]);
           LatLng point = LatLng(pvalues[0], pvalues[1]);
           _googleMapController.animateCamera(
             CameraUpdate.newLatLngZoom(
@@ -6515,477 +6446,475 @@ class _NavigationState extends State<Navigation> {
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
-              body: Center(
-                child: lott.Lottie.asset(
-                  'assets/loading_bluetooth.json', // Path to your Lottie animation
-                  width: 500,
-                  height: 500,
+        body: Center(
+          child: lott.Lottie.asset(
+            'assets/loading_bluetooth.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
+          ),
+        ),
+      )
+          : isLoading
+          ? Scaffold(
+        body: Center(
+            child: lott.Lottie.asset(
+              'assets/loding_animation.json', // Path to your Lottie animation
+              width: 500,
+              height: 500,
+            )),
+      )
+          : Scaffold(
+        body: Stack(
+          children: [
+            detected
+                ? Semantics(
+                excludeSemantics: true,
+                child: nearestLandmarkpannel())
+                : Semantics(
+                excludeSemantics: true, child: Container()),
+            Semantics(
+              excludeSemantics: true,
+              child: Container(
+                child: GoogleMap(
+                  padding: EdgeInsets.only(
+                      left: 20), // <--- padding added here
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  polygons: patch
+                      .union(getCombinedPolygons())
+                      .union(otherpatch),
+                  polylines: singleroute[building.floor[
+                  buildingAllApi.getStoredString()]] !=
+                      null
+                      ? getCombinedPolylines().union(singleroute[
+                  building.floor[
+                  buildingAllApi.getStoredString()]]!)
+                      : getCombinedPolylines(),
+                  markers: getCombinedMarkers(),
+                  onTap: (x) {
+                    mapState.interaction = true;
+                  },
+                  mapType: MapType.normal,
+                  buildingsEnabled: false,
+                  compassEnabled: true,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller) {
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    print("tumhari galti hai sb saalo");
+
+                    if (patch.isNotEmpty) {
+                      fitPolygonInScreen(patch.first);
+                    }
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
+                    print("plpl ${cameraPosition.tilt}");
+                    focusBuildingChecker(cameraPosition);
+                    mapState.interaction = true;
+                    mapbearing = cameraPosition.bearing;
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    if (true) {
+                      _updateMarkers(cameraPosition.zoom);
+                      //_updateBuilding(cameraPosition.zoom);
+                    }
+                  },
+                  onCameraIdle: () {
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    mapState.interaction2 = false;
+                  },
                 ),
               ),
-            )
-          : isLoading
-              ? Scaffold(
-                  body: Center(
-                      child: lott.Lottie.asset(
-                    'assets/loding_animation.json', // Path to your Lottie animation
-                    width: 500,
-                    height: 500,
-                  )),
-                )
-              : Scaffold(
-                  body: Stack(
-                    children: [
-                      detected
-                          ? Semantics(
-                              excludeSemantics: true,
-                              child: nearestLandmarkpannel())
-                          : Semantics(
-                              excludeSemantics: true, child: Container()),
-                      Semantics(
-                        excludeSemantics: true,
-                        child: Container(
-                          child: GoogleMap(
-                            padding: EdgeInsets.only(
-                                left: 20), // <--- padding added here
-                            initialCameraPosition: _initialCameraPosition,
-                            myLocationButtonEnabled: false,
-                            zoomControlsEnabled: false,
-                            zoomGesturesEnabled: true,
-                            polygons: patch
-                                .union(getCombinedPolygons())
-                                .union(otherpatch),
-                            polylines: singleroute[building.floor[
-                                        buildingAllApi.getStoredString()]] !=
-                                    null
-                                ? getCombinedPolylines().union(singleroute[
-                                    building.floor[
-                                        buildingAllApi.getStoredString()]]!)
-                                : getCombinedPolylines(),
-                            markers: getCombinedMarkers(),
-                            onTap: (x) {
-                              mapState.interaction = true;
-                            },
-                            mapType: MapType.normal,
-                            buildingsEnabled: false,
-                            compassEnabled: true,
-                            rotateGesturesEnabled: true,
-                            minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                            onMapCreated: (controller) {
-                              controller.setMapStyle(maptheme);
-                              _googleMapController = controller;
-                              print("tumhari galti hai sb saalo");
+            ),
+            //debug----
+            Positioned(
+              bottom: 150.0, // Adjust the position as needed
+              right: 16.0,
 
-                              if (patch.isNotEmpty) {
-                                fitPolygonInScreen(patch.first);
-                              }
-                            },
-                            onCameraMove: (CameraPosition cameraPosition) {
-                              print("plpl ${cameraPosition.tilt}");
-                              focusBuildingChecker(cameraPosition);
-                              mapState.interaction = true;
-                              mapbearing = cameraPosition.bearing;
-                              if (!mapState.interaction) {
-                                mapState.zoom = cameraPosition.zoom;
-                              }
-                              if (true) {
-                                _updateMarkers(cameraPosition.zoom);
-                                //_updateBuilding(cameraPosition.zoom);
-                              }
-                            },
-                            onCameraIdle: () {
-                              if (!mapState.interaction) {
-                                mapState.interaction2 = true;
-                              }
-                            },
-                            onCameraMoveStarted: () {
-                              mapState.interaction2 = false;
-                            },
+              child: Semantics(
+                excludeSemantics: semanticShouldBeExcluded,
+                child: Column(
+                  children: [
+                    //Text(Building.thresh),
+                    // Visibility(
+                    //   visible: true,
+                    //   child: Container(
+                    //       decoration: BoxDecoration(
+                    //           color: Colors.white,
+                    //           borderRadius: BorderRadius.all(Radius.circular(24))),
+                    //       child: IconButton(
+                    //           onPressed: () {
+                    //
+                    //             //StartPDR();
+                    //
+                    //             bool isvalid = MotionModel.isValidStep(
+                    //                 user,
+                    //                 building.floorDimenssion[user.Bid]![user.floor]![0],
+                    //                 building.floorDimenssion[user.Bid]![user.floor]![1],
+                    //                 building.nonWalkable[user.Bid]![user.floor]!,
+                    //                 reroute);
+                    //             if (isvalid) {
+                    //
+                    //               if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
+                    //                 user.move().then((value) {
+                    //                   //  user.move().then((value){
+                    //                   setState(() {
+                    //
+                    //                     if (markers.length > 0) {
+                    //                       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+                    //                       markers[user.Bid]?[0] = customMarker.move(
+                    //                           LatLng(lvalue[0],lvalue[1]),
+                    //                           markers[user.Bid]![0]
+                    //                       );
+                    //
+                    //                       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+                    //                       markers[user.Bid]?[1] = customMarker.move(
+                    //                           LatLng(ldvalue[0],ldvalue[1]),
+                    //                           markers[user.Bid]![1]
+                    //                       );
+                    //                     }
+                    //                   });
+                    //                   // });
+                    //                 });
+                    //               }else{
+                    //                 StopPDR();
+                    //                 setState(() {
+                    //                   user.isnavigating=false;
+                    //                 });
+                    //
+                    //               }
+                    //
+                    //               print("next [${user.coordX}${user.coordY}]");
+                    //
+                    //             } else {
+                    //               if(user.isnavigating){
+                    //                 // reroute();
+                    //                 // showToast("You are out of path");
+                    //               }
+                    //
+                    //             }
+                    //
+                    //           }, icon: Icon(Icons.directions_walk))),
+                    // ),
+
+                    SizedBox(height: 28.0),
+                    // Text("${user.theta}"),
+                    // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                    //
+                    //   double? compassHeading = newvalue;
+                    //   setState(() {
+                    //     user.theta = compassHeading!;
+                    //     if (mapState.interaction2) {
+                    //       mapState.bearing = compassHeading!;
+                    //       _googleMapController.moveCamera(
+                    //         CameraUpdate.newCameraPosition(
+                    //           CameraPosition(
+                    //             target: mapState.target,
+                    //             zoom: mapState.zoom,
+                    //             bearing: mapState.bearing!,
+                    //           ),
+                    //         ),
+                    //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                    //       );
+                    //     } else {
+                    //       if (markers.length > 0)
+                    //         markers[user.Bid]?[0] =
+                    //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                    //     }
+                    //   });
+                    //
+                    // }),
+                    SizedBox(height: 28.0),
+                    Semantics(
+                      label: "Change floor",
+                      child: SpeedDial(
+                        child: Text(
+                          building.floor == 0
+                              ? 'G'
+                              : '${building.floor[buildingAllApi.getStoredString()]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff24b9b0),
+                            height: 19 / 16,
                           ),
                         ),
-                      ),
-                      //debug----
-                      Positioned(
-                        bottom: 150.0, // Adjust the position as needed
-                        right: 16.0,
-
-                        child: Semantics(
-                          excludeSemantics: semanticShouldBeExcluded,
-                          child: Column(
-                            children: [
-                              //Text(Building.thresh),
-                              // Visibility(
-                              //   visible: true,
-                              //   child: Container(
-                              //       decoration: BoxDecoration(
-                              //           color: Colors.white,
-                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
-                              //       child: IconButton(
-                              //           onPressed: () {
-                              //
-                              //             //StartPDR();
-                              //
-                              //             bool isvalid = MotionModel.isValidStep(
-                              //                 user,
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //                 building.nonWalkable[user.Bid]![user.floor]!,
-                              //                 reroute);
-                              //             if (isvalid) {
-                              //
-                              //               if(MotionModel.reached(user, building.floorDimenssion[user.Bid]![user.floor]![0])==false){
-                              //                 user.move().then((value) {
-                              //                   //  user.move().then((value){
-                              //                   setState(() {
-                              //
-                              //                     if (markers.length > 0) {
-                              //                       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
-                              //                       markers[user.Bid]?[0] = customMarker.move(
-                              //                           LatLng(lvalue[0],lvalue[1]),
-                              //                           markers[user.Bid]![0]
-                              //                       );
-                              //
-                              //                       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
-                              //                       markers[user.Bid]?[1] = customMarker.move(
-                              //                           LatLng(ldvalue[0],ldvalue[1]),
-                              //                           markers[user.Bid]![1]
-                              //                       );
-                              //                     }
-                              //                   });
-                              //                   // });
-                              //                 });
-                              //               }else{
-                              //                 StopPDR();
-                              //                 setState(() {
-                              //                   user.isnavigating=false;
-                              //                 });
-                              //
-                              //               }
-                              //
-                              //               print("next [${user.coordX}${user.coordY}]");
-                              //
-                              //             } else {
-                              //               if(user.isnavigating){
-                              //                 // reroute();
-                              //                 // showToast("You are out of path");
-                              //               }
-                              //
-                              //             }
-                              //
-                              //           }, icon: Icon(Icons.directions_walk))),
-                              // ),
-
-
-                              SizedBox(height: 28.0),
-                              // Text("${user.theta}"),
-
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
-                              SizedBox(height: 28.0),
-                              Semantics(
-                                label: "Change floor",
-                                child: SpeedDial(
-                                  child: Text(
-                                    building.floor == 0
-                                        ? 'G'
-                                        : '${building.floor[buildingAllApi.getStoredString()]}',
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff24b9b0),
-                                      height: 19 / 16,
-                                    ),
-                                  ),
-                                  activeIcon: Icons.close,
-                                  backgroundColor: Colors.white,
-                                  children: [
-                                    for (int i = 0;
-                                        i <
-                                            building.numberOfFloors[
-                                                buildingAllApi
-                                                    .getStoredString()]!;
-                                        i++)
-                                      SpeedDialChild(
-                                        child: Text(
-                                          i == 0 ? 'G' : '${i}',
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            height: 19 / 16,
-                                          ),
-                                        ),
-                                        backgroundColor: pathMarkers[i] == null
-                                            ? Colors.white
-                                            : Color(0xff24b9b0),
-                                        onTap: () {
-                                          building.floor[buildingAllApi
-                                              .getStoredString()] = i;
-                                          createRooms(
-                                              building.polylinedatamap[
-                                                  buildingAllApi
-                                                      .getStoredString()]!,
-                                              building.floor[buildingAllApi
-                                                  .getStoredString()]!);
-                                          if (pathMarkers[i] != null) {
-                                            //setCameraPosition(pathMarkers[i]!);
-                                          }
-                                          building.landmarkdata!.then((value) {
-                                            createMarkers(
-                                                value,
-                                                building.floor[buildingAllApi
-                                                    .getStoredString()]!);
-                                          });
-                                        },
-                                      ),
-                                  ],
+                        activeIcon: Icons.close,
+                        backgroundColor: Colors.white,
+                        children: [
+                          for (int i = 0;
+                          i <
+                              building.numberOfFloors[
+                              buildingAllApi
+                                  .getStoredString()]!;
+                          i++)
+                            SpeedDialChild(
+                              child: Text(
+                                i == 0 ? 'G' : '${i}',
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 19 / 16,
                                 ),
                               ),
-                              SizedBox(
-                                  height: 28.0), // Adjust the height as needed
-                              // Container(
-                              //   width: 300,
-                              //   height: 100,
-                              //   child: SingleChildScrollView(
-                              //     scrollDirection: Axis.horizontal,
-                              //     child: Column(
-                              //       children: [
-                              //         Text(testBIn.keys.toString()),
-                              //         Text(testBIn.values.toString()),
-                              //         Text("summap"),
-                              //         Text(sortedsumMapfordebug.toString()),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
-                              Semantics(
-                                child: FloatingActionButton(
-                                  onPressed: () async {
-                                    //print(PathState.connections);
+                              backgroundColor: pathMarkers[i] == null
+                                  ? Colors.white
+                                  : Color(0xff24b9b0),
+                              onTap: () {
+                                building.floor[buildingAllApi
+                                    .getStoredString()] = i;
+                                createRooms(
+                                    building.polylinedatamap[
+                                    buildingAllApi
+                                        .getStoredString()]!,
                                     building.floor[buildingAllApi
-                                        .getStoredString()] = user.floor;
-                                    createRooms(
-                                        building.polyLineData!,
-                                        building.floor[
-                                            buildingAllApi.getStoredString()]!);
-                                    if (pathMarkers[user.floor] != null) {
-                                      setCameraPosition(
-                                          pathMarkers[user.floor]!);
-                                    }
-                                    building.landmarkdata!.then((value) {
-                                      createMarkers(
-                                          value,
-                                          building.floor[buildingAllApi
-                                              .getStoredString()]!);
-                                    });
-                                    if (markers.length > 0)
-                                      markers[user.Bid]?[0] = customMarker
-                                          .rotate(0, markers[user.Bid]![0]);
-                                    if (user.initialallyLocalised) {
-                                      mapState.interaction =
-                                          !mapState.interaction;
-                                    }
-                                    mapState.zoom = 21;
-                                    fitPolygonInScreen(patch.first);
-                                  },
-                                  child: Icon(
-                                    Icons.my_location_sharp,
-                                    color: Colors.black,
-                                  ),
-                                  backgroundColor: Colors
-                                      .white, // Set the background color of the FAB
-                                ),
-                              ),
-                              SizedBox(
-                                  height: 28.0), // Adjust the height as needed
-                              // FloatingActionButton(
-                              //   onPressed: (){
-                              //     print("checkingBuildingfloor");
-                              //     //building.floor == 0 ? 'G' : '${building.floor}',
-                              //     print(building.floor);
-                              //     int firstKey = building.floor.values.first;
-                              //     print(firstKey);
-                              //     print(singleroute[building.floor.values.first]);
-                              //
-                              //     print(singleroute.keys);
-                              //     print(singleroute.values);
-                              //     print(building.floor[buildingAllApi.getStoredString()]);
-                              //     print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                              //   },
-                              //   child: Icon(Icons.add)
-                              // ),
-                              // FloatingActionButton(
-                              //   onPressed: () async {
-                              //
-                              // StopPDR();
-                              //
-                              //
-                              //
-                              //     // if (user.initialallyLocalised) {
-                              //     //   setState(() {
-                              //     //     isLiveLocalizing = !isLiveLocalizing;
-                              //     //   });
-                              //     //
-                              //     //   Timer.periodic(
-                              //     //       Duration(milliseconds: 6000),
-                              //     //           (timer) async {
-                              //     //         print(resBeacons);
-                              //     //         btadapter.startScanning(resBeacons);
-                              //     //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                              //     //           //c(resBeacons)
-                              //     //         });
-                              //     //
-                              //     //       });
-                              //     //
-                              //     // }
-                              //
-                              //   },
-                              //   child: Icon(
-                              //     Icons.location_history_sharp,
-                              //     color: (isLiveLocalizing)
-                              //         ? Colors.cyan
-                              //         : Colors.black,
-                              //   ),
-                              //   backgroundColor: Colors
-                              //       .white, // Set the background color of the FAB
-                              // ),
-                            ],
-                          ),
-                        ),
+                                        .getStoredString()]!);
+                                if (pathMarkers[i] != null) {
+                                  //setCameraPosition(pathMarkers[i]!);
+                                }
+                                building.landmarkdata!.then((value) {
+                                  createMarkers(
+                                      value,
+                                      building.floor[buildingAllApi
+                                          .getStoredString()]!);
+                                });
+                              },
+                            ),
+                        ],
                       ),
-                      //-------
-                      Positioned(
-                          top: 16,
-                          left: 16,
-                          right: 16,
-                          child: _isLandmarkPanelOpen ||
-                                  _isRoutePanelOpen ||
-                                  _isnavigationPannelOpen
-                              ? Semantics(
-                                  excludeSemantics: true, child: Container())
-                              : FocusScope(
-                                  autofocus: true,
-                                  child: Focus(
-                                    child: Semantics(
-                                      sortKey: const OrdinalSortKey(
-                                          0), // header: true,
-                                      child: HomepageSearch(
-                                        onVenueClicked: onLandmarkVenueClicked,
-                                        fromSourceAndDestinationPage:
-                                            fromSourceAndDestinationPage,
-                                      ),
-                                    ),
-                                  ),
-                                )),
-                      FutureBuilder(
-                        future: building.landmarkdata,
-                        builder: (context, snapshot) {
-                          if (_isLandmarkPanelOpen) {
-                            return landmarkdetailpannel(context, snapshot);
-                          } else {
-                            return Semantics(
-                                excludeSemantics: true, child: Container());
+                    ),
+                    SizedBox(
+                        height: 28.0), // Adjust the height as needed
+                    // Container(
+                    //   width: 300,
+                    //   height: 100,
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     child: Column(
+                    //       children: [
+                    //         Text(testBIn.keys.toString()),
+                    //         Text(testBIn.values.toString()),
+                    //         Text("summap"),
+                    //         Text(sortedsumMapfordebug.toString()),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    Semantics(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          //print(PathState.connections);
+                          building.floor[buildingAllApi
+                              .getStoredString()] = user.floor;
+                          createRooms(
+                              building.polyLineData!,
+                              building.floor[
+                              buildingAllApi.getStoredString()]!);
+                          if (pathMarkers[user.floor] != null) {
+                            setCameraPosition(
+                                pathMarkers[user.floor]!);
                           }
+                          building.landmarkdata!.then((value) {
+                            createMarkers(
+                                value,
+                                building.floor[buildingAllApi
+                                    .getStoredString()]!);
+                          });
+                          if (markers.length > 0)
+                            markers[user.Bid]?[0] = customMarker
+                                .rotate(0, markers[user.Bid]![0]);
+                          if (user.initialallyLocalised) {
+                            mapState.interaction =
+                            !mapState.interaction;
+                          }
+                          mapState.zoom = 21;
+                          fitPolygonInScreen(patch.first);
                         },
+                        child: Icon(
+                          Icons.my_location_sharp,
+                          color: Colors.black,
+                        ),
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
                       ),
-                      routeDeatilPannel(),
-                      navigationPannel(),
-                      reroutePannel(),
-                      detected
-                          ? Semantics(child: nearestLandmarkpannel())
-                          : Container(),
-                      SizedBox(height: 28.0), // Adjust the height as needed
-                      // FloatingActionButton(
-                      //     onPressed: (){
-                      //       print("checkingBuildingfloor");
-                      //       //building.floor == 0 ? 'G' : '${building.floor}',
-                      //       print(building.floor);
-                      //       int firstKey = building.floor.values.first;
-                      //       print(firstKey);
-                      //       print(singleroute[building.floor.values.first]);
-                      //
-                      //       print(singleroute.keys);
-                      //       print(singleroute.values);
-                      //       print(building.floor[buildingAllApi.getStoredString()]);
-                      //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                      //     },
-                      //     child: Icon(Icons.add)
-                      // ),
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                        height: 28.0), // Adjust the height as needed
+                    // FloatingActionButton(
+                    //   onPressed: (){
+                    //     print("checkingBuildingfloor");
+                    //     //building.floor == 0 ? 'G' : '${building.floor}',
+                    //     print(building.floor);
+                    //     int firstKey = building.floor.values.first;
+                    //     print(firstKey);
+                    //     print(singleroute[building.floor.values.first]);
+                    //
+                    //     print(singleroute.keys);
+                    //     print(singleroute.values);
+                    //     print(building.floor[buildingAllApi.getStoredString()]);
+                    //     print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                    //   },
+                    //   child: Icon(Icons.add)
+                    // ),
+                    // FloatingActionButton(
+                    //   onPressed: () async {
+                    //
+                    // StopPDR();
+                    //
+                    //
+                    //
+                    //     // if (user.initialallyLocalised) {
+                    //     //   setState(() {
+                    //     //     isLiveLocalizing = !isLiveLocalizing;
+                    //     //   });
+                    //     //
+                    //     //   Timer.periodic(
+                    //     //       Duration(milliseconds: 6000),
+                    //     //           (timer) async {
+                    //     //         print(resBeacons);
+                    //     //         btadapter.startScanning(resBeacons);
+                    //     //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
+                    //     //           //c(resBeacons)
+                    //     //         });
+                    //     //
+                    //     //       });
+                    //     //
+                    //     // }
+                    //
+                    //   },
+                    //   child: Icon(
+                    //     Icons.location_history_sharp,
+                    //     color: (isLiveLocalizing)
+                    //         ? Colors.cyan
+                    //         : Colors.black,
+                    //   ),
+                    //   backgroundColor: Colors
+                    //       .white, // Set the background color of the FAB
+                    // ),
+                  ],
                 ),
+              ),
+            ),
+            //-------
+            Positioned(
+                top: 16,
+                left: 16,
+                right: 16,
+                child: _isLandmarkPanelOpen ||
+                    _isRoutePanelOpen ||
+                    _isnavigationPannelOpen
+                    ? Semantics(
+                    excludeSemantics: true, child: Container())
+                    : FocusScope(
+                  autofocus: true,
+                  child: Focus(
+                    child: Semantics(
+                      sortKey: const OrdinalSortKey(
+                          0), // header: true,
+                      child: HomepageSearch(
+                        onVenueClicked: onLandmarkVenueClicked,
+                        fromSourceAndDestinationPage:
+                        fromSourceAndDestinationPage,
+                      ),
+                    ),
+                  ),
+                )),
+            FutureBuilder(
+              future: building.landmarkdata,
+              builder: (context, snapshot) {
+                if (_isLandmarkPanelOpen) {
+                  return landmarkdetailpannel(context, snapshot);
+                } else {
+                  return Semantics(
+                      excludeSemantics: true, child: Container());
+                }
+              },
+            ),
+            routeDeatilPannel(),
+            navigationPannel(),
+            reroutePannel(),
+            detected
+                ? Semantics(child: nearestLandmarkpannel())
+                : Container(),
+            SizedBox(height: 28.0), // Adjust the height as needed
+            // FloatingActionButton(
+            //     onPressed: (){
+            //       print("checkingBuildingfloor");
+            //       //building.floor == 0 ? 'G' : '${building.floor}',
+            //       print(building.floor);
+            //       int firstKey = building.floor.values.first;
+            //       print(firstKey);
+            //       print(singleroute[building.floor.values.first]);
+            //
+            //       print(singleroute.keys);
+            //       print(singleroute.values);
+            //       print(building.floor[buildingAllApi.getStoredString()]);
+            //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+            //     },
+            //     child: Icon(Icons.add)
+            // ),
+            // FloatingActionButton(
+            //   onPressed: () async {
+            //
+            //     //StopPDR();
+            //
+            //     if (user.initialallyLocalised) {
+            //       setState(() {
+            //         isLiveLocalizing = !isLiveLocalizing;
+            //       });
+            //       HelperClass.showToast("realTimeReLocalizeUser started");
+            //
+            //       Timer.periodic(
+            //           Duration(milliseconds: 5000),
+            //               (timer) async {
+            //             print(resBeacons);
+            //             btadapter.startScanning(resBeacons);
+            //
+            //
+            //             // setState(() {
+            //             //   sumMap=  btadapter.calculateAverage();
+            //             // });
+            //
+            //
+            //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+            //               realTimeReLocalizeUser(resBeacons)
+            //               // listenToBin()
+            //
+            //
+            //             });
+            //
+            //             setState(() {
+            //               debugPQ = btadapter.returnPQ();
+            //
+            //             });
+            //
+            //           });
+            //
+            //     }
+            //
+            //   },
+            //   child: Icon(
+            //     Icons.location_history_sharp,
+            //     color: (isLiveLocalizing)
+            //         ? Colors.cyan
+            //         : Colors.black,
+            //   ),
+            //   backgroundColor: Colors
+            //       .white, // Set the background color of the FAB
+            // ),
+          ],
+        ),
+      ),
     );
   }
   //
@@ -7101,7 +7030,7 @@ class _NavigationState extends State<Navigation> {
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }

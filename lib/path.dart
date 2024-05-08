@@ -946,7 +946,7 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
-  path = tools.generateCompletePath(tu, numCols);
+  path = tools.generateCompletePath(tu, numCols,nonWalkableCells);
 
 
 

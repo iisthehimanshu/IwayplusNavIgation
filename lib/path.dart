@@ -991,8 +991,10 @@ List<Cell> findCorridorSegments(
         (westCollision ? 1 : 0);
 
     // Check if any two opposite directions collide with non-walkable cells
-
-    if (nextrow != row && nextcol != col) {
+    if(i == 0){
+      print("$pos with first cell");
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+    }else if (nextrow != row && nextcol != col) {
       print("$pos with first eight");
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     } else if (turnPoints.contains(pos)) {

@@ -141,25 +141,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> sortedsumMap={};
 
   bool listenToBin(){
-
-
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
 
-
-    print(sumMap);
-
-
+    sortedsumMap = HelperClass().sortMapByValue(sumMap);
     setState(() {
-      sortedsumMap = HelperClass().sortMapByValue(sumMap);
       ShowsumMap = HelperClass().sortMapByValue(sortedsumMap);
     });
-    if(sortedsumMap.isNotEmpty){
-      nearestBeacon = sortedsumMap.entries.first.key;
-      highestweight = sortedsumMap.entries.first.value;
-    }
-
+    nearestBeacon = sortedsumMap.entries.first.key;
+    highestweight = sortedsumMap.entries.first.value;
 
     // print("-90---   ${sumMap.length}");
     // print("checkingavgmap   ${sumMap}");
@@ -214,8 +205,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && highestweight >=1.2){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
@@ -248,49 +238,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.repaint(nearestBeacon);
                 widget.reroute;
                 return false;//away from path
-
               }else{
-                print("workingg 2");
-                int distanceFromPath = 100000000;
-                int? indexOnPath = null;
-                int numCols = widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
-                widget.user.path.forEach((node) {
-                  List<int> pathcoord = [node % numCols, node ~/ numCols];
-                  double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-                  if(d1<distanceFromPath){
-                    distanceFromPath = d1.toInt();
-                    print("node on path $node");
-                    print("distanceFromPath $distanceFromPath");
-                    indexOnPath = widget.user.path.indexOf(node);
-                    print(indexOnPath);
-                  }
-                });
+                print("workingg 4");
+                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
 
-                if(distanceFromPath>15){
-                  print("workingg 3");
-                  _timer.cancel();
-                  widget.repaint(nearestBeacon);
-                  widget.reroute;
-                  return false;//away from path
-                }else{
-                  print("workingg 4");
-                  widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-
-                  speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
-                  widget.user.moveToPointOnPath(indexOnPath!);
-                  widget.moveUser();
-                  return true; //moved on path
-                }
+                speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
+                widget.user.moveToPointOnPath(indexOnPath!);
+                widget.moveUser();
+                return true; //moved on path
               }
-
-
-              print("d $d");
-              print("widget.user.key ${widget.user.key}");
-              print("beaconcoord ${beaconcoord}");
-              print("usercoord ${usercoord}");
-              print(nearestBeacon);
             }
 
+
+            print("d $d");
+            print("widget.user.key ${widget.user.key}");
+            print("beaconcoord ${beaconcoord}");
+            print("usercoord ${usercoord}");
+            print(nearestBeacon);
           }else{
             print("workingg 5");
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
@@ -322,7 +286,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     HelperClass.showToast("Bin cleared");
     return false;
   }
-
 
 
   FlutterTts flutterTts = FlutterTts() ;

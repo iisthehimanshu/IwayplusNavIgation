@@ -126,7 +126,7 @@ class _NavigationState extends State<Navigation> {
 
   Building building = Building(floor: Map(), numberOfFloors: Map());
   Map<int, Set<gmap.Polyline>> singleroute = {};
-  BT btadapter = new BT();
+  BLueToothClass btadapter = new BLueToothClass();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
   bool _isnavigationPannelOpen = false;
@@ -430,6 +430,7 @@ class _NavigationState extends State<Navigation> {
   double filteredX = 0;
   double filteredY = 0;
   double filteredZ = 0;
+  bool restartScanning=false;
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
@@ -477,6 +478,7 @@ class _NavigationState extends State<Navigation> {
                 if(isvalid){
 
                   bool moveOneMore = true;
+                  restartScanning=false;
                   // bool moveOneLift = true;
                   // bool moveOneDesti=false;
                   Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
@@ -487,6 +489,7 @@ class _NavigationState extends State<Navigation> {
                         if (user.floor == key) {
                           if (user.path[user.pathobj.index] == value) {
                             setState(() {
+                              restartScanning=true;
                               moveOneMore = false;
                             });
                           }
@@ -502,6 +505,7 @@ class _NavigationState extends State<Navigation> {
                         getPoints[j][1] == user.showcoordY) {
                       print("turned it false");
                       setState(() {
+
                         moveOneMore = false;
                       });
 
@@ -3486,6 +3490,9 @@ class _NavigationState extends State<Navigation> {
     }
     getPoints.add([destinationX, destinationY]);
 
+    print("");
+    print(getPoints);
+
 
     List<Cell> Cellpath =
     findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
@@ -4715,7 +4722,7 @@ class _NavigationState extends State<Navigation> {
                 ),
               ),
             ),
-            DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation, isRelocalize: false,)],
+            DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation, isRelocalize: false,restartScanning: restartScanning,)],
         ));
   }
 

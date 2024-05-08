@@ -7,7 +7,7 @@ import '../buildingState.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'APIMODELS/beaconData.dart';
 
-class BT {
+class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   Map<String,double> avgMap = Map();
   HashMap<String,int> numberOfSample = HashMap();
@@ -53,19 +53,21 @@ class BT {
     startbin();
 
     FlutterBluePlus.startScan();
-
+print("scanning strted");
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
         // print("mac $result    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
+          print(MacId);
           beacondetail[MacId] = Rssi * -1;
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
     });
+    print("calc the averagegeee");
     calculateAverage();
   }
 
@@ -168,7 +170,7 @@ class BT {
   }
 
   void addtoBin(String MacId, int rssi) {
-
+print("binnnninngggggg");
     int binnumber = 0;
     int Rssi = rssi * -1;
     if(numberOfSample[MacId] == null){
@@ -200,6 +202,7 @@ class BT {
     }
 
     if (BIN[binnumber]!.containsKey(MacId)) {
+      print(BIN[binnumber]![MacId]! + weight[binnumber]!);
       BIN[binnumber]![MacId] = BIN[binnumber]![MacId]! + weight[binnumber]!;
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
@@ -213,6 +216,7 @@ class BT {
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key
+    print(BIN);
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
@@ -221,10 +225,12 @@ class BT {
 
 
     // Divide the sum by the number of values for each string key
+    print("calc averageeeeeeeeee");
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;
     });
+    print(sumMap);
     avgMap = sumMap;
     return sumMap;
   }

@@ -380,7 +380,7 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future<void> speak(String msg) async {
-    await flutterTts.setSpeechRate(0.6);
+    await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
@@ -460,114 +460,9 @@ class _NavigationState extends State<Navigation> {
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
-            if (MotionModel.reached(user,
-                building.floorDimenssion[user.Bid]![user.floor]![0]) ==
-                false) {
-              user.move().then((value) {
-
-
-                print("moving one more");
-                bool isvalid = MotionModel.isValidStep(
-                    user,
-                    building.floorDimenssion[user.Bid]![user.floor]![0],
-                    building.floorDimenssion[user.Bid]![user.floor]![1],
-                    building.nonWalkable[user.Bid]![user.floor]!,
-                    reroute);
-                if(isvalid){
-
-                  bool moveOneMore = true;
-                  // bool moveOneLift = true;
-                  // bool moveOneDesti=false;
-                  Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
-                  liftLoc.forEach((key, value) {
-                    if (user.Bid == key) {
-                      Map<int, int> liftCoords = value;
-                      liftCoords.forEach((key, value) {
-                        if (user.floor == key) {
-                          if (user.path[user.pathobj.index] == value) {
-                            setState(() {
-                              moveOneMore = false;
-                            });
-                          }
-                        }
-                      });
-                    }
-                  });
-
-                  for (int j = 0; j < getPoints.length; j++) {
-                    print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
-                    print("user point ${user.showcoordX},${user.showcoordY}");
-                    if (getPoints[j][0] == user.showcoordX &&
-                        getPoints[j][1] == user.showcoordY) {
-                      print("turned it false");
-                      setState(() {
-                        moveOneMore = false;
-                      });
-
-                      break;
-                    }
-                  }
-
-                  print("destii cooords");
-
-                  if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
-                    print("destiiii cordsss matchess");
-                    setState(() {
-                      moveOneMore=false;
-                    });
-                  }
-
-
-                  if (moveOneMore) {
-
-                    print("twice movement");
-                    user.move().then((value) {
-                      setState(() {
-                        if (markers.length > 0) {
-                          List<double> lvalue = tools.localtoglobal(
-                              user.showcoordX.toInt(), user.showcoordY.toInt());
-                          markers[user.Bid]?[0] = customMarker.move(
-                              LatLng(lvalue[0], lvalue[1]),
-                              markers[user.Bid]![0]);
-
-                          List<double> ldvalue = tools.localtoglobal(
-                              user.coordX.toInt(), user.coordY.toInt());
-                          markers[user.Bid]?[1] = customMarker.move(
-                              LatLng(ldvalue[0], ldvalue[1]),
-                              markers[user.Bid]![1]);
-                        }
-                      });
-                    });
-                  }else {
-
-                    print("rendering here");
-                    setState(() {
-                      if (markers.length > 0) {
-                        List<double> lvalue = tools.localtoglobal(
-                            user.showcoordX.toInt(), user.showcoordY.toInt());
-                        markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
-
-                        List<double> ldvalue = tools.localtoglobal(
-                            user.coordX.toInt(), user.coordY.toInt());
-                        markers[user.Bid]?[1] = customMarker.move(
-                            LatLng(ldvalue[0], ldvalue[1]),
-                            markers[user.Bid]![1]);
-                      }
-                    });
-                  }
-                }
-
-              });
-            } else {
-              setState(() {
-                user.isnavigating = false;
-              });
-              StopPDR();
-              print("reached destination");
-
-            }
-
-            print("next [${user.coordX}${user.coordY}]");
+            user.move().then((value){
+              renderHere();
+            });
           } else {
             if (user.isnavigating) {
               // reroute();
@@ -585,6 +480,32 @@ class _NavigationState extends State<Navigation> {
         });
       }
     }));
+  }
+
+  void renderHere(){
+    setState(() {
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(
+            user.showcoordX.toInt(), user.showcoordY.toInt());
+        markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+        mapState.target = LatLng(lvalue[0], lvalue[1]);
+        _googleMapController
+            .animateCamera(CameraUpdate
+            .newCameraPosition(
+          CameraPosition(
+              target: mapState.target,
+              zoom: mapState.zoom,
+              bearing: mapState.bearing!,
+              tilt: mapState.tilt),
+        ));
+
+        List<double> ldvalue = tools.localtoglobal(
+            user.coordX.toInt(), user.coordY.toInt());
+        markers[user.Bid]?[1] = customMarker.move(
+            LatLng(ldvalue[0], ldvalue[1]),
+            markers[user.Bid]![1]);
+      }
+    });
   }
 
   void onStepCount() {
@@ -676,7 +597,7 @@ class _NavigationState extends State<Navigation> {
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
       if (speakTTS) {
-        mapState.zoom = 21.0;
+        mapState.zoom = 22.0;
         _googleMapController.animateCamera(
           CameraUpdate.newLatLngZoom(
             LatLng(values[0], values[1]),
@@ -692,6 +613,12 @@ class _NavigationState extends State<Navigation> {
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
+      UserState.cols = building.floorDimenssion[apibeaconmap[nearestBeacon]!.buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
+      UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!.buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+      UserState.reroute = reroute;
+      UserState.closeNavigation = closeNavigation;
+      UserState.AlignMapToPath = alignMapToPath;
+      UserState.speak = speak;
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -979,6 +906,7 @@ class _NavigationState extends State<Navigation> {
           currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
 
           building.nonWalkable[value.landmarks![i].buildingID!] = currrentnonWalkable;
+          UserState.nonWalkable = currrentnonWalkable;
           localizedData.nonWalkable = currrentnonWalkable;
 
 
@@ -3484,7 +3412,7 @@ class _NavigationState extends State<Navigation> {
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
 
-
+    print("numcol $numCols");
 
     List<int> path = findBestPathAmongstBoth(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
@@ -3499,11 +3427,14 @@ class _NavigationState extends State<Navigation> {
     }
     getPoints.add([destinationX, destinationY]);
 
-
+    building.landmarkdata!.then((value){
+      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(path, value.landmarksMap!, 3, numCols, floor);
+      PathState.turnLandmarks = nearbyLandmarks;
+      PathState.associateTurnWithLandmark = tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols);
+    });
     List<Cell> Cellpath =
     findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
-    print("aqaqaq ${PathState.CellTurnPoints}");
     List<int> temp = [];
     List<Cell> Celltemp = [];
 
@@ -4093,32 +4024,16 @@ class _NavigationState extends State<Navigation> {
                                               semanticShouldBeExcluded = false;
 
                                               StartPDR();
-                                              mapState.tilt = 50;
-
-
-                                              mapState.bearing =
-                                                  tools.calculateBearing([
-                                                    user.lat,
-                                                    user.lng
-                                                  ], [
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj.index + 1]
-                                                        .lat,
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj.index + 1]
-                                                        .lng
-                                                  ]);
-                                              _googleMapController
-                                                  .animateCamera(CameraUpdate
-                                                  .newCameraPosition(
-                                                CameraPosition(
-                                                    target: mapState.target,
-                                                    zoom: mapState.zoom,
-                                                    bearing: mapState.bearing!,
-                                                    tilt: mapState.tilt),
-                                              ));
+                                              alignMapToPath([user.lat,user.lng], [
+                                                PathState
+                                                    .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                                    .lat,
+                                                PathState
+                                                    .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                                    .lng
+                                              ]);
                                             },
                                             child: !startingNavigation
                                                 ? Row(
@@ -4363,6 +4278,26 @@ class _NavigationState extends State<Navigation> {
       ),
     );
   }
+
+
+  void alignMapToPath(List<double> A, List<double> B){
+    mapState.tilt = 50;
+
+    mapState.bearing =
+        tools.calculateBearing(A, B);
+    _googleMapController
+        .animateCamera(CameraUpdate
+        .newCameraPosition(
+      CameraPosition(
+          target: mapState.target,
+          zoom: mapState.zoom,
+          bearing: mapState.bearing!,
+          tilt: mapState.tilt),
+    ));
+  }
+
+
+
   void shouldBeOpenedVarChangeFunc(){
     setState(() {
       semanticShouldBeExcluded = false;
@@ -6668,114 +6603,9 @@ class _NavigationState extends State<Navigation> {
                                     building.nonWalkable[user.Bid]![user.floor]!,
                                     reroute);
                                 if (isvalid) {
-                                  if (MotionModel.reached(user,
-                                      building.floorDimenssion[user.Bid]![user.floor]![0]) ==
-                                      false) {
-                                    user.move().then((value) {
-
-
-                                      print("moving one more");
-                                      bool isvalid = MotionModel.isValidStep(
-                                          user,
-                                          building.floorDimenssion[user.Bid]![user.floor]![0],
-                                          building.floorDimenssion[user.Bid]![user.floor]![1],
-                                          building.nonWalkable[user.Bid]![user.floor]!,
-                                          reroute);
-                                      if(isvalid){
-
-                                        bool moveOneMore = true;
-                                        // bool moveOneLift = true;
-                                        // bool moveOneDesti=false;
-                                        // Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
-                                        // liftLoc.forEach((key, value) {
-                                        //   if (user.Bid == key) {
-                                        //     Map<int, int> liftCoords = value;
-                                        //     liftCoords.forEach((key, value) {
-                                        //       if (user.floor == key) {
-                                        //         if (user.path[user.pathobj.index] == value) {
-                                        //           setState(() {
-                                        //             moveOneLift = false;
-                                        //           });
-                                        //         }
-                                        //       }
-                                        //     });
-                                        //   }
-                                        // });
-
-                                        for (int j = 0; j < getPoints.length; j++) {
-                                          print("turn point ${getPoints[j][0]},${getPoints[j][1]}");
-                                          print("user point ${user.showcoordX},${user.showcoordY}");
-                                          if (getPoints[j][0] == user.showcoordX &&
-                                              getPoints[j][1] == user.showcoordY) {
-                                            print("turned it false");
-                                            setState(() {
-                                              moveOneMore = false;
-                                            });
-
-                                            break;
-                                          }
-                                        }
-
-                                        print("destii cooords");
-
-                                        if(user.showcoordX==user.pathobj.destinationX && user.showcoordY== user.pathobj.destinationY){
-                                          print("destiiii cordsss matchess");
-                                          setState(() {
-                                            moveOneMore=false;
-                                          });
-                                        }
-
-
-                                        if (moveOneMore) {
-
-                                          print("twice movement");
-                                          user.move().then((value) {
-                                            setState(() {
-                                              if (markers.length > 0) {
-                                                List<double> lvalue = tools.localtoglobal(
-                                                    user.showcoordX.toInt(), user.showcoordY.toInt());
-                                                markers[user.Bid]?[0] = customMarker.move(
-                                                    LatLng(lvalue[0], lvalue[1]),
-                                                    markers[user.Bid]![0]);
-
-                                                List<double> ldvalue = tools.localtoglobal(
-                                                    user.coordX.toInt(), user.coordY.toInt());
-                                                markers[user.Bid]?[1] = customMarker.move(
-                                                    LatLng(ldvalue[0], ldvalue[1]),
-                                                    markers[user.Bid]![1]);
-                                              }
-                                            });
-                                          });
-                                        }else {
-
-                                          print("rendering here");
-                                          setState(() {
-                                            if (markers.length > 0) {
-                                              List<double> lvalue = tools.localtoglobal(
-                                                  user.showcoordX.toInt(), user.showcoordY.toInt());
-                                              markers[user.Bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
-
-                                              List<double> ldvalue = tools.localtoglobal(
-                                                  user.coordX.toInt(), user.coordY.toInt());
-                                              markers[user.Bid]?[1] = customMarker.move(
-                                                  LatLng(ldvalue[0], ldvalue[1]),
-                                                  markers[user.Bid]![1]);
-                                            }
-                                          });
-                                        }
-                                      }
-
-                                    });
-                                  } else {
-                                    setState(() {
-                                      user.isnavigating = false;
-                                    });
-                                    StopPDR();
-                                    print("reached destination");
-
-                                  }
-
-                                  print("next [${user.coordX}${user.coordY}]");
+                                  user.move().then((value){
+                                    renderHere();
+                                  });
                                 } else {
                                   if (user.isnavigating) {
                                     // reroute();

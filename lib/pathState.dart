@@ -1,5 +1,7 @@
 import 'package:iwayplusnav/Cell.dart';
 
+import 'APIMODELS/landmark.dart';
+
 class pathState {
   String sourcePolyID = "";
   String destinationPolyID = "";
@@ -23,6 +25,8 @@ class pathState {
   String destinationBid = "";
   Map<String,Map<int,int>> connections = {};
   List<int> beaconCords = [];
+  List<Landmarks> turnLandmarks = [];
+  Map<int,Landmarks> associateTurnWithLandmark = Map();
 
   // Default constructor without arguments
   pathState();

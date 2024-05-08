@@ -70,6 +70,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
+
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
     Building.thresh = "";
@@ -281,7 +282,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-
+    HelperClass.showToast("Bin cleared");
     return false;
   }
 

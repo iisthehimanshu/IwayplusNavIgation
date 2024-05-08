@@ -17,6 +17,7 @@ import 'package:iwayplusnav/Elements/DestinationPageChipsWidget.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/Elements/SearchNearby.dart';
 import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
+import 'package:iwayplusnav/UserState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -32,7 +33,10 @@ class DestinationSearchPage extends StatefulWidget {
   String previousFilter;
   bool voiceInputEnabled;
 
-  DestinationSearchPage({this.hintText = "", this.previousFilter = "",required this.voiceInputEnabled});
+  DestinationSearchPage(
+      {this.hintText = "",
+      this.previousFilter = "",
+      required this.voiceInputEnabled});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
@@ -65,20 +69,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         vall = i;
       }
     }
-    if(widget.voiceInputEnabled){
+    if (widget.voiceInputEnabled) {
       initSpeech();
       setState(() {
-        speetchText.isListening
-            ? stopListening()
-            : startListening();
+        speetchText.isListening ? stopListening() : startListening();
       });
       if (!micselected) {
         micColor = Color(0xff24B9B0);
       }
 
-      setState(() {
-      });
-
+      setState(() {});
     }
 
     if (widget.previousFilter != "") {
@@ -256,8 +256,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
-                if(value.name!
-                    .toLowerCase() == searchText.toLowerCase()){
+                if (value.name!.toLowerCase() == searchText.toLowerCase()) {
                   optionListItemBuildingName.add(value.buildingName!);
                   searcCategoryhResults.clear();
                   optionListItemBuildingName.forEach((element) {
@@ -290,10 +289,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           category = false;
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
-
-
             if (searchResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons") {
+              if (value.name != null && value.element!.subType != "beacons" && value.buildingID == buildingAllApi.selectedBuildingID) {
                 if (value.name!
                     .toLowerCase()
                     .contains(searchText.toLowerCase())) {
@@ -323,15 +320,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   searchResults.add(SearchpageResults(
                     name: "${value.name}",
                     location:
-
-                    "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                        "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
                     floor: value.floor!,
                     coordX: value.coordinateX!,
                     coordY: value.coordinateY!,
-
                   ));
                 }
               }
@@ -410,7 +405,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color:
-                      containerBoxColor, // You can customize the border color
+                          containerBoxColor, // You can customize the border color
                       width: 1.0, // You can customize the border width
                     ),
                   ),
@@ -444,39 +439,38 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       Expanded(
                         child: Container(
                             child: TextField(
-
-                              autofocus: true,
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: "${searchHintString}",
-                                border: InputBorder.none, // Remove default border
-                              ),
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff18181b),
-                                height: 25 / 16,
-                              ),
-                              onTap: () {
-                                if (containerBoxColor == Color(0xffA1A1AA)) {
-                                  containerBoxColor = Color(0xff24B9B0);
-                                } else {
-                                  containerBoxColor = Color(0xffA1A1AA);
-                                }
-                                print("Final Set");
-                              },
-                              onSubmitted: (value) {
-                                // print("Final Set");
-                                print(value);
-                                search(value);
-                              },
-                              onChanged: (value) {
-                                search(value);
-                                // print("Final Set");
-                                print(cardSet);
-                              },
-                            )),
+                          autofocus: true,
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: "${searchHintString}",
+                            border: InputBorder.none, // Remove default border
+                          ),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff18181b),
+                            height: 25 / 16,
+                          ),
+                          onTap: () {
+                            if (containerBoxColor == Color(0xffA1A1AA)) {
+                              containerBoxColor = Color(0xff24B9B0);
+                            } else {
+                              containerBoxColor = Color(0xffA1A1AA);
+                            }
+                            print("Final Set");
+                          },
+                          onSubmitted: (value) {
+                            // print("Final Set");
+                            print(value);
+                            search(value);
+                          },
+                          onChanged: (value) {
+                            search(value);
+                            // print("Final Set");
+                            print(cardSet);
+                          },
+                        )),
                       ),
                       Container(
                         margin: EdgeInsets.only(right: 6),
@@ -494,7 +488,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                       searcCategoryhResults = [];
                                     });
                                   },
-                                  icon: Semantics(label:"Close",child: Icon(Icons.close)))
+                                  icon: Semantics(
+                                      label: "Close", child: Icon(Icons.close)))
                               : IconButton(
                                   onPressed: () {
                                     initSpeech();
@@ -507,10 +502,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                       micColor = Color(0xff24B9B0);
                                     }
 
-
-                                    setState(() {
-
-                                    });
+                                    setState(() {});
                                   },
                                   icon: Semantics(
                                     label: "Voice Search",
@@ -520,7 +512,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     ),
                                   ),
                                 ),
-
                         ),
                       ),
                     ],
@@ -566,7 +557,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       child: Column(
                     children: category ? searcCategoryhResults : searchResults,
                   ))),
-
             ],
           ),
         ),
@@ -587,4 +577,3 @@ class SetInfo {
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
 }
-

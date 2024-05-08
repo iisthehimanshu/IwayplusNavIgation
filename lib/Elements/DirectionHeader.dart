@@ -33,8 +33,8 @@ class DirectionHeader extends StatefulWidget {
 
   DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
-      double angle = tools.calculateAngleBWUserandPath(
-          user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(
+          user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
       direction = tools.angleToClocks(angle);
       if(direction == "Straight"){
         direction = "Go Straight";
@@ -97,12 +97,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
       });
-      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index);
+      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
-        angle = tools.calculateAngleBWUserandPath(widget.user, widget.user.path[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
       }
 
       print("angleeeeee $angle")  ;
@@ -115,8 +115,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
          
-          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
-          widget.getSemanticValue="${widget.direction} ${(widget.distance/2).toInt()} steps";
+          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
+          widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
         }
       });
 
@@ -162,7 +162,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     // print("-90---   ${sumMap.length}");
     // print("checkingavgmap   ${sumMap}");
-    widget.direction = "";
 
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -214,6 +213,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
+
           if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && highestweight >=1.2){
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
@@ -247,23 +247,49 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.repaint(nearestBeacon);
                 widget.reroute;
                 return false;//away from path
+
               }else{
-                print("workingg 4");
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-              
-                speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
-                widget.user.moveToPointOnPath(indexOnPath!);
-                widget.moveUser();
-                return true; //moved on path
+                print("workingg 2");
+                int distanceFromPath = 100000000;
+                int? indexOnPath = null;
+                int numCols = widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
+                widget.user.path.forEach((node) {
+                  List<int> pathcoord = [node % numCols, node ~/ numCols];
+                  double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+                  if(d1<distanceFromPath){
+                    distanceFromPath = d1.toInt();
+                    print("node on path $node");
+                    print("distanceFromPath $distanceFromPath");
+                    indexOnPath = widget.user.path.indexOf(node);
+                    print(indexOnPath);
+                  }
+                });
+
+                if(distanceFromPath>15){
+                  print("workingg 3");
+                  _timer.cancel();
+                  widget.repaint(nearestBeacon);
+                  widget.reroute;
+                  return false;//away from path
+                }else{
+                  print("workingg 4");
+                  widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+
+                  speak("You are near ${Building.apibeaconmap[nearestBeacon]!.name}");
+                  widget.user.moveToPointOnPath(indexOnPath!);
+                  widget.moveUser();
+                  return true; //moved on path
+                }
               }
+
+
+              print("d $d");
+              print("widget.user.key ${widget.user.key}");
+              print("beaconcoord ${beaconcoord}");
+              print("usercoord ${usercoord}");
+              print(nearestBeacon);
             }
 
-
-            print("d $d");
-            print("widget.user.key ${widget.user.key}");
-            print("beaconcoord ${beaconcoord}");
-            print("usercoord ${usercoord}");
-            print(nearestBeacon);
           }else{
             print("workingg 5");
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
@@ -351,7 +377,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-      double angle = tools.calculateAngleBWUserandCellPath(widget.user, widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
       widget.direction = tools.angleToClocks(angle);
       if(widget.direction == "Straight"){
         widget.direction = "Go Straight";
@@ -359,9 +385,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = "Turn ${widget.direction}, and Go Straight";
       }
 
-      if(nextTurn == turnPoints.last && widget.distance == 5){
+      if(nextTurn == turnPoints.last && widget.distance == 7){
         double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
+      }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 5){
+        int index = widget.user.path.indexOf(nextTurn);
+        double angle = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+
+        String direc = tools.angleToClocks(angle);
+        if(!direc.contains("slight")){
+          if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
+            speak("Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+          }
+        }
       }
 
       if(oldWidget.direction != widget.direction){
@@ -377,7 +413,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("${widget.direction} ${(widget.distance/2).toInt()} steps");
+          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
 
         }else if(widget.direction == "Go Straight"){
 
@@ -385,7 +421,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           //Vibration.vibrate();
 
-          speak("Go Straight ${(widget.distance/2).toInt()} steps");
+          speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         }
       }
     }
@@ -489,7 +525,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                         SizedBox(height: 4.0),
                         Text(
 
-                          '${(widget.distance/2).toInt()} steps',
+                          '${(widget.distance/UserState.stepSize).ceil()} steps',
                           style: TextStyle(
 
                             color: Colors.white,
@@ -525,25 +561,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ],
             ),
           ),
-          SizedBox(
-            height: 100,
-          ),
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                  Text(ShowsumMap.values.toString()),
-                  Text(debugNearestbeacon.toString()),
-                  Text("current idx"+widget.user.pathobj.index.toString()),
-                ],
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   height: 100,
+          // ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //         Text(ShowsumMap.values.toString()),
+          //         Text(debugNearestbeacon.toString()),
+          //         Text("current idx"+widget.user.pathobj.index.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

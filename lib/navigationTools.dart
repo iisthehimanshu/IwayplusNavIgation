@@ -1018,14 +1018,14 @@ class tools {
     return res;
   }
 
-  static List<int> generateCompletePath(List<int> turns, int numCols) {
+  static List<int> generateCompletePath(List<int> turns, int numCols, List<int> nonWalkableCells) {
     List<int> completePath = [];
 
     // Start with the first point in your path
     int currentPoint = turns[0];
     int x = currentPoint % numCols;
     int y = currentPoint ~/ numCols;
-    completePath.add(x+y*numCols);
+    completePath.add(x + y * numCols);
 
     // Connect each turn point with a straight line
     for (int i = 1; i < turns.length; i++) {
@@ -1045,12 +1045,61 @@ class tools {
         } else if (y > turnY) {
           y--;
         }
-        completePath.add(x+y*numCols);
+
+        // Convert current x, y coordinates back to index form
+        int currentIndex = x + y * numCols;
+
+        // Check if the current index is in the non-walkable cells list
+        if (nonWalkableCells.contains(currentIndex)) {
+          // Handle non-walkable cell, such as breaking out of the loop or finding an alternative path
+          // Here, I'll just break out of the loop
+          break;
+        }
+
+        // Add the current index to the complete path
+        completePath.add(currentIndex);
       }
     }
 
     return completePath;
   }
+
+  // static List<int> generateCompletePath(List<int> turns, int numCols,List<int> nonWalkableCells) {
+  //   List<int> completePath = [];
+  //
+  //   // Start with the first point in your path
+  //   int currentPoint = turns[0];
+  //   int x = currentPoint % numCols;
+  //   int y = currentPoint ~/ numCols;
+  //   completePath.add(x+y*numCols);
+  //
+  //   // Connect each turn point with a straight line
+  //   for (int i = 1; i < turns.length; i++) {
+  //     int turnPoint = turns[i];
+  //     int turnX = turnPoint % numCols;
+  //     int turnY = turnPoint ~/ numCols;
+  //
+  //     // Connect straight line from current point to turn point
+  //     while (x != turnX || y != turnY) {
+  //       if (x < turnX) {
+  //         x++;
+  //       } else if (x > turnX) {
+  //         x--;
+  //       }
+  //       if (y < turnY) {
+  //         y++;
+  //       } else if (y > turnY) {
+  //         y--;
+  //       }
+  //       if(nonWalkableCells.contains(x+y*numCols)){
+  //
+  //       }
+  //       completePath.add(x+y*numCols);
+  //     }
+  //   }
+  //
+  //   return completePath;
+  // }
   static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
     Map<int,int> res=new Map();
 

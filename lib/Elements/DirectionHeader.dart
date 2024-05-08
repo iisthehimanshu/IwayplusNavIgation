@@ -30,6 +30,7 @@ class DirectionHeader extends StatefulWidget {
   final Function() closeNavigation;
 
 
+
   DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
@@ -51,7 +52,7 @@ class DirectionHeader extends StatefulWidget {
 
 class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
-  BT btadapter = new BT();
+  BLueToothClass btadapter = new BLueToothClass();
   late Timer _timer;
 
 
@@ -81,10 +82,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("direction header:: ${turnPoints}");
       print(widget.user.path.length);
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      btadapter.startScanning(Building.apibeaconmap);
+       btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         print("Pathposition");
       print(widget.user.path);
+
 
         // print("listen to bin :${listenToBin()}");
 

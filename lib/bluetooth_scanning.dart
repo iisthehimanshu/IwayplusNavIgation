@@ -53,7 +53,7 @@ class BLueToothClass {
     startbin();
 
     FlutterBluePlus.startScan();
-print("scanning strted");
+
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
@@ -67,7 +67,7 @@ print("scanning strted");
         }
       }
     });
-    print("calc the averagegeee");
+
     calculateAverage();
   }
 
@@ -170,7 +170,7 @@ print("scanning strted");
   }
 
   void addtoBin(String MacId, int rssi) {
-print("binnnninngggggg");
+
     int binnumber = 0;
     int Rssi = rssi * -1;
     if(numberOfSample[MacId] == null){
@@ -216,7 +216,7 @@ print("binnnninngggggg");
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key
-    print(BIN);
+
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
@@ -225,7 +225,7 @@ print("binnnninngggggg");
 
 
     // Divide the sum by the number of values for each string key
-    print("calc averageeeeeeeeee");
+
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;

@@ -123,7 +123,6 @@ class _NavigationState extends State<Navigation> {
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
-
   Building building = Building(floor: Map(), numberOfFloors: Map());
   Map<int, Set<gmap.Polyline>> singleroute = {};
   BLueToothClass btadapter = new BLueToothClass();
@@ -478,7 +477,7 @@ class _NavigationState extends State<Navigation> {
                 if(isvalid){
 
                   bool moveOneMore = true;
-                  restartScanning=false;
+                  // restartScanning=false;
                   // bool moveOneLift = true;
                   // bool moveOneDesti=false;
                   Map<String, Map<int, int>> liftLoc = user.pathobj.connections;
@@ -489,7 +488,7 @@ class _NavigationState extends State<Navigation> {
                         if (user.floor == key) {
                           if (user.path[user.pathobj.index] == value) {
                             setState(() {
-                              restartScanning=true;
+                              // restartScanning=true;
                               moveOneMore = false;
                             });
                           }

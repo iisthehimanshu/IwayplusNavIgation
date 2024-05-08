@@ -28,10 +28,10 @@ class DirectionHeader extends StatefulWidget {
   final Function() reroute;
   final Function() moveUser;
   final Function() closeNavigation;
-  bool restartScanning;
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='',this.restartScanning=false}){
+
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
     try{
       double angle = tools.calculateAngleBWUserandPath(
           user, user.path[1], user.pathobj.numCols![user.Bid]![user.floor]!);
@@ -85,11 +85,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         print("Pathposition");
       print(widget.user.path);
-      if(widget.restartScanning){
-        print("callingggggggg");
-        btadapter.startScanning(Building.apibeaconmap);
-        Future.delayed(Duration(milliseconds: 3000));
-      }
+
 
         // print("listen to bin :${listenToBin()}");
 
@@ -145,8 +141,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   bool listenToBin(){
 
-    print("restat scanning");
-    print(widget.restartScanning);
+
     double highestweight = 0;
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
@@ -219,7 +214,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(nearestBeacon !=""){
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null){
         if(widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId){
-          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  &&(widget.restartScanning)? highestweight >=0.02:highestweight >=1.2){
+          if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && highestweight >=1.2){
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
@@ -495,30 +490,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                         Text(
 
                           '${(widget.distance/2).toInt()} steps',
-                          style: TextStyle(
-
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-
-                          ),
-                        ),
-                        Text(
-
-                          '${widget.restartScanning} steps',
-                          style: TextStyle(
-
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-
-                          ),
-                        ),
-                        Text(
-
-                          '${sortedsumMap} steps',
                           style: TextStyle(
 
                             color: Colors.white,

@@ -491,6 +491,7 @@ class tools {
     print("BB $b");
     print("CC $c");
     print("DD ${node.move.toString()}");
+    print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -784,8 +785,8 @@ class tools {
     // Assuming corners is a list of Point objects representing coordinates of the building corners
 
     // Choose two adjacent corners
-    Point<double> corner1 = corners[0];
-    Point<double> corner2 = corners[1];
+    Point<double> corner1 = corners[2]; //0 for RNI   2 for Ashoka
+    Point<double> corner2 = corners[3]; //1 for RNI   3 for Ashoka
 
     // Calculate the slope
     double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);

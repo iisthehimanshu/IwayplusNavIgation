@@ -3428,8 +3428,10 @@ bool isPdr=false;
 
     print("numcol $numCols");
 
-    List<int> path = findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    List<int> path = findPath(numRows, numCols,
+        building.nonWalkable[bid]![floor]!, sourceIndex, 90149);
+
+    print("pathhhh $path");
 
 
 
@@ -4392,17 +4394,17 @@ bool isPdr=false;
         //     [user.showcoordX, user.showcoordY])}");
         print("turn points before navigating ${getPoints}");
         for (int i = 0; i < getPoints.length; i++) {
-          print("---length  = ${getPoints.length}");
-          print("--- point  = ${getPoints[i]}");
-          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          print("--- val  = $val");
-          print("--- isPDRStop  = $isPdrStop");
+          // print("---length  = ${getPoints.length}");
+          // print("--- point  = ${getPoints[i]}");
+          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          // print("--- val  = $val");
+          // print("--- isPDRStop  = $isPdrStop");
 
-          print("turn corrds");
+          //print("turn corrds");
 
           print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            print("points unmatchedddd");
+            //print("points unmatchedddd");
 
 
             Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -4423,7 +4425,7 @@ bool isPdr=false;
           if (getPoints[i][0] == user.showcoordX &&
               getPoints[i][1] == user.showcoordY) {
 
-            print("points matchedddddddd");
+            //print("points matchedddddddd");
 
 
             StopPDR();

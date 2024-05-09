@@ -186,7 +186,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    //handleCompassEvents();
+    handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -6129,6 +6129,7 @@ bool isPdr=false;
   }
 
   void closeNavigation() {
+    StopPDR();
     _isnavigationPannelOpen = false;
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
@@ -6139,7 +6140,7 @@ bool isPdr=false;
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    StopPDR();
+
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
@@ -6430,66 +6431,66 @@ bool isPdr=false;
                 child: Column(
                   children: [
 
-                    Text(Building.thresh),
-                    Visibility(
-                      visible: true,
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(Radius.circular(24))),
-                          child: IconButton(
-                              onPressed: () {
-
-                                //StartPDR();
-
-                                bool isvalid = MotionModel.isValidStep(
-                                    user,
-                                    building.floorDimenssion[user.Bid]![user.floor]![0],
-                                    building.floorDimenssion[user.Bid]![user.floor]![1],
-                                    building.nonWalkable[user.Bid]![user.floor]!,
-                                    reroute);
-                                if (isvalid) {
-                                  user.move().then((value){
-                                    renderHere();
-                                  });
-                                } else {
-                                  if (user.isnavigating) {
-                                    // reroute();
-                                    // showToast("You are out of path");
-                                  }
-                                }
-
-                              }, icon: Icon(Icons.directions_walk))),
-                    ),
+                    // Text(Building.thresh),
+                    // Visibility(
+                    //   visible: true,
+                    //   child: Container(
+                    //       decoration: BoxDecoration(
+                    //           color: Colors.white,
+                    //           borderRadius: BorderRadius.all(Radius.circular(24))),
+                    //       child: IconButton(
+                    //           onPressed: () {
+                    //
+                    //             //StartPDR();
+                    //
+                    //             bool isvalid = MotionModel.isValidStep(
+                    //                 user,
+                    //                 building.floorDimenssion[user.Bid]![user.floor]![0],
+                    //                 building.floorDimenssion[user.Bid]![user.floor]![1],
+                    //                 building.nonWalkable[user.Bid]![user.floor]!,
+                    //                 reroute);
+                    //             if (isvalid) {
+                    //               user.move().then((value){
+                    //                 renderHere();
+                    //               });
+                    //             } else {
+                    //               if (user.isnavigating) {
+                    //                 // reroute();
+                    //                 // showToast("You are out of path");
+                    //               }
+                    //             }
+                    //
+                    //           }, icon: Icon(Icons.directions_walk))),
+                    // ),
 
 
                     SizedBox(height: 28.0),
-                    Text("${user.theta}"),
-                    Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                      double? compassHeading = newvalue;
-                      setState(() {
-                        user.theta = compassHeading!;
-                        if (mapState.interaction2) {
-                          mapState.bearing = compassHeading!;
-                          _googleMapController.moveCamera(
-                            CameraUpdate.newCameraPosition(
-                              CameraPosition(
-                                target: mapState.target,
-                                zoom: mapState.zoom,
-                                bearing: mapState.bearing!,
-                              ),
-                            ),
-                            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                          );
-                        } else {
-                          if (markers.length > 0)
-                            markers[user.Bid]?[0] =
-                                customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                        }
-                      });
-
-                    }),
+                    // Text("${user.theta}"),
+                    // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+                    //
+                    //   double? compassHeading = newvalue;
+                    //   setState(() {
+                    //     user.theta = compassHeading!;
+                    //     if (mapState.interaction2) {
+                    //       mapState.bearing = compassHeading!;
+                    //       _googleMapController.moveCamera(
+                    //         CameraUpdate.newCameraPosition(
+                    //           CameraPosition(
+                    //             target: mapState.target,
+                    //             zoom: mapState.zoom,
+                    //             bearing: mapState.bearing!,
+                    //           ),
+                    //         ),
+                    //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                    //       );
+                    //     } else {
+                    //       if (markers.length > 0)
+                    //         markers[user.Bid]?[0] =
+                    //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                    //     }
+                    //   });
+                    //
+                    // }),
                     SizedBox(height: 28.0),
                     Semantics(
                       label: "Change floor",
@@ -6733,55 +6734,55 @@ bool isPdr=false;
             //     child: Icon(Icons.add)
             // ),
 
-            // FloatingActionButton(
-            //   onPressed: () async {
-            //
-            //     //StopPDR();
-            //
-            //     if (user.initialallyLocalised) {
-            //       setState(() {
-            //         isLiveLocalizing = !isLiveLocalizing;
-            //       });
-            //       HelperClass.showToast("realTimeReLocalizeUser started");
-            //
-            //       Timer.periodic(
-            //           Duration(milliseconds: 5000),
-            //               (timer) async {
-            //             print(resBeacons);
-            //             btadapter.startScanning(resBeacons);
-            //
-            //
-            //             // setState(() {
-            //             //   sumMap=  btadapter.calculateAverage();
-            //             // });
-            //
-            //
-            //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-            //               realTimeReLocalizeUser(resBeacons)
-            //               // listenToBin()
-            //
-            //
-            //             });
-            //
-            //             setState(() {
-            //               debugPQ = btadapter.returnPQ();
-            //
-            //             });
-            //
-            //           });
-            //
-            //     }
-            //
-            //   },
-            //   child: Icon(
-            //     Icons.location_history_sharp,
-            //     color: (isLiveLocalizing)
-            //         ? Colors.cyan
-            //         : Colors.black,
-            //   ),
-            //   backgroundColor: Colors
-            //       .white, // Set the background color of the FAB
-            // ),
+            FloatingActionButton(
+              onPressed: () async {
+
+                //StopPDR();
+
+                if (user.initialallyLocalised) {
+                  setState(() {
+                    isLiveLocalizing = !isLiveLocalizing;
+                  });
+                  HelperClass.showToast("realTimeReLocalizeUser started");
+
+                  Timer.periodic(
+                      Duration(milliseconds: 5000),
+                          (timer) async {
+                        print(resBeacons);
+                        btadapter.startScanning(resBeacons);
+
+
+                        // setState(() {
+                        //   sumMap=  btadapter.calculateAverage();
+                        // });
+
+
+                        Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+                          realTimeReLocalizeUser(resBeacons)
+                          // listenToBin()
+
+
+                        });
+
+                        setState(() {
+                          debugPQ = btadapter.returnPQ();
+
+                        });
+
+                      });
+
+                }
+
+              },
+              child: Icon(
+                Icons.location_history_sharp,
+                color: (isLiveLocalizing)
+                    ? Colors.cyan
+                    : Colors.black,
+              ),
+              backgroundColor: Colors
+                  .white, // Set the background color of the FAB
+            ),
 
           ],
         ),

@@ -227,6 +227,8 @@
 
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
+
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -246,7 +248,10 @@ class Node {
   @override
   int get hashCode => index.hashCode;
 }
-
+int count1=0;
+int count2=0;
+int count3=0;
+int count4=0;
 List<int> findBestPathAmongstBoth(
   int numRows,
   int numCols,
@@ -304,6 +309,7 @@ List<int> findBestPathAmongstBoth(
   }
 
   return [];
+
 }
 
 List<int> findPath(

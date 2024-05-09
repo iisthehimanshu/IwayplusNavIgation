@@ -58,9 +58,9 @@ class BLueToothClass {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
-        // print("mac $result    rssi $Rssi");
+        //print("mac $MacId    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
-          print(MacId);
+          //print(MacId);
           beacondetail[MacId] = Rssi * -1;
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
@@ -202,7 +202,7 @@ class BLueToothClass {
     }
 
     if (BIN[binnumber]!.containsKey(MacId)) {
-      print(BIN[binnumber]![MacId]! + weight[binnumber]!);
+      // print(BIN[binnumber]![MacId]! + weight[binnumber]!);
       BIN[binnumber]![MacId] = BIN[binnumber]![MacId]! + weight[binnumber]!;
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
@@ -230,7 +230,7 @@ class BLueToothClass {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;
     });
-    print(sumMap);
+    // print(sumMap);
     avgMap = sumMap;
     return sumMap;
   }

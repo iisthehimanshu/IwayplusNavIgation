@@ -260,9 +260,9 @@ List<int> findBestPathAmongstBoth(
   int destinationY = destinationIndex ~/ numCols;
 
   List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
+  //p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
   List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
+  //p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");

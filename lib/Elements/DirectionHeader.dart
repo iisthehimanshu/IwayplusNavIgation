@@ -103,7 +103,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
-        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+        print("p1 $angle");
+        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+        print("p2 $angle");
       }
 
       print("angleeeeee $angle")  ;
@@ -327,12 +329,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
-      print("direction header pointss");
-
-      print(widget.user.path[widget.user.pathobj.index]);
-      print(turnPoints.last);
       if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
-
         speak("You have reached ${widget.user.pathobj.destinationName}");
         widget.closeNavigation();
       }else{
@@ -351,7 +348,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         int nextTurn = findNextTurn(turnPoints, remainingPath);
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";

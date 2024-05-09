@@ -21,6 +21,7 @@ class buildingAllApi {
   static String selectedBuildingID="";
   static String selectedVenue="";
   static HashMap<String,LatLng> allBuildingID = new HashMap();
+  static String outdoorID = "";
 
 
   Future<List<buildingAll>> fetchBuildingAllData() async {

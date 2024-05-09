@@ -337,6 +337,23 @@ class tools {
     return angle;
   }
 
+  static double calculateAnglefifth(int node1, int node2, int node3, int cols) {
+    List<int> a = [node1 % cols , node1 ~/cols];
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
+
+    double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
+    double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
+
+    double angle = (angle2 - angle1) * 180 / pi;
+
+    if (angle < 0) {
+      angle += 360;
+    }
+
+    return angle;
+  }
+
   static double toRadians(double degree) {
     return degree * pi / 180.0;
   }
@@ -436,11 +453,80 @@ class tools {
     return angleInDegrees;
   }
 
-  static double calculateAngleBWUserandCellPath(UserState user, Cell node , int cols) {
-    List<int> a = [user.showcoordX, user.showcoordY];
-    List<int> tval = node.move(user.theta);
-    List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
+  static bool isTurn(List<int> prev, List<int> currentCoordinate, List<int> next) {
+    if (prev == null || next == null) {
+      return false;  // Not enough data to determine if it's a turn.
+    }
+
+    // Extracting coordinates
+    int prevX = prev[0];
+    int prevY = prev[1];
+    int currentX = currentCoordinate[0];
+    int currentY = currentCoordinate[1];
+    int nextX = next[0];
+    int nextY = next[1];
+
+    // Calculate the vectors from prev to current and from current to next
+    int vector1X = currentX - prevX;
+    int vector1Y = currentY - prevY;
+    int vector2X = nextX - currentX;
+    int vector2Y = nextY - currentY;
+
+    // Calculate the cross product of vector1 and vector2
+    int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+    // A cross product of zero means the points are collinear (no turn).
+    // Cross product != 0 means there is a turn.
+    return crossProduct != 0;
+  }
+
+
+  static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
+    List<int> a = [user.x, user.y];
+    List<int> tval = user.move(theta);
+    List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
+
+    print("AA $a");
+    print("BB $b");
+    print("CC $c");
+    print("DD ${node.move.toString()}");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the cross product of the two vectors
+    double crossProduct = ab[0] * ac[1].toDouble() - ab[1] * ac[0].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Check the sign of the cross product to determine the orientation
+    if (crossProduct < 0) {
+      angleInRadians = 2 * pi - angleInRadians;
+    }
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+
+    return angleInDegrees;
+  }
+
+  static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
+
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
 
     print("A $a");
     print("B $b");
@@ -477,8 +563,9 @@ class tools {
     return angleInDegrees;
   }
 
-  static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
+  static double calculateAnglefourth(int node1, int node2 , int node3 , int cols) {
 
+    List<int> a = [node1 % cols , node1 ~/cols];
     List<int> b = [node2 % cols , node2 ~/cols];
     List<int> c = [node3 % cols , node3 ~/cols];
 
@@ -582,7 +669,7 @@ class tools {
     List<Landmarks> nearbyLandmarks = [];
     for (int node in path) {
       landmarksMap.forEach((key, value) {
-        if (floor == value.floor) {
+        if (floor == value.floor && value.name != null && (value.name!.toLowerCase().contains("entry") || value.name!.toLowerCase().contains("corridor"))) {
           List<int> pCoord = computeCellCoordinates(node, numCols);
           double d = 0.0;
           if (value.doorX == null) {
@@ -800,6 +887,54 @@ class tools {
     }
   }
 
+  static Map<int,Landmarks> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols){
+    Map<int,Landmarks> ls = {};
+    List<int> turns = [];
+    for(int i = 1 ; i<path.length-1 ; i++){
+      int prevPos = path[i-1];
+      int currPos = path[i];
+      int nextPos = path[i+1];
+
+      int currentX = (currPos % numCols);
+      int currentY = (currPos ~/ numCols);
+
+      int nextX = (nextPos % numCols);
+      int nextY = (nextPos ~/ numCols);
+
+      int prevX = (prevPos % numCols);
+      int prevY = (prevPos ~/ numCols);
+
+      int vector1X = currentX - prevX;
+      int vector1Y = currentY - prevY;
+      int vector2X = nextX - currentX;
+      int vector2Y = nextY - currentY;
+
+      // Calculate the cross product of vector1 and vector2
+      int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+      if(crossProduct != 0){
+        turns.add(currPos);
+      }
+
+
+    }
+
+    landmarks.forEach((element) {
+      double d = 1000000;
+      int? t;
+      turns.forEach((turn) {
+        if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols])<d){
+          d = tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols]);
+          t = turn;
+        }
+      });
+      if(t != null){
+        ls[t!] = element;
+      }
+    });
+
+    return ls;
+  }
 
   static List<int> getTurnpoints(List<int> pathNodes,int numCols){
     List<int> res=[];
@@ -870,6 +1005,8 @@ class tools {
         }else if(prevDeltaY==0 && nextDeltaY==0){
 
         }else{
+
+
           res.add(currPos);
         }
 
@@ -881,14 +1018,14 @@ class tools {
     return res;
   }
 
-  static List<int> generateCompletePath(List<int> turns, int numCols) {
+  static List<int> generateCompletePath(List<int> turns, int numCols, List<int> nonWalkableCells) {
     List<int> completePath = [];
 
     // Start with the first point in your path
     int currentPoint = turns[0];
     int x = currentPoint % numCols;
     int y = currentPoint ~/ numCols;
-    completePath.add(x+y*numCols);
+    completePath.add(x + y * numCols);
 
     // Connect each turn point with a straight line
     for (int i = 1; i < turns.length; i++) {
@@ -908,12 +1045,61 @@ class tools {
         } else if (y > turnY) {
           y--;
         }
-        completePath.add(x+y*numCols);
+
+        // Convert current x, y coordinates back to index form
+        int currentIndex = x + y * numCols;
+
+        // Check if the current index is in the non-walkable cells list
+        if (nonWalkableCells.contains(currentIndex)) {
+          // Handle non-walkable cell, such as breaking out of the loop or finding an alternative path
+          // Here, I'll just break out of the loop
+          break;
+        }
+
+        // Add the current index to the complete path
+        completePath.add(currentIndex);
       }
     }
 
     return completePath;
   }
+
+  // static List<int> generateCompletePath(List<int> turns, int numCols,List<int> nonWalkableCells) {
+  //   List<int> completePath = [];
+  //
+  //   // Start with the first point in your path
+  //   int currentPoint = turns[0];
+  //   int x = currentPoint % numCols;
+  //   int y = currentPoint ~/ numCols;
+  //   completePath.add(x+y*numCols);
+  //
+  //   // Connect each turn point with a straight line
+  //   for (int i = 1; i < turns.length; i++) {
+  //     int turnPoint = turns[i];
+  //     int turnX = turnPoint % numCols;
+  //     int turnY = turnPoint ~/ numCols;
+  //
+  //     // Connect straight line from current point to turn point
+  //     while (x != turnX || y != turnY) {
+  //       if (x < turnX) {
+  //         x++;
+  //       } else if (x > turnX) {
+  //         x--;
+  //       }
+  //       if (y < turnY) {
+  //         y++;
+  //       } else if (y > turnY) {
+  //         y--;
+  //       }
+  //       if(nonWalkableCells.contains(x+y*numCols)){
+  //
+  //       }
+  //       completePath.add(x+y*numCols);
+  //     }
+  //   }
+  //
+  //   return completePath;
+  // }
   static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
     Map<int,int> res=new Map();
 

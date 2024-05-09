@@ -6,6 +6,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -53,6 +54,15 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
+
+
+  FlutterTts flutterTts = FlutterTts();
+
+  Future<void> speak(String msg) async {
+    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(msg);
+  }
 
 
 
@@ -213,6 +223,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   int vall = 0;
   int vall2 = 0;
   int tag=0;
+  int lastPosition = 0;
+
 
 
   @override
@@ -261,32 +273,38 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                            child: TextField(
-                              autofocus: true,
-                              enabled: false,
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: "${searchHintString}",
-                                border: InputBorder.none, // Remove default border
-                              ),
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff18181b),
-                                height: 25/16,
-                              ),
-                              onTap: (){
-                                if(containerBoxColor==Color(0xffA1A1AA)){
-                                  containerBoxColor = Color(0xff24B9B0);
-                                }else{
-                                  containerBoxColor = Color(0xffA1A1AA);
-                                }
-                                print("Final Set");
+                        child: Focus(
+                          autofocus: true,
+                          child: Semantics(
+                            label: "Search field",
+                            child: Container(
+                                child: TextField(
+                                  autofocus: true,
+                                  enabled: false,
+                                  controller: _controller,
+                                  decoration: InputDecoration(
+                                    hintText: "${searchHintString}",
+                                    border: InputBorder.none, // Remove default border
+                                  ),
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff18181b),
+                                    height: 25/16,
+                                  ),
+                                  onTap: (){
+                                    if(containerBoxColor==Color(0xffA1A1AA)){
+                                      containerBoxColor = Color(0xff24B9B0);
+                                    }else{
+                                      containerBoxColor = Color(0xffA1A1AA);
+                                    }
+                                    print("Final Set");
 
-                              },
-                            )),
+                                  },
+                                )),
+                          ),
+                        ),
                       ),
 
                     ],
@@ -322,6 +340,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                   value: tag,
                   onChanged: (val){
                     setState(() => tag = val);
+                    if(HelperClass.SemanticEnabled) {
+                      speak("Floor ${widget.floors[val]} selected");
+                    }
                     // print("wilsonchecker");
                     // print(val);
                     print("Floor check");

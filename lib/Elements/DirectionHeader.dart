@@ -118,6 +118,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
          
           speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
           widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
+
         }
       });
 

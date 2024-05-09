@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class HelperClass{
+  static bool SemanticEnabled = false;
+
+
   static String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -26,4 +30,6 @@ class HelperClass{
 
     return Map.fromEntries(sortedEntries);
   }
+
+
 }

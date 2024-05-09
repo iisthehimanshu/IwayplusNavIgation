@@ -104,7 +104,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
         print("p1 $angle");
-        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
         print("p2 $angle");
       }
 
@@ -329,7 +329,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
+      print("direction header pointss");
+
+      print(widget.user.path[widget.user.pathobj.index]);
+      print(turnPoints.last);
       if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+
         speak("You have reached ${widget.user.pathobj.destinationName}");
         widget.closeNavigation();
       }else{
@@ -348,7 +353,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         int nextTurn = findNextTurn(turnPoints, remainingPath);
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
@@ -359,7 +364,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if(nextTurn == turnPoints.last && widget.distance == 7){
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
-        }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 5){
+        }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
           int index = widget.user.path.indexOf(nextTurn);
           double angle = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
@@ -367,6 +372,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           if(!direc.contains("slight")){
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
               speak("Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+              widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+            }else{
+              speak("Approaching ${direc} turn");
+              widget.user.move();
             }
           }
         }

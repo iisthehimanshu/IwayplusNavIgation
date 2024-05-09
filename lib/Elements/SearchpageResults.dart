@@ -150,45 +150,60 @@ class _SearchpageResultsState extends State<SearchpageResults> {
               ],
             ),
             Spacer(),
-            Column(
-              children: [
-                FutureBuilder<int>(
-                  future: calculateValue(),
-                  builder: (context, snapshot) {
-                    // Checking connection state of the future
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return SizedBox(width:24,height:24,child: CircularProgressIndicator(color: Colors.grey,)); // Show loading indicator while waiting
-                    } else if (snapshot.hasError) {
-                      return Text('--');
-                    } else {
-                      // Once the data is fetched, show the data
-                      return Text('${snapshot.data} m',
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff000000),
-                            height: 25/16,
-                          ));
-                    }
-                  },
+            // Column(
+            //   children: [
+            //     FutureBuilder<int>(
+            //       future: calculateValue(),
+            //       builder: (context, snapshot) {
+            //         // Checking connection state of the future
+            //         if (snapshot.connectionState == ConnectionState.waiting) {
+            //           return SizedBox(width:24,height:24,child: CircularProgressIndicator(color: Colors.grey,)); // Show loading indicator while waiting
+            //         } else if (snapshot.hasError) {
+            //           return Text('--');
+            //         } else {
+            //           // Once the data is fetched, show the data
+            //           return Text('${snapshot.data} m',
+            //               style: const TextStyle(
+            //                 fontFamily: "Roboto",
+            //                 fontSize: 16,
+            //                 fontWeight: FontWeight.w400,
+            //                 color: Color(0xff000000),
+            //                 height: 25/16,
+            //               ));
+            //         }
+            //       },
+            //     ),
+            //     Container(
+            //       margin: EdgeInsets.only(top: 3, bottom: 14, right: 10),
+            //       alignment: Alignment.center,
+            //       child: Text(
+            //         HelperClass.truncateString("Floor ${widget.floor}", 25),
+            //         style: const TextStyle(
+            //           fontFamily: "Roboto",
+            //           fontSize: 14,
+            //           fontWeight: FontWeight.w400,
+            //           color: Color(0xff8d8c8c),
+            //           height: 20 / 14,
+            //         ),
+            //         textAlign: TextAlign.center,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            Container(
+              margin: EdgeInsets.only(top: 3, bottom: 14, right: 10),
+              alignment: Alignment.center,
+              child: Text(
+                HelperClass.truncateString("Floor ${widget.floor}", 25),
+                style: const TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xff8d8c8c),
+                  height: 20 / 14,
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: 3, bottom: 14, right: 10),
-                  alignment: Alignment.center,
-                  child: Text(
-                    HelperClass.truncateString("Floor ${widget.floor}", 25),
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff8d8c8c),
-                      height: 20 / 14,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

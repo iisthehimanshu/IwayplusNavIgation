@@ -532,25 +532,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ],
             ),
           ),
-          SizedBox(
-            height: 100,
-          ),
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                  Text(ShowsumMap.values.toString()),
-                  Text(debugNearestbeacon.toString()),
-                  Text("current idx"+widget.user.pathobj.index.toString()),
-                ],
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   height: 100,
+          // ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //         Text(ShowsumMap.values.toString()),
+          //         Text(debugNearestbeacon.toString()),
+          //         Text("current idx"+widget.user.pathobj.index.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

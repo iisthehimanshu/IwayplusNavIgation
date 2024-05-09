@@ -227,6 +227,8 @@
 
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
+
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -246,7 +248,10 @@ class Node {
   @override
   int get hashCode => index.hashCode;
 }
-
+int count1=0;
+int count2=0;
+int count3=0;
+int count4=0;
 List<int> findBestPathAmongstBoth(
   int numRows,
   int numCols,
@@ -260,22 +265,104 @@ List<int> findBestPathAmongstBoth(
   int destinationY = destinationIndex ~/ numCols;
 
   List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  //p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
+  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
   List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  //p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
+  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");
   print("lplplp ${p1turns.length}   ${p2turns.length}");
+  print("llncdnjcn");
   if (p1turns.length < p2turns.length) {
-    return p1;
+
+    if(p1.last!=destinationIndex){
+      //finding nearby dstination points.
+      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
+      //for(int i=0;i<coordsSet.length;i++){
+      Random random=new Random();
+      int rand=random.nextInt(4);
+        int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
+        // int newIndexDestinationX=newIndex% numCols;
+        // int newIndexDestinationY=newIndex~/numCols;
+        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
+      count1++;
+
+      if(count1==4){
+        return p1;
+      }
+
+
+      //}
+
+    }
+      return p1;
+
+    
   }else if(p1turns.length > p2turns.length) {
+    if(p2.first!=destinationIndex){
+      //finding nearby dstination points.
+      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
+      //for(int i=0;i<coordsSet.length;i++){
+        Random random=new Random();
+        int rand=random.nextInt(4);
+        int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
+        // int newIndexDestinationX=newIndex% numCols;
+        // int newIndexDestinationY=newIndex~/numCols;
+        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
+        count2++;
+      if(count2==4){
+        return p2.reversed.toList();
+      }
+     // }
+
+    }
+
+    // print("coords matcheddd ${newIndex}----");
     return p2.reversed.toList();
   }else if(p1.length < p2.length){
+    if(p1.last!=destinationIndex){
+      //finding nearby dstination points.
+      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
+     // for(int i=0;i<coordsSet.length;i++){
+      Random random=new Random();
+      int rand=random.nextInt(4);
+      int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
+        // int newIndexDestinationX=newIndex% numCols;
+        // int newIndexDestinationY=newIndex~/numCols;
+        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
+      count3++;
+
+      if(count3==4){
+        return p1;
+      }
+     // }
+
+    }
+    print(p1);
     return p1;
   }else{
+    if(p2.first!=destinationIndex){
+      //finding nearby dstination points.
+      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
+      //for(int i=0;i<coordsSet.length;i++){
+      Random random=new Random();
+      int rand=random.nextInt(4);
+      int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
+        // int newIndexDestinationX=newIndex% numCols;
+        // int newIndexDestinationY=newIndex~/numCols;
+        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
+      count4++;
+
+      if(count4==4){
+        return p2.reversed.toList();
+      }
+      //}
+
+    }
+    print(p2);
     return p2.reversed.toList();
   }
+
 }
 
 List<int> findPath(

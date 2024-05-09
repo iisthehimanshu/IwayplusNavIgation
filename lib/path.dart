@@ -264,6 +264,8 @@ List<int> findBestPathAmongstBoth(
   int destinationX = destinationIndex %  numCols;
   int destinationY = destinationIndex ~/ numCols;
 
+
+
   List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
   p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
   List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
@@ -272,96 +274,41 @@ List<int> findBestPathAmongstBoth(
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");
   print("lplplp ${p1turns.length}   ${p2turns.length}");
-  print("llncdnjcn");
-  if (p1turns.length < p2turns.length) {
 
-    if(p1.last!=destinationIndex){
-      //finding nearby dstination points.
-      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
-      //for(int i=0;i<coordsSet.length;i++){
-      Random random=new Random();
-      int rand=random.nextInt(4);
-        int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
-        // int newIndexDestinationX=newIndex% numCols;
-        // int newIndexDestinationY=newIndex~/numCols;
-        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
-      count1++;
-
-      if(count1==4){
-        return p1;
-      }
+  print("pathp1 $p1");
+  print("pathp2 $p2");
 
 
-      //}
 
-    }
-      return p1;
-
-    
-  }else if(p1turns.length > p2turns.length) {
-    if(p2.first!=destinationIndex){
-      //finding nearby dstination points.
-      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
-      //for(int i=0;i<coordsSet.length;i++){
-        Random random=new Random();
-        int rand=random.nextInt(4);
-        int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
-        // int newIndexDestinationX=newIndex% numCols;
-        // int newIndexDestinationY=newIndex~/numCols;
-        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
-        count2++;
-      if(count2==4){
-        return p2.reversed.toList();
-      }
-     // }
-
-    }
-
-    // print("coords matcheddd ${newIndex}----");
+  if(p1.length == 0){
     return p2.reversed.toList();
-  }else if(p1.length < p2.length){
-    if(p1.last!=destinationIndex){
-      //finding nearby dstination points.
-      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
-     // for(int i=0;i<coordsSet.length;i++){
-      Random random=new Random();
-      int rand=random.nextInt(4);
-      int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
-        // int newIndexDestinationX=newIndex% numCols;
-        // int newIndexDestinationY=newIndex~/numCols;
-        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
-      count3++;
-
-      if(count3==4){
-        return p1;
-      }
-     // }
-
-    }
-    print(p1);
+  }else if(p2.length == 0){
     return p1;
-  }else{
-    if(p2.first!=destinationIndex){
-      //finding nearby dstination points.
-      List<List<int>> coordsSet=[[2,0],[0,2],[-2,0],[0,-2]];
-      //for(int i=0;i<coordsSet.length;i++){
-      Random random=new Random();
-      int rand=random.nextInt(4);
-      int newIndex=(destinationY+coordsSet[rand][1])*numCols+destinationX+coordsSet[rand][0];
-        // int newIndexDestinationX=newIndex% numCols;
-        // int newIndexDestinationY=newIndex~/numCols;
-        findBestPathAmongstBoth(numRows, numCols, nonWalkableCells, sourceIndex,newIndex);
-      count4++;
-
-      if(count4==4){
-        return p2.reversed.toList();
-      }
-      //}
-
-    }
-    print(p2);
-    return p2.reversed.toList();
   }
+
+  if(p1.first == sourceIndex && p1.last == destinationIndex){
+    if(p2.first != destinationIndex || p2.last != sourceIndex){
+      return p1;
+    }
+    if(p1turns.length<p2turns.length){
+      return p1;
+    }
+    if(p1.length< p2.length){
+      return p1;
+    }
+  }else if(p2.first == destinationIndex && p2.last == sourceIndex){
+    if(p2turns.length<p1turns.length){
+      return p2.reversed.toList();
+    }
+    if(p2.length< p1.length){
+      return p2.reversed.toList();
+    }
+    if(p1.first != sourceIndex || p1.last != destinationIndex){
+      return p2;
+    }
+  }
+
+  return [];
 
 }
 

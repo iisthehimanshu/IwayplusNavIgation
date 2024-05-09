@@ -26,7 +26,7 @@ class UserState{
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
   static int UserHeight  = 195;
-  static int stepSize = 3;
+  static int stepSize = 2;
 
 
   static int cols = 0;
@@ -157,8 +157,10 @@ class UserState{
       }
 
       //lift check
+      print("iwiwiwi ${pathobj.connections[Bid]?[floor]}");
+      print("iwwwwi ${showcoordY*cols + showcoordX}");
 
-      if(pathobj.connections[Bid]?[floor] == showcoordY*cols + showcoordX){
+      if(floor!=pathobj.destinationFloor &&  pathobj.connections[Bid]?[floor] == (showcoordY*cols + showcoordX)){
         speak("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
       }
 

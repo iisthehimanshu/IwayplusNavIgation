@@ -403,16 +403,16 @@ class _NavigationState extends State<Navigation> {
 // Function to stop the timer
   bool isPdrStop = false;
   void StopPDR() async {
-    if (PDRTimer != null && PDRTimer!.isActive) {
-      setState(() {
-        isPdrStop = true;
-      });
-
-      PDRTimer!.cancel();
-      for (final subscription in pdr) {
-        subscription.cancel();
-      }
-    }
+    // if (PDRTimer != null && PDRTimer!.isActive) {
+    //   setState(() {
+    //     isPdrStop = true;
+    //   });
+    //
+    //   PDRTimer!.cancel();
+    //   for (final subscription in pdr) {
+    //     subscription.cancel();
+    //   }
+    // }
   }
 
   int stepCount = 0;
@@ -4672,7 +4672,7 @@ class _NavigationState extends State<Navigation> {
                 ),
               ),
             ),
-            DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation, isRelocalize: false,restartScanning: restartScanning,)],
+            DirectionHeader(user: user, paint: paintUser, repaint: repaintUser, reroute: reroute, moveUser: moveUser, closeNavigation: closeNavigation, isRelocalize: false)],
         ));
   }
 
@@ -6718,21 +6718,21 @@ class _NavigationState extends State<Navigation> {
                     ),
                     SizedBox(
                         height: 28.0), // Adjust the height as needed
-                    Container(
-                      width: 300,
-                      height: 100,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Column(
-                          children: [
-                            Text(testBIn.keys.toString()),
-                            Text(testBIn.values.toString()),
-                            Text("summap"),
-                            Text(sortedsumMapfordebug.toString()),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   width: 300,
+                    //   height: 100,
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     child: Column(
+                    //       children: [
+                    //         Text(testBIn.keys.toString()),
+                    //         Text(testBIn.values.toString()),
+                    //         Text("summap"),
+                    //         Text(sortedsumMapfordebug.toString()),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     Semantics(
                       child: FloatingActionButton(
                         onPressed: () async {

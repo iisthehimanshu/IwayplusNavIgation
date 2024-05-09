@@ -3392,7 +3392,7 @@ bool isPdr=false;
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 1,
+          width: 5,
         ));
       } else {
         print("new call $bid $coordinates");
@@ -3401,7 +3401,7 @@ bool isPdr=false;
           polylineId: PolylineId("$bid"),
           points: coordinates,
           color: Colors.red,
-          width: 1,
+          width: 5,
         ));
       }
     });

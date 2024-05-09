@@ -6911,55 +6911,55 @@ bool isPdr=false;
             //     child: Icon(Icons.add)
             // ),
 
-            // FloatingActionButton(
-            //   onPressed: () async {
-            //
-            //     //StopPDR();
-            //
-            //     if (user.initialallyLocalised) {
-            //       setState(() {
-            //         isLiveLocalizing = !isLiveLocalizing;
-            //       });
-            //       HelperClass.showToast("realTimeReLocalizeUser started");
-            //
-            //       Timer.periodic(
-            //           Duration(milliseconds: 5000),
-            //               (timer) async {
-            //             print(resBeacons);
-            //             btadapter.startScanning(resBeacons);
-            //
-            //
-            //             // setState(() {
-            //             //   sumMap=  btadapter.calculateAverage();
-            //             // });
-            //
-            //
-            //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-            //               realTimeReLocalizeUser(resBeacons)
-            //               // listenToBin()
-            //
-            //
-            //             });
-            //
-            //             setState(() {
-            //               debugPQ = btadapter.returnPQ();
-            //
-            //             });
-            //
-            //           });
-            //
-            //     }
-            //
-            //   },
-            //   child: Icon(
-            //     Icons.location_history_sharp,
-            //     color: (isLiveLocalizing)
-            //         ? Colors.cyan
-            //         : Colors.black,
-            //   ),
-            //   backgroundColor: Colors
-            //       .white, // Set the background color of the FAB
-            // ),
+            FloatingActionButton(
+              onPressed: () async {
+
+                //StopPDR();
+
+                if (user.initialallyLocalised) {
+                  setState(() {
+                    isLiveLocalizing = !isLiveLocalizing;
+                  });
+                  HelperClass.showToast("realTimeReLocalizeUser started");
+
+                  Timer.periodic(
+                      Duration(milliseconds: 5000),
+                          (timer) async {
+                        print(resBeacons);
+                        btadapter.startScanning(resBeacons);
+
+
+                        // setState(() {
+                        //   sumMap=  btadapter.calculateAverage();
+                        // });
+
+
+                        Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+                          realTimeReLocalizeUser(resBeacons)
+                          // listenToBin()
+
+
+                        });
+
+                        setState(() {
+                          debugPQ = btadapter.returnPQ();
+
+                        });
+
+                      });
+
+                }
+
+              },
+              child: Icon(
+                Icons.location_history_sharp,
+                color: (isLiveLocalizing)
+                    ? Colors.cyan
+                    : Colors.black,
+              ),
+              backgroundColor: Colors
+                  .white, // Set the background color of the FAB
+            ),
 
           ],
         ),

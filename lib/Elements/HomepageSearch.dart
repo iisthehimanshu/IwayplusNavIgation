@@ -2,9 +2,11 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'package:iwayplusnav/Elements/HomepageFilter.dart';
 import 'package:iwayplusnav/SourceAndDestinationPage.dart';
 
@@ -43,6 +45,15 @@ class _HomepageSearchState extends State<HomepageSearch> {
   //double ratio=0.0;
   String currentSelectedFilter = "";
   int vall = 0;
+  int lastValueStored = 0;
+
+  FlutterTts flutterTts  = FlutterTts();
+
+  Future<void> speak(String msg) async {
+    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(msg);
+  }
 
 
   @override
@@ -183,6 +194,13 @@ class _HomepageSearchState extends State<HomepageSearch> {
             value: vall,
             onChanged: (val){
               setState(() => vall = val);
+
+              if(HelperClass.SemanticEnabled){
+                speak("${options[val]} selected");
+              }else if(lastValueStored == val){
+                speak("${options[val]} selected");
+              }
+              lastValueStored = val;
               print("wilsonchecker");
               print(val);
             },

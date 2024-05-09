@@ -5,6 +5,7 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -58,6 +59,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
+  int lastIndex = -1;
+  String selectedButton = "";
 
   @override
   void initState() {
@@ -247,12 +250,26 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
+  FlutterTts flutterTts  = FlutterTts();
+
+  Future<void> speak(String msg) async {
+    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(msg);
+  }
+
 
   void search(String searchText) {
     setState(() {
       if (searchText.isNotEmpty) {
         if (optionList.contains(searchText.toLowerCase())) {
           category = true;
+          for(int i=0 ; i<optionList.length ; i++){
+            if(optionList[i] == searchText.toLowerCase()){
+              vall = i;
+            }
+          }
+          searcCategoryhResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
@@ -287,6 +304,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           });
         } else {
           category = false;
+          vall = -1;
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length < 10) {
@@ -377,11 +395,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Color micColor = Colors.black;
   bool micselected = false;
   int vall = -1;
+  int lastval =-1;
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
 
     // if(speetchText.isNotListening){
     //   micColor = Colors.black;
@@ -389,8 +414,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     // }else{
     //   micColor = Color(0xff24B9B0);
     // }
-    return SafeArea(
-      child: Scaffold(
+    return MaterialApp(
+      home: Scaffold(
+
         body: Container(
           color: Colors.white,
           child: Column(
@@ -415,62 +441,57 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       Container(
                         width: 48,
                         height: 48,
-                        child: Center(
-                          child: FocusScope(
-                            autofocus: true,
-                            child: Focus(
-                              child: Semantics(
-                                label: "Back",
-                                child: IconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: Semantics(
-                                    excludeSemantics: true,
-                                    child: SvgPicture.asset(
-                                        "assets/DestinationSearchPage_BackIcon.svg"),
-                                  ),
-                                ),
-                              ),
-                            ),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Semantics(
+                            label: "Back",
+                            child: SvgPicture.asset(
+                                "assets/DestinationSearchPage_BackIcon.svg"),
                           ),
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                            child: TextField(
+                        child: FocusScope(
                           autofocus: true,
-                          controller: _controller,
-                          decoration: InputDecoration(
-                            hintText: "${searchHintString}",
-                            border: InputBorder.none, // Remove default border
+                          child: Focus(
+                            child: Container(
+                                child: TextField(
+                              autofocus: true,
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                hintText: "${searchHintString}",
+                                border: InputBorder.none, // Remove default border
+                              ),
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff18181b),
+                                height: 25 / 16,
+                              ),
+                              onTap: () {
+                                if (containerBoxColor == Color(0xffA1A1AA)) {
+                                  containerBoxColor = Color(0xff24B9B0);
+                                } else {
+                                  containerBoxColor = Color(0xffA1A1AA);
+                                }
+                                print("Final Set");
+                              },
+                              onSubmitted: (value) {
+                                // print("Final Set");
+                                print(value);
+                                search(value);
+                              },
+                              onChanged: (value) {
+                                search(value);
+                                // print("Final Set");
+                                print(cardSet);
+                              },
+                            )),
                           ),
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff18181b),
-                            height: 25 / 16,
-                          ),
-                          onTap: () {
-                            if (containerBoxColor == Color(0xffA1A1AA)) {
-                              containerBoxColor = Color(0xff24B9B0);
-                            } else {
-                              containerBoxColor = Color(0xffA1A1AA);
-                            }
-                            print("Final Set");
-                          },
-                          onSubmitted: (value) {
-                            // print("Final Set");
-                            print(value);
-                            search(value);
-                          },
-                          onChanged: (value) {
-                            search(value);
-                            // print("Final Set");
-                            print(cardSet);
-                          },
-                        )),
+                        ),
                       ),
                       Container(
                         margin: EdgeInsets.only(right: 6),
@@ -521,22 +542,36 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 child: ChipsChoice<int>.single(
                   value: vall,
                   onChanged: (val) {
+
+                    if(HelperClass.SemanticEnabled) {
+                      speak("${optionListForUI[val]} selected");
+                    }
+
+                    selectedButton = optionListForUI[val];
                     setState(() => vall = val);
+                    lastval = val;
                     print("wilsonchecker");
                     print(val);
+
                     _controller.text = optionListForUI[val];
+                    search(optionListForUI[val]);
                   },
                   choiceItems: C2Choice.listFrom<int, String>(
                     source: optionListForUI,
                     value: (i, v) => i,
                     label: (i, v) => v,
                   ),
+
                   choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      vall = -1;
+                    }
                     return DestinationPageChipsWidget(
                       svgPath: '',
                       text: optionListForUI[i],
                       onSelect: item.select!,
                       selected: item.selected,
+
                       onTap: (String Text) {
                         if (Text.isNotEmpty) {
                           search(Text);

@@ -324,7 +324,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
-    if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
+    if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
       print("direction header pointss");

@@ -184,7 +184,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    handleCompassEvents();
+    //handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -390,11 +390,14 @@ class _NavigationState extends State<Navigation> {
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
   }
-
+bool isPdr=false;
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
       // print("calling");
+      setState(() {
+        isPdr=true;
+      });
       pdrstepCount();
       // onStepCount();
     });
@@ -403,16 +406,17 @@ class _NavigationState extends State<Navigation> {
 // Function to stop the timer
   bool isPdrStop = false;
   void StopPDR() async {
-    // if (PDRTimer != null && PDRTimer!.isActive) {
-    //   setState(() {
-    //     isPdrStop = true;
-    //   });
-    //
-    //   PDRTimer!.cancel();
-    //   for (final subscription in pdr) {
-    //     subscription.cancel();
-    //   }
-    // }
+    if (PDRTimer != null && PDRTimer!.isActive) {
+      setState(() {
+        isPdrStop = true;
+        isPdr=false;
+      });
+
+      PDRTimer!.cancel();
+      for (final subscription in pdr) {
+        subscription.cancel();
+      }
+    }
   }
 
   int stepCount = 0;
@@ -560,11 +564,17 @@ class _NavigationState extends State<Navigation> {
     );
     List<int> landCords = [];
     if (apibeaconmap[nearestBeacon] != null) {
+
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         landCords = tools.localizefindNearbyLandmarkCoordinated(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        if(landCords.isEmpty){
+          landCords=[apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!];
+        }else{
+
+        }
       });
 
       List<int> localBeconCord = [];
@@ -595,18 +605,10 @@ class _NavigationState extends State<Navigation> {
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
       }
-
+      print("testingbeaon $values");
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
-      if (speakTTS) {
-        mapState.zoom = 22.0;
-        _googleMapController.animateCamera(
-          CameraUpdate.newLatLngZoom(
-            LatLng(values[0], values[1]),
-            22, // Specify your custom zoom level here
-          ),
-        );
-      }
+
 
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
 
@@ -713,7 +715,7 @@ class _NavigationState extends State<Navigation> {
 
         if(speakTTS) {
           if(finalvalue=="None"){
-            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!}");
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${apibeaconmap[nearestBeacon]!.name!}");
           }else {
             speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${apibeaconmap[nearestBeacon]!.name!} is on your ${finalvalue}");
           }
@@ -723,12 +725,22 @@ class _NavigationState extends State<Navigation> {
             apibeaconmap[nearestBeacon]!.floor!.toString();
         if(speakTTS) {
           if(finalvalue == "None"){
-            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name}");
+            speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor, near ${nearestLandInfomation.name}");
           }else {
             speak("You are on ${tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
           }
         }
 
+      }
+
+      if (speakTTS) {
+        mapState.zoom = 22.0;
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(user.lat, user.lng),
+            22, // Specify your custom zoom level here
+          ),
+        );
       }
     } else {
       if (speakTTS) speak("Unable to find your location");
@@ -6581,6 +6593,11 @@ class _NavigationState extends State<Navigation> {
               ),
             ),
             //debug----
+
+            Positioned(
+              top: 150,
+                right: 50,
+                child: Container(height: 20,width: 20,color: (isPdr)?Colors.green:Colors.red,)),
             Positioned(
               bottom: 150.0, // Adjust the position as needed
               right: 16.0,
@@ -6591,66 +6608,66 @@ class _NavigationState extends State<Navigation> {
                 child: Column(
                   children: [
 
-                    //Text(Building.thresh),
-                    // Visibility(
-                    //   visible: true,
-                    //   child: Container(
-                    //       decoration: BoxDecoration(
-                    //           color: Colors.white,
-                    //           borderRadius: BorderRadius.all(Radius.circular(24))),
-                    //       child: IconButton(
-                    //           onPressed: () {
-                    //
-                    //             //StartPDR();
-                    //
-                    //             bool isvalid = MotionModel.isValidStep(
-                    //                 user,
-                    //                 building.floorDimenssion[user.Bid]![user.floor]![0],
-                    //                 building.floorDimenssion[user.Bid]![user.floor]![1],
-                    //                 building.nonWalkable[user.Bid]![user.floor]!,
-                    //                 reroute);
-                    //             if (isvalid) {
-                    //               user.move().then((value){
-                    //                 renderHere();
-                    //               });
-                    //             } else {
-                    //               if (user.isnavigating) {
-                    //                 // reroute();
-                    //                 // showToast("You are out of path");
-                    //               }
-                    //             }
-                    //
-                    //           }, icon: Icon(Icons.directions_walk))),
-                    // ),
+                    Text(Building.thresh),
+                    Visibility(
+                      visible: true,
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(Radius.circular(24))),
+                          child: IconButton(
+                              onPressed: () {
+
+                                //StartPDR();
+
+                                bool isvalid = MotionModel.isValidStep(
+                                    user,
+                                    building.floorDimenssion[user.Bid]![user.floor]![0],
+                                    building.floorDimenssion[user.Bid]![user.floor]![1],
+                                    building.nonWalkable[user.Bid]![user.floor]!,
+                                    reroute);
+                                if (isvalid) {
+                                  user.move().then((value){
+                                    renderHere();
+                                  });
+                                } else {
+                                  if (user.isnavigating) {
+                                    // reroute();
+                                    // showToast("You are out of path");
+                                  }
+                                }
+
+                              }, icon: Icon(Icons.directions_walk))),
+                    ),
 
 
                     SizedBox(height: 28.0),
-                    // Text("${user.theta}"),
-                    // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                    //
-                    //   double? compassHeading = newvalue;
-                    //   setState(() {
-                    //     user.theta = compassHeading!;
-                    //     if (mapState.interaction2) {
-                    //       mapState.bearing = compassHeading!;
-                    //       _googleMapController.moveCamera(
-                    //         CameraUpdate.newCameraPosition(
-                    //           CameraPosition(
-                    //             target: mapState.target,
-                    //             zoom: mapState.zoom,
-                    //             bearing: mapState.bearing!,
-                    //           ),
-                    //         ),
-                    //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                    //       );
-                    //     } else {
-                    //       if (markers.length > 0)
-                    //         markers[user.Bid]?[0] =
-                    //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                    //     }
-                    //   });
-                    //
-                    // }),
+                    Text("${user.theta}"),
+                    Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                      double? compassHeading = newvalue;
+                      setState(() {
+                        user.theta = compassHeading!;
+                        if (mapState.interaction2) {
+                          mapState.bearing = compassHeading!;
+                          _googleMapController.moveCamera(
+                            CameraUpdate.newCameraPosition(
+                              CameraPosition(
+                                target: mapState.target,
+                                zoom: mapState.zoom,
+                                bearing: mapState.bearing!,
+                              ),
+                            ),
+                            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                          );
+                        } else {
+                          if (markers.length > 0)
+                            markers[user.Bid]?[0] =
+                                customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                        }
+                      });
+
+                    }),
                     SizedBox(height: 28.0),
                     Semantics(
                       label: "Change floor",

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:collection/collection.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
 
 import '../buildingState.dart';
 
@@ -159,12 +160,15 @@ class BLueToothClass {
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
+
       BIN[i]!.clear();
     }
+    //HelperClass.showToast(BIN.toString());
     numberOfSample.clear();
     rs.clear();
     print("avgMap.length");
     print(avgMap.length);
+
     avgMap.clear();
 
   }
@@ -185,17 +189,17 @@ class BLueToothClass {
     //print("of beacon ${rs}");
 
 
-    if (Rssi <= 65) {
+    if (Rssi <= 70) {
       binnumber = 0;
-    } else if (Rssi <= 70) {
-      binnumber = 1;
     } else if (Rssi <= 75) {
-      binnumber = 2;
+      binnumber = 1;
     } else if (Rssi <= 80) {
-      binnumber = 3;
+      binnumber = 2;
     } else if (Rssi <= 85) {
-      binnumber = 4;
+      binnumber = 3;
     } else if (Rssi <= 90) {
+      binnumber = 4;
+    } else if (Rssi <= 95) {
       binnumber = 5;
     } else {
       binnumber = 6;
@@ -213,6 +217,9 @@ class BLueToothClass {
 
   }
   Map<String, double> calculateAverage(){
+    avgMap.clear();
+    print("avgMap.toString()");
+    print(avgMap.toString());
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key

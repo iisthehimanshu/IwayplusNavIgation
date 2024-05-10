@@ -826,7 +826,9 @@ class tools {
     print("angleee-----${angle}");
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
-
+    if (angle < 0) {
+      angle = angle + 360;
+    }
     if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
     } else if (angle > 22.5 && angle <= 67.5) {
@@ -855,6 +857,9 @@ class tools {
     }
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
     if (angle >= 315 || angle <= 45) {
       return [0, -1];
     } else if (angle > 45 && angle <= 135) {
@@ -875,6 +880,9 @@ class tools {
     }
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
     if (angle >= 270 || angle <= 90) {
       return [0, -1];
     } else if (angle > 90 && angle <= 270) {
@@ -889,9 +897,11 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print("second $angle");
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
     if (angle > 180 && angle <= 360) {
       return [-1,0];
     } else if (angle > 0 && angle <= 180) {

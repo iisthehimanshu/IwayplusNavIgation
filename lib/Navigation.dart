@@ -6448,10 +6448,8 @@ double minHeight = 90.0;
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6522,7 +6520,6 @@ double minHeight = 90.0;
                               }
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
-                              print("plpl ${cameraPosition.tilt}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6564,7 +6561,6 @@ double minHeight = 90.0;
                           excludeSemantics: false,
                           child: Column(
                             children: [
-                              // Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
                               //   child: Container(

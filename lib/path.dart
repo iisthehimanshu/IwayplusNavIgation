@@ -304,7 +304,7 @@ List<int> findBestPathAmongstBoth(
       return p2.reversed.toList();
     }
     if(p1.first != sourceIndex || p1.last != destinationIndex){
-      return p2;
+      return p2.reversed.toList();
     }
   }
 

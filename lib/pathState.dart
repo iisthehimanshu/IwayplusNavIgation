@@ -62,5 +62,8 @@ class pathState {
     sourceFloor = destinationFloor;
     destinationFloor = tempFloor;
 
+    path.forEach((key, value) {
+      path[key] = value.reversed.toList();
+    });
   }
 }

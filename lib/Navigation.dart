@@ -1262,6 +1262,7 @@ double minHeight = 90.0;
     List<int> currentBinFilled = [];
     setState(() {
       sumMap = btadapter.calculateAverage();
+
     });
 
     print("btadapter.avgMap");
@@ -1291,6 +1292,9 @@ double minHeight = 90.0;
     double firstKey;
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
+      setState(() {
+        sortedsumMapfordebug = sortMapByValue(sumMap);
+      });
       firstValue = sortedsumMap.entries.first.key;
       print("sortedsumMap--");
       print(firstValue);
@@ -6705,6 +6709,7 @@ double minHeight = 90.0;
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(testBIn.keys.toString()),
                                       Text(testBIn.values.toString()),
@@ -6895,7 +6900,7 @@ double minHeight = 90.0;
                                   // });
 
 
-                                  Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+                                  Future.delayed(Duration(milliseconds: 2000)).then((value) => {
                                     realTimeReLocalizeUser(resBeacons)
                                     // listenToBin()
 

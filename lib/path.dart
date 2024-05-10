@@ -227,6 +227,8 @@
 
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
+
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -246,7 +248,10 @@ class Node {
   @override
   int get hashCode => index.hashCode;
 }
-
+int count1=0;
+int count2=0;
+int count3=0;
+int count4=0;
 List<int> findBestPathAmongstBoth(
   int numRows,
   int numCols,
@@ -259,6 +264,8 @@ List<int> findBestPathAmongstBoth(
   int destinationX = destinationIndex %  numCols;
   int destinationY = destinationIndex ~/ numCols;
 
+
+
   List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
   p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
   List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
@@ -267,15 +274,42 @@ List<int> findBestPathAmongstBoth(
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");
   print("lplplp ${p1turns.length}   ${p2turns.length}");
-  if (p1turns.length < p2turns.length) {
-    return p1;
-  }else if(p1turns.length > p2turns.length) {
+
+  print("pathp1 $p1");
+  print("pathp2 $p2");
+
+
+
+  if(p1.length == 0){
     return p2.reversed.toList();
-  }else if(p1.length < p2.length){
+  }else if(p2.length == 0){
     return p1;
-  }else{
-    return p2.reversed.toList();
   }
+
+  if(p1.first == sourceIndex && p1.last == destinationIndex){
+    if(p2.first != destinationIndex || p2.last != sourceIndex){
+      return p1;
+    }
+    if(p1turns.length<p2turns.length){
+      return p1;
+    }
+    if(p1.length< p2.length){
+      return p1;
+    }
+  }else if(p2.first == destinationIndex && p2.last == sourceIndex){
+    if(p2turns.length<p1turns.length){
+      return p2.reversed.toList();
+    }
+    if(p2.length< p1.length){
+      return p2.reversed.toList();
+    }
+    if(p1.first != sourceIndex || p1.last != destinationIndex){
+      return p2;
+    }
+  }
+
+  return [];
+
 }
 
 List<int> findPath(

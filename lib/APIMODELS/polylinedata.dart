@@ -95,8 +95,6 @@ class Floors {
 }
 
 class PolyArray {
-  String? walkableType;
-  String? visibilityType;
   String? contact;
   String? cubicleContact;
   String? cubicleName;
@@ -110,12 +108,12 @@ class PolyArray {
   String? wallNature;
   String? cubicleHeight;
   String? cubicleColor;
+  String? walkableType;
+  String? visibilityType = "visible";
   String? sId;
 
   PolyArray(
-      {this.walkableType,
-        this.visibilityType,
-        this.contact,
+      {this.contact,
         this.cubicleContact,
         this.cubicleName,
         this.floor,
@@ -128,11 +126,11 @@ class PolyArray {
         this.wallNature,
         this.cubicleHeight,
         this.cubicleColor,
+        this.walkableType,
+        this.visibilityType,
         this.sId});
 
   PolyArray.fromJson(Map<dynamic, dynamic> json) {
-    walkableType = json['walkableType'];
-    visibilityType = json['visibilityType'];
     contact = json['contact'];
     cubicleContact = json['cubicleContact'];
     cubicleName = json['cubicleName'];
@@ -151,13 +149,15 @@ class PolyArray {
     wallNature = json['wallNature'];
     cubicleHeight = json['cubicleHeight'];
     cubicleColor = json['cubicleColor'];
+    walkableType = json['walkableType'];
+    if(json['visibilityType'] != null){
+      visibilityType = json['visibilityType'];
+    }
     sId = json['_id'];
   }
 
   Map<dynamic, dynamic> toJson() {
     final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
-    data['walkableType'] = this.walkableType;
-    data['visibilityType'] = this.visibilityType;
     data['contact'] = this.contact;
     data['cubicleContact'] = this.cubicleContact;
     data['cubicleName'] = this.cubicleName;
@@ -173,6 +173,8 @@ class PolyArray {
     data['wallNature'] = this.wallNature;
     data['cubicleHeight'] = this.cubicleHeight;
     data['cubicleColor'] = this.cubicleColor;
+    data['walkableType'] = this.walkableType;
+    data['visibilityType'] = this.visibilityType;
     data['_id'] = this.sId;
     return data;
   }

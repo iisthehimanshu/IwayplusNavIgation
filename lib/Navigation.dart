@@ -3427,8 +3427,91 @@ double minHeight = 90.0;
     getPoints.clear();
   }
 
-  int floors = 0;
+  Widget floorColumn1() {
+    List<int> floorNumbers = List.generate(
+        building.numberOfFloors[buildingAllApi.getStoredString()]!,
+            (index) => index);
+    bool selected = false;
 
+    return Semantics(
+      excludeSemantics: excludeFloorSemanticWork,
+      child: SingleChildScrollView(
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          height:200,
+          width: 100,
+          child: ListView.builder(
+              itemCount: building.numberOfFloors[buildingAllApi.getStoredString()]!,
+              itemBuilder: (BuildContext context, int index) {
+                return AnimatedContainer(
+                  width: 90,
+                  margin: EdgeInsets.symmetric(horizontal: 2,vertical: 7),
+                  padding: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 8),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color:
+                    pathMarkers[index] == null
+                        ? Colors.white
+                        : Color(0xff24b9b0),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey, // Shadow color
+                        offset: Offset(0, 2), // Offset of the shadow
+                        blurRadius: 4, // Spread of the shadow
+                      ),
+                    ],
+                  ),
+                  duration: Duration(milliseconds: 500),
+                  child: Semantics(
+                    label: "Switch to ${tools.numericalToAlphabetical(index)}Floor",
+                    child: InkWell(
+                      onTap: () {
+                        building.floor[buildingAllApi
+                            .getStoredString()] = index;
+                        createRooms(
+                          building.polylinedatamap[
+                          buildingAllApi
+                              .getStoredString()]!,
+                          building.floor[buildingAllApi
+                              .getStoredString()]!,
+                        );
+                        if (pathMarkers[index] != null) {
+                          //setCameraPosition(pathMarkers[i]!);
+                        }
+                        building.landmarkdata!
+                            .then((value) {
+                          createMarkers(
+                            value,
+                            building.floor[buildingAllApi
+                                .getStoredString()]!,
+                          );
+                        });
+                      },
+                      child: Center(
+                        child: Semantics(
+                          excludeSemantics: true,
+                          child: Text(
+                            index == 0 ? 'G' : '$index',
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              height: 19 / 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ),
+    );
+  }
+
+  int floors = 0;
   Widget floorColumn() {
     List<int> floorNumbers = List.generate(
         building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -4518,7 +4601,6 @@ double minHeight = 90.0;
                             label: "",
                             child: Container(
                               height: 522,
-                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
@@ -4689,103 +4771,109 @@ double minHeight = 90.0;
                     ),
                     Row(
                       children: [
-                        Container(
-                          width: 85,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Color(0xff24B9B0),
-                            borderRadius: BorderRadius.circular(4.0),
-                          ),
-                          child: TextButton(
-                            onPressed: () async {
-                              PathState.sourceX = user.coordX;
-                              PathState.sourceY = user.coordY;
-                              user.showcoordX = user.coordX;
-                              user.showcoordY = user.coordY;
-                              PathState.sourceFloor = user.floor;
-                              PathState.sourcePolyID = user.key;
-                              PathState.sourceName = "Your current location";
-                              building.landmarkdata!.then((value) async {
-                                await calculateroute(value.landmarksMap!)
-                                    .then((value) {
-                                  user.pathobj = PathState;
-                                  user.path = PathState.path.values
-                                      .expand((list) => list)
-                                      .toList();
-                                  user.Cellpath = PathState.singleCellListPath;
-                                  user.pathobj.index = 0;
-                                  user.isnavigating = true;
-                                  user.moveToStartofPath().then((value) {
-                                    setState(() {
-                                      if (markers.length > 0) {
-                                        markers[user.Bid]?[0] =
-                                            customMarker.move(
-                                                LatLng(
-                                                    tools.localtoglobal(
-                                                        user.showcoordX.toInt(),
-                                                        user.showcoordY
-                                                            .toInt())[0],
-                                                    tools.localtoglobal(
-                                                        user.showcoordX.toInt(),
-                                                        user.showcoordY
-                                                            .toInt())[1]),
-                                                markers[user.Bid]![0]);
-                                      }
+                        FocusScope(
+                          autofocus: true,
+                          child: Semantics(
+                            label: "Reroute",
+                            child: Container(
+                              width: 85,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Color(0xff24B9B0),
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              child: TextButton(
+                                onPressed: () async {
+                                  PathState.sourceX = user.coordX;
+                                  PathState.sourceY = user.coordY;
+                                  user.showcoordX = user.coordX;
+                                  user.showcoordY = user.coordY;
+                                  PathState.sourceFloor = user.floor;
+                                  PathState.sourcePolyID = user.key;
+                                  PathState.sourceName = "Your current location";
+                                  building.landmarkdata!.then((value) async {
+                                    await calculateroute(value.landmarksMap!)
+                                        .then((value) {
+                                      user.pathobj = PathState;
+                                      user.path = PathState.path.values
+                                          .expand((list) => list)
+                                          .toList();
+                                      user.Cellpath = PathState.singleCellListPath;
+                                      user.pathobj.index = 0;
+                                      user.isnavigating = true;
+                                      user.moveToStartofPath().then((value) {
+                                        setState(() {
+                                          if (markers.length > 0) {
+                                            markers[user.Bid]?[0] =
+                                                customMarker.move(
+                                                    LatLng(
+                                                        tools.localtoglobal(
+                                                            user.showcoordX.toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[0],
+                                                        tools.localtoglobal(
+                                                            user.showcoordX.toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[1]),
+                                                    markers[user.Bid]![0]);
+                                          }
+                                        });
+                                      });
+                                      _isRoutePanelOpen = false;
+                                      building.selectedLandmarkID = null;
+                                      _isnavigationPannelOpen = true;
+                                      _isreroutePannelOpen = false;
+                                      int numCols = building.floorDimenssion[
+                                              PathState.sourceBid]![
+                                          PathState.sourceFloor]![0]; //floor length
+                                      double angle =
+                                          tools.calculateAngleBWUserandPath(
+                                              user,
+                                              PathState
+                                                  .path[PathState.sourceFloor]![1],
+                                              numCols);
+                                      if (angle != 0) {
+                                        speak("Turn " + tools.angleToClocks(angle));
+                                      } else {}
+
+                                      mapState.tilt = 50;
+
+                                      mapState.bearing = tools.calculateBearing([
+                                        user.lat,
+                                        user.lng
+                                      ], [
+                                        PathState
+                                            .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                            .lat,
+                                        PathState
+                                            .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                            .lng
+                                      ]);
+                                      _googleMapController.animateCamera(
+                                          CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                            target: mapState.target,
+                                            zoom: mapState.zoom,
+                                            bearing: mapState.bearing!,
+                                            tilt: mapState.tilt),
+                                      ));
                                     });
                                   });
-                                  _isRoutePanelOpen = false;
-                                  building.selectedLandmarkID = null;
-                                  _isnavigationPannelOpen = true;
-                                  _isreroutePannelOpen = false;
-                                  int numCols = building.floorDimenssion[
-                                          PathState.sourceBid]![
-                                      PathState.sourceFloor]![0]; //floor length
-                                  double angle =
-                                      tools.calculateAngleBWUserandPath(
-                                          user,
-                                          PathState
-                                              .path[PathState.sourceFloor]![1],
-                                          numCols);
-                                  if (angle != 0) {
-                                    speak("Turn " + tools.angleToClocks(angle));
-                                  } else {}
-
-                                  mapState.tilt = 50;
-
-                                  mapState.bearing = tools.calculateBearing([
-                                    user.lat,
-                                    user.lng
-                                  ], [
-                                    PathState
-                                        .singleCellListPath[
-                                            user.pathobj.index + 1]
-                                        .lat,
-                                    PathState
-                                        .singleCellListPath[
-                                            user.pathobj.index + 1]
-                                        .lng
-                                  ]);
-                                  _googleMapController.animateCamera(
-                                      CameraUpdate.newCameraPosition(
-                                    CameraPosition(
-                                        target: mapState.target,
-                                        zoom: mapState.zoom,
-                                        bearing: mapState.bearing!,
-                                        tilt: mapState.tilt),
-                                  ));
-                                });
-                              });
-                            },
-                            child: Text(
-                              "Reroute",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff000000),
-                                height: 20 / 14,
+                                },
+                                child: Text(
+                                  "Reroute",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff000000),
+                                    height: 20 / 14,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
                               ),
-                              textAlign: TextAlign.left,
                             ),
                           ),
                         ),
@@ -6691,7 +6779,7 @@ double minHeight = 90.0;
                                         ),
                                       ),
                                     )
-                                  : floorColumn(),
+                                  : floorColumn1(),
                               SizedBox(
                                   height: 28.0), // Adjust the height as needed
                               // Container(

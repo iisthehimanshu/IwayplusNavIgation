@@ -6552,9 +6552,14 @@ double minHeight = 90.0;
                           top: 150,
                           right: 50,
                           child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(20),
+                              color: (isPdr) ? Colors.green : Colors.red,
+                            ),
                             height: 20,
                             width: 20,
-                            color: (isPdr) ? Colors.green : Colors.red,
+
                           )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
@@ -6694,21 +6699,21 @@ double minHeight = 90.0;
                                   : floorColumn(),
                               SizedBox(
                                   height: 28.0), // Adjust the height as needed
-                              // Container(
-                              //   width: 300,
-                              //   height: 100,
-                              //   child: SingleChildScrollView(
-                              //     scrollDirection: Axis.horizontal,
-                              //     child: Column(
-                              //       children: [
-                              //         Text(testBIn.keys.toString()),
-                              //         Text(testBIn.values.toString()),
-                              //         Text("summap"),
-                              //         Text(sortedsumMapfordebug.toString()),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
+                              Container(
+                                width: 300,
+                                height: 100,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Column(
+                                    children: [
+                                      Text(testBIn.keys.toString()),
+                                      Text(testBIn.values.toString()),
+                                      Text("summap"),
+                                      Text(sortedsumMapfordebug.toString()),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
@@ -6867,55 +6872,55 @@ double minHeight = 90.0;
                       //     child: Icon(Icons.add)
                       // ),
 
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
+                      FloatingActionButton(
+                        onPressed: () async {
+
+                          //StopPDR();
+
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              isLiveLocalizing = !isLiveLocalizing;
+                            });
+                            HelperClass.showToast("realTimeReLocalizeUser started");
+
+                            Timer.periodic(
+                                Duration(milliseconds: 5000),
+                                    (timer) async {
+                                  print(resBeacons);
+                                  btadapter.startScanning(resBeacons);
+
+
+                                  // setState(() {
+                                  //   sumMap=  btadapter.calculateAverage();
+                                  // });
+
+
+                                  Future.delayed(Duration(milliseconds: 1000)).then((value) => {
+                                    realTimeReLocalizeUser(resBeacons)
+                                    // listenToBin()
+
+
+                                  });
+
+                                  setState(() {
+                                    debugPQ = btadapter.returnPQ();
+
+                                  });
+
+                                });
+
+                          }
+
+                        },
+                        child: Icon(
+                          Icons.location_history_sharp,
+                          color: (isLiveLocalizing)
+                              ? Colors.cyan
+                              : Colors.black,
+                        ),
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
+                      ),
                     ],
                   ),
 

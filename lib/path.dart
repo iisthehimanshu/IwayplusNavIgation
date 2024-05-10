@@ -275,8 +275,8 @@ List<int> findBestPathAmongstBoth(
   print("lplp ${p1.length}   ${p2.length}");
   print("lplplp ${p1turns.length}   ${p2turns.length}");
 
-  print("pathp1 $p1");
-  print("pathp2 $p2");
+  print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
+  print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
 
 
 
@@ -286,28 +286,51 @@ List<int> findBestPathAmongstBoth(
     return p1;
   }
 
+
+
   if(p1.first == sourceIndex && p1.last == destinationIndex){
+    print("inside 1");
     if(p2.first != destinationIndex || p2.last != sourceIndex){
+      print("inside 1 1");
+
       return p1;
     }
     if(p1turns.length<p2turns.length){
+      print("inside 1 2");
+
       return p1;
     }
     if(p1.length< p2.length){
+      print("inside 1 3");
+
       return p1;
-    }
-  }else if(p2.first == destinationIndex && p2.last == sourceIndex){
-    if(p2turns.length<p1turns.length){
-      return p2.reversed.toList();
-    }
-    if(p2.length< p1.length){
-      return p2.reversed.toList();
-    }
-    if(p1.first != sourceIndex || p1.last != destinationIndex){
-      return p2;
     }
   }
 
+  if(p2.first == destinationIndex && p2.last == sourceIndex){
+    print("inside 2");
+
+    if(p2turns.length<p1turns.length){
+      print("inside 2 1");
+
+      return p2.reversed.toList();
+    }
+    if(p2.length< p1.length){
+      print("inside 2 2");
+      return p2.reversed.toList();
+    }
+    if(p1.first != sourceIndex || p1.last != destinationIndex){
+      print("inside 2 3");
+      return p2.reversed.toList();
+    }
+  }
+
+  if(p1.length == p2.length){
+    print("inside 3");
+    return p1;
+  }
+
+  print("inside 4");
   return [];
 
 }
@@ -319,8 +342,8 @@ List<int> findPath(
   int sourceIndex,
   int destinationIndex,
 ) {
-  // sourceIndex -= 1;
-  // destinationIndex -= 1;
+  sourceIndex -= 1;
+  destinationIndex -= 1;
 
   if (sourceIndex < 0 ||
       sourceIndex >= numRows * numCols ||

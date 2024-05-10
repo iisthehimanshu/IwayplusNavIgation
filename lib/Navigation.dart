@@ -107,21 +107,22 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  MapState mapState = new MapState();
+  MapState mapState = MapState();
   Timer? PDRTimer;
   String maptheme = "";
-  var _initialCameraPosition = CameraPosition(
+  var _initialCameraPosition = const CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
     zoom: 0,
   );
   late GoogleMapController _googleMapController;
-  Set<Polygon> patch = Set();
+  Set<Polygon> patch = {};
   Set<Polygon> otherpatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
   Map<String, Set<Polygon>> closedpolygons = Map();
-  Set<Polygon> otherclosedpolygons = Set();
+  Set<Polygon> otherclosedpolygons = {};
   Set<Marker> Markers = Set();
+  Set<Marker> tempMarkers = Set();
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -1262,6 +1263,7 @@ double minHeight = 90.0;
     List<int> currentBinFilled = [];
     setState(() {
       sumMap = btadapter.calculateAverage();
+
     });
 
     print("btadapter.avgMap");
@@ -1291,6 +1293,9 @@ double minHeight = 90.0;
     double firstKey;
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
+      setState(() {
+        sortedsumMapfordebug = sortMapByValue(sumMap);
+      });
       firstValue = sortedsumMap.entries.first.key;
       print("sortedsumMap--");
       print(firstValue);
@@ -2991,7 +2996,7 @@ double minHeight = 90.0;
   int destinationVal = 0;
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
-  Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{bool swap = false}) async {
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3021,7 +3026,7 @@ double minHeight = 90.0;
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid);
+            bid: PathState.destinationBid,swap: swap);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
         createRooms(building.polyLineData!,
             building.floor[buildingAllApi.getStoredString()]!);
@@ -3041,13 +3046,16 @@ double minHeight = 90.0;
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
+        print("different floor detected, route via ${commonlifts[0].name}");
+
+
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid);
+            bid: PathState.destinationBid,swap: swap);
 
         Map<String, int> map = {
           'Take ${commonlifts[0].name}': -1,
@@ -3063,7 +3071,7 @@ double minHeight = 90.0;
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-            bid: PathState.destinationBid);
+            bid: PathState.destinationBid,swap: swap);
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -3101,7 +3109,7 @@ double minHeight = 90.0;
                   PathState.destinationX,
                   PathState.destinationY,
                   PathState.destinationFloor,
-                  bid: PathState.destinationBid);
+                  bid: PathState.destinationBid,swap: swap);
               print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
               List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
@@ -3112,10 +3120,10 @@ double minHeight = 90.0;
                   PathState.destinationX,
                   PathState.destinationY,
                   PathState.destinationFloor,
-                  bid: PathState.destinationBid);
+                  bid: PathState.destinationBid,swap: swap);
               await fetchroute(element.coordinateX!, element.coordinateY!,
                   commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                  bid: PathState.destinationBid);
+                  bid: PathState.destinationBid,swap: swap);
 
               PathState.connections[PathState.destinationBid] = {
                 element.floor!: calculateindex(
@@ -3153,7 +3161,7 @@ double minHeight = 90.0;
             if (PathState.sourceFloor == element.floor) {
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid);
+                  bid: PathState.sourceBid,swap: swap);
               print("running source location no lift run");
             } else if (PathState.sourceFloor != element.floor) {
               List<CommonLifts> commonlifts = findCommonLifts(
@@ -3161,10 +3169,10 @@ double minHeight = 90.0;
 
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
                   element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid);
+                  bid: PathState.sourceBid,swap: swap);
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                  bid: PathState.sourceBid);
+                  bid: PathState.sourceBid,swap: swap);
 
               PathState.connections[PathState.sourceBid] = {
                 PathState.sourceFloor: calculateindex(
@@ -3214,6 +3222,14 @@ double minHeight = 90.0;
       print(pathMarkers.keys);
     }
 
+    building.floor[PathState.sourceBid] = PathState.sourceFloor;
+    createRooms(
+      building.polylinedatamap[
+      PathState.sourceBid]!,
+      PathState.sourceFloor,
+    );
+
+
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3242,18 +3258,8 @@ double minHeight = 90.0;
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
-  Future<List<int>> fetchroute(
-      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid = null}) async {
-    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
-    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
-    int sourceIndex = calculateindex(sourceX, sourceY, numCols);
-    int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-
-    print("numcol $numCols");
-
-    List<int> path = findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+  Future<List<int>> setPath(int sourceX, int sourceY, int destinationX, int destinationY, int floor,int numRows,int numCols,int sourceIndex,int destinationIndex, List<int> path,{String? bid = null})async{
+    print("path for floor $floor is $path");
 
 
     List<int> turns = tools.getTurnpoints(path, numCols);
@@ -3273,7 +3279,7 @@ double minHeight = 90.0;
     });
 
     List<Cell> Cellpath =
-        findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+    findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -3369,7 +3375,7 @@ double minHeight = 90.0;
         if (bid != null) {
           print("Himanshubid $bid");
           List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -3415,6 +3421,33 @@ double minHeight = 90.0;
     return path;
   }
 
+  Future<List<int>?> fetchroute(
+      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
+      {String? bid = null, bool swap = false}) async {
+
+    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
+    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
+    int sourceIndex = calculateindex(sourceX, sourceY, numCols);
+    int destinationIndex = calculateindex(destinationX, destinationY, numCols);
+
+
+    print("numcol $numCols");
+    print("for floor $floor sourceindex is $sourceIndex and destinationindex is $destinationIndex");
+
+    List<int> path = [];
+    if(!swap){
+       path = findBestPathAmongstBoth(numRows, numCols,
+          building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+    }else{
+      if(PathState.path[floor] != null){
+        path = PathState.path[floor]!;
+      }
+    }
+
+    setPath(sourceX, sourceY, destinationX, destinationY, floor, numRows, numCols, sourceIndex, destinationIndex, path,bid: bid);
+
+  }
+
   void closeRoutePannel() {
     _routeDetailPannelController.close();
   }
@@ -3427,8 +3460,91 @@ double minHeight = 90.0;
     getPoints.clear();
   }
 
-  int floors = 0;
+  Widget floorColumn1() {
+    List<int> floorNumbers = List.generate(
+        building.numberOfFloors[buildingAllApi.getStoredString()]!,
+            (index) => index);
+    bool selected = false;
 
+    return Semantics(
+      excludeSemantics: excludeFloorSemanticWork,
+      child: SingleChildScrollView(
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          height:200,
+          width: 100,
+          child: ListView.builder(
+              itemCount: building.numberOfFloors[buildingAllApi.getStoredString()]!,
+              itemBuilder: (BuildContext context, int index) {
+                return AnimatedContainer(
+                  width: 90,
+                  margin: EdgeInsets.symmetric(horizontal: 2,vertical: 7),
+                  padding: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 8),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color:
+                    pathMarkers[index] == null
+                        ? Colors.white
+                        : Color(0xff24b9b0),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey, // Shadow color
+                        offset: Offset(0, 2), // Offset of the shadow
+                        blurRadius: 4, // Spread of the shadow
+                      ),
+                    ],
+                  ),
+                  duration: Duration(milliseconds: 500),
+                  child: Semantics(
+                    label: "Switch to ${tools.numericalToAlphabetical(index)}Floor",
+                    child: InkWell(
+                      onTap: () {
+                        building.floor[buildingAllApi
+                            .getStoredString()] = index;
+                        createRooms(
+                          building.polylinedatamap[
+                          buildingAllApi
+                              .getStoredString()]!,
+                          building.floor[buildingAllApi
+                              .getStoredString()]!,
+                        );
+                        if (pathMarkers[index] != null) {
+                          //setCameraPosition(pathMarkers[i]!);
+                        }
+                        building.landmarkdata!
+                            .then((value) {
+                          createMarkers(
+                            value,
+                            building.floor[buildingAllApi
+                                .getStoredString()]!,
+                          );
+                        });
+                      },
+                      child: Center(
+                        child: Semantics(
+                          excludeSemantics: true,
+                          child: Text(
+                            index == 0 ? 'G' : '$index',
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              height: 19 / 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ),
+    );
+  }
+
+  int floors = 0;
   Widget floorColumn() {
     List<int> floorNumbers = List.generate(
         building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -3697,12 +3813,11 @@ double minHeight = 90.0;
                         onPressed: () {
                           setState(() {
                             PathState.swap();
-                            PathState.path.clear();
                             pathMarkers.clear();
                             PathState.directions.clear();
                             clearPathVariables();
                             building.landmarkdata!.then((value) {
-                              calculateroute(value.landmarksMap!);
+                              calculateroute(value.landmarksMap!,swap: true);
                             });
                           });
                         },
@@ -4290,7 +4405,12 @@ double minHeight = 90.0;
         int node = user.path[index + 1];
 
         List<int> c = [node % col, node ~/ col];
-        int val = tools.calculateAngleSecond(a, b, c).toInt();
+        double angle = tools.calculateAngleSecond(a, b, c);
+        int val = 90;
+        if(!angle.isNaN){
+          val = tools.calculateAngleSecond(a, b, c).toInt();
+        }
+
 
         // print("user corrds");
         // print("${user.showcoordX}+" "+ ${user.showcoordY}");
@@ -4518,7 +4638,6 @@ double minHeight = 90.0;
                             label: "",
                             child: Container(
                               height: 522,
-                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
@@ -4689,103 +4808,109 @@ double minHeight = 90.0;
                     ),
                     Row(
                       children: [
-                        Container(
-                          width: 85,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Color(0xff24B9B0),
-                            borderRadius: BorderRadius.circular(4.0),
-                          ),
-                          child: TextButton(
-                            onPressed: () async {
-                              PathState.sourceX = user.coordX;
-                              PathState.sourceY = user.coordY;
-                              user.showcoordX = user.coordX;
-                              user.showcoordY = user.coordY;
-                              PathState.sourceFloor = user.floor;
-                              PathState.sourcePolyID = user.key;
-                              PathState.sourceName = "Your current location";
-                              building.landmarkdata!.then((value) async {
-                                await calculateroute(value.landmarksMap!)
-                                    .then((value) {
-                                  user.pathobj = PathState;
-                                  user.path = PathState.path.values
-                                      .expand((list) => list)
-                                      .toList();
-                                  user.Cellpath = PathState.singleCellListPath;
-                                  user.pathobj.index = 0;
-                                  user.isnavigating = true;
-                                  user.moveToStartofPath().then((value) {
-                                    setState(() {
-                                      if (markers.length > 0) {
-                                        markers[user.Bid]?[0] =
-                                            customMarker.move(
-                                                LatLng(
-                                                    tools.localtoglobal(
-                                                        user.showcoordX.toInt(),
-                                                        user.showcoordY
-                                                            .toInt())[0],
-                                                    tools.localtoglobal(
-                                                        user.showcoordX.toInt(),
-                                                        user.showcoordY
-                                                            .toInt())[1]),
-                                                markers[user.Bid]![0]);
-                                      }
+                        FocusScope(
+                          autofocus: true,
+                          child: Semantics(
+                            label: "Reroute",
+                            child: Container(
+                              width: 85,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Color(0xff24B9B0),
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              child: TextButton(
+                                onPressed: () async {
+                                  PathState.sourceX = user.coordX;
+                                  PathState.sourceY = user.coordY;
+                                  user.showcoordX = user.coordX;
+                                  user.showcoordY = user.coordY;
+                                  PathState.sourceFloor = user.floor;
+                                  PathState.sourcePolyID = user.key;
+                                  PathState.sourceName = "Your current location";
+                                  building.landmarkdata!.then((value) async {
+                                    await calculateroute(value.landmarksMap!)
+                                        .then((value) {
+                                      user.pathobj = PathState;
+                                      user.path = PathState.path.values
+                                          .expand((list) => list)
+                                          .toList();
+                                      user.Cellpath = PathState.singleCellListPath;
+                                      user.pathobj.index = 0;
+                                      user.isnavigating = true;
+                                      user.moveToStartofPath().then((value) {
+                                        setState(() {
+                                          if (markers.length > 0) {
+                                            markers[user.Bid]?[0] =
+                                                customMarker.move(
+                                                    LatLng(
+                                                        tools.localtoglobal(
+                                                            user.showcoordX.toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[0],
+                                                        tools.localtoglobal(
+                                                            user.showcoordX.toInt(),
+                                                            user.showcoordY
+                                                                .toInt())[1]),
+                                                    markers[user.Bid]![0]);
+                                          }
+                                        });
+                                      });
+                                      _isRoutePanelOpen = false;
+                                      building.selectedLandmarkID = null;
+                                      _isnavigationPannelOpen = true;
+                                      _isreroutePannelOpen = false;
+                                      int numCols = building.floorDimenssion[
+                                              PathState.sourceBid]![
+                                          PathState.sourceFloor]![0]; //floor length
+                                      double angle =
+                                          tools.calculateAngleBWUserandPath(
+                                              user,
+                                              PathState
+                                                  .path[PathState.sourceFloor]![1],
+                                              numCols);
+                                      if (angle != 0) {
+                                        speak("Turn " + tools.angleToClocks(angle));
+                                      } else {}
+
+                                      mapState.tilt = 50;
+
+                                      mapState.bearing = tools.calculateBearing([
+                                        user.lat,
+                                        user.lng
+                                      ], [
+                                        PathState
+                                            .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                            .lat,
+                                        PathState
+                                            .singleCellListPath[
+                                                user.pathobj.index + 1]
+                                            .lng
+                                      ]);
+                                      _googleMapController.animateCamera(
+                                          CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                            target: mapState.target,
+                                            zoom: mapState.zoom,
+                                            bearing: mapState.bearing!,
+                                            tilt: mapState.tilt),
+                                      ));
                                     });
                                   });
-                                  _isRoutePanelOpen = false;
-                                  building.selectedLandmarkID = null;
-                                  _isnavigationPannelOpen = true;
-                                  _isreroutePannelOpen = false;
-                                  int numCols = building.floorDimenssion[
-                                          PathState.sourceBid]![
-                                      PathState.sourceFloor]![0]; //floor length
-                                  double angle =
-                                      tools.calculateAngleBWUserandPath(
-                                          user,
-                                          PathState
-                                              .path[PathState.sourceFloor]![1],
-                                          numCols);
-                                  if (angle != 0) {
-                                    speak("Turn " + tools.angleToClocks(angle));
-                                  } else {}
-
-                                  mapState.tilt = 50;
-
-                                  mapState.bearing = tools.calculateBearing([
-                                    user.lat,
-                                    user.lng
-                                  ], [
-                                    PathState
-                                        .singleCellListPath[
-                                            user.pathobj.index + 1]
-                                        .lat,
-                                    PathState
-                                        .singleCellListPath[
-                                            user.pathobj.index + 1]
-                                        .lng
-                                  ]);
-                                  _googleMapController.animateCamera(
-                                      CameraUpdate.newCameraPosition(
-                                    CameraPosition(
-                                        target: mapState.target,
-                                        zoom: mapState.zoom,
-                                        bearing: mapState.bearing!,
-                                        tilt: mapState.tilt),
-                                  ));
-                                });
-                              });
-                            },
-                            child: Text(
-                              "Reroute",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff000000),
-                                height: 20 / 14,
+                                },
+                                child: Text(
+                                  "Reroute",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff000000),
+                                    height: 20 / 14,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
                               ),
-                              textAlign: TextAlign.left,
                             ),
                           ),
                         ),
@@ -6406,14 +6531,26 @@ double minHeight = 90.0;
     double distanceThreshold = 100.0;
     String closestBuildingId = "";
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
-        geo.LatLng(value.latitude, value.longitude),
-        geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
-      );
+      if(key != buildingAllApi.outdoorID){
 
-      if (distance < distanceThreshold) {
-        closestBuildingId = key;
-        buildingAllApi.setStoredString(key);
+        // tempMarkers.add(Marker(
+        //     markerId: MarkerId("$key"),
+        //     position: LatLng(value.latitude, value.longitude),
+        //     onTap: () {
+        //       print("$key");
+        //     },
+        // ));
+        num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+          geo.LatLng(value.latitude, value.longitude),
+          geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+        );
+
+        print("distance for $key is $distance");
+
+        if (distance < distanceThreshold) {
+          closestBuildingId = key;
+          buildingAllApi.setStoredString(key);
+        }
       }
     });
   }
@@ -6448,10 +6585,8 @@ double minHeight = 90.0;
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6522,7 +6657,6 @@ double minHeight = 90.0;
                               }
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
-                              print("plpl ${cameraPosition.tilt}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6552,9 +6686,14 @@ double minHeight = 90.0;
                           top: 150,
                           right: 50,
                           child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(20),
+                              color: (isPdr) ? Colors.green : Colors.red,
+                            ),
                             height: 20,
                             width: 20,
-                            color: (isPdr) ? Colors.green : Colors.red,
+
                           )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
@@ -6564,7 +6703,6 @@ double minHeight = 90.0;
                           excludeSemantics: false,
                           child: Column(
                             children: [
-                              // Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
                               //   child: Container(
@@ -6675,7 +6813,7 @@ double minHeight = 90.0;
                                                       .getStoredString()]!,
                                                 );
                                                 if (pathMarkers[i] != null) {
-                                                  //setCameraPosition(pathMarkers[i]!);
+                                                  setCameraPosition(pathMarkers[i]!);
                                                 }
                                                 building.landmarkdata!
                                                     .then((value) {
@@ -6691,28 +6829,28 @@ double minHeight = 90.0;
                                         ),
                                       ),
                                     )
-                                  : floorColumn(),
+                                  : floorColumn1(),
                               SizedBox(
                                   height: 28.0), // Adjust the height as needed
-                              // Container(
-                              //   width: 300,
-                              //   height: 100,
-                              //   child: SingleChildScrollView(
-                              //     scrollDirection: Axis.horizontal,
-                              //     child: Column(
-                              //       children: [
-                              //         Text(testBIn.keys.toString()),
-                              //         Text(testBIn.values.toString()),
-                              //         Text("summap"),
-                              //         Text(sortedsumMapfordebug.toString()),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
+                              Container(
+                                width: 300,
+                                height: 100,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(testBIn.keys.toString()),
+                                      Text(testBIn.values.toString()),
+                                      Text("summap"),
+                                      Text(sortedsumMapfordebug.toString()),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
-                                    //print(PathState.connections);
                                     building.floor[buildingAllApi
                                         .getStoredString()] = user.floor;
                                     createRooms(
@@ -6867,55 +7005,55 @@ double minHeight = 90.0;
                       //     child: Icon(Icons.add)
                       // ),
 
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 1000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
+                      FloatingActionButton(
+                        onPressed: () async {
+
+                          //StopPDR();
+
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              isLiveLocalizing = !isLiveLocalizing;
+                            });
+                            HelperClass.showToast("realTimeReLocalizeUser started");
+
+                            Timer.periodic(
+                                Duration(milliseconds: 5000),
+                                    (timer) async {
+                                  print(resBeacons);
+                                  btadapter.startScanning(resBeacons);
+
+
+                                  // setState(() {
+                                  //   sumMap=  btadapter.calculateAverage();
+                                  // });
+
+
+                                  Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+                                    realTimeReLocalizeUser(resBeacons)
+                                    // listenToBin()
+
+
+                                  });
+
+                                  setState(() {
+                                    debugPQ = btadapter.returnPQ();
+
+                                  });
+
+                                });
+
+                          }
+
+                        },
+                        child: Icon(
+                          Icons.location_history_sharp,
+                          color: (isLiveLocalizing)
+                              ? Colors.cyan
+                              : Colors.black,
+                        ),
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
+                      ),
                     ],
                   ),
 

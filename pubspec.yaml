@@ -55,7 +55,7 @@ dependencies:
 
   shared_preferences: ^2.2.2
   easter_egg_trigger: ^1.0.1
-  fluttertoast: ^8.2.4
+  fluttertoast:
   easy_search_bar: ^2.5.0
   auto_size_text: ^3.0.0
   sensors_plus: ^4.0.2
@@ -64,6 +64,8 @@ dependencies:
   google_maps: ^6.3.0
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
+  turf: ^0.0.9
+
 
   upgrader:
   intl_phone_number_input: ^0.7.3+1

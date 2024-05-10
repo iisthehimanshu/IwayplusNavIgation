@@ -279,19 +279,22 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                 margin: EdgeInsets.only(
                                     left: 16, top: 8, right: 16),
                                 width: screenWidth,
-                                child: Flexible(
-                                  child: Container(
-                                    child: Text(
-                                      "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff242323),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff242323),
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                               Container(
@@ -377,25 +380,25 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                 mailEditingController.text)) {
                                               await SignInAPI.sendOtpForgetPassword('+91${mailEditingController.text}').then((value) => {
                                                 if (value == 1){
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder:
-                                                            (context) =>
-                                                            VerifyYourAccount(
-                                                              userEmailOrPhone:
-                                                              mailEditingController
-                                                                  .text,
-                                                              previousScreen:
-                                                              'ForgetPassword',
-                                                            ),
-                                                      ),
-                                                    )
-                                                  }
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                          VerifyYourAccount(
+                                                            userEmailOrPhone:
+                                                            mailEditingController
+                                                                .text,
+                                                            previousScreen:
+                                                            'ForgetPassword',
+                                                          ),
+                                                    ),
+                                                  )
+                                                }
                                                 else {
-                                                    showToast(
-                                                        'you are not a registered user')
-                                                  }
+                                                  showToast(
+                                                      'you are not a registered user')
+                                                }
                                               });
                                             }else{
                                               await SignInAPI

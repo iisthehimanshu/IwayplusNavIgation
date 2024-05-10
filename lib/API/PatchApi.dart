@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/API/buildingAllApi.dart';
 import 'package:iwayplusnav/APIMODELS/patchDataModel.dart';
@@ -6,12 +7,14 @@ import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
 class patchAPI {
 
   String token = "";
   final String baseUrl = "https://dev.iwayplus.in/secured/patch/get";
+  var signInBox = Hive.box('SignInDatabase');
 
   void checkForUpdate({String? id=null}) async{
     final PatchBox = PatchAPIModelBox.getData();
@@ -59,6 +62,8 @@ class patchAPI {
   }
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+
+    token = signInBox.get("accessToken");
     print("patch");
     final PatchBox = PatchAPIModelBox.getData();
     if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
@@ -68,11 +73,7 @@ class patchAPI {
       return patchDataModel.fromJson(responseBody);
     }
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
+
 
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString()
@@ -95,6 +96,10 @@ class patchAPI {
       return patchDataModel.fromJson(responseBody);
 
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return patchAPI().fetchPatchData();
+      }
       print(Exception);
       throw Exception('Failed to load data');
     }

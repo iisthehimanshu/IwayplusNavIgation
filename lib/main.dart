@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'Elements/UserCredential.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'VenueSelectionScreen.dart';
@@ -25,7 +27,7 @@ import 'dart:io' show Platform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await Firebase.initializeApp();
+  await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
@@ -95,48 +97,37 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       title: "IWAYPLUS",
-      home: MainScreen()
+      home:
+      //MainScreen()
 
+      FutureBuilder<bool>(
+        future: _isUserAuthenticated(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
 
-      // FutureBuilder<bool>(
-      //   future: _isUserAuthenticated(),
-      //   builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-      //     if (snapshot.connectionState == ConnectionState.waiting) {
-      //       return CircularProgressIndicator();
-      //     }
-      //     if (snapshot.hasError) {
-      //       return Text(snapshot.error.toString());
-      //     }
-      //
-      //     final bool isUserAuthenticated = snapshot.data ?? false;
-      //
-      //     if (!isUserAuthenticated) {
-      //       var SignInDatabasebox = Hive.box('SignInDatabase');
-      //       print(SignInDatabasebox.values);
-      //       //List<dynamic> ss = SignInDatabasebox.get("roles");
-      //       // print(ss.length);
-      //       // if(SignInDatabasebox.get("roles")=="[user]"){
-      //       //   print("True");
-      //       // }
-      //       final SigninBox = SignINAPIModelBox.getData();
-      //       print("SigninBox.length");
-      //       print(SigninBox.values);
-      //       print(SigninBox);
-      //       print(googleSignInUserName);
-      //
-      //       if(!SignInDatabasebox.containsKey("accessToken")){
-      //         return SignIn();
-      //       }else{
-      //
-      //         return MainScreen(initialIndex: 0);
-      //       } // Redirect to Sign-In screen if user is not authenticated
-      //     } else {
-      //       print("googleSignInUserName");
-      //       print(googleSignInUserName);
-      //       return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
-      //     }
-      //   },
-      // ),
+          final bool isUserAuthenticated = snapshot.data ?? false;
+
+          if (!isUserAuthenticated) {
+            var SignInDatabasebox = Hive.box('SignInDatabase');
+            print("SignInDatabasebox.containsKey(accessToken)");
+            print(SignInDatabasebox.containsKey("accessToken"));
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              return MainScreen(initialIndex: 0);
+            } // Redirect to Sign-In screen if user is not authenticated
+          } else {
+            print("googleSignInUserName");
+            print(googleSignInUserName);
+            return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
+          }
+        },
+      ),
 
     );
   }

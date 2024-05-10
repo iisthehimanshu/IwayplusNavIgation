@@ -5,6 +5,7 @@ import '../APIMODELS/guestloginmodel.dart';
 class guestApi {
 
   final String baseUrl = "https://dev.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf";
+
   Future<guestloginmodel> guestlogin() async {
     print("guest");
     final response = await http.get(
@@ -14,6 +15,7 @@ class guestApi {
       Map<String, dynamic> responseBody = json.decode(response.body);
       return guestloginmodel.fromJson(responseBody);
     } else {
+      print("API Exception");
       print(response.statusCode);
       throw Exception('Failed to load data');
     }

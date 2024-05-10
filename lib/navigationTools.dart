@@ -9,6 +9,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'Cell.dart';
 import 'path.dart';
 
 class tools {
@@ -336,13 +337,58 @@ class tools {
     return angle;
   }
 
+  static double calculateAnglefifth(int node1, int node2, int node3, int cols) {
+    List<int> a = [node1 % cols , node1 ~/cols];
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
+
+    double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
+    double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
+
+    double angle = (angle2 - angle1) * 180 / pi;
+
+    if (angle < 0) {
+      angle += 360;
+    }
+
+    return angle;
+  }
+
+  static double toRadians(double degree) {
+    return degree * pi / 180.0;
+  }
+
+  static double calculateBearing(List<double> pointA, List<double> pointB) {
+    double lat1 = toRadians(pointA[0]);
+    double lon1 = toRadians(pointA[1]);
+    double lat2 = toRadians(pointB[0]);
+    double lon2 = toRadians(pointB[1]);
+
+    double dLon = lon2 - lon1;
+
+    double x = sin(dLon) * cos(lat2);
+    double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+
+    double bearingRadians = atan2(x, y);
+    double bearingDegrees = bearingRadians * 180.0 / pi;
+    // Normalize the bearing to be within the range 0° to 360°
+    bearingDegrees = (bearingDegrees + 360) % 360;
+
+    return bearingDegrees;
+  }
+
+
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // print("A $a");
-    // print("B $b");
-    // print("C $c");
+    print("A $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+
+    print("ab----${ab}");
+    print("ac-----${ac}");
 
     // Calculate the dot product of the two vectors
     double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
@@ -407,8 +453,120 @@ class tools {
     return angleInDegrees;
   }
 
+  static bool isTurn(List<int> prev, List<int> currentCoordinate, List<int> next) {
+    if (prev == null || next == null) {
+      return false;  // Not enough data to determine if it's a turn.
+    }
+
+    // Extracting coordinates
+    int prevX = prev[0];
+    int prevY = prev[1];
+    int currentX = currentCoordinate[0];
+    int currentY = currentCoordinate[1];
+    int nextX = next[0];
+    int nextY = next[1];
+
+    // Calculate the vectors from prev to current and from current to next
+    int vector1X = currentX - prevX;
+    int vector1Y = currentY - prevY;
+    int vector2X = nextX - currentX;
+    int vector2Y = nextY - currentY;
+
+    // Calculate the cross product of vector1 and vector2
+    int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+    // A cross product of zero means the points are collinear (no turn).
+    // Cross product != 0 means there is a turn.
+    return crossProduct != 0;
+  }
+
+
+  static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
+    List<int> a = [user.x, user.y];
+    List<int> tval = user.move(theta);
+    List<int> b = [user.x+tval[0], user.y+tval[1]];
+    List<int> c = [node.x , node.y];
+
+    print("AA $a");
+    print("BB $b");
+    print("CC $c");
+    print("DD ${node.move.toString()}");
+    print("EE ${theta}");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the cross product of the two vectors
+    double crossProduct = ab[0] * ac[1].toDouble() - ab[1] * ac[0].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Check the sign of the cross product to determine the orientation
+    if (crossProduct < 0) {
+      angleInRadians = 2 * pi - angleInRadians;
+    }
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+
+    return angleInDegrees;
+  }
+
   static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
 
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
+
+    print("A $a");
+    print("B $b");
+    print("C $c");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the cross product of the two vectors
+    double crossProduct = ab[0] * ac[1].toDouble() - ab[1] * ac[0].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Check the sign of the cross product to determine the orientation
+    if (crossProduct < 0) {
+      angleInRadians = 2 * pi - angleInRadians;
+    }
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+
+    return angleInDegrees;
+  }
+
+  static double calculateAnglefourth(int node1, int node2 , int node3 , int cols) {
+
+    List<int> a = [node1 % cols , node1 ~/cols];
     List<int> b = [node2 % cols , node2 ~/cols];
     List<int> c = [node3 % cols , node3 ~/cols];
 
@@ -512,7 +670,7 @@ class tools {
     List<Landmarks> nearbyLandmarks = [];
     for (int node in path) {
       landmarksMap.forEach((key, value) {
-        if (floor == value.floor) {
+        if (floor == value.floor && value.name != null && (value.name!.toLowerCase().contains("entry") || value.name!.toLowerCase().contains("corridor"))) {
           List<int> pCoord = computeCellCoordinates(node, numCols);
           double d = 0.0;
           if (value.doorX == null) {
@@ -541,7 +699,7 @@ class tools {
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID){
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
         if (Beacon.floor! == value.floor) {
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
@@ -558,14 +716,14 @@ class tools {
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }else{
-            // d = calculateDistance(
-            //     pCoord, [value.coordinateX!, value.coordinateY!]);
-            // print("distance b/w beacon and location${d}");
-            // print(value.name);
-            // if (d<distance) {
-            //   nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
-            //   priorityQueue.add(MapEntry(currentLandInfo, d));
-            // }
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+            print("distance b/w beacon and location${d}");
+            print(value.name);
+            if (d<distance) {
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
+            }
           }
         }
       }
@@ -574,18 +732,22 @@ class tools {
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
+
+      print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
-      print(priorityQueue.isEmpty);
+      print("priorityQueue.isEmpty");
     }
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
     print("called");
+
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (Beacon.floor! == value.floor) {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);
@@ -619,12 +781,25 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
-  static double angleBetweenBuildingAndNorth() {
+  static double angleBetweenBuildingAndNorth(String Bid) {
     // Assuming corners is a list of Point objects representing coordinates of the building corners
 
+    int i = 0;
+    int j = 1;
+    if(Bid  == "65d8825cdb333f89456d0562"){
+      i = 0;
+      j = 1;
+    }else if(Bid == "65d8833adb333f89456e6519"){
+      i=2;
+      j=3;
+    }else if(Bid == "65d8835adb333f89456e687f"){
+      i = 2;
+      j = 3;
+    }
+
     // Choose two adjacent corners
-    Point<double> corner1 = corners[0];
-    Point<double> corner2 = corners[1];
+    Point<double> corner1 = corners[i]; //0 for RNI   2 for Ashoka
+    Point<double> corner2 = corners[j]; //1 for RNI   3 for Ashoka
 
     // Calculate the slope
     double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
@@ -648,8 +823,10 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
+    print("angleee-----${angle}");
     print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
+
     if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
     } else if (angle > 22.5 && angle <= 67.5) {
@@ -669,6 +846,108 @@ class tools {
     } else {
       return [0, 0];
     }
+  }
+
+
+  static List<int> fourcelltransition(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 315 || angle <= 45) {
+      return [0, -1];
+    } else if (angle > 45 && angle <= 135) {
+      return [1, 0];
+    } else if (angle > 135 && angle <= 225) {
+      return [0,1];
+    } else if (angle > 225 && angle <= 315) {
+      return [-1 , 0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+
+  static List<int> twocelltransitionvertical(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle >= 270 || angle <= 90) {
+      return [0, -1];
+    } else if (angle > 90 && angle <= 270) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal(double angle) {
+    print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print("second $angle");
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle > 180 && angle <= 360) {
+      return [-1,0];
+    } else if (angle > 0 && angle <= 180) {
+      return [1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static Map<int,Landmarks> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols){
+    Map<int,Landmarks> ls = {};
+    List<int> turns = [];
+    for(int i = 1 ; i<path.length-1 ; i++){
+      int prevPos = path[i-1];
+      int currPos = path[i];
+      int nextPos = path[i+1];
+
+      int currentX = (currPos % numCols);
+      int currentY = (currPos ~/ numCols);
+
+      int nextX = (nextPos % numCols);
+      int nextY = (nextPos ~/ numCols);
+
+      int prevX = (prevPos % numCols);
+      int prevY = (prevPos ~/ numCols);
+
+      int vector1X = currentX - prevX;
+      int vector1Y = currentY - prevY;
+      int vector2X = nextX - currentX;
+      int vector2Y = nextY - currentY;
+
+      // Calculate the cross product of vector1 and vector2
+      int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+      if(crossProduct != 0){
+        turns.add(currPos);
+      }
+
+
+    }
+
+    landmarks.forEach((element) {
+      double d = 1000000;
+      int? t;
+      turns.forEach((turn) {
+        if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols])<d){
+          d = tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols]);
+          t = turn;
+        }
+      });
+      if(t != null){
+        ls[t!] = element;
+      }
+    });
+
+    return ls;
   }
 
   static List<int> getTurnpoints(List<int> pathNodes,int numCols){
@@ -699,7 +978,14 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res.add(currPos);
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res.add(currPos);
+        }
+
       }
 
 
@@ -707,6 +993,127 @@ class tools {
     }
     return res;
   }
+
+  static List<Cell> getCellTurnpoints(List<Cell> pathNodes,int numCols){
+    List<Cell> res=[];
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      Cell currPos = pathNodes[i];
+      Cell nextPos=pathNodes[i+1];
+      Cell prevPos=pathNodes[i-1];
+
+
+      int prevDeltaX=currPos.x-prevPos.x;
+      int prevDeltaY=currPos.y-prevPos.y;
+      int nextDeltaX=nextPos.x-currPos.x;
+      int nextDeltaY=nextPos.y-currPos.y;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+
+
+          res.add(currPos);
+        }
+
+      }
+
+
+
+    }
+    return res;
+  }
+
+  static List<int> generateCompletePath(List<int> turns, int numCols, List<int> nonWalkableCells) {
+    List<int> completePath = [];
+
+    // Start with the first point in your path
+    int currentPoint = turns[0];
+    int x = currentPoint % numCols;
+    int y = currentPoint ~/ numCols;
+    completePath.add(x + y * numCols);
+
+    // Connect each turn point with a straight line
+    for (int i = 1; i < turns.length; i++) {
+      int turnPoint = turns[i];
+      int turnX = turnPoint % numCols;
+      int turnY = turnPoint ~/ numCols;
+
+      // Connect straight line from current point to turn point
+      while (x != turnX || y != turnY) {
+        if (x < turnX) {
+          x++;
+        } else if (x > turnX) {
+          x--;
+        }
+        if (y < turnY) {
+          y++;
+        } else if (y > turnY) {
+          y--;
+        }
+
+        // Convert current x, y coordinates back to index form
+        int currentIndex = x + y * numCols;
+
+        // Check if the current index is in the non-walkable cells list
+        if (nonWalkableCells.contains(currentIndex)) {
+          // Handle non-walkable cell, such as breaking out of the loop or finding an alternative path
+          // Here, I'll just break out of the loop
+          break;
+        }
+
+        // Add the current index to the complete path
+        completePath.add(currentIndex);
+      }
+    }
+
+    return completePath;
+  }
+
+  // static List<int> generateCompletePath(List<int> turns, int numCols,List<int> nonWalkableCells) {
+  //   List<int> completePath = [];
+  //
+  //   // Start with the first point in your path
+  //   int currentPoint = turns[0];
+  //   int x = currentPoint % numCols;
+  //   int y = currentPoint ~/ numCols;
+  //   completePath.add(x+y*numCols);
+  //
+  //   // Connect each turn point with a straight line
+  //   for (int i = 1; i < turns.length; i++) {
+  //     int turnPoint = turns[i];
+  //     int turnX = turnPoint % numCols;
+  //     int turnY = turnPoint ~/ numCols;
+  //
+  //     // Connect straight line from current point to turn point
+  //     while (x != turnX || y != turnY) {
+  //       if (x < turnX) {
+  //         x++;
+  //       } else if (x > turnX) {
+  //         x--;
+  //       }
+  //       if (y < turnY) {
+  //         y++;
+  //       } else if (y > turnY) {
+  //         y--;
+  //       }
+  //       if(nonWalkableCells.contains(x+y*numCols)){
+  //
+  //       }
+  //       completePath.add(x+y*numCols);
+  //     }
+  //   }
+  //
+  //   return completePath;
+  // }
   static Map<int,int> getTurnMap(List<int> pathNodes,int numCols){
     Map<int,int> res=new Map();
 
@@ -735,7 +1142,15 @@ class tools {
       int nextDeltaY=y2-y1;
 
       if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        res[i]=currPos;
+
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res[i]=currPos;
+        }
+
       }
 
 
@@ -751,12 +1166,24 @@ class tools {
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
-    print("@@@@@ $x1,$y1");
-    print("&&&&& $x2,$y2");
+    // print("@@@@@ $x1,$y1");
+    // print("&&&&& $x2,$y2");
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
+
+  static bool allElementsAreSame(List list) {
+    if (list.isEmpty) return true;  // Consider an empty list as having all elements the same.
+    var first = list.first;
+    for (var element in list) {
+      if (element > first) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 class nearestLandInfo{
   String name;

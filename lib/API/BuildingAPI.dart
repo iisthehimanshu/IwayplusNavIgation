@@ -1,17 +1,22 @@
 import 'dart:convert';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwayplusnav/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../APIMODELS/Building.dart';
+import '../Elements/HelperClass.dart';
+import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
 
 
 class BuildingAPI {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/get/venue";
+  var signInBox = Hive.box('SignInDatabase');
   String token = "";
 
   Future<Building> fetchBuildData() async {
+    token = signInBox.get("accessToken");
     print("buildingapi");
     // final LandMarkBox = LandMarkApiModelBox.getData();
     //
@@ -25,6 +30,7 @@ class BuildingAPI {
     //   return land.fromJson(responseBody);
     // }
     final BuildingBox = BuildingAPIModelBox.getData();
+
     if(BuildingBox.length !=0){
       print("BUILDING API DATA FROM DATABASE");
       print(BuildingBox.length);
@@ -33,11 +39,6 @@ class BuildingAPI {
       return Building.fromJson(responseBody);
     }
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
 
     final Map<String, dynamic> data = {
       "venueName": buildingAllApi.getStoredVenue(),
@@ -73,6 +74,11 @@ class BuildingAPI {
       BuildingData.save();
       return Building.fromJson(responseBody);
     } else {
+      if (response.statusCode == 403) {
+        RefreshTokenAPI.fetchPatchData();
+        return BuildingAPI().fetchBuildData();
+      }
+      //HelperClass.showToast("MishorError in Building API");
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');

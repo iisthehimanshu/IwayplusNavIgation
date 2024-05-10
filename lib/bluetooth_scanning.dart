@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:collection/collection.dart';
+
 import '../buildingState.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'APIMODELS/beaconData.dart';
 
-class BT {
+class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
+  Map<String,double> avgMap = Map();
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
   HashMap<int, double> weight = HashMap();
@@ -15,6 +18,13 @@ class BT {
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+
+
+  PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue((a, b) => a.value.compareTo(b.value));
+
+  PriorityQueue<MapEntry<String, double>> returnPQ (){
+    return priorityQueue;
+  }
 
 
   void startbin() {
@@ -26,15 +36,13 @@ class BT {
     BIN[5] = HashMap<String, double>();
     BIN[6] = HashMap<String, double>();
 
-    weight[0] = 10.0;
+    weight[0] = 12.0;
     weight[1] = 6.0;
     weight[2] = 4.0;
     weight[3] = 0.5;
     weight[4] = 0.25;
     weight[5] = 0.15;
     weight[6] = 0.075;
-
-
   }
 
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
@@ -42,25 +50,27 @@ class BT {
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
-
-
     startbin();
+
     FlutterBluePlus.startScan();
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
-        // print("mac $result    rssi $Rssi");
+        //print("mac $MacId    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
+          //print(MacId);
           beacondetail[MacId] = Rssi * -1;
-
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
     });
+
+    calculateAverage();
   }
+
 
 
   void getDevicesList()async{
@@ -89,6 +99,7 @@ class BT {
     //   }
     // });
   }
+
 
 
   void strtScanningIos(HashMap<String, beacon> apibeaconmap){
@@ -139,11 +150,11 @@ class BT {
 
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
-    _scanResultsSubscription.cancel();
+    //_scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
     emptyBin();
-
+    priorityQueue.clear();
   }
 
   void emptyBin() {
@@ -152,6 +163,10 @@ class BT {
     }
     numberOfSample.clear();
     rs.clear();
+    print("avgMap.length");
+    print(avgMap.length);
+    avgMap.clear();
+
   }
 
   void addtoBin(String MacId, int rssi) {
@@ -165,31 +180,65 @@ class BT {
     numberOfSample[MacId] = numberOfSample[MacId]! + 1;
     rs[MacId]!.add(rssi);
 
-    if (Rssi <= 65) {
+
+
+    //print("of beacon ${rs}");
+
+
+    if (Rssi <= 60) {
       binnumber = 0;
-    } else if (Rssi <= 70) {
+    } else if (Rssi <= 65) {
       binnumber = 1;
-    } else if (Rssi <= 75) {
+    } else if (Rssi <= 70) {
       binnumber = 2;
-    } else if (Rssi <= 80) {
+    } else if (Rssi <= 75) {
       binnumber = 3;
-    } else if (Rssi <= 85) {
+    } else if (Rssi <= 80) {
       binnumber = 4;
-    } else if (Rssi <= 90) {
+    } else if (Rssi <= 85) {
       binnumber = 5;
     } else {
       binnumber = 6;
     }
 
     if (BIN[binnumber]!.containsKey(MacId)) {
+      // print(BIN[binnumber]![MacId]! + weight[binnumber]!);
       BIN[binnumber]![MacId] = BIN[binnumber]![MacId]! + weight[binnumber]!;
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
 
+
+    //print("number of sample---${numberOfSample[MacId]}");
+
+  }
+  Map<String, double> calculateAverage(){
+    Map<String, double> sumMap = {};
+
+    // Iterate over each inner map and accumulate the values for each string key
+
+    BIN.values.forEach((innerMap) {
+      innerMap.forEach((key, value) {
+        sumMap[key] = (sumMap[key] ?? 0.0) + value;
+      });
+    });
+
+
+    // Divide the sum by the number of values for each string key
+
+    sumMap.forEach((key, sum) {
+      int count = numberOfSample[key]!;
+      sumMap[key] = sum / count;
+    });
+    // print(sumMap);
+    avgMap = sumMap;
+    return sumMap;
   }
 
+
+
   void printbin() {
+    print("BIN");
     print(BIN);
   }
 
@@ -227,7 +276,7 @@ class BT2 {
     weight[6] = 0.075;
 
   }
-
+static Map<String,Set<int>> map=new HashMap();
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
@@ -237,8 +286,18 @@ class BT2 {
 
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
-        String MacId = "${result.device.remoteId}";
+
+        String MacId = "${result.device.platformName}";
+
         int Rssi = result.rssi;
+        if (map.containsKey(MacId)) {
+          // If MAC ID already exists, add RSSI value to its set
+          map[MacId]!.add(Rssi);
+        } else {
+          // If MAC ID doesn't exist, create a new set with the RSSI value
+          map[MacId] = {Rssi};
+        }
+       // print("${result.device.remoteId}     $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -253,37 +312,71 @@ class BT2 {
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key
+    print("Checking bin");
+    print(BIN.values);
     BIN.values.forEach((innerMap) {
+
       innerMap.forEach((key, value) {
+
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
 
     // Divide the sum by the number of values for each string key
     sumMap.forEach((key, sum) {
-      int count = numberOfSample[key]!;
-      sumMap[key] = sum / count;
+      if(key != "" || key.isNotEmpty || key != "null"){
+        print("numberOfSample[key]");
+        print(numberOfSample[key]);
+        int count = numberOfSample[key]??0;
+        if(count !=0){
+          sumMap[key] = sum / count;
+        }
+      }
+
     });
 
     return sumMap;
   }
 
 
-  void stopScanning() {
-    _scanResultsSubscription.cancel();
+  // void stopScanning() {
+  //   _scanResultsSubscription.cancel();
+  //   _scanResults.clear();
+  //   _systemDevices.clear();
+  //   FlutterBluePlus.stopScan();
+  //   emptyBin();
+  // }
+
+
+  void stopScanning() async{
+    await FlutterBluePlus.stopScan();
+    //_scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
-    FlutterBluePlus.stopScan();
     emptyBin();
   }
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
-      BIN[i]!.clear();
+      if(BIN[i]!.isNotEmpty){
+        BIN[i]!.forEach((key, value) {
+          key = "";
+          value = 0.0;
+        });
+      }
     }
     numberOfSample.clear();
     rs.clear();
     Building.thresh = "";
+
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       key = "";
+    //       value = 0.0;
+    //     });
+    //   }
+    // }
   }
 
   void getDevicesList()async{

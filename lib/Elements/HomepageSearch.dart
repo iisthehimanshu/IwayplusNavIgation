@@ -2,14 +2,20 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwayplusnav/Elements/HomepageFilter.dart';
 import 'package:iwayplusnav/SourceAndDestinationPage.dart';
 
 import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
+
+import 'HomepageFilter.dart';
+
 
 
 class HomepageSearch extends StatefulWidget {
@@ -27,14 +33,10 @@ class _HomepageSearchState extends State<HomepageSearch> {
   List<String> floorOptionsTags = [];
 
   List<String> options = [
-    'Washroom', 'Food & Drinks',
-    'Reception', 'Break Room', 'Education',
-    'Fashion', 'Travel', 'Rooms', 'Tech',
-    'Science',
+    'Washroom', 'Entry',
+    'Reception', 'Lift',
   ];
-  List<String> floorOptions = [
-    'Food & Drinks', 'Washroom', 'Water',
-  ];
+
   List<IconData> _icons = [
     Icons.home,
     Icons.wash_sharp,
@@ -43,6 +45,15 @@ class _HomepageSearchState extends State<HomepageSearch> {
   //double ratio=0.0;
   String currentSelectedFilter = "";
   int vall = 0;
+  int lastValueStored = 0;
+
+  FlutterTts flutterTts  = FlutterTts();
+
+  Future<void> speak(String msg) async {
+    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(msg);
+  }
 
 
   @override
@@ -51,6 +62,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
     super.initState();
     print("Running init");
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -81,31 +93,36 @@ class _HomepageSearchState extends State<HomepageSearch> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Semantics(
-                    label: "Search Bar",
-                    sortKey: const OrdinalSortKey(1),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
-                        ).then((value){
-                          widget.onVenueClicked(value);
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(left: 16),
-                          child: Text(
-                        widget.searchText,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8e8d8d),
-                          height: 25 / 16,
+                  child: FocusScope(
+                    autofocus: true,
+                    child: Focus(
+                      child: Semantics(
+                        sortKey: const OrdinalSortKey(0),
+                        label: "Search Bar",
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                            ).then((value){
+                              widget.onVenueClicked(value);
+                            });
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16),
+                              child: Text(
+                                widget.searchText,
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff8e8d8d),
+                                  height: 25 / 16,
+                                ),
+                              )),
                         ),
-                      )),
+                      ),
                     ),
                   ),
                 ),
@@ -119,15 +136,19 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',))
+                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                         ).then((value){
                           widget.onVenueClicked(value);
                         });
                       },
-                      icon: Icon(
-                        Icons.mic_none_sharp,
-                        color: Color(0xff8E8C8C),
-                        size: 24,
+                      icon: Semantics(
+                        label: "Voice search",
+                        sortKey: const OrdinalSortKey(1),
+                        child: Icon(
+                          Icons.mic_none_sharp,
+                          color: Color(0xff8E8C8C),
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -136,7 +157,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 Container(
                   width: 47,
                   height: 48,
-
                   decoration: BoxDecoration(
                     color: Color(0xff24B9B0),
                     borderRadius: BorderRadius.only(
@@ -158,97 +178,43 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         });
                       },
 
-                      icon: SvgPicture.asset(
-                          "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                      icon: Semantics(
+                        label: "Get Direction",
+                        child: SvgPicture.asset(
+                            "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                      ),
                     ),
                   ),
                 )
               ],
             )),
         Container(
-          margin: EdgeInsets.only(left: 10,right: 10),
-          child: ValueListenableBuilder(
-            valueListenable: Hive.box('Filters').listenable(),
-            builder: (BuildContext context, value, Widget? child) {
-              //List<dynamic> aa = []
-              if(value.length==2){
-                floorOptionsTags = value.getAt(1);
+          width: screenWidth,
+          child: ChipsChoice<int>.single(
+            value: vall,
+            onChanged: (val){
+              setState(() => vall = val);
+
+              if(HelperClass.SemanticEnabled){
+                speak("${options[val]} selected");
+              }else if(lastValueStored == val){
+                speak("${options[val]} selected");
               }
-              return ChipsChoice<String>.single(
-                value: currentSelectedFilter,
-                onChanged: (val) {
-                  print("Destinationpage Filter change${val}${value.values}");
-                  value.put(1, val);
-                  setState(() {
-                    currentSelectedFilter = val;
-                    //onTagsChanged();
-                    // currentSelectedFilter = value.
-                  });
-
-                },
-
-                choiceItems: C2Choice.listFrom<String, String>(
-                  source: floorOptions,
-                  value: (i, v) => v,
-                  label: (i, v) => v,
-                  tooltip: (i, v) => v,
-                  meta: (i, v) => _icons[i],
-
-                  // delete: (i, v) => () {
-                  //   setState(() => options.removeAt(i));
-                  // },
-                ),
-                choiceLeadingBuilder: (data, i) {
-                  if (data.meta == null) return null;
-                  return Icon(data.meta as IconData); // Display the icon from the meta property
-                },
-                padding: EdgeInsets.only(left: 0,top: 10),
-                choiceCheckmark: true,
-                choiceStyle: C2ChipStyle.outlined(
-                  height: 38,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(9),
-                  ),
-                  selectedStyle:  C2ChipStyle.filled(
-                      color: Colors.black
-                  ),
-                  borderWidth: 1,
-
-                ),
-                wrapped: false,
-              );
+              lastValueStored = val;
+              print("wilsonchecker");
+              print(val);
             },
+            choiceItems: C2Choice.listFrom<int, String>(
+              source: options,
+              value: (i, v) => i,
+              label: (i, v) => v,
+            ),
+            choiceBuilder: (item, i) {
+              return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked,);
+            },
+            direction: Axis.horizontal,
           ),
         ),
-        // SizedBox(
-        //   width: 500,
-        //   child: Content(
-        //     title: 'Vertical Direction',
-        //     child: ChipsChoice<int>.single(
-        //       value: vall,
-        //       onChanged: (val) => setState(() => vall = val),
-        //       choiceItems: C2Choice.listFrom<int, String>(
-        //         source: options,
-        //         value: (i, v) => i,
-        //         label: (i, v) => v,
-        //       ),
-        //       padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        //       choiceBuilder: (item, i) {
-        //         return CustomChip(
-        //           label: item.label,
-        //           width: double.infinity,
-        //           height: 90,
-        //           color: Colors.black,
-        //           margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-        //           selected: item.selected,
-        //           onSelect: item.select!,
-        //         );
-        //       },
-        //       direction: Axis.horizontal,
-        //     ),
-        //   ),
-        // ),
-
       ],
     );
   }

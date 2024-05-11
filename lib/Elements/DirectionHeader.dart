@@ -72,6 +72,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
+    btadapter.startScanning(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+      print("Pathposition");
+      print(widget.user.path);
+
+
+      // print("listen to bin :${listenToBin()}");
+
+      // HelperClass.showToast("Bin cleared");
+      if(widget.user.pathobj.index>3) {
+        listenToBin();
+      }
+
+
+
+    });
 
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
@@ -131,13 +147,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
 
-  String debugNearestbeacon="";
+  String debuglastNearestbeacon="";
+  String debuglNearestbeacon="";
   Map<String, double> sortedsumMap={};
+  Map<String, double> sumMap = {};
+  Map<String, double> sumMapAvg = {};
+
+  var newMap = <String, double>{};
 
   bool listenToBin(){
     double highestweight = 0;
     String nearestBeacon = "";
-    Map<String, double> sumMap = btadapter.calculateAverage();
+    sumMap.clear();
+    sumMap = btadapter.calculateAverage();
+    sortedsumMap.clear();
+    print("sortedsumMapcleared $sortedsumMap");
+
 
     sumMap.forEach((key, value) {
       if(highestweight<value){
@@ -145,6 +170,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         highestweight = value;
       }
     });
+
 
     setState(() {
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
@@ -159,8 +185,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     highestweight = element.value;
     //   }
     // });
-
-
     // print("-90---   ${sumMap.length}");
     // print("checkingavgmap   ${sumMap}");
 
@@ -205,24 +229,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //   }
     // });
     setState(() {
-      debugNearestbeacon = nearestBeacon;
+      debuglNearestbeacon = nearestBeacon;
+      if(debuglastNearestbeacon != nearestBeacon){
+        debuglastNearestbeacon = nearestBeacon;
+      }
+
     });
 
     //print("$nearestBeacon   $highestweight");
 
-
+  print("nearest${nearestBeacon}");
     if(nearestBeacon !=""){
+
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
           if (widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor) {
+
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon,render: false);
             return true;
+
           } else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight >= 0.5) {
+
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -285,6 +317,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }else{
         print("workingg 6");
         print("listening");
+        print("inelese");
 
         print(nearestBeacon);
         _timer.cancel();
@@ -293,7 +326,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         return false;
       }
     }
+
     // btadapter.emptyBin();
+
 
     return false;
   }
@@ -548,6 +583,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           SizedBox(
             height: 100,
           ),
+          ElevatedButton(onPressed: (){
+            btadapter.emptyBin();
+          }, child: Icon(Icons.minimize)),
+          ElevatedButton(onPressed: (){
+
+          }, child: Icon(Icons.add)),
           Container(
             width: 300,
             height: 100,

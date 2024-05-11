@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:iwayplusnav/MapScreen.dart';
+import 'package:iwayplusnav/ProfilePage.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -20,12 +22,15 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   late int index;
+
   final screens = [
     VenueSelectionScreen(),
     MapScreen(),
     VenueSelectionScreen(),
     FavouriteScreen(),
+    ProfilePage()
   ];
+
   @override
   void initState() {
     super.initState();
@@ -41,12 +46,23 @@ class _MainScreenState extends State<MainScreen> {
     print(status);
     if (status.isGranted) {
       print('location permission granted');
+
+
       requestBluetoothConnectPermission();
+
+
     } else if(status.isPermanentlyDenied) {
       print('location permission is permanently granted');
     }else{
         print("location permission is granted");
     }
+  }
+
+  Future<Position> getUsersCurrentLatLng()async{
+
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    return position;
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -60,9 +76,16 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-
+  final screens = [
+    VenueSelectionScreen(),
+    MapScreen(),
+    VenueSelectionScreen(),
+    FavouriteScreen(),
+  ];
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       body: screens[index],
       bottomNavigationBar: NavigationBarTheme(
@@ -81,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if (index==3 || index==2 || index==4){
+            if ( index==3 || index==2){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {

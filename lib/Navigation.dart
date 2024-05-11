@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
@@ -107,22 +108,21 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  MapState mapState = MapState();
+  MapState mapState = new MapState();
   Timer? PDRTimer;
   String maptheme = "";
-  var _initialCameraPosition = const CameraPosition(
+  var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
     zoom: 0,
   );
   late GoogleMapController _googleMapController;
-  Set<Polygon> patch = {};
+  Set<Polygon> patch = Set();
   Set<Polygon> otherpatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
   Map<String, Set<Polygon>> closedpolygons = Map();
-  Set<Polygon> otherclosedpolygons = {};
+  Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
-  Set<Marker> tempMarkers = Set();
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -1062,7 +1062,7 @@ double minHeight = 90.0;
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
 
     List<String> IDS = [];
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) { 
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
     await outBuilding().outbuilding(IDS).then((out) async {
@@ -1295,9 +1295,11 @@ double minHeight = 90.0;
     String lastLocalizedBeacon = "";
     List<int> landCords = [];
     List<int> currentBinFilled = [];
+    sumMap.clear();
+    print("summap cleared ${sumMap}");
     setState(() {
-      sumMap = btadapter.calculateAverage();
 
+      sumMap = btadapter.calculateAverage();
     });
 
 
@@ -1326,9 +1328,6 @@ double minHeight = 90.0;
     double firstKey;
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
-      setState(() {
-        sortedsumMapfordebug = sortMapByValue(sumMap);
-      });
       firstValue = sortedsumMap.entries.first.key;
       print("sortedsumMap--");
       print(firstValue);
@@ -3028,7 +3027,7 @@ double minHeight = 90.0;
   int destinationVal = 0;
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
-  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{bool swap = false}) async {
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3058,7 +3057,7 @@ double minHeight = 90.0;
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid,swap: swap);
+            bid: PathState.destinationBid);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
         createRooms(building.polyLineData!,
             building.floor[buildingAllApi.getStoredString()]!);
@@ -3078,16 +3077,13 @@ double minHeight = 90.0;
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-        print("different floor detected, route via ${commonlifts[0].name}");
-
-
         await fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid,swap: swap);
+            bid: PathState.destinationBid);
 
         Map<String, int> map = {
           'Take ${commonlifts[0].name}': -1,
@@ -3103,7 +3099,7 @@ double minHeight = 90.0;
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-            bid: PathState.destinationBid,swap: swap);
+            bid: PathState.destinationBid);
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -3141,7 +3137,7 @@ double minHeight = 90.0;
                   PathState.destinationX,
                   PathState.destinationY,
                   PathState.destinationFloor,
-                  bid: PathState.destinationBid,swap: swap);
+                  bid: PathState.destinationBid);
               print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
               List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
@@ -3152,10 +3148,10 @@ double minHeight = 90.0;
                   PathState.destinationX,
                   PathState.destinationY,
                   PathState.destinationFloor,
-                  bid: PathState.destinationBid,swap: swap);
+                  bid: PathState.destinationBid);
               await fetchroute(element.coordinateX!, element.coordinateY!,
                   commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                  bid: PathState.destinationBid,swap: swap);
+                  bid: PathState.destinationBid);
 
               PathState.connections[PathState.destinationBid] = {
                 element.floor!: calculateindex(
@@ -3193,7 +3189,7 @@ double minHeight = 90.0;
             if (PathState.sourceFloor == element.floor) {
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid,swap: swap);
+                  bid: PathState.sourceBid);
               print("running source location no lift run");
             } else if (PathState.sourceFloor != element.floor) {
               List<CommonLifts> commonlifts = findCommonLifts(
@@ -3201,10 +3197,10 @@ double minHeight = 90.0;
 
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
                   element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid,swap: swap);
+                  bid: PathState.sourceBid);
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                  bid: PathState.sourceBid,swap: swap);
+                  bid: PathState.sourceBid);
 
               PathState.connections[PathState.sourceBid] = {
                 PathState.sourceFloor: calculateindex(
@@ -3254,14 +3250,6 @@ double minHeight = 90.0;
       print(pathMarkers.keys);
     }
 
-    building.floor[PathState.sourceBid] = PathState.sourceFloor;
-    createRooms(
-      building.polylinedatamap[
-      PathState.sourceBid]!,
-      PathState.sourceFloor,
-    );
-
-
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3294,8 +3282,18 @@ double minHeight = 90.0;
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
-  Future<List<int>> setPath(int sourceX, int sourceY, int destinationX, int destinationY, int floor,int numRows,int numCols,int sourceIndex,int destinationIndex, List<int> path,{String? bid = null})async{
-    print("path for floor $floor is $path");
+  Future<List<int>> fetchroute(
+      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
+      {String? bid = null}) async {
+    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
+    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
+    int sourceIndex = calculateindex(sourceX, sourceY, numCols);
+    int destinationIndex = calculateindex(destinationX, destinationY, numCols);
+
+    print("numcol $numCols");
+
+    List<int> path = findBestPathAmongstBoth(numRows, numCols,
+        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
 
 
     List<int> turns = tools.getTurnpoints(path, numCols);
@@ -3315,7 +3313,7 @@ double minHeight = 90.0;
     });
 
     List<Cell> Cellpath =
-    findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+        findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -3407,7 +3405,7 @@ double minHeight = 90.0;
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
           List<double> value =
-          tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
           coordinates.add(LatLng(value[0], value[1]));
         } else {
@@ -3443,33 +3441,6 @@ double minHeight = 90.0;
     return path;
   }
 
-  Future<List<int>?> fetchroute(
-      int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid = null, bool swap = false}) async {
-
-    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
-    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
-    int sourceIndex = calculateindex(sourceX, sourceY, numCols);
-    int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-
-
-    print("numcol $numCols");
-    print("for floor $floor sourceindex is $sourceIndex and destinationindex is $destinationIndex");
-
-    List<int> path = [];
-    if(!swap){
-       path = findBestPathAmongstBoth(numRows, numCols,
-          building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-    }else{
-      if(PathState.path[floor] != null){
-        path = PathState.path[floor]!;
-      }
-    }
-
-    setPath(sourceX, sourceY, destinationX, destinationY, floor, numRows, numCols, sourceIndex, destinationIndex, path,bid: bid);
-
-  }
-
   void closeRoutePannel() {
     _routeDetailPannelController.close();
   }
@@ -3482,91 +3453,8 @@ double minHeight = 90.0;
     getPoints.clear();
   }
 
-  Widget floorColumn1() {
-    List<int> floorNumbers = List.generate(
-        building.numberOfFloors[buildingAllApi.getStoredString()]!,
-            (index) => index);
-    bool selected = false;
-
-    return Semantics(
-      excludeSemantics: excludeFloorSemanticWork,
-      child: SingleChildScrollView(
-        child: Container(
-          alignment: Alignment.bottomCenter,
-          height:200,
-          width: 100,
-          child: ListView.builder(
-              itemCount: building.numberOfFloors[buildingAllApi.getStoredString()]!,
-              itemBuilder: (BuildContext context, int index) {
-                return AnimatedContainer(
-                  width: 90,
-                  margin: EdgeInsets.symmetric(horizontal: 2,vertical: 7),
-                  padding: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 8),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color:
-                    pathMarkers[index] == null
-                        ? Colors.white
-                        : Color(0xff24b9b0),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey, // Shadow color
-                        offset: Offset(0, 2), // Offset of the shadow
-                        blurRadius: 4, // Spread of the shadow
-                      ),
-                    ],
-                  ),
-                  duration: Duration(milliseconds: 500),
-                  child: Semantics(
-                    label: "Switch to ${tools.numericalToAlphabetical(index)}Floor",
-                    child: InkWell(
-                      onTap: () {
-                        building.floor[buildingAllApi
-                            .getStoredString()] = index;
-                        createRooms(
-                          building.polylinedatamap[
-                          buildingAllApi
-                              .getStoredString()]!,
-                          building.floor[buildingAllApi
-                              .getStoredString()]!,
-                        );
-                        if (pathMarkers[index] != null) {
-                          //setCameraPosition(pathMarkers[i]!);
-                        }
-                        building.landmarkdata!
-                            .then((value) {
-                          createMarkers(
-                            value,
-                            building.floor[buildingAllApi
-                                .getStoredString()]!,
-                          );
-                        });
-                      },
-                      child: Center(
-                        child: Semantics(
-                          excludeSemantics: true,
-                          child: Text(
-                            index == 0 ? 'G' : '$index',
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              height: 19 / 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-        ),
-      ),
-    );
-  }
-
   int floors = 0;
+
   Widget floorColumn() {
     List<int> floorNumbers = List.generate(
         building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -3645,6 +3533,9 @@ double minHeight = 90.0;
     setState(() {
       semanticShouldBeExcluded = true;
     });
+    print("PathState.directions");
+    print(PathState.directions);
+    print(PathState.associateTurnWithLandmark);
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3835,11 +3726,12 @@ double minHeight = 90.0;
                         onPressed: () {
                           setState(() {
                             PathState.swap();
+                            PathState.path.clear();
                             pathMarkers.clear();
                             PathState.directions.clear();
                             clearPathVariables();
                             building.landmarkdata!.then((value) {
-                              calculateroute(value.landmarksMap!,swap: true);
+                              calculateroute(value.landmarksMap!);
                             });
                           });
                         },
@@ -4070,7 +3962,7 @@ double minHeight = 90.0;
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                             // StartPDR();
                                               alignMapToPath([
                                                 user.lat,
                                                 user.lng
@@ -4428,12 +4320,7 @@ double minHeight = 90.0;
         int node = user.path[index + 1];
 
         List<int> c = [node % col, node ~/ col];
-        double angle = tools.calculateAngleSecond(a, b, c);
-        int val = 90;
-        if(!angle.isNaN){
-          val = tools.calculateAngleSecond(a, b, c).toInt();
-        }
-
+        int val = tools.calculateAngleSecond(a, b, c).toInt();
 
         // print("user corrds");
         // print("${user.showcoordX}+" "+ ${user.showcoordY}");
@@ -4454,7 +4341,9 @@ double minHeight = 90.0;
             //print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1500))
-                .then((value) => {StartPDR()});
+                .then((value) => {
+                //  StartPDR()
+                });
 
             setState(() {
               isPdrStop = false;
@@ -4660,6 +4549,7 @@ double minHeight = 90.0;
                             label: "",
                             child: Container(
                               height: 522,
+                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
@@ -4831,6 +4721,7 @@ double minHeight = 90.0;
                     ),
                     Row(
                       children: [
+
                         FocusScope(
                           autofocus: true,
                           child: Semantics(
@@ -4941,7 +4832,9 @@ double minHeight = 90.0;
                                   ),
                                   textAlign: TextAlign.left,
                                 ):Container(height: 24,width: 24,child: CircularProgressIndicator(color: Colors.white,),),
+
                               ),
+                              textAlign: TextAlign.left,
                             ),
                           ),
                         ),
@@ -6562,6 +6455,7 @@ double minHeight = 90.0;
     // double distanceThreshold = 100.0;
     // String closestBuildingId = "";
     // buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+
     //   if(key != buildingAllApi.outdoorID){
     //
     //     // tempMarkers.add(Marker(
@@ -6582,6 +6476,7 @@ double minHeight = 90.0;
     //       closestBuildingId = key;
     //       buildingAllApi.setStoredString(key);
     //     }
+
     //   }
     // });
   }
@@ -6616,8 +6511,10 @@ double minHeight = 90.0;
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
+    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
+    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6688,6 +6585,7 @@ double minHeight = 90.0;
                               }
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
+                              print("plpl ${cameraPosition.tilt}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6734,6 +6632,8 @@ double minHeight = 90.0;
                           excludeSemantics: false,
                           child: Column(
                             children: [
+
+                              // Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
                               //   child: Container(
@@ -6766,6 +6666,7 @@ double minHeight = 90.0;
                               // ),
                               //
                               //
+
                               // SizedBox(height: 28.0),
                               // Text("${user.theta}"),
                               // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
@@ -6844,7 +6745,7 @@ double minHeight = 90.0;
                                                       .getStoredString()]!,
                                                 );
                                                 if (pathMarkers[i] != null) {
-                                                  setCameraPosition(pathMarkers[i]!);
+                                                  //setCameraPosition(pathMarkers[i]!);
                                                 }
                                                 building.landmarkdata!
                                                     .then((value) {
@@ -6860,9 +6761,10 @@ double minHeight = 90.0;
                                         ),
                                       ),
                                     )
-                                  : floorColumn1(),
+                                  : floorColumn(),
                               SizedBox(
                                   height: 28.0), // Adjust the height as needed
+
                               // Container(
                               //   width: 300,
                               //   height: 100,
@@ -6879,9 +6781,11 @@ double minHeight = 90.0;
                               //     ),
                               //   ),
                               // ),
+
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+                                    //print(PathState.connections);
                                     building.floor[buildingAllApi
                                         .getStoredString()] = user.floor;
                                     createRooms(
@@ -7036,6 +6940,7 @@ double minHeight = 90.0;
                       //     child: Icon(Icons.add)
                       // ),
 
+
                       // FloatingActionButton(
                       //   onPressed: () async {
                       //
@@ -7085,6 +6990,7 @@ double minHeight = 90.0;
                       //   backgroundColor: Colors
                       //       .white, // Set the background color of the FAB
                       // ),
+
                     ],
                   ),
 

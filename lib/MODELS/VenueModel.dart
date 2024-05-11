@@ -8,6 +8,9 @@ class VenueModel{
   String? phoneNo;
   String? description;
   String? website;
+  List<double> coordinates;
+  int dist;
+
 
 
   VenueModel({
@@ -19,7 +22,9 @@ class VenueModel{
     required this.address,
     required this.phoneNo,
     required this.description,
-    required this.website
+    required this.website,
+    required this.coordinates,
+    required this.dist
   });
 
 }

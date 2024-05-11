@@ -195,7 +195,7 @@ class BLueToothClass {
       binnumber = 3;
     } else if (Rssi <= 85) {
       binnumber = 4;
-    } else if (Rssi <= 90) {
+    } else if (Rssi <= 90 ) {
       binnumber = 5;
     } else {
       binnumber = 6;

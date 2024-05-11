@@ -65,6 +65,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     super.initState();
     print(widget.receivedAllBuildingList);
     apiCall();
+    print("building list");
     widget.receivedAllBuildingList!.forEach((element) {
       LatLng kk = LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;

@@ -1,16 +1,20 @@
 
 import 'dart:collection';
-import 'dart:ffi';
+
+import 'dart:math';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geodesy/geodesy.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:iwayplusnav/API/BuildingAPI.dart';
 import 'package:iwayplusnav/API/RefreshTokenAPI.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
 import 'package:iwayplusnav/MODELS/VenueModel.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/Building.dart';
@@ -25,6 +29,8 @@ import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'HomeNestedSearch.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
+
+  VenueSelectionScreen({super.key});
   @override
   State<VenueSelectionScreen> createState() => _VenueSelectionScreenState();
 }
@@ -38,14 +44,50 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   late Map<String, List<buildingAll>> venueHashMap = new HashMap();
    // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
+  bool isLocating=false;
 
 
   @override
   void initState(){
     super.initState();
+
     apiCall();
+    getLocs();
     print("venueHashMap");
     print(venueHashMap);
+
+
+
+  }
+
+  void getLocs()async{
+    setState(() {
+      isLocating=true;
+    });
+    userLoc= await getUsersCurrentLatLng();
+    setState(() {
+      isLocating=false;
+
+    });
+  }
+Position? userLoc;
+  Future<Position?> getUsersCurrentLatLng()async{
+    final status = await Permission.location.request();
+    print(status);
+    if (status.isGranted) {
+
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+
+      return position;
+
+
+    }else{
+      return null;
+    }
+
+
+
 
 
   }
@@ -67,10 +109,30 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     //filterVenueList(buildingList);
     print(venueList);
     venueHashMap = createVenueHashMap(buildingList);
+
+
     print(venueHashMap.keys);
     //venueList = venueHashMap.keys
     venueList = createVenueList(venueHashMap);
+    for(int i=0;i<venueList.length;i++)
+      {
+        buildingsPos.add(venueList[i]);
+      }
 
+  }
+  int getDistanceFromLatLonInKm(double lat1, double lon1, double lat2, double lon2) {
+    const double R = 6371; // Radius of the earth in km
+    double dLat = deg2rad(lat2 - lat1); // deg2rad below
+    double dLon = deg2rad(lon2 - lon1);
+    double a = pow(sin(dLat / 2), 2) +
+        cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * pow(sin(dLon / 2), 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double d = R * c; // Distance in km
+    return d.toInt();
+  }
+
+  double deg2rad(double deg) {
+    return deg * (pi / 180);
   }
 
   List<VenueModel> createVenueList(Map<String, List<buildingAll>> venueHashMap){
@@ -78,7 +140,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     for (var entry in venueHashMap.entries) {
       String key = entry.key;
       List<buildingAll> value = entry.value;
-      newList.add(VenueModel(venueName: key, distance: 190, buildingNumber: value.length, imageURL: value[0].venuePhoto??"", Tag: value[0].venueCategory??"", address: value[0].address,description: value[0].description,phoneNo: value[0].phone,website: value[0].website));
+      newList.add(VenueModel(venueName: key, distance: 190, buildingNumber: value.length, imageURL: value[0].venuePhoto??"", Tag: value[0].venueCategory??"", address: value[0].address,description: value[0].description,phoneNo: value[0].phone,website: value[0].website,coordinates: value[0].coordinates!, dist: 0));
       // print('Key: $key');
       // print('Value: $value');
     }
@@ -123,6 +185,20 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     );
   }
 
+  calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
+    // buildingsPos.clear();
+    // finalDist.clear();
+    for(int i=0;i<buildingsPos.length;i++){
+      int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
+      buildingsPos[i].dist=dist;
+      finalDist.add(dist);
+
+    }
+    // print("finalDist");
+    // print(finalDist);
+  }
+List<VenueModel> buildingsPos=[];
+  List<int> finalDist=[];
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +287,24 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
             ),
           ),
         ),
-        body: isLoading_buildingList
+        body:(isLocating)? Center(
+            child: Animate(
+                effects: [FadeEffect(), ScaleEffect()],
+                child: Text("Loading Data. . .",style: TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 30,
+                  color: Color(0xFF666870),
+                  height: 1,
+                  letterSpacing: -1,
+                ),)
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(duration: 1200.ms, color: const Color(0xFF80DDFF))
+                    .animate() // this wraps the previous Animate in another Animate
+                    .fade(duration: 1200.ms, curve: Curves.ease)
+                    .slide()
+            )
+          // Show linear loading indicator
+        ):isLoading_buildingList
             ? Center(
             child: Animate(
                 effects: [FadeEffect(), ScaleEffect()],
@@ -307,7 +400,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                       children: [
                         ListView.builder(
                           itemBuilder: (context,index){
-                            var currentData = venueList[index];
+
+                            // var currentData = venueList[index];
+
+                            calcDistanceFromUser(buildingsPos,userLoc!);
+                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                           var currentData = buildingsPos[index];
+
                             return GestureDetector(
                               onTap: () {
                                 // Handle onTap for the specific item here
@@ -326,7 +425,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 Name: currentData.venueName ?? "",
                                 Tag: currentData.Tag ?? "Null",
                                 Address: currentData.address ?? "",
-                                Distance: 190,
+                                Distance:buildingsPos[index].dist,
                                 NumberofBuildings: currentData.buildingNumber ?? 0,
                                 bid: currentData.venueName ?? "",
                               ),
@@ -349,7 +448,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 },
                                 child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),
                               );
                             } else {
@@ -373,7 +472,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 },
                                 child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),
                               );
                             } else {
@@ -417,7 +516,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 },
                                 child: buildingCard(imageURL: "",
                                   Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: 190, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                 ),
                               );
                             } else {

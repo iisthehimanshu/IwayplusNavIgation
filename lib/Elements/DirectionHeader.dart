@@ -153,12 +153,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     btadapter.stopScanning();
     btadapter.startScanning(Building.apibeaconmap);
 
-    // sortedsumMap.entries.forEach((element) {
-    //   if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
-    //     nearestBeacon = element.key;
-    //     highestweight = element.value;
-    //   }
-    // });
+    sortedsumMap.entries.forEach((element) {
+      if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.25){
+        nearestBeacon = element.key;
+        highestweight = element.value;
+      }
+    });
 
 
     // print("-90---   ${sumMap.length}");

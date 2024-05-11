@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
@@ -1260,7 +1261,10 @@ double minHeight = 90.0;
     String lastLocalizedBeacon = "";
     List<int> landCords = [];
     List<int> currentBinFilled = [];
+    sumMap.clear();
+    print("summap cleared ${sumMap}");
     setState(() {
+
       sumMap = btadapter.calculateAverage();
     });
 
@@ -3507,6 +3511,9 @@ double minHeight = 90.0;
     setState(() {
       semanticShouldBeExcluded = true;
     });
+    print("PathState.directions");
+    print(PathState.directions);
+    print(PathState.associateTurnWithLandmark);
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3933,7 +3940,7 @@ double minHeight = 90.0;
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                             // StartPDR();
                                               alignMapToPath([
                                                 user.lat,
                                                 user.lng
@@ -4312,7 +4319,9 @@ double minHeight = 90.0;
             //print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1500))
-                .then((value) => {StartPDR()});
+                .then((value) => {
+                //  StartPDR()
+                });
 
             setState(() {
               isPdrStop = false;
@@ -6406,14 +6415,28 @@ double minHeight = 90.0;
     // double distanceThreshold = 100.0;
     // String closestBuildingId = "";
     // buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-    //   num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
-    //     geo.LatLng(value.latitude, value.longitude),
-    //     geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
-    //   );
+
+    //   if(key != buildingAllApi.outdoorID){
     //
-    //   if (distance < distanceThreshold) {
-    //     closestBuildingId = key;
-    //     buildingAllApi.setStoredString(key);
+    //     // tempMarkers.add(Marker(
+    //     //     markerId: MarkerId("$key"),
+    //     //     position: LatLng(value.latitude, value.longitude),
+    //     //     onTap: () {
+    //     //       print("$key");
+    //     //     },
+    //     // ));
+    //     num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+    //       geo.LatLng(value.latitude, value.longitude),
+    //       geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+    //     );
+    //
+    //     print("distance for $key is $distance");
+    //
+    //     if (distance < distanceThreshold) {
+    //       closestBuildingId = key;
+    //       buildingAllApi.setStoredString(key);
+    //     }
+
     //   }
     // });
   }
@@ -6569,6 +6592,7 @@ double minHeight = 90.0;
                           excludeSemantics: false,
                           child: Column(
                             children: [
+
                               // Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
@@ -6602,6 +6626,7 @@ double minHeight = 90.0;
                               // ),
                               //
                               //
+
                               // SizedBox(height: 28.0),
                               // Text("${user.theta}"),
                               // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
@@ -6713,6 +6738,16 @@ double minHeight = 90.0;
                                     ],
                                   ),
                                 ),
+                              ),
+                              FloatingActionButton(
+                                onPressed: (){
+                                  btadapter.emptyBin();
+                                  HelperClass.showToast(btadapter.BIN.toString());
+
+                                },
+                                child: Icon(Icons.minimize),
+                                backgroundColor: Colors
+                                    .white,
                               ),
                               Semantics(
                                 child: FloatingActionButton(
@@ -6872,6 +6907,7 @@ double minHeight = 90.0;
                       //     child: Icon(Icons.add)
                       // ),
 
+
                       FloatingActionButton(
                         onPressed: () async {
 
@@ -6921,6 +6957,7 @@ double minHeight = 90.0;
                         backgroundColor: Colors
                             .white, // Set the background color of the FAB
                       ),
+
                     ],
                   ),
 

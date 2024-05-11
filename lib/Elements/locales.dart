@@ -1,0 +1,171 @@
+
+import 'package:flutter_localization/flutter_localization.dart';
+
+const List<MapLocale> LOCALES=[
+  MapLocale('en', LocaleData.EN), //English
+  MapLocale('hi', LocaleData.HI), // Hindi
+  MapLocale('ta', LocaleData.TA), // Tamil
+  MapLocale('te', LocaleData.TE), // Telugu
+  MapLocale('pa', LocaleData.PA), // Punjabi
+];
+
+mixin LocaleData {
+
+  static const String title = 'title';
+  static const String generalSettings = 'generalSettings';
+  static const String language = 'language';
+  static const String pushNotification = 'pushNotification';
+  static const String appInformation = 'appInformation';
+  static const String updateAvailable = 'updateAvailable';
+  static const String accessibilitySettings = 'accessibilitySettings';
+  static const String highContrastMode = 'highContrastMode';
+  static const String personWithDisability = 'personWithDisability';
+  static const String navigationSettings = 'navigationSettings';
+  static const String UserHeight = 'userHeight';
+
+  static const String navigationMode = 'navigationMode';
+
+  static const String orientationSetting = 'orientationSetting';
+  static const String pathDetails = 'pathDetails';
+  static const String naturalDirection = 'naturalDirection';
+  static const String clockDirection = 'clockDirection';
+  static const String focusMode = 'focusMode';
+  static const String exploreMode = 'exploreMode';
+  static const String distanceInMeters = 'distanceInMeters';
+  static const String estimatedSteps = 'estimatedSteps';
+  static const String blind = 'Blind';
+  static const String lowVision = 'Low Vision';
+  static const String wheelchair = 'Wheelchair';
+  static const String regular = 'Regular';
+
+  static const Map<String, dynamic> EN = {
+    'title': 'Settings',
+    'generalSettings': 'General Settings',
+    'language': 'Language',
+    'pushNotification': 'Push Notification',
+    'appInformation': 'App Information',
+    'updateAvailable': 'Update Available',
+    'accessibilitySettings': 'Accessibility Settings',
+    'highContrastMode': 'High Contrast Mode',
+    'personWithDisability': 'Person with Disability',
+    'navigationSettings': 'Navigation Settings',
+    'navigationMode': 'Navigation Mode',
+    'orientationSetting': 'Orientation Setting',
+    'pathDetails': 'Path Details',
+    'naturalDirection': 'Natural Direction',
+    'clockDirection': 'Clock Direction',
+    'focusMode': 'Focus Mode',
+    'exploreMode': 'Explore Mode',
+    'distanceInMeters': 'Distance in meters',
+    'estimatedSteps': 'Estimated steps',
+    'blind': 'Blind',
+    'lowVision': 'Low Vision',
+    'wheelchair': 'Wheelchair',
+    'regular': 'Regular',
+  };
+
+  static const Map<String, dynamic> HI = {
+    'title': 'सेटिंग्स',
+    'generalSettings': 'सामान्य सेटिंग्स',
+    'language': 'भाषा',
+    'pushNotification': 'पुश सूचना',
+    'appInformation': 'ऐप सूचना',
+    'updateAvailable': 'अपडेट उपलब्ध है',
+    'accessibilitySettings': 'पहुँचनीयता सेटिंग्स',
+    'highContrastMode': 'उच्च अंतर के मोड',
+    'personWithDisability': 'विकलांग व्यक्ति',
+    'navigationSettings': 'नेविगेशन सेटिंग्स',
+    'navigationMode': 'नेविगेशन मोड',
+    'orientationSetting': 'अभिविन्यास सेटिंग',
+    'pathDetails': 'मार्ग विवरण',
+    'naturalDirection': 'प्राकृतिक दिशा',
+    'clockDirection': 'घड़ी की दिशा',
+    'focusMode': 'फोकस मोड',
+    'exploreMode': 'अन्वेषण मोड',
+    'distanceInMeters': 'मीटर में दूरी',
+    'estimatedSteps': 'अनुमानित कदम',
+    'blind': 'अंधा',
+    'lowVision': 'कम दृष्टि',
+    'wheelchair': 'व्हीलचेयर',
+    'regular': 'नियमित',
+  };
+
+  static const Map<String, dynamic> TA = {
+    'title': 'அமைப்புகள்',
+    'generalSettings': 'பொது அமைப்புகள்',
+    'language': 'மொழி',
+    'pushNotification': 'தடவை அறிவிப்பு',
+    'appInformation': 'பயன்பாடு தகவல்',
+    'updateAvailable': 'புதுப்பிக்கம் கிடைக்கும்',
+    'accessibilitySettings': 'அணுகுமுறை அமைப்புகள்',
+    'highContrastMode': 'உயர் மேற்கோள் முறை',
+    'personWithDisability': 'இருந்து மனிதர்',
+    'navigationSettings': 'வழிசெலுத்து அமைப்புகள்',
+    'navigationMode': 'வழிசெலுத்து முறை',
+    'orientationSetting': 'அமைப்பு அமைப்பு',
+    'pathDetails': 'பாதை விவரங்கள்',
+    'naturalDirection': 'இயல்புநிலை வழி',
+    'clockDirection': 'கடிகார இடைவேளை',
+    'focusMode': 'கோல்கள் முறை',
+    'exploreMode': 'ஆராய்வு முறை',
+    'distanceInMeters': 'மீட்டரில் தூரம்',
+    'estimatedSteps': 'மதிப்பிட்ட படிகள்',
+    'blind': 'குருட்டு',
+    'lowVision': 'குறைந்த கண்ணோட்டம்',
+    'wheelchair': 'சுட்டி நாற்பந்து',
+    'regular': 'நியமான',
+  };
+
+  static const Map<String, dynamic> TE = {
+    'title': 'అమరికలు',
+    'generalSettings': 'సాధారణ అమరికలు',
+    'language': 'భాష',
+    'pushNotification': 'పుష్ నోటిఫికేషన్',
+    'appInformation': 'అప్లికేషన్ సమాచారం',
+    'updateAvailable': 'అందుబాటులో నవీకరణ',
+    'accessibilitySettings': 'అభ్యాసకంపను అమరికలు',
+    'highContrastMode': 'అధిక సరళం మోడ్',
+    'personWithDisability': 'అంగనులకు వ్యక్తి',
+    'navigationSettings': 'నావిగేషన్ అమరికలు',
+    'navigationMode': 'నావిగేషన్ మోడ్',
+    'orientationSetting': 'సమాన్య అమరికలు',
+    'pathDetails': 'మార్గం వివరాలు',
+    'naturalDirection': 'ప్రాకృత దిగ్భాంతం',
+    'clockDirection': 'గడియారం దిశ',
+    'focusMode': 'ఫోకస్ మోడ్',
+    'exploreMode': 'అన్వేషణ మోడ్',
+    'distanceInMeters': 'మీటర్లునాటి దూరం',
+    'estimatedSteps': 'అంచనా పటకాలు',
+    'blind': 'కాగాబడి',
+    'lowVision': 'కనుక వెనుక',
+    'wheelchair': 'వీల్‌చేర్‌',
+    'regular': 'నియమిత',
+  };
+
+  static const Map<String, dynamic> PA = {
+    'title': 'ਸੈਟਿੰਗਾਂ',
+    'generalSettings': 'ਆਮ ਸੈਟਿੰਗਾਂ',
+    'language': 'ਭਾਸ਼ਾ',
+    'pushNotification': 'ਪੁਸ਼ ਸੂਚਨਾ',
+    'appInformation': 'ਐਪ ਜਾਣਕਾਰੀ',
+    'updateAvailable': 'ਅਪਡੇਟ ਉਪਲੱਬਧ ਹੈ',
+    'accessibilitySettings': 'ਪਹੁੰਚਯੋਗਤਾ ਸੈਟਿੰਗਾਂ',
+    'highContrastMode': 'ਉੱਚਾ ਤਫ਼ਾਵਤ ਮੋਡ',
+    'personWithDisability': 'ਅਸਮਰਥ ਵਿਅਕਤੀ',
+    'navigationSettings': 'ਨੇਵੀਗੇਸ਼ਨ ਸੈਟਿੰਗਾਂ',
+    'navigationMode': 'ਨੇਵੀਗੇਸ਼ਨ ਮੋਡ',
+    'orientationSetting': 'ਅਭਿਸਥਾਨ ਸੈਟਿੰਗ',
+    'pathDetails': 'ਮਾਰਗ ਵੇਰਵਾ',
+    'naturalDirection': 'ਪ੍ਰਾਕ੃ਤਿਕ ਦਿਸ਼ਾ',
+    'clockDirection': 'ਘੜੀ ਦਿਸ਼ਾ',
+    'focusMode': 'ਫੋਕਸ ਮੋਡ',
+    'exploreMode': 'ਅਨਿਵੇਸ਼ਣ ਮੋਡ',
+    'distanceInMeters': 'ਮੀਟਰ ਵਿੱਚ ਦੂਰੀ',
+    'estimatedSteps': 'ਅਨੁਮਾਨਤ ਕਦਮ',
+    'blind': 'ਅੰਧਾ',
+    'lowVision': 'ਘੱਟੀ ਦਿਮਾਗ',
+    'wheelchair': 'ਵੀਲਚੇਅਰ',
+    'regular': 'ਨਿਯਮਿਤ',
+  };
+
+}

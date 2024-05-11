@@ -76,12 +76,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  final screens = [
-    VenueSelectionScreen(),
-    MapScreen(),
-    VenueSelectionScreen(),
-    FavouriteScreen(),
-  ];
+
   @override
   Widget build(BuildContext context) {
 

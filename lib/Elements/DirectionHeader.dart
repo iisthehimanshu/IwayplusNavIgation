@@ -246,7 +246,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               });
 
-              if(distanceFromPath>10){
+              if(distanceFromPath>15){
                 print("workingg 3");
                 _timer.cancel();
                 widget.repaint(nearestBeacon);

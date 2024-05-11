@@ -74,36 +74,34 @@ class UserState{
 
     moveOneStep();
 
-    print(Cellpath);
-    if(Cellpath.isNotEmpty){
-      print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
-      for(int j = 0; j<Cellpath.length ; j++){
-        print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
-
-        if(Cellpath[j].node == showcoordY*cols + showcoordX){
-          pathobj.index = j;
-          startOnPath();
-          return;
-        }
-      }
-    }
+    // if(Cellpath.isNotEmpty && !isnavigating){
+    //   print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
+    //   for(int j = 0; j<Cellpath.length ; j++){
+    //     print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
+    //
+    //     if(Cellpath[j].node == showcoordY*cols + showcoordX){
+    //       pathobj.index = j;
+    //       startOnPath();
+    //       return;
+    //     }
+    //   }
+    // }
 
     for(int i=1;i<stepSize ; i++){
       bool movementAllowed = true;
-      print(Cellpath);
-      if(Cellpath.isNotEmpty){
-        print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
-        for(int j = 0; j<Cellpath.length ; j++){
-          print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
-
-          if(Cellpath[j].node == showcoordY*cols + showcoordX){
-            movementAllowed = false;
-            pathobj.index = j;
-            startOnPath();
-            return;
-          }
-        }
-      }
+      // if(Cellpath.isNotEmpty && !isnavigating){
+      //   print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
+      //   for(int j = 0; j<Cellpath.length ; j++){
+      //     print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
+      //
+      //     if(Cellpath[j].node == showcoordY*cols + showcoordX){
+      //       movementAllowed = false;
+      //       pathobj.index = j;
+      //       startOnPath();
+      //       return;
+      //     }
+      //   }
+      // }
 
       if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[floor]!, reroute)){
         movementAllowed = false;

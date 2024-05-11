@@ -58,7 +58,7 @@ class BLueToothClass {
       for (ScanResult result in results) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
-        print("mac $MacId    rssi $Rssi");
+        //print("mac $MacId    rssi $Rssi");
         if (apibeaconmap.containsKey(MacId)) {
           //print(MacId);
           beacondetail[MacId] = Rssi * -1;

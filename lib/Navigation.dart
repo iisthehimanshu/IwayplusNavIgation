@@ -188,7 +188,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    handleCompassEvents();
+    //handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -4764,6 +4764,7 @@ double minHeight = 90.0;
         ));
   }
 
+  bool rerouting = false;
   Widget reroutePannel() {
     return Visibility(
         visible: _isreroutePannelOpen,
@@ -4823,86 +4824,93 @@ double minHeight = 90.0;
                               ),
                               child: TextButton(
                                 onPressed: () async {
-                                  clearPathVariables();
-                                  PathState.sourceX = user.coordX;
-                                  PathState.sourceY = user.coordY;
-                                  user.showcoordX = user.coordX;
-                                  user.showcoordY = user.coordY;
-                                  PathState.sourceFloor = user.floor;
-                                  PathState.sourcePolyID = user.key;
-                                  PathState.sourceName = "Your current location";
-                                  building.landmarkdata!.then((value) async {
-                                    await calculateroute(value.landmarksMap!)
-                                        .then((value) {
-                                      user.pathobj = PathState;
-                                      user.path = PathState.path.values
-                                          .expand((list) => list)
-                                          .toList();
-                                      user.Cellpath = PathState.singleCellListPath;
-                                      user.pathobj.index = 0;
-                                      user.isnavigating = true;
-                                      user.moveToStartofPath().then((value) {
-                                        setState(() {
-                                          if (markers.length > 0) {
-                                            markers[user.Bid]?[0] =
-                                                customMarker.move(
-                                                    LatLng(
-                                                        tools.localtoglobal(
-                                                            user.showcoordX.toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[0],
-                                                        tools.localtoglobal(
-                                                            user.showcoordX.toInt(),
-                                                            user.showcoordY
-                                                                .toInt())[1]),
-                                                    markers[user.Bid]![0]);
-                                          }
-                                        });
-                                      });
-                                      _isRoutePanelOpen = false;
-                                      building.selectedLandmarkID = null;
-                                      _isnavigationPannelOpen = true;
-                                      _isreroutePannelOpen = false;
-                                      int numCols = building.floorDimenssion[
-                                              PathState.sourceBid]![
-                                          PathState.sourceFloor]![0]; //floor length
-                                      double angle =
-                                          tools.calculateAngleBWUserandPath(
-                                              user,
-                                              PathState
-                                                  .path[PathState.sourceFloor]![1],
-                                              numCols);
-                                      if (angle != 0) {
-                                        speak("Turn " + tools.angleToClocks(angle));
-                                      } else {}
-
-                                      mapState.tilt = 50;
-
-                                      mapState.bearing = tools.calculateBearing([
-                                        user.lat,
-                                        user.lng
-                                      ], [
-                                        PathState
-                                            .singleCellListPath[
-                                                user.pathobj.index + 1]
-                                            .lat,
-                                        PathState
-                                            .singleCellListPath[
-                                                user.pathobj.index + 1]
-                                            .lng
-                                      ]);
-                                      _googleMapController.animateCamera(
-                                          CameraUpdate.newCameraPosition(
-                                        CameraPosition(
-                                            target: mapState.target,
-                                            zoom: mapState.zoom,
-                                            bearing: mapState.bearing!,
-                                            tilt: mapState.tilt),
-                                      ));
+                                  if(!rerouting){
+                                    setState(() {
+                                      rerouting = true;
                                     });
-                                  });
+                                    clearPathVariables();
+                                    PathState.clear();
+                                    PathState.sourceX = user.coordX;
+                                    PathState.sourceY = user.coordY;
+                                    user.showcoordX = user.coordX;
+                                    user.showcoordY = user.coordY;
+                                    PathState.sourceFloor = user.floor;
+                                    PathState.sourcePolyID = user.key;
+                                    PathState.sourceName = "Your current location";
+                                    building.landmarkdata!.then((value) async {
+                                      await calculateroute(value.landmarksMap!)
+                                          .then((value) {
+                                        user.pathobj = PathState;
+                                        user.path = PathState.path.values
+                                            .expand((list) => list)
+                                            .toList();
+                                        user.Cellpath = PathState.singleCellListPath;
+                                        user.pathobj.index = 0;
+                                        user.isnavigating = true;
+                                        user.moveToStartofPath().then((value) {
+                                          setState(() {
+                                            if (markers.length > 0) {
+                                              markers[user.Bid]?[0] =
+                                                  customMarker.move(
+                                                      LatLng(
+                                                          tools.localtoglobal(
+                                                              user.showcoordX.toInt(),
+                                                              user.showcoordY
+                                                                  .toInt())[0],
+                                                          tools.localtoglobal(
+                                                              user.showcoordX.toInt(),
+                                                              user.showcoordY
+                                                                  .toInt())[1]),
+                                                      markers[user.Bid]![0]);
+                                            }
+                                          });
+                                        });
+                                        _isRoutePanelOpen = false;
+                                        building.selectedLandmarkID = null;
+                                        _isnavigationPannelOpen = true;
+                                        _isreroutePannelOpen = false;
+                                        int numCols = building.floorDimenssion[
+                                        PathState.sourceBid]![
+                                        PathState.sourceFloor]![0]; //floor length
+                                        double angle =
+                                        tools.calculateAngleBWUserandPath(
+                                            user,
+                                            PathState
+                                                .path[PathState.sourceFloor]![1],
+                                            numCols);
+                                        if (angle != 0) {
+                                          speak("Turn " + tools.angleToClocks(angle));
+                                        } else {}
+
+                                        mapState.tilt = 50;
+
+                                        mapState.bearing = tools.calculateBearing([
+                                          user.lat,
+                                          user.lng
+                                        ], [
+                                          PathState
+                                              .singleCellListPath[
+                                          user.pathobj.index + 1]
+                                              .lat,
+                                          PathState
+                                              .singleCellListPath[
+                                          user.pathobj.index + 1]
+                                              .lng
+                                        ]);
+                                        _googleMapController.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                              CameraPosition(
+                                                  target: mapState.target,
+                                                  zoom: mapState.zoom,
+                                                  bearing: mapState.bearing!,
+                                                  tilt: mapState.tilt),
+                                            ));
+                                      });
+                                    });
+                                    rerouting = false;
+                                  }
                                 },
-                                child: Text(
+                                child: !rerouting?Text(
                                   "Reroute",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
@@ -4912,7 +4920,7 @@ double minHeight = 90.0;
                                     height: 20 / 14,
                                   ),
                                   textAlign: TextAlign.left,
-                                ),
+                                ):Container(height: 24,width: 24,child: CircularProgressIndicator(color: Colors.white,),),
                               ),
                             ),
                           ),
@@ -6740,31 +6748,31 @@ double minHeight = 90.0;
                               //
                               // SizedBox(height: 28.0),
                               // Text("${user.theta}"),
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
+                              Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                                double? compassHeading = newvalue;
+                                setState(() {
+                                  user.theta = compassHeading!;
+                                  if (mapState.interaction2) {
+                                    mapState.bearing = compassHeading!;
+                                    _googleMapController.moveCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                          target: mapState.target,
+                                          zoom: mapState.zoom,
+                                          bearing: mapState.bearing!,
+                                        ),
+                                      ),
+                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                    );
+                                  } else {
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] =
+                                          customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                                  }
+                                });
+
+                              }),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(

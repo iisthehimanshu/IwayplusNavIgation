@@ -210,7 +210,7 @@ class BLueToothClass {
 
   }
   Map<String, double> calculateAverage(){
-    HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
+    //HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key

@@ -128,6 +128,7 @@ class _NavigationState extends State<Navigation> {
   Map<String, List<Marker>> markers = Map();
   Building building = Building(floor: Map(), numberOfFloors: Map());
   Map<int, Set<gmap.Polyline>> singleroute = {};
+  Map<int, Set<Marker>> dottedSingleRoute = {};
   BLueToothClass btadapter = new BLueToothClass();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
@@ -519,6 +520,46 @@ double minHeight = 90.0;
     }));
   }
 
+  Future<void> paintMarker(LatLng Location) async {
+    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/userloc0.png',
+    );
+    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(44, 44)),
+      'assets/tealtorch.png',
+    );
+
+    if (markers.containsKey(user.Bid)) {
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("UserLocation"),
+        position: Location,
+        icon: userloc,
+        anchor: Offset(0.5, 0.829),
+      ));
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("debug"),
+        position: Location,
+        icon: userlocdebug,
+        anchor: Offset(0.5, 0.829),
+      ));
+    } else {
+      markers.putIfAbsent(user.Bid, () => []);
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("UserLocation"),
+        position: Location,
+        icon: userloc,
+        anchor: Offset(0.5, 0.829),
+      ));
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("debug"),
+        position: Location,
+        icon: userlocdebug,
+        anchor: Offset(0.5, 0.829),
+      ));
+    }
+  }
+
   void renderHere() {
     setState(() {
       if (markers.length > 0) {
@@ -526,6 +567,7 @@ double minHeight = 90.0;
             user.showcoordX.toInt(), user.showcoordY.toInt());
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+
         mapState.target = LatLng(lvalue[0], lvalue[1]);
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -581,7 +623,7 @@ double minHeight = 90.0;
     paintUser(nearestBeacon, speakTTS: false);
   }
 
-  void paintUser(String nearestBeacon, {bool speakTTS = true}) async {
+  void paintUser(String nearestBeacon, {bool speakTTS = true,bool render = true}) async {
     print("nearestBeacon : $nearestBeacon");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
@@ -657,6 +699,7 @@ double minHeight = 90.0;
       UserState.AlignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
+      UserState.paintMarker = paintMarker;
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -675,7 +718,8 @@ double minHeight = 90.0;
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        if (markers.containsKey(user.Bid)) {
+        if(render){
+          markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: beaconLocation,
@@ -688,17 +732,18 @@ double minHeight = 90.0;
             icon: userlocdebug,
             anchor: Offset(0.5, 0.829),
           ));
-        } else {
+        }else{
+          user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
-            position: beaconLocation,
+            position: LatLng(user.lat, user.lng),
             icon: userloc,
             anchor: Offset(0.5, 0.829),
           ));
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("debug"),
-            position: beaconLocation,
+            position: LatLng(user.lat, user.lng),
             icon: userlocdebug,
             anchor: Offset(0.5, 0.829),
           ));
@@ -809,34 +854,19 @@ double minHeight = 90.0;
 
     setState(() {
       markers.clear();
-      if (markers.containsKey(user.Bid)) {
-        markers[user.Bid]?.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: userlocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        markers[user.Bid]?.add(Marker(
-          markerId: MarkerId("debug"),
-          position: userlocation,
-          icon: userlocdebug,
-          anchor: Offset(0.5, 0.829),
-        ));
-      } else {
-        markers.putIfAbsent(user.Bid, () => []);
-        markers[user.Bid]?.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: userlocation,
-          icon: userloc,
-          anchor: Offset(0.5, 0.829),
-        ));
-        markers[user.Bid]?.add(Marker(
-          markerId: MarkerId("debug"),
-          position: userlocation,
-          icon: userlocdebug,
-          anchor: Offset(0.5, 0.829),
-        ));
-      }
+      markers.putIfAbsent(user.Bid, () => []);
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("UserLocation"),
+        position: userlocation,
+        icon: userloc,
+        anchor: Offset(0.5, 0.829),
+      ));
+      markers[user.Bid]?.add(Marker(
+        markerId: MarkerId("debug"),
+        position: userlocation,
+        icon: userlocdebug,
+        anchor: Offset(0.5, 0.829),
+      ));
     });
   }
 
@@ -3254,6 +3284,10 @@ double minHeight = 90.0;
     }
   }
 
+
+
+
+
   List<int> beaconCord = [];
   double cordL = 0;
   double cordLt = 0;
@@ -3368,14 +3402,10 @@ double minHeight = 90.0;
     List<LatLng> coordinates = [];
 
     for (int node in path) {
-      print("Bharti debug");
-      print(user.Bid);
-      print(buildingAllApi.getStoredString());
       if (!building.nonWalkable[bid]![floor]!.contains(node)) {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
-          print("Himanshubid $bid");
           List<double> value =
           tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
@@ -3387,24 +3417,14 @@ double minHeight = 90.0;
       }
     }
     setState(() {
-      if (singleroute.containsKey(floor)) {
-        print("contained call $bid");
-        singleroute[floor]?.add(gmap.Polyline(
-          polylineId: PolylineId("$bid"),
-          points: coordinates,
-          color: Colors.red,
-          width: 5,
-        ));
-      } else {
-        print("new call $bid $coordinates");
-        singleroute.putIfAbsent(floor, () => Set());
-        singleroute[floor]?.add(gmap.Polyline(
-          polylineId: PolylineId("$bid"),
-          points: coordinates,
-          color: Colors.red,
-          width: 5,
-        ));
-      }
+
+      singleroute.putIfAbsent(floor, () => Set());
+      singleroute[floor]?.add(gmap.Polyline(
+        polylineId: PolylineId("$bid"),
+        points: coordinates,
+        color: Colors.red,
+        width: 5,
+      ));
     });
 
     // setState(() {
@@ -7185,8 +7205,10 @@ double minHeight = 90.0;
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) =>
+              b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }
+
 }

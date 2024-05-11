@@ -36,6 +36,19 @@ class pathState {
       this.sourceX, this.sourceY, this.sourceFloor, this.destinationX, this.destinationY, this.destinationFloor, this.numCols, this.index);
 
 
+  void clear(){
+    path.clear();
+    Cellpath.clear();
+    singleListPath.clear();
+    CellTurnPoints.clear();
+    directions.clear();
+    connections.clear();
+    turnLandmarks.clear();
+    associateTurnWithLandmark.clear();
+    index = 0;
+    beaconCords.clear();
+  }
+
   void swap() {
     // Swap source and destination information
     String tempPolyID = sourcePolyID;

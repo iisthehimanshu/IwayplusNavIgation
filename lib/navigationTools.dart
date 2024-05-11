@@ -86,8 +86,8 @@ class tools {
 
   static List<double> localtoglobal(int x, int y,
       {PDM.patchDataModel? patchData = null}) {
-    // x = x - UserState.xdiff;
-    // y = y - UserState.ydiff;
+    x = x - UserState.xdiff;
+    y = y - UserState.ydiff;
     //print("Wilsonlocaltoglobal started");
     PDM.patchDataModel Data = PDM.patchDataModel();
     if (patchData != null) {
@@ -379,16 +379,16 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // print("A $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
 
 
-    print("ab----${ab}");
-    print("ac-----${ac}");
+    // print("ab----${ab}");
+    // print("ac-----${ac}");
 
     // Calculate the dot product of the two vectors
     double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
@@ -487,11 +487,11 @@ class tools {
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    print("AA $a");
-    print("BB $b");
-    print("CC $c");
-    print("DD ${node.move.toString()}");
-    print("EE ${theta}");
+    // print("AA $a");
+    // print("BB $b");
+    // print("CC $c");
+    // print("DD ${node.move.toString()}");
+    // print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -823,8 +823,8 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print("angleee-----${angle}");
-    print(AngleBetweenBuildingandGlobalNorth);
+    // print("angleee-----${angle}");
+    // print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

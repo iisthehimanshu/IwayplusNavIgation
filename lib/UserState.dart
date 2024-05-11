@@ -1,8 +1,11 @@
+import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwayplusnav/MotionModel.dart';
 import 'package:iwayplusnav/pathState.dart';
 
 import 'Cell.dart';
 import 'navigationTools.dart';
+import 'package:geodesy/geodesy.dart' as geo;
 
 
 class UserState{
@@ -26,7 +29,7 @@ class UserState{
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
   static int UserHeight  = 195;
-  static int stepSize = 2;
+  static int stepSize = 1;
 
 
   static int cols = 0;
@@ -36,6 +39,8 @@ class UserState{
   static Function closeNavigation = (){};
   static Function speak = (){};
   static Function AlignMapToPath = (){};
+  static Function startOnPath = (){};
+  static Function paintMarker = (geo.LatLng Location){};
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false});
 
@@ -72,8 +77,36 @@ class UserState{
 
 
     moveOneStep();
+
+    // if(Cellpath.isNotEmpty && !isnavigating){
+    //   print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
+    //   for(int j = 0; j<Cellpath.length ; j++){
+    //     print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
+    //
+    //     if(Cellpath[j].node == showcoordY*cols + showcoordX){
+    //       pathobj.index = j;
+    //       startOnPath();
+    //       return;
+    //     }
+    //   }
+    // }
+
     for(int i=1;i<stepSize ; i++){
       bool movementAllowed = true;
+      // if(Cellpath.isNotEmpty && !isnavigating){
+      //   print("user [$showcoordX, $showcoordY]  ${showcoordY*cols + showcoordX}");
+      //   for(int j = 0; j<Cellpath.length ; j++){
+      //     print("[${Cellpath[j].x},${Cellpath[j].y}]   ${Cellpath[j].node}");
+      //
+      //     if(Cellpath[j].node == showcoordY*cols + showcoordX){
+      //       movementAllowed = false;
+      //       pathobj.index = j;
+      //       startOnPath();
+      //       return;
+      //     }
+      //   }
+      // }
+
       if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[floor]!, reroute)){
         movementAllowed = false;
       }
@@ -205,6 +238,21 @@ class UserState{
     }
   }
 
+
+  Future<void> moveToFloor(int fl)async{
+    floor = fl;
+    if(pathobj.Cellpath[fl] != null){
+      coordX = pathobj.Cellpath[fl]![0].x;
+      coordY = pathobj.Cellpath[fl]![0].y;
+      List<double> values = tools.localtoglobal(coordX, coordY);
+      lat = values[0];
+      lng = values[1];
+      showcoordX = coordX;
+      showcoordY = coordY;
+      pathobj.index = path.indexOf(pathobj.Cellpath[fl]![0].node);
+      paintMarker(geo.LatLng(lat, lng));
+    }
+  }
 
 
   Future<void> moveToPointOnPath(int index)async{

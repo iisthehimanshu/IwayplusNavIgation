@@ -21,7 +21,10 @@ mixin LocaleData {
   static const String highContrastMode = 'highContrastMode';
   static const String personWithDisability = 'personWithDisability';
   static const String navigationSettings = 'navigationSettings';
+  static const String UserHeight = 'userHeight';
+
   static const String navigationMode = 'navigationMode';
+
   static const String orientationSetting = 'orientationSetting';
   static const String pathDetails = 'pathDetails';
   static const String naturalDirection = 'naturalDirection';

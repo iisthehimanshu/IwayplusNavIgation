@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
 import 'package:iwayplusnav/BuildingInfoScreen.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
@@ -13,6 +14,7 @@ import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'Elements/UserCredential.dart';
+import 'Elements/locales.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'VenueSelectionScreen.dart';
@@ -50,6 +52,10 @@ Future<void> main() async {
   // await Firebase.initializeApp();
 
   await Hive.openBox('Favourites');
+  await Hive.openBox('UserInformation');
+  var userInformationBox = Hive.box('UserInformation');
+  userInformationBox.put("UserHeight ", 5.8);
+
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   runApp(const MyApp());
@@ -64,6 +70,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
+  final FlutterLocalization localization = FlutterLocalization.instance;
+
+
   Future<bool> _isUserAuthenticated() async {
     // Check if the user is already signed in with Google
     User? user = FirebaseAuth.instance.currentUser;
@@ -84,6 +93,22 @@ class _MyAppState extends State<MyApp> {
     return false;
   }
 
+  @override
+  void initState() {
+    configureLocalization();
+    super.initState();
+  }
+  void configureLocalization(){
+    localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
+    localization.onTranslatedLanguage = ontranslatedLanguage;
+  }
+
+  void ontranslatedLanguage(Locale? locale){
+    setState(() {
+
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,10 +122,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       title: "IWAYPLUS",
-      home:
-      //MainScreen()
-
-      FutureBuilder<bool>(
+      home: FutureBuilder<bool>(
         future: _isUserAuthenticated(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -128,6 +150,19 @@ class _MyAppState extends State<MyApp> {
           }
         },
       ),
+      supportedLocales: [
+        Locale('en'), // English
+        Locale('hi'), // Hindi
+        // Locale('es'), // Spanish
+        // Locale('fr'), // French
+        // Locale('de'), // German
+        Locale('ta'), // Tamil
+        Locale('te'), // Telugu
+        Locale('pa'), // Punjabi
+      ],
+      localizationsDelegates: localization.localizationsDelegates,
+      //LoginScreen(),
+      // MainScreen(initialIndex: 0,),
 
     );
   }

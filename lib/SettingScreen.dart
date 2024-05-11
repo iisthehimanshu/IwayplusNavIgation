@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hive/hive.dart';
+import 'package:iwayplusnav/Elements/UserCredential.dart';
 
 import 'Elements/locales.dart';
 
@@ -19,56 +21,82 @@ class _SettingScreenState extends State<SettingScreen> {
   bool isFocusMode = true;
   bool isDistanceinM = true;
   // String? selectedLanguage = 'English';
+  late FlutterLocalization _flutterLocalization;
+  late String _currentLocale = '';
 
   @override
   void initState() {
+    _flutterLocalization = FlutterLocalization.instance;
+    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    print("UserCredentials.getUserHeight()");
+    print(UserCredentials.getUserHeight());
     super.initState();
-
   }
 
   void _toggleSelection() {
     setState(() {
       isNaturalDirectionSelected = !isNaturalDirectionSelected;
     });
+    String currString = isNaturalDirectionSelected? LocaleData.naturalDirection.getString(context):LocaleData.clockDirection.getString(context);
+    UserCredentials.setUserNavigationModeSetting(currString);
+    print("UserCredentials.getuserNavigationModeSetting()");
+    print(UserCredentials.getuserNavigationModeSetting());
+
   }
 
   void _toggleSelection2() {
     setState(() {
       isFocusMode = !isFocusMode;
     });
+    String currOrtString = isFocusMode? LocaleData.focusMode.getString(context) : LocaleData.exploreMode.getString(context);
+    UserCredentials.setUserOrentationSetting(currOrtString);
+    print("UserCredentials.getUserOrentationSetting()");
+    print(UserCredentials.getUserOrentationSetting());
   }
 
   void _toggleSelection3() {
     setState(() {
       isDistanceinM = !isDistanceinM;
     });
+    String currPathString = isDistanceinM? LocaleData.distanceInMeters.getString(context) : LocaleData.estimatedSteps.getString(context);
+    UserCredentials.setUserPathDetails(currPathString);
+    print("UserCredentials.getUserSetting()");
+    print(UserCredentials.getUserPathDetails());
   }
 
   final List<bool> _selectedDisability = <bool>[true, false, false, false];
-  TextEditingController _controller = TextEditingController();
-
+  final List<bool> _selectedHeight = <bool>[true, false, false];
+  List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
+  List<Widget> disability = <Widget>[
+    Text('Blind'
+      // LocaleData.blind.getString(context),
+    ),
+    Text('Low Vision'
+      // LocaleData.lowVision.getString(context),
+    ),
+    Text('Wheelchair'
+      // LocaleData.wheelchair.getString(context),
+    ),
+    Text(
+      'Regular',
+      // LocaleData.regular.getString(context),
+    ),
+  ];
+  List<String> StringHeight = ["< 5 Feet","5Ft to 6Ft","> 6 Feet"];
+  List<Widget> heigth = <Widget>[
+    Text('< 5 Feet'
+      // LocaleData.blind.getString(context),
+    ),
+    Text('5Ft to 6Ft'
+      // LocaleData.lowVision.getString(context),
+    ),
+    Text('> 6 Feet'
+      // LocaleData.wheelchair.getString(context),
+    )
+  ];
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> disability = <Widget>[
-      Text(
-        'Blind'
-        // LocaleData.blind.getString(context),
-      ),
-      Text(
-        'Low Vision'
-        // LocaleData.lowVision.getString(context),
-      ),
-      Text(
-        'Wheelchair'
-        // LocaleData.wheelchair.getString(context),
-      ),
-      Text(
-        'Regular',
-        // LocaleData.regular.getString(context),
-      ),
-    ];
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -79,7 +107,7 @@ class _SettingScreenState extends State<SettingScreen> {
         bottomOpacity: 0.8,
         title: Text(
           // 'Settings',
-          "Settings",
+          LocaleData.title.getString(context),
           style: TextStyle(
             color: Color(0xFF374151),
             fontSize: 16,
@@ -89,8 +117,7 @@ class _SettingScreenState extends State<SettingScreen> {
           ),
         ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(
-              4.0),
+          preferredSize: Size.fromHeight(4.0),
           child: Container(
             decoration: BoxDecoration(
               border: Border(
@@ -106,40 +133,6 @@ class _SettingScreenState extends State<SettingScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 10,right: 10),
-                  child: TextField(
-                    controller: _controller,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Enter a decimal value',
-                    ),
-
-                  ),
-                ),
-                SizedBox(height: 20.0),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      double? decimalValue = double.tryParse(_controller.text);
-                      if (decimalValue != null) {
-                        // Do something with the decimal value
-                        print('You entered: $decimalValue');
-                      } else {
-                        // Handle invalid input
-                        print('Invalid input. Please enter a valid decimal value.');
-                      }
-                    },
-                    child: Text('Submit'),
-                  ),
-                ),
-              ],
-            ),
             Container(
               width: MediaQuery.sizeOf(context).width,
               height: 48,
@@ -170,7 +163,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.of(context).size.width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -189,7 +182,33 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                     Spacer(),
-
+                    DropdownButton(
+                        value: _currentLocale,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'en',
+                            child: Text('English'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'hi',
+                            child: Text('Hindi'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'ta',
+                            child: Text('Tamil'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'te',
+                            child: Text('Telugu'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pa',
+                            child: Text('Punjabi'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          _setLocale(value);
+                        }),
                   ],
                 ),
               ),
@@ -200,7 +219,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -221,19 +240,19 @@ class _SettingScreenState extends State<SettingScreen> {
                     Spacer(),
                     Container(
 
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
                         child: Switch(
-                      inactiveTrackColor: Color(0xffEBEBEB),
-                      inactiveThumbColor: Color(0xff79747E),
-                      activeColor: Colors.white,
-                      activeTrackColor: Color(0xff0B6B94),
-                      value: NotificationswitchValue,
-                      onChanged: (bool value) {
-                        setState(() {
-                          NotificationswitchValue = value;
-                        });
-                      },
-                    )),
+                          inactiveTrackColor: Color(0xffEBEBEB),
+                          inactiveThumbColor: Color(0xff79747E),
+                          activeColor: Colors.white,
+                          activeTrackColor: Color(0xff0B6B94),
+                          value: NotificationswitchValue,
+                          onChanged: (bool value) {
+                            setState(() {
+                              NotificationswitchValue = value;
+                            });
+                          },
+                        )),
                   ],
                 ),
               ),
@@ -244,7 +263,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -312,7 +331,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -332,21 +351,21 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     Spacer(),
                     Container(
-                        // width: 12,
-                        // height: 12,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      // width: 12,
+                      // height: 12,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
                         child: Switch(
-                      inactiveTrackColor: Color(0xffEBEBEB),
-                      inactiveThumbColor: Color(0xff79747E),
-                      activeColor: Colors.white,
-                      activeTrackColor: Color(0xff0B6B94),
-                      value: ColorContrastswitchValue,
-                      onChanged: (bool value) {
-                        setState(() {
-                          ColorContrastswitchValue = value;
-                        });
-                      },
-                    )),
+                          inactiveTrackColor: Color(0xffEBEBEB),
+                          inactiveThumbColor: Color(0xff79747E),
+                          activeColor: Colors.white,
+                          activeTrackColor: Color(0xff0B6B94),
+                          value: ColorContrastswitchValue,
+                          onChanged: (bool value) {
+                            setState(() {
+                              ColorContrastswitchValue = value;
+                            });
+                          },
+                        )),
                   ],
                 ),
               ),
@@ -357,7 +376,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -377,19 +396,18 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     Spacer(),
                     Container(
-
                         child: Switch(
-                      inactiveTrackColor: Color(0xffEBEBEB),
-                      inactiveThumbColor: Color(0xff79747E),
-                      activeColor: Colors.white,
-                      activeTrackColor: Color(0xff0B6B94),
-                      value: DisabilityswitchValue,
-                      onChanged: (bool value) {
-                        setState(() {
-                          DisabilityswitchValue = value;
-                        });
-                      },
-                    )),
+                          inactiveTrackColor: Color(0xffEBEBEB),
+                          inactiveThumbColor: Color(0xff79747E),
+                          activeColor: Colors.white,
+                          activeTrackColor: Color(0xff0B6B94),
+                          value: DisabilityswitchValue,
+                          onChanged: (bool value) {
+                            setState(() {
+                              DisabilityswitchValue = value;
+                            });
+                          },
+                        )),
                     // SizedBox(
                     //   width: 16,
                     // )
@@ -399,63 +417,63 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
             DisabilityswitchValue
                 ? Container(
-                    height: 56,
-                    width: MediaQuery.sizeOf(context).width * 0.9,
-                    child: Container(
-                      // padding: EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Color(0xff0B6B94), width: 2.0),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ToggleButtons(
-                          direction: Axis.horizontal,
-                          onPressed: (int index) {
-                            setState(() {
-                              for (int i = 0;
-                                  i < _selectedDisability.length;
-                                  i++) {
-                                _selectedDisability[i] = i == index;
-                              }
-                            });
-                          },
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8)),
-                          selectedBorderColor: Color(0xff0B6B94),
-                          borderColor: Colors.white,
-                          selectedColor: Colors.white,
-                          // disabledColor: Color(0xff0B6B94),
-                          fillColor: Color(0xff0B6B94),
-                          color: Color(0xff0B6B94),
-                          constraints: BoxConstraints(
-                              minWidth: MediaQuery.sizeOf(context).width * 0.2,
-                              minHeight: 40
-                              // minHeight: 15.0,
-                              // minWidth: 15.0,
-                              ),
-                          isSelected: _selectedDisability,
-                          // children: disability,
+              height: 56,
+              width: MediaQuery.sizeOf(context).width * 0.9,
+              child: Container(
+                // padding: EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  border:
+                  Border.all(color: Color(0xff0B6B94), width: 2.0),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ToggleButtons(
+                    direction: Axis.horizontal,
+                    onPressed: (int index) {
+                      UserCredentials.setUserPersonWithDisability(StringDisability[index]);
+                      print("UserCredentials.getUserPersonWithDisability()");
+                      print(UserCredentials.getUserPersonWithDisability());
+                      setState(() {
+                        for (int i = 0;
+                        i < _selectedDisability.length;
+                        i++) {
+                          _selectedDisability[i] = i == index;
+                        }
+                      });
+                    },
+                    borderRadius:
+                    const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Color(0xff0B6B94),
+                    borderColor: Colors.white,
+                    selectedColor: Colors.white,
+                    // disabledColor: Color(0xff0B6B94),
+                    fillColor: Color(0xff0B6B94),
+                    color: Color(0xff0B6B94),
+                    constraints: BoxConstraints(
+                        minWidth: MediaQuery.sizeOf(context).width * 0.2,
+                        minHeight: 40
+                      // minHeight: 15.0,
+                      // minWidth: 15.0,
+                    ),
+                    isSelected: _selectedDisability,
+                    // children: disability,
+                    children: [
+                      for (int i = 0; i < disability.length; i++)
+                        Row(
                           children: [
-                            for (int i = 0; i < disability.length; i++)
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: 6,
-                                  ),
-                                  disability.elementAt(
-                                      i),
-                                  SizedBox(
-                                      width:
-                                          6),
-                                ],
-                              ),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            disability.elementAt(i),
+                            SizedBox(width: 6),
                           ],
                         ),
-                      ),
-                    ),
-                  )
+                    ],
+                  ),
+                ),
+              ),
+            )
                 : Container(),
             Container(
               width: MediaQuery.sizeOf(context).width,
@@ -489,7 +507,100 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      // 'Navigation Mode',
+                      LocaleData.UserHeight.getString(context),
+
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                        height: 0.10,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      width: 13,
+                      height: 13,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: SvgPicture.asset('assets/images/info.svg'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              height: 56,
+              width: MediaQuery.sizeOf(context).width * 0.7,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                // padding: EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xff0B6B94), width: 2.0),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ToggleButtons(
+                    direction: Axis.horizontal,
+                    onPressed: (int index) {
+                      print("UserHeight");
+                      print(heigth[index]);
+
+                      print(StringHeight[index]);
+                      UserCredentials.setUserHeight(StringHeight[index]);
+                      print(UserCredentials.getUserHeight());
+                      setState(() {
+                        for (int i = 0; i < _selectedHeight.length; i++) {
+                          _selectedHeight[i] = i == index;
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Color(0xff0B6B94),
+                    borderColor: Colors.white,
+                    selectedColor: Colors.white,
+                    // disabledColor: Color(0xff0B6B94),
+                    fillColor: Color(0xff0B6B94),
+                    color: Color(0xff0B6B94),
+                    constraints: BoxConstraints(
+                        minWidth: MediaQuery.sizeOf(context).width * 0.2,
+                        minHeight: 40
+                      // minHeight: 15.0,
+                      // minWidth: 15.0,
+                    ),
+                    isSelected: _selectedHeight,
+                    // children: disability,
+                    children: [
+                      for (int i = 0; i < heigth.length; i++)
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 6,
+                            ),
+                            heigth.elementAt(i),
+                            SizedBox(width: 6),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Semantics(
+              label: "",
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: 50,
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -560,7 +671,6 @@ class _SettingScreenState extends State<SettingScreen> {
                               Text(
                                 // 'Natural Direction',
                                 LocaleData.naturalDirection.getString(context),
-
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: isNaturalDirectionSelected
@@ -632,7 +742,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -682,7 +792,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           clipBehavior: Clip.antiAlias,
                           decoration: ShapeDecoration(
                             color:
-                                isFocusMode ? Color(0xFF0B6B94) : Colors.white,
+                            isFocusMode ? Color(0xFF0B6B94) : Colors.white,
                             shape: RoundedRectangleBorder(
                               side: BorderSide(
                                   color: isFocusMode
@@ -736,7 +846,7 @@ class _SettingScreenState extends State<SettingScreen> {
                               ),
                             ),
                             color:
-                                !isFocusMode ? Color(0xFF0B6B94) : Colors.white,
+                            !isFocusMode ? Color(0xFF0B6B94) : Colors.white,
                           ),
                           child: Row(
                             // mainAxisSize: MainAxisSize.min,
@@ -773,7 +883,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -916,5 +1026,32 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
+  void _setLocale(String? value) {
+    if (value == null) return;
 
+    switch (value) {
+      case "en":
+        _flutterLocalization.translate("en");
+        break;
+      case "hi":
+        _flutterLocalization.translate("hi");
+        break;
+
+      case "ta":
+        _flutterLocalization.translate("ta");
+        break;
+      case "te":
+        _flutterLocalization.translate("te");
+        break;
+      case "pa":
+        _flutterLocalization.translate("pa");
+        break;
+      default:
+        return;
+    }
+
+    setState(() {
+      _currentLocale = value;
+    });
+  }
 }

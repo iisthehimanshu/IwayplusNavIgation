@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -84,18 +85,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
        btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        print("Pathposition");
-      print(widget.user.path);
 
-
-        // print("listen to bin :${listenToBin()}");
-
-        // HelperClass.showToast("Bin cleared");
-        if(widget.user.pathobj.index>3) {
-          listenToBin();
-        }
-
-
+        listenToBin();
 
       });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
@@ -148,18 +139,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     Map<String, double> sumMap = btadapter.calculateAverage();
 
-    sortedsumMap = HelperClass().sortMapByValue(sumMap);
-    setState(() {
-      ShowsumMap = HelperClass().sortMapByValue(sortedsumMap);
-    });
-    nearestBeacon = sortedsumMap.entries.first.key;
-    highestweight = sortedsumMap.entries.first.value;
-    sortedsumMap.entries.forEach((element) {
-      if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
-        nearestBeacon = element.key;
-        highestweight = element.value;
+    sumMap.forEach((key, value) {
+      if(highestweight<value){
+        nearestBeacon = key;
+        highestweight = value;
       }
     });
+
+    setState(() {
+      ShowsumMap = HelperClass().sortMapByValue(sumMap);
+    });
+
+    btadapter.stopScanning();
+    btadapter.startScanning(Building.apibeaconmap);
+
+    // sortedsumMap.entries.forEach((element) {
+    //   if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
+    //     nearestBeacon = element.key;
+    //     highestweight = element.value;
+    //   }
+    // });
 
 
     // print("-90---   ${sumMap.length}");
@@ -220,7 +219,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon); //different floor
             return true;
-          }else if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=1.2){
+          }else if(widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor  && highestweight >=0.5){
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [Building.apibeaconmap[nearestBeacon]!.coordinateX!,Building.apibeaconmap[nearestBeacon]!.coordinateY!];
             List<int> usercoord = [widget.user.showcoordX, widget.user.showcoordY];
@@ -285,15 +284,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     }
     // btadapter.emptyBin();
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if (btadapter.BIN[i]!.isNotEmpty) {
-        btadapter.BIN[i]!.forEach((key, value) {
-          key = "";
-          value = 0.0;
-        });
-      }
-    }
-    HelperClass.showToast("Bin cleared");
+
     return false;
   }
 
@@ -554,9 +545,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(ShowsumMap.toString()),
-                  Text(ShowsumMap.values.toString()),
-                  Text(debugNearestbeacon.toString()),
-                  Text("current idx"+widget.user.pathobj.index.toString()),
                 ],
               ),
             ),

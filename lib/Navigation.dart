@@ -278,6 +278,14 @@ double minHeight = 90.0;
     StartPDR();
   }
 
+  void startOnPath(){
+    setState(() {
+      _isnavigationPannelOpen = true;
+      _isreroutePannelOpen = false;
+      user.isnavigating = true;
+    });
+  }
+
   void calculateThresholds() {
     if (accelerationMagnitudes.isNotEmpty) {
       double mean = accelerationMagnitudes.reduce((a, b) => a + b) /
@@ -647,6 +655,7 @@ double minHeight = 90.0;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
       UserState.AlignMapToPath = alignMapToPath;
+      UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       List<int> userCords = [];
       userCords.add(user.coordX);
@@ -832,7 +841,7 @@ double minHeight = 90.0;
   }
 
   void reroute() {
-    clearPathVariables();
+
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -840,13 +849,8 @@ double minHeight = 90.0;
     user.isnavigating = false;
     print("reroute----- coord ${user.coordX},${user.coordY}");
     print("reroute----- show ${user.showcoordX},${user.showcoordY}");
-    PathState.sourceX = user.coordX;
-    PathState.sourceY = user.coordY;
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
-    PathState.sourceFloor = user.floor;
-    PathState.sourcePolyID = user.key;
-    PathState.sourceName = "Your current location";
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue =
@@ -1266,8 +1270,7 @@ double minHeight = 90.0;
 
     });
 
-    print("btadapter.avgMap");
-    print(btadapter.avgMap);
+
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
@@ -1829,9 +1832,7 @@ double minHeight = 90.0;
 
   List<int> findCommonLift(List<PolyArray> list1, List<PolyArray> list2) {
     List<int> diff = [0, 0];
-    print("Himanshuchecker");
-    print(list1.length);
-    print(list2.length);
+
     for (int i = 0; i < list1.length; i++) {
       for (int y = 0; y < list2.length; y++) {
         PolyArray l1 = list1[i];
@@ -1843,17 +1844,18 @@ double minHeight = 90.0;
           print("y ${l2.cubicleName}");
           int x1 = 0;
           int y1 = 0;
-          l1.nodes!.forEach((element) {
-            x1 = x1 + element.coordx!;
-            y1 = y1 + element.coordy!;
-          });
+          for(int a=0;a<4;a++){
+            x1 = (x1 + l1.nodes![a].coordx!).toInt();
+            y1 = (y1 + l1.nodes![a].coordy!).toInt();
+          }
+
 
           int x2 = 0;
           int y2 = 0;
-          l2.nodes!.forEach((element) {
-            x2 = x2 + element.coordx!;
-            y2 = y2 + element.coordy!;
-          });
+          for(int a=0;a<4;a++){
+            x2 = (x2 + l2.nodes![a].coordx!).toInt();
+            y2 = (y2 + l2.nodes![a].coordy!).toInt();
+          }
 
           x1 = (x1 / 4).toInt();
           y1 = (y1 / 4).toInt();
@@ -4390,7 +4392,8 @@ double minHeight = 90.0;
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
     //implement the turn functionality.
-    if (user.isnavigating) {
+    if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
+
       int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
       if (MotionModel.reached(user, col) == false) {
@@ -4417,7 +4420,6 @@ double minHeight = 90.0;
 
         // print("pointss matchedddd ${getPoints.contains(
         //     [user.showcoordX, user.showcoordY])}");
-        print("turn points before navigating ${getPoints}");
         for (int i = 0; i < getPoints.length; i++) {
           // print("---length  = ${getPoints.length}");
           // print("--- point  = ${getPoints[i]}");
@@ -4821,6 +4823,7 @@ double minHeight = 90.0;
                               ),
                               child: TextButton(
                                 onPressed: () async {
+                                  clearPathVariables();
                                   PathState.sourceX = user.coordX;
                                   PathState.sourceY = user.coordY;
                                   user.showcoordX = user.coordX;
@@ -6527,32 +6530,32 @@ double minHeight = 90.0;
   }
 
   void focusBuildingChecker(CameraPosition position) {
-    LatLng currentLatLng = position.target;
-    double distanceThreshold = 100.0;
-    String closestBuildingId = "";
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      if(key != buildingAllApi.outdoorID){
-
-        // tempMarkers.add(Marker(
-        //     markerId: MarkerId("$key"),
-        //     position: LatLng(value.latitude, value.longitude),
-        //     onTap: () {
-        //       print("$key");
-        //     },
-        // ));
-        num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
-          geo.LatLng(value.latitude, value.longitude),
-          geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
-        );
-
-        print("distance for $key is $distance");
-
-        if (distance < distanceThreshold) {
-          closestBuildingId = key;
-          buildingAllApi.setStoredString(key);
-        }
-      }
-    });
+    // LatLng currentLatLng = position.target;
+    // double distanceThreshold = 100.0;
+    // String closestBuildingId = "";
+    // buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+    //   if(key != buildingAllApi.outdoorID){
+    //
+    //     // tempMarkers.add(Marker(
+    //     //     markerId: MarkerId("$key"),
+    //     //     position: LatLng(value.latitude, value.longitude),
+    //     //     onTap: () {
+    //     //       print("$key");
+    //     //     },
+    //     // ));
+    //     num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+    //       geo.LatLng(value.latitude, value.longitude),
+    //       geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+    //     );
+    //
+    //     print("distance for $key is $distance");
+    //
+    //     if (distance < distanceThreshold) {
+    //       closestBuildingId = key;
+    //       buildingAllApi.setStoredString(key);
+    //     }
+    //   }
+    // });
   }
 
   @override
@@ -6832,22 +6835,22 @@ double minHeight = 90.0;
                                   : floorColumn1(),
                               SizedBox(
                                   height: 28.0), // Adjust the height as needed
-                              Container(
-                                width: 300,
-                                height: 100,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(testBIn.keys.toString()),
-                                      Text(testBIn.values.toString()),
-                                      Text("summap"),
-                                      Text(sortedsumMapfordebug.toString()),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   width: 300,
+                              //   height: 100,
+                              //   child: SingleChildScrollView(
+                              //     scrollDirection: Axis.horizontal,
+                              //     child: Column(
+                              //       crossAxisAlignment: CrossAxisAlignment.start,
+                              //       children: [
+                              //         Text(testBIn.keys.toString()),
+                              //         Text(testBIn.values.toString()),
+                              //         Text("summap"),
+                              //         Text(sortedsumMapfordebug.toString()),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
@@ -7005,55 +7008,55 @@ double minHeight = 90.0;
                       //     child: Icon(Icons.add)
                       // ),
 
-                      FloatingActionButton(
-                        onPressed: () async {
-
-                          //StopPDR();
-
-                          if (user.initialallyLocalised) {
-                            setState(() {
-                              isLiveLocalizing = !isLiveLocalizing;
-                            });
-                            HelperClass.showToast("realTimeReLocalizeUser started");
-
-                            Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  print(resBeacons);
-                                  btadapter.startScanning(resBeacons);
-
-
-                                  // setState(() {
-                                  //   sumMap=  btadapter.calculateAverage();
-                                  // });
-
-
-                                  Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                                    realTimeReLocalizeUser(resBeacons)
-                                    // listenToBin()
-
-
-                                  });
-
-                                  setState(() {
-                                    debugPQ = btadapter.returnPQ();
-
-                                  });
-
-                                });
-
-                          }
-
-                        },
-                        child: Icon(
-                          Icons.location_history_sharp,
-                          color: (isLiveLocalizing)
-                              ? Colors.cyan
-                              : Colors.black,
-                        ),
-                        backgroundColor: Colors
-                            .white, // Set the background color of the FAB
-                      ),
+                      // FloatingActionButton(
+                      //   onPressed: () async {
+                      //
+                      //     //StopPDR();
+                      //
+                      //     if (user.initialallyLocalised) {
+                      //       setState(() {
+                      //         isLiveLocalizing = !isLiveLocalizing;
+                      //       });
+                      //       HelperClass.showToast("realTimeReLocalizeUser started");
+                      //
+                      //       Timer.periodic(
+                      //           Duration(milliseconds: 5000),
+                      //               (timer) async {
+                      //             print(resBeacons);
+                      //             btadapter.startScanning(resBeacons);
+                      //
+                      //
+                      //             // setState(() {
+                      //             //   sumMap=  btadapter.calculateAverage();
+                      //             // });
+                      //
+                      //
+                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+                      //               realTimeReLocalizeUser(resBeacons)
+                      //               // listenToBin()
+                      //
+                      //
+                      //             });
+                      //
+                      //             setState(() {
+                      //               debugPQ = btadapter.returnPQ();
+                      //
+                      //             });
+                      //
+                      //           });
+                      //
+                      //     }
+                      //
+                      //   },
+                      //   child: Icon(
+                      //     Icons.location_history_sharp,
+                      //     color: (isLiveLocalizing)
+                      //         ? Colors.cyan
+                      //         : Colors.black,
+                      //   ),
+                      //   backgroundColor: Colors
+                      //       .white, // Set the background color of the FAB
+                      // ),
                     ],
                   ),
 

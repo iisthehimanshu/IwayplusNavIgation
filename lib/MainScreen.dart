@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:iwayplusnav/MapScreen.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
@@ -20,12 +21,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   late int index;
-  final screens = [
-    VenueSelectionScreen(),
-    MapScreen(),
-    VenueSelectionScreen(),
-    FavouriteScreen(),
-  ];
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -41,12 +40,23 @@ class _MainScreenState extends State<MainScreen> {
     print(status);
     if (status.isGranted) {
       print('location permission granted');
+
+
       requestBluetoothConnectPermission();
+
+
     } else if(status.isPermanentlyDenied) {
       print('location permission is permanently granted');
     }else{
         print("location permission is granted");
     }
+  }
+
+  Future<Position> getUsersCurrentLatLng()async{
+
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    return position;
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -60,9 +70,16 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-
+  final screens = [
+    VenueSelectionScreen(),
+    MapScreen(),
+    VenueSelectionScreen(),
+    FavouriteScreen(),
+  ];
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       body: screens[index],
       bottomNavigationBar: NavigationBarTheme(

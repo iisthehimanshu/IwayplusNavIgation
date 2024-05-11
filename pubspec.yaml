@@ -65,6 +65,7 @@ dependencies:
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
   turf: ^0.0.9
+  geolocator: ^11.0.0
 
 
   upgrader:

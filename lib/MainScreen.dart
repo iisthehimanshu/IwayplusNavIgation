@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwayplusnav/MapScreen.dart';
+import 'package:iwayplusnav/ProfilePage.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
 import 'package:iwayplusnav/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -25,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
     MapScreen(),
     VenueSelectionScreen(),
     FavouriteScreen(),
+    ProfilePage()
   ];
   @override
   void initState() {
@@ -81,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if (index==3 || index==2 || index==4){
+            if ( index==3 || index==2){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {

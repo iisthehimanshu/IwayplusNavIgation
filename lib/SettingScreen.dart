@@ -23,6 +23,7 @@ class _SettingScreenState extends State<SettingScreen> {
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  List<bool> _selectedDisability = <bool>[true, false, false, false];
 
   @override
   void initState() {
@@ -30,8 +31,19 @@ class _SettingScreenState extends State<SettingScreen> {
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
     print("UserCredentials.getUserHeight()");
     print(UserCredentials.getUserHeight());
+    setboolArray();
     super.initState();
   }
+  void setboolArray(){
+    for(int i=0 ; i<disability.length ; i++){
+      if(StringDisability[i] == UserCredentials.UserPersonWithDisability){
+        _selectedDisability[i] = true;
+      }else{
+        _selectedDisability[i] = false;
+      }
+    }
+  }
+
 
   void _toggleSelection() {
     setState(() {
@@ -64,7 +76,7 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials.getUserPathDetails());
   }
 
-  final List<bool> _selectedDisability = <bool>[true, false, false, false];
+
   final List<bool> _selectedHeight = <bool>[true, false, false];
   List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
   List<Widget> disability = <Widget>[
@@ -469,6 +481,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             SizedBox(width: 6),
                           ],
                         ),
+
                     ],
                   ),
                 ),

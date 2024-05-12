@@ -3962,7 +3962,7 @@ double minHeight = 90.0;
 
                                               semanticShouldBeExcluded = false;
 
-                                             // StartPDR();
+                                              StartPDR();
                                               alignMapToPath([
                                                 user.lat,
                                                 user.lng
@@ -4342,7 +4342,7 @@ double minHeight = 90.0;
 
             Future.delayed(Duration(milliseconds: 1500))
                 .then((value) => {
-                //  StartPDR()
+                  StartPDR()
                 });
 
             setState(() {

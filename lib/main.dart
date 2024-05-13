@@ -53,8 +53,8 @@ Future<void> main() async {
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
-  var userInformationBox = Hive.box('UserInformation');
-  userInformationBox.put("UserHeight ", 5.8);
+  //var userInformationBox = Hive.box('UserInformation');
+  //userInformationBox.put("UserHeight ", 5.8);
 
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');

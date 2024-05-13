@@ -28,7 +28,7 @@ class _SettingScreenState extends State<SettingScreen> {
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    print("UserCredentials().getUserHeight()");
+    print("UserCredentials().getUserHeight() ${UserCredentials().getUserHeight()}");
     print(UserCredentials().getUserHeight());
     super.initState();
   }

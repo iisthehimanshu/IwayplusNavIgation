@@ -2,7 +2,7 @@
 import 'package:hive/hive.dart';
 
  class UserCredentials{
-   static var userInformationBox = Hive.box('UserInformation');
+   var userInformationBox = Hive.box('UserInformation');
    String RefreshToken = "";
    String AccessToken = "";
    List<dynamic> Roles = [];
@@ -16,10 +16,10 @@ import 'package:hive/hive.dart';
 
   void setUserHeight(String userheight){
     userInformationBox.put('UserHeight', userheight);
-
   }
   String getUserHeight(){
     UserHeight = userInformationBox.get('UserHeight')?? '5.8';
+    print(userInformationBox.keys);
     return UserHeight;
   }
 
@@ -60,7 +60,7 @@ import 'package:hive/hive.dart';
 
 
 
-   bool containsAccessToken(){
+  bool containsAccessToken(){
     return AccessToken.length!=0;
   }
 

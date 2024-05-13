@@ -51,9 +51,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-
-    apiCall();
     getLocs();
+    apiCall();
+
     print("venueHashMap");
     print(venueHashMap);
 

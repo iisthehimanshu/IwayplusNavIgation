@@ -29,7 +29,7 @@ class UserState{
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
   static int UserHeight  = 195;
-  static int stepSize = 1;
+  static int stepSize = 2;
 
 
   static int cols = 0;

@@ -4834,7 +4834,6 @@ double minHeight = 90.0;
                                 ):Container(height: 24,width: 24,child: CircularProgressIndicator(color: Colors.white,),),
 
                               ),
-                              textAlign: TextAlign.left,
                             ),
                           ),
                         ),

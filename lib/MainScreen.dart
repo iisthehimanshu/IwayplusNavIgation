@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:iwayplusnav/MapScreen.dart';
 import 'package:iwayplusnav/ProfilePage.dart';
 import 'package:iwayplusnav/VenueSelectionScreen.dart';
@@ -38,13 +39,16 @@ class _MainScreenState extends State<MainScreen> {
     index = widget.initialIndex;
   }
   checkPermission()async{
-    await requestLocationPermission();
+    await requestBluetoothConnectPermission();
   }
-
+  var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     print(status);
+
+    locBox.put('location', (status.isGranted)?true:false);
     if (status.isGranted) {
+
       print('location permission granted');
 
 

@@ -8,6 +8,7 @@ import 'package:iwayplusnav/BuildingInfoScreen.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
@@ -58,6 +59,7 @@ Future<void> main() async {
 
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
+  await Hive.openBox('LocationPermission');
   runApp(const MyApp());
 }
 
@@ -109,6 +111,25 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  var locBox=Hive.box('LocationPermission');
+  Future<void> requestLocationPermission() async {
+    final status = await Permission.location.request();
+    print(status);
+
+    await locBox.put('location', (status.isGranted)?true:false);
+    if (status.isGranted) {
+
+      print('location permission granted');
+
+
+
+    } else if(status.isPermanentlyDenied) {
+      print('location permission is permanently granted');
+    }else{
+      print("location permission is granted");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +140,7 @@ class _MyAppState extends State<MyApp> {
     }else if(isAndroid){
       print("Android");
     }
-
+requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(

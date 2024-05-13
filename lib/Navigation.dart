@@ -123,6 +123,7 @@ class _NavigationState extends State<Navigation> {
   Map<String, Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
+  Map<int, Set<Marker>> pathrouteMarkers = {};
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -718,6 +719,7 @@ double minHeight = 90.0;
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
+        pathrouteMarkers.clear();
         if(render){
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
@@ -2516,6 +2518,7 @@ double minHeight = 90.0;
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
+                          pathrouteMarkers.clear();
                         },
                         icon: Semantics(
                           label: "Back",
@@ -2551,6 +2554,7 @@ double minHeight = 90.0;
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
+                          pathrouteMarkers.clear();
                         },
                         icon: Semantics(
                           label: "Close",
@@ -3404,6 +3408,7 @@ double minHeight = 90.0;
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
+
           List<double> value =
               tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
@@ -3414,16 +3419,50 @@ double minHeight = 90.0;
         }
       }
     }
-    setState(() {
+    setState(() async {
+      pathrouteMarkers.clear();
+      final Uint8List iconMarker =
+      await getImagesFromMarker('assets/white.png', 25);
 
-      singleroute.putIfAbsent(floor, () => Set());
-      singleroute[floor]?.add(gmap.Polyline(
-        polylineId: PolylineId("$bid"),
-        points: coordinates,
-        color: Colors.red,
-        width: 5,
-      ));
+      for(int i=0 ; i<coordinates.length ; i++){
+        if(pathrouteMarkers[floor] != null) {
+          print("coordinates.length%UserState.stepSize");
+          print("${i%UserState.stepSize} ${i}");
+          if(i%UserState.stepSize == 0){
+            pathrouteMarkers[floor]!.add(
+                Marker(markerId: MarkerId(coordinates[i].toString()),
+                    position: coordinates[i],
+                    icon:BitmapDescriptor.fromBytes(iconMarker),
+                )
+            );
+          }
+        }else{
+          pathrouteMarkers[floor] = Set<Marker>();
+          if(i%UserState.stepSize == 0){
+            pathrouteMarkers[floor]!.add(
+                Marker(markerId: MarkerId(coordinates[i].toString()),
+                  position: coordinates[i],
+                  icon: BitmapDescriptor.fromBytes(iconMarker),
+                )
+            );
+          }
+
+        }
+      }
+
+
     });
+
+    // setState(() {
+    //
+    //   singleroute.putIfAbsent(floor, () => Set());
+    //   singleroute[floor]?.add(gmap.Polyline(
+    //     polylineId: PolylineId("$bid"),
+    //     points: coordinates,
+    //     color: Colors.red,
+    //     width: 5,
+    //   ));
+    // });
 
     // setState(() {
     //   Set<gmap.Polyline> innerset = Set();
@@ -6168,6 +6207,14 @@ double minHeight = 90.0;
   }
 
   Set<Marker> getCombinedMarkers() {
+    // pathrouteMarkers.add(
+    //   Marker(markerId: MarkerId(""),
+    //   position: LatLng( 28.5455693,77.1845945),
+    //     icon: BitmapDescriptor.defaultMarker
+    //   )
+    // );
+
+
     if (user.floor == building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
         Set<Marker> marker = Set();
@@ -6177,14 +6224,14 @@ double minHeight = 90.0;
         });
 
         // print(Set<Marker>.of(markers[user.Bid]!));
-        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
+        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([])));
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
                     .union(Set<Marker>.of(markers[user.Bid] ?? [])))
                 .union(Markers)
-            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers);
+            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
       }
     } else {
       if (_isLandmarkPanelOpen) {
@@ -6192,13 +6239,13 @@ double minHeight = 90.0;
         selectedroomMarker.forEach((key, value) {
           marker = marker.union(value);
         });
-        return marker.union(Markers);
+        return marker.union(Markers).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!)
                 .union(Markers)
-            : Markers;
+            : Markers.union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
       }
     }
   }

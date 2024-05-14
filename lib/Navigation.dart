@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -16,6 +17,8 @@ import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'CLUSTERING/MapHelper.dart';
+import 'CLUSTERING/MapMarkers.dart';
 import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -171,6 +174,127 @@ class _NavigationState extends State<Navigation> {
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork= false;
+
+  //-----------------------------------------------------------------------------------------
+  List<LatLng> coordinates = [];
+  /// Set of displayed markers and cluster markers on the map
+  final Set<Marker> _markers = Set();
+
+  /// Minimum zoom at which the markers will cluster
+  final int _minClusterZoom = 0;
+
+  /// Maximum zoom at which the markers will cluster
+  final int _maxClusterZoom = 20;
+
+  /// [Fluster] instance used to manage the clusters
+  Fluster<MapMarker>? _clusterManager;
+
+  /// Current map zoom. Initial zoom will be 15, street level
+  double _currentZoom = 15;
+
+  /// Map loading flag
+  bool _isMapLoading = true;
+
+  /// Markers loading flag
+  bool _areMarkersLoading = true;
+
+  /// Url image used on normal markers
+  final String _markerImageUrl =
+      'https://img.icons8.com/office/80/000000/marker.png';
+
+  /// Color of the cluster circle
+  final Color _clusterColor = Color(0xff24B9B0);
+
+  /// Color of the cluster text
+  final Color _clusterTextColor = Color(0xff24B9B0);
+
+  /// Example marker coordinates
+  final List<LatLng> _markerLocations = [
+    LatLng(41.147125, -8.611249),
+    LatLng(41.145599, -8.610691),
+    LatLng(41.145645, -8.614761),
+    LatLng(41.146775, -8.614913),
+    LatLng(41.146982, -8.615682),
+    LatLng(41.140558, -8.611530),
+    LatLng(41.138393, -8.608642),
+    LatLng(41.137860, -8.609211),
+    LatLng(41.138344, -8.611236),
+    LatLng(41.139813, -8.609381),
+  ];
+
+
+  /// Inits [Fluster] and all the markers with network images and updates the loading state.
+  void _initMarkers() async {
+    final List<MapMarker> markers = [];
+
+    // for (LatLng markerLocation in _markerLocations) {
+    //   final BitmapDescriptor markerImage =
+    //   await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+    //
+    //   markers.add(
+    //     MapMarker(
+    //       id: _markerLocations.indexOf(markerLocation).toString(),
+    //       position: markerLocation,
+    //       icon: markerImage,
+    //     ),
+    //   );
+    // }
+    for(int i=0 ; i<coordinates.length ; i++){
+      if(i% UserState.stepSize == 0) {
+        final Uint8List iconMarker = await getImagesFromMarker('assets/white.png', 25);
+        final BitmapDescriptor markerImage = await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+
+        markers.add(
+          MapMarker(
+            id: coordinates[i].toString(),
+            position: coordinates[i],
+            icon: BitmapDescriptor.fromBytes(iconMarker),
+          ),
+        );
+      }
+    }
+
+    
+
+    _clusterManager = await MapHelper.initClusterManager(
+      markers,
+      _minClusterZoom,
+      _maxClusterZoom,
+    );
+
+    await _updateMarkers11();
+  }
+
+  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
+  /// updates state.
+  Future<void> _updateMarkers11([double? updatedZoom]) async {
+    if (_clusterManager == null || updatedZoom == _currentZoom) return;
+
+    if (updatedZoom != null) {
+      _currentZoom = updatedZoom;
+    }
+
+    setState(() {
+      _areMarkersLoading = true;
+    });
+
+    final updatedMarkers = await MapHelper.getClusterMarkers(
+      _clusterManager,
+      _currentZoom,
+      _clusterColor,
+      _clusterTextColor,
+      25,
+    );
+
+    _markers
+      ..clear()
+      ..addAll(updatedMarkers);
+
+    setState(() {
+      _areMarkersLoading = false;
+    });
+  }
+  //--------------------------------------------------------------------------------------
 
   @override
   void initState() {
@@ -3415,7 +3539,7 @@ double minHeight = 90.0;
       print("No path found.");
     }
 
-    List<LatLng> coordinates = [];
+    
 
     for (int node in path) {
       if (!building.nonWalkable[bid]![floor]!.contains(node)) {
@@ -3433,39 +3557,39 @@ double minHeight = 90.0;
         }
       }
     }
-    setState(() async {
-      pathrouteMarkers.clear();
-      final Uint8List iconMarker =
-      await getImagesFromMarker('assets/white.png', 25);
 
-      for(int i=0 ; i<coordinates.length ; i++){
-        if(pathrouteMarkers[floor] != null) {
-          print("coordinates.length%UserState.stepSize");
-          print("${i%UserState.stepSize} ${i}");
-          if(i%UserState.stepSize == 0){
-            pathrouteMarkers[floor]!.add(
-                Marker(markerId: MarkerId(coordinates[i].toString()),
-                    position: coordinates[i],
-                    icon:BitmapDescriptor.fromBytes(iconMarker),
-                )
-            );
-          }
-        }else{
-          pathrouteMarkers[floor] = Set<Marker>();
-          if(i%UserState.stepSize == 0){
-            pathrouteMarkers[floor]!.add(
-                Marker(markerId: MarkerId(coordinates[i].toString()),
-                  position: coordinates[i],
-                  icon: BitmapDescriptor.fromBytes(iconMarker),
-                )
-            );
-          }
+    pathrouteMarkers.clear();
+    final Uint8List iconMarker =
+    await getImagesFromMarker('assets/white.png', 25);
+    _initMarkers();
 
-        }
-      }
+    // for(int i=0 ; i<coordinates.length ; i++){
+    //   if(pathrouteMarkers[floor] != null) {
+    //     print("coordinates.length%UserState.stepSize");
+    //     print("${i%UserState.stepSize} ${i}");
+    //     if(i%UserState.stepSize == 0){
+    //       pathrouteMarkers[floor]!.add(
+    //           Marker(markerId: MarkerId(coordinates[i].toString()),
+    //             position: coordinates[i],
+    //             icon:BitmapDescriptor.fromBytes(iconMarker),
+    //           )
+    //       );
+    //     }
+    //   }else{
+    //     pathrouteMarkers[floor] = Set<Marker>();
+    //     if(i%UserState.stepSize == 0){
+    //       pathrouteMarkers[floor]!.add(
+    //           Marker(markerId: MarkerId(coordinates[i].toString()),
+    //             position: coordinates[i],
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           )
+    //       );
+    //     }
+    //
+    //   }
+    // }
 
 
-    });
 
     // setState(() {
     //
@@ -6651,7 +6775,7 @@ double minHeight = 90.0;
                                     building.floor[
                                         buildingAllApi.getStoredString()]]!)
                                 : getCombinedPolylines(),
-                            markers: getCombinedMarkers(),
+                            markers: getCombinedMarkers().union(_markers),
                             onTap: (x) {
                               mapState.interaction = true;
                             },
@@ -6668,9 +6792,11 @@ double minHeight = 90.0;
                               if (patch.isNotEmpty) {
                                 fitPolygonInScreen(patch.first);
                               }
+                              _initMarkers();
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
                               print("plpl ${cameraPosition.tilt}");
+                              print("ZOOM ${cameraPosition.zoom}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6681,6 +6807,7 @@ double minHeight = 90.0;
                                 _updateMarkers(cameraPosition.zoom);
                                 //_updateBuilding(cameraPosition.zoom);
                               }
+                              _updateMarkers11(cameraPosition.zoom);
                             },
                             onCameraIdle: () {
                               if (!mapState.interaction) {

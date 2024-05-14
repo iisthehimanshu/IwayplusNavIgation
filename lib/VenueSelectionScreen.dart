@@ -408,6 +408,7 @@ List<VenueModel> buildingsPos=[];
                             buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
                            var currentData = buildingsPos[index];
 
+
                             return GestureDetector(
                               onTap: () {
                                 // Handle onTap for the specific item here
@@ -429,6 +430,7 @@ List<VenueModel> buildingsPos=[];
                                 Distance:buildingsPos[index].dist,
                                 NumberofBuildings: currentData.buildingNumber ?? 0,
                                 bid: currentData.venueName ?? "",
+
                               ),
                             );
                           },
@@ -436,7 +438,9 @@ List<VenueModel> buildingsPos=[];
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            var currentData = venueList[index];
+                            calcDistanceFromUser(buildingsPos,userLoc!);
+                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            var currentData = buildingsPos[index];
                             if (currentData.Tag == "Academic") {
                               return GestureDetector(
                                 onTap: () {
@@ -460,7 +464,9 @@ List<VenueModel> buildingsPos=[];
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            var currentData = venueList[index];
+                            calcDistanceFromUser(buildingsPos,userLoc!);
+                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            var currentData = buildingsPos[index];
                             if (currentData.Tag == "Hospital") {
                               return GestureDetector(
                                 onTap: () {
@@ -503,7 +509,9 @@ List<VenueModel> buildingsPos=[];
                         // ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            var currentData = venueList[index];
+                            calcDistanceFromUser(buildingsPos,userLoc!);
+                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            var currentData = buildingsPos[index];
                             if (currentData.Tag == "Event") {
                               return GestureDetector(
                                 onTap: () {

@@ -189,7 +189,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    //handleCompassEvents();
+    handleCompassEvents();
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")

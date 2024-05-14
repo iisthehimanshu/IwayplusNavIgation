@@ -10,6 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:iwayplusnav/API/BuildingAPI.dart';
 import 'package:iwayplusnav/API/RefreshTokenAPI.dart';
 import 'package:iwayplusnav/Elements/buildingCard.dart';
@@ -50,9 +51,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-
-    apiCall();
     getLocs();
+    apiCall();
+
     print("venueHashMap");
     print(venueHashMap);
 
@@ -70,11 +71,11 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
     });
   }
+  var locBox=Hive.box('LocationPermission');
 Position? userLoc;
   Future<Position?> getUsersCurrentLatLng()async{
-    final status = await Permission.location.request();
-    print(status);
-    if (status.isGranted) {
+
+    if ((locBox.get('location')==null)?false:locBox.get('location')) {
 
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 

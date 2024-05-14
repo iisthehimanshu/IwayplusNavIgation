@@ -652,6 +652,8 @@ double minHeight = 90.0;
           ];
         } else {}
       });
+      print("nearestLandInfomation");
+      print(nearestLandInfomation);
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -1249,7 +1251,7 @@ double minHeight = 90.0;
       }
     }
     setState(() {
-      lastBeaconValue = nearestBeacon;
+      //lastBeaconValue = nearestBeacon;
     });
 
     nearestLandmarkToBeacon = nearestBeacon;
@@ -1279,6 +1281,7 @@ double minHeight = 90.0;
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
+  List<nearestLandInfo> getallnearestInfo=[];
   //Map<String, double> sumMap  = HashMap();
   List<int> currentBinSIze = [];
   Map<String, double> sumMap = new Map();
@@ -1355,9 +1358,20 @@ double minHeight = 90.0;
           await building.landmarkdata!.then((value) {
             nearestLandInfomation = tools.localizefindNearbyLandmark(
                 apibeaconmap[firstValue]!, value.landmarksMap!);
+    setState(() {
+      getallnearestInfo=tools.localizefindAllNearbyLandmark(
+          apibeaconmap[firstValue]!, value.landmarksMap!);
+    });
+
+
             landCords = tools.localizefindNearbyLandmarkCoordinated(
                 apibeaconmap[firstValue]!, value.landmarksMap!);
           });
+
+          print("getallnearestInfo");
+          print(getallnearestInfo);
+
+
 
           List<double> values = tools.localtoglobal(
               apibeaconmap[firstValue]!.coordinateX!,
@@ -1425,7 +1439,7 @@ double minHeight = 90.0;
 
           print("finalvalue");
           print(finalvalue);
-          detected = true;
+          detected = !detected;
           _isBuildingPannelOpen = true;
           _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
           nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
@@ -6116,6 +6130,7 @@ double minHeight = 90.0;
     double screenHeight = MediaQuery.of(context).size.height;
     //fetchlist();
     //filterItems();
+
     return Visibility(
         visible: _isBuildingPannelOpen,
         child: Semantics(
@@ -6129,12 +6144,12 @@ double minHeight = 90.0;
                 color: Colors.grey,
               ),
             ],
-            minHeight: 90,
+            minHeight: (getallnearestInfo.isNotEmpty)?290:90,
             snapPoint:
                 element.workingDays != null && element.workingDays!.length > 0
                     ? 220 / screenHeight
                     : 175 / screenHeight,
-            maxHeight: 90,
+
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6199,6 +6214,30 @@ double minHeight = 90.0;
                     width: screenWidth,
                     color: Color(0xffebebeb),
                   ),
+
+
+                      ( getallnearestInfo.isNotEmpty)?
+                      Expanded(child:
+                      ListView.builder(
+                          itemCount: getallnearestInfo.length,
+                          scrollDirection: Axis.vertical,
+                          physics: ScrollPhysics(),
+                          itemBuilder: (BuildContext context,int index){
+
+                            nearestLandInfo currentInfo=getallnearestInfo[index];
+                            print("currentInfo");
+                            print(currentInfo);
+
+                            return ListTile(
+                              contentPadding: EdgeInsets.all(0.0),
+                              leading: Text(currentInfo.name.toString(),style: TextStyle(color: Colors.black,fontSize: 15)),title:Align(alignment:  Alignment(0.05, 0),child: Text(currentInfo.buildingName.toString(),style: TextStyle(color: Colors.black,fontSize: 15))),trailing:Text("Floor ${currentInfo.floor.toString()}",style: TextStyle(color: Colors.black,fontSize: 15)),);
+                          })):SizedBox(
+
+                      ),
+
+
+
+
                 ],
               ),
             ),
@@ -6987,55 +7026,55 @@ double minHeight = 90.0;
                       // ),
 
 
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
+                      FloatingActionButton(
+                        onPressed: () async {
+
+                          //StopPDR();
+
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              isLiveLocalizing = !isLiveLocalizing;
+                            });
+                            HelperClass.showToast("realTimeReLocalizeUser started");
+
+                            Timer.periodic(
+                                Duration(milliseconds: 5000),
+                                    (timer) async {
+                                  print(resBeacons);
+                                  btadapter.startScanning(resBeacons);
+
+
+                                  // setState(() {
+                                  //   sumMap=  btadapter.calculateAverage();
+                                  // });
+
+
+                                  Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+                                    realTimeReLocalizeUser(resBeacons)
+                                    // listenToBin()
+
+
+                                  });
+
+                                  setState(() {
+                                    debugPQ = btadapter.returnPQ();
+
+                                  });
+
+                                });
+
+                          }
+
+                        },
+                        child: Icon(
+                          Icons.location_history_sharp,
+                          color: (isLiveLocalizing)
+                              ? Colors.cyan
+                              : Colors.black,
+                        ),
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
+                      ),
 
                     ],
                   ),

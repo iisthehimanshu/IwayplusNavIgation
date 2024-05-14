@@ -680,8 +680,6 @@ class tools {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
-            print(value.name);
-            print(d);
             if (!nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }
@@ -694,7 +692,47 @@ class tools {
 
 
   static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
+
+    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
+    int distance=10;
+    landmarksMap.forEach((key, value) {
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
+        if (Beacon.floor! == value.floor) {
+          List<int> pCoord = [];
+          pCoord.add(Beacon.coordinateX!);
+          pCoord.add(Beacon.coordinateY!);
+          double d = 0.0;
+
+          if (value.doorX != null) {
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+
+            if (d<distance) {
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
+              print(value.name);
+            }
+          }else{
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+            if (d<distance) {
+              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
+              priorityQueue.add(MapEntry(currentLandInfo, d));
+            }
+          }
+        }
+      }
+    });
+    nearestLandInfo nearestLandmark=nearestLandInfo("","","","");
+    if(priorityQueue.isNotEmpty){
+      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      nearestLandmark = entry.key;
+    }else{
+      print("priorityQueue.isEmpty");
+    }
+    return nearestLandmark;
+  }
+  static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -728,13 +766,15 @@ class tools {
         }
       }
     });
-    nearestLandInfo nearestLandmark=nearestLandInfo("","","","");
+    List<nearestLandInfo> nearestLandmark=[];
     if(priorityQueue.isNotEmpty){
-      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
-
-      print(entry.key.name);
-      nearestLandmark = entry.key;
+      while(priorityQueue.isNotEmpty)
+        {
+          MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+          nearestLandmark.add(entry.key);
+        }
     }else{
       print("priorityQueue.isEmpty");
     }
@@ -855,7 +895,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+   // print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -878,7 +918,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -897,7 +937,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

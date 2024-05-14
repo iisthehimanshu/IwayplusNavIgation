@@ -23,36 +23,24 @@ class _SettingScreenState extends State<SettingScreen> {
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
-  List<bool> _selectedDisability = <bool>[true, false, false, false];
 
   @override
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    print("UserCredentials.getUserHeight()");
-    print(UserCredentials.getUserHeight());
-    setboolArray();
+    print("UserCredentials().getUserHeight() ${UserCredentials().getUserHeight()}");
+    print(UserCredentials().getUserHeight());
     super.initState();
   }
-  void setboolArray(){
-    for(int i=0 ; i<disability.length ; i++){
-      if(StringDisability[i] == UserCredentials.UserPersonWithDisability){
-        _selectedDisability[i] = true;
-      }else{
-        _selectedDisability[i] = false;
-      }
-    }
-  }
-
 
   void _toggleSelection() {
     setState(() {
       isNaturalDirectionSelected = !isNaturalDirectionSelected;
     });
     String currString = isNaturalDirectionSelected? LocaleData.naturalDirection.getString(context):LocaleData.clockDirection.getString(context);
-    UserCredentials.setUserNavigationModeSetting(currString);
-    print("UserCredentials.getuserNavigationModeSetting()");
-    print(UserCredentials.getuserNavigationModeSetting());
+    UserCredentials().setUserNavigationModeSetting(currString);
+    print("UserCredentials().getuserNavigationModeSetting()");
+    print(UserCredentials().getuserNavigationModeSetting());
 
   }
 
@@ -61,9 +49,9 @@ class _SettingScreenState extends State<SettingScreen> {
       isFocusMode = !isFocusMode;
     });
     String currOrtString = isFocusMode? LocaleData.focusMode.getString(context) : LocaleData.exploreMode.getString(context);
-    UserCredentials.setUserOrentationSetting(currOrtString);
-    print("UserCredentials.getUserOrentationSetting()");
-    print(UserCredentials.getUserOrentationSetting());
+    UserCredentials().setUserOrentationSetting(currOrtString);
+    print("UserCredentials().getUserOrentationSetting()");
+    print(UserCredentials().getUserOrentationSetting());
   }
 
   void _toggleSelection3() {
@@ -71,12 +59,12 @@ class _SettingScreenState extends State<SettingScreen> {
       isDistanceinM = !isDistanceinM;
     });
     String currPathString = isDistanceinM? LocaleData.distanceInMeters.getString(context) : LocaleData.estimatedSteps.getString(context);
-    UserCredentials.setUserPathDetails(currPathString);
-    print("UserCredentials.getUserSetting()");
-    print(UserCredentials.getUserPathDetails());
+    UserCredentials().setUserPathDetails(currPathString);
+    print("UserCredentials().getUserSetting()");
+    print(UserCredentials().getUserPathDetails());
   }
 
-
+  final List<bool> _selectedDisability = <bool>[true, false, false, false];
   final List<bool> _selectedHeight = <bool>[true, false, false];
   List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
   List<Widget> disability = <Widget>[
@@ -443,9 +431,9 @@ class _SettingScreenState extends State<SettingScreen> {
                   child: ToggleButtons(
                     direction: Axis.horizontal,
                     onPressed: (int index) {
-                      UserCredentials.setUserPersonWithDisability(StringDisability[index]);
-                      print("UserCredentials.getUserPersonWithDisability()");
-                      print(UserCredentials.getUserPersonWithDisability());
+                      UserCredentials().setUserPersonWithDisability(StringDisability[index]);
+                      print("UserCredentials()().getUserPersonWithDisability()");
+                      print(UserCredentials().getUserPersonWithDisability());
                       setState(() {
                         for (int i = 0;
                         i < _selectedDisability.length;
@@ -481,7 +469,6 @@ class _SettingScreenState extends State<SettingScreen> {
                             SizedBox(width: 6),
                           ],
                         ),
-
                     ],
                   ),
                 ),
@@ -566,10 +553,8 @@ class _SettingScreenState extends State<SettingScreen> {
                     onPressed: (int index) {
                       print("UserHeight");
                       print(heigth[index]);
-
                       print(StringHeight[index]);
-                      UserCredentials.setUserHeight(StringHeight[index]);
-                      print(UserCredentials.getUserHeight());
+                      UserCredentials().setUserHeight(StringHeight[index]);
                       setState(() {
                         for (int i = 0; i < _selectedHeight.length; i++) {
                           _selectedHeight[i] = i == index;

@@ -55,11 +55,11 @@ class SignInAPI{
         signInBox.put("roles", roles);
 
         //------STORING USER CREDENTIALS FROM DATABASE----------
-        UserCredentials.setAccessToken(signInBox.get("accessToken"));
-        UserCredentials.setRefreshToken(signInBox.get("refreshToken"));
+        UserCredentials().setAccessToken(signInBox.get("accessToken"));
+        UserCredentials().setRefreshToken(signInBox.get("refreshToken"));
         List<dynamic> rolesList = signInBox.get("roles");
-        UserCredentials.setRoles(rolesList);
-        UserCredentials.setUserId(signInBox.get("userId"));
+        UserCredentials().setRoles(rolesList);
+        UserCredentials().setUserId(signInBox.get("userId"));
 
         //--------------------------------------------------------
 

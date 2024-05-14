@@ -74,8 +74,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-      print("Pathposition");
-      print(widget.user.path);
 
 
       // print("listen to bin :${listenToBin()}");
@@ -96,8 +94,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      print("direction header:: ${turnPoints}");
-      print(widget.user.path.length);
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
        btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
@@ -110,12 +106,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
-        print("p1 $angle");
         angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-        print("p2 $angle");
       }
 
-      print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
@@ -161,7 +154,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
     sortedsumMap.clear();
-    print("sortedsumMapcleared $sortedsumMap");
 
 
     sumMap.forEach((key, value) {
@@ -366,10 +358,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
-      print("direction header pointss");
 
-      print(widget.user.path[widget.user.pathobj.index]);
-      print(turnPoints.last);
       if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
 
         speak("You have reached ${widget.user.pathobj.destinationName}");
@@ -388,7 +377,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
         int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print("nextturn $nextTurn");
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
         double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
@@ -404,7 +392,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
         }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
           int index = widget.user.path.indexOf(nextTurn);
-          print("index $index");
           double angle = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
           String direc = tools.angleToClocks(angle);
@@ -580,28 +567,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ],
             ),
           ),
-          SizedBox(
-            height: 100,
-          ),
-          ElevatedButton(onPressed: (){
-            btadapter.emptyBin();
-          }, child: Icon(Icons.minimize)),
-          ElevatedButton(onPressed: (){
-
-          }, child: Icon(Icons.add)),
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                ],
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   height: 100,
+          // ),
+          // ElevatedButton(onPressed: (){
+          //   btadapter.emptyBin();
+          // }, child: Icon(Icons.minimize)),
+          // ElevatedButton(onPressed: (){
+          //
+          // }, child: Icon(Icons.add)),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

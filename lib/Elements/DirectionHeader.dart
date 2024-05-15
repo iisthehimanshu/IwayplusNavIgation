@@ -94,6 +94,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     Building.thresh = "";
 
     widget.getSemanticValue="";
+
+
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
       print("direction header:: ${turnPoints}");
@@ -558,7 +560,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       ],
                     ),
 
-                    Spacer(),
+                    // Spacer(),
                     // Text("$c"),
                     // Text("$d",style: TextStyle(
                     //   color: Colors.red
@@ -580,28 +582,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ],
             ),
           ),
-          SizedBox(
-            height: 100,
-          ),
-          ElevatedButton(onPressed: (){
-            btadapter.emptyBin();
-          }, child: Icon(Icons.minimize)),
-          ElevatedButton(onPressed: (){
-
-          }, child: Icon(Icons.add)),
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                ],
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   height: 100,
+          // ),
+          // ElevatedButton(onPressed: (){
+          //   btadapter.emptyBin();
+          // }, child: Icon(Icons.minimize)),
+          // ElevatedButton(onPressed: (){
+          //
+          // }, child: Icon(Icons.add)),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

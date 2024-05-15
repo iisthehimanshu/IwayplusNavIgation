@@ -418,7 +418,7 @@ List<VenueModel> buildingsPos=[];
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,),
                                   ),
                                 );
                               },
@@ -447,7 +447,7 @@ List<VenueModel> buildingsPos=[];
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },
@@ -473,7 +473,7 @@ List<VenueModel> buildingsPos=[];
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },
@@ -519,7 +519,7 @@ List<VenueModel> buildingsPos=[];
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },

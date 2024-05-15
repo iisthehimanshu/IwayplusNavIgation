@@ -31,8 +31,9 @@ class BuildingInfoScreen extends StatefulWidget {
   String? venueAddress;
   String? venuePhone;
   String? venueWebsite;
+  int? dist;
 
-  BuildingInfoScreen({ this.receivedAllBuildingList,this.venueTitle,this.venueDescription,this.venueCategory,this.venueAddress,this.venuePhone,this.venueWebsite});
+  BuildingInfoScreen({ this.receivedAllBuildingList,this.venueTitle,this.venueDescription,this.venueCategory,this.venueAddress,this.venuePhone,this.venueWebsite,this.dist});
 
 
   @override
@@ -243,7 +244,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  height: 220,
+                  height: 225,
+
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box("Favourites").listenable(),
                     builder: (BuildContext context, Box<dynamic> value, Widget? child) {
@@ -255,21 +257,31 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
                             width: 208,
+
                             child: Container(
+
                               child: ListTile(
+
                                 onTap: (){
-                                  buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
-                                  buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>   Navigation(),
-                                    ),
-                                  );
+                                  if(widget.dist==0){
+                                    buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                    buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                    buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>   Navigation(),
+                                      ),
+                                    );
+                                  }else{
+                                    HelperClass.showToast("Not your current venue");
+                                  }
+
                                 },
                                 title: Container(
+
                                   decoration: BoxDecoration(
+                                      color:  (widget.dist==0)?Colors.white:Colors.black.withOpacity(0.2),
                                         border: Border.all(
                                           color: Color(0xffEBEBEB),
                                         ),
@@ -278,6 +290,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                   child: Column(
                                     children: [
                                       Container(
+
                                         width: 208,
                                         height: 117,
                                         padding: EdgeInsets.all(5),

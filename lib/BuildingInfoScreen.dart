@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geodesy/geodesy.dart';
@@ -242,7 +243,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-                  height: 208,
+                  height: 220,
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box("Favourites").listenable(),
                     builder: (BuildContext context, Box<dynamic> value, Widget? child) {
@@ -250,6 +251,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
+                          currentData.geofencing;
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
                             width: 208,
@@ -350,6 +352,12 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                           )
                                         ],
                                       ),
+
+                                     // SizedBox(width: screenWidth/3.2,),
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 130),
+                                        child: Container(height: 10,width: 10,decoration: BoxDecoration(color: (currentData.geofencing)?Colors.green:Colors.red,borderRadius: BorderRadius.circular(20)),),
+                                      )
                                     ],
                                   ),
                                 ),

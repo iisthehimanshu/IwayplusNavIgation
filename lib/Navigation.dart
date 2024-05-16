@@ -4384,16 +4384,16 @@ if(user.isnavigating==false){
           // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
           // print("--- val  = $val");
           // print("--- isPDRStop  = $isPdrStop");
-
-          //print("turn corrds");
+          //
+          // print("turn corrds");
 
           print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            //print("points unmatchedddd");
+           // print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1500))
                 .then((value) => {
-                //  StartPDR()
+                  StartPDR()
                 });
 
             setState(() {
@@ -4406,7 +4406,7 @@ if(user.isnavigating==false){
               getPoints[i][1] == user.showcoordY) {
 
 
-            //print("points matchedddddddd");
+          //  print("points matchedddddddd");
 
 
             StopPDR();
@@ -6114,7 +6114,7 @@ if(user.isnavigating==false){
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6142,12 +6142,11 @@ if(user.isnavigating==false){
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty)?290:90,
+            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 220 / screenHeight
-                    : 175 / screenHeight,
-
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 220 / screenHeight
+                : 175 / screenHeight,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6174,20 +6173,32 @@ if(user.isnavigating==false){
                   Row(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(bottom: 20),
+                        margin: EdgeInsets.only(bottom: 10),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
+                            !isLiveLocalizing
+                                ? Text(
                               "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xff292929),
-                                height: 25 / 18,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
+                              ),
+                              textAlign: TextAlign.left,
+                            )
+                                : Text(
+                              "Explore Mode",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
                               ),
                               textAlign: TextAlign.left,
                             )
@@ -6202,41 +6213,105 @@ if(user.isnavigating==false){
                         child: Container(
                           margin: EdgeInsets.only(right: 20),
                           alignment: Alignment.topCenter,
-                          child: SvgPicture.asset("assets/closeicon.svg"),
+                          child: SvgPicture.asset("assets/close.svg"),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    height: 1,
-                    width: screenWidth,
-                    color: Color(0xffebebeb),
-                  ),
+
+                  (getallnearestInfo.isNotEmpty)
+                      ? Expanded(
+                      child: Container(
+                        child: ListView.builder(
+                            itemCount: getallnearestInfo.length,
+                            scrollDirection: Axis.vertical,
+                            physics: ScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              nearestLandInfo currentInfo =
+                              getallnearestInfo[index];
+                              print("currentInfo");
+                              print(currentInfo);
+
+                              return Container(
+                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Color(0xffEBEBEB),
+                                    ),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
+                                child: Row(
+                                  children: [
+
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(top: 12, left: 18),
+                                          alignment: Alignment.topLeft,
+                                          child: Text(
+                                            HelperClass.truncateString(
+                                                currentInfo.name,
+                                                30),
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff18181b),
+                                              height: 25/16,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  top: 3, bottom: 14, left: 2),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.buildingName,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
 
 
-                      ( getallnearestInfo.isNotEmpty)?
-                      Expanded(child:
-                      ListView.builder(
-                          itemCount: getallnearestInfo.length,
-                          scrollDirection: Axis.vertical,
-                          physics: ScrollPhysics(),
-                          itemBuilder: (BuildContext context,int index){
-
-                            nearestLandInfo currentInfo=getallnearestInfo[index];
-
-
-
-                            return ListTile(
-                              contentPadding: EdgeInsets.all(0.0),
-                              leading: Text(currentInfo.name.toString(),style: TextStyle(color: Colors.black,fontSize: 15)),title:Align(alignment:  Alignment(0.05, 0),child: Text(currentInfo.buildingName.toString(),style: TextStyle(color: Colors.black,fontSize: 15))),trailing:
-                            Text("Floor ${finalDirections[index].toString()}",style: TextStyle(color: Colors.black,fontSize: 15)),);
-                          })):SizedBox(
-
-                      ),
-
-
-
-
+                                  ],
+                                ),
+                              );
+                            }),
+                      ))
+                      : SizedBox(),
                 ],
               ),
             ),
@@ -6839,7 +6914,8 @@ if(user.isnavigating==false){
                                     )
                                   : floorColumn(),
                               SizedBox(
-                                  height: 28.0), // Adjust the height as needed
+                                  height: 28.0),
+
 
                               // Container(
                               //   width: 300,
@@ -6902,7 +6978,47 @@ if(user.isnavigating==false){
                                 ),
                               ),
                               SizedBox(
-                                  height: 28.0), // Adjust the height as needed
+                                  height: 28.0),
+                              FloatingActionButton(
+                                onPressed: () async {
+                                  //StopPDR();
+
+                                  if (user.initialallyLocalised) {
+                                    setState(() {
+                                      isLiveLocalizing = !isLiveLocalizing;
+                                    });
+                                    HelperClass.showToast(
+                                        "Explore mode enabled");
+
+                                    Timer.periodic(Duration(milliseconds: 5000),
+                                            (timer) async {
+                                          print(resBeacons);
+                                          btadapter.startScanning(resBeacons);
+
+                                          // setState(() {
+                                          //   sumMap=  btadapter.calculateAverage();
+                                          // });
+
+                                          Future.delayed(Duration(milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(resBeacons)
+                                            // listenToBin()
+                                          });
+
+                                          setState(() {
+                                            debugPQ = btadapter.returnPQ();
+                                          });
+                                        });
+                                  }
+                                },
+                                child: SvgPicture.asset(
+                                  "assets/Navigation_RTLIcon.svg",
+                                  // color:
+                                  // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                ),
+                                backgroundColor:
+                                Color(0xff24B9B0), // Set the background color of the FAB
+                              ),// Adjust the height as needed// Adjust the height as needed
                               // FloatingActionButton(
                               //   onPressed: (){
                               //     print("checkingBuildingfloor");

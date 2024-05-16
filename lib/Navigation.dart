@@ -6211,6 +6211,7 @@ if(user.isnavigating==false){
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
+
                           margin: EdgeInsets.only(right: 20),
                           alignment: Alignment.topCenter,
                           child: SvgPicture.asset("assets/close.svg"),

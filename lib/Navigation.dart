@@ -6230,6 +6230,7 @@ if(user.isnavigating==false){
                             itemBuilder: (BuildContext context, int index) {
                               nearestLandInfo currentInfo =
                               getallnearestInfo[index];
+
                               print("currentInfo");
                               print(currentInfo);
 
@@ -6248,22 +6249,45 @@ if(user.isnavigating==false){
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Container(
-                                          margin: EdgeInsets.only(top: 12, left: 18),
-                                          alignment: Alignment.topLeft,
-                                          child: Text(
-                                            HelperClass.truncateString(
-                                                currentInfo.name,
-                                                30),
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff18181b),
-                                              height: 25/16,
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(top: 12, left: 18),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.name,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff18181b),
+                                                  height: 25/16,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
                                             ),
-                                            textAlign: TextAlign.left,
-                                          ),
+
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  top: 10, bottom: 11, left: 2),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    finalDirections[index],
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/12,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         Row(
                                           children: [

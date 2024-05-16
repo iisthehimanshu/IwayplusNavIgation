@@ -303,22 +303,14 @@ class tools {
       angle = angle + 360;
     }
 
-    if (angle >= 337.5 || angle <= 22.5) {
+    if (angle >= 315 || angle <= 45) {
       return "Front";
-    } else if (angle > 22.5 && angle <= 67.5) {
-      return "Slight Right";
-    } else if (angle > 67.5 && angle <= 112.5) {
+    } else if (angle > 45 && angle <= 135) {
       return "Right";
-    } else if (angle > 112.5 && angle <= 157.5) {
-      return "Sharp Right";
-    } else if (angle > 157.5 && angle <= 202.5) {
+    } else if (angle > 135 && angle <= 225) {
       return "Back";
-    } else if (angle > 202.5 && angle <= 247.5) {
-      return "Sharp Left";
-    } else if (angle > 247.5 && angle <= 292.5) {
+    } else if (angle > 225 && angle <= 315) {
       return "Left";
-    } else if (angle > 292.5 && angle <= 337.5) {
-      return "Slight Left";
     } else {
       return "None";
     }
@@ -379,9 +371,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // print("A $a");
-    // print("B $b");
-    // print("C $c");
+    print("AAAAAA $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -407,6 +399,29 @@ class tools {
     double angleInDegrees = angleInRadians * 180 / pi;
 
     print(angleInDegrees);
+
+    return angleInDegrees;
+  }
+
+
+    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+    // print("AAAAAA $a");
+    // print("B $b");
+    // print("C $c");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the angle between the two vectors in radians
+    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+    // Ensure the angle is within [0, 360] degrees
+    if (angleInDegrees < 0) {
+      angleInDegrees += 360;
+    }
 
     return angleInDegrees;
   }
@@ -797,7 +812,7 @@ class tools {
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && Beacon.floor == value.floor) {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);
@@ -805,8 +820,8 @@ class tools {
         if (value.doorX != null) {
           d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           if (d<distance) {
-            coordinates.add(value.doorX!);
-            coordinates.add(value.doorY!);
+            coordinates.add(value.coordinateX!);
+            coordinates.add(value.coordinateY!);
           }
         }else{
           d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
@@ -819,6 +834,40 @@ class tools {
     });
 
     return coordinates;
+  }
+  static List<List<int>> localizefindNearbyListLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
+    print("called");
+
+    int distance=10;
+    List<List<int>> finalCords=[];
+    List<int> coordinates=[];
+    landmarksMap.forEach((key, value) {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && Beacon.floor == value.floor) {
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
+        if (value.doorX != null) {
+          d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
+          if (d<distance) {
+            coordinates.add(value.coordinateX!);
+            coordinates.add(value.coordinateY!);
+            finalCords.add([value.coordinateX!,value.coordinateY!]);
+          }
+        }else{
+          d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
+          if (d<distance) {
+            coordinates.add(value.coordinateX!);
+            coordinates.add(value.coordinateY!);
+           // finalCords.add(coordinates);
+          }
+        }
+      }
+
+    });
+
+    return finalCords;
   }
 
   static List<int> computeCellCoordinates(int node, int numCols) {

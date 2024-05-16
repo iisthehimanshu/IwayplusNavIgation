@@ -255,7 +255,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           } else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 0.5) {
+              highestweight >= 1.2) {
 
             print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -591,19 +591,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // ElevatedButton(onPressed: (){
           //
           // }, child: Icon(Icons.add)),
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(ShowsumMap.toString()),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

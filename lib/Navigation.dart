@@ -6268,10 +6268,8 @@ if(user.isnavigating==false){
                                                 textAlign: TextAlign.left,
                                               ),
                                             ),
-
                                             Container(
-                                              margin: EdgeInsets.only(
-                                                  top: 10, bottom: 11, left: 2),
+                                              margin: EdgeInsets.only(left: 10,top: 14),
                                               alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(

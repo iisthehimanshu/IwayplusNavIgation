@@ -303,13 +303,13 @@ class tools {
       angle = angle + 360;
     }
 
-    if (angle >= 315 || angle <= 45) {
+    if ((angle >= 315 && angle <= 360) || (angle >= 0 && angle <= 45)) {
       return "Front";
     } else if (angle > 45 && angle <= 135) {
       return "Right";
     } else if (angle > 135 && angle <= 225) {
       return "Back";
-    } else if (angle > 225 && angle <= 315) {
+    } else if (angle > 225 && angle < 315) {
       return "Left";
     } else {
       return "None";
@@ -726,7 +726,8 @@ class tools {
                 pCoord, [value.doorX!, value.doorY!]);
 
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+                  doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
               print("distance b/w beacon and location${d}");
               print(value.name);
@@ -737,14 +738,15 @@ class tools {
             print("distance b/w beacon and location${d}");
             print(value.name);
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
         }
       }
     });
-    nearestLandInfo nearestLandmark=nearestLandInfo("","","","");
+    late nearestLandInfo nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       print("entry.key");
@@ -775,7 +777,8 @@ class tools {
             print("distance b/w beacon and location${d}");
             print(value.name);
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }else{
@@ -784,7 +787,8 @@ class tools {
             print("distance b/w beacon and location${d}");
             print(value.name);
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
+              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
@@ -811,6 +815,7 @@ class tools {
 
     int distance=10;
     List<int> coordinates=[];
+    int i=0;
     landmarksMap.forEach((key, value) {
       if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && Beacon.floor == value.floor) {
         List<int> pCoord = [];
@@ -820,9 +825,11 @@ class tools {
         if (value.doorX != null) {
           d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           if (d<distance) {
-            coordinates.add(value.coordinateX!);
-            coordinates.add(value.coordinateY!);
+            coordinates.add(value.doorX!);
+            coordinates.add(value.doorY!);
           }
+
+          return;
         }else{
           d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
           if (d<distance) {
@@ -830,6 +837,7 @@ class tools {
             coordinates.add(value.coordinateY!);
           }
         }
+        return;
       }
     });
 
@@ -1295,9 +1303,66 @@ class tools {
 
 }
 class nearestLandInfo{
-  String name;
-  String buildingName;
-  String venuename;
-  String floor;
-  nearestLandInfo( this.name, this.buildingName, this.venuename,this.floor);
+  Element? element;
+  // Properties? properties;
+  String? sId;
+  String? buildingID;
+  int? coordinateX;
+  int? coordinateY;
+  int? doorX;
+  int? doorY;
+  String? featureType;
+  String? type;
+  int? floor;
+  String? geometryType;
+  String? name;
+  // List<Lifts>? lifts;
+  // List<Stairs>? stairs;
+  // List<Others>? others;
+  String? createdAt;
+  String? updatedAt;
+  int? iV;
+  String? buildingName;
+  String? venueName;
+
+  nearestLandInfo({
+    this.element,
+    // this.properties,
+    required this.sId,
+    required this.buildingID,
+    required this.coordinateX,
+    required this.coordinateY,
+    required this.doorX,
+    required this.doorY,
+    required this.type,
+    required this.floor,
+    required this.name,
+    // this.lifts,
+    // this.stairs,
+    // this.others,
+    required this.updatedAt,
+    required this.buildingName,
+    required this.venueName,
+  });
+
+  bool? wasPolyIdNull ;
+
+}
+class Element {
+  String? type;
+  String? subType;
+
+  Element({this.type, this.subType});
+
+  Element.fromJson(Map<dynamic, dynamic> json) {
+    type = json['type'];
+    subType = json['subType'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['type'] = this.type;
+    data['subType'] = this.subType;
+    return data;
+  }
 }

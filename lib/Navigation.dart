@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
-import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -17,8 +16,6 @@ import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
-import 'CLUSTERING/MapHelper.dart';
-import 'CLUSTERING/MapMarkers.dart';
 import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -126,7 +123,6 @@ class _NavigationState extends State<Navigation> {
   Map<String, Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
-  Map<int, Set<Marker>> pathrouteMarkers = {};
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<int, Set<Marker>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -174,127 +170,6 @@ class _NavigationState extends State<Navigation> {
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork= false;
-
-  //-----------------------------------------------------------------------------------------
-  List<LatLng> coordinates = [];
-  /// Set of displayed markers and cluster markers on the map
-  final Set<Marker> _markers = Set();
-
-  /// Minimum zoom at which the markers will cluster
-  final int _minClusterZoom = 0;
-
-  /// Maximum zoom at which the markers will cluster
-  final int _maxClusterZoom = 20;
-
-  /// [Fluster] instance used to manage the clusters
-  Fluster<MapMarker>? _clusterManager;
-
-  /// Current map zoom. Initial zoom will be 15, street level
-  double _currentZoom = 15;
-
-  /// Map loading flag
-  bool _isMapLoading = true;
-
-  /// Markers loading flag
-  bool _areMarkersLoading = true;
-
-  /// Url image used on normal markers
-  final String _markerImageUrl =
-      'https://img.icons8.com/office/80/000000/marker.png';
-
-  /// Color of the cluster circle
-  final Color _clusterColor = Color(0xff24B9B0);
-
-  /// Color of the cluster text
-  final Color _clusterTextColor = Color(0xff24B9B0);
-
-  /// Example marker coordinates
-  final List<LatLng> _markerLocations = [
-    LatLng(41.147125, -8.611249),
-    LatLng(41.145599, -8.610691),
-    LatLng(41.145645, -8.614761),
-    LatLng(41.146775, -8.614913),
-    LatLng(41.146982, -8.615682),
-    LatLng(41.140558, -8.611530),
-    LatLng(41.138393, -8.608642),
-    LatLng(41.137860, -8.609211),
-    LatLng(41.138344, -8.611236),
-    LatLng(41.139813, -8.609381),
-  ];
-
-
-  /// Inits [Fluster] and all the markers with network images and updates the loading state.
-  void _initMarkers() async {
-    final List<MapMarker> markers = [];
-
-    // for (LatLng markerLocation in _markerLocations) {
-    //   final BitmapDescriptor markerImage =
-    //   await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
-    //
-    //   markers.add(
-    //     MapMarker(
-    //       id: _markerLocations.indexOf(markerLocation).toString(),
-    //       position: markerLocation,
-    //       icon: markerImage,
-    //     ),
-    //   );
-    // }
-    for(int i=0 ; i<coordinates.length ; i++){
-      if(i% UserState.stepSize == 0) {
-        final Uint8List iconMarker = await getImagesFromMarker('assets/white.png', 25);
-        final BitmapDescriptor markerImage = await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
-
-        markers.add(
-          MapMarker(
-            id: coordinates[i].toString(),
-            position: coordinates[i],
-            icon: BitmapDescriptor.fromBytes(iconMarker),
-          ),
-        );
-      }
-    }
-
-    
-
-    _clusterManager = await MapHelper.initClusterManager(
-      markers,
-      _minClusterZoom,
-      _maxClusterZoom,
-    );
-
-    await _updateMarkers11();
-  }
-
-  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
-  /// updates state.
-  Future<void> _updateMarkers11([double? updatedZoom]) async {
-    if (_clusterManager == null || updatedZoom == _currentZoom) return;
-
-    if (updatedZoom != null) {
-      _currentZoom = updatedZoom;
-    }
-
-    setState(() {
-      _areMarkersLoading = true;
-    });
-
-    final updatedMarkers = await MapHelper.getClusterMarkers(
-      _clusterManager,
-      _currentZoom,
-      _clusterColor,
-      _clusterTextColor,
-      25,
-    );
-
-    _markers
-      ..clear()
-      ..addAll(updatedMarkers);
-
-    setState(() {
-      _areMarkersLoading = false;
-    });
-  }
-  //--------------------------------------------------------------------------------------
 
   @override
   void initState() {
@@ -869,7 +744,6 @@ List<List<int>> nearbyLandmarkCoords=[];
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        pathrouteMarkers.clear();
         if(render){
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
@@ -2693,7 +2567,6 @@ if(user.isnavigating==false){
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
-                          pathrouteMarkers.clear();
                         },
                         icon: Semantics(
                           label: "Back",
@@ -2729,7 +2602,6 @@ if(user.isnavigating==false){
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
-                          pathrouteMarkers.clear();
                         },
                         icon: Semantics(
                           label: "Close",
@@ -3576,14 +3448,13 @@ if(user.isnavigating==false){
       print("No path found.");
     }
 
-    
+    List<LatLng> coordinates = [];
 
     for (int node in path) {
       if (!building.nonWalkable[bid]![floor]!.contains(node)) {
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         if (bid != null) {
-
           List<double> value =
               tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
@@ -3594,50 +3465,16 @@ if(user.isnavigating==false){
         }
       }
     }
+    setState(() {
 
-    pathrouteMarkers.clear();
-    final Uint8List iconMarker =
-    await getImagesFromMarker('assets/white.png', 25);
-    _initMarkers();
-
-    // for(int i=0 ; i<coordinates.length ; i++){
-    //   if(pathrouteMarkers[floor] != null) {
-    //     print("coordinates.length%UserState.stepSize");
-    //     print("${i%UserState.stepSize} ${i}");
-    //     if(i%UserState.stepSize == 0){
-    //       pathrouteMarkers[floor]!.add(
-    //           Marker(markerId: MarkerId(coordinates[i].toString()),
-    //             position: coordinates[i],
-    //             icon:BitmapDescriptor.fromBytes(iconMarker),
-    //           )
-    //       );
-    //     }
-    //   }else{
-    //     pathrouteMarkers[floor] = Set<Marker>();
-    //     if(i%UserState.stepSize == 0){
-    //       pathrouteMarkers[floor]!.add(
-    //           Marker(markerId: MarkerId(coordinates[i].toString()),
-    //             position: coordinates[i],
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           )
-    //       );
-    //     }
-    //
-    //   }
-    // }
-
-
-
-    // setState(() {
-    //
-    //   singleroute.putIfAbsent(floor, () => Set());
-    //   singleroute[floor]?.add(gmap.Polyline(
-    //     polylineId: PolylineId("$bid"),
-    //     points: coordinates,
-    //     color: Colors.red,
-    //     width: 5,
-    //   ));
-    // });
+      singleroute.putIfAbsent(floor, () => Set());
+      singleroute[floor]?.add(gmap.Polyline(
+        polylineId: PolylineId("$bid"),
+        points: coordinates,
+        color: Colors.red,
+        width: 5,
+      ));
+    });
 
     // setState(() {
     //   Set<gmap.Polyline> innerset = Set();
@@ -4547,16 +4384,16 @@ if(user.isnavigating==false){
           // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
           // print("--- val  = $val");
           // print("--- isPDRStop  = $isPdrStop");
-
-          //print("turn corrds");
+          //
+          // print("turn corrds");
 
           print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            //print("points unmatchedddd");
+           // print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1500))
                 .then((value) => {
-                //  StartPDR()
+                  StartPDR()
                 });
 
             setState(() {
@@ -4569,7 +4406,7 @@ if(user.isnavigating==false){
               getPoints[i][1] == user.showcoordY) {
 
 
-            //print("points matchedddddddd");
+          //  print("points matchedddddddd");
 
 
             StopPDR();
@@ -6277,7 +6114,7 @@ if(user.isnavigating==false){
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6305,12 +6142,11 @@ if(user.isnavigating==false){
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty)?290:90,
+            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 220 / screenHeight
-                    : 175 / screenHeight,
-
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 220 / screenHeight
+                : 175 / screenHeight,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6337,20 +6173,32 @@ if(user.isnavigating==false){
                   Row(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(bottom: 20),
+                        margin: EdgeInsets.only(bottom: 10),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
+                            !isLiveLocalizing
+                                ? Text(
                               "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xff292929),
-                                height: 25 / 18,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
+                              ),
+                              textAlign: TextAlign.left,
+                            )
+                                : Text(
+                              "Explore Mode",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
                               ),
                               textAlign: TextAlign.left,
                             )
@@ -6363,43 +6211,130 @@ if(user.isnavigating==false){
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
+
                           margin: EdgeInsets.only(right: 20),
                           alignment: Alignment.topCenter,
-                          child: SvgPicture.asset("assets/closeicon.svg"),
+                          child: SvgPicture.asset("assets/close.svg"),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    height: 1,
-                    width: screenWidth,
-                    color: Color(0xffebebeb),
-                  ),
+
+                  (getallnearestInfo.isNotEmpty)
+                      ? Expanded(
+                      child: Container(
+                        child: ListView.builder(
+                            itemCount: getallnearestInfo.length,
+                            scrollDirection: Axis.vertical,
+                            physics: ScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              nearestLandInfo currentInfo =
+                              getallnearestInfo[index];
+
+                              print("currentInfo");
+                              print(currentInfo);
+
+                              return Container(
+                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Color(0xffEBEBEB),
+                                    ),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
+                                child: Row(
+                                  children: [
+
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(top: 12, left: 18),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.name,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff18181b),
+                                                  height: 25/16,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: EdgeInsets.only(left: 10,top: 14),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    finalDirections[index],
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/12,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  top: 3, bottom: 14, left: 2),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.buildingName,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
 
 
-                      ( getallnearestInfo.isNotEmpty)?
-                      Expanded(child:
-                      ListView.builder(
-                          itemCount: getallnearestInfo.length,
-                          scrollDirection: Axis.vertical,
-                          physics: ScrollPhysics(),
-                          itemBuilder: (BuildContext context,int index){
-
-                            nearestLandInfo currentInfo=getallnearestInfo[index];
-
-
-
-                            return ListTile(
-                              contentPadding: EdgeInsets.all(0.0),
-                              leading: Text(currentInfo.name.toString(),style: TextStyle(color: Colors.black,fontSize: 15)),title:Align(alignment:  Alignment(0.05, 0),child: Text(currentInfo.buildingName.toString(),style: TextStyle(color: Colors.black,fontSize: 15))),trailing:
-                            Text("Floor ${finalDirections[index].toString()}",style: TextStyle(color: Colors.black,fontSize: 15)),);
-                          })):SizedBox(
-
-                      ),
-
-
-
-
+                                  ],
+                                ),
+                              );
+                            }),
+                      ))
+                      : SizedBox(),
                 ],
               ),
             ),
@@ -6408,14 +6343,6 @@ if(user.isnavigating==false){
   }
 
   Set<Marker> getCombinedMarkers() {
-    // pathrouteMarkers.add(
-    //   Marker(markerId: MarkerId(""),
-    //   position: LatLng( 28.5455693,77.1845945),
-    //     icon: BitmapDescriptor.defaultMarker
-    //   )
-    // );
-
-
     if (user.floor == building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
         Set<Marker> marker = Set();
@@ -6425,14 +6352,14 @@ if(user.isnavigating==false){
         });
 
         // print(Set<Marker>.of(markers[user.Bid]!));
-        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([])));
+        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
                     .union(Set<Marker>.of(markers[user.Bid] ?? [])))
                 .union(Markers)
-            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
+            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers);
       }
     } else {
       if (_isLandmarkPanelOpen) {
@@ -6440,13 +6367,13 @@ if(user.isnavigating==false){
         selectedroomMarker.forEach((key, value) {
           marker = marker.union(value);
         });
-        return marker.union(Markers).union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
+        return marker.union(Markers);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!)
                 .union(Markers)
-            : Markers.union(pathrouteMarkers[user.floor] ?? Set<Marker>.of([]));
+            : Markers;
       }
     }
   }
@@ -6813,7 +6740,7 @@ if(user.isnavigating==false){
                                     building.floor[
                                         buildingAllApi.getStoredString()]]!)
                                 : getCombinedPolylines(),
-                            markers: getCombinedMarkers().union(_markers),
+                            markers: getCombinedMarkers(),
                             onTap: (x) {
                               mapState.interaction = true;
                             },
@@ -6830,11 +6757,9 @@ if(user.isnavigating==false){
                               if (patch.isNotEmpty) {
                                 fitPolygonInScreen(patch.first);
                               }
-                              _initMarkers();
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
                               print("plpl ${cameraPosition.tilt}");
-                              print("ZOOM ${cameraPosition.zoom}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6845,7 +6770,6 @@ if(user.isnavigating==false){
                                 _updateMarkers(cameraPosition.zoom);
                                 //_updateBuilding(cameraPosition.zoom);
                               }
-                              _updateMarkers11(cameraPosition.zoom);
                             },
                             onCameraIdle: () {
                               if (!mapState.interaction) {
@@ -7013,7 +6937,8 @@ if(user.isnavigating==false){
                                     )
                                   : floorColumn(),
                               SizedBox(
-                                  height: 28.0), // Adjust the height as needed
+                                  height: 28.0),
+
 
                               // Container(
                               //   width: 300,
@@ -7076,7 +7001,47 @@ if(user.isnavigating==false){
                                 ),
                               ),
                               SizedBox(
-                                  height: 28.0), // Adjust the height as needed
+                                  height: 28.0),
+                              FloatingActionButton(
+                                onPressed: () async {
+                                  //StopPDR();
+
+                                  if (user.initialallyLocalised) {
+                                    setState(() {
+                                      isLiveLocalizing = !isLiveLocalizing;
+                                    });
+                                    HelperClass.showToast(
+                                        "Explore mode enabled");
+
+                                    Timer.periodic(Duration(milliseconds: 5000),
+                                            (timer) async {
+                                          print(resBeacons);
+                                          btadapter.startScanning(resBeacons);
+
+                                          // setState(() {
+                                          //   sumMap=  btadapter.calculateAverage();
+                                          // });
+
+                                          Future.delayed(Duration(milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(resBeacons)
+                                            // listenToBin()
+                                          });
+
+                                          setState(() {
+                                            debugPQ = btadapter.returnPQ();
+                                          });
+                                        });
+                                  }
+                                },
+                                child: SvgPicture.asset(
+                                  "assets/Navigation_RTLIcon.svg",
+                                  // color:
+                                  // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                ),
+                                backgroundColor:
+                                Color(0xff24B9B0), // Set the background color of the FAB
+                              ),// Adjust the height as needed// Adjust the height as needed
                               // FloatingActionButton(
                               //   onPressed: (){
                               //     print("checkingBuildingfloor");

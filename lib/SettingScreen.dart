@@ -82,12 +82,12 @@ class _SettingScreenState extends State<SettingScreen> {
       // LocaleData.regular.getString(context),
     ),
   ];
-  List<String> StringHeight = ["< 5 Feet","5Ft to 6Ft","> 6 Feet"];
+  List<String> StringHeight = ["< 5 Feet","5 to 6 Feet","> 6 Feet"];
   List<Widget> heigth = <Widget>[
     Text('< 5 Feet'
       // LocaleData.blind.getString(context),
     ),
-    Text('5Ft to 6Ft'
+    Text('5 to 6 Feet'
       // LocaleData.lowVision.getString(context),
     ),
     Text('> 6 Feet'

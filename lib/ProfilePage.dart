@@ -7,6 +7,10 @@ import 'package:iwayplusnav/API/DeleteApi.dart';
 import 'package:iwayplusnav/Elements/UserCredential.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/SignIn.dart';
 
+import 'EditProfile.dart';
+import 'FavouriteRGCIScreen.dart';
+import 'Help&SupportScreen.dart';
+import 'PrivacyPolicy.dart';
 import 'SettingScreen.dart';
 
 
@@ -103,87 +107,105 @@ class ProfilePage extends StatelessWidget {
           SizedBox(height: 24,),
           Semantics(
             label: "",
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.person),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      color: Color(0xFF18181B),
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      height: 0.10,
+            child: InkWell(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>EditProfile()),
+                );
+                },
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.person),
                     ),
-                  ),
-                  Spacer(),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    child: Container(
+                    const SizedBox(width: 12),
+                    Text(
+                      'Edit Profile',
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        height: 0.10,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
                       width: 12,
                       height: 12,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.keyboard_arrow_right),
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: Icon(Icons.keyboard_arrow_right),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
           Semantics(
             label: "",
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.favorite),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Favourite',
-                    style: TextStyle(
-                      color: Color(0xFF18181B),
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      height: 0.10,
+            child: InkWell(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>FavouriteRGCIScreen()),
+                );
+              },
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.favorite),
                     ),
-                  ),
-                  Spacer(),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    child: Container(
+                    const SizedBox(width: 12),
+                    Text(
+                      'Favourite',
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        height: 0.10,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
                       width: 12,
                       height: 12,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.keyboard_arrow_right),
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: Icon(Icons.keyboard_arrow_right),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -235,80 +257,98 @@ class ProfilePage extends StatelessWidget {
           ),
           Semantics(
             label:"",
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.padding_rounded),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Terms and Privacy Policy',
-                    style: TextStyle(
-                      color: Color(0xFF18181B),
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      height: 0.10,
+            child: InkWell(
+            onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>PrivacyPolicy()),
+                );
+              },
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.padding_rounded),
                     ),
-                  ),
-                  Spacer(),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.keyboard_arrow_right),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Text(
+                      'Terms and Privacy Policy',
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        height: 0.10,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      width: 12,
+                      height: 12,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.keyboard_arrow_right),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
           Semantics(
             label: '',
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.question_mark_sharp),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Help and Support',
-                    style: TextStyle(
-                      color: Color(0xFF18181B),
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w500,
-                      height: 0.10,
+            child: InkWell(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>HelpSupportScreen()),
+                );
+              },
+              child: Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.question_mark_sharp),
                     ),
-                  ),
-                  Spacer(),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                    child: Icon(Icons.keyboard_arrow_right),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Text(
+                      'Help and Support',
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        height: 0.10,
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      width: 12,
+                      height: 12,
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.keyboard_arrow_right),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

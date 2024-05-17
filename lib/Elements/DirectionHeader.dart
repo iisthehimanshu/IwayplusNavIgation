@@ -591,19 +591,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // ElevatedButton(onPressed: (){
           //
           // }, child: Icon(Icons.add)),
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(ShowsumMap.toString()),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

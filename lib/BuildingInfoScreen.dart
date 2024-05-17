@@ -267,7 +267,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                               child: ListTile(
 
                                 onTap: (){
-                                  if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) || widget.dist==0 ){
+                                  if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) ){
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
@@ -278,7 +278,20 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                       ),
                                     );
                                   }else{
-                                    HelperClass.showToast("Not your current venue");
+                                    if(widget.dist==0 && currentData.geofencing){
+                                      buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                      buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                      buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>   Navigation(),
+                                        ),
+                                      );
+                                    }else{
+                                      HelperClass.showToast("Not your current venue");
+                                    }
+
                                   }
 
                                 },

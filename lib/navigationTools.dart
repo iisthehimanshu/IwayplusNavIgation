@@ -669,6 +669,27 @@ class tools {
     return directions;
   }
 
+  static Map<int,Landmarks> getPathWithLandmarks(List<int> path, int columns,List<Landmarks> landmarks) {
+
+    Map<int,Landmarks> pathWithLandmarks = {};
+
+    for (int i = 1; i < path.length - 1; i++) {
+      int current = path[i];
+
+      late Landmarks dirLand;
+      landmarks.forEach((element) {
+        double d = 25;
+        print("tools");
+        print(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [current%columns,current~/columns]));
+        if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [current%columns,current~/columns])<d){
+          dirLand = element;
+        }
+      });
+      pathWithLandmarks[current] = dirLand;
+    }
+    return pathWithLandmarks;
+  }
+
   static int roundToNextInt(double number) {
     int rounded = number.round();
     return number >= 0 ? rounded : rounded - 1;

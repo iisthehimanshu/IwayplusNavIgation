@@ -25,7 +25,7 @@ class pathState {
   String destinationBid = "";
   Map<String,Map<int,int>> connections = {};
   List<int> beaconCords = [];
-  List<Landmarks> turnLandmarks = [];
+  List<Landmarks> nearbyLandmarks = [];
   Map<int,Landmarks> associateTurnWithLandmark = Map();
 
   // Default constructor without arguments
@@ -43,7 +43,7 @@ class pathState {
     CellTurnPoints.clear();
     directions.clear();
     connections.clear();
-    turnLandmarks.clear();
+    nearbyLandmarks.clear();
     associateTurnWithLandmark.clear();
     index = 0;
     beaconCords.clear();

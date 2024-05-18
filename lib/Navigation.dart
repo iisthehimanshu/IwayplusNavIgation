@@ -189,7 +189,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    handleCompassEvents();
+    //handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -3320,10 +3320,16 @@ double minHeight = 90.0;
 
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-          path, value.landmarksMap!, 3, numCols, floor);
-      PathState.turnLandmarks = nearbyLandmarks;
+          path, value.landmarksMap!, 5, numCols, floor,bid!);
+      PathState.nearbyLandmarks = nearbyLandmarks;
+      // PathState.nearbyLandmarks.forEach((element) {
+      //   print(element.name);
+      // });
       PathState.associateTurnWithLandmark =
           tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols);
+      PathState.associateTurnWithLandmark.forEach((key, value) {
+        print("${key} , ${value.name}");
+      });
     });
 
     List<Cell> Cellpath =
@@ -3547,9 +3553,7 @@ double minHeight = 90.0;
     setState(() {
       semanticShouldBeExcluded = true;
     });
-    print("PathState.directions");
-    print(PathState.directions);
-    print(PathState.associateTurnWithLandmark);
+
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3932,39 +3936,49 @@ double minHeight = 90.0;
                                           child: TextButton(
                                             onPressed: () async {
                                               user.pathobj = PathState;
-                                              user.path =
-                                                  PathState.singleListPath;
+                                              user.path = PathState.singleListPath;
                                               user.isnavigating = true;
-                                              user.Cellpath =
-                                                  PathState.singleCellListPath;
+                                              user.Cellpath = PathState.singleCellListPath;
                                               user
                                                   .moveToStartofPath()
-                                                  .then((value) {
+                                                  .then((value)async{
+                                                BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+                                                  ImageConfiguration(size: Size(44, 44)),
+                                                  'assets/userloc0.png',
+                                                );
+                                                BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+                                                  ImageConfiguration(size: Size(44, 44)),
+                                                  'assets/tealtorch.png',
+                                                );
                                                 setState(() {
-                                                  if (markers.length > 0) {
-                                                    List<double> val =
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt());
-                                                    markers[user.Bid]?[0] =
-                                                        customMarker.move(
-                                                            LatLng(
-                                                                val[0], val[1]),
-                                                            markers[user.Bid]![
-                                                                0]);
+                                                  markers.clear();
+                                                  List<double> val =
+                                                  tools.localtoglobal(
+                                                      user.showcoordX
+                                                          .toInt(),
+                                                      user.showcoordY
+                                                          .toInt());
 
-                                                    val = tools.localtoglobal(
-                                                        user.coordX.toInt(),
-                                                        user.coordY.toInt());
-                                                    markers[user.Bid]?[1] =
-                                                        customMarker.move(
-                                                            LatLng(
-                                                                val[0], val[1]),
-                                                            markers[user.Bid]![
-                                                                1]);
-                                                  }
+                                                  markers.putIfAbsent(user.Bid, () => []);
+                                                  markers[user.Bid]?.add(Marker(
+                                                    markerId: MarkerId("UserLocation"),
+                                                    position: LatLng(
+                                                        val[0], val[1]),
+                                                    icon: userloc,
+                                                    anchor: Offset(0.5, 0.829),
+                                                  ));
+
+                                                  val = tools.localtoglobal(
+                                                      user.coordX.toInt(),
+                                                      user.coordY.toInt());
+
+                                                  markers[user.Bid]?.add(Marker(
+                                                    markerId: MarkerId("debug"),
+                                                    position: LatLng(
+                                                        val[0], val[1]),
+                                                    icon: userlocdebug,
+                                                    anchor: Offset(0.5, 0.829),
+                                                  ));
                                                 });
                                               });
                                               _isRoutePanelOpen = false;
@@ -4221,6 +4235,7 @@ double minHeight = 90.0;
   }
 
   void alignMapToPath(List<double> A, List<double> B) {
+
     mapState.tilt = 50;
 
     mapState.bearing = tools.calculateBearing(A, B);
@@ -4325,7 +4340,7 @@ double minHeight = 90.0;
       if (MotionModel.reached(user, col) == false) {
         List<int> a = [user.showcoordX, user.showcoordY];
         List<int> tval = tools.eightcelltransition(user.theta);
-        print(tval);
+        //print(tval);
         List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
         int index =
@@ -4350,7 +4365,7 @@ double minHeight = 90.0;
 
           //print("turn corrds");
 
-          print("${getPoints[i][0]}, ${getPoints[i][1]}");
+          //print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
             //print("points unmatchedddd");
 
@@ -6549,10 +6564,8 @@ double minHeight = 90.0;
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6672,66 +6685,66 @@ double minHeight = 90.0;
                             children: [
 
                               // Text(Building.thresh),
-                              // Visibility(
-                              //   visible: true,
-                              //   child: Container(
-                              //       decoration: BoxDecoration(
-                              //           color: Colors.white,
-                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
-                              //       child: IconButton(
-                              //           onPressed: () {
-                              //
-                              //             //StartPDR();
-                              //
-                              //             bool isvalid = MotionModel.isValidStep(
-                              //                 user,
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //                 building.nonWalkable[user.Bid]![user.floor]!,
-                              //                 reroute);
-                              //             if (isvalid) {
-                              //               user.move().then((value){
-                              //                 renderHere();
-                              //               });
-                              //             } else {
-                              //               if (user.isnavigating) {
-                              //                 // reroute();
-                              //                 // showToast("You are out of path");
-                              //               }
-                              //             }
-                              //
-                              //           }, icon: Icon(Icons.directions_walk))),
-                              // ),
-                              //
-                              //
+                              Visibility(
+                                visible: true,
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                                    child: IconButton(
+                                        onPressed: () {
 
-                              // SizedBox(height: 28.0),
-                              // Text("${user.theta}"),
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
+                                          //StartPDR();
+
+                                          bool isvalid = MotionModel.isValidStep(
+                                              user,
+                                              building.floorDimenssion[user.Bid]![user.floor]![0],
+                                              building.floorDimenssion[user.Bid]![user.floor]![1],
+                                              building.nonWalkable[user.Bid]![user.floor]!,
+                                              reroute);
+                                          if (isvalid) {
+                                            user.move().then((value){
+                                              renderHere();
+                                            });
+                                          } else {
+                                            if (user.isnavigating) {
+                                              // reroute();
+                                              // showToast("You are out of path");
+                                            }
+                                          }
+
+                                        }, icon: Icon(Icons.directions_walk))),
+                              ),
+
+
+
+                              SizedBox(height: 28.0),
+                              Text("${user.theta}"),
+                              Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                                double? compassHeading = newvalue;
+                                setState(() {
+                                  user.theta = compassHeading!;
+                                  if (mapState.interaction2) {
+                                    mapState.bearing = compassHeading!;
+                                    _googleMapController.moveCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                          target: mapState.target,
+                                          zoom: mapState.zoom,
+                                          bearing: mapState.bearing!,
+                                        ),
+                                      ),
+                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                    );
+                                  } else {
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] =
+                                          customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                                  }
+                                });
+
+                              }),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(
@@ -6979,55 +6992,55 @@ double minHeight = 90.0;
                       // ),
 
 
-                      FloatingActionButton(
-                        onPressed: () async {
-
-                          //StopPDR();
-
-                          if (user.initialallyLocalised) {
-                            setState(() {
-                              isLiveLocalizing = !isLiveLocalizing;
-                            });
-                            HelperClass.showToast("realTimeReLocalizeUser started");
-
-                            Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  print(resBeacons);
-                                  btadapter.startScanning(resBeacons);
-
-
-                                  // setState(() {
-                                  //   sumMap=  btadapter.calculateAverage();
-                                  // });
-
-
-                                  Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                                    realTimeReLocalizeUser(resBeacons)
-                                    // listenToBin()
-
-
-                                  });
-
-                                  setState(() {
-                                    debugPQ = btadapter.returnPQ();
-
-                                  });
-
-                                });
-
-                          }
-
-                        },
-                        child: Icon(
-                          Icons.location_history_sharp,
-                          color: (isLiveLocalizing)
-                              ? Colors.cyan
-                              : Colors.black,
-                        ),
-                        backgroundColor: Colors
-                            .white, // Set the background color of the FAB
-                      ),
+                      // FloatingActionButton(
+                      //   onPressed: () async {
+                      //
+                      //     //StopPDR();
+                      //
+                      //     if (user.initialallyLocalised) {
+                      //       setState(() {
+                      //         isLiveLocalizing = !isLiveLocalizing;
+                      //       });
+                      //       HelperClass.showToast("realTimeReLocalizeUser started");
+                      //
+                      //       Timer.periodic(
+                      //           Duration(milliseconds: 5000),
+                      //               (timer) async {
+                      //             print(resBeacons);
+                      //             btadapter.startScanning(resBeacons);
+                      //
+                      //
+                      //             // setState(() {
+                      //             //   sumMap=  btadapter.calculateAverage();
+                      //             // });
+                      //
+                      //
+                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+                      //               realTimeReLocalizeUser(resBeacons)
+                      //               // listenToBin()
+                      //
+                      //
+                      //             });
+                      //
+                      //             setState(() {
+                      //               debugPQ = btadapter.returnPQ();
+                      //
+                      //             });
+                      //
+                      //           });
+                      //
+                      //     }
+                      //
+                      //   },
+                      //   child: Icon(
+                      //     Icons.location_history_sharp,
+                      //     color: (isLiveLocalizing)
+                      //         ? Colors.cyan
+                      //         : Colors.black,
+                      //   ),
+                      //   backgroundColor: Colors
+                      //       .white, // Set the background color of the FAB
+                      // ),
 
                     ],
                   ),

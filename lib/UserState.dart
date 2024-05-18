@@ -133,29 +133,27 @@ class UserState{
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      print("theta ${this.theta}");
       List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
-      print("movefunction $transitionvalue");
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values = tools.localtoglobal(coordX, coordY);
       lat = values[0];
       lng = values[1];
 
-      if(coordXf == 0.0){
-        coordXf = transitionvalue[0]*(stepSize-stepSize.toInt());
-      }else{
-        coordX = coordX + transitionvalue[0];
-        coordXf = 0.0;
-      }
-
-
-      if(coordYf == 0.0){
-        coordYf = transitionvalue[1]*(stepSize-stepSize.toInt());
-      }else{
-        coordY = coordY + transitionvalue[1];
-        coordYf = 0.0;
-      }
+      // if(coordXf == 0.0){
+      //   coordXf = transitionvalue[0]*(stepSize-stepSize.toInt());
+      // }else{
+      //   coordX = coordX + transitionvalue[0];
+      //   coordXf = 0.0;
+      // }
+      //
+      //
+      // if(coordYf == 0.0){
+      //   coordYf = transitionvalue[1]*(stepSize-stepSize.toInt());
+      // }else{
+      //   coordY = coordY + transitionvalue[1];
+      //   coordYf = 0.0;
+      // }
 
       if(this.isnavigating && pathobj.Cellpath.isNotEmpty && pathobj.numCols != 0){
         showcoordX = Cellpath[pathobj.index].x;
@@ -195,10 +193,22 @@ class UserState{
         speak("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
       }
 
-
-
-
-
+      if(pathobj.nearbyLandmarks.isNotEmpty){
+        pathobj.nearbyLandmarks.forEach((element) {
+          if(element.element!.subType == "room door" && element.properties!.polygonExist != true){
+            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=3){
+              speak("Passing by ${element.name}");
+              pathobj.nearbyLandmarks.remove(element);
+            }
+          }else{
+            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
+              double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
+              speak("${element.name} is on your ${tools.angleToClocks(agl)}");
+              pathobj.nearbyLandmarks.remove(element);
+            }
+          }
+        });
+      }
 
     }else{
       pathobj.index = pathobj.index + 1;
@@ -272,6 +282,7 @@ class UserState{
     if(tools.calculateDistance([Cellpath[0].x,Cellpath[0].y], [turnPoints[0].x,turnPoints[0].y])<5){
       pathobj.index = Cellpath.indexOf(turnPoints[0]);
     }
+    floor = pathobj.sourceFloor;
     showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;
@@ -279,6 +290,8 @@ class UserState{
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
+
+    print("moveToStartofPath [$coordX,$coordY] === [$showcoordX,$showcoordY]");
   }
 
   Future<void> reset()async{

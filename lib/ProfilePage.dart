@@ -2,15 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hive/hive.dart';
-import 'package:iwayplusnav/API/DeleteApi.dart';
-import 'package:iwayplusnav/Elements/UserCredential.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/SignIn.dart';
 
-import 'EditProfile.dart';
-import 'FavouriteRGCIScreen.dart';
-import 'Help&SupportScreen.dart';
-import 'PrivacyPolicy.dart';
 import 'SettingScreen.dart';
 
 
@@ -107,105 +99,87 @@ class ProfilePage extends StatelessWidget {
           SizedBox(height: 24,),
           Semantics(
             label: "",
-            child: InkWell(
-              onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>EditProfile()),
-                );
-                },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.person),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.person),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      color: Color(0xFF18181B),
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      height: 0.10,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        color: Color(0xFF18181B),
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        height: 0.10,
-                      ),
-                    ),
-                    Spacer(),
-                    Container(
+                  ),
+                  Spacer(),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    child: Container(
                       width: 12,
                       height: 12,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: Icon(Icons.keyboard_arrow_right),
-                      ),
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.keyboard_arrow_right),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
           Semantics(
             label: "",
-            child: InkWell(
-              onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>FavouriteRGCIScreen()),
-                );
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.favorite),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.favorite),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Favourite',
+                    style: TextStyle(
+                      color: Color(0xFF18181B),
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      height: 0.10,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Favourite',
-                      style: TextStyle(
-                        color: Color(0xFF18181B),
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        height: 0.10,
-                      ),
-                    ),
-                    Spacer(),
-                    Container(
+                  ),
+                  Spacer(),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    child: Container(
                       width: 12,
                       height: 12,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: Icon(Icons.keyboard_arrow_right),
-                      ),
+                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                      child: Icon(Icons.keyboard_arrow_right),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -257,144 +231,84 @@ class ProfilePage extends StatelessWidget {
           ),
           Semantics(
             label:"",
-            child: InkWell(
-            onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>PrivacyPolicy()),
-                );
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.padding_rounded),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.padding_rounded),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Terms and Privacy Policy',
+                    style: TextStyle(
+                      color: Color(0xFF18181B),
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      height: 0.10,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Terms and Privacy Policy',
-                      style: TextStyle(
-                        color: Color(0xFF18181B),
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        height: 0.10,
-                      ),
-                    ),
-                    Spacer(),
-                    Container(
-                      width: 12,
-                      height: 12,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.keyboard_arrow_right),
-                    ),
-                  ],
-                ),
+                  ),
+                  Spacer(),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.keyboard_arrow_right),
+                  ),
+                ],
               ),
             ),
           ),
 
           Semantics(
             label: '',
-            child: InkWell(
-              onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>HelpSupportScreen()),
-                );
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.question_mark_sharp),
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: 50,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.question_mark_sharp),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Help and Support',
+                    style: TextStyle(
+                      color: Color(0xFF18181B),
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w500,
+                      height: 0.10,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Help and Support',
-                      style: TextStyle(
-                        color: Color(0xFF18181B),
-                        fontSize: 16,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        height: 0.10,
-                      ),
-                    ),
-                    Spacer(),
-                    Container(
-                      width: 12,
-                      height: 12,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: Icon(Icons.keyboard_arrow_right),
-                    ),
-                  ],
-                ),
+                  ),
+                  Spacer(),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                    child: Icon(Icons.keyboard_arrow_right),
+                  ),
+                ],
               ),
             ),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 22),
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () async {
-                var signInBox = Hive.box('SignInDatabase');
-                String userid = signInBox.get("userId");
-                String token = signInBox.get("accessToken");
-                print("userid");
-                print(signInBox.get("userId"));
-                print(userid);
-                print(token);
-                print(signInBox.keys);
-                signInBox.clear();
-                print("Localdatabase cleared");
-                print(signInBox.keys);
-                Future<bool> response = DeleteApi.fetchPatchData();
-                if(await response){
-                  signInBox.clear();
-                  print("Localdatabase cleared");
-                  print(signInBox.keys);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignIn()),
-                        (route) => false,
-                  );
-                }else{
-
-                }
-              },
-              child: Text(
-                'Delete Profile',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w500,
-                  height: 0.10,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: MediaQuery.sizeOf(context).height*0.25,),
+          SizedBox(height: MediaQuery.sizeOf(context).height*0.32,),
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -404,14 +318,8 @@ class ProfilePage extends StatelessWidget {
               Container(
                 width: MediaQuery.sizeOf(context).width*0.9,
                 child: OutlinedButton(
-                  onPressed: () async {
-                    var signInBox = Hive.box('SignInDatabase');
-                    signInBox.clear();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignIn()),
-                          (route) => false,
-                    );
+                  onPressed: () {
+                    // Handle View Profile button press
                   },
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12),

@@ -303,14 +303,22 @@ class tools {
       angle = angle + 360;
     }
 
-    if (angle >= 315 || angle <= 45) {
+    if (angle >= 337.5 || angle <= 22.5) {
       return "Front";
-    } else if (angle > 45 && angle <= 135) {
+    } else if (angle > 22.5 && angle <= 67.5) {
+      return "Slight Right";
+    } else if (angle > 67.5 && angle <= 112.5) {
       return "Right";
-    } else if (angle > 135 && angle <= 225) {
+    } else if (angle > 112.5 && angle <= 157.5) {
+      return "Sharp Right";
+    } else if (angle > 157.5 && angle <= 202.5) {
       return "Back";
-    } else if (angle > 225 && angle <= 315) {
+    } else if (angle > 202.5 && angle <= 247.5) {
+      return "Sharp Left";
+    } else if (angle > 247.5 && angle <= 292.5) {
       return "Left";
+    } else if (angle > 292.5 && angle <= 337.5) {
+      return "Slight Left";
     } else {
       return "None";
     }
@@ -371,9 +379,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("AAAAAA $a");
-    print("B $b");
-    print("C $c");
+    // print("A $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -399,29 +407,6 @@ class tools {
     double angleInDegrees = angleInRadians * 180 / pi;
 
     print(angleInDegrees);
-
-    return angleInDegrees;
-  }
-
-
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
-    // print("AAAAAA $a");
-    // print("B $b");
-    // print("C $c");
-    // Convert the points to vectors
-    List<int> ab = [b[0] - a[0], b[1] - a[1]];
-    List<int> ac = [c[0] - a[0], c[1] - a[1]];
-
-    // Calculate the angle between the two vectors in radians
-    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
-
-    // Convert radians to degrees
-    double angleInDegrees = angleInRadians * 180 / pi;
-
-    // Ensure the angle is within [0, 360] degrees
-    if (angleInDegrees < 0) {
-      angleInDegrees += 360;
-    }
 
     return angleInDegrees;
   }
@@ -669,27 +654,6 @@ class tools {
     return directions;
   }
 
-  static Map<int,Landmarks> getPathWithLandmarks(List<int> path, int columns,List<Landmarks> landmarks) {
-
-    Map<int,Landmarks> pathWithLandmarks = {};
-
-    for (int i = 1; i < path.length - 1; i++) {
-      int current = path[i];
-
-      late Landmarks dirLand;
-      landmarks.forEach((element) {
-        double d = 25;
-        print("tools");
-        print(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [current%columns,current~/columns]));
-        if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [current%columns,current~/columns])<d){
-          dirLand = element;
-        }
-      });
-      pathWithLandmarks[current] = dirLand;
-    }
-    return pathWithLandmarks;
-  }
-
   static int roundToNextInt(double number) {
     int rounded = number.round();
     return number >= 0 ? rounded : rounded - 1;
@@ -716,8 +680,6 @@ class tools {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
-            print(value.name);
-            print(d);
             if (!nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }
@@ -730,7 +692,6 @@ class tools {
 
 
   static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -749,14 +710,11 @@ class tools {
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(value.name!,value.buildingName!,value.venueName!,value.floor!.toString());
               priorityQueue.add(MapEntry(currentLandInfo, d));
-              print("distance b/w beacon and location${d}");
               print(value.name);
             }
           }else{
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            print("distance b/w beacon and location${d}");
-            print(value.name);
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(value.name??"",value.buildingName??"",value.venueName??"",value.floor.toString());
               priorityQueue.add(MapEntry(currentLandInfo, d));
@@ -768,9 +726,6 @@ class tools {
     nearestLandInfo nearestLandmark=nearestLandInfo("","","","");
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-      print("entry.key");
-
-      print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
       print("priorityQueue.isEmpty");
@@ -778,7 +733,6 @@ class tools {
     return nearestLandmark;
   }
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -833,7 +787,7 @@ class tools {
     int distance=10;
     List<int> coordinates=[];
     landmarksMap.forEach((key, value) {
-      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && Beacon.floor == value.floor) {
+      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons") {
         List<int> pCoord = [];
         pCoord.add(Beacon.coordinateX!);
         pCoord.add(Beacon.coordinateY!);
@@ -841,8 +795,8 @@ class tools {
         if (value.doorX != null) {
           d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           if (d<distance) {
-            coordinates.add(value.coordinateX!);
-            coordinates.add(value.coordinateY!);
+            coordinates.add(value.doorX!);
+            coordinates.add(value.doorY!);
           }
         }else{
           d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
@@ -855,40 +809,6 @@ class tools {
     });
 
     return coordinates;
-  }
-  static List<List<int>> localizefindNearbyListLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-
-    print("called");
-
-    int distance=10;
-    List<List<int>> finalCords=[];
-    List<int> coordinates=[];
-    landmarksMap.forEach((key, value) {
-      if (Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && Beacon.floor == value.floor) {
-        List<int> pCoord = [];
-        pCoord.add(Beacon.coordinateX!);
-        pCoord.add(Beacon.coordinateY!);
-        double d = 0.0;
-        if (value.doorX != null) {
-          d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
-          if (d<distance) {
-            coordinates.add(value.coordinateX!);
-            coordinates.add(value.coordinateY!);
-            finalCords.add([value.coordinateX!,value.coordinateY!]);
-          }
-        }else{
-          d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
-          if (d<distance) {
-            coordinates.add(value.coordinateX!);
-            coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
-          }
-        }
-      }
-
-    });
-
-    return finalCords;
   }
 
   static List<int> computeCellCoordinates(int node, int numCols) {
@@ -975,7 +895,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+   // print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -998,7 +918,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1017,7 +937,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

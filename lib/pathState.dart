@@ -27,8 +27,6 @@ class pathState {
   List<int> beaconCords = [];
   List<Landmarks> turnLandmarks = [];
   Map<int,Landmarks> associateTurnWithLandmark = Map();
-  Map<int,Map<int,Landmarks>> pathIndexWithLandmark = Map();
-
 
   // Default constructor without arguments
   pathState();

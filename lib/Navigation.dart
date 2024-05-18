@@ -169,7 +169,7 @@ class _NavigationState extends State<Navigation> {
   List<String> allBuildingList = [];
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
-  bool excludeFloorSemanticWork= false;
+  bool excludeFloorSemanticWork = false;
 
   @override
   void initState() {
@@ -190,7 +190,6 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
     handleCompassEvents();
-
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -229,31 +228,26 @@ class _NavigationState extends State<Navigation> {
           true;
         }),
       );
-    } catch (E) {
-      print("E----");
-      print(E);
-    }
+    } catch (E) {}
     // fetchlist();
     // filterItems();
   }
 
-  void excludeFloorSemanticWorkchange(){
+  void excludeFloorSemanticWorkchange() {
     setState(() {
       excludeFloorSemanticWork = true;
     });
   }
 
-double minHeight = 90.0;
-  bool maxHeightBottomSheet=false;
-  void close_isnavigationPannelOpen(){
+  double minHeight = 90.0;
+  bool maxHeightBottomSheet = false;
+  void close_isnavigationPannelOpen() {
     _slidePanelDown();
     _resetScrollPosition();
     print("close_isnavigationPannelOpen");
     setState(() {
-      print(_isnavigationPannelOpen);
-    //_isnavigationPannelOpen = false;
+      //_isnavigationPannelOpen = false;
       minHeight = 90;
-    print(_isnavigationPannelOpen);
     });
   }
 
@@ -279,7 +273,7 @@ double minHeight = 90.0;
     StartPDR();
   }
 
-  void startOnPath(){
+  void startOnPath() {
     setState(() {
       _isnavigationPannelOpen = true;
       _isreroutePannelOpen = false;
@@ -490,7 +484,6 @@ double minHeight = 90.0;
           lastPeakTime = DateTime.now().millisecondsSinceEpoch;
           stepCount++;
 
-          print("prev [${user.coordX},${user.coordY}]");
           bool isvalid = MotionModel.isValidStep(
               user,
               building.floorDimenssion[user.Bid]![user.floor]![0],
@@ -617,32 +610,14 @@ double minHeight = 90.0;
       }
     });
   }
-List<List<int>> nearbyLandmarkCoords=[];
-  List<String> finalDirections=[];
-  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<List<int>> nearbyLandmarkCoords){
-    for(int i=0;i<nearbyLandmarkCoords.length;i++)
-    {
-      double value =
-      tools.calculateAngle2(userCords,newUserCord,nearbyLandmarkCoords[i]);
 
-      // print("value----");
-      // print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
-      // print(finalvalue);
-      finalDirections.add(finalvalue);
-    }
-    setState(() {
-      finalDirections;
-    });
-
-  }
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, speakTTS: false);
   }
 
-  void paintUser(String nearestBeacon, {bool speakTTS = true,bool render = true}) async {
+  void paintUser(String nearestBeacon,
+      {bool speakTTS = true, bool render = true}) async {
     print("nearestBeacon : $nearestBeacon");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
@@ -654,20 +629,14 @@ List<List<int>> nearbyLandmarkCoords=[];
     );
     List<int> landCords = [];
     if (apibeaconmap[nearestBeacon] != null) {
+      tools.angleBetweenBuildingAndNorth(
+          apibeaconmap[nearestBeacon]!.buildingID!);
 
-      tools.angleBetweenBuildingAndNorth(apibeaconmap[nearestBeacon]!.buildingID!);
-
-      nearbyLandmarkCoords.clear();
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         landCords = tools.localizefindNearbyLandmarkCoordinated(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        setState(() {
-            getallnearestInfo=tools.localizefindAllNearbyLandmark(
-                apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-          });
         if (landCords.isEmpty) {
           landCords = [
             apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -676,7 +645,7 @@ List<List<int>> nearbyLandmarkCoords=[];
         } else {}
       });
       print("nearestLandInfomation");
-      print(nearbyLandmarkCoords);
+      print(nearestLandInfomation);
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -744,7 +713,7 @@ List<List<int>> nearbyLandmarkCoords=[];
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        if(render){
+        if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
@@ -758,7 +727,7 @@ List<List<int>> nearbyLandmarkCoords=[];
             icon: userlocdebug,
             anchor: Offset(0.5, 0.829),
           ));
-        }else{
+        } else {
           user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
@@ -784,28 +753,13 @@ List<List<int>> nearbyLandmarkCoords=[];
         });
       });
       double value =
-      tools.calculateAngle2(userCords,newUserCord,landCords);
+          tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
-      print("value----");
-      print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
-      calcDirectionsExploreMode(userCords,newUserCord,nearbyLandmarkCoords);
-
-      // double value =
-      //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
-      // print(value);
-      // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-
-      // print("final value");
-      // print(finalvalue);
-if(user.isnavigating==false){
-  detected = true;
-  _isBuildingPannelOpen = true;
-  _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-  nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-}
-
+      detected = !detected;
+      _isBuildingPannelOpen = true;
+      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
       if (nearestLandInfomation.name.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
@@ -912,7 +866,6 @@ if(user.isnavigating==false){
   }
 
   void reroute() {
-
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -983,6 +936,7 @@ if(user.isnavigating==false){
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
+      building.floor[buildingAllApi.selectedBuildingID] = 0;
       createRooms(value, 0);
     });
 
@@ -1107,29 +1061,27 @@ if(user.isnavigating==false){
       IDS.add(key);
     });
     await outBuilding().outbuilding(IDS).then((out) async {
-      if(out != null){
+      if (out != null) {
         buildingAllApi.outdoorID = out!.data!.campusId!;
-        buildingAllApi.allBuildingID[out!.data!.campusId!] = geo.LatLng(0.0,0.0);
+        buildingAllApi.allBuildingID[out!.data!.campusId!] =
+            geo.LatLng(0.0, 0.0);
       }
     });
-
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       IDS.add(key);
       if (key != buildingAllApi.getSelectedBuildingID()) {
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
-          if(key == buildingAllApi.outdoorID){
+          if (key == buildingAllApi.outdoorID) {
             createotherPatch(value);
-          }else{
-
-          }
+          } else {}
         });
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
-          if(key == buildingAllApi.outdoorID){
+          if (key == buildingAllApi.outdoorID) {
             createRooms(value, 1);
-          }else{
+          } else {
             createRooms(value, 0);
           }
           building.polylinedatamap[key] = value;
@@ -1143,7 +1095,9 @@ if(user.isnavigating==false){
           });
           Map<int, LatLng> coordinates = {};
           for (int i = 0; i < value.landmarks!.length; i++) {
-            if (value.landmarks![i].element!.subType == "AR" && value.landmarks![i].properties!.arName == "P${int.parse(value.landmarks![i].properties!.arValue!)}") {
+            if (value.landmarks![i].element!.subType == "AR" &&
+                value.landmarks![i].properties!.arName ==
+                    "P${int.parse(value.landmarks![i].properties!.arValue!)}") {
               coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
                   LatLng(
                       double.parse(value.landmarks![i].properties!.latitude!),
@@ -1224,7 +1178,6 @@ if(user.isnavigating==false){
         });
       }
     });
-
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
     await Future.delayed(Duration(seconds: 3));
@@ -1318,7 +1271,7 @@ if(user.isnavigating==false){
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
-  List<nearestLandInfo> getallnearestInfo=[];
+  List<nearestLandInfo> getallnearestInfo = [];
   //Map<String, double> sumMap  = HashMap();
   List<int> currentBinSIze = [];
   Map<String, double> sumMap = new Map();
@@ -1340,11 +1293,8 @@ if(user.isnavigating==false){
     sumMap.clear();
     print("summap cleared ${sumMap}");
     setState(() {
-
       sumMap = btadapter.calculateAverage();
     });
-
-
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
@@ -1380,7 +1330,7 @@ if(user.isnavigating==false){
         // entry1.forEach((element) {
         //   element.value;
         // });
-       paintUser(firstValue);
+        paintUser(firstValue);
 
         setState(() {
           lastBeaconValue = firstValue;
@@ -1391,111 +1341,110 @@ if(user.isnavigating==false){
 
         print("nearestBeacon : $firstValue");
 
-    //     if (apibeaconmap[firstValue] != null) {
-    //       await building.landmarkdata!.then((value) {
-    //         nearestLandInfomation = tools.localizefindNearbyLandmark(
-    //             apibeaconmap[firstValue]!, value.landmarksMap!);
-    // setState(() {
-    //   getallnearestInfo=tools.localizefindAllNearbyLandmark(
-    //       apibeaconmap[firstValue]!, value.landmarksMap!);
-    // });
-    //
-    //
-    //         landCords = tools.localizefindNearbyLandmarkCoordinated(
-    //             apibeaconmap[firstValue]!, value.landmarksMap!);
-    //       });
-    //
-    //       print("getallnearestInfo");
-    //       print(getallnearestInfo);
-    //
-    //
-    //
-    //       List<double> values = tools.localtoglobal(
-    //           apibeaconmap[firstValue]!.coordinateX!,
-    //           apibeaconmap[firstValue]!.coordinateY!);
-    //       LatLng beaconLocation = LatLng(values[0], values[1]);
-    //       mapState.target = LatLng(values[0], values[1]);
-    //       mapState.zoom = 21.0;
-    //       _googleMapController.animateCamera(
-    //         CameraUpdate.newLatLngZoom(
-    //           LatLng(values[0], values[1]),
-    //           20, // Specify your custom zoom level here
-    //         ),
-    //       );
-    //       user.Bid = apibeaconmap[firstValue]!.buildingID!;
-    //       user.coordX = apibeaconmap[firstValue]!.coordinateX!;
-    //       user.coordY = apibeaconmap[firstValue]!.coordinateY!;
-    //       print("user.coordXuser.coordY");
-    //       print("${user.coordX}${user.coordY}");
-    //       List<int> userCords = [];
-    //       userCords.add(user.coordX);
-    //       userCords.add(user.coordY);
-    //       List<int> transitionValue = tools.eightcelltransition(user.theta);
-    //       int newX = user.coordX + transitionValue[0];
-    //       int newY = user.coordY + transitionValue[1];
-    //       List<int> newUserCord = [];
-    //       newUserCord.add(newX);
-    //       newUserCord.add(newY);
-    //
-    //       user.lat =
-    //           double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
-    //       user.lng =
-    //           double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
-    //       user.floor = apibeaconmap[firstValue]!.floor!;
-    //       user.key = apibeaconmap[firstValue]!.sId!;
-    //       user.initialallyLocalised = true;
-    //       setState(() {
-    //         print("hehe: $beaconLocation");
-    //         markers.clear();
-    //         markers[user.Bid]?.add(Marker(
-    //           markerId: MarkerId("UserLocation"),
-    //           position: beaconLocation,
-    //           icon: userloc,
-    //           anchor: Offset(0.5, 0.829),
-    //         ));
-    //         building.floor[apibeaconmap[firstValue]!.buildingID!] =
-    //             apibeaconmap[firstValue]!.floor!;
-    //         createRooms(
-    //             building.polyLineData!, apibeaconmap[firstValue]!.floor!);
-    //         building.landmarkdata!.then((value) {
-    //           createMarkers(value, apibeaconmap[firstValue]!.floor!);
-    //         });
-    //       });
-    //       print("userCords");
-    //       print(userCords);
-    //       print(newUserCord);
-    //       print(landCords);
-    //
-    //       double value =
-    //           tools.calculateAngle(newUserCord,userCords,landCords);
-    //
-    //       print("value----");
-    //       print(value);
-    //       String finalvalue =
-    //           tools.angleToClocksForNearestLandmarkToBeacon(value);
-    //
-    //       print("finalvalue");
-    //       print(finalvalue);
-    //
-    //       if (nearestLandInfomation.name == "") {
-    //         print("no beacon found");
-    //         nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
-    //         nearestLandInfomation.floor =
-    //             apibeaconmap[firstValue]!.floor!.toString();
-    //
-    //         speak(
-    //             "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your $finalvalue");
-    //       } else {
-    //         nearestLandInfomation.floor =
-    //             apibeaconmap[firstValue]!.floor!.toString();
-    //         speak(
-    //             "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your $finalvalue");
-    //       }
-    //     } else {
-    //       speak("Unable to find your location");
-    //     }
+        if (apibeaconmap[firstValue] != null) {
+          await building.landmarkdata!.then((value) {
+            nearestLandInfomation = tools.localizefindNearbyLandmark(
+                apibeaconmap[firstValue]!, value.landmarksMap!);
+            setState(() {
+              getallnearestInfo = tools.localizefindAllNearbyLandmark(
+                  apibeaconmap[firstValue]!, value.landmarksMap!);
+            });
 
-        // btadapter.stopScanning();
+            landCords = tools.localizefindNearbyLandmarkCoordinated(
+                apibeaconmap[firstValue]!, value.landmarksMap!);
+          });
+
+          print("getallnearestInfo");
+          print(getallnearestInfo);
+
+          List<double> values = tools.localtoglobal(
+              apibeaconmap[firstValue]!.coordinateX!,
+              apibeaconmap[firstValue]!.coordinateY!);
+          LatLng beaconLocation = LatLng(values[0], values[1]);
+          mapState.target = LatLng(values[0], values[1]);
+          mapState.zoom = 21.0;
+          _googleMapController.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              LatLng(values[0], values[1]),
+              20, // Specify your custom zoom level here
+            ),
+          );
+          user.Bid = apibeaconmap[firstValue]!.buildingID!;
+          user.coordX = apibeaconmap[firstValue]!.coordinateX!;
+          user.coordY = apibeaconmap[firstValue]!.coordinateY!;
+          print("user.coordXuser.coordY");
+          print("${user.coordX}${user.coordY}");
+          List<int> userCords = [];
+          userCords.add(user.coordX);
+          userCords.add(user.coordY);
+          List<int> transitionValue = tools.eightcelltransition(user.theta);
+          int newX = user.coordX + transitionValue[0];
+          int newY = user.coordY + transitionValue[1];
+          List<int> newUserCord = [];
+          newUserCord.add(newX);
+          newUserCord.add(newY);
+
+          user.lat =
+              double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
+          user.lng =
+              double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
+          user.floor = apibeaconmap[firstValue]!.floor!;
+          user.key = apibeaconmap[firstValue]!.sId!;
+          user.initialallyLocalised = true;
+          setState(() {
+            print("hehe: $beaconLocation");
+            markers.clear();
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("UserLocation"),
+              position: beaconLocation,
+              icon: userloc,
+              anchor: Offset(0.5, 0.829),
+            ));
+            building.floor[apibeaconmap[firstValue]!.buildingID!] =
+                apibeaconmap[firstValue]!.floor!;
+            createRooms(
+                building.polyLineData!, apibeaconmap[firstValue]!.floor!);
+            building.landmarkdata!.then((value) {
+              createMarkers(value, apibeaconmap[firstValue]!.floor!);
+            });
+          });
+          print("userCords");
+          print(userCords);
+          print(newUserCord);
+          print(landCords);
+
+          double value =
+              tools.calculateAngle(userCords, newUserCord, landCords);
+
+          print("value----");
+          print(value);
+          String finalvalue =
+              tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+          print("finalvalue");
+          print(finalvalue);
+          detected = !detected;
+          _isBuildingPannelOpen = true;
+          _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+          nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+          if (nearestLandInfomation.name == "") {
+            print("no beacon found");
+            nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
+            nearestLandInfomation.floor =
+                apibeaconmap[firstValue]!.floor!.toString();
+            speak(
+                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
+          } else {
+            nearestLandInfomation.floor =
+                apibeaconmap[firstValue]!.floor!.toString();
+            speak(
+                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+          }
+        } else {
+          speak("Unable to find your location");
+        }
+
+        btadapter.stopScanning();
         print("Beacon searching Stoped");
       } else {
         HelperClass.showToast("Beacon Already scanned");
@@ -1924,15 +1873,14 @@ if(user.isnavigating==false){
           print("y ${l2.cubicleName}");
           int x1 = 0;
           int y1 = 0;
-          for(int a=0;a<4;a++){
+          for (int a = 0; a < 4; a++) {
             x1 = (x1 + l1.nodes![a].coordx!).toInt();
             y1 = (y1 + l1.nodes![a].coordy!).toInt();
           }
 
-
           int x2 = 0;
           int y2 = 0;
-          for(int a=0;a<4;a++){
+          for (int a = 0; a < 4; a++) {
             x2 = (x2 + l2.nodes![a].coordx!).toInt();
             y2 = (y2 + l2.nodes![a].coordy!).toInt();
           }
@@ -1989,8 +1937,7 @@ if(user.isnavigating==false){
     setState(() {
       if (FloorPolyArray != null) {
         for (PolyArray polyArray in FloorPolyArray) {
-
-          if(polyArray.visibilityType == "visible"){
+          if (polyArray.visibilityType == "visible") {
             List<LatLng> coordinates = [];
 
             for (Nodes node in polyArray.nodes!) {
@@ -1998,10 +1945,10 @@ if(user.isnavigating==false){
               coordinates.add(LatLng(
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                      building.patchData[value.polyline!.buildingID])[0],
+                          building.patchData[value.polyline!.buildingID])[0],
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                      building.patchData[value.polyline!.buildingID])[1]));
+                          building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
               closedpolygons.putIfAbsent(
@@ -2010,22 +1957,24 @@ if(user.isnavigating==false){
             if (!polylines.containsKey(value.polyline!.buildingID!)) {
               polylines.putIfAbsent(
                   value.polyline!.buildingID!, () => Set<gmap.Polyline>());
-
             }
 
             if (polyArray.polygonType == 'Wall' ||
                 polyArray.polygonType == 'undefined') {
               if (coordinates.length >= 2) {
                 polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
-                  polylineId: PolylineId(
-                      "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
-                  points: coordinates,
-                  color: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black,
-                  width: 1,
-                    onTap: (){
+                    polylineId: PolylineId(
+                        "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
+                    points: coordinates,
+                    color: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Colors.black,
+                    width: 1,
+                    onTap: () {
                       print("polyArray.id! ${polyArray.id!}");
-                    }
-                ));
+                    }));
               }
             } else if (polyArray.polygonType == 'Room') {
               if (coordinates.length > 2) {
@@ -2038,7 +1987,11 @@ if(user.isnavigating==false){
                     // Modify the color and opacity based on the selectedRoomId
 
                     strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffE5F9FF),
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Color(0xffE5F9FF),
                     consumeTapEvents: true,
                     onTap: () {
                       _googleMapController.animateCamera(
@@ -2048,7 +2001,8 @@ if(user.isnavigating==false){
                         ),
                       );
                       setState(() {
-                        if (building.selectedLandmarkID != polyArray.id && !user.isnavigating) {
+                        if (building.selectedLandmarkID != polyArray.id &&
+                            !user.isnavigating) {
                           user.reset();
                           PathState = pathState.withValues(
                               -1, -1, -1, -1, -1, -1, null, 0);
@@ -2079,154 +2033,189 @@ if(user.isnavigating==false){
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffC2F1D5),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffC2F1D5),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("lift")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFFFF00),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFFFF00),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Male Washroom") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff0000FF),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff0000FF),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Female Washroom") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFF69B4),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFF69B4),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("fire")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("fire")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFF4500),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFF4500),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("water")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("water")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff00FFFF),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff00FFFF),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("wall")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("wall")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffCCCCCC),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffCCCCCC),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Restricted Area") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff800000),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff800000),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Non Walkable Area") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff333333),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff333333),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else {
                 if (coordinates.length > 2) {
@@ -2237,10 +2226,14 @@ if(user.isnavigating==false){
                     points: coordinates,
                     strokeWidth: 1,
                     strokeColor: Colors.black,
-                      onTap: (){
-                        print("polyArray.id! ${polyArray.id!}");
-                      },
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black.withOpacity(0.2),
+                    onTap: () {
+                      print("polyArray.id! ${polyArray.id!}");
+                    },
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Colors.black.withOpacity(0.2),
                   ));
                 }
               }
@@ -2248,36 +2241,41 @@ if(user.isnavigating==false){
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                  polygonId: PolygonId(
-                      "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                  points: coordinates,
-                  strokeWidth: 1,
-                  // Modify the color and opacity based on the selectedRoomId
-                  strokeColor: Colors.black,
-                  fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffCCCCCC),
-                  consumeTapEvents: true,
-                    onTap: (){
+                    polygonId: PolygonId(
+                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                    points: coordinates,
+                    strokeWidth: 1,
+                    // Modify the color and opacity based on the selectedRoomId
+                    strokeColor: Colors.black,
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Color(0xffCCCCCC),
+                    consumeTapEvents: true,
+                    onTap: () {
                       print("polyArray.id! ${polyArray.id!}");
-                    }
-                ));
+                    }));
               }
             } else {
               polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
-                polylineId: PolylineId(polyArray.id!),
-                points: coordinates,
-                color: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black,
-                width: 1,
-                  onTap: (){
+                  polylineId: PolylineId(polyArray.id!),
+                  points: coordinates,
+                  color: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                      ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                      : Colors.black,
+                  width: 1,
+                  onTap: () {
                     print("polyArray.id! ${polyArray.id!}");
-                  }
-              ));
+                  }));
             }
           }
         }
       }
     });
   }
-
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
     ByteData data = await rootBundle.load(path);
@@ -2582,16 +2580,16 @@ if(user.isnavigating==false){
                   Expanded(
                     child: Container(
                         child: Text(
-                          snapshot.data!
-                              .landmarksMap![building.selectedLandmarkID]!.name!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
-                          ),
-                        )),
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                          .name!,
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8e8d8d),
+                        height: 25 / 16,
+                      ),
+                    )),
                   ),
                   Container(
                     height: 48,
@@ -2664,8 +2662,7 @@ if(user.isnavigating==false){
                       ),
 
                       Container(
-                        padding: EdgeInsets.only(left: 17,top:12),
-
+                        padding: EdgeInsets.only(left: 17, top: 12),
                         child: Focus(
                           autofocus: true,
                           child: Semantics(
@@ -2687,7 +2684,9 @@ if(user.isnavigating==false){
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.only(left: 17,),
+                        padding: EdgeInsets.only(
+                          left: 17,
+                        ),
                         child: Text(
                           "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
                           style: const TextStyle(
@@ -2730,8 +2729,9 @@ if(user.isnavigating==false){
                         height: 8,
                       ),
                       Container(
-                        margin: EdgeInsets.only(left: 17,),
-
+                        margin: EdgeInsets.only(
+                          left: 17,
+                        ),
                         width: 114,
                         height: 40,
                         decoration: BoxDecoration(
@@ -2748,26 +2748,22 @@ if(user.isnavigating==false){
                               PathState.sourceFloor = user.floor;
                               PathState.sourcePolyID = user.key;
                               print("object ${PathState.sourcePolyID}");
-                              PathState.sourceName =
-                              "Your current location";
+                              PathState.sourceName = "Your current location";
                               PathState.destinationPolyID =
-                              building.selectedLandmarkID!;
+                                  building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .name!;
                               PathState.destinationFloor = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .floor!;
                               PathState.sourceBid = user.Bid;
 
                               PathState.destinationBid = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .buildingID!;
 
                               setState(() {
@@ -2775,8 +2771,7 @@ if(user.isnavigating==false){
                                 calculatingPath = true;
                               });
                               Future.delayed(Duration(seconds: 1), () {
-                                calculateroute(
-                                    snapshot.data!.landmarksMap!)
+                                calculateroute(snapshot.data!.landmarksMap!)
                                     .then((value) {
                                   calculatingPath = false;
                                   _isLandmarkPanelOpen = false;
@@ -2784,19 +2779,16 @@ if(user.isnavigating==false){
                                 });
                               });
                             } else {
-                              PathState.sourceName =
-                              "Choose Starting Point";
+                              PathState.sourceName = "Choose Starting Point";
                               PathState.destinationPolyID =
-                              building.selectedLandmarkID!;
+                                  building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .name!;
                               PathState.destinationFloor = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .floor!;
                               building.selectedLandmarkID = "";
                               Navigator.push(
@@ -2804,8 +2796,8 @@ if(user.isnavigating==false){
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           SourceAndDestinationPage(
-                                            DestinationID: PathState
-                                                .destinationPolyID,
+                                            DestinationID:
+                                                PathState.destinationPolyID,
                                           ))).then((value) {
                                 if (value != null) {
                                   fromSourceAndDestinationPage(value);
@@ -2815,40 +2807,40 @@ if(user.isnavigating==false){
                           },
                           child: (!calculatingPath)
                               ? const Row(
-                            //  mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.directions,
-                                color: Colors.black,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "Direction",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
-                              )
-                            ],
-                          )
+                                  //  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.directions,
+                                      color: Colors.black,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Direction",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    )
+                                  ],
+                                )
                               : Container(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top:20),
+                        margin: EdgeInsets.only(top: 20),
                         height: 1,
                         width: screenWidth,
                         color: Color(0xffebebeb),
                       ),
                       Semantics(
-                        label:"Information",
+                        label: "Information",
                         child: Container(
-                          margin: EdgeInsets.only(left: 17,top: 20),
+                          margin: EdgeInsets.only(left: 17, top: 20),
                           child: Text(
                             "Information",
                             style: const TextStyle(
@@ -2868,8 +2860,7 @@ if(user.isnavigating==false){
                         decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffebebeb))),
+                                  width: 1.0, color: Color(0xffebebeb))),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -2901,7 +2892,7 @@ if(user.isnavigating==false){
                                   children: [
                                     TextSpan(
                                       text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                     ),
                                   ],
                                 ),
@@ -2910,128 +2901,112 @@ if(user.isnavigating==false){
                           ],
                         ),
                       ),
-                      snapshot
-                          .data!
-                          .landmarksMap![
-                      building.selectedLandmarkID]!
-                          .properties!
-                          .contactNo !=
-                          null
-                          ? Container(
-                        margin:
-                        EdgeInsets.only(left: 16, right: 16),
-                        padding:
-                        EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              width: 1.0,
-                              color: Color(0xffebebeb),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(right: 16),
-                              width: 32,
-                              height: 32,
-                              child: Icon(
-                                Icons.call,
-                                color: Color(0xff24B9B0),
-                                size: 24,
-                              ),
-                            ),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                          : Container(),
-                      snapshot
-                          .data!
-                          .landmarksMap![
-                      building.selectedLandmarkID]!
-                          .properties!
-                          .email !=
-                          "" &&
-                          snapshot
-                              .data!
-                              .landmarksMap![
-                          building.selectedLandmarkID]!
-                              .properties!
-                              .email !=
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                  .properties!.contactNo !=
                               null
                           ? Container(
-                        margin:
-                        EdgeInsets.only(left: 16, right: 16),
-                        padding:
-                        EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffebebeb))),
-                        ),
-                        child: Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                                margin:
-                                EdgeInsets.only(right: 16),
-                                width: 32,
-                                height: 32,
-                                child: Icon(
-                                  Icons.mail_outline,
-                                  color: Color(0xff24B9B0),
-                                  size: 24,
-                                )),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
+                              margin: EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    width: 1.0,
+                                    color: Color(0xffebebeb),
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                    ),
-                                  ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 16),
+                                    width: 32,
+                                    height: 32,
+                                    child: Icon(
+                                      Icons.call,
+                                      color: Color(0xff24B9B0),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(),
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                      .properties!.email !=
+                                  "" &&
+                              snapshot
+                                      .data!
+                                      .landmarksMap![
+                                          building.selectedLandmarkID]!
+                                      .properties!
+                                      .email !=
+                                  null
+                          ? Container(
+                              margin: EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        width: 1.0, color: Color(0xffebebeb))),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(right: 16),
+                                      width: 32,
+                                      height: 32,
+                                      child: Icon(
+                                        Icons.mail_outline,
+                                        color: Color(0xff24B9B0),
+                                        size: 24,
+                                      )),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : Container(),
                     ],
                   ),
@@ -3296,9 +3271,6 @@ if(user.isnavigating==false){
         }
       });
       print("different building detected");
-
-      print(PathState.path.keys);
-      print(pathMarkers.keys);
     }
 
     double time = 0;
@@ -3323,10 +3295,6 @@ if(user.isnavigating==false){
     }
   }
 
-
-
-
-
   List<int> beaconCord = [];
   double cordL = 0;
   double cordLt = 0;
@@ -3345,7 +3313,6 @@ if(user.isnavigating==false){
 
     List<int> path = findBestPathAmongstBoth(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {
@@ -3466,7 +3433,6 @@ if(user.isnavigating==false){
       }
     }
     setState(() {
-
       singleroute.putIfAbsent(floor, () => Set());
       singleroute[floor]?.add(gmap.Polyline(
         polylineId: PolylineId("$bid"),
@@ -3514,10 +3480,11 @@ if(user.isnavigating==false){
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
       child: Container(
-        height:300,
+        height: 300,
         width: 100,
         child: ListView.builder(
-            itemCount: building.numberOfFloors[buildingAllApi.getStoredString()]!,
+            itemCount:
+                building.numberOfFloors[buildingAllApi.getStoredString()]!,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.only(top: 10),
@@ -3532,25 +3499,22 @@ if(user.isnavigating==false){
                         width: 30,
                         height: 42,
                         child: ListTile(
-                          onTap: (){
-                            building.floor[buildingAllApi
-                                .getStoredString()] = index;
+                          onTap: () {
+                            building.floor[buildingAllApi.getStoredString()] =
+                                index;
                             createRooms(
                               building.polylinedatamap[
-                              buildingAllApi
-                                  .getStoredString()]!,
-                              building.floor[buildingAllApi
-                                  .getStoredString()]!,
+                                  buildingAllApi.getStoredString()]!,
+                              building.floor[buildingAllApi.getStoredString()]!,
                             );
                             if (pathMarkers[index] != null) {
                               //setCameraPosition(pathMarkers[i]!);
                             }
-                            building.landmarkdata!
-                                .then((value) {
+                            building.landmarkdata!.then((value) {
                               createMarkers(
                                 value,
-                                building.floor[buildingAllApi
-                                    .getStoredString()]!,
+                                building
+                                    .floor[buildingAllApi.getStoredString()]!,
                               );
                             });
                           },
@@ -3558,7 +3522,8 @@ if(user.isnavigating==false){
                             child: Semantics(
                               excludeSemantics: true,
                               child: Text(
-                                floorNumbers[index].toString(), // Text to be displayed
+                                floorNumbers[index]
+                                    .toString(), // Text to be displayed
                                 style: TextStyle(
                                   color: Colors.black, // Text color
                                   fontSize: 12.0,
@@ -3584,9 +3549,6 @@ if(user.isnavigating==false){
     setState(() {
       semanticShouldBeExcluded = true;
     });
-    print("PathState.directions");
-    print(PathState.directions);
-    print(PathState.associateTurnWithLandmark);
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3854,7 +3816,6 @@ if(user.isnavigating==false){
                                     child: Semantics(
                                       label:
                                           "Your destination is ${distance}m away ",
-
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
@@ -3898,18 +3859,20 @@ if(user.isnavigating==false){
                                                 building.selectedLandmarkID =
                                                     null;
 
-                                                PathState = pathState.withValues(
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    null,
-                                                    0);
+                                                PathState =
+                                                    pathState.withValues(
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        null,
+                                                        0);
                                                 PathState.path.clear();
                                                 PathState.sourcePolyID = "";
-                                                PathState.destinationPolyID = "";
+                                                PathState.destinationPolyID =
+                                                    "";
                                                 PathState.sourceBid = "";
                                                 PathState.destinationBid = "";
                                                 singleroute.clear();
@@ -4013,7 +3976,7 @@ if(user.isnavigating==false){
 
                                               semanticShouldBeExcluded = false;
 
-                                              StartPDR();
+                                              // StartPDR();
                                               alignMapToPath([
                                                 user.lat,
                                                 user.lng
@@ -4275,13 +4238,15 @@ if(user.isnavigating==false){
       semanticShouldBeExcluded = false;
     });
   }
+
   bool shouldStepOpen = false;
-  void shouldStepOpenfunc(){
+  void shouldStepOpenfunc() {
     setState(() {
       shouldStepOpen = true;
     });
   }
-  void noshouldStepOpenfunc(){
+
+  void noshouldStepOpenfunc() {
     setState(() {
       shouldStepOpen = false;
     });
@@ -4356,13 +4321,11 @@ if(user.isnavigating==false){
 
     //implement the turn functionality.
     if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
-
       int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
       if (MotionModel.reached(user, col) == false) {
         List<int> a = [user.showcoordX, user.showcoordY];
         List<int> tval = tools.eightcelltransition(user.theta);
-        print(tval);
         List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
         int index =
@@ -4384,16 +4347,14 @@ if(user.isnavigating==false){
           // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
           // print("--- val  = $val");
           // print("--- isPDRStop  = $isPdrStop");
-          //
-          // print("turn corrds");
 
-          print("${getPoints[i][0]}, ${getPoints[i][1]}");
+          //print("turn corrds");
+
           if (isPdrStop && val == 0) {
-           // print("points unmatchedddd");
+            //print("points unmatchedddd");
 
-            Future.delayed(Duration(milliseconds: 1500))
-                .then((value) => {
-                  StartPDR()
+            Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+                  //  StartPDR()
                 });
 
             setState(() {
@@ -4404,10 +4365,7 @@ if(user.isnavigating==false){
           }
           if (getPoints[i][0] == user.showcoordX &&
               getPoints[i][1] == user.showcoordY) {
-
-
-          //  print("points matchedddddddd");
-
+            //print("points matchedddddddd");
 
             StopPDR();
             getPoints.removeAt(i);
@@ -4419,7 +4377,6 @@ if(user.isnavigating==false){
 
     return Visibility(
         visible: _isnavigationPannelOpen,
-
         child: Stack(
           children: [
             SlidingUpPanel(
@@ -4449,24 +4406,22 @@ if(user.isnavigating==false){
                           IconButton(
                               onPressed: () {
                                 setState(() {
-                                  maxHeightBottomSheet=!maxHeightBottomSheet;
+                                  maxHeightBottomSheet = !maxHeightBottomSheet;
                                 });
                                 print("isCLicked");
 
-                                if(!maxHeightBottomSheet){
+                                if (!maxHeightBottomSheet) {
                                   print('panel was open');
                                   _slidePanelDown();
-                                }else{
+                                } else {
                                   print('panel was closeed');
                                   _slidePanelUpNavigation();
-
                                 }
 
                                 // setState(() {
                                 //   _isnavigationPannelOpen = true;
                                 //   maxHeightBottomSheet=true;
                                 // });
-
                               },
                               icon: Semantics(
                                 label: "Expand",
@@ -4480,12 +4435,14 @@ if(user.isnavigating==false){
                             child: Focus(
                               autofocus: true,
                               child: Semantics(
-                                onDidGainAccessibilityFocus: noshouldStepOpenfunc,
+                                onDidGainAccessibilityFocus:
+                                    noshouldStepOpenfunc,
                                 child: Row(
                                   children: [
                                     Semantics(
                                         excludeSemantics: true,
-                                        child: SvgPicture.asset("assets/navigationVector.svg")),
+                                        child: SvgPicture.asset(
+                                            "assets/navigationVector.svg")),
                                     SizedBox(
                                       width: 12,
                                     ),
@@ -4496,13 +4453,14 @@ if(user.isnavigating==false){
                                           child: Row(
                                             children: [
                                               Semantics(
-                                                label:"Travel time",
+                                                label: "Travel time",
                                                 child: Text(
                                                   "${time.toInt()} min",
                                                   style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 20,
-                                                      fontWeight: FontWeight.w700,
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                       height: 26 / 20,
                                                       color: Color(0xffDC6A01)),
                                                   textAlign: TextAlign.left,
@@ -4568,15 +4526,13 @@ if(user.isnavigating==false){
                               },
                               icon: Semantics(
                                 label: "Close",
-                                onDidGainAccessibilityFocus:
-                                shouldStepOpenfunc,
+                                onDidGainAccessibilityFocus: shouldStepOpenfunc,
                                 child: Icon(
                                   Icons.cancel_outlined,
                                   size: 24,
                                   color: Colors.black,
                                 ),
-                              )
-                          )
+                              ))
                         ],
                       ),
                     ),
@@ -4590,25 +4546,24 @@ if(user.isnavigating==false){
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-
                           SizedBox(
                             height: 22,
                           ),
                           Semantics(
-
                             label: "",
                             child: Container(
                               height: 522,
-
+                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        margin: EdgeInsets.only(right: 17,bottom: 17),
+                                        margin: EdgeInsets.only(
+                                            right: 17, bottom: 17),
                                         child: Semantics(
                                           header: true,
                                           label: "Steps preview",
@@ -4628,7 +4583,7 @@ if(user.isnavigating==false){
                                       ),
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Container(
                                             height: 25,
@@ -4665,7 +4620,7 @@ if(user.isnavigating==false){
                                       ),
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Container(
                                             height: 25,
@@ -4677,7 +4632,8 @@ if(user.isnavigating==false){
                                           ),
                                           Semantics(
                                             label: "Destination",
-                                            onDidGainAccessibilityFocus: excludeFloorSemanticWorkchange,
+                                            onDidGainAccessibilityFocus:
+                                                excludeFloorSemanticWorkchange,
                                             child: Text(
                                               PathState.destinationName,
                                               style: const TextStyle(
@@ -4772,7 +4728,6 @@ if(user.isnavigating==false){
                     ),
                     Row(
                       children: [
-
                         FocusScope(
                           autofocus: true,
                           child: Semantics(
@@ -4786,7 +4741,7 @@ if(user.isnavigating==false){
                               ),
                               child: TextButton(
                                 onPressed: () async {
-                                  if(!rerouting){
+                                  if (!rerouting) {
                                     setState(() {
                                       rerouting = true;
                                     });
@@ -4798,7 +4753,8 @@ if(user.isnavigating==false){
                                     user.showcoordY = user.coordY;
                                     PathState.sourceFloor = user.floor;
                                     PathState.sourcePolyID = user.key;
-                                    PathState.sourceName = "Your current location";
+                                    PathState.sourceName =
+                                        "Your current location";
                                     building.landmarkdata!.then((value) async {
                                       await calculateroute(value.landmarksMap!)
                                           .then((value) {
@@ -4806,21 +4762,25 @@ if(user.isnavigating==false){
                                         user.path = PathState.path.values
                                             .expand((list) => list)
                                             .toList();
-                                        user.Cellpath = PathState.singleCellListPath;
+                                        user.Cellpath =
+                                            PathState.singleCellListPath;
                                         user.pathobj.index = 0;
                                         user.isnavigating = true;
                                         user.moveToStartofPath().then((value) {
                                           setState(() {
                                             if (markers.length > 0) {
-                                              markers[user.Bid]?[0] =
+                                              markers[user.Bid]?[
+                                                      0] =
                                                   customMarker.move(
                                                       LatLng(
                                                           tools.localtoglobal(
-                                                              user.showcoordX.toInt(),
+                                                              user.showcoordX
+                                                                  .toInt(),
                                                               user.showcoordY
                                                                   .toInt())[0],
                                                           tools.localtoglobal(
-                                                              user.showcoordX.toInt(),
+                                                              user.showcoordX
+                                                                  .toInt(),
                                                               user.showcoordY
                                                                   .toInt())[1]),
                                                       markers[user.Bid]![0]);
@@ -4832,58 +4792,68 @@ if(user.isnavigating==false){
                                         _isnavigationPannelOpen = true;
                                         _isreroutePannelOpen = false;
                                         int numCols = building.floorDimenssion[
-                                        PathState.sourceBid]![
-                                        PathState.sourceFloor]![0]; //floor length
-                                        double angle =
-                                        tools.calculateAngleBWUserandPath(
-                                            user,
                                             PathState
-                                                .path[PathState.sourceFloor]![1],
-                                            numCols);
+                                                .sourceBid]![PathState
+                                            .sourceFloor]![0]; //floor length
+                                        double angle =
+                                            tools.calculateAngleBWUserandPath(
+                                                user,
+                                                PathState.path[
+                                                    PathState.sourceFloor]![1],
+                                                numCols);
                                         if (angle != 0) {
-                                          speak("Turn " + tools.angleToClocks(angle));
+                                          speak("Turn " +
+                                              tools.angleToClocks(angle));
                                         } else {}
 
                                         mapState.tilt = 50;
 
-                                        mapState.bearing = tools.calculateBearing([
+                                        mapState.bearing =
+                                            tools.calculateBearing([
                                           user.lat,
                                           user.lng
                                         ], [
                                           PathState
                                               .singleCellListPath[
-                                          user.pathobj.index + 1]
+                                                  user.pathobj.index + 1]
                                               .lat,
                                           PathState
                                               .singleCellListPath[
-                                          user.pathobj.index + 1]
+                                                  user.pathobj.index + 1]
                                               .lng
                                         ]);
                                         _googleMapController.animateCamera(
                                             CameraUpdate.newCameraPosition(
-                                              CameraPosition(
-                                                  target: mapState.target,
-                                                  zoom: mapState.zoom,
-                                                  bearing: mapState.bearing!,
-                                                  tilt: mapState.tilt),
-                                            ));
+                                          CameraPosition(
+                                              target: mapState.target,
+                                              zoom: mapState.zoom,
+                                              bearing: mapState.bearing!,
+                                              tilt: mapState.tilt),
+                                        ));
                                       });
                                     });
                                     rerouting = false;
                                   }
                                 },
-                                child: !rerouting?Text(
-                                  "Reroute",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ):Container(height: 24,width: 24,child: CircularProgressIndicator(color: Colors.white,),),
-
+                                child: !rerouting
+                                    ? Text(
+                                        "Reroute",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff000000),
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    : Container(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
                             ),
                           ),
@@ -4996,18 +4966,20 @@ if(user.isnavigating==false){
 
   void _slidePanelUp() {
     _panelController.open();
-
   }
-  void _slidePanelUpNavigation(){
+
+  void _slidePanelUpNavigation() {
     _panelController.animatePanelToSnapPoint();
   }
 
   void _slidePanelDown() {
     _panelController.close();
   }
+
   void _slidePanelDownNavigation() {
     _panelController.animatePanelToPosition(90.0);
   }
+
   bool _isFilterOpen = false;
   bool isLiveLocalizing = false;
 
@@ -6114,7 +6086,7 @@ if(user.isnavigating==false){
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-      responseBody.map((data) => buildingAll.fromJson(data)).toList();
+          responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6144,9 +6116,9 @@ if(user.isnavigating==false){
             ],
             minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
-            element.workingDays != null && element.workingDays!.length > 0
-                ? 220 / screenHeight
-                : 175 / screenHeight,
+                element.workingDays != null && element.workingDays!.length > 0
+                    ? 220 / screenHeight
+                    : 175 / screenHeight,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6173,32 +6145,20 @@ if(user.isnavigating==false){
                   Row(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(bottom: 10),
+                        margin: EdgeInsets.only(bottom: 20),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            !isLiveLocalizing
-                                ? Text(
+                            Text(
                               "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
-                              ),
-                              textAlign: TextAlign.left,
-                            )
-                                : Text(
-                              "Explore Mode",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
+                                color: Color(0xff292929),
+                                height: 25 / 18,
                               ),
                               textAlign: TextAlign.left,
                             )
@@ -6211,129 +6171,48 @@ if(user.isnavigating==false){
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
-
                           margin: EdgeInsets.only(right: 20),
                           alignment: Alignment.topCenter,
-                          child: SvgPicture.asset("assets/close.svg"),
+                          child: SvgPicture.asset("assets/closeicon.svg"),
                         ),
                       ),
                     ],
                   ),
-
+                  Container(
+                    height: 1,
+                    width: screenWidth,
+                    color: Color(0xffebebeb),
+                  ),
                   (getallnearestInfo.isNotEmpty)
                       ? Expanded(
-                      child: Container(
-                        child: ListView.builder(
-                            itemCount: getallnearestInfo.length,
-                            scrollDirection: Axis.vertical,
-                            physics: ScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              nearestLandInfo currentInfo =
-                              getallnearestInfo[index];
+                          child: ListView.builder(
+                              itemCount: getallnearestInfo.length,
+                              scrollDirection: Axis.vertical,
+                              physics: ScrollPhysics(),
+                              itemBuilder: (BuildContext context, int index) {
+                                nearestLandInfo currentInfo =
+                                    getallnearestInfo[index];
+                                print("currentInfo");
+                                print(currentInfo);
 
-                              print("currentInfo");
-                              print(currentInfo);
-
-                              return Container(
-                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Color(0xffEBEBEB),
-                                    ),
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                                child: Row(
-                                  children: [
-
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(top: 12, left: 18),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.name,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff18181b),
-                                                  height: 25/16,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(left: 10,top: 14),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    finalDirections[index],
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/12,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  top: 3, bottom: 14, left: 2),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.buildingName,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-
-
-                                  ],
-                                ),
-                              );
-                            }),
-                      ))
+                                return ListTile(
+                                  contentPadding: EdgeInsets.all(0.0),
+                                  leading: Text(currentInfo.name.toString(),
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 15)),
+                                  title: Align(
+                                      alignment: Alignment(0.05, 0),
+                                      child: Text(
+                                          currentInfo.buildingName.toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15))),
+                                  trailing: Text(
+                                      "Floor ${currentInfo.floor.toString()}",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 15)),
+                                );
+                              }))
                       : SizedBox(),
                 ],
               ),
@@ -6685,10 +6564,8 @@ if(user.isnavigating==false){
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6699,7 +6576,6 @@ if(user.isnavigating==false){
                   height: 500,
                 ),
               ),
-
             )
           : isLoading
               ? Scaffold(
@@ -6759,7 +6635,6 @@ if(user.isnavigating==false){
                               }
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
-                              print("plpl ${cameraPosition.tilt}");
                               focusBuildingChecker(cameraPosition);
                               mapState.interaction = true;
                               mapbearing = cameraPosition.bearing;
@@ -6779,25 +6654,28 @@ if(user.isnavigating==false){
                             onCameraMoveStarted: () {
                               mapState.interaction2 = false;
                             },
-
                           ),
                         ),
                       ),
                       //debug----
+                      Positioned(
+                          left: 32,
+                          bottom: 32,
+                          child: SvgPicture.asset(
+                              "assets/Iwayplus_Watermark.svg")),
 
-                      // Positioned(
-                      //     top: 150,
-                      //     right: 50,
-                      //     child: Container(
-                      //       decoration: BoxDecoration(
-                      //         border: Border.all(),
-                      //         borderRadius: BorderRadius.circular(20),
-                      //         color: (isPdr) ? Colors.green : Colors.red,
-                      //       ),
-                      //       height: 20,
-                      //       width: 20,
-                      //
-                      //     )),
+                      Positioned(
+                          top: 150,
+                          right: 50,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(20),
+                              color: (isPdr) ? Colors.green : Colors.red,
+                            ),
+                            height: 20,
+                            width: 20,
+                          )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
@@ -6806,6 +6684,28 @@ if(user.isnavigating==false){
                           excludeSemantics: false,
                           child: Column(
                             children: [
+                              // IconButton(
+                              //   onPressed: () {
+                              //     setState(() {
+                              //       if(mapState.layer == 1){
+                              //         mapState.layer = 2;
+                              //       }else if(mapState.layer == 2){
+                              //         mapState.layer = 1;
+                              //       }
+                              //     });
+                              //
+                              //   },
+                              //   icon: mapState.layer == 1 ?SvgPicture.asset(
+                              //     'assets/Layer1.svg',
+                              //     width: 48,
+                              //     height: 48,
+                              //   ):SvgPicture.asset(
+                              //     'assets/Layer2.svg',
+                              //     width: 48,
+                              //     height: 48,
+                              //   ),
+                              //   color: Colors.white,
+                              // ),
 
                               // Text(Building.thresh),
                               // Visibility(
@@ -6813,20 +6713,24 @@ if(user.isnavigating==false){
                               //   child: Container(
                               //       decoration: BoxDecoration(
                               //           color: Colors.white,
-                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
+                              //           borderRadius: BorderRadius.all(
+                              //               Radius.circular(24))),
                               //       child: IconButton(
                               //           onPressed: () {
-                              //
                               //             //StartPDR();
                               //
-                              //             bool isvalid = MotionModel.isValidStep(
-                              //                 user,
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //                 building.nonWalkable[user.Bid]![user.floor]!,
-                              //                 reroute);
+                              //             bool isvalid =
+                              //                 MotionModel.isValidStep(
+                              //                     user,
+                              //                     building.floorDimenssion[user
+                              //                         .Bid]![user.floor]![0],
+                              //                     building.floorDimenssion[user
+                              //                         .Bid]![user.floor]![1],
+                              //                     building.nonWalkable[
+                              //                         user.Bid]![user.floor]!,
+                              //                     reroute);
                               //             if (isvalid) {
-                              //               user.move().then((value){
+                              //               user.move().then((value) {
                               //                 renderHere();
                               //               });
                               //             } else {
@@ -6835,39 +6739,41 @@ if(user.isnavigating==false){
                               //                 // showToast("You are out of path");
                               //               }
                               //             }
-                              //
-                              //           }, icon: Icon(Icons.directions_walk))),
+                              //           },
+                              //           icon: Icon(Icons.directions_walk))),
                               // ),
                               //
-                              //
-
                               // SizedBox(height: 28.0),
                               // Text("${user.theta}"),
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
+                              // Slider(
+                              //     value: user.theta,
+                              //     min: -180,
+                              //     max: 180,
+                              //     onChanged: (newvalue) {
+                              //       double? compassHeading = newvalue;
+                              //       setState(() {
+                              //         user.theta = compassHeading!;
+                              //         if (mapState.interaction2) {
+                              //           mapState.bearing = compassHeading!;
+                              //           _googleMapController.moveCamera(
+                              //             CameraUpdate.newCameraPosition(
+                              //               CameraPosition(
+                              //                 target: mapState.target,
+                              //                 zoom: mapState.zoom,
+                              //                 bearing: mapState.bearing!,
+                              //               ),
+                              //             ),
+                              //             //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              //           );
+                              //         } else {
+                              //           if (markers.length > 0)
+                              //             markers[user.Bid]?[0] =
+                              //                 customMarker.rotate(
+                              //                     compassHeading! - mapbearing,
+                              //                     markers[user.Bid]![0]);
+                              //         }
+                              //       });
+                              //     }),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(
@@ -6937,8 +6843,7 @@ if(user.isnavigating==false){
                                     )
                                   : floorColumn(),
                               SizedBox(
-                                  height: 28.0),
-
+                                  height: 28.0), // Adjust the height as needed
 
                               // Container(
                               //   width: 300,
@@ -6989,7 +6894,8 @@ if(user.isnavigating==false){
                                   },
                                   child: Semantics(
                                     label: "Localize",
-                                    onDidGainAccessibilityFocus: close_isnavigationPannelOpen,
+                                    onDidGainAccessibilityFocus:
+                                        close_isnavigationPannelOpen,
                                     child: Icon(
                                       Icons.my_location_sharp,
                                       color: Colors.black,
@@ -7001,47 +6907,7 @@ if(user.isnavigating==false){
                                 ),
                               ),
                               SizedBox(
-                                  height: 28.0),
-                              FloatingActionButton(
-                                onPressed: () async {
-                                  //StopPDR();
-
-                                  if (user.initialallyLocalised) {
-                                    setState(() {
-                                      isLiveLocalizing = !isLiveLocalizing;
-                                    });
-                                    HelperClass.showToast(
-                                        "Explore mode enabled");
-
-                                    Timer.periodic(Duration(milliseconds: 5000),
-                                            (timer) async {
-                                          print(resBeacons);
-                                          btadapter.startScanning(resBeacons);
-
-                                          // setState(() {
-                                          //   sumMap=  btadapter.calculateAverage();
-                                          // });
-
-                                          Future.delayed(Duration(milliseconds: 2000))
-                                              .then((value) => {
-                                            realTimeReLocalizeUser(resBeacons)
-                                            // listenToBin()
-                                          });
-
-                                          setState(() {
-                                            debugPQ = btadapter.returnPQ();
-                                          });
-                                        });
-                                  }
-                                },
-                                child: SvgPicture.asset(
-                                  "assets/Navigation_RTLIcon.svg",
-                                  // color:
-                                  // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                                ),
-                                backgroundColor:
-                                Color(0xff24B9B0), // Set the background color of the FAB
-                              ),// Adjust the height as needed// Adjust the height as needed
+                                  height: 28.0), // Adjust the height as needed
                               // FloatingActionButton(
                               //   onPressed: (){
                               //     print("checkingBuildingfloor");
@@ -7111,7 +6977,8 @@ if(user.isnavigating==false){
                                   autofocus: true,
                                   child: Focus(
                                     child: Semantics(
-                                      sortKey: const OrdinalSortKey(0), // header: true,
+                                      sortKey: const OrdinalSortKey(
+                                          0), // header: true,
                                       child: HomepageSearch(
                                         onVenueClicked: onLandmarkVenueClicked,
                                         fromSourceAndDestinationPage:
@@ -7134,9 +7001,7 @@ if(user.isnavigating==false){
                       routeDeatilPannel(),
                       navigationPannel(),
                       reroutePannel(),
-                      detected
-                          ? Semantics(child: nearestLandmarkpannel())
-                          : Container(),
+                      detected ? Semantics(child: Container()) : Container(),
                       SizedBox(height: 28.0), // Adjust the height as needed
                       // FloatingActionButton(
                       //     onPressed: (){
@@ -7155,62 +7020,48 @@ if(user.isnavigating==false){
                       //     child: Icon(Icons.add)
                       // ),
 
-
                       // FloatingActionButton(
                       //   onPressed: () async {
-                      //
                       //     //StopPDR();
                       //
                       //     if (user.initialallyLocalised) {
                       //       setState(() {
                       //         isLiveLocalizing = !isLiveLocalizing;
                       //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
+                      //       HelperClass.showToast(
+                      //           "realTimeReLocalizeUser started");
                       //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
+                      //       Timer.periodic(Duration(milliseconds: 5000),
+                      //           (timer) async {
+                      //         btadapter.startScanning(resBeacons);
                       //
+                      //         // setState(() {
+                      //         //   sumMap=  btadapter.calculateAverage();
+                      //         // });
                       //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
+                      //         Future.delayed(Duration(milliseconds: 2000))
+                      //             .then((value) => {
+                      //                   realTimeReLocalizeUser(resBeacons)
+                      //                   // listenToBin()
+                      //                 });
                       //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
+                      //         setState(() {
+                      //           debugPQ = btadapter.returnPQ();
+                      //         });
+                      //       });
                       //     }
-                      //
                       //   },
                       //   child: Icon(
                       //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
+                      //     color:
+                      //         (isLiveLocalizing) ? Colors.cyan : Colors.black,
                       //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
+                      //   backgroundColor:
+                      //       Colors.white, // Set the background color of the FAB
                       // ),
-
                     ],
                   ),
-
                 ),
-
     );
   }
   //
@@ -7326,10 +7177,8 @@ if(user.isnavigating==false){
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-              (a, b) =>
-              b.value.compareTo(a.value)); // Sorting in descending order
+          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }
-
 }

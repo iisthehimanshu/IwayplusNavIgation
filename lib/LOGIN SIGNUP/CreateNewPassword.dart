@@ -187,14 +187,14 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
     UserCredential userCredential =
-    await FirebaseAuth.instance.signInWithCredential(credential);
+        await FirebaseAuth.instance.signInWithCredential(credential);
     print('Google user name ${userCredential.user?.displayName}');
 
     if (userCredential.user != null) {
       Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => MainScreen(
-            initialIndex: 0,
-          )));
+                initialIndex: 0,
+              )));
     }
   }
 
@@ -294,21 +294,23 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      "Please create a new 8 character strong password for your account.",
-                                      style: TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4c4949),
+                                    Flexible(
+                                      child: const Text(
+                                        "Please create a new 8 character strong password for your account.",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4c4949),
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
                                     ),
                                   ],
                                 ),
                               ),
                               Container(
-                                //color: Colors.amberAccent,
+                                  //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(
                                       top: 20, left: 16, right: 16),
                                   height: 58,
@@ -324,7 +326,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       ),
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Semantics(
@@ -333,26 +335,26 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                 child: TextFormField(
                                                   focusNode: _focusNode1,
                                                   controller:
-                                                  mailEditingController,
+                                                      mailEditingController,
                                                   decoration: InputDecoration(
                                                       hintText: 'New Password',
                                                       hintStyle: TextStyle(
                                                         fontFamily: 'Roboto',
                                                         fontSize: 14,
                                                         fontWeight:
-                                                        FontWeight.w400,
+                                                            FontWeight.w400,
                                                         color:
-                                                        Color(0xffbdbdbd),
+                                                            Color(0xffbdbdbd),
                                                       ),
                                                       border: InputBorder.none
-                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                  ),
+                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                      ),
                                                   onChanged: (value) {
                                                     emailFieldListner();
                                                     outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
+                                                        new Color(0xff49454f);
                                                     outlineheaderColorForName =
-                                                    new Color(0xff49454f);
+                                                        new Color(0xff49454f);
                                                   },
                                                 ),
                                               ),
@@ -361,7 +363,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         ],
                                       ))),
                               Container(
-                                //color: Colors.amberAccent,
+                                  //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(
                                       top: 20, left: 16, right: 16),
                                   height: 58,
@@ -377,7 +379,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       ),
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Semantics(
@@ -386,27 +388,27 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                 child: TextFormField(
                                                   focusNode: _focusNode2,
                                                   controller:
-                                                  confirmmailEditingController,
+                                                      confirmmailEditingController,
                                                   decoration: InputDecoration(
                                                       hintText:
-                                                      'Confirm Password',
+                                                          'Confirm Password',
                                                       hintStyle: TextStyle(
                                                         fontFamily: 'Roboto',
                                                         fontSize: 14,
                                                         fontWeight:
-                                                        FontWeight.w400,
+                                                            FontWeight.w400,
                                                         color:
-                                                        Color(0xffbdbdbd),
+                                                            Color(0xffbdbdbd),
                                                       ),
                                                       border: InputBorder.none
-                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                  ),
+                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                      ),
                                                   onChanged: (value) {
                                                     confirmemailFieldListner();
                                                     outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
+                                                        new Color(0xff49454f);
                                                     outlineheaderColorForName =
-                                                    new Color(0xff49454f);
+                                                        new Color(0xff49454f);
                                                   },
                                                 ),
                                               ),
@@ -439,7 +441,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         style: ElevatedButton.styleFrom(
                                           foregroundColor: Color(0xff777777),
                                           backgroundColor:
-                                          buttonBGColor, // Text color
+                                              buttonBGColor, // Text color
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
                                                 4.0), // Button border radius
@@ -454,7 +456,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                           print(widget.user);
                                           print(widget.otp);
                                           if (mailEditingController
-                                              .text.isNotEmpty &&
+                                                  .text.isNotEmpty &&
                                               confirmmailEditingController
                                                   .text.isNotEmpty) {
                                             if (mailEditingController.text ==
@@ -465,33 +467,33 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                               print(mailEditingController.text);
                                               print(widget.otp);
                                               await SignInAPI.changePassword(
-                                                  widget.user,
-                                                  mailEditingController
-                                                      .text,
-                                                  widget.otp)
+                                                      widget.user,
+                                                      mailEditingController
+                                                          .text,
+                                                      widget.otp)
                                                   .then((value) => {
-                                                if (value == 1)
-                                                  {
-                                                    Navigator
-                                                        .pushAndRemoveUntil(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder:
-                                                              (context) =>
-                                                          const SignIn(),
-                                                        ),
-                                                            (Route<dynamic>
-                                                        route) =>
-                                                        false),
-                                                    showToast(
-                                                        'Password reset Successfully')
-                                                  }
-                                                else
-                                                  {
-                                                    showToast(
-                                                        'Something went wrong')
-                                                  }
-                                              });
+                                                        if (value == 1)
+                                                          {
+                                                            Navigator
+                                                                .pushAndRemoveUntil(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              const SignIn(),
+                                                                    ),
+                                                                    (Route<dynamic>
+                                                                            route) =>
+                                                                        false),
+                                                            showToast(
+                                                                'Password reset Successfully')
+                                                          }
+                                                        else
+                                                          {
+                                                            showToast(
+                                                                'Something went wrong')
+                                                          }
+                                                      });
                                             } else {
                                               HelperClass.showToast(
                                                   "Incorrect matching fields");
@@ -507,26 +509,26 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         },
                                         child: Center(
                                           child:
-                                          // loginapifetching
-                                          //     ? Center(
-                                          //     child: lot.Lottie.asset(
-                                          //         "assets/loader.json"))
-                                          //     :
-                                          (isLoading)
-                                              ? const CircularProgressIndicator(
-                                            color: Colors.white,
-                                          )
-                                              : const Text(
-                                            'Change Password',
-                                            style: TextStyle(
-                                              fontFamily: 'Roboto',
-                                              fontSize: 16,
-                                              fontWeight:
-                                              FontWeight.w500,
-                                              color:
-                                              Color(0xffffffff),
-                                            ),
-                                          ),
+                                              // loginapifetching
+                                              //     ? Center(
+                                              //     child: lot.Lottie.asset(
+                                              //         "assets/loader.json"))
+                                              //     :
+                                              (isLoading)
+                                                  ? const CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                    )
+                                                  : const Text(
+                                                      'Change Password',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color:
+                                                            Color(0xffffffff),
+                                                      ),
+                                                    ),
                                         ),
                                       )))
                             ],

@@ -66,8 +66,7 @@ dependencies:
   chips_choice: ^3.0.1
   turf: ^0.0.9
   geolocator: ^11.0.0
-  fluster: ^1.2.0
-  flutter_cache_manager:
+
 
   upgrader:
   intl_phone_number_input: ^0.7.3+1
@@ -81,8 +80,6 @@ dependencies:
   flutter_animator: ^3.2.2
   vibration: ^1.8.4
   flutter_localization: ^0.2.0
-  share_plus: ^9.0.0
-
 
 
 dev_dependencies:

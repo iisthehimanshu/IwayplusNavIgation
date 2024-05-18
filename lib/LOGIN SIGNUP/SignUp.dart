@@ -347,280 +347,281 @@ class _SignUpState extends State<SignUp> {
         ),
       ),
       body: Stack(
-          children: [SafeArea(
-            child: SingleChildScrollView(
-              physics: ScrollPhysics(),
-              child: Container(
-                height: (orientation == Orientation.portrait)
-                    ? screenHeight-37
-                    : screenWidth,
-                decoration: BoxDecoration(
-                  color: Color(0xffffffff),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-                                    width: double.infinity,
-                                    child: Text(
-                                      "Sign Up",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 30/24,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
+        children: [SafeArea(
+          child: SingleChildScrollView(
+            physics: ScrollPhysics(),
+            child: Container(
+              height: (orientation == Orientation.portrait)
+                  ? screenHeight-37
+                  : screenWidth,
+              decoration: BoxDecoration(
+                color: Color(0xffffffff),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
+                                  width: double.infinity,
+                                  child: Text(
+                                    "Sign Up",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xff000000),
+                                      height: 30/24,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
 
-                                ),
-                                Container(
-                                  //color: Colors.amberAccent,
-                                    margin: EdgeInsets.only(top: 20,left: 16,right: 16),
-                                    height: 58,
-                                    child: Container(
-                                        padding: EdgeInsets.only(left: 12),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: outlineheaderColor,width: 2),
-                                          color: Color(0xfffffff),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
-                                            Expanded(
-                                              child: Semantics(
-                                                label: "Enter Email or mobile number",
-                                                child: ExcludeSemantics(
-                                                  child: TextFormField(
-                                                    focusNode: _focusNode1,
-                                                    controller: mailEditingController,
-                                                    decoration: InputDecoration(
-                                                        hintText: 'Email or mobile number',
-                                                        hintStyle: TextStyle(
-                                                          fontFamily: 'Roboto',
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w400,
-                                                          color: Color(0xffbdbdbd),
-                                                        ),
-                                                        border: InputBorder.none
-                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                    ),
-                                                    onChanged: (value) {
-                                                      emailFieldListner();
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ))
-                                ),
-                                Container(
-                                  //color: Colors.amberAccent,
-                                    margin: EdgeInsets.only(top: 20,left: 16,right: 16),
-                                    height: 58,
-                                    child: Container(
-                                        padding: EdgeInsets.only(left: 12),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: outlineheaderColor,width: 2),
-                                          color: Color(0xfffffff),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
-                                            Expanded(
-                                              child: Semantics(
-                                                label: "Enter your name",
-                                                child: ExcludeSemantics(
-                                                  child: TextFormField(
-                                                    focusNode: nameFocusNode,
-                                                    controller: nameEditingController,
-                                                    decoration: InputDecoration(
-                                                        hintText: 'Name',
-                                                        hintStyle: TextStyle(
-                                                          fontFamily: 'Roboto',
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w400,
-                                                          color: Color(0xffbdbdbd),
-                                                        ),
-                                                        border: InputBorder.none
-                                                      //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                    ),
-                                                    onChanged: (value) {
-                                                      nameFiledListner();
-                                                      setState(() {
-                                                        outlineheaderColorForPass = new Color(0xff49454f);
-                                                        outlineheaderColor = new Color(0xff49454f);
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ))
-                                ),
-                                Container(
-                                  //color: Colors.amberAccent,
+                              ),
+                              Container(
+                                //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(top: 20,left: 16,right: 16),
                                   height: 58,
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 12),
-                                    width: double.infinity,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: passincorrect
-                                              ? Colors.redAccent
-                                              : outlineheaderColorForPass,width: 2),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Container(
-                                      child: Semantics(
-                                        label: "Enter your password",
-                                        child: ExcludeSemantics(
-                                          child: TextFormField(
-                                            focusNode: _focusNode1_1,
-                                            controller: passEditingController,
-                                            obscureText: obsecure,
-                                            decoration: InputDecoration(
-                                                hintText: 'Password',
-                                                hintStyle: TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffbdbdbd),
-                                                ),
-                                                border: InputBorder.none
-                                              //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                      padding: EdgeInsets.only(left: 12),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: outlineheaderColor,width: 2),
+                                        color: Color(0xfffffff),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                  children: [
+                                  containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                Expanded(
+                                  child: Semantics(
+                                    label: "Enter Email or mobile number",
+                                    child: ExcludeSemantics(
+                                      child: TextFormField(
+                                        focusNode: _focusNode1,
+                                        controller: mailEditingController,
+                                        decoration: InputDecoration(
+                                            hintText: 'Email or mobile number',
+                                            hintStyle: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xffbdbdbd),
                                             ),
-                                            onChanged: (value) {
-                                              passwordFieldListner();
-                                              setState(() {
-                                                outlineheaderColorForName = new Color(0xff49454f);
-                                                outlineheaderColor = new Color(0xff49454f);
-                                                passincorrect = false;
-                                              });
-                                            },
-                                          ),
+                                            border: InputBorder.none
+                                          //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                         ),
+                                        onChanged: (value) {
+                                          emailFieldListner();
+                                        },
                                       ),
-                                    ),),
+                                    ),
+                                  ),
                                 ),
-                                passEditingController.text.length<8? ExcludeSemantics(
+                                ],
+                              ))
+                              ),
+                              Container(
+                                //color: Colors.amberAccent,
+                                  margin: EdgeInsets.only(top: 20,left: 16,right: 16),
+                                  height: 58,
                                   child: Container(
-                                    margin: EdgeInsets.only(left: 32,top: 4),
-                                    child: Text(
-                                      "8 characters password required.",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xffB3261E),
-                                        height: 16/12,
+                                      padding: EdgeInsets.only(left: 12),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: outlineheaderColor,width: 2),
+                                        color: Color(0xfffffff),
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ) : ExcludeSemantics(
-                                  child: Container(
-                                    margin: EdgeInsets.only(left: 32,top: 4),
-                                    child: Text(
-                                      "8 characters password required.",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff49454f),
-                                        height: 16/12,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ) ,
-                                Container(
-                                    margin: EdgeInsets.only(top: 20,right: 16,left: 16),
-                                    child: SizedBox(
-                                        height: 48,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Button border radius
-                                            ),
-                                            elevation: 0,
-                                          ),
-                                          // onPressed: loginclickable ? login : null,
-                                          onPressed: () {
-                                            if(mailEditingController.text.isNotEmpty && nameEditingController.text.isNotEmpty && passEditingController.text.isNotEmpty) {
-                                              if(passEditingController.text.length>=8){
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        VerifyYourAccount(
-                                                            previousScreen: 'SignUp',
-                                                            userEmailOrPhone: mailEditingController
-                                                                .text,
-                                                            userName: nameEditingController
-                                                                .text,
-                                                            userPasword: passEditingController
-                                                                .text),
+                                      child: Row(
+                                        children: [
+                                          containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
+                                          Expanded(
+                                            child: Semantics(
+                                              label: "Enter your name",
+                                              child: ExcludeSemantics(
+                                                child: TextFormField(
+                                                  focusNode: nameFocusNode,
+                                                  controller: nameEditingController,
+                                                  decoration: InputDecoration(
+                                                      hintText: 'Name',
+                                                      hintStyle: TextStyle(
+                                                        fontFamily: 'Roboto',
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xffbdbdbd),
+                                                      ),
+                                                      border: InputBorder.none
+                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                   ),
-                                                );
-                                                SendOTPAPI().sendOTP(
-                                                    mailEditingController.text);}else{
-                                                HelperClass.showToast("Password should be of 8 characters");
-                                              }
-                                            }else{
-                                              HelperClass.showToast("Please provide all required field");
-                                            }
-                                          },
-                                          child: Center(
-                                            child:
-                                            // loginapifetching
-                                            //     ? Center(
-                                            //     child: lot.Lottie.asset(
-                                            //         "assets/loader.json"))
-                                            //     :
-                                            Text(
-                                              'Sign Up',
-                                              style: TextStyle(
-                                                fontFamily: 'Roboto',
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xffffffff),
+                                                  onChanged: (value) {
+                                                    nameFiledListner();
+                                                    setState(() {
+                                                      outlineheaderColorForPass = new Color(0xff49454f);
+                                                      outlineheaderColor = new Color(0xff49454f);
+                                                    });
+                                                  },
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ))
-                                )
-                              ],
-                            ),
+                                        ],
+                                      ))
+                              ),
+                              Container(
+                                //color: Colors.amberAccent,
+                                margin: EdgeInsets.only(top: 20,left: 16,right: 16),
+                                height: 58,
+                                child: Container(
+                                  padding: EdgeInsets.only(left: 12),
+                                  width: double.infinity,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: passincorrect
+                                            ? Colors.redAccent
+                                            : outlineheaderColorForPass,width: 2),
+                                    color: Color(0xfffffff),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Container(
+                                    child: Semantics(
+                                      label: "Enter your password",
+                                      child: ExcludeSemantics(
+                                        child: TextFormField(
+                                          focusNode: _focusNode1_1,
+                                          controller: passEditingController,
+                                          obscureText: obsecure,
+                                          decoration: InputDecoration(
+                                              hintText: 'Password',
+                                              hintStyle: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xffbdbdbd),
+                                              ),
+                                              border: InputBorder.none
+                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                          ),
+                                          onChanged: (value) {
+                                            passwordFieldListner();
+                                            setState(() {
+                                              outlineheaderColorForName = new Color(0xff49454f);
+                                              outlineheaderColor = new Color(0xff49454f);
+                                              passincorrect = false;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),),
+                              ),
+                              passEditingController.text.length<8? ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xffB3261E),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ) : ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32,top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff49454f),
+                                      height: 16/12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ) ,
+                              Container(
+                                  margin: EdgeInsets.only(top: 20,right: 16,left: 16),
+                                  child: SizedBox(
+                                      height: 48,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                4.0), // Button border radius
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        // onPressed: loginclickable ? login : null,
+                                        onPressed: () {
+                                          if(mailEditingController.text.isNotEmpty && nameEditingController.text.isNotEmpty && passEditingController.text.isNotEmpty) {
+                                            if(passEditingController.text.length>=8){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    VerifyYourAccount(
+                                                        previousScreen: 'SignUp',
+                                                        userEmailOrPhone: mailEditingController
+                                                            .text,
+                                                        userName: nameEditingController
+                                                            .text,
+                                                        userPasword: passEditingController
+                                                            .text),
+                                              ),
+                                            );
+
+                                            SendOTPAPI().sendOTP(
+                                                mailEditingController.text);}else{
+                                              HelperClass.showToast("Password should be of 8 characters");
+                                            }
+                                          }else{
+                                            HelperClass.showToast("Please provide all required field");
+                                          }
+                                        },
+                                        child: Center(
+                                          child:
+                                          // loginapifetching
+                                          //     ? Center(
+                                          //     child: lot.Lottie.asset(
+                                          //         "assets/loader.json"))
+                                          //     :
+                                          Text(
+                                            'Sign Up',
+                                            style: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
+                                            ),
+                                          ),
+                                        ),
+                                      ))
+                              )
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          )]
+          ),
+        )]
       ),
     );
   }
@@ -637,3 +638,4 @@ String extractPhoneNumber(String countryCode, String fullPhoneNumber) {
     return fullPhoneNumber;
   }
 }
+

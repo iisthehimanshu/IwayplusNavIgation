@@ -282,16 +282,18 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                 child: const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
-                                      style: TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff242323),
+                                    Flexible(
+                                      child: Text(
+                                        "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff242323),
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),

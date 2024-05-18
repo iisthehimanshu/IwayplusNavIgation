@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import 'dart:collection';
 
 import 'dart:math';
@@ -48,7 +43,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   List<Widget> BuildingCard = [];
   late List<VenueModel> venueList=[];
   late Map<String, List<buildingAll>> venueHashMap = new HashMap();
-  // Replace with your actual document ID
+   // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
 
@@ -71,16 +66,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       isLocating=true;
     });
     userLoc= await getUsersCurrentLatLng();
-    if(mounted){
-      setState(() {
-        isLocating=false;
+    setState(() {
+      isLocating=false;
 
-      });
-    }
-
+    });
   }
   var locBox=Hive.box('LocationPermission');
-  Position? userLoc;
+Position? userLoc;
   Future<Position?> getUsersCurrentLatLng()async{
 
     if ((locBox.get('location')==null)?false:locBox.get('location')) {
@@ -124,9 +116,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     //venueList = venueHashMap.keys
     venueList = createVenueList(venueHashMap);
     for(int i=0;i<venueList.length;i++)
-    {
-      buildingsPos.add(venueList[i]);
-    }
+      {
+        buildingsPos.add(venueList[i]);
+      }
 
   }
   int getDistanceFromLatLonInKm(double lat1, double lon1, double lat2, double lon2) {
@@ -206,7 +198,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     // print("finalDist");
     // print(finalDist);
   }
-  List<VenueModel> buildingsPos=[];
+List<VenueModel> buildingsPos=[];
   List<int> finalDist=[];
 
   @override
@@ -253,36 +245,36 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 final LandMarkBox = LandMarkApiModelBox.getData();
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
-
+            
                 BeaconBox.clear();
                 BuildingAllBox.clear();
                 LandMarkBox.clear();
                 PatchBox.clear();
                 PolyLineBox.clear();
                 showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length}");
-
+            
               },
             ),
           ),
 
           actions: [
             Container(
-                margin: EdgeInsets.only(right: 20),
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(8.0),
-                //   border: Border.all(
-                //     color: Color(0x204A4545),
-                //   ),
-                // ),
-                child: IconButton(
-                  icon: Semantics(
-                      label: "Search",
-                      child: Icon(Icons.search,color: Colors.black,)),
-                  color: Color(0xff000000),
-                  onPressed: () {
-                    showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
-                  },
-                ))
+              margin: EdgeInsets.only(right: 20),
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(8.0),
+              //   border: Border.all(
+              //     color: Color(0x204A4545),
+              //   ),
+              // ),
+              child: IconButton(
+                icon: Semantics(
+                    label: "Search",
+                    child: Icon(Icons.search,color: Colors.black,)),
+                color: Color(0xff000000),
+                onPressed: () {
+                  showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
+                },
+              ))
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent
           elevation: 0,
@@ -414,7 +406,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
                             calcDistanceFromUser(buildingsPos,userLoc!);
                             buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
-                            var currentData = buildingsPos[index];
+                           var currentData = buildingsPos[index];
 
 
                             return GestureDetector(
@@ -426,7 +418,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc,),
+                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                   ),
                                 );
                               },
@@ -455,7 +447,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                     ),
                                   );
                                 },
@@ -481,7 +473,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                     ),
                                   );
                                 },
@@ -527,7 +519,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website),
                                     ),
                                   );
                                 },
@@ -574,11 +566,11 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
         //
         //   ),
         // )
-        ,
+    ,
 
       ),
     );
   }
+
+
 }
-
-

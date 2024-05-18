@@ -80,6 +80,8 @@ dependencies:
   flutter_animator: ^3.2.2
   vibration: ^1.8.4
   flutter_localization: ^0.2.0
+  share_plus: ^9.0.0
+
 
 
 dev_dependencies:

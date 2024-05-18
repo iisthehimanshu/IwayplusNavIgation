@@ -539,6 +539,8 @@ class tools {
     return angleInDegrees;
   }
 
+
+
   static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
 
     List<int> b = [node2 % cols , node2 ~/cols];
@@ -935,6 +937,37 @@ class tools {
     } else if (angle > 247.5 && angle <= 292.5) {
       return [-1, 0];
     } else if (angle > 292.5 && angle <= 337.5) {
+      return [-1, -1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> eightcelltransitionforTurns(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    // //print("angleee-----${angle}");
+    // //print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    if (angle >= 345 || angle <= 15) {
+      return [0, -1];
+    } else if (angle > 30 && angle <= 60) {
+      return [1, -1];
+    } else if (angle > 75 && angle <= 105) {
+      return [1, 0];
+    } else if (angle > 120 && angle <= 150) {
+      return [1, 1];
+    } else if (angle > 165 && angle <= 195) {
+      return [0, 1];
+    } else if (angle > 210 && angle <= 240) {
+      return [-1, 1];
+    } else if (angle > 255 && angle <= 285) {
+      return [-1, 0];
+    } else if (angle > 300 && angle <= 330) {
       return [-1, -1];
     } else {
       return [0, 0];

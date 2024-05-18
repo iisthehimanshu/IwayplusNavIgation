@@ -1025,10 +1025,10 @@ List<Cell> findCorridorSegments(
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     }else if (nextrow != row && nextcol != col) {
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
       single

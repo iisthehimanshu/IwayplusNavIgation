@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -16,6 +17,8 @@ import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'CLUSTERING/MapHelper.dart';
+import 'CLUSTERING/MapMarkers.dart';
 import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -170,6 +173,118 @@ class _NavigationState extends State<Navigation> {
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork = false;
+
+
+  //-----------------------------------------------------------------------------------------
+  /// Set of displayed markers and cluster markers on the map
+  final Set<Marker> _markers = Set();
+
+  /// Minimum zoom at which the markers will cluster
+  final int _minClusterZoom = 0;
+
+  /// Maximum zoom at which the markers will cluster
+  final int _maxClusterZoom = 19;
+
+  /// [Fluster] instance used to manage the clusters
+  Fluster<MapMarker>? _clusterManager;
+
+  /// Current map zoom. Initial zoom will be 15, street level
+  double _currentZoom = 15;
+
+
+  /// Map loading flag
+  bool _isMapLoading = true;
+
+  /// Markers loading flag
+  bool _areMarkersLoading = true;
+
+  /// Url image used on normal markers
+  final String _markerImageUrl =
+      'https://img.icons8.com/office/80/000000/marker.png';
+
+  /// Color of the cluster circle
+  final Color _clusterColor = Colors.blue;
+
+  /// Color of the cluster text
+  final Color _clusterTextColor = Colors.white;
+
+  /// Example marker coordinates
+  final List<LatLng> _markerLocations = [
+    LatLng(41.147125, -8.611249),
+    LatLng(41.145599, -8.610691),
+    LatLng(41.145645, -8.614761),
+    LatLng(41.146775, -8.614913),
+    LatLng(41.146982, -8.615682),
+    LatLng(41.140558, -8.611530),
+    LatLng(41.138393, -8.608642),
+    LatLng(41.137860, -8.609211),
+    LatLng(41.138344, -8.611236),
+    LatLng(41.139813, -8.609381),
+  ];
+
+  /// Inits [Fluster] and all the markers with network images and updates the loading state.
+  void _initMarkers() async {
+
+
+    final List<MapMarker> markers = [];
+
+    for (LatLng markerLocation in _markerLocations) {
+
+      final Uint8List iconMarker =
+      await getImagesFromMarker('assets/entry.png', 75);
+      final BitmapDescriptor markerImage =
+      await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+
+      markers.add(
+        MapMarker(
+          id: _markerLocations.indexOf(markerLocation).toString(),
+          position: markerLocation,
+          icon: markerImage,
+
+        ),
+      );
+    }
+
+    _clusterManager = await MapHelper.initClusterManager(
+      markers,
+      _minClusterZoom,
+      _maxClusterZoom,
+    );
+
+    await _updateMarkers11();
+  }
+
+  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
+  /// updates state.
+  Future<void> _updateMarkers11([double? updatedZoom]) async {
+    if (_clusterManager == null || updatedZoom == _currentZoom) return;
+
+    if (updatedZoom != null) {
+      _currentZoom = updatedZoom;
+    }
+
+    setState(() {
+      _areMarkersLoading = true;
+    });
+
+    final updatedMarkers = await MapHelper.getClusterMarkers(
+      _clusterManager,
+      _currentZoom,
+      _clusterColor,
+      _clusterTextColor,
+      80,
+    );
+
+    _markers
+      ..clear()
+      ..addAll(updatedMarkers);
+
+    setState(() {
+      _areMarkersLoading = false;
+    });
+  }
+  //--------------------------------------------------------------------------------------
+
 
   @override
   void initState() {
@@ -914,96 +1029,105 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls() async {
     print("working 1");
-    await patchAPI()
-        .fetchPatchData(id: buildingAllApi.selectedBuildingID)
-        .then((value) {
-      print("${value.patchData.toString()}");
-      building.patchData[value.patchData!.buildingID!] = value;
-      createPatch(value);
-      tools.globalData = value;
-      for (int i = 0; i < 4; i++) {
-        tools.corners.add(math.Point(
-            double.parse(value.patchData!.coordinates![i].globalRef!.lat!),
-            double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
-      }
-    });
-    print("working 2");
-    await PolyLineApi()
-        .fetchPolyData(id: buildingAllApi.selectedBuildingID)
-        .then((value) {
-      print("object ${value.polyline!.floors!.length}");
-      building.polyLineData = value;
-      building.numberOfFloors[buildingAllApi.selectedBuildingID] =
-          value.polyline!.floors!.length;
-      building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
-      building.floor[buildingAllApi.selectedBuildingID] = 0;
-      createRooms(value, 0);
-    });
-
-    print("working 3");
-    building.landmarkdata = landmarkApi()
-        .fetchLandmarkData(id: buildingAllApi.selectedBuildingID)
-        .then((value) {
-      print("Himanshuchecker ids ${value.landmarks![0].name}");
-      Map<int, LatLng> coordinates = {};
-      for (int i = 0; i < value.landmarks!.length; i++) {
-        if (value.landmarks![i].floor == 3 &&
-            value.landmarks![i].properties!.name != null) {
-          landmarkListForFilter.add(FilterInfoModel(
-              LandmarkLat: value.landmarks![i].coordinateX!,
-              LandmarkLong: value.landmarks![i].coordinateY!,
-              LandmarkName: value.landmarks![i].properties!.name ?? ""));
+    await Future.wait([
+      patchAPI()
+          .fetchPatchData(id: buildingAllApi.selectedBuildingID)
+          .then((value) {
+        print("${value.patchData.toString()}");
+        building.patchData[value.patchData!.buildingID!] = value;
+        createPatch(value);
+        tools.globalData = value;
+        for (int i = 0; i < 4; i++) {
+          tools.corners.add(math.Point(
+              double.parse(value.patchData!.coordinates![i].globalRef!.lat!),
+              double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
         }
-        if (value.landmarks![i].element!.subType == "AR") {
-          coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
-              LatLng(double.parse(value.landmarks![i].properties!.latitude!),
-                  double.parse(value.landmarks![i].properties!.longitude!));
-        }
-        if (value.landmarks![i].element!.type == "Floor") {
-          List<int> allIntegers = [];
-          String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
-          RegExp regExp = RegExp(r'\d+');
-          Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
-          for (Match match in matches) {
-            String matched = match.group(0)!;
-            allIntegers.add(int.parse(matched));
+      }),
+      PolyLineApi()
+          .fetchPolyData(id: buildingAllApi.selectedBuildingID)
+          .then((value) {
+        print("object ${value.polyline!.floors!.length}");
+        building.polyLineData = value;
+        building.numberOfFloors[buildingAllApi.selectedBuildingID] =
+            value.polyline!.floors!.length;
+        building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
+        building.floor[buildingAllApi.selectedBuildingID] = 0;
+        createRooms(value, 0);
+      }),
+      PolyLineApi()
+          .fetchPolyData(id: buildingAllApi.selectedBuildingID)
+          .then((value) {
+        print("object ${value.polyline!.floors!.length}");
+        building.polyLineData = value;
+        building.numberOfFloors[buildingAllApi.selectedBuildingID] =
+            value.polyline!.floors!.length;
+        building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
+        building.floor[buildingAllApi.selectedBuildingID] = 0;
+        createRooms(value, 0);
+      }),
+      building.landmarkdata = landmarkApi()
+          .fetchLandmarkData(id: buildingAllApi.selectedBuildingID)
+          .then((value) {
+        print("Himanshuchecker ids ${value.landmarks![0].name}");
+        Map<int, LatLng> coordinates = {};
+        for (int i = 0; i < value.landmarks!.length; i++) {
+          if (value.landmarks![i].floor == 3 &&
+              value.landmarks![i].properties!.name != null) {
+            landmarkListForFilter.add(FilterInfoModel(
+                LandmarkLat: value.landmarks![i].coordinateX!,
+                LandmarkLong: value.landmarks![i].coordinateY!,
+                LandmarkName: value.landmarks![i].properties!.name ?? ""));
           }
-          Map<int, List<int>> currrentnonWalkable =
-              building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
-          currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
+          if (value.landmarks![i].element!.subType == "AR") {
+            coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
+                LatLng(double.parse(value.landmarks![i].properties!.latitude!),
+                    double.parse(value.landmarks![i].properties!.longitude!));
+          }
+          if (value.landmarks![i].element!.type == "Floor") {
+            List<int> allIntegers = [];
+            String jointnonwalkable =
+                value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+            RegExp regExp = RegExp(r'\d+');
+            Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
+            for (Match match in matches) {
+              String matched = match.group(0)!;
+              allIntegers.add(int.parse(matched));
+            }
+            Map<int, List<int>> currrentnonWalkable =
+                building.nonWalkable[value.landmarks![i].buildingID!] ?? Map();
+            currrentnonWalkable[value.landmarks![i].floor!] = allIntegers;
 
-          building.nonWalkable[value.landmarks![i].buildingID!] =
-              currrentnonWalkable;
-          UserState.nonWalkable = currrentnonWalkable;
-          localizedData.nonWalkable = currrentnonWalkable;
+            building.nonWalkable[value.landmarks![i].buildingID!] =
+                currrentnonWalkable;
+            UserState.nonWalkable = currrentnonWalkable;
+            localizedData.nonWalkable = currrentnonWalkable;
 
-          Map<int, List<int>> currentfloorDimenssion =
-              building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
-                  Map();
-          currentfloorDimenssion[value.landmarks![i].floor!] = [
-            value.landmarks![i].properties!.floorLength!,
-            value.landmarks![i].properties!.floorBreadth!
-          ];
+            Map<int, List<int>> currentfloorDimenssion =
+                building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
+                    Map();
+            currentfloorDimenssion[value.landmarks![i].floor!] = [
+              value.landmarks![i].properties!.floorLength!,
+              value.landmarks![i].properties!.floorBreadth!
+            ];
 
-          building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-              currentfloorDimenssion!;
-          localizedData.currentfloorDimenssion = currentfloorDimenssion;
+            building.floorDimenssion[buildingAllApi.selectedBuildingID] =
+                currentfloorDimenssion!;
+            localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
-          print("fetch route--  ${building.floorDimenssion}");
+            print("fetch route--  ${building.floorDimenssion}");
 
-          // building.floorDimenssion[value.landmarks![i].floor!] = [
-          //   value.landmarks![i].properties!.floorLength!,
-          //   value.landmarks![i].properties!.floorBreadth!
-          // ];
+            // building.floorDimenssion[value.landmarks![i].floor!] = [
+            //   value.landmarks![i].properties!.floorLength!,
+            //   value.landmarks![i].properties!.floorBreadth!
+            // ];
+          }
         }
-      }
-      createARPatch(coordinates);
-      createMarkers(value, 0);
-      return value;
-    });
-    print("working 4");
-    await Future.delayed(Duration(seconds: 2));
+        createARPatch(coordinates);
+        createMarkers(value, 0);
+        return value;
+      }),
+    ]);
+    Future.delayed(Duration(seconds: 2));
     print("5 seconds over");
     setState(() {
       isBlueToothLoading = true;
@@ -6633,6 +6757,7 @@ class _NavigationState extends State<Navigation> {
                               if (patch.isNotEmpty) {
                                 fitPolygonInScreen(patch.first);
                               }
+                              _initMarkers();
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
                               focusBuildingChecker(cameraPosition);
@@ -6642,9 +6767,11 @@ class _NavigationState extends State<Navigation> {
                                 mapState.zoom = cameraPosition.zoom;
                               }
                               if (true) {
-                                _updateMarkers(cameraPosition.zoom);
+                               _updateMarkers(cameraPosition.zoom);
                                 //_updateBuilding(cameraPosition.zoom);
                               }
+
+                              _updateMarkers11();
                             },
                             onCameraIdle: () {
                               if (!mapState.interaction) {

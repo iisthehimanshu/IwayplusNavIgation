@@ -12,22 +12,18 @@ class MotionModel{
     }
     int newX = user.coordX + transitionValue[0];
     int newY = user.coordY + transitionValue[1];
-    print("$newX, $newY");
 
 
 
     if(newX<0 || newX >=cols || newY < 0 || newY >= rows){
-      print("1");
       return false;
     }
 
     if(nonWalkable.contains((newY*cols)+newX)){
-      print("${(newY*cols)+newX}");
       return false;
     }
 
     if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>10){
-      print("${user.coordX} ,${user.coordY} ,            ${user.showcoordX},${user.showcoordY}");
        reroute();
     }
 
@@ -43,10 +39,8 @@ class MotionModel{
     }
 
     if(state.showcoordX==x && state.showcoordY==y){
-      print("true");
       return true;
     }
-    print("falsse");
     return false;
   }
 

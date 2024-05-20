@@ -411,7 +411,9 @@ double minHeight = 90.0;
     );
   }
 
+
   Future<void> speak(String msg) async {
+
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -617,26 +619,7 @@ double minHeight = 90.0;
       }
     });
   }
-List<List<int>> nearbyLandmarkCoords=[];
-  List<String> finalDirections=[];
-  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<List<int>> nearbyLandmarkCoords){
-    for(int i=0;i<nearbyLandmarkCoords.length;i++)
-    {
-      double value =
-      tools.calculateAngle2(userCords,newUserCord,nearbyLandmarkCoords[i]);
 
-      // print("value----");
-      // print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
-      // print(finalvalue);
-      finalDirections.add(finalvalue);
-    }
-    setState(() {
-      finalDirections;
-    });
-
-  }
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, speakTTS: false);
@@ -657,17 +640,12 @@ List<List<int>> nearbyLandmarkCoords=[];
 
       tools.angleBetweenBuildingAndNorth(apibeaconmap[nearestBeacon]!.buildingID!);
 
-      nearbyLandmarkCoords.clear();
+
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         landCords = tools.localizefindNearbyLandmarkCoordinated(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        setState(() {
-            getallnearestInfo=tools.localizefindAllNearbyLandmark(
-                apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-          });
         if (landCords.isEmpty) {
           landCords = [
             apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -676,7 +654,7 @@ List<List<int>> nearbyLandmarkCoords=[];
         } else {}
       });
       print("nearestLandInfomation");
-      print(nearbyLandmarkCoords);
+      print(nearestLandInfomation);
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -784,28 +762,13 @@ List<List<int>> nearbyLandmarkCoords=[];
         });
       });
       double value =
-      tools.calculateAngle2(userCords,newUserCord,landCords);
+          tools.calculateAngleSecond(userCords, newUserCord, landCords);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
-      print("value----");
-      print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
-      calcDirectionsExploreMode(userCords,newUserCord,nearbyLandmarkCoords);
-
-      // double value =
-      //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
-      // print(value);
-      // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-
-      // print("final value");
-      // print(finalvalue);
-if(user.isnavigating==false){
-  detected = true;
-  _isBuildingPannelOpen = true;
-  _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-  nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-}
-
+      detected = !detected;
+      _isBuildingPannelOpen = true;
+      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
       if (nearestLandInfomation.name.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
@@ -1380,7 +1343,7 @@ if(user.isnavigating==false){
         // entry1.forEach((element) {
         //   element.value;
         // });
-       paintUser(firstValue);
+        paintUser(firstValue);
 
         setState(() {
           lastBeaconValue = firstValue;
@@ -1391,111 +1354,113 @@ if(user.isnavigating==false){
 
         print("nearestBeacon : $firstValue");
 
-    //     if (apibeaconmap[firstValue] != null) {
-    //       await building.landmarkdata!.then((value) {
-    //         nearestLandInfomation = tools.localizefindNearbyLandmark(
-    //             apibeaconmap[firstValue]!, value.landmarksMap!);
-    // setState(() {
-    //   getallnearestInfo=tools.localizefindAllNearbyLandmark(
-    //       apibeaconmap[firstValue]!, value.landmarksMap!);
-    // });
-    //
-    //
-    //         landCords = tools.localizefindNearbyLandmarkCoordinated(
-    //             apibeaconmap[firstValue]!, value.landmarksMap!);
-    //       });
-    //
-    //       print("getallnearestInfo");
-    //       print(getallnearestInfo);
-    //
-    //
-    //
-    //       List<double> values = tools.localtoglobal(
-    //           apibeaconmap[firstValue]!.coordinateX!,
-    //           apibeaconmap[firstValue]!.coordinateY!);
-    //       LatLng beaconLocation = LatLng(values[0], values[1]);
-    //       mapState.target = LatLng(values[0], values[1]);
-    //       mapState.zoom = 21.0;
-    //       _googleMapController.animateCamera(
-    //         CameraUpdate.newLatLngZoom(
-    //           LatLng(values[0], values[1]),
-    //           20, // Specify your custom zoom level here
-    //         ),
-    //       );
-    //       user.Bid = apibeaconmap[firstValue]!.buildingID!;
-    //       user.coordX = apibeaconmap[firstValue]!.coordinateX!;
-    //       user.coordY = apibeaconmap[firstValue]!.coordinateY!;
-    //       print("user.coordXuser.coordY");
-    //       print("${user.coordX}${user.coordY}");
-    //       List<int> userCords = [];
-    //       userCords.add(user.coordX);
-    //       userCords.add(user.coordY);
-    //       List<int> transitionValue = tools.eightcelltransition(user.theta);
-    //       int newX = user.coordX + transitionValue[0];
-    //       int newY = user.coordY + transitionValue[1];
-    //       List<int> newUserCord = [];
-    //       newUserCord.add(newX);
-    //       newUserCord.add(newY);
-    //
-    //       user.lat =
-    //           double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
-    //       user.lng =
-    //           double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
-    //       user.floor = apibeaconmap[firstValue]!.floor!;
-    //       user.key = apibeaconmap[firstValue]!.sId!;
-    //       user.initialallyLocalised = true;
-    //       setState(() {
-    //         print("hehe: $beaconLocation");
-    //         markers.clear();
-    //         markers[user.Bid]?.add(Marker(
-    //           markerId: MarkerId("UserLocation"),
-    //           position: beaconLocation,
-    //           icon: userloc,
-    //           anchor: Offset(0.5, 0.829),
-    //         ));
-    //         building.floor[apibeaconmap[firstValue]!.buildingID!] =
-    //             apibeaconmap[firstValue]!.floor!;
-    //         createRooms(
-    //             building.polyLineData!, apibeaconmap[firstValue]!.floor!);
-    //         building.landmarkdata!.then((value) {
-    //           createMarkers(value, apibeaconmap[firstValue]!.floor!);
-    //         });
-    //       });
-    //       print("userCords");
-    //       print(userCords);
-    //       print(newUserCord);
-    //       print(landCords);
-    //
-    //       double value =
-    //           tools.calculateAngle(newUserCord,userCords,landCords);
-    //
-    //       print("value----");
-    //       print(value);
-    //       String finalvalue =
-    //           tools.angleToClocksForNearestLandmarkToBeacon(value);
-    //
-    //       print("finalvalue");
-    //       print(finalvalue);
-    //
-    //       if (nearestLandInfomation.name == "") {
-    //         print("no beacon found");
-    //         nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
-    //         nearestLandInfomation.floor =
-    //             apibeaconmap[firstValue]!.floor!.toString();
-    //
-    //         speak(
-    //             "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your $finalvalue");
-    //       } else {
-    //         nearestLandInfomation.floor =
-    //             apibeaconmap[firstValue]!.floor!.toString();
-    //         speak(
-    //             "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your $finalvalue");
-    //       }
-    //     } else {
-    //       speak("Unable to find your location");
-    //     }
+        if (apibeaconmap[firstValue] != null) {
+          await building.landmarkdata!.then((value) {
+            nearestLandInfomation = tools.localizefindNearbyLandmark(
+                apibeaconmap[firstValue]!, value.landmarksMap!);
+    setState(() {
+      getallnearestInfo=tools.localizefindAllNearbyLandmark(
+          apibeaconmap[firstValue]!, value.landmarksMap!);
+    });
 
-        // btadapter.stopScanning();
+
+            landCords = tools.localizefindNearbyLandmarkCoordinated(
+                apibeaconmap[firstValue]!, value.landmarksMap!);
+          });
+
+          print("getallnearestInfo");
+          print(getallnearestInfo);
+
+
+
+          List<double> values = tools.localtoglobal(
+              apibeaconmap[firstValue]!.coordinateX!,
+              apibeaconmap[firstValue]!.coordinateY!);
+          LatLng beaconLocation = LatLng(values[0], values[1]);
+          mapState.target = LatLng(values[0], values[1]);
+          mapState.zoom = 21.0;
+          _googleMapController.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              LatLng(values[0], values[1]),
+              20, // Specify your custom zoom level here
+            ),
+          );
+          user.Bid = apibeaconmap[firstValue]!.buildingID!;
+          user.coordX = apibeaconmap[firstValue]!.coordinateX!;
+          user.coordY = apibeaconmap[firstValue]!.coordinateY!;
+          print("user.coordXuser.coordY");
+          print("${user.coordX}${user.coordY}");
+          List<int> userCords = [];
+          userCords.add(user.coordX);
+          userCords.add(user.coordY);
+          List<int> transitionValue = tools.eightcelltransition(user.theta);
+          int newX = user.coordX + transitionValue[0];
+          int newY = user.coordY + transitionValue[1];
+          List<int> newUserCord = [];
+          newUserCord.add(newX);
+          newUserCord.add(newY);
+
+          user.lat =
+              double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
+          user.lng =
+              double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
+          user.floor = apibeaconmap[firstValue]!.floor!;
+          user.key = apibeaconmap[firstValue]!.sId!;
+          user.initialallyLocalised = true;
+          setState(() {
+            print("hehe: $beaconLocation");
+            markers.clear();
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("UserLocation"),
+              position: beaconLocation,
+              icon: userloc,
+              anchor: Offset(0.5, 0.829),
+            ));
+            building.floor[apibeaconmap[firstValue]!.buildingID!] =
+                apibeaconmap[firstValue]!.floor!;
+            createRooms(
+                building.polyLineData!, apibeaconmap[firstValue]!.floor!);
+            building.landmarkdata!.then((value) {
+              createMarkers(value, apibeaconmap[firstValue]!.floor!);
+            });
+          });
+          print("userCords");
+          print(userCords);
+          print(newUserCord);
+          print(landCords);
+
+          double value =
+              tools.calculateAngle(userCords, newUserCord, landCords);
+
+          print("value----");
+          print(value);
+          String finalvalue =
+              tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+          print("finalvalue");
+          print(finalvalue);
+          detected = !detected;
+          _isBuildingPannelOpen = true;
+          _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+          nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+          if (nearestLandInfomation.name == "") {
+            print("no beacon found");
+            nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
+            nearestLandInfomation.floor =
+                apibeaconmap[firstValue]!.floor!.toString();
+            speak(
+                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
+          } else {
+            nearestLandInfomation.floor =
+                apibeaconmap[firstValue]!.floor!.toString();
+            speak(
+                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+          }
+        } else {
+          speak("Unable to find your location");
+        }
+
+        btadapter.stopScanning();
         print("Beacon searching Stoped");
       } else {
         HelperClass.showToast("Beacon Already scanned");
@@ -3357,10 +3322,16 @@ if(user.isnavigating==false){
 
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-          path, value.landmarksMap!, 3, numCols, floor);
-      PathState.turnLandmarks = nearbyLandmarks;
+          path, value.landmarksMap!, 5, numCols, floor,bid!);
+      PathState.nearbyLandmarks = nearbyLandmarks;
+      // PathState.nearbyLandmarks.forEach((element) {
+      //   print(element.name);
+      // });
       PathState.associateTurnWithLandmark =
           tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols);
+      PathState.associateTurnWithLandmark.forEach((key, value) {
+        print("${key} , ${value.name}");
+      });
     });
 
     List<Cell> Cellpath =
@@ -3584,9 +3555,7 @@ if(user.isnavigating==false){
     setState(() {
       semanticShouldBeExcluded = true;
     });
-    print("PathState.directions");
-    print(PathState.directions);
-    print(PathState.associateTurnWithLandmark);
+
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -3969,39 +3938,49 @@ if(user.isnavigating==false){
                                           child: TextButton(
                                             onPressed: () async {
                                               user.pathobj = PathState;
-                                              user.path =
-                                                  PathState.singleListPath;
+                                              user.path = PathState.singleListPath;
                                               user.isnavigating = true;
-                                              user.Cellpath =
-                                                  PathState.singleCellListPath;
+                                              user.Cellpath = PathState.singleCellListPath;
                                               user
                                                   .moveToStartofPath()
-                                                  .then((value) {
+                                                  .then((value)async{
+                                                BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
+                                                  ImageConfiguration(size: Size(44, 44)),
+                                                  'assets/userloc0.png',
+                                                );
+                                                BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
+                                                  ImageConfiguration(size: Size(44, 44)),
+                                                  'assets/tealtorch.png',
+                                                );
                                                 setState(() {
-                                                  if (markers.length > 0) {
-                                                    List<double> val =
-                                                        tools.localtoglobal(
-                                                            user.showcoordX
-                                                                .toInt(),
-                                                            user.showcoordY
-                                                                .toInt());
-                                                    markers[user.Bid]?[0] =
-                                                        customMarker.move(
-                                                            LatLng(
-                                                                val[0], val[1]),
-                                                            markers[user.Bid]![
-                                                                0]);
+                                                  markers.clear();
+                                                  List<double> val =
+                                                  tools.localtoglobal(
+                                                      user.showcoordX
+                                                          .toInt(),
+                                                      user.showcoordY
+                                                          .toInt());
 
-                                                    val = tools.localtoglobal(
-                                                        user.coordX.toInt(),
-                                                        user.coordY.toInt());
-                                                    markers[user.Bid]?[1] =
-                                                        customMarker.move(
-                                                            LatLng(
-                                                                val[0], val[1]),
-                                                            markers[user.Bid]![
-                                                                1]);
-                                                  }
+                                                  markers.putIfAbsent(user.Bid, () => []);
+                                                  markers[user.Bid]?.add(Marker(
+                                                    markerId: MarkerId("UserLocation"),
+                                                    position: LatLng(
+                                                        val[0], val[1]),
+                                                    icon: userloc,
+                                                    anchor: Offset(0.5, 0.829),
+                                                  ));
+
+                                                  val = tools.localtoglobal(
+                                                      user.coordX.toInt(),
+                                                      user.coordY.toInt());
+
+                                                  markers[user.Bid]?.add(Marker(
+                                                    markerId: MarkerId("debug"),
+                                                    position: LatLng(
+                                                        val[0], val[1]),
+                                                    icon: userlocdebug,
+                                                    anchor: Offset(0.5, 0.829),
+                                                  ));
                                                 });
                                               });
                                               _isRoutePanelOpen = false;
@@ -4258,6 +4237,7 @@ if(user.isnavigating==false){
   }
 
   void alignMapToPath(List<double> A, List<double> B) {
+
     mapState.tilt = 50;
 
     mapState.bearing = tools.calculateBearing(A, B);
@@ -4362,7 +4342,7 @@ if(user.isnavigating==false){
       if (MotionModel.reached(user, col) == false) {
         List<int> a = [user.showcoordX, user.showcoordY];
         List<int> tval = tools.eightcelltransition(user.theta);
-        print(tval);
+        //print(tval);
         List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
         int index =
@@ -4372,6 +4352,7 @@ if(user.isnavigating==false){
 
         List<int> c = [node % col, node ~/ col];
         int val = tools.calculateAngleSecond(a, b, c).toInt();
+        print("val $val");
 
         // print("user corrds");
         // print("${user.showcoordX}+" "+ ${user.showcoordY}");
@@ -4384,14 +4365,14 @@ if(user.isnavigating==false){
           // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
           // print("--- val  = $val");
           // print("--- isPDRStop  = $isPdrStop");
-          //
-          // print("turn corrds");
 
-          print("${getPoints[i][0]}, ${getPoints[i][1]}");
+          //print("turn corrds");
+
+          //print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-           // print("points unmatchedddd");
+            //print("points unmatchedddd");
 
-            Future.delayed(Duration(milliseconds: 1500))
+            Future.delayed(Duration(milliseconds: 1800))
                 .then((value) => {
                   StartPDR()
                 });
@@ -4406,7 +4387,7 @@ if(user.isnavigating==false){
               getPoints[i][1] == user.showcoordY) {
 
 
-          //  print("points matchedddddddd");
+            //print("points matchedddddddd");
 
 
             StopPDR();
@@ -4600,7 +4581,7 @@ if(user.isnavigating==false){
                             label: "",
                             child: Container(
                               height: 522,
-
+                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
@@ -6114,7 +6095,7 @@ if(user.isnavigating==false){
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-      responseBody.map((data) => buildingAll.fromJson(data)).toList();
+          responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6142,11 +6123,12 @@ if(user.isnavigating==false){
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
+            minHeight: (getallnearestInfo.isNotEmpty)?290:90,
             snapPoint:
-            element.workingDays != null && element.workingDays!.length > 0
-                ? 220 / screenHeight
-                : 175 / screenHeight,
+                element.workingDays != null && element.workingDays!.length > 0
+                    ? 220 / screenHeight
+                    : 175 / screenHeight,
+
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6173,32 +6155,20 @@ if(user.isnavigating==false){
                   Row(
                     children: [
                       Container(
-                        margin: EdgeInsets.only(bottom: 10),
+                        margin: EdgeInsets.only(bottom: 20),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            !isLiveLocalizing
-                                ? Text(
+                            Text(
                               "${nearestLandInfomation.name}, Floor ${nearestLandInfomation.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
-                              ),
-                              textAlign: TextAlign.left,
-                            )
-                                : Text(
-                              "Explore Mode",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
+                                color: Color(0xff292929),
+                                height: 25 / 18,
                               ),
                               textAlign: TextAlign.left,
                             )
@@ -6211,130 +6181,42 @@ if(user.isnavigating==false){
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
-
                           margin: EdgeInsets.only(right: 20),
                           alignment: Alignment.topCenter,
-                          child: SvgPicture.asset("assets/close.svg"),
+                          child: SvgPicture.asset("assets/closeicon.svg"),
                         ),
                       ),
                     ],
                   ),
-
-                  (getallnearestInfo.isNotEmpty)
-                      ? Expanded(
-                      child: Container(
-                        child: ListView.builder(
-                            itemCount: getallnearestInfo.length,
-                            scrollDirection: Axis.vertical,
-                            physics: ScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              nearestLandInfo currentInfo =
-                              getallnearestInfo[index];
-
-                              print("currentInfo");
-                              print(currentInfo);
-
-                              return Container(
-                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Color(0xffEBEBEB),
-                                    ),
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                                child: Row(
-                                  children: [
-
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(top: 12, left: 18),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.name,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff18181b),
-                                                  height: 25/16,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(left: 10,top: 14),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    finalDirections[index],
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/12,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  top: 3, bottom: 14, left: 2),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.buildingName,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                  Container(
+                    height: 1,
+                    width: screenWidth,
+                    color: Color(0xffebebeb),
+                  ),
 
 
-                                  ],
-                                ),
-                              );
-                            }),
-                      ))
-                      : SizedBox(),
+                      ( getallnearestInfo.isNotEmpty)?
+                      Expanded(child:
+                      ListView.builder(
+                          itemCount: getallnearestInfo.length,
+                          scrollDirection: Axis.vertical,
+                          physics: ScrollPhysics(),
+                          itemBuilder: (BuildContext context,int index){
+
+                            nearestLandInfo currentInfo=getallnearestInfo[index];
+                            print("currentInfo");
+                            print(currentInfo);
+
+                            return ListTile(
+                              contentPadding: EdgeInsets.all(0.0),
+                              leading: Text(currentInfo.name.toString(),style: TextStyle(color: Colors.black,fontSize: 15)),title:Align(alignment:  Alignment(0.05, 0),child: Text(currentInfo.buildingName.toString(),style: TextStyle(color: Colors.black,fontSize: 15))),trailing:Text("Floor ${currentInfo.floor.toString()}",style: TextStyle(color: Colors.black,fontSize: 15)),);
+                          })):SizedBox(
+
+                      ),
+
+
+
+
                 ],
               ),
             ),
@@ -6685,10 +6567,8 @@ if(user.isnavigating==false){
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
         MediaQuery.of(context).devicePixelRatio;
-    print("talkaback");
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    print(isSemanticEnabled);
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
@@ -6785,19 +6665,19 @@ if(user.isnavigating==false){
                       ),
                       //debug----
 
-                      // Positioned(
-                      //     top: 150,
-                      //     right: 50,
-                      //     child: Container(
-                      //       decoration: BoxDecoration(
-                      //         border: Border.all(),
-                      //         borderRadius: BorderRadius.circular(20),
-                      //         color: (isPdr) ? Colors.green : Colors.red,
-                      //       ),
-                      //       height: 20,
-                      //       width: 20,
-                      //
-                      //     )),
+                      Positioned(
+                          top: 150,
+                          right: 50,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(20),
+                              color: (isPdr) ? Colors.green : Colors.red,
+                            ),
+                            height: 20,
+                            width: 20,
+
+                          )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
@@ -6806,8 +6686,8 @@ if(user.isnavigating==false){
                           excludeSemantics: false,
                           child: Column(
                             children: [
-
-                              // Text(Building.thresh),
+                              //
+                              // // Text(Building.thresh),
                               // Visibility(
                               //   visible: true,
                               //   child: Container(
@@ -6840,7 +6720,7 @@ if(user.isnavigating==false){
                               // ),
                               //
                               //
-
+                              //
                               // SizedBox(height: 28.0),
                               // Text("${user.theta}"),
                               // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
@@ -6937,8 +6817,7 @@ if(user.isnavigating==false){
                                     )
                                   : floorColumn(),
                               SizedBox(
-                                  height: 28.0),
-
+                                  height: 28.0), // Adjust the height as needed
 
                               // Container(
                               //   width: 300,
@@ -7001,47 +6880,7 @@ if(user.isnavigating==false){
                                 ),
                               ),
                               SizedBox(
-                                  height: 28.0),
-                              FloatingActionButton(
-                                onPressed: () async {
-                                  //StopPDR();
-
-                                  if (user.initialallyLocalised) {
-                                    setState(() {
-                                      isLiveLocalizing = !isLiveLocalizing;
-                                    });
-                                    HelperClass.showToast(
-                                        "Explore mode enabled");
-
-                                    Timer.periodic(Duration(milliseconds: 5000),
-                                            (timer) async {
-                                          print(resBeacons);
-                                          btadapter.startScanning(resBeacons);
-
-                                          // setState(() {
-                                          //   sumMap=  btadapter.calculateAverage();
-                                          // });
-
-                                          Future.delayed(Duration(milliseconds: 2000))
-                                              .then((value) => {
-                                            realTimeReLocalizeUser(resBeacons)
-                                            // listenToBin()
-                                          });
-
-                                          setState(() {
-                                            debugPQ = btadapter.returnPQ();
-                                          });
-                                        });
-                                  }
-                                },
-                                child: SvgPicture.asset(
-                                  "assets/Navigation_RTLIcon.svg",
-                                  // color:
-                                  // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                                ),
-                                backgroundColor:
-                                Color(0xff24B9B0), // Set the background color of the FAB
-                              ),// Adjust the height as needed// Adjust the height as needed
+                                  height: 28.0), // Adjust the height as needed
                               // FloatingActionButton(
                               //   onPressed: (){
                               //     print("checkingBuildingfloor");

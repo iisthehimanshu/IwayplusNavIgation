@@ -272,11 +272,7 @@ List<int> findBestPathAmongstBoth(
   p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
-  print("lplp ${p1.length}   ${p2.length}");
-  print("lplplp ${p1turns.length}   ${p2turns.length}");
 
-  print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
-  print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
 
 
 
@@ -289,48 +285,38 @@ List<int> findBestPathAmongstBoth(
 
 
   if(p1.first == sourceIndex && p1.last == destinationIndex){
-    print("inside 1");
     if(p2.first != destinationIndex || p2.last != sourceIndex){
-      print("inside 1 1");
 
       return p1;
     }
     if(p1turns.length<p2turns.length){
-      print("inside 1 2");
 
       return p1;
     }
     if(p1.length< p2.length){
-      print("inside 1 3");
 
       return p1;
     }
   }
 
   if(p2.first == destinationIndex && p2.last == sourceIndex){
-    print("inside 2");
 
     if(p2turns.length<p1turns.length){
-      print("inside 2 1");
 
       return p2.reversed.toList();
     }
     if(p2.length< p1.length){
-      print("inside 2 2");
       return p2.reversed.toList();
     }
     if(p1.first != sourceIndex || p1.last != destinationIndex){
-      print("inside 2 3");
       return p2.reversed.toList();
     }
   }
 
   if(p1.length == p2.length){
-    print("inside 3");
     return p1;
   }
 
-  print("inside 4");
   return [];
 
 }
@@ -867,15 +853,12 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
-  print("getTurnsss ${getTurns}");
 
   path = getOptiPath(getTurns, numCols, path);
 
-  print("pathhh-----${path.length}");
 
   List<int> turns = tools.getTurnpoints(path, numCols);
 
-  print("turns ${turns}");
 
   for (int i = 0; i < turns.length; i++) {
     int x = turns[i] % numCols;
@@ -883,7 +866,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 
     getPoints.add([x, y]);
   }
-  print("before optimizing pathh :${getPoints}");
 //optimizing turnsss
   for (int i = 0; i < getPoints.length - 1; i++) {
     if (getPoints[i][0] != getPoints[i + 1][0] &&
@@ -891,13 +873,10 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
       int dist =
           tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
       if (dist <= 15) {
-        print("dist $dist");
 
         //points of prev turn
         int index1 = getPoints[i][0] + getPoints[i][1] * numCols;
-        print("we are getting ind1 $index1");
         int ind1 = path.indexOf(index1);
-        print("we are getting ind1 $ind1");
 
         int prev = path[ind1 - 1];
 
@@ -907,16 +886,13 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
         int prevX = prev % numCols;
         int prevY = prev ~/ numCols;
 
-        print("points---- ${index1}---${prev}");
 
         //straight line eqautaion1
         //y-prevY=(currY-prevY)/(currX-prevX)*(x-prevX);
 
         //points of next turn;
         int index2 = getPoints[i + 1][0] + getPoints[i + 1][1] * numCols;
-        print("we are getting ind2 $index2");
         int ind2 = path.indexOf(index2);
-        print("we are getting ind2 $ind2");
         int next = path[ind2 + 1];
 
         int nextX = index2 % numCols;
@@ -925,7 +901,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
         int nextNextX = next % numCols;
         int nextNextY = next ~/ numCols;
 
-        print("points---- ${index2}---${next}");
 
         int ind3 = path.indexOf(index1 - 1);
 
@@ -949,7 +924,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 
           while (x1 <= x2) {
             int pointIndex = x1 + y1 * numCols;
-            print("point indexess------${pointIndex}");
             if (nonWalkableCells.contains(pointIndex)) {
               isNonWalkablePoint = true;
               break;
@@ -977,7 +951,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 
             int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
 
-            print("points---- ${newIndex}");
 
             path[ind1] = newIndex;
 
@@ -987,7 +960,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
           }
         }
 
-        print("intersection points ${intersectPoints}");
 
         print("${ind1}  ${ind2}  ${ind3}");
 
@@ -1053,10 +1025,10 @@ List<Cell> findCorridorSegments(
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     }else if (nextrow != row && nextcol != col) {
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
       print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
       single

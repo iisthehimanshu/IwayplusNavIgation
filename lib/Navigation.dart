@@ -16,6 +16,7 @@ import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'directionClass.dart';
 import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -189,7 +190,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    handleCompassEvents();
+    //handleCompassEvents();
 
 
     DefaultAssetBundle.of(context)
@@ -769,11 +770,11 @@ double minHeight = 90.0;
       _isBuildingPannelOpen = true;
       _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name.isEmpty) {
+      if (nearestLandInfomation.name == "") {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
+            apibeaconmap[nearestBeacon]!.floor!;
 
         //updating user pointer
 
@@ -806,7 +807,7 @@ double minHeight = 90.0;
         }
       } else {
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
+            apibeaconmap[nearestBeacon]!.floor!;
         if (speakTTS) {
           if (finalvalue == "None") {
             speak(
@@ -1447,12 +1448,12 @@ double minHeight = 90.0;
             print("no beacon found");
             nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
             nearestLandInfomation.floor =
-                apibeaconmap[firstValue]!.floor!.toString();
+                apibeaconmap[firstValue]!.floor!;
             speak(
                 "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
           } else {
             nearestLandInfomation.floor =
-                apibeaconmap[firstValue]!.floor!.toString();
+                apibeaconmap[firstValue]!.floor!;
             speak(
                 "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
           }
@@ -3327,11 +3328,18 @@ double minHeight = 90.0;
       // PathState.nearbyLandmarks.forEach((element) {
       //   print(element.name);
       // });
-      PathState.associateTurnWithLandmark =
-          tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols);
-      PathState.associateTurnWithLandmark.forEach((key, value) {
-        print("${key} , ${value.name}");
+      tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols).then((value){
+        PathState.associateTurnWithLandmark = value;
+        // PathState.associateTurnWithLandmark.forEach((key, value) {
+        //   print("${key} , ${value.name}");
+        // });
+        List<direction> directions = tools.getDirections(path, numCols,value);
+        // directions.forEach((element) {
+        //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
+        // });
+
       });
+
     });
 
     List<Cell> Cellpath =
@@ -3359,10 +3367,6 @@ double minHeight = 90.0;
       PathState.numCols![bid]![floor] = numCols;
     }
 
-    List<Map<String, int>> directions = tools.getDirections(path, numCols);
-    directions.forEach((element) {
-      PathState.directions.add(element);
-    });
 
     if (path.isNotEmpty) {
       if (floor != 0) {
@@ -3937,6 +3941,8 @@ double minHeight = 90.0;
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
+                                              user.Bid = PathState.sourceBid;
+                                              user.floor = PathState.sourceFloor;
                                               user.pathobj = PathState;
                                               user.path = PathState.singleListPath;
                                               user.isnavigating = true;
@@ -3991,6 +3997,9 @@ double minHeight = 90.0;
                                               _isnavigationPannelOpen = true;
 
                                               semanticShouldBeExcluded = false;
+
+
+
 
                                               StartPDR();
                                               alignMapToPath([
@@ -4579,9 +4588,8 @@ double minHeight = 90.0;
                           Semantics(
 
                             label: "",
-                            child: Container(
+                            child: SizedBox(
                               height: 522,
-                              color: Colors.green,
                               child: SingleChildScrollView(
                                 controller: _scrollController,
                                 child: Container(
@@ -6688,66 +6696,66 @@ double minHeight = 90.0;
                             children: [
                               //
                               // // Text(Building.thresh),
-                              // Visibility(
-                              //   visible: true,
-                              //   child: Container(
-                              //       decoration: BoxDecoration(
-                              //           color: Colors.white,
-                              //           borderRadius: BorderRadius.all(Radius.circular(24))),
-                              //       child: IconButton(
-                              //           onPressed: () {
-                              //
-                              //             //StartPDR();
-                              //
-                              //             bool isvalid = MotionModel.isValidStep(
-                              //                 user,
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![0],
-                              //                 building.floorDimenssion[user.Bid]![user.floor]![1],
-                              //                 building.nonWalkable[user.Bid]![user.floor]!,
-                              //                 reroute);
-                              //             if (isvalid) {
-                              //               user.move().then((value){
-                              //                 renderHere();
-                              //               });
-                              //             } else {
-                              //               if (user.isnavigating) {
-                              //                 // reroute();
-                              //                 // showToast("You are out of path");
-                              //               }
-                              //             }
-                              //
-                              //           }, icon: Icon(Icons.directions_walk))),
-                              // ),
-                              //
-                              //
-                              //
-                              // SizedBox(height: 28.0),
-                              // Text("${user.theta}"),
-                              // Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-                              //
-                              //   double? compassHeading = newvalue;
-                              //   setState(() {
-                              //     user.theta = compassHeading!;
-                              //     if (mapState.interaction2) {
-                              //       mapState.bearing = compassHeading!;
-                              //       _googleMapController.moveCamera(
-                              //         CameraUpdate.newCameraPosition(
-                              //           CameraPosition(
-                              //             target: mapState.target,
-                              //             zoom: mapState.zoom,
-                              //             bearing: mapState.bearing!,
-                              //           ),
-                              //         ),
-                              //         //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              //       );
-                              //     } else {
-                              //       if (markers.length > 0)
-                              //         markers[user.Bid]?[0] =
-                              //             customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                              //     }
-                              //   });
-                              //
-                              // }),
+                              Visibility(
+                                visible: true,
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                                    child: IconButton(
+                                        onPressed: () {
+
+                                          //StartPDR();
+
+                                          bool isvalid = MotionModel.isValidStep(
+                                              user,
+                                              building.floorDimenssion[user.Bid]![user.floor]![0],
+                                              building.floorDimenssion[user.Bid]![user.floor]![1],
+                                              building.nonWalkable[user.Bid]![user.floor]!,
+                                              reroute);
+                                          if (isvalid) {
+                                            user.move().then((value){
+                                              renderHere();
+                                            });
+                                          } else {
+                                            if (user.isnavigating) {
+                                              // reroute();
+                                              // showToast("You are out of path");
+                                            }
+                                          }
+
+                                        }, icon: Icon(Icons.directions_walk))),
+                              ),
+
+
+
+                              SizedBox(height: 28.0),
+                              Text("${user.theta}"),
+                              Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
+
+                                double? compassHeading = newvalue;
+                                setState(() {
+                                  user.theta = compassHeading!;
+                                  if (mapState.interaction2) {
+                                    mapState.bearing = compassHeading!;
+                                    _googleMapController.moveCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                          target: mapState.target,
+                                          zoom: mapState.zoom,
+                                          bearing: mapState.bearing!,
+                                        ),
+                                      ),
+                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                    );
+                                  } else {
+                                    if (markers.length > 0)
+                                      markers[user.Bid]?[0] =
+                                          customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
+                                  }
+                                });
+
+                              }),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(

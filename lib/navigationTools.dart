@@ -10,6 +10,7 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'directionClass.dart';
 import 'path.dart';
 
 class tools {
@@ -539,6 +540,8 @@ class tools {
     return angleInDegrees;
   }
 
+  //static setUpUserFromPath
+
 
 
   static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
@@ -622,53 +625,20 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<Map<String, int>> getDirections(List<int> path, int columns) {
-    List<Map<String, int>> directions = [
-      {"Straight": 1}
-    ];
-
-    for (int i = 1; i < path.length - 1; i++) {
-      int prev = path[i - 1];
-      int current = path[i];
-      int next = path[i + 1];
-
-      // Compare current and next nodes' indices to determine direction
-
-      int prevrow = prev % columns;
-      int prevrcol = prev ~/ columns;
-      int currrow = current % columns;
-      int currcol = current ~/ columns;
-      int nextrrow = next % columns;
-      int nextrcol = next ~/ columns;
-
-      double angle = calculateAngle(
-          [prevrow, prevrcol], [currrow, currcol], [nextrrow, nextrcol]);
-      String dir = angleToClocks(angle);
-      if (directions.isNotEmpty) {
-        if (directions.last.keys.first != dir) {
-          Map<String, int> innermap = {dir: 1};
-          directions.add(innermap);
-        } else {
-          directions.last[dir] = directions.last[dir]! + 1;
-        }
-      } else {
-        Map<String, int> innermap = {dir: 1};
-        directions.add(innermap);
-      }
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark) {
+    List<direction> Directions = [direction(path[0], "Straight", null, null, null)];
+    List<int> turns = tools.getTurnpoints(path, columns);
+    turns.insert(0, path[0]);
+    turns.add(path.last);
+    for(int i = 1 ; i<turns.length-1 ; i++){
+      int index = path.indexOf(turns[i]);
+      double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
+      double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
+      double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
+      String direc = tools.angleToClocks(angle);
+      Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance));
     }
-    String dir = "Straight";
-    if (directions.isNotEmpty) {
-      if (directions.last.keys.first != dir) {
-        Map<String, int> innermap = {dir: 1};
-        directions.add(innermap);
-      } else {
-        directions.last[dir] = directions.last[dir]! + 1;
-      }
-    } else {
-      Map<String, int> innermap = {dir: 1};
-      directions.add(innermap);
-    }
-    return directions;
+    return Directions;
   }
 
   static int roundToNextInt(double number) {
@@ -1043,7 +1013,7 @@ class tools {
     }
   }
 
-  static Map<int,Landmarks> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols){
+  static Future<Map<int,Landmarks>> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols,)async{
     Map<int,Landmarks> ls = {};
     List<int> turns = [];
     for(int i = 1 ; i<path.length-1 ; i++){
@@ -1087,6 +1057,8 @@ class tools {
       if(land != null){
         ls[turn] = land!;
       }
+
+
     });
 
     // landmarks.forEach((element) {

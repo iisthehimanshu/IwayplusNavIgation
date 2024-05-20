@@ -246,7 +246,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
+
                   height: 225,
+
 
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box("Favourites").listenable(),
@@ -256,8 +258,10 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
 
+
                           currentData.geofencing;
                           print(widget.currentLatLng!.latitude);
+
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
                             width: 208,
@@ -383,7 +387,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                         ],
                                       ),
 
+
                                       // SizedBox(width: screenWidth/3.2,),
+
                                       Padding(
                                         padding: const EdgeInsets.only(right: 130),
                                         child: Container(height: 10,width: 10,decoration: BoxDecoration(color: (currentData.geofencing)?Colors.green:Colors.red,borderRadius: BorderRadius.circular(20)),),

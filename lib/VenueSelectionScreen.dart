@@ -417,6 +417,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                             var currentData = buildingsPos[index];
 
 
+
                             return GestureDetector(
                               onTap: () {
                                 // Handle onTap for the specific item here

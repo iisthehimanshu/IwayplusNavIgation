@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'ContactUs.dart';
@@ -37,7 +38,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     }
   }
   Future<void> _shareContent(String text) async {
-    // await Share.share(text);
+    await Share.share(text);
   }
   @override
   Widget build(BuildContext context) {

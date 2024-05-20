@@ -374,33 +374,29 @@ double minHeight = 90.0;
   }
 
   void handleCompassEvents() {
-    //Timer.periodic(Duration(milliseconds: 1000), (timer) {
-      compassSubscription = FlutterCompass.events!.listen((event) {
-        double? compassHeading = event.heading!;
-        print("current manetometer angle:${compassHeading}");
-        setState(() {
-          user.theta = compassHeading!;
-          if (mapState.interaction2) {
-            mapState.bearing = compassHeading!;
-            _googleMapController.moveCamera(
-              CameraUpdate.newCameraPosition(
-                CameraPosition(
-                  target: mapState.target,
-                  zoom: mapState.zoom,
-                  bearing: mapState.bearing!,
-                ),
+    compassSubscription = FlutterCompass.events!.listen((event) {
+      double? compassHeading = event.heading!;
+      setState(() {
+        user.theta = compassHeading!;
+        if (mapState.interaction2) {
+          mapState.bearing = compassHeading!;
+          _googleMapController.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: mapState.target,
+                zoom: mapState.zoom,
+                bearing: mapState.bearing!,
               ),
-              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-            );
-          } else {
-            if (markers.length > 0)
-              markers[user.Bid]![0] = customMarker.rotate(
-                  compassHeading! - mapbearing, markers[user.Bid]![0]);
-          }
-        });
+            ),
+            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+          );
+        } else {
+          if (markers.length > 0)
+            markers[user.Bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing, markers[user.Bid]![0]);
+        }
       });
-    //});
-
+    });
   }
 
   void showToast(String mssg) {
@@ -621,14 +617,13 @@ double minHeight = 90.0;
       }
     });
   }
-//List<List<int>> nearbyLandmarkCoords=[];
+List<List<int>> nearbyLandmarkCoords=[];
   List<String> finalDirections=[];
-  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<nearestLandInfo> nearbyLandmarkCoords){
-    finalDirections.clear();
+  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<List<int>> nearbyLandmarkCoords){
     for(int i=0;i<nearbyLandmarkCoords.length;i++)
     {
       double value =
-      tools.calculateAngle2(userCords,newUserCord,[nearbyLandmarkCoords[i].coordinateX!,nearbyLandmarkCoords[i].coordinateY!]);
+      tools.calculateAngle2(userCords,newUserCord,nearbyLandmarkCoords[i]);
 
       // print("value----");
       // print(value);
@@ -641,15 +636,12 @@ double minHeight = 90.0;
       finalDirections;
     });
 
-    // print("finalDirectionsss");
-    // print(finalDirections);
-
   }
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, speakTTS: false);
   }
-double currentAngle=0.0;
+
   void paintUser(String nearestBeacon, {bool speakTTS = true,bool render = true}) async {
     print("nearestBeacon : $nearestBeacon");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
@@ -665,17 +657,13 @@ double currentAngle=0.0;
 
       tools.angleBetweenBuildingAndNorth(apibeaconmap[nearestBeacon]!.buildingID!);
 
-
+      nearbyLandmarkCoords.clear();
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords.add(nearestLandInfomation.coordinateX!);
-        landCords.add(nearestLandInfomation.coordinateY!);
-
-        // landCords = tools.localizefindNearbyLandmarkCoordinated(
-        //     apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-
-      //  nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        landCords = tools.localizefindNearbyLandmarkCoordinated(
+            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         setState(() {
             getallnearestInfo=tools.localizefindAllNearbyLandmark(
                 apibeaconmap[nearestBeacon]!, value.landmarksMap!);
@@ -687,7 +675,8 @@ double currentAngle=0.0;
           ];
         } else {}
       });
-
+      print("nearestLandInfomation");
+      print(nearbyLandmarkCoords);
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -794,22 +783,14 @@ double currentAngle=0.0;
           createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
-      // print("corrdsss");
-      // print(userCords);
-      // print(newUserCord);
-      // print(landCords);
       double value =
       tools.calculateAngle2(userCords,newUserCord,landCords);
 
       print("value----");
-
-      setState(() {
-        currentAngle=value;
-      });
       print(value);
       String finalvalue =
       tools.angleToClocksForNearestLandmarkToBeacon(value);
-      calcDirectionsExploreMode(userCords,newUserCord,getallnearestInfo);
+      calcDirectionsExploreMode(userCords,newUserCord,nearbyLandmarkCoords);
 
       // double value =
       //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
@@ -825,11 +806,11 @@ if(user.isnavigating==false){
   nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
 }
 
-      if (nearestLandInfomation.name!.isEmpty) {
+      if (nearestLandInfomation.name.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!;
+            apibeaconmap[nearestBeacon]!.floor!.toString();
 
         //updating user pointer
 
@@ -862,7 +843,7 @@ if(user.isnavigating==false){
         }
       } else {
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!;
+            apibeaconmap[nearestBeacon]!.floor!.toString();
         if (speakTTS) {
           if (finalvalue == "None") {
             speak(
@@ -1359,6 +1340,7 @@ if(user.isnavigating==false){
     sumMap.clear();
     print("summap cleared ${sumMap}");
     setState(() {
+
       sumMap = btadapter.calculateAverage();
     });
 
@@ -1389,11 +1371,10 @@ if(user.isnavigating==false){
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
-      firstKey=sortedsumMap.entries.first.value;
       print("sortedsumMap--");
       print(firstValue);
 
-      if (lastBeaconValue != firstValue && firstKey>=0.35) {
+      if (lastBeaconValue != firstValue) {
         // print(entry.key);
         // print(entry.value);
         // entry1.forEach((element) {
@@ -1516,7 +1497,6 @@ if(user.isnavigating==false){
 
         // btadapter.stopScanning();
         print("Beacon searching Stoped");
-        sumMap.clear();
       } else {
         HelperClass.showToast("Beacon Already scanned");
       }
@@ -6276,7 +6256,7 @@ if(user.isnavigating==false){
                                               alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(
-                                                    currentInfo.name??"",
+                                                    currentInfo.name,
                                                     30),
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",
@@ -6288,13 +6268,12 @@ if(user.isnavigating==false){
                                                 textAlign: TextAlign.left,
                                               ),
                                             ),
-
                                             Container(
-                                              margin: EdgeInsets.only(top: 12, left: 18),
-                                               alignment: Alignment.topLeft,
+                                              margin: EdgeInsets.only(left: 10,top: 14),
+                                              alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(
-                                                   finalDirections[index],
+                                                    finalDirections[index],
                                                     30),
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",
@@ -6332,7 +6311,7 @@ if(user.isnavigating==false){
                                               alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(
-                                                    currentInfo.buildingName??"",
+                                                    currentInfo.buildingName,
                                                     30),
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",
@@ -6808,15 +6787,17 @@ if(user.isnavigating==false){
 
                       // Positioned(
                       //     top: 150,
-                      //     right: 100,
-                      //     child:
-                      //
-                      //       Column(
-                      //         children: [
-                      //           Text("${sumMap}"),
-                      //         ],
+                      //     right: 50,
+                      //     child: Container(
+                      //       decoration: BoxDecoration(
+                      //         border: Border.all(),
+                      //         borderRadius: BorderRadius.circular(20),
+                      //         color: (isPdr) ? Colors.green : Colors.red,
                       //       ),
-                      //     ),
+                      //       height: 20,
+                      //       width: 20,
+                      //
+                      //     )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,
@@ -6959,22 +6940,22 @@ if(user.isnavigating==false){
                                   height: 28.0),
 
 
-                              Container(
-                                width: 300,
-                                height: 100,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Text(testBIn.keys.toString()),
-                                      // Text(testBIn.values.toString()),
-                                      Text("summap"),
-                                      Text(sumMap.toString()),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   width: 300,
+                              //   height: 100,
+                              //   child: SingleChildScrollView(
+                              //     scrollDirection: Axis.horizontal,
+                              //     child: Column(
+                              //       crossAxisAlignment: CrossAxisAlignment.start,
+                              //       children: [
+                              //         Text(testBIn.keys.toString()),
+                              //         Text(testBIn.values.toString()),
+                              //         Text("summap"),
+                              //         Text(sortedsumMapfordebug.toString()),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
 
                               Semantics(
                                 child: FloatingActionButton(

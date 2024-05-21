@@ -806,11 +806,11 @@ if(user.isnavigating==false){
   nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
 }
 
-      if (nearestLandInfomation.name.isEmpty) {
+      if (nearestLandInfomation.name!.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
+            apibeaconmap[nearestBeacon]!.floor!;
 
         //updating user pointer
 
@@ -843,7 +843,7 @@ if(user.isnavigating==false){
         }
       } else {
         nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!.toString();
+            apibeaconmap[nearestBeacon]!.floor!;
         if (speakTTS) {
           if (finalvalue == "None") {
             speak(
@@ -6256,7 +6256,7 @@ if(user.isnavigating==false){
                                               alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(
-                                                    currentInfo.name,
+                                                    currentInfo.name!,
                                                     30),
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",
@@ -6311,7 +6311,7 @@ if(user.isnavigating==false){
                                               alignment: Alignment.topLeft,
                                               child: Text(
                                                 HelperClass.truncateString(
-                                                    currentInfo.buildingName,
+                                                    currentInfo.buildingName!,
                                                     30),
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",

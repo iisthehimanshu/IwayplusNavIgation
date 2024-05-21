@@ -110,6 +110,7 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   MapState mapState = new MapState();
   Timer? PDRTimer;
+  Timer? _exploreModeTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
@@ -619,11 +620,12 @@ double minHeight = 90.0;
   }
 List<List<int>> nearbyLandmarkCoords=[];
   List<String> finalDirections=[];
-  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<List<int>> nearbyLandmarkCoords){
+  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<nearestLandInfo> nearbyLandmarkCoords){
+    finalDirections.clear();
     for(int i=0;i<nearbyLandmarkCoords.length;i++)
     {
       double value =
-      tools.calculateAngle2(userCords,newUserCord,nearbyLandmarkCoords[i]);
+      tools.calculateAngle2(userCords,newUserCord,[nearbyLandmarkCoords[i].coordinateX!,nearbyLandmarkCoords[i].coordinateY!]);
 
       // print("value----");
       // print(value);
@@ -664,10 +666,13 @@ List<List<int>> nearbyLandmarkCoords=[];
         landCords = tools.localizefindNearbyLandmarkCoordinated(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        setState(() {
+        if(isLiveLocalizing){
+          setState(() {
             getallnearestInfo=tools.localizefindAllNearbyLandmark(
                 apibeaconmap[nearestBeacon]!, value.landmarksMap!);
           });
+        }
+
         if (landCords.isEmpty) {
           landCords = [
             apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -784,13 +789,13 @@ List<List<int>> nearbyLandmarkCoords=[];
         });
       });
       double value =
-      tools.calculateAngle2(userCords,newUserCord,landCords);
+      tools.calculateAngle2(userCords,newUserCord,[nearestLandInfomation.coordinateX!,nearestLandInfomation.coordinateY!]);
 
       print("value----");
       print(value);
       String finalvalue =
       tools.angleToClocksForNearestLandmarkToBeacon(value);
-      calcDirectionsExploreMode(userCords,newUserCord,nearbyLandmarkCoords);
+      calcDirectionsExploreMode(userCords,newUserCord,getallnearestInfo);
 
       // double value =
       //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
@@ -3333,6 +3338,8 @@ if(user.isnavigating==false){
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
+
+
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null}) async {
@@ -3343,8 +3350,9 @@ if(user.isnavigating==false){
 
     print("numcol $numCols");
 
+
     List<int> path = findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor);
 
 
     List<int> turns = tools.getTurnpoints(path, numCols);
@@ -3354,14 +3362,21 @@ if(user.isnavigating==false){
       getPoints.add([x, y]);
     }
     getPoints.add([destinationX, destinationY]);
-
+    List<Landmarks> nearbyPathLandmarks=[];
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 3, numCols, floor);
+      nearbyPathLandmarks.addAll(nearbyLandmarks);
       PathState.turnLandmarks = nearbyLandmarks;
       PathState.associateTurnWithLandmark =
           tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols);
     });
+
+
+
+
+
+
 
     List<Cell> Cellpath =
         findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
@@ -6142,7 +6157,7 @@ if(user.isnavigating==false){
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
+            minHeight: (isLiveLocalizing && getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
             element.workingDays != null && element.workingDays!.length > 0
                 ? 220 / screenHeight
@@ -6208,6 +6223,10 @@ if(user.isnavigating==false){
                       Spacer(),
                       InkWell(
                         onTap: () {
+                          if(isLiveLocalizing){
+                            HelperClass.showToast("Explore mode is disabled");
+                            _exploreModeTimer!.cancel();
+                          }
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
@@ -6220,7 +6239,7 @@ if(user.isnavigating==false){
                     ],
                   ),
 
-                  (getallnearestInfo.isNotEmpty)
+                  (isLiveLocalizing && getallnearestInfo.isNotEmpty)
                       ? Expanded(
                       child: Container(
                         child: ListView.builder(
@@ -7007,13 +7026,17 @@ if(user.isnavigating==false){
                                   //StopPDR();
 
                                   if (user.initialallyLocalised) {
+                                    if(isLiveLocalizing){
+                                      HelperClass.showToast("Explore mode is disabled");
+                                      _exploreModeTimer!.cancel();
+                                    }
                                     setState(() {
                                       isLiveLocalizing = !isLiveLocalizing;
                                     });
                                     HelperClass.showToast(
                                         "Explore mode enabled");
 
-                                    Timer.periodic(Duration(milliseconds: 5000),
+                                   _exploreModeTimer= Timer.periodic(Duration(milliseconds: 5000),
                                             (timer) async {
                                           print(resBeacons);
                                           btadapter.startScanning(resBeacons);

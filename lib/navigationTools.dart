@@ -692,6 +692,7 @@ class tools {
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
           } else {
+
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {

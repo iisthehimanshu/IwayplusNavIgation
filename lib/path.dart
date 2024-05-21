@@ -228,7 +228,9 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:iwayplusnav/buildingState.dart';
 
+import 'APIMODELS/landmark.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -258,6 +260,8 @@ List<int> findBestPathAmongstBoth(
   List<int> nonWalkableCells,
   int sourceIndex,
   int destinationIndex,
+    Building building,
+    int floor
 ) {
   int sourceX = sourceIndex % numCols;
   int sourceY = sourceIndex ~/ numCols;
@@ -267,9 +271,9 @@ List<int> findBestPathAmongstBoth(
 
 
   List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
+  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY,building,floor);
   List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
+  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY,building,floor);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");
@@ -277,7 +281,36 @@ List<int> findBestPathAmongstBoth(
 
   print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
   print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
+  List<List<List<int>>> res=[];
+  building.landmarkdata!.then((value) {
+    List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
+        p1, value.landmarksMap!, 3, numCols, floor);
 
+    res=findDoorAndPathTurnCoords(nearbyLandmarks,p1,numCols);
+
+    print(res);
+// for(int i=0;i<res.length;i++)
+//   {
+//     if(res.isNotEmpty){
+//       print("p1-----p2");
+//       print("door cords${res[i][0]}");
+//       print("turn corrds");
+//       print(res[i][1]);
+//       print(res[i][2]);
+//     }
+//
+//   }
+
+    for(int i=0;i<res.length;i++){
+      List<List<int>> p1=findIntersection(res[i][1], res[i][0], res[i][0],);
+
+
+      print("p1-----p2");
+      print(p1);
+      print(p2);
+    }
+
+  });
 
 
   if(p1.length == 0){
@@ -301,6 +334,7 @@ List<int> findBestPathAmongstBoth(
       return p1;
     }
     if(p1.length< p2.length){
+
       print("inside 1 3");
 
       return p1;
@@ -561,57 +595,58 @@ int getMovementCost(Node a, Node b) {
   return (a.x != b.x && a.y != b.y) ? 15 : 10;
 }
 
-List<Node> findOptimizedPath(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
-  double epsilon,
-) {
-  List<int> pathIndices = findBestPathAmongstBoth(
-    numRows,
-    numCols,
-    nonWalkableCells,
-    sourceIndex,
-    destinationIndex,
-  );
-
-  List<Node> nodes = List.generate(numRows * numCols, (index) {
-    int x = index % numCols;
-    int y = index ~/ numCols;
-    return Node(index, x, y);
-  });
-
-  List<Node> pathNodes = pathIndices.map((index) => nodes[index - 1]).toList();
-
-  List<Node> turnPoints = getTurnpoints(pathNodes, numCols);
-  //Apply RDP optimization to the path
-  Set<int> nonWalkableSet = nonWalkableCells.toSet();
-  List<Node> optimizedPath = rdp(pathNodes, epsilon, nonWalkableSet);
-
+// List<Node> findOptimizedPath(
+//   int numRows,
+//   int numCols,
+//   List<int> nonWalkableCells,
+//   int sourceIndex,
+//   int destinationIndex,
+//   double epsilon,
+// ) {
+//   List<int> pathIndices = findBestPathAmongstBoth(
+//     numRows,
+//     numCols,
+//     nonWalkableCells,
+//     sourceIndex,
+//     destinationIndex,
 //
-  print("turnPointts: ${turnPoints[0].index}");
-
-  List<Node> pt = [];
-  for (int i = 0; i < turnPoints.length - 1; i++) {
-    int x1 = (turnPoints[i].index % numCols);
-    int y1 = (turnPoints[i].index ~/ numCols);
-    if (turnPoints[i + 1] == turnPoints[i]) {
-      pt.add(turnPoints[i + 1]);
-    }
-  }
-
-  for (int i = 0; i < pt.length; i++) {
-    if (optimizedPath[pt[i].x + 1].x == optimizedPath[pt[i].x].x) {
-      optimizedPath[pt[i].y].y = optimizedPath[pt[i].y - 1].y;
-    } else if (optimizedPath[pt[i].y + 1].y == optimizedPath[pt[i].y].y) {
-      optimizedPath[pt[i].x].x = optimizedPath[pt[i].x - 1].x;
-    }
-  }
-
-  return optimizedPath;
-}
+//   );
+//
+//   List<Node> nodes = List.generate(numRows * numCols, (index) {
+//     int x = index % numCols;
+//     int y = index ~/ numCols;
+//     return Node(index, x, y);
+//   });
+//
+//   List<Node> pathNodes = pathIndices.map((index) => nodes[index - 1]).toList();
+//
+//   List<Node> turnPoints = getTurnpoints(pathNodes, numCols);
+//   //Apply RDP optimization to the path
+//   Set<int> nonWalkableSet = nonWalkableCells.toSet();
+//   List<Node> optimizedPath = rdp(pathNodes, epsilon, nonWalkableSet);
+//
+// //
+//   print("turnPointts: ${turnPoints[0].index}");
+//
+//   List<Node> pt = [];
+//   for (int i = 0; i < turnPoints.length - 1; i++) {
+//     int x1 = (turnPoints[i].index % numCols);
+//     int y1 = (turnPoints[i].index ~/ numCols);
+//     if (turnPoints[i + 1] == turnPoints[i]) {
+//       pt.add(turnPoints[i + 1]);
+//     }
+//   }
+//
+//   for (int i = 0; i < pt.length; i++) {
+//     if (optimizedPath[pt[i].x + 1].x == optimizedPath[pt[i].x].x) {
+//       optimizedPath[pt[i].y].y = optimizedPath[pt[i].y - 1].y;
+//     } else if (optimizedPath[pt[i].y + 1].y == optimizedPath[pt[i].y].y) {
+//       optimizedPath[pt[i].x].x = optimizedPath[pt[i].x - 1].x;
+//     }
+//   }
+//
+//   return optimizedPath;
+// }
 
 List<Node> getTurnpoints(List<Node> pathNodes, int numCols) {
   List<Node> res = [];
@@ -862,7 +897,7 @@ List<int> getOptiPath(Map<int, int> getTurns, int numCols, List<int> path) {
 }
 
 List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
-    int numCols, int sourceX, int sourceY, int destinationX, int destinationY) {
+    int numCols, int sourceX, int sourceY, int destinationX, int destinationY,Building building,int floor) {
 
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
@@ -995,6 +1030,9 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
       }
     }
   }
+
+
+
   List<int> tu = [];
   tu.add(sourceX + sourceY * numCols);
   tu.addAll(tools.getTurnpoints(path, numCols));
@@ -1003,7 +1041,20 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
+
+
+
+
   path = tools.generateCompletePath(tu, numCols,nonWalkableCells);
+
+
+// Future.delayed(Duration(milliseconds: 2000));
+
+
+
+
+
+
 
 
 
@@ -1011,6 +1062,115 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 
 
   return path;
+}
+
+// List<int> findIntersection(List<int> p1, List<int> p2, List<int> p3, double m) {
+//   // Slope of the line passing through P3
+//   double m_prime = -1 / m; // assuming the perpendicular slope
+//
+//   // y-intercepts of the lines passing through P1 and P2
+//   double b1 = p1[1] - m * p1[0];
+//   double b2 = p2[1] - m * p2[0];
+//   double c = p3[1] - m_prime * p3[0];
+//
+//   // Intersection with the line through P1
+//   double x1_prime = (b1 - c) / (m_prime - m);
+//   double y1_prime = m * x1_prime + b1;
+//
+//   // Intersection with the line through P2
+//   double x2_prime = (b2 - c) / (m_prime - m);
+//   double y2_prime = m * x2_prime + b2;
+//
+//   return [x1_prime.toInt(), y1_prime.toInt()];
+// }
+
+List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3) {
+  // Calculate slope of the parallel lines
+  double m = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+
+  // Calculate y-intercepts of the parallel lines
+  double c1 = p1[1] - m * p1[0];
+  double c2 = p2[1] - m * p2[0];
+
+  // Calculate slope of the perpendicular line
+  double mPerpendicular = -1 / m;
+
+  // Calculate y-intercept of the perpendicular line
+  double cPerpendicular = p3[1] - mPerpendicular * p3[0];
+
+  // Calculate intersection with the line through P1
+  double xIntersection1 = (cPerpendicular - c1) / (m - mPerpendicular);
+  double yIntersection1 = mPerpendicular * xIntersection1 + cPerpendicular;
+
+  // Calculate intersection with the line through P2
+  double xIntersection2 = (cPerpendicular - c2) / (m - mPerpendicular);
+  double yIntersection2 = mPerpendicular * xIntersection2 + cPerpendicular;
+
+  // Create and return the intersection points
+  List<List<int>> intersections = [
+    [xIntersection1.toInt(), yIntersection1.toInt()],
+    [xIntersection2.toInt(), yIntersection2.toInt()]
+  ];
+  return intersections;
+}
+List<List<List<int>>> findDoorAndPathTurnCoords(List<Landmarks> nearbyPathLandmarks,List<int> path,int numCols){
+
+ List< List<List<int>>> res=[];
+  // List<int> turns= tools.getTurnpoints(path, numCols);
+  // print("turns pointsss");
+  // print(turns);
+  List<int> turns= tools.getTurnpoints(path, numCols);
+  for(int i=0;i<nearbyPathLandmarks.length;i++){
+    List<List<int>> temp1=[];
+    print("dorrr cordsss");
+    print("${nearbyPathLandmarks[i].coordinateX}-----${nearbyPathLandmarks[i].coordinateY}");
+
+
+
+
+
+   for(int j=0;j<turns.length-1;j++)
+     {
+
+       int x1 = (turns[j] % numCols);
+       int y1 = (turns[j] ~/ numCols);
+
+       int x2 = (turns[j+1] % numCols);
+       int y2 = (turns[j+1] ~/ numCols);
+
+
+       bool iswithinRange=isWithinRange([nearbyPathLandmarks[i].coordinateX!,nearbyPathLandmarks[i].coordinateY!],[x1,y1],[x2,y2],20);
+       if(iswithinRange){
+         print("turnn pointsss");
+         print("${x1}---${y1}");
+         print("${x2}---${y2}");
+         print("${nearbyPathLandmarks[i].coordinateX!}--${nearbyPathLandmarks[i].coordinateY!}");
+         temp1.add([nearbyPathLandmarks[i].coordinateX!,nearbyPathLandmarks[i].coordinateY!]);
+         temp1.add([x1,y1]);
+         temp1.add([x2,y2]);
+
+         res.add(temp1);
+         break;
+       }
+     }
+
+
+
+
+  }
+  return res;
+}
+
+// Function to calculate the distance between two points
+double calculateDistance(List<int> p1, List<int> p2) {
+  return sqrt(pow((p2[0] - p1[0]), 2) + pow((p2[1] - p1[1]), 2));
+}
+
+// Function to check if a point (x, y) is within range of P1 or P2
+bool isWithinRange(List<int> target, List<int> p1,List<int> p2, double range) {
+  double distanceToP1 = calculateDistance(target, p1);
+  double distanceToP2 = calculateDistance(target, p2);
+  return distanceToP1 <= range && distanceToP2 <= range;
 }
 
 List<Cell> findCorridorSegments(

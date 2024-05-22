@@ -26,7 +26,7 @@ class pathState {
   String destinationBid = "";
   Map<String,Map<int,int>> connections = {};
   List<int> beaconCords = [];
-  List<Landmarks> nearbyLandmarks = [];
+  static List<Landmarks> nearbyLandmarks = [];
   Map<int,Landmarks> associateTurnWithLandmark = Map();
 
   // Default constructor without arguments

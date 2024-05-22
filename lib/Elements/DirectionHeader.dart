@@ -19,6 +19,8 @@ import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
 import '../directionClass.dart';
+import '../directionClass.dart' as dc;
+import '../directionClass.dart';
 
 
 class DirectionHeader extends StatefulWidget {
@@ -32,10 +34,11 @@ class DirectionHeader extends StatefulWidget {
   final Function() reroute;
   final Function() moveUser;
   final Function() closeNavigation;
+  final Function(dc.direction turn) focusOnTurn;
 
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
           user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
@@ -59,19 +62,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   BLueToothClass btadapter = new BLueToothClass();
   late Timer _timer;
   String turnDirection = "";
-  List<Widget> DirectionWidgetList = [Container()];
+  List<Widget> DirectionWidgetList = [];
 
 
   Map<String, double> ShowsumMap = Map();
-  int DirectionIndex = 0;
+  int DirectionIndex = 1;
+  int nextTurnIndex = 0;
   
   @override
   void initState() {
     super.initState();
 
-    for(int i = 1; i<widget.user.pathobj.directions.length ; i++){
+    for(int i = 0; i<widget.user.pathobj.directions.length ; i++){
       direction element = widget.user.pathobj.directions[i];
-      DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
+      //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
 
     }
 
@@ -397,7 +401,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
         int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print("nextturn $nextTurn    ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]?.name!}");
+        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
+
+        if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
+          if(DirectionIndex + 1 < widget.user.pathobj.directions.length && DirectionIndex - 1 >=1)
+          DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
+        }
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
         double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
@@ -590,21 +599,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(onPressed: (){setState(() {
-                  if(DirectionIndex - 1 >=0){
+                  if(DirectionIndex - 1 >=1){
                     DirectionIndex--;
+                    widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
                   }
-                });}, icon: Icon(Icons.arrow_back_ios_new,color: Colors.white,)),
+                });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 SizedBox(
                   width: 12,
                 ),
-                DirectionIndex == 0 ?scrollableDirection("${widget.direction == "Straight"?"Go Straight":"Turn ${widget.direction}, and Go Straight"}", '${(widget.distance/UserState.stepSize).ceil()} steps', getCustomIcon(widget.direction)):
-                DirectionWidgetList[DirectionIndex],
-                SizedBox(width: 12,),
+                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.focusOnTurn),
                 IconButton(onPressed: (){setState(() {
                   if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
                     DirectionIndex++;
+                    widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
                   }
-                });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: Colors.white,))
+                });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,))
               ],
             ),
           ),
@@ -642,7 +651,28 @@ class scrollableDirection extends StatelessWidget {
   String Direction;
   String steps;
   Icon i;
-  scrollableDirection(this.Direction,this.steps,this.i);
+  int DirectionIndex;
+  int nextTurnIndex;
+  List<direction> listOfDirections;
+  final Function(dc.direction turn) focusOnTurn;
+
+  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.focusOnTurn);
+
+  String chooseDirection(){
+    if(DirectionIndex == nextTurnIndex){
+      return "${Direction == "Straight"?"Go Straight":"Turn ${Direction}, and Go Straight"}";
+    }else{
+      return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
+    }
+  }
+
+  String chooseSteps(){
+    if(DirectionIndex == nextTurnIndex){
+      return '$steps steps';
+    }else{
+      return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} steps';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -657,7 +687,7 @@ class scrollableDirection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    Direction,
+                    chooseDirection(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -669,7 +699,7 @@ class scrollableDirection extends StatelessWidget {
                   SizedBox(height: 4.0),
                   Text(
 
-                    steps,
+                    chooseSteps(),
                     style: TextStyle(
 
                       color: Colors.white,

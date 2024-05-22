@@ -3360,7 +3360,7 @@ if(user.isnavigating==false){
 
 
     List<int> path = findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor);
+        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor,bid??"");
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {

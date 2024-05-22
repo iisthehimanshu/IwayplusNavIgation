@@ -262,7 +262,8 @@ List<int> findBestPathAmongstBoth(
     int sourceIndex,
     int destinationIndex,
     Building building,
-    int floor) {
+    int floor,
+    String Bid) {
   int sourceX = sourceIndex % numCols;
   int sourceY = sourceIndex ~/ numCols;
   int destinationX = destinationIndex % numCols;
@@ -282,38 +283,8 @@ List<int> findBestPathAmongstBoth(
 
   print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
   print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
-  List<List<List<int>>> res = [];
-  building.landmarkdata!.then((value) {
-    List<Landmarks> nearbyLandmarks =
-        tools.findNearbyLandmark(p1, value.landmarksMap!, 3, numCols, floor);
 
-    res = findDoorAndPathTurnCoords(nearbyLandmarks, p1, numCols);
-
-    print(res);
-// for(int i=0;i<res.length;i++)
-//   {
-//     if(res.isNotEmpty){
-//       print("p1-----p2");
-//       print("door cords${res[i][0]}");
-//       print("turn corrds");
-//       print(res[i][1]);
-//       print(res[i][2]);
-//     }
-//
-//   }
-
-
-    for (int i = 0; i < res.length; i++) {
-      List<List<int>> p1 = findIntersection(
-        res[i][1],
-        res[i][0],
-        res[i][0],
-      );
-      print("p1-----p2");
-      print(p1);
-      print(p2);
-    }
-  });
+optimizeDiagonalEntry(building, p1, numCols, floor, Bid, nonWalkableCells);
 
   if (p1.length == 0) {
     return p2.reversed.toList();
@@ -444,6 +415,45 @@ List<int> findPath(
   }
 
   return [];
+}
+
+
+ optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells){
+  List<List<List<int>>> res = [];
+  building.landmarkdata!.then((value) {
+    List<Landmarks> nearbyLandmarks =
+    tools.findNearbyLandmark(path, value.landmarksMap!, 3, numCols, floor,Bid);
+
+    res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
+
+    print(res);
+// for(int i=0;i<res.length;i++)
+//   {
+//     if(res.isNotEmpty){
+//       print("p1-----p2");
+//       print("door cords${res[i][0]}");
+//       print("turn corrds");
+//       print(res[i][1]);
+//       print(res[i][2]);
+//     }
+//
+//   }
+
+
+    for (int i = 0; i < res.length; i++) {
+      List<List<int>> p1 = findIntersection(
+          res[i][1],
+          res[i][2],
+          res[i][0],
+          res[i][3],
+          res[i][4], nonWalkableCells,numCols
+
+      );
+      print("p1-----p2");
+      print(p1);
+
+    }
+  });
 }
 
 // List<int> findPath(
@@ -1036,7 +1046,11 @@ List<int> getFinalOptimizedPath(
   //  path.clear();
   // //
 
+
   path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
+
+
+  optimizeDiagonalEntry(building, path, numCols, floor, Bid, nonWalkableCells);
 
 // Future.delayed(Duration(milliseconds: 2000));
 
@@ -1063,33 +1077,46 @@ List<int> getFinalOptimizedPath(
 //   return [x1_prime.toInt(), y1_prime.toInt()];
 // }
 
-List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3) {
-  // Calculate slope of the parallel lines
-  double m = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3,List<int> p11,List<int> p22,List<int> nonWalkableCells,int numCols) {
+ double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
+ double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
+print("m1----m2");
+if(m1.isInfinite || m1.isNaN){
+  m1=p1[0]+0.0;
+}
+ if(m2.isInfinite || m2.isNaN){
+   m2=p2[0]+0.0;
+ }
+print(m1);
+print(m2);
+ //eq of parallel lines
+ double node1=(m1);
+ double node2=(m2);
 
-  // Calculate y-intercepts of the parallel lines
-  double c1 = p1[1] - m * p1[0];
-  double c2 = p2[1] - m * p2[0];
+ //checking vertical and horizontal condition
 
-  // Calculate slope of the perpendicular line
-  double mPerpendicular = -1 / m;
 
-  // Calculate y-intercept of the perpendicular line
-  double cPerpendicular = p3[1] - mPerpendicular * p3[0];
+ List<List<int>> intersections =[
+   [node1.toInt(), p3[1]],
+   [node2.toInt(), p3[1]]];
 
-  // Calculate intersection with the line through P1
-  double xIntersection1 = (cPerpendicular - c1) / (m - mPerpendicular);
-  double yIntersection1 = mPerpendicular * xIntersection1 + cPerpendicular;
+ int index1=intersections[0][0]+intersections[0][1]*numCols;
+ int index2=intersections[1][0]+intersections[1][1]*numCols;
+ print(index1);
+ print(index2);
+ if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
+   node1=p1[1]+0.0;
+   node2=p2[1]+0.0;
+   intersections=[[p3[0], node1.toInt()],
+     [p3[0],node2.toInt()]];
+ }else{
+   intersections=[
+     [node1.toInt(), p3[1]],
+     [node2.toInt(), p3[1]]
+   ];
+ }
+ //noww new points areeee
 
-  // Calculate intersection with the line through P2
-  double xIntersection2 = (cPerpendicular - c2) / (m - mPerpendicular);
-  double yIntersection2 = mPerpendicular * xIntersection2 + cPerpendicular;
-
-  // Create and return the intersection points
-  List<List<int>> intersections = [
-    [xIntersection1.toInt(), yIntersection1.toInt()],
-    [xIntersection2.toInt(), yIntersection2.toInt()]
-  ];
   return intersections;
 }
 

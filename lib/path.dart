@@ -273,50 +273,46 @@ List<int> findBestPathAmongstBoth(
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
 
+  print("p1 length ${p1.length}");
+  print("p2 length ${p2.length}");
+  print("p1 turns ${p1turns}");
+  print("p2 turns ${p2turns}");
 
 
-
-  if(p1.length == 0){
+  // If either path is empty, return the other path
+  if (p1.isEmpty) {
     return p2.reversed.toList();
-  }else if(p2.length == 0){
+  } else if (p2.isEmpty) {
     return p1;
   }
 
+  // Check if both paths start and end at the correct indices
+  bool p1Valid = p1.first == sourceIndex && p1.last == destinationIndex;
+  bool p2Valid = p2.first == destinationIndex && p2.last == sourceIndex;
 
-
-  if(p1.first == sourceIndex && p1.last == destinationIndex){
-    if(p2.first != destinationIndex || p2.last != sourceIndex){
-
-      return p1;
-    }
-    if(p1turns.length<p2turns.length){
-
-      return p1;
-    }
-    if(p1.length< p2.length){
-
-      return p1;
-    }
+  if (p1Valid && !p2Valid) {
+    return p1;
+  } else if (!p1Valid && p2Valid) {
+    return p2.reversed.toList();
   }
 
-  if(p2.first == destinationIndex && p2.last == sourceIndex){
-
-    if(p2turns.length<p1turns.length){
-
-      return p2.reversed.toList();
-    }
-    if(p2.length< p1.length){
-      return p2.reversed.toList();
-    }
-    if(p1.first != sourceIndex || p1.last != destinationIndex){
-      return p2.reversed.toList();
-    }
+  // Compare the number of turns
+  if (p1turns.length < p2turns.length) {
+    return p1;
+  } else if (p1turns.length > p2turns.length) {
+    return p2.reversed.toList();
   }
 
-  if(p1.length == p2.length){
+  // If the number of turns is the same, compare the length of the paths
+  if (p1.length < p2.length) {
+    return p1;
+  } else if (p1.length > p2.length) {
+    return p2.reversed.toList();
+  } else{
     return p1;
   }
 
+  // If all else fails, return an empty list
   return [];
 
 }

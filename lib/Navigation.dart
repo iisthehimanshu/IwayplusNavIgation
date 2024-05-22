@@ -2357,7 +2357,8 @@ class _NavigationState extends State<Navigation> {
                 )));
           });
         } else if (landmarks[i].name != null &&
-            landmarks[i].name!.toLowerCase().contains("lift") && landmarks[i].element!.subType != "room door") {
+            landmarks[i].name!.toLowerCase().contains("lift") &&
+            landmarks[i].element!.subType != "room door") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -3330,10 +3331,11 @@ class _NavigationState extends State<Navigation> {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(
-              direction(-1, "Take ${liftName}", null, null, floor.toDouble(),null,null,floor,bid??""));
+          directions.add(direction(-1, "Take ${liftName}", null, null,
+              floor.toDouble(), null, null, floor, bid ?? ""));
         }
-        directions.addAll(tools.getDirections(path, numCols, value,floor,bid??""));
+        directions.addAll(
+            tools.getDirections(path, numCols, value, floor, bid ?? ""));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -3558,11 +3560,19 @@ class _NavigationState extends State<Navigation> {
       semanticShouldBeExcluded = true;
     });
     double? angle;
-    if(PathState.singleCellListPath.isNotEmpty){
+    if (PathState.singleCellListPath.isNotEmpty) {
       int l = PathState.singleCellListPath.length;
-      angle = tools.calculateAngle([PathState.singleCellListPath[l-2].x, PathState.singleCellListPath[l-2].y], [PathState.singleCellListPath[l-1].x,PathState.singleCellListPath[l-1].y], [PathState.destinationX,PathState.destinationY]);
+      angle = tools.calculateAngle([
+        PathState.singleCellListPath[l - 2].x,
+        PathState.singleCellListPath[l - 2].y
+      ], [
+        PathState.singleCellListPath[l - 1].x,
+        PathState.singleCellListPath[l - 1].y
+      ], [
+        PathState.destinationX,
+        PathState.destinationY
+      ]);
     }
-
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -4179,102 +4189,101 @@ class _NavigationState extends State<Navigation> {
                                   SizedBox(
                                     height: 22,
                                   ),
-                                  Semantics(
-                                    child: Expanded(
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Semantics(
-                                              excludeSemantics: false,
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                    height: 25,
-                                                    margin: EdgeInsets.only(
-                                                        right: 8),
-                                                    child: SvgPicture.asset(
-                                                        "assets/StartpointVector.svg"),
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        Semantics(
+                                          excludeSemantics: false,
+                                          child: Row(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                height: 25,
+                                                margin: EdgeInsets.only(
+                                                    right: 8),
+                                                child: SvgPicture.asset(
+                                                    "assets/StartpointVector.svg"),
+                                              ),
+                                              Semantics(
+                                                label:
+                                                "Steps preview,    You are heading from",
+                                                child: Text(
+                                                  "${PathState.sourceName}",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w400,
+                                                    color:
+                                                    Color(0xff0e0d0d),
+                                                    height: 25 / 16,
                                                   ),
-                                                  Semantics(
-                                                    label:
-                                                        "Steps preview,    You are heading from",
-                                                    child: Text(
-                                                      "${PathState.sourceName}",
-                                                      style: const TextStyle(
-                                                        fontFamily: "Roboto",
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color:
-                                                            Color(0xff0e0d0d),
-                                                        height: 25 / 16,
-                                                      ),
-                                                      textAlign: TextAlign.left,
-                                                    ),
-                                                  )
-                                                ],
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Container(
+                                          width: screenHeight,
+                                          height: 1,
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                        Column(
+                                          children: directionWidgets,
+                                        ),
+                                        SizedBox(
+                                          height: 22,
+                                        ),
+                                        Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              height: 25,
+                                              margin:
+                                              EdgeInsets.only(right: 8),
+                                              child: Icon(
+                                                Icons.pin_drop_sharp,
+                                                size: 24,
                                               ),
                                             ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
-                                            Column(
-                                              children: directionWidgets,
-                                            ),
-                                            SizedBox(
-                                              height: 22,
-                                            ),
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  height: 25,
-                                                  margin:
-                                                      EdgeInsets.only(right: 8),
-                                                  child: Icon(
-                                                    Icons.pin_drop_sharp,
-                                                    size: 24,
-                                                  ),
+                                            Semantics(
+                                              label:
+                                              "Your are heading towards ",
+                                              child: Text(
+                                                angle != null
+                                                    ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
+                                                    : PathState
+                                                    .destinationName,
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight:
+                                                  FontWeight.w400,
+                                                  color: Color(0xff0e0d0d),
+                                                  height: 25 / 16,
                                                 ),
-                                                Semantics(
-                                                  label:
-                                                      "Your are heading towards ",
-                                                  child: Text(
-                                                    angle != null?"${PathState.destinationName} will be ${tools.angleToClocks3(angle)}":PathState.destinationName,
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff0e0d0d),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.left,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            )
                                           ],
                                         ),
-                                      ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Container(
+                                          width: screenHeight,
+                                          height: 1,
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                      ],
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                             )
@@ -4523,11 +4532,12 @@ class _NavigationState extends State<Navigation> {
                               ),
                             ),
                           ),
-                          Container(height: 40,width: 56,
+                          Container(
+                            height: 40,
+                            width: 56,
                             decoration: BoxDecoration(
                               color: Color(0xffDF3535),
-                              borderRadius:
-                              BorderRadius.circular(20.0),
+                              borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: TextButton(
                                 onPressed: () {
@@ -4560,7 +4570,7 @@ class _NavigationState extends State<Navigation> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Color(0xffFFFFFF),
-                                    height: 20/14,
+                                    height: 20 / 14,
                                   ),
                                   textAlign: TextAlign.left,
                                 )),
@@ -4578,13 +4588,15 @@ class _NavigationState extends State<Navigation> {
               ),
             ),
             DirectionHeader(
-                user: user,
-                paint: paintUser,
-                repaint: repaintUser,
-                reroute: reroute,
-                moveUser: moveUser,
-                closeNavigation: closeNavigation,
-                isRelocalize: false, focusOnTurn: focusOnTurn,)
+              user: user,
+              paint: paintUser,
+              repaint: repaintUser,
+              reroute: reroute,
+              moveUser: moveUser,
+              closeNavigation: closeNavigation,
+              isRelocalize: false,
+              focusOnTurn: focusOnTurn,
+            )
           ],
         ));
   }
@@ -6411,14 +6423,35 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  focusOnTurn(direction turn){
-    if(turn.x != null && turn.y != null && turn.numCols != null){
-      int i = user.path.indexWhere((element) => element == turn.node)-1;
-      List<int> nextPoint = [user.path[i]%turn.numCols! , user.path[i]~/turn.numCols!];
-      List<double> latlng = tools.localtoglobal(turn.x!, turn.y!,patchData:building.patchData[turn.Bid]);
-      List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],patchData:building.patchData[turn.Bid]);
+  focusOnTurn(direction turn) {
+    if (turn.x != null && turn.y != null && turn.numCols != null) {
+
+      int i = user.path.indexWhere((element) => element == turn.node);
+      if(building.floor[buildingAllApi.getStoredString()] != turn.floor){
+        i++;
+      }else{
+        i--;
+      }
+
+      if (turn.floor != null &&
+          building.floor[buildingAllApi.getStoredString()] != turn.floor) {
+        building.floor[buildingAllApi.getStoredString()] = turn.floor!;
+        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+      }
+
+
+
+      List<int> nextPoint = [
+        user.path[i] % turn.numCols!,
+        user.path[i] ~/ turn.numCols!
+      ];
+      List<double> latlng = tools.localtoglobal(turn.x!, turn.y!,
+          patchData: building.patchData[turn.Bid]);
+      List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
+          patchData: building.patchData[turn.Bid]);
       mapState.target = LatLng(latlng[0], latlng[1]);
-      mapState.bearing = tools.calculateBearing( [latlng2[0],latlng2[1]],[latlng[0],latlng[1]]);
+      mapState.bearing = tools
+          .calculateBearing([latlng2[0], latlng2[1]], [latlng[0], latlng[1]]);
       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
             target: mapState.target,

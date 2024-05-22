@@ -404,7 +404,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
 
         if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
-          if(DirectionIndex + 1 < widget.user.pathobj.directions.length && DirectionIndex - 1 >=1)
+          if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
           DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
         }
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -463,7 +463,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-  Icon getCustomIcon(String direction) {
+  static Icon getCustomIcon(String direction) {
     if(direction == "Straight"){
       return Icon(
         Icons.straight,
@@ -592,7 +592,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             height: 95,
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Color(0xff01544F),
+              color: DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
 
             ),
             child: Row(
@@ -618,7 +618,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ),
           SizedBox(height: 4,),
-          Container(
+          DirectionIndex == nextTurnIndex?Container(
             width: 98,
             height: 39,
             color: Color(0xff013633),
@@ -640,7 +640,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 getNextCustomIcon(turnDirection)
               ],
             ),
-          )
+          ):Container()
         ],
       ),
     );
@@ -671,6 +671,14 @@ class scrollableDirection extends StatelessWidget {
       return '$steps steps';
     }else{
       return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} steps';
+    }
+  }
+
+  Icon chooseIcon(){
+    if(DirectionIndex == nextTurnIndex){
+      return i;
+    }else{
+      return _DirectionHeaderState.getCustomIcon(listOfDirections[DirectionIndex].turnDirection!);
     }
   }
 
@@ -726,7 +734,7 @@ class scrollableDirection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(28.0),
                   ),
 
-                  child: i,
+                  child: chooseIcon(),
 
 
 

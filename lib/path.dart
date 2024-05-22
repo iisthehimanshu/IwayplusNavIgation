@@ -250,30 +250,32 @@ class Node {
   @override
   int get hashCode => index.hashCode;
 }
-int count1=0;
-int count2=0;
-int count3=0;
-int count4=0;
+
+int count1 = 0;
+int count2 = 0;
+int count3 = 0;
+int count4 = 0;
 List<int> findBestPathAmongstBoth(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
+    int numRows,
+    int numCols,
+    List<int> nonWalkableCells,
+    int sourceIndex,
+    int destinationIndex,
     Building building,
-    int floor
-) {
+    int floor) {
   int sourceX = sourceIndex % numCols;
   int sourceY = sourceIndex ~/ numCols;
-  int destinationX = destinationIndex %  numCols;
+  int destinationX = destinationIndex % numCols;
   int destinationY = destinationIndex ~/ numCols;
 
-
-
-  List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY,building,floor);
-  List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY,building,floor);
+  List<int> p1 = findPath(
+      numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
+      destinationX, destinationY, building, floor);
+  List<int> p2 = findPath(
+      numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
+      destinationY, sourceX, sourceY, building, floor);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
   print("lplp ${p1.length}   ${p2.length}");
@@ -281,12 +283,12 @@ List<int> findBestPathAmongstBoth(
 
   print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
   print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
-  List<List<List<int>>> res=[];
+  List<List<List<int>>> res = [];
   building.landmarkdata!.then((value) {
-    List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-        p1, value.landmarksMap!, 3, numCols, floor);
+    List<Landmarks> nearbyLandmarks =
+        tools.findNearbyLandmark(p1, value.landmarksMap!, 3, numCols, floor);
 
-    res=findDoorAndPathTurnCoords(nearbyLandmarks,p1,numCols);
+    res = findDoorAndPathTurnCoords(nearbyLandmarks, p1, numCols);
 
     print(res);
 // for(int i=0;i<res.length;i++)
@@ -301,72 +303,68 @@ List<int> findBestPathAmongstBoth(
 //
 //   }
 
-    for(int i=0;i<res.length;i++){
-      List<List<int>> p1=findIntersection(res[i][1], res[i][0], res[i][0],);
-
-
+    for (int i = 0; i < res.length; i++) {
+      List<List<int>> p1 = findIntersection(
+        res[i][1],
+        res[i][0],
+        res[i][0],
+      );
       print("p1-----p2");
       print(p1);
       print(p2);
     }
-
   });
 
-
-  if(p1.length == 0){
+  if (p1.length == 0) {
     return p2.reversed.toList();
-  }else if(p2.length == 0){
+  } else if (p2.length == 0) {
     return p1;
   }
 
-
-
-  if(p1.first == sourceIndex && p1.last == destinationIndex){
+  if (p1.first == sourceIndex && p1.last == destinationIndex) {
     print("inside 1");
-    if(p2.first != destinationIndex || p2.last != sourceIndex){
+    if (p2.first != destinationIndex || p2.last != sourceIndex) {
       print("inside 1 1");
 
       return p1;
     }
-    if(p1turns.length<p2turns.length){
+    if (p1turns.length < p2turns.length) {
       print("inside 1 2");
 
       return p1;
     }
-    if(p1.length< p2.length){
-
+    if (p1.length < p2.length) {
       print("inside 1 3");
 
       return p1;
     }
   }
 
-  if(p2.first == destinationIndex && p2.last == sourceIndex){
+  if (p2.first == destinationIndex && p2.last == sourceIndex) {
     print("inside 2");
 
-    if(p2turns.length<p1turns.length){
+    if (p2turns.length < p1turns.length) {
       print("inside 2 1");
 
       return p2.reversed.toList();
     }
-    if(p2.length< p1.length){
+    if (p2.length < p1.length) {
       print("inside 2 2");
       return p2.reversed.toList();
     }
-    if(p1.first != sourceIndex || p1.last != destinationIndex){
+    if (p1.first != sourceIndex || p1.last != destinationIndex) {
       print("inside 2 3");
       return p2.reversed.toList();
     }
   }
 
-  if(p1.length == p2.length){
+  if (p1.length == p2.length) {
     print("inside 3");
     return p1;
   }
 
   print("inside 4");
   return [];
-
 }
 
 List<int> findPath(
@@ -896,9 +894,16 @@ List<int> getOptiPath(Map<int, int> getTurns, int numCols, List<int> path) {
   return path;
 }
 
-List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
-    int numCols, int sourceX, int sourceY, int destinationX, int destinationY,Building building,int floor) {
-
+List<int> getFinalOptimizedPath(
+    List<int> path,
+    List<int> nonWalkableCells,
+    int numCols,
+    int sourceX,
+    int sourceY,
+    int destinationX,
+    int destinationY,
+    Building building,
+    int floor) {
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -1031,8 +1036,6 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
     }
   }
 
-
-
   List<int> tu = [];
   tu.add(sourceX + sourceY * numCols);
   tu.addAll(tools.getTurnpoints(path, numCols));
@@ -1042,24 +1045,9 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
   //  path.clear();
   // //
 
-
-
-
-  path = tools.generateCompletePath(tu, numCols,nonWalkableCells);
-
+  path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
 
 // Future.delayed(Duration(milliseconds: 2000));
-
-
-
-
-
-
-
-
-
-
-
 
   return path;
 }
@@ -1113,50 +1101,69 @@ List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3) {
   ];
   return intersections;
 }
-List<List<List<int>>> findDoorAndPathTurnCoords(List<Landmarks> nearbyPathLandmarks,List<int> path,int numCols){
 
- List< List<List<int>>> res=[];
+List<List<List<int>>> findDoorAndPathTurnCoords(
+    List<Landmarks> nearbyPathLandmarks, List<int> path, int numCols) {
+  List<List<List<int>>> res = [];
   // List<int> turns= tools.getTurnpoints(path, numCols);
   // print("turns pointsss");
   // print(turns);
-  List<int> turns= tools.getTurnpoints(path, numCols);
-  for(int i=0;i<nearbyPathLandmarks.length;i++){
-    List<List<int>> temp1=[];
+  List<int> turns = tools.getTurnpoints(path, numCols);
+  for (int i = 0; i < nearbyPathLandmarks.length; i++) {
+    List<List<int>> temp1 = [];
     print("dorrr cordsss");
-    print("${nearbyPathLandmarks[i].coordinateX}-----${nearbyPathLandmarks[i].coordinateY}");
+    print(
+        "${nearbyPathLandmarks[i].coordinateX}-----${nearbyPathLandmarks[i].coordinateY}");
 
+    for (int j = 0; j < turns.length - 1; j++) {
+      int x1 = (turns[j] % numCols);
+      int y1 = (turns[j] ~/ numCols);
+      //now a path point before this turn
+      int ind1 = path.indexOf(x1 + y1 * numCols);
+      int index1 = path[ind1 - 1];
 
+      int x11 = (index1 % numCols);
+      int y11 = (index1 ~/ numCols);
 
+      int x2 = (turns[j + 1] % numCols);
+      int y2 = (turns[j + 1] ~/ numCols);
 
+      //now a path point before this turn
+      int ind2 = path.indexOf(x2 + y2 * numCols);
+      int index2 = path[ind2 + 1];
 
-   for(int j=0;j<turns.length-1;j++)
-     {
+      int x22 = (index2 % numCols);
+      int y22 = (index2 ~/ numCols);
 
-       int x1 = (turns[j] % numCols);
-       int y1 = (turns[j] ~/ numCols);
+      bool iswithinRange = isWithinRange([
+        nearbyPathLandmarks[i].coordinateX!,
+        nearbyPathLandmarks[i].coordinateY!
+      ], [
+        x1,
+        y1
+      ], [
+        x2,
+        y2
+      ], 10);
+      if (iswithinRange) {
+        print("turnn pointsss");
+        print("${x1}---${y1}");
+        print("${x2}---${y2}");
+        print(
+            "${nearbyPathLandmarks[i].coordinateX!}--${nearbyPathLandmarks[i].coordinateY!}");
+        temp1.add([
+          nearbyPathLandmarks[i].coordinateX!,
+          nearbyPathLandmarks[i].coordinateY!
+        ]);
+        temp1.add([x1, y1]);
+        temp1.add([x2, y2]);
+        temp1.add([x11, y11]);
+        temp1.add([x22, y22]);
 
-       int x2 = (turns[j+1] % numCols);
-       int y2 = (turns[j+1] ~/ numCols);
-
-
-       bool iswithinRange=isWithinRange([nearbyPathLandmarks[i].coordinateX!,nearbyPathLandmarks[i].coordinateY!],[x1,y1],[x2,y2],20);
-       if(iswithinRange){
-         print("turnn pointsss");
-         print("${x1}---${y1}");
-         print("${x2}---${y2}");
-         print("${nearbyPathLandmarks[i].coordinateX!}--${nearbyPathLandmarks[i].coordinateY!}");
-         temp1.add([nearbyPathLandmarks[i].coordinateX!,nearbyPathLandmarks[i].coordinateY!]);
-         temp1.add([x1,y1]);
-         temp1.add([x2,y2]);
-
-         res.add(temp1);
-         break;
-       }
-     }
-
-
-
-
+        res.add(temp1);
+        break;
+      }
+    }
   }
   return res;
 }
@@ -1167,7 +1174,7 @@ double calculateDistance(List<int> p1, List<int> p2) {
 }
 
 // Function to check if a point (x, y) is within range of P1 or P2
-bool isWithinRange(List<int> target, List<int> p1,List<int> p2, double range) {
+bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
   double distanceToP1 = calculateDistance(target, p1);
   double distanceToP2 = calculateDistance(target, p2);
   return distanceToP1 <= range && distanceToP2 <= range;
@@ -1208,10 +1215,10 @@ List<Cell> findCorridorSegments(
         (westCollision ? 1 : 0);
 
     // Check if any two opposite directions collide with non-walkable cells
-    if(i == 0){
+    if (i == 0) {
       print("$pos with first cell");
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
-    }else if (nextrow != row && nextcol != col) {
+    } else if (nextrow != row && nextcol != col) {
       print("$pos with first eight");
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
     } else if (turnPoints.contains(pos)) {
@@ -1258,5 +1265,3 @@ bool checkDirection(List<int> nonWalkable, int row, int col, int width,
   }
   return false;
 }
-
-

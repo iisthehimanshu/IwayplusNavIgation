@@ -3374,7 +3374,7 @@ if(user.isnavigating==false){
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
 
           path, value.landmarksMap!, 5, numCols, floor, bid!);
-      PathState.nearbyLandmarks = nearbyLandmarks;
+      pathState.nearbyLandmarks = nearbyLandmarks;
       // PathState.nearbyLandmarks.forEach((element) {
       //   print(element.name);
       // });
@@ -3388,9 +3388,9 @@ if(user.isnavigating==false){
         List<direction> directions = [];
         if (liftName != null) {
           directions.add(
-              direction(-1, "Take ${liftName}", null, null, floor.toDouble()));
+              direction(-1, "Take ${liftName}", null, null, floor.toDouble(),null,null,floor,bid??""));
         }
-        directions.addAll(tools.getDirections(path, numCols, value));
+        directions.addAll(tools.getDirections(path, numCols, value,floor,bid??""));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -4447,7 +4447,7 @@ if(user.isnavigating==false){
 
         List<int> c = [node % col, node ~/ col];
         int val = tools.calculateAngleSecond(a, b, c).toInt();
-        print("val $val");
+        //print("val $val");
 
         // print("user corrds");
         // print("${user.showcoordX}+" "+ ${user.showcoordY}");
@@ -4648,7 +4648,7 @@ if(user.isnavigating==false){
                 reroute: reroute,
                 moveUser: moveUser,
                 closeNavigation: closeNavigation,
-                isRelocalize: false)
+                isRelocalize: false, focusOnTurn: focusOnTurn,)
           ],
         ));
   }
@@ -6559,6 +6559,24 @@ if(user.isnavigating==false){
         });
       });
     });
+  }
+
+  focusOnTurn(direction turn){
+    if(turn.x != null && turn.y != null && turn.numCols != null){
+      int i = user.path.indexWhere((element) => element == turn.node)-1;
+      List<int> nextPoint = [user.path[i]%turn.numCols! , user.path[i]~/turn.numCols!];
+      List<double> latlng = tools.localtoglobal(turn.x!, turn.y!,patchData:building.patchData[turn.Bid]);
+      List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],patchData:building.patchData[turn.Bid]);
+      mapState.target = LatLng(latlng[0], latlng[1]);
+      mapState.bearing = tools.calculateBearing( [latlng2[0],latlng2[1]],[latlng[0],latlng[1]]);
+      _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: mapState.target,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!,
+            tilt: mapState.tilt),
+      ));
+    }
   }
 
   void focusBuildingChecker(CameraPosition position) {

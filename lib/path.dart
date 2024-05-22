@@ -257,7 +257,7 @@ int count1 = 0;
 int count2 = 0;
 int count3 = 0;
 int count4 = 0;
-List<int> findBestPathAmongstBoth(
+Future<List<int>> findBestPathAmongstBoth(
     int numRows,
     int numCols,
     List<int> nonWalkableCells,
@@ -265,7 +265,7 @@ List<int> findBestPathAmongstBoth(
     int destinationIndex,
     Building building,
     int floor,
-    String Bid) {
+    String Bid)async{
   int sourceX = sourceIndex % numCols;
   int sourceY = sourceIndex ~/ numCols;
   int destinationX = destinationIndex % numCols;
@@ -273,11 +273,11 @@ List<int> findBestPathAmongstBoth(
 
   List<int> p1 = findPath(
       numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
+  p1 = await getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
       destinationX, destinationY, building, floor,Bid);
   List<int> p2 = findPath(
       numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
+  p2 = await getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
       destinationY, sourceX, sourceY, building, floor,Bid);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
@@ -403,10 +403,16 @@ List<int> findPath(
 }
 
 
- List<List<List<int>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells){
+ Future<List<List<List<int>>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells)async{
   List<List<List<int>>> res = [];
-    List<Landmarks> nearbyLandmarks =
-    pathState.nearbyLandmarks;
+  List<Landmarks> nearbyLandmarks = [];
+  await building.landmarkdata!.then((value){
+   nearbyLandmarks = tools.findNearbyLandmark(
+
+        path, value.landmarksMap!, 5, numCols, floor, Bid!);
+
+  });
+
 
     res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
 
@@ -894,7 +900,7 @@ List<int> getOptiPath(Map<int, int> getTurns, int numCols, List<int> path) {
   return path;
 }
 
-List<int> getFinalOptimizedPath(
+Future<List<int>> getFinalOptimizedPath(
     List<int> path,
     List<int> nonWalkableCells,
     int numCols,
@@ -903,7 +909,7 @@ List<int> getFinalOptimizedPath(
     int destinationX,
     int destinationY,
     Building building,
-    int floor,String Bid) {
+    int floor,String Bid) async {
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -1026,13 +1032,16 @@ List<int> getFinalOptimizedPath(
   tu.add(sourceX + sourceY * numCols);
   tu.addAll(tools.getTurnpoints(path, numCols));
   tu.add(destinationX + destinationY * numCols);
-
+  print("ressssssssss");
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
-  List<List<List<int>>> res=optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells);
-  // print("ressssssssss");
-  // print(res);
+  List<List<List<int>>> res=[];
+  await optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells).then((value){
+    res=value;
+  });
+  print(res);
+
   print("turns array before optimization");
   for(int i=0;i<tu.length;i++){
     int x=tu[i] % numCols;
@@ -1058,6 +1067,8 @@ List<int> getFinalOptimizedPath(
       tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
       print(res[i][0][0]+res[i][0][1]*numCols);
       print(res[i][1][0]+res[i][1][1]*numCols);
+
+
     }
 
     // for(int i=0;i<tu.length;i++){
@@ -1072,10 +1083,27 @@ List<int> getFinalOptimizedPath(
   }
 
   print("turns array after optimization");
-  for(int i=0;i<tu.length;i++){
-    int x=tu[i] % numCols;
-    int y = tu[i] ~/ numCols;
-    print("${x}-----${y}");
+  for(int i=0;i<tu.length-1;i++){
+    int x1=tu[i] % numCols;
+    int y1 = tu[i] ~/ numCols;
+    int x2=tu[i+1] % numCols;
+    int y2 = tu[i+1] ~/ numCols;
+
+
+    if(x1+1==x2 || x1-1==x2){
+      int oldindex=x2+y2*numCols;
+      x2=x2-1;
+      int index=x2+y2*numCols;
+     int oldInd= tu.indexOf(oldindex);
+     tu[oldInd]=index;
+    }
+    if(y1+1==y2 || y1-1==y2){
+      int oldindex=x2+y2*numCols;
+      y2=y2-1;
+      int index=x2+y2*numCols;
+      int oldInd= tu.indexOf(oldindex);
+      tu[oldInd]=index;
+    }
   }
 
 

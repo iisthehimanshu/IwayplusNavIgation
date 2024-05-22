@@ -3360,7 +3360,7 @@ if(user.isnavigating==false){
     print("numcol $numCols");
 
 
-    List<int> path = findBestPathAmongstBoth(numRows, numCols,
+    List<int> path = await findBestPathAmongstBoth(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor,bid??"");
 
     List<int> turns = tools.getTurnpoints(path, numCols);

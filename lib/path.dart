@@ -228,7 +228,9 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:iwayplusnav/buildingState.dart';
+import 'package:iwayplusnav/pathState.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Cell.dart';
@@ -272,11 +274,11 @@ List<int> findBestPathAmongstBoth(
   List<int> p1 = findPath(
       numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
   p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
-      destinationX, destinationY, building, floor);
+      destinationX, destinationY, building, floor,Bid);
   List<int> p2 = findPath(
       numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
   p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
-      destinationY, sourceX, sourceY, building, floor);
+      destinationY, sourceX, sourceY, building, floor,Bid);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
 
@@ -418,11 +420,10 @@ List<int> findPath(
 }
 
 
- optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells){
+ List<List<List<int>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells){
   List<List<List<int>>> res = [];
-  building.landmarkdata!.then((value) {
     List<Landmarks> nearbyLandmarks =
-    tools.findNearbyLandmark(path, value.landmarksMap!, 3, numCols, floor,Bid);
+    pathState.nearbyLandmarks;
 
     res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
 
@@ -439,7 +440,7 @@ List<int> findPath(
 //
 //   }
 
-
+List<List<List<int>>> result=[];
     for (int i = 0; i < res.length; i++) {
       List<List<int>> p1 = findIntersection(
           res[i][1],
@@ -451,9 +452,10 @@ List<int> findPath(
       );
       print("p1-----p2");
       print(p1);
+      result.add(p1);
 
     }
-  });
+    return result;
 }
 
 // List<int> findPath(
@@ -918,7 +920,7 @@ List<int> getFinalOptimizedPath(
     int destinationX,
     int destinationY,
     Building building,
-    int floor) {
+    int floor,String Bid) {
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -1045,12 +1047,59 @@ List<int> getFinalOptimizedPath(
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
+  List<List<List<int>>> res=optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells);
+  // print("ressssssssss");
+  // print(res);
+  print("turns array before optimization");
+  for(int i=0;i<tu.length;i++){
+    int x=tu[i] % numCols;
+    int y = tu[i] ~/ numCols;
+    print("${x}-----${y}");
+  }
+
+
+  //removing prev turn points with new turn points.
+  if(res.isNotEmpty){
+    for(int i=0;i<res.length;i++)
+    {
+      int oldIndexAtTurn1=res[i][2][0]+res[i][2][1]*numCols;
+      int oldIndexAtTurn2=res[i][3][0]+res[i][3][1]*numCols;
+
+      print(oldIndexAtTurn1);
+      print(oldIndexAtTurn2);
+      int oldArrayIndexAtTurn1=tu.indexOf(oldIndexAtTurn1);
+      int oldArrayIndexAtTurn2=tu.indexOf(oldIndexAtTurn2);
+
+      //turns array updated
+      tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
+      tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
+      print(res[i][0][0]+res[i][0][1]*numCols);
+      print(res[i][1][0]+res[i][1][1]*numCols);
+    }
+
+    // for(int i=0;i<tu.length;i++){
+    //   if(tu.contains(tu[i]+1)){
+    //
+    //     tu.removeAt(2);
+    //     tu.removeAt(3);
+    //     tu.removeAt(4);
+    //
+    //   }
+    // }
+  }
+
+  print("turns array after optimization");
+  for(int i=0;i<tu.length;i++){
+    int x=tu[i] % numCols;
+    int y = tu[i] ~/ numCols;
+    print("${x}-----${y}");
+  }
 
 
   path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
 
 
-  optimizeDiagonalEntry(building, path, numCols, floor, Bid, nonWalkableCells);
+
 
 // Future.delayed(Duration(milliseconds: 2000));
 
@@ -1108,11 +1157,12 @@ print(m2);
    node1=p1[1]+0.0;
    node2=p2[1]+0.0;
    intersections=[[p3[0], node1.toInt()],
-     [p3[0],node2.toInt()]];
+     [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
  }else{
    intersections=[
      [node1.toInt(), p3[1]],
-     [node2.toInt(), p3[1]]
+     [node2.toInt(), p3[1]],
+     [p1[0],p1[1]],[p2[0],p2[1]]
    ];
  }
  //noww new points areeee
@@ -1163,7 +1213,7 @@ List<List<List<int>>> findDoorAndPathTurnCoords(
         x2,
         y2
       ], 10);
-      if (iswithinRange) {
+      if (iswithinRange && (x1!=x2 && y1!=y2)) {
         print("turnn pointsss");
         print("${x1}---${y1}");
         print("${x2}---${y2}");

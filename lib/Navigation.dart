@@ -3308,7 +3308,7 @@ if(user.isnavigating==false){
             polylineId: PolylineId("InterBuilding"),
             points: coords,
             color: Colors.red,
-            width: 3,
+            width: 1,
           ));
         }
       });
@@ -4243,82 +4243,35 @@ if(user.isnavigating==false){
                                   SizedBox(
                                     height: 22,
                                   ),
-                                  Semantics(
-                                    child: Expanded(
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Semantics(
-                                              excludeSemantics: false,
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                    height: 25,
-                                                    margin: EdgeInsets.only(
-                                                        right: 8),
-                                                    child: SvgPicture.asset(
-                                                        "assets/StartpointVector.svg"),
-                                                  ),
-                                                  Semantics(
-                                                    label:
-                                                        "Steps preview,    You are heading from",
-                                                    child: Text(
-                                                      "${PathState.sourceName}",
-                                                      style: const TextStyle(
-                                                        fontFamily: "Roboto",
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color:
-                                                            Color(0xff0e0d0d),
-                                                        height: 25 / 16,
-                                                      ),
-                                                      textAlign: TextAlign.left,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
-                                            Column(
-                                              children: directionWidgets,
-                                            ),
-                                            SizedBox(
-                                              height: 22,
-                                            ),
-                                            Row(
+
+                                   SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          Semantics(
+                                            excludeSemantics: false,
+                                            child: Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Container(
                                                   height: 25,
-                                                  margin:
-                                                      EdgeInsets.only(right: 8),
-                                                  child: Icon(
-                                                    Icons.pin_drop_sharp,
-                                                    size: 24,
-                                                  ),
+                                                  margin: EdgeInsets.only(
+                                                      right: 8),
+                                                  child: SvgPicture.asset(
+                                                      "assets/StartpointVector.svg"),
                                                 ),
                                                 Semantics(
                                                   label:
-                                                      "Your are heading towards ",
+                                                      "Steps preview,    You are heading from",
                                                   child: Text(
-                                                    angle != null?"${PathState.destinationName} will be ${tools.angleToClocks3(angle)}":PathState.destinationName,
+                                                    "${PathState.sourceName}",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      color: Color(0xff0e0d0d),
+                                                      color:
+                                                          Color(0xff0e0d0d),
                                                       height: 25 / 16,
                                                     ),
                                                     textAlign: TextAlign.left,
@@ -4326,19 +4279,64 @@ if(user.isnavigating==false){
                                                 )
                                               ],
                                             ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                          Column(
+                                            children: directionWidgets,
+                                          ),
+                                          SizedBox(
+                                            height: 22,
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                height: 25,
+                                                margin:
+                                                    EdgeInsets.only(right: 8),
+                                                child: Icon(
+                                                  Icons.pin_drop_sharp,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                              Semantics(
+                                                label:
+                                                    "Your are heading towards ",
+                                                child: Text(
+                                                  angle != null?"${PathState.destinationName} will be ${tools.angleToClocks3(angle)}":PathState.destinationName,
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w400,
+                                                    color: Color(0xff0e0d0d),
+                                                    height: 25 / 16,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
+
                                 ],
                               ),
                             )

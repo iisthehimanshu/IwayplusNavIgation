@@ -170,7 +170,7 @@ class _NavigationState extends State<Navigation> {
   List<String> allBuildingList = [];
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
-  bool excludeFloorSemanticWork= false;
+  bool excludeFloorSemanticWork = false;
 
   @override
   void initState() {
@@ -191,7 +191,6 @@ class _NavigationState extends State<Navigation> {
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
     //handleCompassEvents();
-
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -238,23 +237,23 @@ class _NavigationState extends State<Navigation> {
     // filterItems();
   }
 
-  void excludeFloorSemanticWorkchange(){
+  void excludeFloorSemanticWorkchange() {
     setState(() {
       excludeFloorSemanticWork = true;
     });
   }
 
-double minHeight = 90.0;
-  bool maxHeightBottomSheet=false;
-  void close_isnavigationPannelOpen(){
+  double minHeight = 92.0;
+  bool maxHeightBottomSheet = false;
+  void close_isnavigationPannelOpen() {
     _slidePanelDown();
     _resetScrollPosition();
     print("close_isnavigationPannelOpen");
     setState(() {
       print(_isnavigationPannelOpen);
-    //_isnavigationPannelOpen = false;
+      //_isnavigationPannelOpen = false;
       minHeight = 90;
-    print(_isnavigationPannelOpen);
+      print(_isnavigationPannelOpen);
     });
   }
 
@@ -280,7 +279,7 @@ double minHeight = 90.0;
     StartPDR();
   }
 
-  void startOnPath(){
+  void startOnPath() {
     setState(() {
       _isnavigationPannelOpen = true;
       _isreroutePannelOpen = false;
@@ -412,9 +411,7 @@ double minHeight = 90.0;
     );
   }
 
-
   Future<void> speak(String msg) async {
-
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -626,7 +623,8 @@ double minHeight = 90.0;
     paintUser(nearestBeacon, speakTTS: false);
   }
 
-  void paintUser(String nearestBeacon, {bool speakTTS = true,bool render = true}) async {
+  void paintUser(String nearestBeacon,
+      {bool speakTTS = true, bool render = true}) async {
     print("nearestBeacon : $nearestBeacon");
     BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(44, 44)),
@@ -638,9 +636,8 @@ double minHeight = 90.0;
     );
     List<int> landCords = [];
     if (apibeaconmap[nearestBeacon] != null) {
-
-      tools.angleBetweenBuildingAndNorth(apibeaconmap[nearestBeacon]!.buildingID!);
-
+      tools.angleBetweenBuildingAndNorth(
+          apibeaconmap[nearestBeacon]!.buildingID!);
 
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
@@ -723,7 +720,7 @@ double minHeight = 90.0;
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        if(render){
+        if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
@@ -737,7 +734,7 @@ double minHeight = 90.0;
             icon: userlocdebug,
             anchor: Offset(0.5, 0.829),
           ));
-        }else{
+        } else {
           user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
@@ -773,8 +770,7 @@ double minHeight = 90.0;
       if (nearestLandInfomation.name == "") {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!;
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
 
         //updating user pointer
 
@@ -806,8 +802,7 @@ double minHeight = 90.0;
           }
         }
       } else {
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!;
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
         if (speakTTS) {
           if (finalvalue == "None") {
             speak(
@@ -876,7 +871,6 @@ double minHeight = 90.0;
   }
 
   void reroute() {
-
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -1071,29 +1065,27 @@ double minHeight = 90.0;
       IDS.add(key);
     });
     await outBuilding().outbuilding(IDS).then((out) async {
-      if(out != null){
+      if (out != null) {
         buildingAllApi.outdoorID = out!.data!.campusId!;
-        buildingAllApi.allBuildingID[out!.data!.campusId!] = geo.LatLng(0.0,0.0);
+        buildingAllApi.allBuildingID[out!.data!.campusId!] =
+            geo.LatLng(0.0, 0.0);
       }
     });
-
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       IDS.add(key);
       if (key != buildingAllApi.getSelectedBuildingID()) {
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
-          if(key == buildingAllApi.outdoorID){
+          if (key == buildingAllApi.outdoorID) {
             createotherPatch(value);
-          }else{
-
-          }
+          } else {}
         });
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
-          if(key == buildingAllApi.outdoorID){
+          if (key == buildingAllApi.outdoorID) {
             createRooms(value, 1);
-          }else{
+          } else {
             createRooms(value, 0);
           }
           building.polylinedatamap[key] = value;
@@ -1107,7 +1099,9 @@ double minHeight = 90.0;
           });
           Map<int, LatLng> coordinates = {};
           for (int i = 0; i < value.landmarks!.length; i++) {
-            if (value.landmarks![i].element!.subType == "AR" && value.landmarks![i].properties!.arName == "P${int.parse(value.landmarks![i].properties!.arValue!)}") {
+            if (value.landmarks![i].element!.subType == "AR" &&
+                value.landmarks![i].properties!.arName ==
+                    "P${int.parse(value.landmarks![i].properties!.arValue!)}") {
               coordinates[int.parse(value.landmarks![i].properties!.arValue!)] =
                   LatLng(
                       double.parse(value.landmarks![i].properties!.latitude!),
@@ -1188,7 +1182,6 @@ double minHeight = 90.0;
         });
       }
     });
-
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
     await Future.delayed(Duration(seconds: 3));
@@ -1282,7 +1275,7 @@ double minHeight = 90.0;
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
-  List<nearestLandInfo> getallnearestInfo=[];
+  List<nearestLandInfo> getallnearestInfo = [];
   //Map<String, double> sumMap  = HashMap();
   List<int> currentBinSIze = [];
   Map<String, double> sumMap = new Map();
@@ -1304,11 +1297,8 @@ double minHeight = 90.0;
     sumMap.clear();
     print("summap cleared ${sumMap}");
     setState(() {
-
       sumMap = btadapter.calculateAverage();
     });
-
-
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
@@ -1359,11 +1349,10 @@ double minHeight = 90.0;
           await building.landmarkdata!.then((value) {
             nearestLandInfomation = tools.localizefindNearbyLandmark(
                 apibeaconmap[firstValue]!, value.landmarksMap!);
-    setState(() {
-      getallnearestInfo=tools.localizefindAllNearbyLandmark(
-          apibeaconmap[firstValue]!, value.landmarksMap!);
-    });
-
+            setState(() {
+              getallnearestInfo = tools.localizefindAllNearbyLandmark(
+                  apibeaconmap[firstValue]!, value.landmarksMap!);
+            });
 
             landCords = tools.localizefindNearbyLandmarkCoordinated(
                 apibeaconmap[firstValue]!, value.landmarksMap!);
@@ -1371,8 +1360,6 @@ double minHeight = 90.0;
 
           print("getallnearestInfo");
           print(getallnearestInfo);
-
-
 
           List<double> values = tools.localtoglobal(
               apibeaconmap[firstValue]!.coordinateX!,
@@ -1447,13 +1434,11 @@ double minHeight = 90.0;
           if (nearestLandInfomation.name == "") {
             print("no beacon found");
             nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
-            nearestLandInfomation.floor =
-                apibeaconmap[firstValue]!.floor!;
+            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
             speak(
                 "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
           } else {
-            nearestLandInfomation.floor =
-                apibeaconmap[firstValue]!.floor!;
+            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
             speak(
                 "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
           }
@@ -1890,15 +1875,14 @@ double minHeight = 90.0;
           print("y ${l2.cubicleName}");
           int x1 = 0;
           int y1 = 0;
-          for(int a=0;a<4;a++){
+          for (int a = 0; a < 4; a++) {
             x1 = (x1 + l1.nodes![a].coordx!).toInt();
             y1 = (y1 + l1.nodes![a].coordy!).toInt();
           }
 
-
           int x2 = 0;
           int y2 = 0;
-          for(int a=0;a<4;a++){
+          for (int a = 0; a < 4; a++) {
             x2 = (x2 + l2.nodes![a].coordx!).toInt();
             y2 = (y2 + l2.nodes![a].coordy!).toInt();
           }
@@ -1955,8 +1939,7 @@ double minHeight = 90.0;
     setState(() {
       if (FloorPolyArray != null) {
         for (PolyArray polyArray in FloorPolyArray) {
-
-          if(polyArray.visibilityType == "visible"){
+          if (polyArray.visibilityType == "visible") {
             List<LatLng> coordinates = [];
 
             for (Nodes node in polyArray.nodes!) {
@@ -1964,10 +1947,10 @@ double minHeight = 90.0;
               coordinates.add(LatLng(
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                      building.patchData[value.polyline!.buildingID])[0],
+                          building.patchData[value.polyline!.buildingID])[0],
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                      building.patchData[value.polyline!.buildingID])[1]));
+                          building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
               closedpolygons.putIfAbsent(
@@ -1976,22 +1959,24 @@ double minHeight = 90.0;
             if (!polylines.containsKey(value.polyline!.buildingID!)) {
               polylines.putIfAbsent(
                   value.polyline!.buildingID!, () => Set<gmap.Polyline>());
-
             }
 
             if (polyArray.polygonType == 'Wall' ||
                 polyArray.polygonType == 'undefined') {
               if (coordinates.length >= 2) {
                 polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
-                  polylineId: PolylineId(
-                      "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
-                  points: coordinates,
-                  color: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black,
-                  width: 1,
-                    onTap: (){
+                    polylineId: PolylineId(
+                        "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
+                    points: coordinates,
+                    color: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Colors.black,
+                    width: 1,
+                    onTap: () {
                       print("polyArray.id! ${polyArray.id!}");
-                    }
-                ));
+                    }));
               }
             } else if (polyArray.polygonType == 'Room') {
               if (coordinates.length > 2) {
@@ -2004,7 +1989,11 @@ double minHeight = 90.0;
                     // Modify the color and opacity based on the selectedRoomId
 
                     strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffE5F9FF),
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Color(0xffE5F9FF),
                     consumeTapEvents: true,
                     onTap: () {
                       _googleMapController.animateCamera(
@@ -2014,7 +2003,8 @@ double minHeight = 90.0;
                         ),
                       );
                       setState(() {
-                        if (building.selectedLandmarkID != polyArray.id && !user.isnavigating) {
+                        if (building.selectedLandmarkID != polyArray.id &&
+                            !user.isnavigating) {
                           user.reset();
                           PathState = pathState.withValues(
                               -1, -1, -1, -1, -1, -1, null, 0);
@@ -2045,154 +2035,189 @@ double minHeight = 90.0;
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffC2F1D5),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffC2F1D5),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("lift")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("lift")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFFFF00),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFFFF00),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Male Washroom") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff0000FF),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff0000FF),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Female Washroom") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFF69B4),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFF69B4),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("fire")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("fire")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffFF4500),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFF4500),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("water")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("water")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff00FFFF),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff00FFFF),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
-              } else if (polyArray.cubicleName!.toLowerCase().contains("wall")) {
+              } else if (polyArray.cubicleName!
+                  .toLowerCase()
+                  .contains("wall")) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffCCCCCC),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffCCCCCC),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Restricted Area") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff800000),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff800000),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else if (polyArray.cubicleName == "Non Walkable Area") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xff333333),
-                      onTap: (){
+                      strokeColor: Colors.black,
+                      fillColor: polyArray.cubicleColor != null &&
+                              polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xff333333),
+                      onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
-                      }
-                  ));
+                      }));
                 }
               } else {
                 if (coordinates.length > 2) {
@@ -2203,10 +2228,14 @@ double minHeight = 90.0;
                     points: coordinates,
                     strokeWidth: 1,
                     strokeColor: Colors.black,
-                      onTap: (){
-                        print("polyArray.id! ${polyArray.id!}");
-                      },
-                    fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black.withOpacity(0.2),
+                    onTap: () {
+                      print("polyArray.id! ${polyArray.id!}");
+                    },
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Colors.black.withOpacity(0.2),
                   ));
                 }
               }
@@ -2214,36 +2243,41 @@ double minHeight = 90.0;
               if (coordinates.length > 2) {
                 coordinates.add(coordinates.first);
                 closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                  polygonId: PolygonId(
-                      "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
-                  points: coordinates,
-                  strokeWidth: 1,
-                  // Modify the color and opacity based on the selectedRoomId
-                  strokeColor: Colors.black,
-                  fillColor: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Color(0xffCCCCCC),
-                  consumeTapEvents: true,
-                    onTap: (){
+                    polygonId: PolygonId(
+                        "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                    points: coordinates,
+                    strokeWidth: 1,
+                    // Modify the color and opacity based on the selectedRoomId
+                    strokeColor: Colors.black,
+                    fillColor: polyArray.cubicleColor != null &&
+                            polyArray.cubicleColor != "undefined"
+                        ? Color(int.parse(
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        : Color(0xffCCCCCC),
+                    consumeTapEvents: true,
+                    onTap: () {
                       print("polyArray.id! ${polyArray.id!}");
-                    }
-                ));
+                    }));
               }
             } else {
               polylines[value.polyline!.buildingID!]!.add(gmap.Polyline(
-                polylineId: PolylineId(polyArray.id!),
-                points: coordinates,
-                color: polyArray.cubicleColor != null && polyArray.cubicleColor != "undefined" ? Color(int.parse('0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}')):Colors.black,
-                width: 1,
-                  onTap: (){
+                  polylineId: PolylineId(polyArray.id!),
+                  points: coordinates,
+                  color: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                      ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                      : Colors.black,
+                  width: 1,
+                  onTap: () {
                     print("polyArray.id! ${polyArray.id!}");
-                  }
-              ));
+                  }));
             }
           }
         }
       }
     });
   }
-
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
     ByteData data = await rootBundle.load(path);
@@ -2323,7 +2357,7 @@ double minHeight = 90.0;
                 )));
           });
         } else if (landmarks[i].name != null &&
-            landmarks[i].name!.toLowerCase().contains("lift")) {
+            landmarks[i].name!.toLowerCase().contains("lift") && landmarks[i].element!.subType != "room door") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -2548,16 +2582,16 @@ double minHeight = 90.0;
                   Expanded(
                     child: Container(
                         child: Text(
-                          snapshot.data!
-                              .landmarksMap![building.selectedLandmarkID]!.name!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
-                          ),
-                        )),
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                          .name!,
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8e8d8d),
+                        height: 25 / 16,
+                      ),
+                    )),
                   ),
                   Container(
                     height: 48,
@@ -2630,8 +2664,7 @@ double minHeight = 90.0;
                       ),
 
                       Container(
-                        padding: EdgeInsets.only(left: 17,top:12),
-
+                        padding: EdgeInsets.only(left: 17, top: 12),
                         child: Focus(
                           autofocus: true,
                           child: Semantics(
@@ -2653,7 +2686,9 @@ double minHeight = 90.0;
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.only(left: 17,),
+                        padding: EdgeInsets.only(
+                          left: 17,
+                        ),
                         child: Text(
                           "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
                           style: const TextStyle(
@@ -2696,8 +2731,9 @@ double minHeight = 90.0;
                         height: 8,
                       ),
                       Container(
-                        margin: EdgeInsets.only(left: 17,),
-
+                        margin: EdgeInsets.only(
+                          left: 17,
+                        ),
                         width: 114,
                         height: 40,
                         decoration: BoxDecoration(
@@ -2714,26 +2750,22 @@ double minHeight = 90.0;
                               PathState.sourceFloor = user.floor;
                               PathState.sourcePolyID = user.key;
                               print("object ${PathState.sourcePolyID}");
-                              PathState.sourceName =
-                              "Your current location";
+                              PathState.sourceName = "Your current location";
                               PathState.destinationPolyID =
-                              building.selectedLandmarkID!;
+                                  building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .name!;
                               PathState.destinationFloor = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .floor!;
                               PathState.sourceBid = user.Bid;
 
                               PathState.destinationBid = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .buildingID!;
 
                               setState(() {
@@ -2741,8 +2773,7 @@ double minHeight = 90.0;
                                 calculatingPath = true;
                               });
                               Future.delayed(Duration(seconds: 1), () {
-                                calculateroute(
-                                    snapshot.data!.landmarksMap!)
+                                calculateroute(snapshot.data!.landmarksMap!)
                                     .then((value) {
                                   calculatingPath = false;
                                   _isLandmarkPanelOpen = false;
@@ -2750,19 +2781,16 @@ double minHeight = 90.0;
                                 });
                               });
                             } else {
-                              PathState.sourceName =
-                              "Choose Starting Point";
+                              PathState.sourceName = "Choose Starting Point";
                               PathState.destinationPolyID =
-                              building.selectedLandmarkID!;
+                                  building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .name!;
                               PathState.destinationFloor = snapshot
                                   .data!
-                                  .landmarksMap![
-                              building.selectedLandmarkID]!
+                                  .landmarksMap![building.selectedLandmarkID]!
                                   .floor!;
                               building.selectedLandmarkID = "";
                               Navigator.push(
@@ -2770,8 +2798,8 @@ double minHeight = 90.0;
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           SourceAndDestinationPage(
-                                            DestinationID: PathState
-                                                .destinationPolyID,
+                                            DestinationID:
+                                                PathState.destinationPolyID,
                                           ))).then((value) {
                                 if (value != null) {
                                   fromSourceAndDestinationPage(value);
@@ -2781,40 +2809,40 @@ double minHeight = 90.0;
                           },
                           child: (!calculatingPath)
                               ? const Row(
-                            //  mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.directions,
-                                color: Colors.black,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "Direction",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
-                              )
-                            ],
-                          )
+                                  //  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.directions,
+                                      color: Colors.black,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "Direction",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    )
+                                  ],
+                                )
                               : Container(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top:20),
+                        margin: EdgeInsets.only(top: 20),
                         height: 1,
                         width: screenWidth,
                         color: Color(0xffebebeb),
                       ),
                       Semantics(
-                        label:"Information",
+                        label: "Information",
                         child: Container(
-                          margin: EdgeInsets.only(left: 17,top: 20),
+                          margin: EdgeInsets.only(left: 17, top: 20),
                           child: Text(
                             "Information",
                             style: const TextStyle(
@@ -2834,8 +2862,7 @@ double minHeight = 90.0;
                         decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffebebeb))),
+                                  width: 1.0, color: Color(0xffebebeb))),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -2867,7 +2894,7 @@ double minHeight = 90.0;
                                   children: [
                                     TextSpan(
                                       text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                     ),
                                   ],
                                 ),
@@ -2876,128 +2903,112 @@ double minHeight = 90.0;
                           ],
                         ),
                       ),
-                      snapshot
-                          .data!
-                          .landmarksMap![
-                      building.selectedLandmarkID]!
-                          .properties!
-                          .contactNo !=
-                          null
-                          ? Container(
-                        margin:
-                        EdgeInsets.only(left: 16, right: 16),
-                        padding:
-                        EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              width: 1.0,
-                              color: Color(0xffebebeb),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(right: 16),
-                              width: 32,
-                              height: 32,
-                              child: Icon(
-                                Icons.call,
-                                color: Color(0xff24B9B0),
-                                size: 24,
-                              ),
-                            ),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                          : Container(),
-                      snapshot
-                          .data!
-                          .landmarksMap![
-                      building.selectedLandmarkID]!
-                          .properties!
-                          .email !=
-                          "" &&
-                          snapshot
-                              .data!
-                              .landmarksMap![
-                          building.selectedLandmarkID]!
-                              .properties!
-                              .email !=
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                  .properties!.contactNo !=
                               null
                           ? Container(
-                        margin:
-                        EdgeInsets.only(left: 16, right: 16),
-                        padding:
-                        EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffebebeb))),
-                        ),
-                        child: Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                                margin:
-                                EdgeInsets.only(right: 16),
-                                width: 32,
-                                height: 32,
-                                child: Icon(
-                                  Icons.mail_outline,
-                                  color: Color(0xff24B9B0),
-                                  size: 24,
-                                )),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
+                              margin: EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    width: 1.0,
+                                    color: Color(0xffebebeb),
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                    ),
-                                  ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 16),
+                                    width: 32,
+                                    height: 32,
+                                    child: Icon(
+                                      Icons.call,
+                                      color: Color(0xff24B9B0),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(),
+                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                      .properties!.email !=
+                                  "" &&
+                              snapshot
+                                      .data!
+                                      .landmarksMap![
+                                          building.selectedLandmarkID]!
+                                      .properties!
+                                      .email !=
+                                  null
+                          ? Container(
+                              margin: EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        width: 1.0, color: Color(0xffebebeb))),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(right: 16),
+                                      width: 32,
+                                      height: 32,
+                                      child: Icon(
+                                        Icons.mail_outline,
+                                        color: Color(0xff24B9B0),
+                                        size: 24,
+                                      )),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    margin: EdgeInsets.only(top: 8),
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff4a4545),
+                                          height: 25 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                           : Container(),
                     ],
                   ),
@@ -3040,8 +3051,6 @@ double minHeight = 90.0;
     return commonLifts;
   }
 
-  int sourceVal = 0;
-  int destinationVal = 0;
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
@@ -3100,19 +3109,8 @@ double minHeight = 90.0;
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid);
-
-        Map<String, int> map = {
-          'Take ${commonlifts[0].name}': -1,
-        };
-        print("test map: ${PathState.sourceFloor}");
-
-        setState(() {
-          sourceVal = PathState.sourceFloor;
-          destinationVal = PathState.destinationFloor;
-        });
-
-        PathState.directions.add(map);
+            bid: PathState.destinationBid,
+            liftName: commonlifts[0].name);
 
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
@@ -3289,10 +3287,6 @@ double minHeight = 90.0;
     }
   }
 
-
-
-
-
   List<int> beaconCord = [];
   double cordL = 0;
   double cordLt = 0;
@@ -3301,7 +3295,7 @@ double minHeight = 90.0;
 
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid = null}) async {
+      {String? bid = null, String? liftName}) async {
     int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
@@ -3311,7 +3305,6 @@ double minHeight = 90.0;
 
     List<int> path = findBestPathAmongstBoth(numRows, numCols,
         building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
-
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {
@@ -3323,23 +3316,31 @@ double minHeight = 90.0;
 
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-          path, value.landmarksMap!, 5, numCols, floor,bid!);
+          path, value.landmarksMap!, 5, numCols, floor, bid!);
       PathState.nearbyLandmarks = nearbyLandmarks;
       // PathState.nearbyLandmarks.forEach((element) {
       //   print(element.name);
       // });
-      tools.associateTurnWithLandmark(path, nearbyLandmarks, numCols).then((value){
+      tools
+          .associateTurnWithLandmark(path, nearbyLandmarks, numCols)
+          .then((value) {
         PathState.associateTurnWithLandmark = value;
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
         // });
-        List<direction> directions = tools.getDirections(path, numCols,value);
+        List<direction> directions = [];
+        if (liftName != null) {
+          directions.add(
+              direction(-1, "Take ${liftName}", null, null, floor.toDouble()));
+        }
+        directions.addAll(tools.getDirections(path, numCols, value));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
 
+        directions.addAll(PathState.directions);
+        PathState.directions = directions;
       });
-
     });
 
     List<Cell> Cellpath =
@@ -3366,7 +3367,6 @@ double minHeight = 90.0;
       PathState.numCols![bid] = Map();
       PathState.numCols![bid]![floor] = numCols;
     }
-
 
     if (path.isNotEmpty) {
       if (floor != 0) {
@@ -3441,7 +3441,6 @@ double minHeight = 90.0;
       }
     }
     setState(() {
-
       singleroute.putIfAbsent(floor, () => Set());
       singleroute[floor]?.add(gmap.Polyline(
         polylineId: PolylineId("$bid"),
@@ -3489,10 +3488,11 @@ double minHeight = 90.0;
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
       child: Container(
-        height:300,
+        height: 300,
         width: 100,
         child: ListView.builder(
-            itemCount: building.numberOfFloors[buildingAllApi.getStoredString()]!,
+            itemCount:
+                building.numberOfFloors[buildingAllApi.getStoredString()]!,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.only(top: 10),
@@ -3507,25 +3507,22 @@ double minHeight = 90.0;
                         width: 30,
                         height: 42,
                         child: ListTile(
-                          onTap: (){
-                            building.floor[buildingAllApi
-                                .getStoredString()] = index;
+                          onTap: () {
+                            building.floor[buildingAllApi.getStoredString()] =
+                                index;
                             createRooms(
                               building.polylinedatamap[
-                              buildingAllApi
-                                  .getStoredString()]!,
-                              building.floor[buildingAllApi
-                                  .getStoredString()]!,
+                                  buildingAllApi.getStoredString()]!,
+                              building.floor[buildingAllApi.getStoredString()]!,
                             );
                             if (pathMarkers[index] != null) {
                               //setCameraPosition(pathMarkers[i]!);
                             }
-                            building.landmarkdata!
-                                .then((value) {
+                            building.landmarkdata!.then((value) {
                               createMarkers(
                                 value,
-                                building.floor[buildingAllApi
-                                    .getStoredString()]!,
+                                building
+                                    .floor[buildingAllApi.getStoredString()]!,
                               );
                             });
                           },
@@ -3533,7 +3530,8 @@ double minHeight = 90.0;
                             child: Semantics(
                               excludeSemantics: true,
                               child: Text(
-                                floorNumbers[index].toString(), // Text to be displayed
+                                floorNumbers[index]
+                                    .toString(), // Text to be displayed
                                 style: TextStyle(
                                   color: Colors.black, // Text color
                                   fontSize: 12.0,
@@ -3559,33 +3557,73 @@ double minHeight = 90.0;
     setState(() {
       semanticShouldBeExcluded = true;
     });
+    double? angle;
+    if(PathState.singleCellListPath.isNotEmpty){
+      int l = PathState.singleCellListPath.length;
+      angle = tools.calculateAngle([PathState.singleCellListPath[l-2].x, PathState.singleCellListPath[l-2].y], [PathState.singleCellListPath[l-1].x,PathState.singleCellListPath[l-1].y], [PathState.destinationX,PathState.destinationY]);
+    }
 
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
-    for (int i = 0; i < PathState.directions.length; i++) {
-      if (PathState.directions[i].keys.first == "Straight") {
-        directionWidgets.add(directionInstruction(
-            direction: "Go " + PathState.directions[i].keys.first,
-            distance: tools
-                .roundToNextInt(PathState.directions[i].values.first * 0.3048)
-                .toString()));
-      } else if (PathState.directions[i].keys.first.substring(0, 4) == "Take") {
-        directionWidgets.add(directionInstruction(
-            direction: PathState.directions[i].keys.first,
-            distance: "Floor $sourceVal -> Floor $destinationVal"));
-      } else {
-        directionWidgets.add(directionInstruction(
-            direction: "Turn " +
-                PathState.directions[i].keys.first +
-                ", and Go Straight",
-            distance: tools
-                .roundToNextInt(PathState.directions[++i].values.first * 0.3048)
-                .toString()));
+    if (PathState.directions.isNotEmpty) {
+      directionWidgets.add(directionInstruction(
+          direction: "Go Straight",
+          distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
+              .ceil()
+              .toString()));
+      for (int i = 1; i < PathState.directions.length; i++) {
+        if (PathState.directions[i].nearbyLandmark != null) {
+          directionWidgets.add(directionInstruction(
+              direction: PathState.directions[i].turnDirection == "Straight"
+                  ? "Go Straight"
+                  : "Turn ${PathState.directions[i].turnDirection!} from ${PathState.directions[i].nearbyLandmark!.name!}, and Go Straight",
+              distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
+                  .ceil()
+                  .toString()));
+        } else {
+          if (PathState.directions[i].node == -1) {
+            directionWidgets.add(directionInstruction(
+                direction: "${PathState.directions[i].turnDirection!}",
+                distance:
+                    "and go to ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} floor"));
+          } else {
+            directionWidgets.add(directionInstruction(
+                direction: PathState.directions[i].turnDirection == "Straight"
+                    ? "Go Straight"
+                    : "Turn ${PathState.directions[i].turnDirection!}, and Go Straight",
+                distance:
+                    (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
+                        .ceil()
+                        .toString()));
+          }
+        }
       }
     }
+
+    // for (int i = 0; i < PathState.directions.length; i++) {
+    //   if (PathState.directions[i].keys.first == "Straight") {
+    //     directionWidgets.add(directionInstruction(
+    //         direction: "Go " + PathState.directions[i].keys.first,
+    //         distance: tools
+    //             .roundToNextInt(PathState.directions[i].values.first * 0.3048)
+    //             .toString()));
+    //   } else if (PathState.directions[i].keys.first.substring(0, 4) == "Take") {
+    //     directionWidgets.add(directionInstruction(
+    //         direction: PathState.directions[i].keys.first,
+    //         distance: "Floor $sourceVal -> Floor $destinationVal"));
+    //   } else {
+    //     directionWidgets.add(directionInstruction(
+    //         direction: "Turn " +
+    //             PathState.directions[i].keys.first +
+    //             ", and Go Straight",
+    //         distance: tools
+    //             .roundToNextInt(PathState.directions[++i].values.first * 0.3048)
+    //             .toString()));
+    //   }
+    // }
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3784,7 +3822,6 @@ double minHeight = 90.0;
                 ],
                 minHeight: 163,
                 maxHeight: screenHeight * 0.9,
-                snapPoint: 0.9,
                 panel: Semantics(
                   sortKey: const OrdinalSortKey(0),
                   child: Column(
@@ -3827,7 +3864,6 @@ double minHeight = 90.0;
                                     child: Semantics(
                                       label:
                                           "Your destination is ${distance}m away ",
-
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
@@ -3871,18 +3907,20 @@ double minHeight = 90.0;
                                                 building.selectedLandmarkID =
                                                     null;
 
-                                                PathState = pathState.withValues(
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    -1,
-                                                    null,
-                                                    0);
+                                                PathState =
+                                                    pathState.withValues(
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        -1,
+                                                        null,
+                                                        0);
                                                 PathState.path.clear();
                                                 PathState.sourcePolyID = "";
-                                                PathState.destinationPolyID = "";
+                                                PathState.destinationPolyID =
+                                                    "";
                                                 PathState.sourceBid = "";
                                                 PathState.destinationBid = "";
                                                 singleroute.clear();
@@ -3942,36 +3980,47 @@ double minHeight = 90.0;
                                           child: TextButton(
                                             onPressed: () async {
                                               user.Bid = PathState.sourceBid;
-                                              user.floor = PathState.sourceFloor;
+                                              user.floor =
+                                                  PathState.sourceFloor;
                                               user.pathobj = PathState;
-                                              user.path = PathState.singleListPath;
+                                              user.path =
+                                                  PathState.singleListPath;
                                               user.isnavigating = true;
-                                              user.Cellpath = PathState.singleCellListPath;
+                                              user.Cellpath =
+                                                  PathState.singleCellListPath;
                                               user
                                                   .moveToStartofPath()
-                                                  .then((value)async{
-                                                BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-                                                  ImageConfiguration(size: Size(44, 44)),
+                                                  .then((value) async {
+                                                BitmapDescriptor userloc =
+                                                    await BitmapDescriptor
+                                                        .fromAssetImage(
+                                                  ImageConfiguration(
+                                                      size: Size(44, 44)),
                                                   'assets/userloc0.png',
                                                 );
-                                                BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-                                                  ImageConfiguration(size: Size(44, 44)),
+                                                BitmapDescriptor userlocdebug =
+                                                    await BitmapDescriptor
+                                                        .fromAssetImage(
+                                                  ImageConfiguration(
+                                                      size: Size(44, 44)),
                                                   'assets/tealtorch.png',
                                                 );
                                                 setState(() {
                                                   markers.clear();
                                                   List<double> val =
-                                                  tools.localtoglobal(
-                                                      user.showcoordX
-                                                          .toInt(),
-                                                      user.showcoordY
-                                                          .toInt());
+                                                      tools.localtoglobal(
+                                                          user.showcoordX
+                                                              .toInt(),
+                                                          user.showcoordY
+                                                              .toInt());
 
-                                                  markers.putIfAbsent(user.Bid, () => []);
+                                                  markers.putIfAbsent(
+                                                      user.Bid, () => []);
                                                   markers[user.Bid]?.add(Marker(
-                                                    markerId: MarkerId("UserLocation"),
-                                                    position: LatLng(
-                                                        val[0], val[1]),
+                                                    markerId: MarkerId(
+                                                        "UserLocation"),
+                                                    position:
+                                                        LatLng(val[0], val[1]),
                                                     icon: userloc,
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
@@ -3982,8 +4031,8 @@ double minHeight = 90.0;
 
                                                   markers[user.Bid]?.add(Marker(
                                                     markerId: MarkerId("debug"),
-                                                    position: LatLng(
-                                                        val[0], val[1]),
+                                                    position:
+                                                        LatLng(val[0], val[1]),
                                                     icon: userlocdebug,
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
@@ -3997,9 +4046,6 @@ double minHeight = 90.0;
                                               _isnavigationPannelOpen = true;
 
                                               semanticShouldBeExcluded = false;
-
-
-
 
                                               StartPDR();
                                               alignMapToPath([
@@ -4134,8 +4180,7 @@ double minHeight = 90.0;
                                     height: 22,
                                   ),
                                   Semantics(
-                                    child: Container(
-                                      height: 522,
+                                    child: Expanded(
                                       child: SingleChildScrollView(
                                         child: Column(
                                           children: [
@@ -4203,7 +4248,7 @@ double minHeight = 90.0;
                                                   label:
                                                       "Your are heading towards ",
                                                   child: Text(
-                                                    PathState.destinationName,
+                                                    angle != null?"${PathState.destinationName} will be ${tools.angleToClocks3(angle)}":PathState.destinationName,
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 16,
@@ -4246,7 +4291,6 @@ double minHeight = 90.0;
   }
 
   void alignMapToPath(List<double> A, List<double> B) {
-
     mapState.tilt = 50;
 
     mapState.bearing = tools.calculateBearing(A, B);
@@ -4264,13 +4308,15 @@ double minHeight = 90.0;
       semanticShouldBeExcluded = false;
     });
   }
+
   bool shouldStepOpen = false;
-  void shouldStepOpenfunc(){
+  void shouldStepOpenfunc() {
     setState(() {
       shouldStepOpen = true;
     });
   }
-  void noshouldStepOpenfunc(){
+
+  void noshouldStepOpenfunc() {
     setState(() {
       shouldStepOpen = false;
     });
@@ -4306,29 +4352,6 @@ double minHeight = 90.0;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    List<Widget> directionWidgets = [];
-    directionWidgets.clear();
-    for (int i = 0; i < PathState.directions.length; i++) {
-      if (PathState.directions[i].keys.first == "Straight") {
-        directionWidgets.add(directionInstruction(
-            direction: "Go " + PathState.directions[i].keys.first,
-            distance: tools
-                .roundToNextInt(PathState.directions[i].values.first * 0.3048)
-                .toString()));
-      } else if (PathState.directions[i].keys.first.substring(0, 4) == "Take") {
-        directionWidgets.add(directionInstruction(
-            direction: PathState.directions[i].keys.first,
-            distance: "Floor $sourceVal -> Floor $destinationVal"));
-      } else {
-        directionWidgets.add(directionInstruction(
-            direction: "Turn " +
-                PathState.directions[i].keys.first +
-                ", and Go Straight",
-            distance: tools
-                .roundToNextInt(PathState.directions[++i].values.first * 0.3048)
-                .toString()));
-      }
-    }
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -4345,7 +4368,6 @@ double minHeight = 90.0;
 
     //implement the turn functionality.
     if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
-
       int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
       if (MotionModel.reached(user, col) == false) {
@@ -4382,9 +4404,7 @@ double minHeight = 90.0;
             //print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1800))
-                .then((value) => {
-                  StartPDR()
-                });
+                .then((value) => {StartPDR()});
 
             setState(() {
               isPdrStop = false;
@@ -4394,10 +4414,7 @@ double minHeight = 90.0;
           }
           if (getPoints[i][0] == user.showcoordX &&
               getPoints[i][1] == user.showcoordY) {
-
-
             //print("points matchedddddddd");
-
 
             StopPDR();
             getPoints.removeAt(i);
@@ -4409,11 +4426,11 @@ double minHeight = 90.0;
 
     return Visibility(
         visible: _isnavigationPannelOpen,
-
         child: Stack(
           children: [
             SlidingUpPanel(
               controller: _panelController,
+              isDraggable: false,
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(24), topRight: Radius.circular(24)),
               boxShadow: [
@@ -4422,7 +4439,7 @@ double minHeight = 90.0;
                   color: Colors.grey,
                 ),
               ],
-              minHeight: minHeight,
+              minHeight: 92,
               maxHeight: screenHeight * 0.9,
               snapPoint: 0.9,
               panel: Container(
@@ -4430,69 +4447,40 @@ double minHeight = 90.0;
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      height: 90,
+                      height: 92,
                       padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  maxHeightBottomSheet=!maxHeightBottomSheet;
-                                });
-                                print("isCLicked");
-
-                                if(!maxHeightBottomSheet){
-                                  print('panel was open');
-                                  _slidePanelDown();
-                                }else{
-                                  print('panel was closeed');
-                                  _slidePanelUpNavigation();
-
-                                }
-
-                                // setState(() {
-                                //   _isnavigationPannelOpen = true;
-                                //   maxHeightBottomSheet=true;
-                                // });
-
-                              },
-                              icon: Semantics(
-                                label: "Expand",
-                                child: Icon(
-                                  Icons.keyboard_arrow_up_outlined,
-                                  size: 36,
-                                  color: Colors.black,
-                                ),
-                              )),
                           Container(
                             child: Focus(
                               autofocus: true,
                               child: Semantics(
-                                onDidGainAccessibilityFocus: noshouldStepOpenfunc,
+                                onDidGainAccessibilityFocus:
+                                    noshouldStepOpenfunc,
                                 child: Row(
                                   children: [
-                                    Semantics(
-                                        excludeSemantics: true,
-                                        child: SvgPicture.asset("assets/navigationVector.svg")),
                                     SizedBox(
                                       width: 12,
                                     ),
                                     Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Semantics(
                                           excludeSemantics: false,
                                           child: Row(
                                             children: [
                                               Semantics(
-                                                label:"Travel time",
+                                                label: "Travel time",
                                                 child: Text(
                                                   "${time.toInt()} min",
                                                   style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 20,
-                                                      fontWeight: FontWeight.w700,
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                       height: 26 / 20,
                                                       color: Color(0xffDC6A01)),
                                                   textAlign: TextAlign.left,
@@ -4510,6 +4498,9 @@ double minHeight = 90.0;
                                               )
                                             ],
                                           ),
+                                        ),
+                                        SizedBox(
+                                          height: 4,
                                         ),
                                         Semantics(
                                           excludeSemantics: true,
@@ -4532,41 +4523,48 @@ double minHeight = 90.0;
                               ),
                             ),
                           ),
-                          IconButton(
-                              onPressed: () {
-                                _isnavigationPannelOpen = false;
-                                user.reset();
-                                PathState = pathState.withValues(
-                                    -1, -1, -1, -1, -1, -1, null, 0);
-                                selectedroomMarker.clear();
-                                pathMarkers.clear();
-                                PathState.path.clear();
-                                PathState.sourcePolyID = "";
-                                PathState.destinationPolyID = "";
-                                singleroute.clear();
-                                fitPolygonInScreen(patch.first);
-                                setState(() {
-                                  if (markers.length > 0) {
-                                    List<double> lvalue = tools.localtoglobal(
-                                        user.showcoordX.toInt(),
-                                        user.showcoordY.toInt());
-                                    markers[user.Bid]?[0] = customMarker.move(
-                                        LatLng(lvalue[0], lvalue[1]),
-                                        markers[user.Bid]![0]);
-                                  }
-                                });
-                              },
-                              icon: Semantics(
-                                label: "Close",
-                                onDidGainAccessibilityFocus:
-                                shouldStepOpenfunc,
-                                child: Icon(
-                                  Icons.cancel_outlined,
-                                  size: 24,
-                                  color: Colors.black,
-                                ),
-                              )
-                          )
+                          Container(height: 40,width: 56,
+                            decoration: BoxDecoration(
+                              color: Color(0xffDF3535),
+                              borderRadius:
+                              BorderRadius.circular(20.0),
+                            ),
+                            child: TextButton(
+                                onPressed: () {
+                                  _isnavigationPannelOpen = false;
+                                  user.reset();
+                                  PathState = pathState.withValues(
+                                      -1, -1, -1, -1, -1, -1, null, 0);
+                                  selectedroomMarker.clear();
+                                  pathMarkers.clear();
+                                  PathState.path.clear();
+                                  PathState.sourcePolyID = "";
+                                  PathState.destinationPolyID = "";
+                                  singleroute.clear();
+                                  fitPolygonInScreen(patch.first);
+                                  setState(() {
+                                    if (markers.length > 0) {
+                                      List<double> lvalue = tools.localtoglobal(
+                                          user.showcoordX.toInt(),
+                                          user.showcoordY.toInt());
+                                      markers[user.Bid]?[0] = customMarker.move(
+                                          LatLng(lvalue[0], lvalue[1]),
+                                          markers[user.Bid]![0]);
+                                    }
+                                  });
+                                },
+                                child: Text(
+                                  "Exit",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xffFFFFFF),
+                                    height: 20/14,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                )),
+                          ),
                         ],
                       ),
                     ),
@@ -4575,129 +4573,6 @@ double minHeight = 90.0;
                       height: 1,
                       color: Color(0xffEBEBEB),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(left: 17, top: 12, right: 17),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-
-
-                          SizedBox(
-                            height: 22,
-                          ),
-                          Semantics(
-
-                            label: "",
-                            child: SizedBox(
-                              height: 522,
-                              child: SingleChildScrollView(
-                                controller: _scrollController,
-                                child: Container(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        margin: EdgeInsets.only(right: 17,bottom: 17),
-                                        child: Semantics(
-                                          header: true,
-                                          label: "Steps preview",
-                                          excludeSemantics: true,
-                                          child: Text(
-                                            "Steps",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xff000000),
-                                              height: 24 / 18,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            height: 25,
-                                            margin: EdgeInsets.only(right: 8),
-                                            child: SvgPicture.asset(
-                                                "assets/StartpointVector.svg"),
-                                          ),
-                                          Text(
-                                            "${PathState.sourceName}",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff0e0d0d),
-                                              height: 25 / 16,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      Container(
-                                        width: screenHeight,
-                                        height: 1,
-                                        color: Color(0xffEBEBEB),
-                                      ),
-                                      Column(
-                                        children: directionWidgets,
-                                      ),
-                                      SizedBox(
-                                        height: 22,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            height: 25,
-                                            margin: EdgeInsets.only(right: 8),
-                                            child: Icon(
-                                              Icons.pin_drop_sharp,
-                                              size: 24,
-                                            ),
-                                          ),
-                                          Semantics(
-                                            label: "Destination",
-                                            onDidGainAccessibilityFocus: excludeFloorSemanticWorkchange,
-                                            child: Text(
-                                              PathState.destinationName,
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff0e0d0d),
-                                                height: 25 / 16,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      Container(
-                                        width: screenHeight,
-                                        height: 1,
-                                        color: Color(0xffEBEBEB),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
                   ],
                 ),
               ),
@@ -4761,7 +4636,6 @@ double minHeight = 90.0;
                     ),
                     Row(
                       children: [
-
                         FocusScope(
                           autofocus: true,
                           child: Semantics(
@@ -4775,7 +4649,7 @@ double minHeight = 90.0;
                               ),
                               child: TextButton(
                                 onPressed: () async {
-                                  if(!rerouting){
+                                  if (!rerouting) {
                                     setState(() {
                                       rerouting = true;
                                     });
@@ -4787,7 +4661,8 @@ double minHeight = 90.0;
                                     user.showcoordY = user.coordY;
                                     PathState.sourceFloor = user.floor;
                                     PathState.sourcePolyID = user.key;
-                                    PathState.sourceName = "Your current location";
+                                    PathState.sourceName =
+                                        "Your current location";
                                     building.landmarkdata!.then((value) async {
                                       await calculateroute(value.landmarksMap!)
                                           .then((value) {
@@ -4795,21 +4670,25 @@ double minHeight = 90.0;
                                         user.path = PathState.path.values
                                             .expand((list) => list)
                                             .toList();
-                                        user.Cellpath = PathState.singleCellListPath;
+                                        user.Cellpath =
+                                            PathState.singleCellListPath;
                                         user.pathobj.index = 0;
                                         user.isnavigating = true;
                                         user.moveToStartofPath().then((value) {
                                           setState(() {
                                             if (markers.length > 0) {
-                                              markers[user.Bid]?[0] =
+                                              markers[user.Bid]?[
+                                                      0] =
                                                   customMarker.move(
                                                       LatLng(
                                                           tools.localtoglobal(
-                                                              user.showcoordX.toInt(),
+                                                              user.showcoordX
+                                                                  .toInt(),
                                                               user.showcoordY
                                                                   .toInt())[0],
                                                           tools.localtoglobal(
-                                                              user.showcoordX.toInt(),
+                                                              user.showcoordX
+                                                                  .toInt(),
                                                               user.showcoordY
                                                                   .toInt())[1]),
                                                       markers[user.Bid]![0]);
@@ -4821,58 +4700,68 @@ double minHeight = 90.0;
                                         _isnavigationPannelOpen = true;
                                         _isreroutePannelOpen = false;
                                         int numCols = building.floorDimenssion[
-                                        PathState.sourceBid]![
-                                        PathState.sourceFloor]![0]; //floor length
-                                        double angle =
-                                        tools.calculateAngleBWUserandPath(
-                                            user,
                                             PathState
-                                                .path[PathState.sourceFloor]![1],
-                                            numCols);
+                                                .sourceBid]![PathState
+                                            .sourceFloor]![0]; //floor length
+                                        double angle =
+                                            tools.calculateAngleBWUserandPath(
+                                                user,
+                                                PathState.path[
+                                                    PathState.sourceFloor]![1],
+                                                numCols);
                                         if (angle != 0) {
-                                          speak("Turn " + tools.angleToClocks(angle));
+                                          speak("Turn " +
+                                              tools.angleToClocks(angle));
                                         } else {}
 
                                         mapState.tilt = 50;
 
-                                        mapState.bearing = tools.calculateBearing([
+                                        mapState.bearing =
+                                            tools.calculateBearing([
                                           user.lat,
                                           user.lng
                                         ], [
                                           PathState
                                               .singleCellListPath[
-                                          user.pathobj.index + 1]
+                                                  user.pathobj.index + 1]
                                               .lat,
                                           PathState
                                               .singleCellListPath[
-                                          user.pathobj.index + 1]
+                                                  user.pathobj.index + 1]
                                               .lng
                                         ]);
                                         _googleMapController.animateCamera(
                                             CameraUpdate.newCameraPosition(
-                                              CameraPosition(
-                                                  target: mapState.target,
-                                                  zoom: mapState.zoom,
-                                                  bearing: mapState.bearing!,
-                                                  tilt: mapState.tilt),
-                                            ));
+                                          CameraPosition(
+                                              target: mapState.target,
+                                              zoom: mapState.zoom,
+                                              bearing: mapState.bearing!,
+                                              tilt: mapState.tilt),
+                                        ));
                                       });
                                     });
                                     rerouting = false;
                                   }
                                 },
-                                child: !rerouting?Text(
-                                  "Reroute",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                ):Container(height: 24,width: 24,child: CircularProgressIndicator(color: Colors.white,),),
-
+                                child: !rerouting
+                                    ? Text(
+                                        "Reroute",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff000000),
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      )
+                                    : Container(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
                             ),
                           ),
@@ -4985,18 +4874,20 @@ double minHeight = 90.0;
 
   void _slidePanelUp() {
     _panelController.open();
-
   }
-  void _slidePanelUpNavigation(){
+
+  void _slidePanelUpNavigation() {
     _panelController.animatePanelToSnapPoint();
   }
 
   void _slidePanelDown() {
     _panelController.close();
   }
+
   void _slidePanelDownNavigation() {
     _panelController.animatePanelToPosition(90.0);
   }
+
   bool _isFilterOpen = false;
   bool isLiveLocalizing = false;
 
@@ -6131,12 +6022,11 @@ double minHeight = 90.0;
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty)?290:90,
+            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
                 element.workingDays != null && element.workingDays!.length > 0
                     ? 220 / screenHeight
                     : 175 / screenHeight,
-
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -6201,30 +6091,37 @@ double minHeight = 90.0;
                     width: screenWidth,
                     color: Color(0xffebebeb),
                   ),
+                  (getallnearestInfo.isNotEmpty)
+                      ? Expanded(
+                          child: ListView.builder(
+                              itemCount: getallnearestInfo.length,
+                              scrollDirection: Axis.vertical,
+                              physics: ScrollPhysics(),
+                              itemBuilder: (BuildContext context, int index) {
+                                nearestLandInfo currentInfo =
+                                    getallnearestInfo[index];
+                                print("currentInfo");
+                                print(currentInfo);
 
-
-                      ( getallnearestInfo.isNotEmpty)?
-                      Expanded(child:
-                      ListView.builder(
-                          itemCount: getallnearestInfo.length,
-                          scrollDirection: Axis.vertical,
-                          physics: ScrollPhysics(),
-                          itemBuilder: (BuildContext context,int index){
-
-                            nearestLandInfo currentInfo=getallnearestInfo[index];
-                            print("currentInfo");
-                            print(currentInfo);
-
-                            return ListTile(
-                              contentPadding: EdgeInsets.all(0.0),
-                              leading: Text(currentInfo.name.toString(),style: TextStyle(color: Colors.black,fontSize: 15)),title:Align(alignment:  Alignment(0.05, 0),child: Text(currentInfo.buildingName.toString(),style: TextStyle(color: Colors.black,fontSize: 15))),trailing:Text("Floor ${currentInfo.floor.toString()}",style: TextStyle(color: Colors.black,fontSize: 15)),);
-                          })):SizedBox(
-
-                      ),
-
-
-
-
+                                return ListTile(
+                                  contentPadding: EdgeInsets.all(0.0),
+                                  leading: Text(currentInfo.name.toString(),
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 15)),
+                                  title: Align(
+                                      alignment: Alignment(0.05, 0),
+                                      child: Text(
+                                          currentInfo.buildingName.toString(),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 15))),
+                                  trailing: Text(
+                                      "Floor ${currentInfo.floor.toString()}",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 15)),
+                                );
+                              }))
+                      : SizedBox(),
                 ],
               ),
             ),
@@ -6587,7 +6484,6 @@ double minHeight = 90.0;
                   height: 500,
                 ),
               ),
-
             )
           : isLoading
               ? Scaffold(
@@ -6667,7 +6563,6 @@ double minHeight = 90.0;
                             onCameraMoveStarted: () {
                               mapState.interaction2 = false;
                             },
-
                           ),
                         ),
                       ),
@@ -6684,7 +6579,6 @@ double minHeight = 90.0;
                             ),
                             height: 20,
                             width: 20,
-
                           )),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
@@ -6701,20 +6595,24 @@ double minHeight = 90.0;
                                 child: Container(
                                     decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(24))),
                                     child: IconButton(
                                         onPressed: () {
-
                                           //StartPDR();
 
-                                          bool isvalid = MotionModel.isValidStep(
-                                              user,
-                                              building.floorDimenssion[user.Bid]![user.floor]![0],
-                                              building.floorDimenssion[user.Bid]![user.floor]![1],
-                                              building.nonWalkable[user.Bid]![user.floor]!,
-                                              reroute);
+                                          bool isvalid =
+                                              MotionModel.isValidStep(
+                                                  user,
+                                                  building.floorDimenssion[user
+                                                      .Bid]![user.floor]![0],
+                                                  building.floorDimenssion[user
+                                                      .Bid]![user.floor]![1],
+                                                  building.nonWalkable[
+                                                      user.Bid]![user.floor]!,
+                                                  reroute);
                                           if (isvalid) {
-                                            user.move().then((value){
+                                            user.move().then((value) {
                                               renderHere();
                                             });
                                           } else {
@@ -6723,39 +6621,41 @@ double minHeight = 90.0;
                                               // showToast("You are out of path");
                                             }
                                           }
-
-                                        }, icon: Icon(Icons.directions_walk))),
+                                        },
+                                        icon: Icon(Icons.directions_walk))),
                               ),
-
-
 
                               SizedBox(height: 28.0),
                               Text("${user.theta}"),
-                              Slider(value: user.theta,min: -180,max: 180, onChanged: (newvalue){
-
-                                double? compassHeading = newvalue;
-                                setState(() {
-                                  user.theta = compassHeading!;
-                                  if (mapState.interaction2) {
-                                    mapState.bearing = compassHeading!;
-                                    _googleMapController.moveCamera(
-                                      CameraUpdate.newCameraPosition(
-                                        CameraPosition(
-                                          target: mapState.target,
-                                          zoom: mapState.zoom,
-                                          bearing: mapState.bearing!,
-                                        ),
-                                      ),
-                                      //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                    );
-                                  } else {
-                                    if (markers.length > 0)
-                                      markers[user.Bid]?[0] =
-                                          customMarker.rotate(compassHeading! - mapbearing, markers[user.Bid]![0]);
-                                  }
-                                });
-
-                              }),
+                              Slider(
+                                  value: user.theta,
+                                  min: -180,
+                                  max: 180,
+                                  onChanged: (newvalue) {
+                                    double? compassHeading = newvalue;
+                                    setState(() {
+                                      user.theta = compassHeading!;
+                                      if (mapState.interaction2) {
+                                        mapState.bearing = compassHeading!;
+                                        _googleMapController.moveCamera(
+                                          CameraUpdate.newCameraPosition(
+                                            CameraPosition(
+                                              target: mapState.target,
+                                              zoom: mapState.zoom,
+                                              bearing: mapState.bearing!,
+                                            ),
+                                          ),
+                                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                        );
+                                      } else {
+                                        if (markers.length > 0)
+                                          markers[user.Bid]?[0] =
+                                              customMarker.rotate(
+                                                  compassHeading! - mapbearing,
+                                                  markers[user.Bid]![0]);
+                                      }
+                                    });
+                                  }),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(
@@ -6876,7 +6776,8 @@ double minHeight = 90.0;
                                   },
                                   child: Semantics(
                                     label: "Localize",
-                                    onDidGainAccessibilityFocus: close_isnavigationPannelOpen,
+                                    onDidGainAccessibilityFocus:
+                                        close_isnavigationPannelOpen,
                                     child: Icon(
                                       Icons.my_location_sharp,
                                       color: Colors.black,
@@ -6958,7 +6859,8 @@ double minHeight = 90.0;
                                   autofocus: true,
                                   child: Focus(
                                     child: Semantics(
-                                      sortKey: const OrdinalSortKey(0), // header: true,
+                                      sortKey: const OrdinalSortKey(
+                                          0), // header: true,
                                       child: HomepageSearch(
                                         onVenueClicked: onLandmarkVenueClicked,
                                         fromSourceAndDestinationPage:
@@ -7001,7 +6903,6 @@ double minHeight = 90.0;
                       //     },
                       //     child: Icon(Icons.add)
                       // ),
-
 
                       // FloatingActionButton(
                       //   onPressed: () async {
@@ -7052,12 +6953,9 @@ double minHeight = 90.0;
                       //   backgroundColor: Colors
                       //       .white, // Set the background color of the FAB
                       // ),
-
                     ],
                   ),
-
                 ),
-
     );
   }
   //
@@ -7173,10 +7071,8 @@ double minHeight = 90.0;
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-              (a, b) =>
-              b.value.compareTo(a.value)); // Sorting in descending order
+          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }
-
 }

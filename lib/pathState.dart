@@ -1,6 +1,7 @@
 import 'package:iwayplusnav/Cell.dart';
 
 import 'APIMODELS/landmark.dart';
+import 'directionClass.dart';
 
 class pathState {
   String sourcePolyID = "";
@@ -18,7 +19,7 @@ class pathState {
   List<int> singleListPath = [];
   List<Cell> singleCellListPath = [];
   List<Cell> CellTurnPoints = [];
-  List<Map<String, int>> directions = [];
+  List<direction> directions = [];
   Map<String,Map<int,int>>? numCols = Map();
   int index = 0;
   String sourceBid = "";

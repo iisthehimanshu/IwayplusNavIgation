@@ -1,8 +1,8 @@
 import 'APIMODELS/landmark.dart';
 
 class direction{
-  int node;
-  String turnDirection;
+  int? node;
+  String? turnDirection;
   Landmarks? nearbyLandmark;
   double? distanceToPrevTurn;
   double? distanceToNextTurn;

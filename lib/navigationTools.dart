@@ -10,6 +10,7 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'directionClass.dart';
 import 'path.dart';
 
 class tools {
@@ -21,7 +22,7 @@ class tools {
 
   static Future<void> fetchData() async {
     await patchAPI().fetchPatchData().then((value) {
-      print("object ${value.patchData!.coordinates.toString()}");
+      //print("object ${value.patchData!.coordinates.toString()}");
       _cachedCordData = value.patchData!.coordinates;
     });
   }
@@ -88,7 +89,7 @@ class tools {
       {PDM.patchDataModel? patchData = null}) {
     x = x - UserState.xdiff;
     y = y - UserState.ydiff;
-    //print("Wilsonlocaltoglobal started");
+    ////print("Wilsonlocaltoglobal started");
     PDM.patchDataModel Data = PDM.patchDataModel();
     if (patchData != null) {
       Data = patchData;
@@ -297,6 +298,22 @@ class tools {
     }
   }
 
+  static String angleToClocks3(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    if (angle >= 315 || angle <= 45) {
+      return "on your front";
+    } else if (angle > 45 && angle <= 180) {
+      return "on your Right";
+    } else if (angle > 180 && angle <= 315) {
+      return "on your Left";
+    } else {
+      return "on your Front";
+    }
+  }
+
 
   static String angleToClocksForNearestLandmarkToBeacon(double angle) {
     if (angle < 0) {
@@ -371,16 +388,16 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("AAAAAA $a");
-    print("B $b");
-    print("C $c");
+    // //print("AAAAAA $a");
+    // //print("B $b");
+    // //print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
 
 
-    // print("ab----${ab}");
-    // print("ac-----${ac}");
+    // //print("ab----${ab}");
+    // //print("ac-----${ac}");
 
     // Calculate the dot product of the two vectors
     double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
@@ -398,16 +415,16 @@ class tools {
     // Convert radians to degrees
     double angleInDegrees = angleInRadians * 180 / pi;
 
-    print(angleInDegrees);
+    // //print(angleInDegrees);
 
     return angleInDegrees;
   }
 
 
     static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
-    // print("AAAAAA $a");
-    // print("B $b");
-    // print("C $c");
+    // //print("AAAAAA $a");
+    // //print("B $b");
+    // //print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -433,9 +450,9 @@ class tools {
     List<int> b = [user.showcoordX+tval[0], user.showcoordY+tval[1]];
     List<int> c = [node % cols , node ~/cols];
 
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // //print("A $a");
+    // //print("B $b");
+    // //print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -502,11 +519,11 @@ class tools {
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    // print("AA $a");
-    // print("BB $b");
-    // print("CC $c");
-    // print("DD ${node.move.toString()}");
-    // print("EE ${theta}");
+    // //print("AA $a");
+    // //print("BB $b");
+    // //print("CC $c");
+    // //print("DD ${node.move.toString()}");
+    // //print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -539,14 +556,18 @@ class tools {
     return angleInDegrees;
   }
 
+  //static setUpUserFromPath
+
+
+
   static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
 
     List<int> b = [node2 % cols , node2 ~/cols];
     List<int> c = [node3 % cols , node3 ~/cols];
 
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // //print("A $a");
+    // //print("B $b");
+    // //print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -585,9 +606,9 @@ class tools {
     List<int> b = [node2 % cols , node2 ~/cols];
     List<int> c = [node3 % cols , node3 ~/cols];
 
-    print("A $a");
-    print("B $b");
-    print("C $c");
+    // //print("A $a");
+    // //print("B $b");
+    // //print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -620,53 +641,21 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<Map<String, int>> getDirections(List<int> path, int columns) {
-    List<Map<String, int>> directions = [
-      {"Straight": 1}
-    ];
-
-    for (int i = 1; i < path.length - 1; i++) {
-      int prev = path[i - 1];
-      int current = path[i];
-      int next = path[i + 1];
-
-      // Compare current and next nodes' indices to determine direction
-
-      int prevrow = prev % columns;
-      int prevrcol = prev ~/ columns;
-      int currrow = current % columns;
-      int currcol = current ~/ columns;
-      int nextrrow = next % columns;
-      int nextrcol = next ~/ columns;
-
-      double angle = calculateAngle(
-          [prevrow, prevrcol], [currrow, currcol], [nextrrow, nextrcol]);
-      String dir = angleToClocks(angle);
-      if (directions.isNotEmpty) {
-        if (directions.last.keys.first != dir) {
-          Map<String, int> innermap = {dir: 1};
-          directions.add(innermap);
-        } else {
-          directions.last[dir] = directions.last[dir]! + 1;
-        }
-      } else {
-        Map<String, int> innermap = {dir: 1};
-        directions.add(innermap);
-      }
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark) {
+    List<int> turns = tools.getTurnpoints(path, columns);
+    turns.insert(0, path[0]);
+    turns.add(path.last);
+    double Nextdistance = tools.calculateDistance([turns[0]%columns,turns[0]~/columns], [turns[1]%columns,turns[1]~/columns]);
+    List<direction> Directions = [direction(path[0], "Straight", null, Nextdistance, null)];
+    for(int i = 1 ; i<turns.length-1 ; i++){
+      int index = path.indexOf(turns[i]);
+      double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
+      double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
+      double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
+      String direc = tools.angleToClocks(angle);
+      Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance));
     }
-    String dir = "Straight";
-    if (directions.isNotEmpty) {
-      if (directions.last.keys.first != dir) {
-        Map<String, int> innermap = {dir: 1};
-        directions.add(innermap);
-      } else {
-        directions.last[dir] = directions.last[dir]! + 1;
-      }
-    } else {
-      Map<String, int> innermap = {dir: 1};
-      directions.add(innermap);
-    }
-    return directions;
+    return Directions;
   }
 
   static int roundToNextInt(double number) {
@@ -680,12 +669,12 @@ class tools {
       Map<String, Landmarks> landmarksMap,
       int distance,
       int numCols,
-      int floor) {
-    print("called");
+      int floor,
+      String bid) {
     List<Landmarks> nearbyLandmarks = [];
     for (int node in path) {
       landmarksMap.forEach((key, value) {
-        if (floor == value.floor && value.name != null && (value.name!.toLowerCase().contains("entry") || value.name!.toLowerCase().contains("corridor"))) {
+        if (floor == value.floor && value.name != null && value.buildingID == bid && value.element!.subType != "beacons" && value.element!.subType != "lift") {
           List<int> pCoord = computeCellCoordinates(node, numCols);
           double d = 0.0;
           if (value.doorX == null) {
@@ -696,9 +685,9 @@ class tools {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
-            print(value.name);
-            print(d);
+
             if (!nearbyLandmarks.contains(value)) {
+              print("adding ${value.name} [${value.doorX??value.coordinateX},${value.doorY??value.coordinateY}]  for point $pCoord with distance $d");
               nearbyLandmarks.add(value);
             }
           }
@@ -710,7 +699,6 @@ class tools {
 
 
   static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -730,14 +718,11 @@ class tools {
               nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
                   doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
-              print("distance b/w beacon and location${d}");
-              print(value.name);
+              //print(value.name);
             }
           }else{
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            print("distance b/w beacon and location${d}");
-            print(value.name);
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
                 doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
@@ -750,17 +735,13 @@ class tools {
     late nearestLandInfo nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-      print("entry.key");
-
-      print(entry.key.name);
       nearestLandmark = entry.key;
     }else{
-      print("priorityQueue.isEmpty");
+      //print("priorityQueue.isEmpty");
     }
     return nearestLandmark;
   }
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-    print("called");
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -775,8 +756,8 @@ class tools {
           if (value.doorX != null) {
             d = calculateDistance(
                 pCoord, [value.doorX!, value.doorY!]);
-            print("distance b/w beacon and location${d}");
-            print(value.name);
+            //print("distance b/w beacon and location${d}");
+            //print(value.name);
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
                 doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
@@ -785,8 +766,8 @@ class tools {
           }else{
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            print("distance b/w beacon and location${d}");
-            print(value.name);
+            //print("distance b/w beacon and location${d}");
+            //print(value.name);
             if (d<distance) {
               nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
                 doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
@@ -799,20 +780,20 @@ class tools {
     List<nearestLandInfo> nearestLandmark=[];
     if(priorityQueue.isNotEmpty){
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-      print("entry.key");
+      //print("entry.key");
       while(priorityQueue.isNotEmpty)
         {
           MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
           nearestLandmark.add(entry.key);
         }
     }else{
-      print("priorityQueue.isEmpty");
+      //print("priorityQueue.isEmpty");
     }
     return nearestLandmark;
   }
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
-    print("called");
+    //print("called");
 
     int distance=10;
     List<int> coordinates=[];
@@ -846,7 +827,7 @@ class tools {
   }
   static List<List<int>> localizefindNearbyListLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
-    print("called");
+    //print("called");
 
     int distance=10;
     List<List<int>> finalCords=[];
@@ -931,8 +912,8 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    // print("angleee-----${angle}");
-    // print(AngleBetweenBuildingandGlobalNorth);
+    // //print("angleee-----${angle}");
+    // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -958,12 +939,43 @@ class tools {
     }
   }
 
+  static List<int> eightcelltransitionforTurns(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    // //print("angleee-----${angle}");
+    // //print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    if (angle >= 345 || angle <= 15) {
+      return [0, -1];
+    } else if (angle > 30 && angle <= 60) {
+      return [1, -1];
+    } else if (angle > 75 && angle <= 105) {
+      return [1, 0];
+    } else if (angle > 120 && angle <= 150) {
+      return [1, 1];
+    } else if (angle > 165 && angle <= 195) {
+      return [0, 1];
+    } else if (angle > 210 && angle <= 240) {
+      return [-1, 1];
+    } else if (angle > 255 && angle <= 285) {
+      return [-1, 0];
+    } else if (angle > 300 && angle <= 330) {
+      return [-1, -1];
+    } else {
+      return [0, 0];
+    }
+  }
+
 
   static List<int> fourcelltransition(double angle) {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+   // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -986,7 +998,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    ////print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1001,11 +1013,11 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontal(double angle) {
-    print("first $angle");
+    //print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
     }
-    print(AngleBetweenBuildingandGlobalNorth);
+    ////print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1019,7 +1031,7 @@ class tools {
     }
   }
 
-  static Map<int,Landmarks> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols){
+  static Future<Map<int,Landmarks>> associateTurnWithLandmark(List<int> path, List<Landmarks> landmarks, int numCols,)async{
     Map<int,Landmarks> ls = {};
     List<int> turns = [];
     for(int i = 1 ; i<path.length-1 ; i++){
@@ -1042,28 +1054,44 @@ class tools {
       int vector2Y = nextY - currentY;
 
       // Calculate the cross product of vector1 and vector2
-      int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
-
-      if(crossProduct != 0){
+      int dotProduct = vector1X * vector2X + vector1Y * vector2Y;
+      if(dotProduct == 0){
         turns.add(currPos);
       }
 
 
     }
 
-    landmarks.forEach((element) {
-      double d = 1000000;
-      int? t;
-      turns.forEach((turn) {
-        if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols])<d){
-          d = tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols]);
-          t = turn;
+    turns.forEach((turn) {
+      double d = 6.5;
+      Landmarks? land;
+      landmarks.forEach((element) {
+        double distance = tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols]);
+        if(distance<d){
+          land = element;
+          d = distance;
         }
       });
-      if(t != null){
-        ls[t!] = element;
+      if(land != null){
+        ls[turn] = land!;
       }
+
+
     });
+
+    // landmarks.forEach((element) {
+    //   double d = 1000000;
+    //   int? t;
+    //   turns.forEach((turn) {
+    //     if(tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols])<d){
+    //       d = tools.calculateDistance([element.coordinateX!,element.coordinateY!], [turn%numCols,turn~/numCols]);
+    //       t = turn;
+    //     }
+    //   });
+    //   if(t != null){
+    //     ls[t!] = element;
+    //   }
+    // });
 
     return ls;
   }
@@ -1284,8 +1312,8 @@ class tools {
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
-    // print("@@@@@ $x1,$y1");
-    // print("&&&&& $x2,$y2");
+    // //print("@@@@@ $x1,$y1");
+    // //print("&&&&& $x2,$y2");
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();

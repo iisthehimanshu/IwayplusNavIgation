@@ -106,6 +106,7 @@ class Navigation extends StatefulWidget {
 
   @override
   State<Navigation> createState() => _NavigationState();
+
 }
 
 class _NavigationState extends State<Navigation> {
@@ -121,6 +122,8 @@ class _NavigationState extends State<Navigation> {
   Set<Polygon> otherpatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
+  Set<gmap.Polyline> focusturn = Set();
+  Set<Marker> focusturnArrow = Set();
   Map<String, Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
@@ -2004,7 +2007,7 @@ class _NavigationState extends State<Navigation> {
                       );
                       setState(() {
                         if (building.selectedLandmarkID != polyArray.id &&
-                            !user.isnavigating) {
+                            !user.isnavigating && !_isRoutePanelOpen) {
                           user.reset();
                           PathState = pathState.withValues(
                               -1, -1, -1, -1, -1, -1, null, 0);
@@ -2357,7 +2360,8 @@ class _NavigationState extends State<Navigation> {
                 )));
           });
         } else if (landmarks[i].name != null &&
-            landmarks[i].name!.toLowerCase().contains("lift") && landmarks[i].element!.subType != "room door") {
+            landmarks[i].name!.toLowerCase().contains("lift") &&
+            landmarks[i].element!.subType != "room door") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -3264,7 +3268,6 @@ class _NavigationState extends State<Navigation> {
       print(PathState.path.keys);
       print(pathMarkers.keys);
     }
-
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3317,7 +3320,7 @@ class _NavigationState extends State<Navigation> {
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 5, numCols, floor, bid!);
-      PathState.nearbyLandmarks = nearbyLandmarks;
+      pathState.nearbyLandmarks = nearbyLandmarks;
       // PathState.nearbyLandmarks.forEach((element) {
       //   print(element.name);
       // });
@@ -3330,10 +3333,11 @@ class _NavigationState extends State<Navigation> {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(
-              direction(-1, "Take ${liftName}", null, null, floor.toDouble()));
+          directions.add(direction(-1, "Take ${liftName}", null, null,
+              floor.toDouble(), null, null, floor, bid ?? ""));
         }
-        directions.addAll(tools.getDirections(path, numCols, value));
+        directions.addAll(
+            tools.getDirections(path, numCols, value, floor, bid ?? "",PathState));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -3558,11 +3562,19 @@ class _NavigationState extends State<Navigation> {
       semanticShouldBeExcluded = true;
     });
     double? angle;
-    if(PathState.singleCellListPath.isNotEmpty){
+    if (PathState.singleCellListPath.isNotEmpty) {
       int l = PathState.singleCellListPath.length;
-      angle = tools.calculateAngle([PathState.singleCellListPath[l-2].x, PathState.singleCellListPath[l-2].y], [PathState.singleCellListPath[l-1].x,PathState.singleCellListPath[l-1].y], [PathState.destinationX,PathState.destinationY]);
+      angle = tools.calculateAngle([
+        PathState.singleCellListPath[l - 2].x,
+        PathState.singleCellListPath[l - 2].y
+      ], [
+        PathState.singleCellListPath[l - 1].x,
+        PathState.singleCellListPath[l - 1].y
+      ], [
+        PathState.destinationX,
+        PathState.destinationY
+      ]);
     }
-
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -4179,102 +4191,101 @@ class _NavigationState extends State<Navigation> {
                                   SizedBox(
                                     height: 22,
                                   ),
-                                  Semantics(
-                                    child: Expanded(
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Semantics(
-                                              excludeSemantics: false,
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Container(
-                                                    height: 25,
-                                                    margin: EdgeInsets.only(
-                                                        right: 8),
-                                                    child: SvgPicture.asset(
-                                                        "assets/StartpointVector.svg"),
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        Semantics(
+                                          excludeSemantics: false,
+                                          child: Row(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                height: 25,
+                                                margin: EdgeInsets.only(
+                                                    right: 8),
+                                                child: SvgPicture.asset(
+                                                    "assets/StartpointVector.svg"),
+                                              ),
+                                              Semantics(
+                                                label:
+                                                "Steps preview,    You are heading from",
+                                                child: Text(
+                                                  "${PathState.sourceName}",
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w400,
+                                                    color:
+                                                    Color(0xff0e0d0d),
+                                                    height: 25 / 16,
                                                   ),
-                                                  Semantics(
-                                                    label:
-                                                        "Steps preview,    You are heading from",
-                                                    child: Text(
-                                                      "${PathState.sourceName}",
-                                                      style: const TextStyle(
-                                                        fontFamily: "Roboto",
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                        color:
-                                                            Color(0xff0e0d0d),
-                                                        height: 25 / 16,
-                                                      ),
-                                                      textAlign: TextAlign.left,
-                                                    ),
-                                                  )
-                                                ],
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Container(
+                                          width: screenHeight,
+                                          height: 1,
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                        Column(
+                                          children: directionWidgets,
+                                        ),
+                                        SizedBox(
+                                          height: 22,
+                                        ),
+                                        Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              height: 25,
+                                              margin:
+                                              EdgeInsets.only(right: 8),
+                                              child: Icon(
+                                                Icons.pin_drop_sharp,
+                                                size: 24,
                                               ),
                                             ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
-                                            Column(
-                                              children: directionWidgets,
-                                            ),
-                                            SizedBox(
-                                              height: 22,
-                                            ),
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  height: 25,
-                                                  margin:
-                                                      EdgeInsets.only(right: 8),
-                                                  child: Icon(
-                                                    Icons.pin_drop_sharp,
-                                                    size: 24,
-                                                  ),
+                                            Semantics(
+                                              label:
+                                              "Your are heading towards ",
+                                              child: Text(
+                                                angle != null
+                                                    ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
+                                                    : PathState
+                                                    .destinationName,
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight:
+                                                  FontWeight.w400,
+                                                  color: Color(0xff0e0d0d),
+                                                  height: 25 / 16,
                                                 ),
-                                                Semantics(
-                                                  label:
-                                                      "Your are heading towards ",
-                                                  child: Text(
-                                                    angle != null?"${PathState.destinationName} will be ${tools.angleToClocks3(angle)}":PathState.destinationName,
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff0e0d0d),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.left,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                            Container(
-                                              width: screenHeight,
-                                              height: 1,
-                                              color: Color(0xffEBEBEB),
-                                            ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            )
                                           ],
                                         ),
-                                      ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Container(
+                                          width: screenHeight,
+                                          height: 1,
+                                          color: Color(0xffEBEBEB),
+                                        ),
+                                      ],
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                             )
@@ -4383,7 +4394,7 @@ class _NavigationState extends State<Navigation> {
 
         List<int> c = [node % col, node ~/ col];
         int val = tools.calculateAngleSecond(a, b, c).toInt();
-        print("val $val");
+        //print("val $val");
 
         // print("user corrds");
         // print("${user.showcoordX}+" "+ ${user.showcoordY}");
@@ -4523,11 +4534,12 @@ class _NavigationState extends State<Navigation> {
                               ),
                             ),
                           ),
-                          Container(height: 40,width: 56,
+                          Container(
+                            height: 40,
+                            width: 56,
                             decoration: BoxDecoration(
                               color: Color(0xffDF3535),
-                              borderRadius:
-                              BorderRadius.circular(20.0),
+                              borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: TextButton(
                                 onPressed: () {
@@ -4560,7 +4572,7 @@ class _NavigationState extends State<Navigation> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Color(0xffFFFFFF),
-                                    height: 20/14,
+                                    height: 20 / 14,
                                   ),
                                   textAlign: TextAlign.left,
                                 )),
@@ -4578,13 +4590,15 @@ class _NavigationState extends State<Navigation> {
               ),
             ),
             DirectionHeader(
-                user: user,
-                paint: paintUser,
-                repaint: repaintUser,
-                reroute: reroute,
-                moveUser: moveUser,
-                closeNavigation: closeNavigation,
-                isRelocalize: false)
+              user: user,
+              paint: paintUser,
+              repaint: repaintUser,
+              reroute: reroute,
+              moveUser: moveUser,
+              closeNavigation: closeNavigation,
+              isRelocalize: false,
+              focusOnTurn: focusOnTurn,
+            )
           ],
         ));
   }
@@ -6176,10 +6190,10 @@ class _NavigationState extends State<Navigation> {
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
     polylines.forEach((key, value) {
-      poly = poly.union(value);
+      poly = poly.union(value).union(focusturn);
     });
     interBuildingPath.forEach((key, value) {
-      poly = poly.union(value);
+      poly = poly.union(value).union(focusturn);
     });
     return poly;
   }
@@ -6411,6 +6425,86 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+
+
+  focusOnTurn(direction turn)async{
+    focusturnArrow.clear();
+    if (turn.x != null && turn.y != null && turn.numCols != null) {
+      int i = user.path.indexWhere((element) => element == turn.node);
+      if(building.floor[buildingAllApi.getStoredString()] != turn.floor){
+        i++;
+      }else{
+        i--;
+      }
+      
+      //List<LatLng> coordinates = [];
+      BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(44, 44)),
+        'assets/greytorch.png',
+      );
+      // for(int a = i;a>i-5;a--){
+      //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
+      //     break;
+      //   }
+      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
+      //   coordinates.insert(0,LatLng(ltln[0], ltln[1]));
+      // }
+      //
+      // for(int a = i+1;a<i+6;a++){
+      //   // if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
+      //   //   break;
+      //   // }
+      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
+      //   coordinates.add(LatLng(ltln[0], ltln[1]));
+      // }
+
+      if (turn.floor != null &&
+          building.floor[buildingAllApi.getStoredString()] != turn.floor) {
+        building.floor[buildingAllApi.getStoredString()] = turn.floor!;
+        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+      }
+
+
+
+      List<int> nextPoint = [
+        user.path[i] % turn.numCols!,
+        user.path[i] ~/ turn.numCols!
+      ];
+      List<double> latlng = tools.localtoglobal(turn.x!, turn.y!,
+          patchData: building.patchData[turn.Bid]);
+      List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
+          patchData: building.patchData[turn.Bid]);
+
+
+      setState(() {
+        // focusturn.add(gmap.Polyline(
+        //   polylineId: PolylineId("focusturn"),
+        //   points: coordinates,
+        //   color: Colors.blue,
+        //   width: 5,
+        // ));
+
+        focusturnArrow.add(Marker(markerId: MarkerId("focusturn"),
+            position: LatLng(latlng[0], latlng[1]),
+            icon: greytorch,
+            anchor: Offset(0.5, 0.5)
+        ));
+      });
+
+
+      mapState.target = LatLng(latlng[0], latlng[1]);
+      mapState.bearing = tools
+          .calculateBearing([latlng2[0], latlng2[1]], [latlng[0], latlng[1]]);
+      _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: mapState.target,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!,
+            tilt: mapState.tilt),
+      ));
+    }
+  }
+
   void focusBuildingChecker(CameraPosition position) {
     // LatLng currentLatLng = position.target;
     // double distanceThreshold = 100.0;
@@ -6524,7 +6618,7 @@ class _NavigationState extends State<Navigation> {
                                     building.floor[
                                         buildingAllApi.getStoredString()]]!)
                                 : getCombinedPolylines(),
-                            markers: getCombinedMarkers(),
+                            markers: getCombinedMarkers().union(focusturnArrow),
                             onTap: (x) {
                               mapState.interaction = true;
                             },

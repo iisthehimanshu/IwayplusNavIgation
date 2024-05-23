@@ -193,18 +193,18 @@ class UserState{
         speak("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
       }
 
-      if(pathobj.nearbyLandmarks.isNotEmpty){
-        pathobj.nearbyLandmarks.forEach((element) {
+      if(pathState.nearbyLandmarks.isNotEmpty){
+        pathState.nearbyLandmarks.forEach((element) {
           if(element.element!.subType == "room door" && element.properties!.polygonExist != true){
             if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=3){
               speak("Passing by ${element.name}");
-              pathobj.nearbyLandmarks.remove(element);
+              pathState.nearbyLandmarks.remove(element);
             }
           }else{
             if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
               double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
               speak("${element.name} is on your ${tools.angleToClocks(agl)}");
-              pathobj.nearbyLandmarks.remove(element);
+              pathState.nearbyLandmarks.remove(element);
             }
           }
         });

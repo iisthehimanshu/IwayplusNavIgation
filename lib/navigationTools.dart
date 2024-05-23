@@ -747,8 +747,7 @@ class tools {
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
-        if (Beacon.floor! == value.floor) {
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
           pCoord.add(Beacon.coordinateY!);
@@ -775,7 +774,7 @@ class tools {
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
-        }
+
       }
     });
     List<nearestLandInfo> nearestLandmark=[];

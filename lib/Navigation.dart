@@ -13,6 +13,7 @@ import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
+import 'package:iwayplusnav/Elements/ExploreModeWidget.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
@@ -106,7 +107,6 @@ class Navigation extends StatefulWidget {
 
   @override
   State<Navigation> createState() => _NavigationState();
-
 }
 
 class _NavigationState extends State<Navigation> {
@@ -140,7 +140,6 @@ class _NavigationState extends State<Navigation> {
   bool _isnavigationPannelOpen = false;
   bool _isreroutePannelOpen = false;
   bool _isBuildingPannelOpen = true;
-  bool _isNearestLandmarkPannelOpen = false;
   bool _isFilterPanelOpen = false;
   bool checkedForPolyineUpdated = false;
   bool checkedForPatchDataUpdated = false;
@@ -622,25 +621,24 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-List<List<int>> nearbyLandmarkCoords=[];
-  List<String> finalDirections=[];
-  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<nearestLandInfo> nearbyLandmarkCoords){
-    finalDirections.clear();
-    for(int i=0;i<nearbyLandmarkCoords.length;i++)
-    {
-      double value =
-      tools.calculateAngle2(userCords,newUserCord,[nearbyLandmarkCoords[i].coordinateX!,nearbyLandmarkCoords[i].coordinateY!]);
+  List<String> finalDirections = [];
+  List<String> calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord,
+      List<nearestLandInfo> nearbyLandmarkCoords) {
+    List<String> finalDirections = [];
+    for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
+      double value = tools.calculateAngle2(userCords, newUserCord, [
+        nearbyLandmarkCoords[i].coordinateX!,
+        nearbyLandmarkCoords[i].coordinateY!
+      ]);
 
       // print("value----");
       // print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
       // print(finalvalue);
       finalDirections.add(finalvalue);
     }
-    setState(() {
-      finalDirections;
-    });
+    return finalDirections;
+
   }
 
   void repaintUser(String nearestBeacon) {
@@ -659,36 +657,19 @@ List<List<int>> nearbyLandmarkCoords=[];
       ImageConfiguration(size: Size(44, 44)),
       'assets/tealtorch.png',
     );
-    List<int> landCords = [];
     if (apibeaconmap[nearestBeacon] != null) {
+
+      //buildingAngle compute
       tools.angleBetweenBuildingAndNorth(
           apibeaconmap[nearestBeacon]!.buildingID!);
 
+      //nearestLandmark compute
       await building.landmarkdata!.then((value) {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        landCords = tools.localizefindNearbyLandmarkCoordinated(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-
-
-        nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        if(isLiveLocalizing){
-          setState(() {
-            getallnearestInfo=tools.localizefindAllNearbyLandmark(
-                apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-          });
-        }
-
-
-        if (landCords.isEmpty) {
-          landCords = [
-            apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!
-          ];
-        } else {}
       });
-      print("nearestLandInfomation");
-      print(nearestLandInfomation);
+
+
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -700,6 +681,7 @@ List<List<int>> nearbyLandmarkCoords=[];
 
       List<double> values = [];
 
+      //floor alignment
       if (apibeaconmap[nearestBeacon]!.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
@@ -718,7 +700,8 @@ List<List<int>> nearbyLandmarkCoords=[];
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
       }
-      print("testingbeaon $values");
+
+
       LatLng beaconLocation = LatLng(values[0], values[1]);
       mapState.target = LatLng(values[0], values[1]);
 
@@ -795,15 +778,16 @@ List<List<int>> nearbyLandmarkCoords=[];
           createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
       });
-      double value =
 
-      tools.calculateAngle2(userCords,newUserCord,[nearestLandInfomation.coordinateX!,nearestLandInfomation.coordinateY!]);
+
+      double value = tools.calculateAngle2(userCords, newUserCord, [
+        nearestLandInfomation.coordinateX!,
+        nearestLandInfomation.coordinateY!
+      ]);
 
       print("value----");
       print(value);
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value);
-      calcDirectionsExploreMode(userCords,newUserCord,getallnearestInfo);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
       // double value =
       //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
@@ -812,19 +796,18 @@ List<List<int>> nearbyLandmarkCoords=[];
 
       // print("final value");
       // print(finalvalue);
-if(user.isnavigating==false){
-  detected = true;
-  _isBuildingPannelOpen = true;
-  _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-  nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-}
+      if (user.isnavigating == false) {
+        detected = true;
+        if(!_isExploreModePannelOpen){
+          _isBuildingPannelOpen = true;
+        }
+        nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+      }
 
       if (nearestLandInfomation.name!.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
-        nearestLandInfomation.floor =
-            apibeaconmap[nearestBeacon]!.floor!;
-
+        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
 
         //updating user pointer
 
@@ -856,7 +839,6 @@ if(user.isnavigating==false){
           }
         }
       } else {
-
         nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
 
         if (speakTTS) {
@@ -882,7 +864,6 @@ if(user.isnavigating==false){
     } else {
       if (speakTTS) speak("Unable to find your location");
     }
-    btadapter.stopScanning();
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
       onLandmarkVenueClicked(widget.directLandID);
@@ -1313,6 +1294,7 @@ if(user.isnavigating==false){
         currentBinSIze.add(value.length);
       });
     });
+    btadapter.stopScanning();
 
     // sumMap = btadapter.calculateAverage();
     paintUser(nearestBeacon);
@@ -1340,172 +1322,36 @@ if(user.isnavigating==false){
 
   Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
-    print("Beacon searching started from realTimeReLocalizeUser");
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    double highestweight = 0;
-    String nearestBeacon = "";
-    String lastLocalizedBeacon = "";
-    List<int> landCords = [];
-    List<int> currentBinFilled = [];
     sumMap.clear();
-    print("summap cleared ${sumMap}");
     setState(() {
       sumMap = btadapter.calculateAverage();
     });
 
-    // for (int i = 0; i < btadapter.BIN.length; i++) {
-    //   if (btadapter.BIN[i]!.isNotEmpty) {
-    //     currentBinFilled.add(i);
-    //     btadapter.BIN[i]!.forEach((key, value) {
-    //       print("Wilsonchecker");
-    //       print(value.toString());
-    //       print(key);
-    //
-    //       if (value > highestweight) {
-    //         highestweight = value;
-    //         //nearestBeacon = key;
-    //       }
-    //     });
-    //     break;
-    //   }
-    // }
-
-    print("sumMap");
-    print(sumMap);
-
     String firstValue = "";
-    double firstKey;
+
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
-      print("sortedsumMap--");
-      print(firstValue);
 
-      if (lastBeaconValue != firstValue) {
-        // print(entry.key);
-        // print(entry.value);
-        // entry1.forEach((element) {
-        //   element.value;
-        // });
+
+      if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.5) {
+        btadapter.stopScanning();
+
+        await building.landmarkdata!.then((value){
+          getallnearestInfo=tools.localizefindAllNearbyLandmark(
+              apibeaconmap[firstValue]!, value.landmarksMap!);
+        });
+
+        List<int> tv = tools.eightcelltransition(user.theta);
+        finalDirections = calcDirectionsExploreMode([apibeaconmap[firstValue]!.coordinateX!,apibeaconmap[firstValue]!.coordinateY!], [apibeaconmap[firstValue]!.coordinateX!+tv[0],apibeaconmap[firstValue]!.coordinateY!+tv[1]], getallnearestInfo);
         paintUser(firstValue);
-
+        ExploreModePannelController.open();
         setState(() {
           lastBeaconValue = firstValue;
-          // nearbeacon = firstValue;
-          //  weight = highestweight.toString();
         });
         btadapter.emptyBin();
-
-        print("nearestBeacon : $firstValue");
-
-        if (apibeaconmap[firstValue] != null) {
-          await building.landmarkdata!.then((value) {
-            nearestLandInfomation = tools.localizefindNearbyLandmark(
-                apibeaconmap[firstValue]!, value.landmarksMap!);
-            setState(() {
-              getallnearestInfo = tools.localizefindAllNearbyLandmark(
-                  apibeaconmap[firstValue]!, value.landmarksMap!);
-            });
-
-            landCords = tools.localizefindNearbyLandmarkCoordinated(
-                apibeaconmap[firstValue]!, value.landmarksMap!);
-          });
-
-          print("getallnearestInfo");
-          print(getallnearestInfo);
-
-          List<double> values = tools.localtoglobal(
-              apibeaconmap[firstValue]!.coordinateX!,
-              apibeaconmap[firstValue]!.coordinateY!);
-          LatLng beaconLocation = LatLng(values[0], values[1]);
-          mapState.target = LatLng(values[0], values[1]);
-          mapState.zoom = 21.0;
-          _googleMapController.animateCamera(
-            CameraUpdate.newLatLngZoom(
-              LatLng(values[0], values[1]),
-              20, // Specify your custom zoom level here
-            ),
-          );
-          user.Bid = apibeaconmap[firstValue]!.buildingID!;
-          user.coordX = apibeaconmap[firstValue]!.coordinateX!;
-          user.coordY = apibeaconmap[firstValue]!.coordinateY!;
-          print("user.coordXuser.coordY");
-          print("${user.coordX}${user.coordY}");
-          List<int> userCords = [];
-          userCords.add(user.coordX);
-          userCords.add(user.coordY);
-          List<int> transitionValue = tools.eightcelltransition(user.theta);
-          int newX = user.coordX + transitionValue[0];
-          int newY = user.coordY + transitionValue[1];
-          List<int> newUserCord = [];
-          newUserCord.add(newX);
-          newUserCord.add(newY);
-
-          user.lat =
-              double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
-          user.lng =
-              double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
-          user.floor = apibeaconmap[firstValue]!.floor!;
-          user.key = apibeaconmap[firstValue]!.sId!;
-          user.initialallyLocalised = true;
-          setState(() {
-            print("hehe: $beaconLocation");
-            markers.clear();
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("UserLocation"),
-              position: beaconLocation,
-              icon: userloc,
-              anchor: Offset(0.5, 0.829),
-            ));
-            building.floor[apibeaconmap[firstValue]!.buildingID!] =
-                apibeaconmap[firstValue]!.floor!;
-            createRooms(
-                building.polyLineData!, apibeaconmap[firstValue]!.floor!);
-            building.landmarkdata!.then((value) {
-              createMarkers(value, apibeaconmap[firstValue]!.floor!);
-            });
-          });
-          print("userCords");
-          print(userCords);
-          print(newUserCord);
-          print(landCords);
-
-          double value =
-              tools.calculateAngle(userCords, newUserCord, landCords);
-
-          print("value----");
-          print(value);
-          String finalvalue =
-              tools.angleToClocksForNearestLandmarkToBeacon(value);
-
-          print("finalvalue");
-          print(finalvalue);
-          detected = !detected;
-          _isBuildingPannelOpen = true;
-          _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-          nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-          if (nearestLandInfomation.name == "") {
-            print("no beacon found");
-            nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
-            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
-            speak(
-                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
-          } else {
-            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
-            speak(
-                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
-          }
-        } else {
-          speak("Unable to find your location");
-        }
-
-        btadapter.stopScanning();
-        print("Beacon searching Stoped");
       } else {
-        HelperClass.showToast("Beacon Already scanned");
+        //HelperClass.showToast("Beacon Already scanned");
       }
     }
   }
@@ -2060,7 +1906,8 @@ if(user.isnavigating==false){
                       );
                       setState(() {
                         if (building.selectedLandmarkID != polyArray.id &&
-                            !user.isnavigating && !_isRoutePanelOpen) {
+                            !user.isnavigating &&
+                            !_isRoutePanelOpen) {
                           user.reset();
                           PathState = pathState.withValues(
                               -1, -1, -1, -1, -1, -1, null, 0);
@@ -2799,7 +2646,6 @@ if(user.isnavigating==false){
                         ),
                         child: TextButton(
                           onPressed: () async {
-                            _isNearestLandmarkPannelOpen = false;
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -3349,8 +3195,6 @@ if(user.isnavigating==false){
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
-
-
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null, String? liftName}) async {
@@ -3361,9 +3205,15 @@ if(user.isnavigating==false){
 
     print("numcol $numCols");
 
-
-    List<int> path = await findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor,bid??"");
+    List<int> path = await findBestPathAmongstBoth(
+        numRows,
+        numCols,
+        building.nonWalkable[bid]![floor]!,
+        sourceIndex,
+        destinationIndex,
+        building,
+        floor,
+        bid ?? "");
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {
@@ -3372,10 +3222,9 @@ if(user.isnavigating==false){
       getPoints.add([x, y]);
     }
     getPoints.add([destinationX, destinationY]);
-    List<Landmarks> nearbyPathLandmarks=[];
+    List<Landmarks> nearbyPathLandmarks = [];
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
-
           path, value.landmarksMap!, 5, numCols, floor, bid!);
       pathState.nearbyLandmarks = nearbyLandmarks;
       // PathState.nearbyLandmarks.forEach((element) {
@@ -3393,8 +3242,8 @@ if(user.isnavigating==false){
           directions.add(direction(-1, "Take ${liftName}", null, null,
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
-        directions.addAll(
-            tools.getDirections(path, numCols, value, floor, bid ?? "",PathState));
+        directions.addAll(tools.getDirections(
+            path, numCols, value, floor, bid ?? "", PathState));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -3402,14 +3251,7 @@ if(user.isnavigating==false){
         directions.addAll(PathState.directions);
         PathState.directions = directions;
       });
-
     });
-
-
-
-
-
-
 
     List<Cell> Cellpath =
         findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
@@ -4262,27 +4104,25 @@ if(user.isnavigating==false){
                                           excludeSemantics: false,
                                           child: Row(
                                             crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Container(
                                                 height: 25,
-                                                margin: EdgeInsets.only(
-                                                    right: 8),
+                                                margin:
+                                                    EdgeInsets.only(right: 8),
                                                 child: SvgPicture.asset(
                                                     "assets/StartpointVector.svg"),
                                               ),
                                               Semantics(
                                                 label:
-                                                "Steps preview,    You are heading from",
+                                                    "Steps preview,    You are heading from",
                                                 child: Text(
                                                   "${PathState.sourceName}",
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
                                                     fontSize: 16,
-                                                    fontWeight:
-                                                    FontWeight.w400,
-                                                    color:
-                                                    Color(0xff0e0d0d),
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff0e0d0d),
                                                     height: 25 / 16,
                                                   ),
                                                   textAlign: TextAlign.left,
@@ -4307,12 +4147,11 @@ if(user.isnavigating==false){
                                         ),
                                         Row(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                           children: [
                                             Container(
                                               height: 25,
-                                              margin:
-                                              EdgeInsets.only(right: 8),
+                                              margin: EdgeInsets.only(right: 8),
                                               child: Icon(
                                                 Icons.pin_drop_sharp,
                                                 size: 24,
@@ -4320,17 +4159,15 @@ if(user.isnavigating==false){
                                             ),
                                             Semantics(
                                               label:
-                                              "Your are heading towards ",
+                                                  "Your are heading towards ",
                                               child: Text(
                                                 angle != null
                                                     ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
-                                                    : PathState
-                                                    .destinationName,
+                                                    : PathState.destinationName,
                                                 style: const TextStyle(
                                                   fontFamily: "Roboto",
                                                   fontSize: 16,
-                                                  fontWeight:
-                                                  FontWeight.w400,
+                                                  fontWeight: FontWeight.w400,
                                                   color: Color(0xff0e0d0d),
                                                   height: 25 / 16,
                                                 ),
@@ -4350,7 +4187,6 @@ if(user.isnavigating==false){
                                       ],
                                     ),
                                   )
-
                                 ],
                               ),
                             )
@@ -6067,6 +5903,73 @@ if(user.isnavigating==false){
   String nearestLandmarkNameForPannel = "";
   String nearestAddressForPannel = "";
 
+  bool _isExploreModePannelOpen = false;
+  PanelController ExploreModePannelController = new PanelController();
+
+  Widget ExploreModePannel() {
+    List<Widget> Exwidgets = [];
+    for(int i = 0; i<getallnearestInfo.length ; i++){
+      Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
+    }
+
+    return Visibility(
+      visible: _isExploreModePannelOpen,
+        child: SlidingUpPanel(
+      maxHeight: 90+8+(getallnearestInfo.length*100),
+      minHeight: 90+8,
+      controller: ExploreModePannelController,
+      panel: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Color(0xff79747E),
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Explore Mode",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xff000000),
+                    height: 20/14,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+                IconButton(onPressed: (){
+                  isLiveLocalizing = false;
+                  HelperClass.showToast(
+                      "Explore mode is disabled");
+                  _exploreModeTimer!.cancel();
+                  _isExploreModePannelOpen = false;
+                  _isBuildingPannelOpen = true;
+                  lastBeaconValue = "";
+                }, icon: Icon(Icons.close))
+              ],
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Column(
+              children: Exwidgets,
+            )
+          ],
+        ),
+      ),
+    ));
+  }
+
   Widget nearestLandmarkpannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
@@ -6101,7 +6004,8 @@ if(user.isnavigating==false){
                 color: Colors.grey,
               ),
             ],
-            minHeight: (isLiveLocalizing && getallnearestInfo.isNotEmpty) ? 290 : 90,
+            minHeight:
+                 90,
             snapPoint:
                 element.workingDays != null && element.workingDays!.length > 0
                     ? 220 / screenHeight
@@ -6155,10 +6059,6 @@ if(user.isnavigating==false){
                       Spacer(),
                       InkWell(
                         onTap: () {
-                          if(isLiveLocalizing){
-                            HelperClass.showToast("Explore mode is disabled");
-                            _exploreModeTimer!.cancel();
-                          }
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
@@ -6170,123 +6070,6 @@ if(user.isnavigating==false){
                     ],
                   ),
 
-
-                  (isLiveLocalizing && getallnearestInfo.isNotEmpty)
-                      ? Expanded(
-                      child: Container(
-                        child: ListView.builder(
-                            itemCount: getallnearestInfo.length,
-                            scrollDirection: Axis.vertical,
-                            physics: ScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              nearestLandInfo currentInfo =
-                              getallnearestInfo[index];
-
-                              print("currentInfo");
-                              print(currentInfo);
-
-                              return Container(
-                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Color(0xffEBEBEB),
-                                    ),
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(8))),
-                                child: Row(
-                                  children: [
-
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(top: 12, left: 18),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.name!,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff18181b),
-                                                  height: 25/16,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(left: 10,top: 14),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    finalDirections[index],
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/12,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-
-                                            Container(
-                                              margin: EdgeInsets.only(
-                                                  top: 3, bottom: 14, left: 2),
-                                              alignment: Alignment.topLeft,
-                                              child: Text(
-                                                HelperClass.truncateString(
-                                                    currentInfo.buildingName!,
-                                                    30),
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xffa1a1aa),
-                                                  height: 20/14,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-
-
-                                  ],
-                                ),
-                              );
-                            }),
-                      ))
-
-                      : SizedBox(),
                 ],
               ),
             ),
@@ -6576,18 +6359,16 @@ if(user.isnavigating==false){
     });
   }
 
-
-
-  focusOnTurn(direction turn)async{
+  focusOnTurn(direction turn) async {
     focusturnArrow.clear();
     if (turn.x != null && turn.y != null && turn.numCols != null) {
       int i = user.path.indexWhere((element) => element == turn.node);
-      if(building.floor[buildingAllApi.getStoredString()] != turn.floor){
+      if (building.floor[buildingAllApi.getStoredString()] != turn.floor) {
         i++;
-      }else{
+      } else {
         i--;
       }
-      
+
       //List<LatLng> coordinates = [];
       BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(size: Size(44, 44)),
@@ -6612,10 +6393,9 @@ if(user.isnavigating==false){
       if (turn.floor != null &&
           building.floor[buildingAllApi.getStoredString()] != turn.floor) {
         building.floor[buildingAllApi.getStoredString()] = turn.floor!;
-        createRooms(building.polyLineData!, building.floor[buildingAllApi.getStoredString()]!);
+        createRooms(building.polyLineData!,
+            building.floor[buildingAllApi.getStoredString()]!);
       }
-
-
 
       List<int> nextPoint = [
         user.path[i] % turn.numCols!,
@@ -6626,7 +6406,6 @@ if(user.isnavigating==false){
       List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
           patchData: building.patchData[turn.Bid]);
 
-
       setState(() {
         // focusturn.add(gmap.Polyline(
         //   polylineId: PolylineId("focusturn"),
@@ -6635,13 +6414,12 @@ if(user.isnavigating==false){
         //   width: 5,
         // ));
 
-        focusturnArrow.add(Marker(markerId: MarkerId("focusturn"),
+        focusturnArrow.add(Marker(
+            markerId: MarkerId("focusturn"),
             position: LatLng(latlng[0], latlng[1]),
             icon: greytorch,
-            anchor: Offset(0.5, 0.5)
-        ));
+            anchor: Offset(0.5, 0.5)));
       });
-
 
       mapState.target = LatLng(latlng[0], latlng[1]);
       mapState.bearing = tools
@@ -6745,7 +6523,7 @@ if(user.isnavigating==false){
                       detected
                           ? Semantics(
                               excludeSemantics: true,
-                              child: nearestLandmarkpannel())
+                              child: ExploreModePannel())
                           : Semantics(
                               excludeSemantics: true, child: Container()),
                       Semantics(
@@ -7033,43 +6811,41 @@ if(user.isnavigating==false){
                                       .white, // Set the background color of the FAB
                                 ),
                               ),
-                              SizedBox(
-
-                                  height: 28.0),
+                              SizedBox(height: 28.0),
                               FloatingActionButton(
                                 onPressed: () async {
-                                  //StopPDR();
-
                                   if (user.initialallyLocalised) {
-                                    if(isLiveLocalizing){
-                                      HelperClass.showToast("Explore mode is disabled");
-                                      _exploreModeTimer!.cancel();
-                                    }
+
                                     setState(() {
-                                      isLiveLocalizing = !isLiveLocalizing;
+                                      if (isLiveLocalizing) {
+                                        isLiveLocalizing = false;
+                                        HelperClass.showToast(
+                                            "Explore mode is disabled");
+                                        _exploreModeTimer!.cancel();
+                                        _isExploreModePannelOpen = false;
+                                        _isBuildingPannelOpen = true;
+                                        lastBeaconValue = "";
+                                      }else{
+                                        speak("Explore Mode Enabled");
+                                        isLiveLocalizing = true;
+                                        HelperClass.showToast(
+                                            "Explore mode enabled");
+                                        _exploreModeTimer = Timer.periodic(
+                                            Duration(milliseconds: 5000),
+                                                (timer) async {
+                                              btadapter.startScanning(resBeacons);
+                                              Future.delayed(
+                                                  Duration(milliseconds: 2000))
+                                                  .then((value) => {
+                                                realTimeReLocalizeUser(
+                                                    resBeacons)
+                                                // listenToBin()
+                                              });
+                                            });
+                                        _isBuildingPannelOpen = false;
+                                        _isExploreModePannelOpen = true;
+                                      }
                                     });
-                                    HelperClass.showToast(
-                                        "Explore mode enabled");
-
-                                   _exploreModeTimer= Timer.periodic(Duration(milliseconds: 5000),
-                                            (timer) async {
-                                          print(resBeacons);
-                                          btadapter.startScanning(resBeacons);
-
-                                          // setState(() {
-                                          //   sumMap=  btadapter.calculateAverage();
-                                          // });
-
-                                          Future.delayed(Duration(milliseconds: 2000))
-                                              .then((value) => {
-                                            realTimeReLocalizeUser(resBeacons)
-                                            // listenToBin()
-                                          });
-
-                                          setState(() {
-                                            debugPQ = btadapter.returnPQ();
-                                          });
-                                        });
                                   }
                                 },
                                 child: SvgPicture.asset(
@@ -7077,9 +6853,9 @@ if(user.isnavigating==false){
                                   // color:
                                   // (isLiveLocalizing) ? Colors.white : Colors.cyan,
                                 ),
-                                backgroundColor:
-                                Color(0xff24B9B0), // Set the background color of the FAB
-                              ),// Adjust the height as needed// Adjust the height as needed
+                                backgroundColor: Color(
+                                    0xff24B9B0), // Set the background color of the FAB
+                              ), // Adjust the height as needed// Adjust the height as needed
 
                               // FloatingActionButton(
                               //   onPressed: (){
@@ -7174,6 +6950,7 @@ if(user.isnavigating==false){
                       routeDeatilPannel(),
                       navigationPannel(),
                       reroutePannel(),
+                      ExploreModePannel(),
                       detected
                           ? Semantics(child: nearestLandmarkpannel())
                           : Container(),

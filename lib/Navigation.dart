@@ -112,6 +112,7 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   MapState mapState = new MapState();
   Timer? PDRTimer;
+  Timer? _exploreModeTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
     target: LatLng(60.543833319119475, 77.18729871127312),
@@ -621,6 +622,27 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+List<List<int>> nearbyLandmarkCoords=[];
+  List<String> finalDirections=[];
+  void calcDirectionsExploreMode(List<int> userCords,List<int> newUserCord,List<nearestLandInfo> nearbyLandmarkCoords){
+    finalDirections.clear();
+    for(int i=0;i<nearbyLandmarkCoords.length;i++)
+    {
+      double value =
+      tools.calculateAngle2(userCords,newUserCord,[nearbyLandmarkCoords[i].coordinateX!,nearbyLandmarkCoords[i].coordinateY!]);
+
+      // print("value----");
+      // print(value);
+      String finalvalue =
+      tools.angleToClocksForNearestLandmarkToBeacon(value);
+      // print(finalvalue);
+      finalDirections.add(finalvalue);
+    }
+    setState(() {
+      finalDirections;
+    });
+  }
+
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, speakTTS: false);
@@ -647,6 +669,17 @@ class _NavigationState extends State<Navigation> {
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         landCords = tools.localizefindNearbyLandmarkCoordinated(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+
+
+        nearbyLandmarkCoords=tools.localizefindNearbyListLandmarkCoordinated(apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        if(isLiveLocalizing){
+          setState(() {
+            getallnearestInfo=tools.localizefindAllNearbyLandmark(
+                apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+          });
+        }
+
+
         if (landCords.isEmpty) {
           landCords = [
             apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -763,17 +796,35 @@ class _NavigationState extends State<Navigation> {
         });
       });
       double value =
-          tools.calculateAngleSecond(userCords, newUserCord, landCords);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
 
-      detected = !detected;
-      _isBuildingPannelOpen = true;
-      _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-      if (nearestLandInfomation.name == "") {
+      tools.calculateAngle2(userCords,newUserCord,[nearestLandInfomation.coordinateX!,nearestLandInfomation.coordinateY!]);
+
+      print("value----");
+      print(value);
+      String finalvalue =
+      tools.angleToClocksForNearestLandmarkToBeacon(value);
+      calcDirectionsExploreMode(userCords,newUserCord,getallnearestInfo);
+
+      // double value =
+      //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
+      // print(value);
+      // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+      // print("final value");
+      // print(finalvalue);
+if(user.isnavigating==false){
+  detected = true;
+  _isBuildingPannelOpen = true;
+  _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+  nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+}
+
+      if (nearestLandInfomation.name!.isEmpty) {
         nearestLandInfomation.name = apibeaconmap[nearestBeacon]!.name!;
 
-        nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
+        nearestLandInfomation.floor =
+            apibeaconmap[nearestBeacon]!.floor!;
+
 
         //updating user pointer
 
@@ -805,7 +856,9 @@ class _NavigationState extends State<Navigation> {
           }
         }
       } else {
+
         nearestLandInfomation.floor = apibeaconmap[nearestBeacon]!.floor!;
+
         if (speakTTS) {
           if (finalvalue == "None") {
             speak(
@@ -3259,7 +3312,7 @@ class _NavigationState extends State<Navigation> {
             polylineId: PolylineId("InterBuilding"),
             points: coords,
             color: Colors.red,
-            width: 3,
+            width: 1,
           ));
         }
       });
@@ -3296,6 +3349,8 @@ class _NavigationState extends State<Navigation> {
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
+
+
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null, String? liftName}) async {
@@ -3306,8 +3361,9 @@ class _NavigationState extends State<Navigation> {
 
     print("numcol $numCols");
 
-    List<int> path = findBestPathAmongstBoth(numRows, numCols,
-        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex);
+
+    List<int> path = await findBestPathAmongstBoth(numRows, numCols,
+        building.nonWalkable[bid]![floor]!, sourceIndex, destinationIndex,building,floor,bid??"");
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {
@@ -3316,9 +3372,10 @@ class _NavigationState extends State<Navigation> {
       getPoints.add([x, y]);
     }
     getPoints.add([destinationX, destinationY]);
-
+    List<Landmarks> nearbyPathLandmarks=[];
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
+
           path, value.landmarksMap!, 5, numCols, floor, bid!);
       pathState.nearbyLandmarks = nearbyLandmarks;
       // PathState.nearbyLandmarks.forEach((element) {
@@ -3345,7 +3402,14 @@ class _NavigationState extends State<Navigation> {
         directions.addAll(PathState.directions);
         PathState.directions = directions;
       });
+
     });
+
+
+
+
+
+
 
     List<Cell> Cellpath =
         findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
@@ -4286,6 +4350,7 @@ class _NavigationState extends State<Navigation> {
                                       ],
                                     ),
                                   )
+
                                 ],
                               ),
                             )
@@ -6036,7 +6101,7 @@ class _NavigationState extends State<Navigation> {
                 color: Colors.grey,
               ),
             ],
-            minHeight: (getallnearestInfo.isNotEmpty) ? 290 : 90,
+            minHeight: (isLiveLocalizing && getallnearestInfo.isNotEmpty) ? 290 : 90,
             snapPoint:
                 element.workingDays != null && element.workingDays!.length > 0
                     ? 220 / screenHeight
@@ -6090,6 +6155,10 @@ class _NavigationState extends State<Navigation> {
                       Spacer(),
                       InkWell(
                         onTap: () {
+                          if(isLiveLocalizing){
+                            HelperClass.showToast("Explore mode is disabled");
+                            _exploreModeTimer!.cancel();
+                          }
                           _isBuildingPannelOpen = false;
                         },
                         child: Container(
@@ -6100,41 +6169,123 @@ class _NavigationState extends State<Navigation> {
                       ),
                     ],
                   ),
-                  Container(
-                    height: 1,
-                    width: screenWidth,
-                    color: Color(0xffebebeb),
-                  ),
-                  (getallnearestInfo.isNotEmpty)
-                      ? Expanded(
-                          child: ListView.builder(
-                              itemCount: getallnearestInfo.length,
-                              scrollDirection: Axis.vertical,
-                              physics: ScrollPhysics(),
-                              itemBuilder: (BuildContext context, int index) {
-                                nearestLandInfo currentInfo =
-                                    getallnearestInfo[index];
-                                print("currentInfo");
-                                print(currentInfo);
 
-                                return ListTile(
-                                  contentPadding: EdgeInsets.all(0.0),
-                                  leading: Text(currentInfo.name.toString(),
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 15)),
-                                  title: Align(
-                                      alignment: Alignment(0.05, 0),
-                                      child: Text(
-                                          currentInfo.buildingName.toString(),
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 15))),
-                                  trailing: Text(
-                                      "Floor ${currentInfo.floor.toString()}",
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 15)),
-                                );
-                              }))
+
+                  (isLiveLocalizing && getallnearestInfo.isNotEmpty)
+                      ? Expanded(
+                      child: Container(
+                        child: ListView.builder(
+                            itemCount: getallnearestInfo.length,
+                            scrollDirection: Axis.vertical,
+                            physics: ScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              nearestLandInfo currentInfo =
+                              getallnearestInfo[index];
+
+                              print("currentInfo");
+                              print(currentInfo);
+
+                              return Container(
+                                margin: EdgeInsets.only(top: 10, left: 16, right: 16),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Color(0xffEBEBEB),
+                                    ),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(8))),
+                                child: Row(
+                                  children: [
+
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(top: 12, left: 18),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.name!,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff18181b),
+                                                  height: 25/16,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: EdgeInsets.only(left: 10,top: 14),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    finalDirections[index],
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/12,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(left: 18,top: 3, bottom: 14, right: 10),
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                HelperClass.truncateString("Floor ${currentInfo.floor}", 25),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+
+                                            Container(
+                                              margin: EdgeInsets.only(
+                                                  top: 3, bottom: 14, left: 2),
+                                              alignment: Alignment.topLeft,
+                                              child: Text(
+                                                HelperClass.truncateString(
+                                                    currentInfo.buildingName!,
+                                                    30),
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffa1a1aa),
+                                                  height: 20/14,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+
+
+                                  ],
+                                ),
+                              );
+                            }),
+                      ))
+
                       : SizedBox(),
                 ],
               ),
@@ -6883,7 +7034,53 @@ class _NavigationState extends State<Navigation> {
                                 ),
                               ),
                               SizedBox(
-                                  height: 28.0), // Adjust the height as needed
+
+                                  height: 28.0),
+                              FloatingActionButton(
+                                onPressed: () async {
+                                  //StopPDR();
+
+                                  if (user.initialallyLocalised) {
+                                    if(isLiveLocalizing){
+                                      HelperClass.showToast("Explore mode is disabled");
+                                      _exploreModeTimer!.cancel();
+                                    }
+                                    setState(() {
+                                      isLiveLocalizing = !isLiveLocalizing;
+                                    });
+                                    HelperClass.showToast(
+                                        "Explore mode enabled");
+
+                                   _exploreModeTimer= Timer.periodic(Duration(milliseconds: 5000),
+                                            (timer) async {
+                                          print(resBeacons);
+                                          btadapter.startScanning(resBeacons);
+
+                                          // setState(() {
+                                          //   sumMap=  btadapter.calculateAverage();
+                                          // });
+
+                                          Future.delayed(Duration(milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(resBeacons)
+                                            // listenToBin()
+                                          });
+
+                                          setState(() {
+                                            debugPQ = btadapter.returnPQ();
+                                          });
+                                        });
+                                  }
+                                },
+                                child: SvgPicture.asset(
+                                  "assets/Navigation_RTLIcon.svg",
+                                  // color:
+                                  // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                ),
+                                backgroundColor:
+                                Color(0xff24B9B0), // Set the background color of the FAB
+                              ),// Adjust the height as needed// Adjust the height as needed
+
                               // FloatingActionButton(
                               //   onPressed: (){
                               //     print("checkingBuildingfloor");

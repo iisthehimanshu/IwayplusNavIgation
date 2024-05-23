@@ -228,7 +228,11 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:iwayplusnav/buildingState.dart';
+import 'package:iwayplusnav/pathState.dart';
 
+import 'APIMODELS/landmark.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -248,28 +252,33 @@ class Node {
   @override
   int get hashCode => index.hashCode;
 }
-int count1=0;
-int count2=0;
-int count3=0;
-int count4=0;
-List<int> findBestPathAmongstBoth(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
-) {
+
+int count1 = 0;
+int count2 = 0;
+int count3 = 0;
+int count4 = 0;
+Future<List<int>> findBestPathAmongstBoth(
+    int numRows,
+    int numCols,
+    List<int> nonWalkableCells,
+    int sourceIndex,
+    int destinationIndex,
+    Building building,
+    int floor,
+    String Bid)async{
   int sourceX = sourceIndex % numCols;
   int sourceY = sourceIndex ~/ numCols;
-  int destinationX = destinationIndex %  numCols;
+  int destinationX = destinationIndex % numCols;
   int destinationY = destinationIndex ~/ numCols;
 
-
-
-  List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
-  List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
+  List<int> p1 = findPath(
+      numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  p1 = await getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
+      destinationX, destinationY, building, floor,Bid);
+  List<int> p2 = findPath(
+      numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  p2 = await getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
+      destinationY, sourceX, sourceY, building, floor,Bid);
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
 
@@ -278,8 +287,10 @@ List<int> findBestPathAmongstBoth(
   print("p1 turns ${p1turns}");
   print("p2 turns ${p2turns}");
 
+  print("pathp1 ${p1.length}  ${p1turns.length}  $p1");
+  print("pathp2 ${p2.length}  ${p2turns.length}  $p2");
 
-  // If either path is empty, return the other path
+// If either path is empty, return the other path
   if (p1.isEmpty) {
     return p2.reversed.toList();
   } else if (p2.isEmpty) {
@@ -389,6 +400,51 @@ List<int> findPath(
   }
 
   return [];
+}
+
+
+ Future<List<List<List<int>>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells)async{
+  List<List<List<int>>> res = [];
+  List<Landmarks> nearbyLandmarks = [];
+  await building.landmarkdata!.then((value){
+   nearbyLandmarks = tools.findNearbyLandmark(
+
+        path, value.landmarksMap!, 5, numCols, floor, Bid!);
+
+  });
+
+
+    res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
+
+    print(res);
+// for(int i=0;i<res.length;i++)
+//   {
+//     if(res.isNotEmpty){
+//       print("p1-----p2");
+//       print("door cords${res[i][0]}");
+//       print("turn corrds");
+//       print(res[i][1]);
+//       print(res[i][2]);
+//     }
+//
+//   }
+
+List<List<List<int>>> result=[];
+    for (int i = 0; i < res.length; i++) {
+      List<List<int>> p1 = findIntersection(
+          res[i][1],
+          res[i][2],
+          res[i][0],
+          res[i][3],
+          res[i][4], nonWalkableCells,numCols
+
+      );
+      print("p1-----p2");
+      print(p1);
+      result.add(p1);
+
+    }
+    return result;
 }
 
 // List<int> findPath(
@@ -543,57 +599,58 @@ int getMovementCost(Node a, Node b) {
   return (a.x != b.x && a.y != b.y) ? 15 : 10;
 }
 
-List<Node> findOptimizedPath(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
-  double epsilon,
-) {
-  List<int> pathIndices = findBestPathAmongstBoth(
-    numRows,
-    numCols,
-    nonWalkableCells,
-    sourceIndex,
-    destinationIndex,
-  );
-
-  List<Node> nodes = List.generate(numRows * numCols, (index) {
-    int x = index % numCols;
-    int y = index ~/ numCols;
-    return Node(index, x, y);
-  });
-
-  List<Node> pathNodes = pathIndices.map((index) => nodes[index - 1]).toList();
-
-  List<Node> turnPoints = getTurnpoints(pathNodes, numCols);
-  //Apply RDP optimization to the path
-  Set<int> nonWalkableSet = nonWalkableCells.toSet();
-  List<Node> optimizedPath = rdp(pathNodes, epsilon, nonWalkableSet);
-
+// List<Node> findOptimizedPath(
+//   int numRows,
+//   int numCols,
+//   List<int> nonWalkableCells,
+//   int sourceIndex,
+//   int destinationIndex,
+//   double epsilon,
+// ) {
+//   List<int> pathIndices = findBestPathAmongstBoth(
+//     numRows,
+//     numCols,
+//     nonWalkableCells,
+//     sourceIndex,
+//     destinationIndex,
 //
-  print("turnPointts: ${turnPoints[0].index}");
-
-  List<Node> pt = [];
-  for (int i = 0; i < turnPoints.length - 1; i++) {
-    int x1 = (turnPoints[i].index % numCols);
-    int y1 = (turnPoints[i].index ~/ numCols);
-    if (turnPoints[i + 1] == turnPoints[i]) {
-      pt.add(turnPoints[i + 1]);
-    }
-  }
-
-  for (int i = 0; i < pt.length; i++) {
-    if (optimizedPath[pt[i].x + 1].x == optimizedPath[pt[i].x].x) {
-      optimizedPath[pt[i].y].y = optimizedPath[pt[i].y - 1].y;
-    } else if (optimizedPath[pt[i].y + 1].y == optimizedPath[pt[i].y].y) {
-      optimizedPath[pt[i].x].x = optimizedPath[pt[i].x - 1].x;
-    }
-  }
-
-  return optimizedPath;
-}
+//   );
+//
+//   List<Node> nodes = List.generate(numRows * numCols, (index) {
+//     int x = index % numCols;
+//     int y = index ~/ numCols;
+//     return Node(index, x, y);
+//   });
+//
+//   List<Node> pathNodes = pathIndices.map((index) => nodes[index - 1]).toList();
+//
+//   List<Node> turnPoints = getTurnpoints(pathNodes, numCols);
+//   //Apply RDP optimization to the path
+//   Set<int> nonWalkableSet = nonWalkableCells.toSet();
+//   List<Node> optimizedPath = rdp(pathNodes, epsilon, nonWalkableSet);
+//
+// //
+//   print("turnPointts: ${turnPoints[0].index}");
+//
+//   List<Node> pt = [];
+//   for (int i = 0; i < turnPoints.length - 1; i++) {
+//     int x1 = (turnPoints[i].index % numCols);
+//     int y1 = (turnPoints[i].index ~/ numCols);
+//     if (turnPoints[i + 1] == turnPoints[i]) {
+//       pt.add(turnPoints[i + 1]);
+//     }
+//   }
+//
+//   for (int i = 0; i < pt.length; i++) {
+//     if (optimizedPath[pt[i].x + 1].x == optimizedPath[pt[i].x].x) {
+//       optimizedPath[pt[i].y].y = optimizedPath[pt[i].y - 1].y;
+//     } else if (optimizedPath[pt[i].y + 1].y == optimizedPath[pt[i].y].y) {
+//       optimizedPath[pt[i].x].x = optimizedPath[pt[i].x - 1].x;
+//     }
+//   }
+//
+//   return optimizedPath;
+// }
 
 List<Node> getTurnpoints(List<Node> pathNodes, int numCols) {
   List<Node> res = [];
@@ -843,9 +900,16 @@ List<int> getOptiPath(Map<int, int> getTurns, int numCols, List<int> path) {
   return path;
 }
 
-List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
-    int numCols, int sourceX, int sourceY, int destinationX, int destinationY) {
-
+Future<List<int>> getFinalOptimizedPath(
+    List<int> path,
+    List<int> nonWalkableCells,
+    int numCols,
+    int sourceX,
+    int sourceY,
+    int destinationX,
+    int destinationY,
+    Building building,
+    int floor,String Bid) async {
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -963,22 +1027,236 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
       }
     }
   }
+
   List<int> tu = [];
   tu.add(sourceX + sourceY * numCols);
   tu.addAll(tools.getTurnpoints(path, numCols));
   tu.add(destinationX + destinationY * numCols);
-
+  print("ressssssssss");
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
-  path = tools.generateCompletePath(tu, numCols,nonWalkableCells);
+  List<List<List<int>>> res=[];
+  await optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells).then((value){
+    res=value;
+  });
+  print(res);
+
+  print("turns array before optimization");
+  for(int i=0;i<tu.length;i++){
+    int x=tu[i] % numCols;
+    int y = tu[i] ~/ numCols;
+    print("${x}-----${y}");
+  }
+
+
+  //removing prev turn points with new turn points.
+  if(res.isNotEmpty){
+    for(int i=0;i<res.length;i++)
+    {
+      int oldIndexAtTurn1=res[i][2][0]+res[i][2][1]*numCols;
+      int oldIndexAtTurn2=res[i][3][0]+res[i][3][1]*numCols;
+
+      print(oldIndexAtTurn1);
+      print(oldIndexAtTurn2);
+      int oldArrayIndexAtTurn1=tu.indexOf(oldIndexAtTurn1);
+      int oldArrayIndexAtTurn2=tu.indexOf(oldIndexAtTurn2);
+
+      //turns array updated
+      tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
+      tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
+      print(res[i][0][0]+res[i][0][1]*numCols);
+      print(res[i][1][0]+res[i][1][1]*numCols);
+
+
+    }
+
+    // for(int i=0;i<tu.length;i++){
+    //   if(tu.contains(tu[i]+1)){
+    //
+    //     tu.removeAt(2);
+    //     tu.removeAt(3);
+    //     tu.removeAt(4);
+    //
+    //   }
+    // }
+  }
+
+  print("turns array after optimization");
+  for(int i=0;i<tu.length-1;i++){
+    int x1=tu[i] % numCols;
+    int y1 = tu[i] ~/ numCols;
+    int x2=tu[i+1] % numCols;
+    int y2 = tu[i+1] ~/ numCols;
+
+
+    if(x1+1==x2 || x1-1==x2){
+      int oldindex=x2+y2*numCols;
+      x2=x2-1;
+      int index=x2+y2*numCols;
+     int oldInd= tu.indexOf(oldindex);
+     tu[oldInd]=index;
+    }
+    if(y1+1==y2 || y1-1==y2){
+      int oldindex=x2+y2*numCols;
+      y2=y2-1;
+      int index=x2+y2*numCols;
+      int oldInd= tu.indexOf(oldindex);
+      tu[oldInd]=index;
+    }
+  }
+
+
+  path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
 
 
 
 
-
+// Future.delayed(Duration(milliseconds: 2000));
 
   return path;
+}
+
+// List<int> findIntersection(List<int> p1, List<int> p2, List<int> p3, double m) {
+//   // Slope of the line passing through P3
+//   double m_prime = -1 / m; // assuming the perpendicular slope
+//
+//   // y-intercepts of the lines passing through P1 and P2
+//   double b1 = p1[1] - m * p1[0];
+//   double b2 = p2[1] - m * p2[0];
+//   double c = p3[1] - m_prime * p3[0];
+//
+//   // Intersection with the line through P1
+//   double x1_prime = (b1 - c) / (m_prime - m);
+//   double y1_prime = m * x1_prime + b1;
+//
+//   // Intersection with the line through P2
+//   double x2_prime = (b2 - c) / (m_prime - m);
+//   double y2_prime = m * x2_prime + b2;
+//
+//   return [x1_prime.toInt(), y1_prime.toInt()];
+// }
+
+List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3,List<int> p11,List<int> p22,List<int> nonWalkableCells,int numCols) {
+ double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
+ double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
+print("m1----m2");
+if(m1.isInfinite || m1.isNaN){
+  m1=p1[0]+0.0;
+}
+ if(m2.isInfinite || m2.isNaN){
+   m2=p2[0]+0.0;
+ }
+print(m1);
+print(m2);
+ //eq of parallel lines
+ double node1=(m1);
+ double node2=(m2);
+
+ //checking vertical and horizontal condition
+
+
+ List<List<int>> intersections =[
+   [node1.toInt(), p3[1]],
+   [node2.toInt(), p3[1]]];
+
+ int index1=intersections[0][0]+intersections[0][1]*numCols;
+ int index2=intersections[1][0]+intersections[1][1]*numCols;
+ print(index1);
+ print(index2);
+ if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
+   node1=p1[1]+0.0;
+   node2=p2[1]+0.0;
+   intersections=[[p3[0], node1.toInt()],
+     [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
+ }else{
+   intersections=[
+     [node1.toInt(), p3[1]],
+     [node2.toInt(), p3[1]],
+     [p1[0],p1[1]],[p2[0],p2[1]]
+   ];
+ }
+ //noww new points areeee
+
+  return intersections;
+}
+
+List<List<List<int>>> findDoorAndPathTurnCoords(
+    List<Landmarks> nearbyPathLandmarks, List<int> path, int numCols) {
+  List<List<List<int>>> res = [];
+  // List<int> turns= tools.getTurnpoints(path, numCols);
+  // print("turns pointsss");
+  // print(turns);
+  List<int> turns = tools.getTurnpoints(path, numCols);
+  for (int i = 0; i < nearbyPathLandmarks.length; i++) {
+    List<List<int>> temp1 = [];
+    print("dorrr cordsss");
+    print(
+        "${nearbyPathLandmarks[i].coordinateX}-----${nearbyPathLandmarks[i].coordinateY}");
+
+    for (int j = 0; j < turns.length - 1; j++) {
+      int x1 = (turns[j] % numCols);
+      int y1 = (turns[j] ~/ numCols);
+      //now a path point before this turn
+      int ind1 = path.indexOf(x1 + y1 * numCols);
+      int index1 = path[ind1 - 1];
+
+      int x11 = (index1 % numCols);
+      int y11 = (index1 ~/ numCols);
+
+      int x2 = (turns[j + 1] % numCols);
+      int y2 = (turns[j + 1] ~/ numCols);
+
+      //now a path point before this turn
+      int ind2 = path.indexOf(x2 + y2 * numCols);
+      int index2 = path[ind2 + 1];
+
+      int x22 = (index2 % numCols);
+      int y22 = (index2 ~/ numCols);
+
+      bool iswithinRange = isWithinRange([
+        nearbyPathLandmarks[i].coordinateX!,
+        nearbyPathLandmarks[i].coordinateY!
+      ], [
+        x1,
+        y1
+      ], [
+        x2,
+        y2
+      ], 10);
+      if (iswithinRange && (x1!=x2 && y1!=y2)) {
+        print("turnn pointsss");
+        print("${x1}---${y1}");
+        print("${x2}---${y2}");
+        print(
+            "${nearbyPathLandmarks[i].coordinateX!}--${nearbyPathLandmarks[i].coordinateY!}");
+        temp1.add([
+          nearbyPathLandmarks[i].coordinateX!,
+          nearbyPathLandmarks[i].coordinateY!
+        ]);
+        temp1.add([x1, y1]);
+        temp1.add([x2, y2]);
+        temp1.add([x11, y11]);
+        temp1.add([x22, y22]);
+
+        res.add(temp1);
+        break;
+      }
+    }
+  }
+  return res;
+}
+
+// Function to calculate the distance between two points
+double calculateDistance(List<int> p1, List<int> p2) {
+  return sqrt(pow((p2[0] - p1[0]), 2) + pow((p2[1] - p1[1]), 2));
+}
+
+// Function to check if a point (x, y) is within range of P1 or P2
+bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
+  double distanceToP1 = calculateDistance(target, p1);
+  double distanceToP2 = calculateDistance(target, p2);
+  return distanceToP1 <= range && distanceToP2 <= range;
 }
 
 List<Cell> findCorridorSegments(
@@ -1016,10 +1294,10 @@ List<Cell> findCorridorSegments(
         (westCollision ? 1 : 0);
 
     // Check if any two opposite directions collide with non-walkable cells
-    if(i == 0){
+    if (i == 0) {
       print("$pos with first cell");
       single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
-    }else if (nextrow != row && nextcol != col) {
+    } else if (nextrow != row && nextcol != col) {
       print("$pos with first eight");
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
@@ -1066,5 +1344,3 @@ bool checkDirection(List<int> nonWalkable, int row, int col, int width,
   }
   return false;
 }
-
-

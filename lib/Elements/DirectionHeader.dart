@@ -21,6 +21,7 @@ import '../buildingState.dart';
 import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
+import '../Navigation.dart';
 
 
 class DirectionHeader extends StatefulWidget {
@@ -401,6 +402,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
         int nextTurn = findNextTurn(turnPoints, remainingPath);
+        print(nextTurn);
+        print(remainingPath);
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
 
         if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
@@ -413,7 +416,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
         int index = widget.user.path.indexOf(nextTurn);
         //print("index $index");
-        double a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        double a =0;
+        if(index+1 == widget.user.path.length){
+          a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }else{
+          a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }
 
         String direc = tools.angleToClocks(a);
         turnDirection = direc;
@@ -447,7 +455,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //   speak("${widget.direction} ${widget.distance} meter");
             // }
 
-            speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+            speak("Turn ${widget.direction}");
+            //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
 
 
           }else if(widget.direction == "Straight"){
@@ -467,56 +476,56 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(direction == "Straight"){
       return Icon(
         Icons.straight,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Slight Right"){
       return Icon(
         Icons.turn_slight_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Right"){
       return Icon(
         Icons.turn_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Sharp Right"){
       return Icon(
         Icons.turn_sharp_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "U Turn"){
       return Icon(
         Icons.u_turn_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Sharp Left"){
       return Icon(
         Icons.turn_sharp_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Left"){
       return Icon(
         Icons.turn_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else if(direction == "Slight Left"){
       return Icon(
         Icons.turn_slight_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else{
       return Icon(
         Icons.check_box_outline_blank,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }
   }
@@ -586,43 +595,53 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return Semantics(
       excludeSemantics: true,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 95,
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(top: 8,bottom: 8),
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
               color: DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
 
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(onPressed: (){setState(() {
-                  if(DirectionIndex - 1 >=1){
-                    DirectionIndex--;
-                    widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                  }
-                });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
-                SizedBox(
-                  width: 12,
+                Container(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(onPressed: (){setState(() {
+                    if(DirectionIndex - 1 >=1){
+                      DirectionIndex--;
+                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                    }
+                  });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
+                SizedBox(width: 8,),
                 scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.focusOnTurn),
-                IconButton(onPressed: (){setState(() {
-                  if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                    DirectionIndex++;
-                    widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                  }
-                });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,))
+                SizedBox(width: 8,),
+                Container(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(onPressed: (){setState(() {
+                    if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                      DirectionIndex++;
+                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                    }
+                  });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                )
               ],
             ),
           ),
-          SizedBox(height: 4,),
-          DirectionIndex == nextTurnIndex?Container(
+          DirectionIndex == DirectionIndex?Container(
             width: 98,
             height: 39,
-            color: Color(0xff013633),
+            margin: EdgeInsets.only(left: 9,top: 5),
             padding: EdgeInsets.only(left: 16,right: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              color: Color(0xff013633),
+            ),
             child: Row(
               children: [
                 Text(
@@ -637,7 +656,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   textAlign: TextAlign.left,
                 ),
                 SizedBox(width: 6,),
-                getNextCustomIcon(turnDirection)
+                Text(DirectionIndex.toString()),
+                Text(nextTurnIndex.toString())
+                //getNextCustomIcon(turnDirection)
               ],
             ),
           ):Container()
@@ -662,15 +683,19 @@ class scrollableDirection extends StatelessWidget {
     if(DirectionIndex == nextTurnIndex){
       return "${Direction == "Straight"?"Go Straight":"Turn ${Direction}, and Go Straight"}";
     }else{
-      return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
+      if(DirectionIndex<listOfDirections.length){
+        return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
+      }else{
+        return "${listOfDirections[DirectionIndex-1].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex-1].turnDirection}, and Go Straight"}";
+      }
     }
   }
 
   String chooseSteps(){
     if(DirectionIndex == nextTurnIndex){
-      return '$steps steps';
+      return '$steps Steps';
     }else{
-      return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} steps';
+      return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} Steps';
     }
   }
 
@@ -684,64 +709,54 @@ class scrollableDirection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return  Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    chooseDirection(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w700,
-
-                    ),
-                  ),
-                  SizedBox(height: 4.0),
-                  Text(
-
-                    chooseSteps(),
-                    style: TextStyle(
-
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-
-                    ),
-                  ),
-
-                ],
+          Expanded(
+            child: Center(
+              child: Text(
+                chooseDirection(),
+                style: const TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 30/24,
+                ),
               ),
-
-
-              Container(
-                  height: 54,
-                  width: 54,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(28.0),
-                  ),
-
-                  child: chooseIcon(),
-
-
-
-              )],
+            ),
           ),
-
-        ],
+          SizedBox(
+            width: 4,
+          ),
+          Container(
+            width: 75,
+            child: Column(
+              children: [
+                Text(
+                  chooseSteps(),
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                    height: 26/16,
+                  ),
+                ),
+                SizedBox(
+                  height: 4,
+                ),
+                Container(
+                  height: 40,
+                  width: 40,
+                  child: chooseIcon(),
+                ),
+              ],
+            ),
+          )],
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwayplusnav/UserState.dart';
+import 'package:iwayplusnav/pathState.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
@@ -641,7 +642,7 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid) {
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);

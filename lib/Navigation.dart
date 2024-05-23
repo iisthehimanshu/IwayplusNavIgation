@@ -106,6 +106,7 @@ class Navigation extends StatefulWidget {
 
   @override
   State<Navigation> createState() => _NavigationState();
+
 }
 
 class _NavigationState extends State<Navigation> {
@@ -121,6 +122,8 @@ class _NavigationState extends State<Navigation> {
   Set<Polygon> otherpatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
+  Set<gmap.Polyline> focusturn = Set();
+  Set<Marker> focusturnArrow = Set();
   Map<String, Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
@@ -2004,7 +2007,7 @@ class _NavigationState extends State<Navigation> {
                       );
                       setState(() {
                         if (building.selectedLandmarkID != polyArray.id &&
-                            !user.isnavigating) {
+                            !user.isnavigating && !_isRoutePanelOpen) {
                           user.reset();
                           PathState = pathState.withValues(
                               -1, -1, -1, -1, -1, -1, null, 0);
@@ -3265,7 +3268,6 @@ class _NavigationState extends State<Navigation> {
       print(PathState.path.keys);
       print(pathMarkers.keys);
     }
-
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3335,7 +3337,7 @@ class _NavigationState extends State<Navigation> {
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(
-            tools.getDirections(path, numCols, value, floor, bid ?? ""));
+            tools.getDirections(path, numCols, value, floor, bid ?? "",PathState));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -6188,10 +6190,10 @@ class _NavigationState extends State<Navigation> {
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
     polylines.forEach((key, value) {
-      poly = poly.union(value);
+      poly = poly.union(value).union(focusturn);
     });
     interBuildingPath.forEach((key, value) {
-      poly = poly.union(value);
+      poly = poly.union(value).union(focusturn);
     });
     return poly;
   }
@@ -6423,15 +6425,38 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
-  focusOnTurn(direction turn) {
-    if (turn.x != null && turn.y != null && turn.numCols != null) {
 
+
+  focusOnTurn(direction turn)async{
+    focusturnArrow.clear();
+    if (turn.x != null && turn.y != null && turn.numCols != null) {
       int i = user.path.indexWhere((element) => element == turn.node);
       if(building.floor[buildingAllApi.getStoredString()] != turn.floor){
         i++;
       }else{
         i--;
       }
+      
+      //List<LatLng> coordinates = [];
+      BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(44, 44)),
+        'assets/greytorch.png',
+      );
+      // for(int a = i;a>i-5;a--){
+      //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
+      //     break;
+      //   }
+      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
+      //   coordinates.insert(0,LatLng(ltln[0], ltln[1]));
+      // }
+      //
+      // for(int a = i+1;a<i+6;a++){
+      //   // if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
+      //   //   break;
+      //   // }
+      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
+      //   coordinates.add(LatLng(ltln[0], ltln[1]));
+      // }
 
       if (turn.floor != null &&
           building.floor[buildingAllApi.getStoredString()] != turn.floor) {
@@ -6449,6 +6474,24 @@ class _NavigationState extends State<Navigation> {
           patchData: building.patchData[turn.Bid]);
       List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
           patchData: building.patchData[turn.Bid]);
+
+
+      setState(() {
+        // focusturn.add(gmap.Polyline(
+        //   polylineId: PolylineId("focusturn"),
+        //   points: coordinates,
+        //   color: Colors.blue,
+        //   width: 5,
+        // ));
+
+        focusturnArrow.add(Marker(markerId: MarkerId("focusturn"),
+            position: LatLng(latlng[0], latlng[1]),
+            icon: greytorch,
+            anchor: Offset(0.5, 0.5)
+        ));
+      });
+
+
       mapState.target = LatLng(latlng[0], latlng[1]);
       mapState.bearing = tools
           .calculateBearing([latlng2[0], latlng2[1]], [latlng[0], latlng[1]]);
@@ -6575,7 +6618,7 @@ class _NavigationState extends State<Navigation> {
                                     building.floor[
                                         buildingAllApi.getStoredString()]]!)
                                 : getCombinedPolylines(),
-                            markers: getCombinedMarkers(),
+                            markers: getCombinedMarkers().union(focusturnArrow),
                             onTap: (x) {
                               mapState.interaction = true;
                             },

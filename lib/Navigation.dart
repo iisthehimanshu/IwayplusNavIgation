@@ -420,7 +420,7 @@ class _NavigationState extends State<Navigation> {
 
   void checkPermissions() async {
     print("running");
-    await requestLocationPermission();
+  //  await requestLocationPermission();
     await requestBluetoothConnectPermission();
     //  await requestActivityPermission();
   }
@@ -1397,109 +1397,109 @@ if(user.isnavigating==false){
         btadapter.emptyBin();
 
         print("nearestBeacon : $firstValue");
-
-        if (apibeaconmap[firstValue] != null) {
-          await building.landmarkdata!.then((value) {
-            nearestLandInfomation = tools.localizefindNearbyLandmark(
-                apibeaconmap[firstValue]!, value.landmarksMap!);
-            setState(() {
-              getallnearestInfo = tools.localizefindAllNearbyLandmark(
-                  apibeaconmap[firstValue]!, value.landmarksMap!);
-            });
-
-            landCords = tools.localizefindNearbyLandmarkCoordinated(
-                apibeaconmap[firstValue]!, value.landmarksMap!);
-          });
-
-          print("getallnearestInfo");
-          print(getallnearestInfo);
-
-          List<double> values = tools.localtoglobal(
-              apibeaconmap[firstValue]!.coordinateX!,
-              apibeaconmap[firstValue]!.coordinateY!);
-          LatLng beaconLocation = LatLng(values[0], values[1]);
-          mapState.target = LatLng(values[0], values[1]);
-          mapState.zoom = 21.0;
-          _googleMapController.animateCamera(
-            CameraUpdate.newLatLngZoom(
-              LatLng(values[0], values[1]),
-              20, // Specify your custom zoom level here
-            ),
-          );
-          user.Bid = apibeaconmap[firstValue]!.buildingID!;
-          user.coordX = apibeaconmap[firstValue]!.coordinateX!;
-          user.coordY = apibeaconmap[firstValue]!.coordinateY!;
-          print("user.coordXuser.coordY");
-          print("${user.coordX}${user.coordY}");
-          List<int> userCords = [];
-          userCords.add(user.coordX);
-          userCords.add(user.coordY);
-          List<int> transitionValue = tools.eightcelltransition(user.theta);
-          int newX = user.coordX + transitionValue[0];
-          int newY = user.coordY + transitionValue[1];
-          List<int> newUserCord = [];
-          newUserCord.add(newX);
-          newUserCord.add(newY);
-
-          user.lat =
-              double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
-          user.lng =
-              double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
-          user.floor = apibeaconmap[firstValue]!.floor!;
-          user.key = apibeaconmap[firstValue]!.sId!;
-          user.initialallyLocalised = true;
-          setState(() {
-            print("hehe: $beaconLocation");
-            markers.clear();
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("UserLocation"),
-              position: beaconLocation,
-              icon: userloc,
-              anchor: Offset(0.5, 0.829),
-            ));
-            building.floor[apibeaconmap[firstValue]!.buildingID!] =
-                apibeaconmap[firstValue]!.floor!;
-            createRooms(
-                building.polyLineData!, apibeaconmap[firstValue]!.floor!);
-            building.landmarkdata!.then((value) {
-              createMarkers(value, apibeaconmap[firstValue]!.floor!);
-            });
-          });
-          print("userCords");
-          print(userCords);
-          print(newUserCord);
-          print(landCords);
-
-          double value =
-              tools.calculateAngle(userCords, newUserCord, landCords);
-
-          print("value----");
-          print(value);
-          String finalvalue =
-              tools.angleToClocksForNearestLandmarkToBeacon(value);
-
-          print("finalvalue");
-          print(finalvalue);
-          detected = !detected;
-          _isBuildingPannelOpen = true;
-          _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
-          nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
-          if (nearestLandInfomation.name == "") {
-            print("no beacon found");
-            nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
-            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
-            speak(
-                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
-          } else {
-            nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
-            speak(
-                "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
-          }
-        } else {
-          speak("Unable to find your location");
-        }
-
-        btadapter.stopScanning();
+        //
+        // if (apibeaconmap[firstValue] != null) {
+        //   await building.landmarkdata!.then((value) {
+        //     nearestLandInfomation = tools.localizefindNearbyLandmark(
+        //         apibeaconmap[firstValue]!, value.landmarksMap!);
+        //     setState(() {
+        //       getallnearestInfo = tools.localizefindAllNearbyLandmark(
+        //           apibeaconmap[firstValue]!, value.landmarksMap!);
+        //     });
+        //
+        //     landCords = tools.localizefindNearbyLandmarkCoordinated(
+        //         apibeaconmap[firstValue]!, value.landmarksMap!);
+        //   });
+        //
+        //   print("getallnearestInfo");
+        //   print(getallnearestInfo);
+        //
+        //   List<double> values = tools.localtoglobal(
+        //       apibeaconmap[firstValue]!.coordinateX!,
+        //       apibeaconmap[firstValue]!.coordinateY!);
+        //   LatLng beaconLocation = LatLng(values[0], values[1]);
+        //   mapState.target = LatLng(values[0], values[1]);
+        //   mapState.zoom = 21.0;
+        //   _googleMapController.animateCamera(
+        //     CameraUpdate.newLatLngZoom(
+        //       LatLng(values[0], values[1]),
+        //       20, // Specify your custom zoom level here
+        //     ),
+        //   );
+        //   user.Bid = apibeaconmap[firstValue]!.buildingID!;
+        //   user.coordX = apibeaconmap[firstValue]!.coordinateX!;
+        //   user.coordY = apibeaconmap[firstValue]!.coordinateY!;
+        //   print("user.coordXuser.coordY");
+        //   print("${user.coordX}${user.coordY}");
+        //   List<int> userCords = [];
+        //   userCords.add(user.coordX);
+        //   userCords.add(user.coordY);
+        //   List<int> transitionValue = tools.eightcelltransition(user.theta);
+        //   int newX = user.coordX + transitionValue[0];
+        //   int newY = user.coordY + transitionValue[1];
+        //   List<int> newUserCord = [];
+        //   newUserCord.add(newX);
+        //   newUserCord.add(newY);
+        //
+        //   user.lat =
+        //       double.parse(apibeaconmap[firstValue]!.properties!.latitude!);
+        //   user.lng =
+        //       double.parse(apibeaconmap[firstValue]!.properties!.longitude!);
+        //   user.floor = apibeaconmap[firstValue]!.floor!;
+        //   user.key = apibeaconmap[firstValue]!.sId!;
+        //   user.initialallyLocalised = true;
+        //   setState(() {
+        //     print("hehe: $beaconLocation");
+        //     markers.clear();
+        //     markers[user.Bid]?.add(Marker(
+        //       markerId: MarkerId("UserLocation"),
+        //       position: beaconLocation,
+        //       icon: userloc,
+        //       anchor: Offset(0.5, 0.829),
+        //     ));
+        //     building.floor[apibeaconmap[firstValue]!.buildingID!] =
+        //         apibeaconmap[firstValue]!.floor!;
+        //     createRooms(
+        //         building.polyLineData!, apibeaconmap[firstValue]!.floor!);
+        //     building.landmarkdata!.then((value) {
+        //       createMarkers(value, apibeaconmap[firstValue]!.floor!);
+        //     });
+        //   });
+        //   print("userCords");
+        //   print(userCords);
+        //   print(newUserCord);
+        //   print(landCords);
+        //
+        //   double value =
+        //       tools.calculateAngle(userCords, newUserCord, landCords);
+        //
+        //   print("value----");
+        //   print(value);
+        //   String finalvalue =
+        //       tools.angleToClocksForNearestLandmarkToBeacon(value);
+        //
+        //   print("finalvalue");
+        //   print(finalvalue);
+        //   detected = !detected;
+        //   _isBuildingPannelOpen = true;
+        //   _isNearestLandmarkPannelOpen = !_isNearestLandmarkPannelOpen;
+        //   nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+        //   if (nearestLandInfomation.name == "") {
+        //     print("no beacon found");
+        //     nearestLandInfomation.name = apibeaconmap[firstValue]!.name!;
+        //     nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
+        //     speak(
+        //         "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${apibeaconmap[firstValue]!.name!} is on your ${finalvalue}");
+        //   } else {
+        //     nearestLandInfomation.floor = apibeaconmap[firstValue]!.floor!;
+        //     speak(
+        //         "You are on ${tools.numericalToAlphabetical(apibeaconmap[firstValue]!.floor!)} floor,${nearestLandInfomation.name} is on your ${finalvalue}");
+        //   }
+        // } else {
+        //   speak("Unable to find your location");
+        // }
+        //
+        // btadapter.stopScanning();
         print("Beacon searching Stoped");
       } else {
         HelperClass.showToast("Beacon Already scanned");

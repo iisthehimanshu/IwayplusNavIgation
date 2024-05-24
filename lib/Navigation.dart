@@ -3549,6 +3549,8 @@ class _NavigationState extends State<Navigation> {
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
+    print("screenheight ${screenHeight * 0.9}");
+
     return Visibility(
       visible: _isRoutePanelOpen,
       child: Stack(
@@ -3993,7 +3995,7 @@ class _NavigationState extends State<Navigation> {
                                         ),
                                       ),
                                       Container(
-                                        width: 95,
+                                        width: 98,
                                         height: 40,
                                         margin: EdgeInsets.only(left: 12),
                                         decoration: BoxDecoration(
@@ -4080,27 +4082,75 @@ class _NavigationState extends State<Navigation> {
                                   SizedBox(
                                     height: 22,
                                   ),
-                                  SingleChildScrollView(
-                                    child: Column(
-                                      children: [
-                                        Semantics(
-                                          excludeSemantics: false,
-                                          child: Row(
+                                  Container(
+                                    height: 544,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          Semantics(
+                                            excludeSemantics: false,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  height: 25,
+                                                  margin:
+                                                      EdgeInsets.only(right: 8),
+                                                  child: SvgPicture.asset(
+                                                      "assets/StartpointVector.svg"),
+                                                ),
+                                                Semantics(
+                                                  label:
+                                                      "Steps preview,    You are heading from",
+                                                  child: Text(
+                                                    "${PathState.sourceName}",
+                                                    style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff0e0d0d),
+                                                      height: 25 / 16,
+                                                    ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                          Column(
+                                            children: directionWidgets,
+                                          ),
+                                          SizedBox(
+                                            height: 22,
+                                          ),
+                                          Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
                                             children: [
                                               Container(
                                                 height: 25,
-                                                margin:
-                                                    EdgeInsets.only(right: 8),
-                                                child: SvgPicture.asset(
-                                                    "assets/StartpointVector.svg"),
+                                                margin: EdgeInsets.only(right: 8),
+                                                child: Icon(
+                                                  Icons.pin_drop_sharp,
+                                                  size: 24,
+                                                ),
                                               ),
                                               Semantics(
                                                 label:
-                                                    "Steps preview,    You are heading from",
+                                                    "Your are heading towards ",
                                                 child: Text(
-                                                  "${PathState.sourceName}",
+                                                  angle != null
+                                                      ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
+                                                      : PathState.destinationName,
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
                                                     fontSize: 16,
@@ -4113,61 +4163,16 @@ class _NavigationState extends State<Navigation> {
                                               )
                                             ],
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Container(
-                                          width: screenHeight,
-                                          height: 1,
-                                          color: Color(0xffEBEBEB),
-                                        ),
-                                        Column(
-                                          children: directionWidgets,
-                                        ),
-                                        SizedBox(
-                                          height: 22,
-                                        ),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              height: 25,
-                                              margin: EdgeInsets.only(right: 8),
-                                              child: Icon(
-                                                Icons.pin_drop_sharp,
-                                                size: 24,
-                                              ),
-                                            ),
-                                            Semantics(
-                                              label:
-                                                  "Your are heading towards ",
-                                              child: Text(
-                                                angle != null
-                                                    ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
-                                                    : PathState.destinationName,
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Color(0xff0e0d0d),
-                                                  height: 25 / 16,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Container(
-                                          width: screenHeight,
-                                          height: 1,
-                                          color: Color(0xffEBEBEB),
-                                        ),
-                                      ],
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   )
                                 ],
@@ -6633,38 +6638,35 @@ class _NavigationState extends State<Navigation> {
 
                               SizedBox(height: 28.0),
                               DebugToggle.Slider?Text("${user.theta}"):Container(),
-                              Visibility(
-                                visible: DebugToggle.Slider,
-                                child: Slider(
-                                    value: user.theta,
-                                    min: -180,
-                                    max: 180,
-                                    onChanged: (newvalue) {
-                                      double? compassHeading = newvalue;
-                                      setState(() {
-                                        user.theta = compassHeading!;
-                                        if (mapState.interaction2) {
-                                          mapState.bearing = compassHeading!;
-                                          _googleMapController.moveCamera(
-                                            CameraUpdate.newCameraPosition(
-                                              CameraPosition(
-                                                target: mapState.target,
-                                                zoom: mapState.zoom,
-                                                bearing: mapState.bearing!,
-                                              ),
+                              DebugToggle.Slider?Slider(
+                                  value: user.theta,
+                                  min: -180,
+                                  max: 180,
+                                  onChanged: (newvalue) {
+                                    double? compassHeading = newvalue;
+                                    setState(() {
+                                      user.theta = compassHeading!;
+                                      if (mapState.interaction2) {
+                                        mapState.bearing = compassHeading!;
+                                        _googleMapController.moveCamera(
+                                          CameraUpdate.newCameraPosition(
+                                            CameraPosition(
+                                              target: mapState.target,
+                                              zoom: mapState.zoom,
+                                              bearing: mapState.bearing!,
                                             ),
-                                            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                          );
-                                        } else {
-                                          if (markers.length > 0)
-                                            markers[user.Bid]?[0] =
-                                                customMarker.rotate(
-                                                    compassHeading! - mapbearing,
-                                                    markers[user.Bid]![0]);
-                                        }
-                                      });
-                                    }),
-                              ),
+                                          ),
+                                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                        );
+                                      } else {
+                                        if (markers.length > 0)
+                                          markers[user.Bid]?[0] =
+                                              customMarker.rotate(
+                                                  compassHeading! - mapbearing,
+                                                  markers[user.Bid]![0]);
+                                      }
+                                    });
+                                  }):Container(),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(

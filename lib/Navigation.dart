@@ -524,26 +524,22 @@ class _NavigationState extends State<Navigation> {
   }
 
   Future<void> paintMarker(LatLng Location) async {
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/tealtorch.png',
-    );
+    final Uint8List userloc =
+    await getImagesFromMarker('assets/userloc0.png', 44);
+    final Uint8List userlocdebug =
+    await getImagesFromMarker('assets/tealtorch.png', 44);
 
     if (markers.containsKey(user.Bid)) {
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
-        icon: userloc,
+        icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("debug"),
         position: Location,
-        icon: userlocdebug,
+        icon: BitmapDescriptor.fromBytes(userlocdebug),
         anchor: Offset(0.5, 0.829),
       ));
     } else {
@@ -551,13 +547,13 @@ class _NavigationState extends State<Navigation> {
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
-        icon: userloc,
+        icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("debug"),
         position: Location,
-        icon: userlocdebug,
+        icon: BitmapDescriptor.fromBytes(userlocdebug),
         anchor: Offset(0.5, 0.829),
       ));
     }
@@ -649,14 +645,13 @@ class _NavigationState extends State<Navigation> {
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
     print("nearestBeacon : $nearestBeacon");
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/tealtorch.png',
-    );
+
+    final Uint8List userloc =
+    await getImagesFromMarker('assets/userloc0.png', 44);
+    final Uint8List userlocdebug =
+    await getImagesFromMarker('assets/tealtorch.png', 44);
+
+
     if (apibeaconmap[nearestBeacon] != null) {
 
       //buildingAngle compute
@@ -744,13 +739,13 @@ class _NavigationState extends State<Navigation> {
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: beaconLocation,
-            icon: userloc,
+            icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("debug"),
             position: beaconLocation,
-            icon: userlocdebug,
+            icon: BitmapDescriptor.fromBytes(userlocdebug),
             anchor: Offset(0.5, 0.829),
           ));
         } else {
@@ -759,13 +754,13 @@ class _NavigationState extends State<Navigation> {
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: LatLng(user.lat, user.lng),
-            icon: userloc,
+            icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("debug"),
             position: LatLng(user.lat, user.lng),
-            icon: userlocdebug,
+            icon: BitmapDescriptor.fromBytes(userlocdebug),
             anchor: Offset(0.5, 0.829),
           ));
         }
@@ -871,14 +866,11 @@ class _NavigationState extends State<Navigation> {
   }
 
   void moveUser() async {
-    BitmapDescriptor userloc = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/userloc0.png',
-    );
-    BitmapDescriptor userlocdebug = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(44, 44)),
-      'assets/tealtorch.png',
-    );
+    final Uint8List userloc =
+    await getImagesFromMarker('assets/userloc0.png', 44);
+    final Uint8List userlocdebug =
+    await getImagesFromMarker('assets/tealtorch.png', 44);
+
     LatLng userlocation = LatLng(user.lat, user.lng);
     mapState.target = LatLng(user.lat, user.lng);
     mapState.zoom = 21.0;
@@ -895,13 +887,13 @@ class _NavigationState extends State<Navigation> {
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: userlocation,
-        icon: userloc,
+        icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       markers[user.Bid]?.add(Marker(
         markerId: MarkerId("debug"),
         position: userlocation,
-        icon: userlocdebug,
+        icon: BitmapDescriptor.fromBytes(userlocdebug),
         anchor: Offset(0.5, 0.829),
       ));
     });
@@ -3909,20 +3901,11 @@ class _NavigationState extends State<Navigation> {
                                               user
                                                   .moveToStartofPath()
                                                   .then((value) async {
-                                                BitmapDescriptor userloc =
-                                                    await BitmapDescriptor
-                                                        .fromAssetImage(
-                                                  ImageConfiguration(
-                                                      size: Size(44, 44)),
-                                                  'assets/userloc0.png',
-                                                );
-                                                BitmapDescriptor userlocdebug =
-                                                    await BitmapDescriptor
-                                                        .fromAssetImage(
-                                                  ImageConfiguration(
-                                                      size: Size(44, 44)),
-                                                  'assets/tealtorch.png',
-                                                );
+                                                final Uint8List userloc =
+                                                await getImagesFromMarker('assets/userloc0.png', 44);
+                                                final Uint8List userlocdebug =
+                                                await getImagesFromMarker('assets/tealtorch.png', 44);
+
                                                 setState(() {
                                                   markers.clear();
                                                   List<double> val =
@@ -3939,7 +3922,7 @@ class _NavigationState extends State<Navigation> {
                                                         "UserLocation"),
                                                     position:
                                                         LatLng(val[0], val[1]),
-                                                    icon: userloc,
+                                                    icon: BitmapDescriptor.fromBytes(userloc),
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
 
@@ -3951,7 +3934,7 @@ class _NavigationState extends State<Navigation> {
                                                     markerId: MarkerId("debug"),
                                                     position:
                                                         LatLng(val[0], val[1]),
-                                                    icon: userlocdebug,
+                                                    icon: BitmapDescriptor.fromBytes(userlocdebug),
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
                                                 });
@@ -6770,6 +6753,7 @@ class _NavigationState extends State<Navigation> {
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+
                                     //print(PathState.connections);
                                     building.floor[buildingAllApi
                                         .getStoredString()] = user.floor;

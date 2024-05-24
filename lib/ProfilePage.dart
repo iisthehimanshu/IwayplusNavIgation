@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -9,6 +10,7 @@ import 'package:iwayplusnav/API/DeleteApi.dart';
 import 'package:iwayplusnav/Elements/UserCredential.dart';
 import 'package:iwayplusnav/LOGIN%20SIGNUP/SignIn.dart';
 
+import 'DebugToggle.dart';
 import 'EditProfile.dart';
 import 'FavouriteRGCIScreen.dart';
 import 'Help&SupportScreen.dart';
@@ -160,73 +162,83 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: (isLoading)?Center(child: CircularProgressIndicator(),):Column(
         children: [
-          Container(
-            child: Row(
-              children: [
-                Semantics(
-                  label: "Profile Photo",
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0,right: 8),
-                    child: Container(
-                      width: 54,
-                      height: 54,
+          EasterEggTrigger(
+            codes: [EasterEggTriggers.SwipeRight,EasterEggTriggers.SwipeRight,EasterEggTriggers.LongPress],
+            action: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>DebugToggle()),
+              );
+            },
+            child: Container(
+              child: Row(
+                children: [
+                  Semantics(
+                    label: "Profile Photo",
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0,right: 8),
+                      child: Container(
+                        width: 54,
+                        height: 54,
 
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage('assets/profilePageAssets/User image.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-
-                  ),
-                ),
-                Semantics(
-                  label: "Name",
-                  child: Container(
-                    height: 40,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            '${_nameController.text} ',
-                            style: TextStyle(
-                              color: Color(0xFF18181B),
-                              fontSize: 16,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w500,
-                              height: 0.09,
-                            ),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage('assets/profilePageAssets/User image.png'),
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        SizedBox(height: 10,),
+                      ),
 
-                        Semantics(
-                          label: "Email Address",
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    ),
+                  ),
+                  Semantics(
+                    label: "Name",
+                    child: Container(
+                      height: 40,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
-
-                              '${_emailController.text}',
+                              '${_nameController.text} ',
                               style: TextStyle(
-
-                                color: Color(0xFF8D8C8C),
-                                fontSize: 12,
+                                color: Color(0xFF18181B),
+                                fontSize: 16,
                                 fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                                height: 0.12,
+                                fontWeight: FontWeight.w500,
+                                height: 0.09,
                               ),
                             ),
                           ),
-                        )
-                      ],
+                          SizedBox(height: 10,),
+
+                          Semantics(
+                            label: "Email Address",
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+
+                                '${_emailController.text}',
+                                style: TextStyle(
+
+                                  color: Color(0xFF8D8C8C),
+                                  fontSize: 12,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w400,
+                                  height: 0.12,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
           SizedBox(height: 24,),

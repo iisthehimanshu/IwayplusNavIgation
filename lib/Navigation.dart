@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
+import 'package:iwayplusnav/DebugToggle.dart';
 import 'package:iwayplusnav/Elements/DirectionHeader.dart';
 import 'package:iwayplusnav/Elements/ExploreModeWidget.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
@@ -193,7 +194,7 @@ class _NavigationState extends State<Navigation> {
 
     //btadapter.strtScanningIos(apibeaconmap);
     apiCalls();
-    //handleCompassEvents();
+    !DebugToggle.Slider?handleCompassEvents():(){};
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -525,9 +526,9 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> paintMarker(LatLng Location) async {
     final Uint8List userloc =
-    await getImagesFromMarker('assets/userloc0.png', 44);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-    await getImagesFromMarker('assets/tealtorch.png', 44);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
     if (markers.containsKey(user.Bid)) {
       markers[user.Bid]?.add(Marker(
@@ -647,9 +648,9 @@ class _NavigationState extends State<Navigation> {
     print("nearestBeacon : $nearestBeacon");
 
     final Uint8List userloc =
-    await getImagesFromMarker('assets/userloc0.png', 44);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-    await getImagesFromMarker('assets/tealtorch.png', 44);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
 
     if (apibeaconmap[nearestBeacon] != null) {
@@ -867,9 +868,9 @@ class _NavigationState extends State<Navigation> {
 
   void moveUser() async {
     final Uint8List userloc =
-    await getImagesFromMarker('assets/userloc0.png', 44);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-    await getImagesFromMarker('assets/tealtorch.png', 44);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
     LatLng userlocation = LatLng(user.lat, user.lng);
     mapState.target = LatLng(user.lat, user.lng);
@@ -3301,10 +3302,9 @@ class _NavigationState extends State<Navigation> {
         dvalue = tools.localtoglobal(destinationX, destinationY);
       }
 
-      BitmapDescriptor tealtorch = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(),
-        'assets/tealtorch.png',
-      );
+      final Uint8List tealtorch =
+      await getImagesFromMarker('assets/tealtorch.png', 35);
+
       Set<Marker> innerMarker = Set();
 
       innerMarker.add(Marker(
@@ -3315,7 +3315,7 @@ class _NavigationState extends State<Navigation> {
         Marker(
           markerId: MarkerId('source${bid}'),
           position: LatLng(svalue[0], svalue[1]),
-          icon: tealtorch,
+          icon: BitmapDescriptor.fromBytes(tealtorch),
           anchor: Offset(0.5, 0.5),
         ),
       );
@@ -3902,9 +3902,9 @@ class _NavigationState extends State<Navigation> {
                                                   .moveToStartofPath()
                                                   .then((value) async {
                                                 final Uint8List userloc =
-                                                await getImagesFromMarker('assets/userloc0.png', 44);
+                                                await getImagesFromMarker('assets/userloc0.png', 1);
                                                 final Uint8List userlocdebug =
-                                                await getImagesFromMarker('assets/tealtorch.png', 44);
+                                                await getImagesFromMarker('assets/tealtorch.png', 35);
 
                                                 setState(() {
                                                   markers.clear();
@@ -6597,7 +6597,7 @@ class _NavigationState extends State<Navigation> {
                               //
                               // // Text(Building.thresh),
                               Visibility(
-                                visible: true,
+                                visible: DebugToggle.StepButton,
                                 child: Container(
                                     decoration: BoxDecoration(
                                         color: Colors.white,
@@ -6632,36 +6632,39 @@ class _NavigationState extends State<Navigation> {
                               ),
 
                               SizedBox(height: 28.0),
-                              Text("${user.theta}"),
-                              Slider(
-                                  value: user.theta,
-                                  min: -180,
-                                  max: 180,
-                                  onChanged: (newvalue) {
-                                    double? compassHeading = newvalue;
-                                    setState(() {
-                                      user.theta = compassHeading!;
-                                      if (mapState.interaction2) {
-                                        mapState.bearing = compassHeading!;
-                                        _googleMapController.moveCamera(
-                                          CameraUpdate.newCameraPosition(
-                                            CameraPosition(
-                                              target: mapState.target,
-                                              zoom: mapState.zoom,
-                                              bearing: mapState.bearing!,
+                              DebugToggle.Slider?Text("${user.theta}"):Container(),
+                              Visibility(
+                                visible: DebugToggle.Slider,
+                                child: Slider(
+                                    value: user.theta,
+                                    min: -180,
+                                    max: 180,
+                                    onChanged: (newvalue) {
+                                      double? compassHeading = newvalue;
+                                      setState(() {
+                                        user.theta = compassHeading!;
+                                        if (mapState.interaction2) {
+                                          mapState.bearing = compassHeading!;
+                                          _googleMapController.moveCamera(
+                                            CameraUpdate.newCameraPosition(
+                                              CameraPosition(
+                                                target: mapState.target,
+                                                zoom: mapState.zoom,
+                                                bearing: mapState.bearing!,
+                                              ),
                                             ),
-                                          ),
-                                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                        );
-                                      } else {
-                                        if (markers.length > 0)
-                                          markers[user.Bid]?[0] =
-                                              customMarker.rotate(
-                                                  compassHeading! - mapbearing,
-                                                  markers[user.Bid]![0]);
-                                      }
-                                    });
-                                  }),
+                                            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                          );
+                                        } else {
+                                          if (markers.length > 0)
+                                            markers[user.Bid]?[0] =
+                                                customMarker.rotate(
+                                                    compassHeading! - mapbearing,
+                                                    markers[user.Bid]![0]);
+                                        }
+                                      });
+                                    }),
+                              ),
                               SizedBox(height: 28.0),
                               !isSemanticEnabled
                                   ? Semantics(

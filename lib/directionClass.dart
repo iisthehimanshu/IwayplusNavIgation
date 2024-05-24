@@ -11,6 +11,7 @@ class direction{
   int?floor;
   String? Bid;
   int? numCols;
+  bool isDestination;
 
-  direction(this.node, this.turnDirection, this.nearbyLandmark, this.distanceToNextTurn, this.distanceToPrevTurn,this.x,this.y,this.floor,this.Bid,{this.numCols});
+  direction(this.node, this.turnDirection, this.nearbyLandmark, this.distanceToNextTurn, this.distanceToPrevTurn,this.x,this.y,this.floor,this.Bid,{this.isDestination = false,this.numCols});
 }

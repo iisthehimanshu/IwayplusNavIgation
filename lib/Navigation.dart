@@ -3195,6 +3195,7 @@ class _NavigationState extends State<Navigation> {
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
+    
 
     print("numcol $numCols");
 
@@ -3244,6 +3245,10 @@ class _NavigationState extends State<Navigation> {
         directions.addAll(PathState.directions);
         PathState.directions = directions;
       });
+
+      if(destinationX == PathState.destinationX && destinationY == PathState.destinationY){
+        PathState.directions.add(direction(destinationIndex, value.landmarksMap![PathState.destinationPolyID]!.name!, value.landmarksMap![PathState.destinationPolyID], 0, 0, destinationX, destinationY, floor, bid,isDestination: true));
+      }
     });
 
     List<Cell> Cellpath =
@@ -3485,29 +3490,31 @@ class _NavigationState extends State<Navigation> {
               .ceil()
               .toString()));
       for (int i = 1; i < PathState.directions.length; i++) {
-        if (PathState.directions[i].nearbyLandmark != null) {
-          directionWidgets.add(directionInstruction(
-              direction: PathState.directions[i].turnDirection == "Straight"
-                  ? "Go Straight"
-                  : "Turn ${PathState.directions[i].turnDirection!} from ${PathState.directions[i].nearbyLandmark!.name!}, and Go Straight",
-              distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
-                  .ceil()
-                  .toString()));
-        } else {
-          if (PathState.directions[i].node == -1) {
-            directionWidgets.add(directionInstruction(
-                direction: "${PathState.directions[i].turnDirection!}",
-                distance:
-                    "and go to ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} floor"));
-          } else {
+        if(!PathState.directions[i].isDestination){
+          if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == "Straight"
                     ? "Go Straight"
-                    : "Turn ${PathState.directions[i].turnDirection!}, and Go Straight",
-                distance:
-                    (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
-                        .ceil()
-                        .toString()));
+                    : "Turn ${PathState.directions[i].turnDirection!} from ${PathState.directions[i].nearbyLandmark!.name!}, and Go Straight",
+                distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
+                    .ceil()
+                    .toString()));
+          } else {
+            if (PathState.directions[i].node == -1) {
+              directionWidgets.add(directionInstruction(
+                  direction: "${PathState.directions[i].turnDirection!}",
+                  distance:
+                  "and go to ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} floor"));
+            } else {
+              directionWidgets.add(directionInstruction(
+                  direction: PathState.directions[i].turnDirection == "Straight"
+                      ? "Go Straight"
+                      : "Turn ${PathState.directions[i].turnDirection!}, and Go Straight",
+                  distance:
+                  (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
+                      .ceil()
+                      .toString()));
+            }
           }
         }
       }
@@ -3549,7 +3556,6 @@ class _NavigationState extends State<Navigation> {
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
-    print("screenheight ${screenHeight * 0.9}");
 
     return Visibility(
       visible: _isRoutePanelOpen,

@@ -618,7 +618,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
                 SizedBox(width: 8,),
-                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.focusOnTurn),
+                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.focusOnTurn,widget.user),
                 SizedBox(width: 8,),
                 Container(
                   width: 44,
@@ -676,11 +676,29 @@ class scrollableDirection extends StatelessWidget {
   int nextTurnIndex;
   List<direction> listOfDirections;
   final Function(dc.direction turn) focusOnTurn;
+  UserState user;
 
-  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.focusOnTurn);
+  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.focusOnTurn,this.user);
 
   String chooseDirection(){
-    if(DirectionIndex == nextTurnIndex){
+    if(listOfDirections[DirectionIndex].isDestination){
+      double? angle;
+      if (user.pathobj.singleCellListPath.isNotEmpty) {
+        int l = user.pathobj.singleCellListPath.length;
+        angle = tools.calculateAngle([
+          user.pathobj.singleCellListPath[l - 2].x,
+          user.pathobj.singleCellListPath[l - 2].y
+        ], [
+          user.pathobj.singleCellListPath[l - 1].x,
+          user.pathobj.singleCellListPath[l - 1].y
+        ], [
+          user.pathobj.destinationX,
+          user.pathobj.destinationY
+        ]);
+      }
+      return angle!=null?"${listOfDirections[DirectionIndex].turnDirection} will be ${tools.angleToClocks3(angle)}":
+      "${listOfDirections[DirectionIndex].turnDirection} will be on your front";
+    }else if(DirectionIndex == nextTurnIndex){
       return "${Direction == "Straight"?"Go Straight":"Turn ${Direction}, and Go Straight"}";
     }else{
       if(DirectionIndex<listOfDirections.length){
@@ -692,7 +710,9 @@ class scrollableDirection extends StatelessWidget {
   }
 
   String chooseSteps(){
-    if(DirectionIndex == nextTurnIndex){
+    if(listOfDirections[DirectionIndex].isDestination){
+     return "";
+    }else if(DirectionIndex == nextTurnIndex){
       return '$steps Steps';
     }else{
       return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} Steps';
@@ -700,7 +720,9 @@ class scrollableDirection extends StatelessWidget {
   }
 
   Icon chooseIcon(){
-    if(DirectionIndex == nextTurnIndex){
+    if(listOfDirections[DirectionIndex].isDestination){
+     return Icon(Icons.place_rounded,color: Colors.white,size: 40,);
+    }else if(DirectionIndex == nextTurnIndex){
       return i;
     }else{
       return _DirectionHeaderState.getCustomIcon(listOfDirections[DirectionIndex].turnDirection!);
@@ -734,9 +756,11 @@ class scrollableDirection extends StatelessWidget {
           ),
           Container(
             width: 75,
+            height: 70,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                listOfDirections[DirectionIndex].isDestination?Container():Text(
                   chooseSteps(),
                   style: const TextStyle(
                     fontFamily: "Roboto",

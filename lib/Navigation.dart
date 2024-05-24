@@ -3904,7 +3904,7 @@ class _NavigationState extends State<Navigation> {
                                                   .moveToStartofPath()
                                                   .then((value) async {
                                                 final Uint8List userloc =
-                                                await getImagesFromMarker('assets/userloc0.png', 1);
+                                                await getImagesFromMarker('assets/userloc0.png', 80);
                                                 final Uint8List userlocdebug =
                                                 await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -4083,7 +4083,7 @@ class _NavigationState extends State<Navigation> {
                                     height: 22,
                                   ),
                                   Container(
-                                    height: 544,
+                                    height: screenHeight-300,
                                     child: SingleChildScrollView(
                                       child: Column(
                                         children: [

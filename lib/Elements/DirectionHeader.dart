@@ -36,10 +36,11 @@ class DirectionHeader extends StatefulWidget {
   final Function() moveUser;
   final Function() closeNavigation;
   final Function(dc.direction turn) focusOnTurn;
+  final Function()clearFocusTurnArrow;
 
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn,required this.clearFocusTurnArrow}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
           user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
@@ -601,7 +602,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             padding: EdgeInsets.only(top: 8,bottom: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
-              color: DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
+              color: widget.user.pathobj.directions[DirectionIndex].isDestination?Colors.blue:DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
 
             ),
             child: Row(
@@ -614,12 +615,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     if(DirectionIndex - 1 >=1){
                       DirectionIndex--;
                       widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                      if(DirectionIndex == nextTurnIndex){
+                        widget.clearFocusTurnArrow();
+                      }
                     }
                   });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
-                SizedBox(width: 8,),
-                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.focusOnTurn,widget.user),
-                SizedBox(width: 8,),
+                const SizedBox(width: 8,),
+                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user),
+                const SizedBox(width: 8,),
                 Container(
                   width: 44,
                   height: 44,
@@ -627,13 +631,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
                       DirectionIndex++;
                       widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                      if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                        DirectionIndex++;
+                      }
+                      if(DirectionIndex == nextTurnIndex){
+                        widget.clearFocusTurnArrow();
+                      }
                     }
                   });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
                 )
               ],
             ),
           ),
-          DirectionIndex == DirectionIndex?Container(
+          DirectionIndex == nextTurnIndex?Container(
             width: 98,
             height: 39,
             margin: EdgeInsets.only(left: 9,top: 5),
@@ -656,9 +666,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   textAlign: TextAlign.left,
                 ),
                 SizedBox(width: 6,),
-                Text(DirectionIndex.toString()),
-                Text(nextTurnIndex.toString())
-                //getNextCustomIcon(turnDirection)
+                // Text(DirectionIndex.toString()),
+                // Text(nextTurnIndex.toString())
+                getNextCustomIcon(turnDirection)
               ],
             ),
           ):Container()
@@ -675,10 +685,9 @@ class scrollableDirection extends StatelessWidget {
   int DirectionIndex;
   int nextTurnIndex;
   List<direction> listOfDirections;
-  final Function(dc.direction turn) focusOnTurn;
   UserState user;
 
-  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.focusOnTurn,this.user);
+  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user);
 
   String chooseDirection(){
     if(listOfDirections[DirectionIndex].isDestination){

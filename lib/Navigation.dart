@@ -973,7 +973,7 @@ class _NavigationState extends State<Navigation> {
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, 0);
     });
-
+    building.floor[buildingAllApi.selectedBuildingID] = 0;
     print("working 3");
     building.landmarkdata = landmarkApi()
         .fetchLandmarkData(id: buildingAllApi.selectedBuildingID)
@@ -4492,7 +4492,7 @@ class _NavigationState extends State<Navigation> {
               moveUser: moveUser,
               closeNavigation: closeNavigation,
               isRelocalize: false,
-              focusOnTurn: focusOnTurn,
+              focusOnTurn: focusOnTurn, clearFocusTurnArrow: clearFocusTurnArrow,
             )
           ],
         ));
@@ -6209,6 +6209,12 @@ class _NavigationState extends State<Navigation> {
     });
   }
 
+  void clearFocusTurnArrow(){
+    setState(() {
+      focusturnArrow.clear();
+    });
+  }
+
   void closeNavigation() {
     StopPDR();
     _isnavigationPannelOpen = false;
@@ -6221,6 +6227,9 @@ class _NavigationState extends State<Navigation> {
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
+    setState(() {
+      focusturnArrow.clear();
+    });
 
     // setState(() {
     if (markers.length > 0) {
@@ -6585,7 +6594,7 @@ class _NavigationState extends State<Navigation> {
                       ),
                       //debug----
 
-                      Positioned(
+                      DebugToggle.PDRIcon?Positioned(
                           top: 150,
                           right: 50,
                           child: Container(
@@ -6596,7 +6605,7 @@ class _NavigationState extends State<Navigation> {
                             ),
                             height: 20,
                             width: 20,
-                          )),
+                          )):Container(),
                       Positioned(
                         bottom: 150.0, // Adjust the position as needed
                         right: 16.0,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class DebugToggle extends StatefulWidget {
   static bool Slider = false;
   static bool StepButton = false;
+  static bool PDRIcon = false;
   const DebugToggle({super.key});
 
   @override
@@ -12,6 +13,7 @@ class DebugToggle extends StatefulWidget {
 class _DebugToggleState extends State<DebugToggle> {
   bool Slider = false;
   bool StepButton = false;
+  bool PDRIcon = false;
 
 
   @override
@@ -47,6 +49,18 @@ class _DebugToggleState extends State<DebugToggle> {
                     setState(() {
                       StepButton = value;
                       DebugToggle.StepButton = value;
+                    });
+                  })
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("PDRIcon"),
+                  Switch(value: PDRIcon, onChanged: (value){
+                    setState(() {
+                      PDRIcon = value;
+                      DebugToggle.PDRIcon = value;
                     });
                   })
                 ],

@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwayplusnav/Elements/HelperClass.dart';
 
@@ -17,6 +18,10 @@ import 'package:vibration/vibration.dart';
 import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
+import '../directionClass.dart';
+import '../directionClass.dart' as dc;
+import '../directionClass.dart';
+import '../Navigation.dart';
 
 
 class DirectionHeader extends StatefulWidget {
@@ -30,10 +35,12 @@ class DirectionHeader extends StatefulWidget {
   final Function() reroute;
   final Function() moveUser;
   final Function() closeNavigation;
+  final Function(dc.direction turn) focusOnTurn;
+  final Function()clearFocusTurnArrow;
 
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue=''}){
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn,required this.clearFocusTurnArrow}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
           user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
@@ -56,13 +63,24 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   List<int> turnPoints = [];
   BLueToothClass btadapter = new BLueToothClass();
   late Timer _timer;
+  String turnDirection = "";
+  List<Widget> DirectionWidgetList = [];
 
 
   Map<String, double> ShowsumMap = Map();
+  int DirectionIndex = 1;
+  int nextTurnIndex = 0;
   
   @override
   void initState() {
     super.initState();
+
+    for(int i = 0; i<widget.user.pathobj.directions.length ; i++){
+      direction element = widget.user.pathobj.directions[i];
+      //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
+
+    }
+
 
     btadapter.emptyBin();
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -97,8 +115,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue="";
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      //print("direction header:: ${turnPoints}");
-      //print(widget.user.path.length);
+
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
       //  btadapter.startScanning(Building.apibeaconmap);
       // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
@@ -386,21 +403,33 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
         int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print("nextturn $nextTurn    ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]?.name!}");
+        print(nextTurn);
+        print(remainingPath);
+        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
+
+        if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
+          if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
+          DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
+        }
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
         double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
         widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
+        int index = widget.user.path.indexOf(nextTurn);
+        //print("index $index");
+        double a =0;
+        if(index+1 == widget.user.path.length){
+          a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }else{
+          a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }
 
+        String direc = tools.angleToClocks(a);
+        turnDirection = direc;
         if(nextTurn == turnPoints.last && widget.distance == 7){
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
         }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
-          int index = widget.user.path.indexOf(nextTurn);
-          //print("index $index");
-          double angle = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-
-          String direc = tools.angleToClocks(angle);
           if(!direc.contains("slight")){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
@@ -427,7 +456,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //   speak("${widget.direction} ${widget.distance} meter");
             // }
 
-            speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+            speak("Turn ${widget.direction}");
+            //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
 
 
           }else if(widget.direction == "Straight"){
@@ -443,190 +473,325 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-  Icon getCustomIcon(String direction) {
-    if(direction == "Go Straight"){
+  static Icon getCustomIcon(String direction) {
+    if(direction == "Straight"){
       return Icon(
         Icons.straight,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Slight Right, and Go Straight"){
+    }else if(direction == "Slight Right"){
       return Icon(
         Icons.turn_slight_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Right, and Go Straight"){
+    }else if(direction == "Right"){
       return Icon(
         Icons.turn_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Sharp Right, and Go Straight"){
+    }else if(direction == "Sharp Right"){
       return Icon(
         Icons.turn_sharp_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn U Turn, and Go Straight"){
+    }else if(direction == "U Turn"){
       return Icon(
         Icons.u_turn_right,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Sharp Left, and Go Straight"){
+    }else if(direction == "Sharp Left"){
       return Icon(
         Icons.turn_sharp_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Left, and Go Straight"){
+    }else if(direction == "Left"){
       return Icon(
         Icons.turn_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
-    }else if(direction == "Turn Slight Left, and Go Straight"){
+    }else if(direction == "Slight Left"){
       return Icon(
         Icons.turn_slight_left,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
       );
     }else{
       return Icon(
         Icons.check_box_outline_blank,
-        color: Colors.black,
-        size: 32,
+        color: Colors.white,
+        size: 40,
+      );
+    }
+  }
+
+  Icon getNextCustomIcon(String direction) {
+    if(direction == "Straight"){
+      return Icon(
+        Icons.straight,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Slight Right"){
+      return Icon(
+        Icons.turn_slight_right,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Right"){
+      return Icon(
+        Icons.turn_right,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Sharp Right"){
+      return Icon(
+        Icons.turn_sharp_right,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "U Turn"){
+      return Icon(
+        Icons.u_turn_right,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Sharp Left"){
+      return Icon(
+        Icons.turn_sharp_left,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Left"){
+      return Icon(
+        Icons.turn_left,
+        color: Colors.white,
+        size: 23,
+      );
+    }else if(direction == "Slight Left"){
+      return Icon(
+        Icons.turn_slight_left,
+        color: Colors.white,
+        size: 23,
+      );
+    }else{
+      return Icon(
+        Icons.check_box_outline_blank,
+        color: Colors.white,
+        size: 23,
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Semantics(
       excludeSemantics: true,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 8,vertical: 8),
-            height: 95,
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.only(top: 8,bottom: 8),
             decoration: BoxDecoration(
-              color: Color(0xff01544F),
-              border: Border.all(
-                color: Color(0xff01544F),
-                width: 1.0,
-              ),
-              borderRadius: BorderRadius.circular(4.0),
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
+              color: widget.user.pathobj.directions[DirectionIndex].isDestination?Colors.blue:DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
+
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${widget.direction == "Straight"?"Go Straight":"Turn ${widget.direction}, and Go Straight"}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w700,
-
-                          ),
-                        ),
-                        SizedBox(height: 4.0),
-                        Text(
-
-                          '${(widget.distance/UserState.stepSize).ceil()} steps',
-                          style: TextStyle(
-
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-
-                          ),
-                        ),
-
-                      ],
-                    ),
-
-                    Spacer(),
-                    // Text("$c"),
-                    // Text("$d",style: TextStyle(
-                    //   color: Colors.red
-                    // ),),
-                    // ElevatedButton(onPressed: (){
-                    //   _timer.cancel();
-                    //   _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
-                    //   c++;
-                    //   listenToBin();
-                    //
-                    // });}, child: Icon(Icons.start))
-
-
-
-
-                  ],
+                Container(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(onPressed: (){setState(() {
+                    if(DirectionIndex - 1 >=1){
+                      DirectionIndex--;
+                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                      if(DirectionIndex == nextTurnIndex){
+                        widget.clearFocusTurnArrow();
+                      }
+                    }
+                  });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
-
+                const SizedBox(width: 8,),
+                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user),
+                const SizedBox(width: 8,),
+                Container(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(onPressed: (){setState(() {
+                    if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                      DirectionIndex++;
+                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                      if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                        DirectionIndex++;
+                      }
+                      if(DirectionIndex == nextTurnIndex){
+                        widget.clearFocusTurnArrow();
+                      }
+                    }
+                  });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                )
               ],
             ),
           ),
-          // SizedBox(
-          //   height: 100,
-          // ),
-          // ElevatedButton(onPressed: (){
-          //   btadapter.emptyBin();
-          // }, child: Icon(Icons.minimize)),
-          // ElevatedButton(onPressed: (){
-          //
-          // }, child: Icon(Icons.add)),
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(ShowsumMap.toString()),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          DirectionIndex == nextTurnIndex?Container(
+            width: 98,
+            height: 39,
+            margin: EdgeInsets.only(left: 9,top: 5),
+            padding: EdgeInsets.only(left: 16,right: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              color: Color(0xff013633),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  "Then",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffFFFFFF),
+                    height: 25/16,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+                SizedBox(width: 6,),
+                // Text(DirectionIndex.toString()),
+                // Text(nextTurnIndex.toString())
+                getNextCustomIcon(turnDirection)
+              ],
+            ),
+          ):Container()
         ],
       ),
     );
   }
 }
-// Positioned(
-//     top: 13,
-//     right: 15,
-//     child: IconButton(
-//         onPressed: () {
-//           showMarkers();
-//           _isBuildingPannelOpen = true;
-//           _isRoutePanelOpen = false;
-//           selectedroomMarker.clear();
-//           pathMarkers.clear();
-//           building.selectedLandmarkID = null;
-//           PathState = pathState.withValues(
-//               -1, -1, -1, -1, -1, -1, null, 0);
-//           PathState.path.clear();
-//           PathState.sourcePolyID = "";
-//           PathState.destinationPolyID = "";
-//           PathState.sourceBid = "";
-//           PathState.destinationBid = "";
-//           singleroute.clear();
-//           PathState.directions = [];
-//           interBuildingPath.clear();
-//           fitPolygonInScreen(patch.first);
-//         },
-//         icon: Icon(
-//           Icons.cancel_outlined,
-//           size: 25,
-//         )))
+
+class scrollableDirection extends StatelessWidget {
+  String Direction;
+  String steps;
+  Icon i;
+  int DirectionIndex;
+  int nextTurnIndex;
+  List<direction> listOfDirections;
+  UserState user;
+
+  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user);
+
+  String chooseDirection(){
+    if(listOfDirections[DirectionIndex].isDestination){
+      double? angle;
+      if (user.pathobj.singleCellListPath.isNotEmpty) {
+        int l = user.pathobj.singleCellListPath.length;
+        angle = tools.calculateAngle([
+          user.pathobj.singleCellListPath[l - 2].x,
+          user.pathobj.singleCellListPath[l - 2].y
+        ], [
+          user.pathobj.singleCellListPath[l - 1].x,
+          user.pathobj.singleCellListPath[l - 1].y
+        ], [
+          user.pathobj.destinationX,
+          user.pathobj.destinationY
+        ]);
+      }
+      return angle!=null?"${listOfDirections[DirectionIndex].turnDirection} will be ${tools.angleToClocks3(angle)}":
+      "${listOfDirections[DirectionIndex].turnDirection} will be on your front";
+    }else if(DirectionIndex == nextTurnIndex){
+      return "${Direction == "Straight"?"Go Straight":"Turn ${Direction}, and Go Straight"}";
+    }else{
+      if(DirectionIndex<listOfDirections.length){
+        return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
+      }else{
+        return "${listOfDirections[DirectionIndex-1].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex-1].turnDirection}, and Go Straight"}";
+      }
+    }
+  }
+
+  String chooseSteps(){
+    if(listOfDirections[DirectionIndex].isDestination){
+     return "";
+    }else if(DirectionIndex == nextTurnIndex){
+      return '$steps Steps';
+    }else{
+      return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} Steps';
+    }
+  }
+
+  Icon chooseIcon(){
+    if(listOfDirections[DirectionIndex].isDestination){
+     return Icon(Icons.place_rounded,color: Colors.white,size: 40,);
+    }else if(DirectionIndex == nextTurnIndex){
+      return i;
+    }else{
+      return _DirectionHeaderState.getCustomIcon(listOfDirections[DirectionIndex].turnDirection!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    return  Expanded(
+
+      child: Row(
+        children: [
+          Expanded(
+            child: Center(
+              child: Text(
+                chooseDirection(),
+                style: const TextStyle(
+                  fontFamily: "Roboto",
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 30/24,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 4,
+          ),
+          Container(
+            width: 75,
+            height: 70,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                listOfDirections[DirectionIndex].isDestination?Container():Text(
+                  chooseSteps(),
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                    height: 26/16,
+                  ),
+                ),
+                SizedBox(
+                  height: 4,
+                ),
+                Container(
+                  height: 40,
+                  width: 40,
+                  child: chooseIcon(),
+                ),
+              ],
+            ),
+          )],
+      ),
+    );
+  }
+}
+

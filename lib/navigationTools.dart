@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwayplusnav/UserState.dart';
+import 'package:iwayplusnav/pathState.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
@@ -295,6 +296,22 @@ class tools {
       return "on your Slight Left";
     } else {
       return "on your None";
+    }
+  }
+
+  static String angleToClocks3(double angle) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    if (angle >= 315 || angle <= 45) {
+      return "on your front";
+    } else if (angle > 45 && angle <= 180) {
+      return "on your Right";
+    } else if (angle > 180 && angle <= 315) {
+      return "on your Left";
+    } else {
+      return "on your Front";
     }
   }
 
@@ -625,18 +642,19 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark) {
-    List<direction> Directions = [direction(path[0], "Straight", null, null, null)];
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);
+    double Nextdistance = tools.calculateDistance([turns[0]%columns,turns[0]~/columns], [turns[1]%columns,turns[1]~/columns]);
+    List<direction> Directions = [direction(path[0], "Straight", null, Nextdistance, null,path[0]%columns,path[0]~/columns,floor,Bid,numCols:columns)];
     for(int i = 1 ; i<turns.length-1 ; i++){
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
       double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
       double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
       String direc = tools.angleToClocks(angle);
-      Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance));
+      Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
     return Directions;
   }
@@ -664,6 +682,7 @@ class tools {
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
           } else {
+
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
           if (d < distance) {
@@ -728,8 +747,7 @@ class tools {
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
-        if (Beacon.floor! == value.floor) {
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
           List<int> pCoord = [];
           pCoord.add(Beacon.coordinateX!);
           pCoord.add(Beacon.coordinateY!);
@@ -756,7 +774,7 @@ class tools {
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
-        }
+
       }
     });
     List<nearestLandInfo> nearestLandmark=[];

@@ -14,7 +14,7 @@ class directionInstruction extends StatefulWidget {
 }
 
 class _directionInstructionState extends State<directionInstruction> {
-  Icon icon = Icon(Icons.directions);
+  Widget icon = Icon(Icons.directions);
   String distance = "";
   @override
   void initState() {
@@ -25,57 +25,61 @@ class _directionInstructionState extends State<directionInstruction> {
     });
   }
 
-  Icon getCustomIcon(String direction) {
-    print("direction lift: $direction");
+  Widget getCustomIcon(String direction) {
     if (direction == "Go Straight") {
       return Icon(
         Icons.straight,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction == "Turn Slight Right, and Go Straight") {
+    } else if (direction.contains("Slight Right")) {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction == "Turn Right, and Go Straight") {
-      return Icon(
-        Icons.turn_right,
-        color: Colors.black,
-        size: 32,
-      );
-    } else if (direction == "Turn Sharp Right, and Go Straight") {
+    } else if (direction.contains("Sharp Right")) {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction == "Turn U Turn, and Go Straight") {
+    } else if (direction.contains("Right")) {
+      return Icon(
+        Icons.turn_right,
+        color: Colors.black,
+        size: 32,
+      );
+    }  else if (direction.contains("U Turn")) {
       return Icon(
         Icons.u_turn_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction == "Turn Sharp Left, and Go Straight") {
+    } else if (direction.contains("Sharp Left")) {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction == "Turn Left, and Go Straight") {
-      return Icon(
-        Icons.turn_left,
-        color: Colors.black,
-        size: 32,
-      );
-    } else if (direction == "Turn Slight Left, and Go Straight") {
+    } else if (direction.contains("Slight Left")) {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.black,
         size: 32,
       );
-    
+
+    } else if (direction.contains("Left")) {
+      return Icon(
+        Icons.turn_left,
+        color: Colors.black,
+        size: 32,
+      );
+    } else if (direction.contains("Lift")) {
+      return Padding(
+        padding: const EdgeInsets.all(3.5),
+        child: SvgPicture.asset("assets/elevator.svg"),
+      );
     }
     // else if(direction.substring(0,4)=="Take"){
     //   return Icon(
@@ -102,46 +106,47 @@ class _directionInstructionState extends State<directionInstruction> {
     return Column(
       children: [
         Container(
-          height: 45,
+          width: screenWidth,
           margin: EdgeInsets.only(top: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Semantics(
-                label: widget.direction + "${widget.distance} m",
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ExcludeSemantics(
-                      child: Text(
-                        widget.direction,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff0e0d0d),
-                          height: 25 / 16,
+              Expanded(
+                child: Semantics(
+                  label: widget.direction + "${widget.distance} m",
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ExcludeSemantics(
+                        child: Text(
+                          widget.direction,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff0e0d0d),
+                            height: 25 / 16,
+                          ),
+                          textAlign: TextAlign.left,
                         ),
-                        textAlign: TextAlign.left,
                       ),
-                    ),
-                    ExcludeSemantics(
-                      child: Text(
-                        (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8d8c8c),
-                          height: 20 / 14,
+                      ExcludeSemantics(
+                        child: Text(
+                          (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8d8c8c),
+                            height: 20 / 14,
+                          ),
+                          textAlign: TextAlign.left,
                         ),
-                        textAlign: TextAlign.left,
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-              Spacer(),
               Container(
                   height: 40,
                   width: 40,
@@ -149,10 +154,7 @@ class _directionInstructionState extends State<directionInstruction> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.black),
                   ),
-                  child: (widget.direction.substring(0,4)=="Take")?Padding(
-                    padding: const EdgeInsets.all(3.5),
-                    child: SvgPicture.asset("assets/elevator.svg"),
-                  ):icon)
+                  child: icon)
             ],
           ),
         ),

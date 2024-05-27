@@ -155,7 +155,7 @@ class buildingCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4,),
                     Text(
-                      "$Distance Km to Venue",
+                      Distance==0?"Your Current Venue":"$Distance Km to Venue",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 14,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
-import 'package:iwayplusnav/UserState.dart';
-import 'package:iwayplusnav/localizedData.dart';
-import 'package:iwayplusnav/path.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/localizedData.dart';
+import 'package:iwaymaps/path.dart';
 
 import '../navigationTools.dart';
 

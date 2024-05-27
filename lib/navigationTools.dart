@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwayplusnav/UserState.dart';
-import 'package:iwayplusnav/pathState.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/pathState.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;

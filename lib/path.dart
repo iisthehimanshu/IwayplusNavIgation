@@ -229,8 +229,8 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:iwayplusnav/buildingState.dart';
-import 'package:iwayplusnav/pathState.dart';
+import 'package:iwaymaps/buildingState.dart';
+import 'package:iwaymaps/pathState.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Cell.dart';

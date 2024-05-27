@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/API/DeleteApi.dart';
-import 'package:iwayplusnav/Elements/UserCredential.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/SignIn.dart';
+import 'package:iwaymaps/API/DeleteApi.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 
 import 'DebugToggle.dart';
 import 'EditProfile.dart';

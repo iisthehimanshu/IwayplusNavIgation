@@ -1,4 +1,4 @@
-package com.iwayplus.navigation
+package com.iwaymaps.navigation
 
 import io.flutter.embedding.android.FlutterActivity
 

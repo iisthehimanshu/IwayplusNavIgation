@@ -1,18 +1,14 @@
 import 'dart:async';
-import 'dart:collection';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 
-import 'package:iwayplusnav/navigationTools.dart';
+import 'package:iwaymaps/navigationTools.dart';
 import 'package:vibration/vibration.dart';
 
 import '../UserState.dart';

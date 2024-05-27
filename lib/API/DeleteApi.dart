@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 
 class DeleteApi {
 

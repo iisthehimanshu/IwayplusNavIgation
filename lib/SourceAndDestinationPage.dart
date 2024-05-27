@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:iwayplusnav/API/ladmarkApi.dart';
-import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/Elements/SearchpageRecents.dart';
+import 'package:iwaymaps/API/ladmarkApi.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'APIMODELS/landmark.dart';

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/APIMODELS/patchDataModel.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/APIMODELS/patchDataModel.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';

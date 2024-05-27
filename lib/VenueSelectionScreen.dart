@@ -16,10 +16,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/API/BuildingAPI.dart';
-import 'package:iwayplusnav/API/RefreshTokenAPI.dart';
-import 'package:iwayplusnav/Elements/buildingCard.dart';
-import 'package:iwayplusnav/MODELS/VenueModel.dart';
+import 'package:iwaymaps/API/BuildingAPI.dart';
+import 'package:iwaymaps/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/Elements/buildingCard.dart';
+import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'API/buildingAllApi.dart';
@@ -92,7 +92,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
     }else{
-      return null;
+      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+      return pos;
     }
 
 
@@ -575,7 +576,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
         //
         //   ),
         // )
-        ,
+
 
       ),
     );

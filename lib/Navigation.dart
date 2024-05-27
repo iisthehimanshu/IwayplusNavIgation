@@ -6,16 +6,15 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
-import 'package:iwayplusnav/DebugToggle.dart';
-import 'package:iwayplusnav/Elements/DirectionHeader.dart';
-import 'package:iwayplusnav/Elements/ExploreModeWidget.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/DebugToggle.dart';
+import 'package:iwaymaps/Elements/DirectionHeader.dart';
+import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'directionClass.dart';
@@ -39,20 +38,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwayplusnav/API/PolyLineApi.dart';
-import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/APIMODELS/buildingAll.dart';
-import 'package:iwayplusnav/APIMODELS/landmark.dart';
-import 'package:iwayplusnav/Elements/HomepageLandmarkClickedSearchBar.dart';
-import 'package:iwayplusnav/Elements/buildingCard.dart';
-import 'package:iwayplusnav/Elements/directionInstruction.dart';
-import 'package:iwayplusnav/PolylineTestClass.dart';
-import 'package:iwayplusnav/UserState.dart';
-import 'package:iwayplusnav/buildingState.dart';
-import 'package:iwayplusnav/navigationTools.dart';
-import 'package:iwayplusnav/path.dart';
-import 'package:iwayplusnav/pathState.dart';
-import 'package:iwayplusnav/pathState.dart';
+import 'package:iwaymaps/API/PolyLineApi.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/APIMODELS/buildingAll.dart';
+import 'package:iwaymaps/APIMODELS/landmark.dart';
+import 'package:iwaymaps/Elements/HomepageLandmarkClickedSearchBar.dart';
+import 'package:iwaymaps/Elements/buildingCard.dart';
+import 'package:iwaymaps/Elements/directionInstruction.dart';
+import 'package:iwaymaps/PolylineTestClass.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/buildingState.dart';
+import 'package:iwaymaps/navigationTools.dart';
+import 'package:iwaymaps/path.dart';
+import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/pathState.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -1061,12 +1060,16 @@ class _NavigationState extends State<Navigation> {
       print("scanningggg starteddddd");
 
       if (Platform.isAndroid) {
+        print("starting scanning for android");
         btadapter.startScanning(apibeaconmap);
       } else {
-        btadapter.strtScanningIos(apibeaconmap);
+        print("starting scanning for IOS");
+        btadapter.startScanningIOS(apibeaconmap);
+        // btadapter.strtScanningIos(apibeaconmap);
+        // btadapter.getDevicesList();
       }
 
-      // btadapter.startScanning(apibeaconmap);
+       //btadapter.startScanning(apibeaconmap);
       setState(() {
         resBeacons = apibeaconmap;
       });
@@ -1159,7 +1162,7 @@ class _NavigationState extends State<Navigation> {
                 value.landmarks![i].properties!.floorBreadth!
               ];
               building.floorDimenssion[key] = currentfloorDimenssion!;
-              print("fetch route--  ${building.floorDimenssion}");
+             // print("fetch route--  ${building.floorDimenssion}");
 
               // building.floorDimenssion[value.landmarks![i].floor!] = [
               //   value.landmarks![i].properties!.floorLength!,
@@ -6773,33 +6776,34 @@ class _NavigationState extends State<Navigation> {
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
-
-                                    //print(PathState.connections);
-                                    building.floor[buildingAllApi
-                                        .getStoredString()] = user.floor;
-                                    createRooms(
-                                        building.polyLineData!,
-                                        building.floor[
-                                            buildingAllApi.getStoredString()]!);
-                                    if (pathMarkers[user.floor] != null) {
-                                      setCameraPosition(
-                                          pathMarkers[user.floor]!);
-                                    }
-                                    building.landmarkdata!.then((value) {
-                                      createMarkers(
-                                          value,
-                                          building.floor[buildingAllApi
-                                              .getStoredString()]!);
-                                    });
-                                    if (markers.length > 0)
-                                      markers[user.Bid]?[0] = customMarker
-                                          .rotate(0, markers[user.Bid]![0]);
-                                    if (user.initialallyLocalised) {
-                                      mapState.interaction =
-                                          !mapState.interaction;
-                                    }
-                                    mapState.zoom = 21;
-                                    fitPolygonInScreen(patch.first);
+                                    print(FlutterBluePlus.adapterStateNow.toString());
+                                    btadapter.startScanningIOS(apibeaconmap);
+                                    // //print(PathState.connections);
+                                    // building.floor[buildingAllApi
+                                    //     .getStoredString()] = user.floor;
+                                    // createRooms(
+                                    //     building.polyLineData!,
+                                    //     building.floor[
+                                    //         buildingAllApi.getStoredString()]!);
+                                    // if (pathMarkers[user.floor] != null) {
+                                    //   setCameraPosition(
+                                    //       pathMarkers[user.floor]!);
+                                    // }
+                                    // building.landmarkdata!.then((value) {
+                                    //   createMarkers(
+                                    //       value,
+                                    //       building.floor[buildingAllApi
+                                    //           .getStoredString()]!);
+                                    // });
+                                    // if (markers.length > 0)
+                                    //   markers[user.Bid]?[0] = customMarker
+                                    //       .rotate(0, markers[user.Bid]![0]);
+                                    // if (user.initialallyLocalised) {
+                                    //   mapState.interaction =
+                                    //       !mapState.interaction;
+                                    // }
+                                    // mapState.zoom = 21;
+                                    // fitPolygonInScreen(patch.first);
                                   },
                                   child: Semantics(
                                     label: "Localize",

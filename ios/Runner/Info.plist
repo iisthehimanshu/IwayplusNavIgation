@@ -53,16 +53,6 @@
 	<string>Voice search</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>bluetooth-central</string>
-		<string>bluetooth-peripheral</string>
-		<string>external-accessory</string>
-		<string>fetch</string>
-		<string>location</string>
-		<string>nearby-interaction</string>
-		<string>processing</string>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

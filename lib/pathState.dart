@@ -1,4 +1,4 @@
-import 'package:iwayplusnav/Cell.dart';
+import 'package:iwaymaps/Cell.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'directionClass.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/BuildingInfoScreen.dart';
+import 'package:iwaymaps/BuildingInfoScreen.dart';
 import '../API/buildingAllApi.dart';
 import '../Navigation.dart';
 

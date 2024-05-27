@@ -1,4 +1,4 @@
-import 'package:iwayplusnav/navigationTools.dart';
+import 'package:iwaymaps/navigationTools.dart';
 
 import 'UserState.dart';
 import 'buildingState.dart';

@@ -35,7 +35,7 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserNavigationModeSetting', userNavigationModeSetting);
   }
   String getuserNavigationModeSetting(){
-    UserNavigationModeSetting = userInformationBox.get('UserNavigationModeSetting');
+    UserNavigationModeSetting = userInformationBox.get('UserNavigationModeSetting')??'Natural Direction';
     return UserNavigationModeSetting;
   }
 

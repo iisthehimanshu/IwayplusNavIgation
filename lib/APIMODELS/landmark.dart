@@ -517,6 +517,27 @@ class CommonLifts {
   CommonLifts({this.name, this.distance, this.x1, this.y1,this.x2,this.y2});
 
 }
+class CommonStairs {
+  String? name;
+  int? distance;
+  int? x1;
+  int? x2;
+  int? y1;
+  int? y2;
+
+  CommonStairs({this.name, this.distance, this.x1, this.y1, this.x2, this.y2});
+}
+
+class CommonRamp {
+  String? name;
+  int? distance;
+  int? x1;
+  int? x2;
+  int? y1;
+  int? y2;
+
+  CommonRamp({this.name, this.distance, this.x1, this.y1, this.x2, this.y2});
+}
 class Stairs {
   String? name;
   int? distance;

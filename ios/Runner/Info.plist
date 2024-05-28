@@ -32,6 +32,16 @@
     <key>NSBluetoothPeripheralUsageDescription</key>
     <string>bluetooth</string>
 
+    <key>NSCalendarsUsageDescription</key>
+    <string>To add or access events to your calendar</string>
+    <key>NSContactsUsageDescription</key>
+    <string>To add access contact information</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>To play music</string>
+    <key>NSSiriUsageDescription</key>
+    <string>To add or access events to your calendar</string>
+
+
 
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes</string>

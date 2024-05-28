@@ -2977,6 +2977,7 @@ class _NavigationState extends State<Navigation> {
 
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
   int pathTypeSelected = 0;
+  bool multiFloorPath=false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     print("landmarksMap");
@@ -3024,6 +3025,9 @@ class _NavigationState extends State<Navigation> {
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+        setState(() {
+          multiFloorPath = true;
+        });
         if (pathTypeSelected == 0) {
           List<CommonLifts> commonlifts = findCommonLifts(
               landmarksMap[PathState.sourcePolyID]!.lifts!,
@@ -3112,6 +3116,9 @@ class _NavigationState extends State<Navigation> {
                   bid: PathState.destinationBid);
               print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
+               setState(() {
+                multiFloorPath = true;
+              });
               if (pathTypeSelected == 0) {
                 List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
                     landmarksMap[PathState.destinationPolyID]!.lifts!);
@@ -3620,14 +3627,14 @@ class _NavigationState extends State<Navigation> {
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
     if (PathState.directions.isNotEmpty) {
-      if(PathState.directions[0].distanceToNextTurn!=null){
-directionWidgets.add(directionInstruction(
+      if (PathState.directions[0].distanceToNextTurn != null) {
+        directionWidgets.add(directionInstruction(
             direction: "Go Straight",
             distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
                 .ceil()
                 .toString()));
       }
-      
+
       for (int i = 1; i < PathState.directions.length; i++) {
         if (!PathState.directions[i].isDestination) {
           if (PathState.directions[i].nearbyLandmark != null) {
@@ -3701,7 +3708,7 @@ directionWidgets.add(directionInstruction(
         children: [
           Container(
             margin: EdgeInsets.only(left: 16, top: 16),
-            height: 160,
+            height:(multiFloorPath)? 160:119,
             width: screenWidth - 32,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -3837,7 +3844,7 @@ directionWidgets.add(directionInstruction(
                           },
                         ),
 
-                        Center(
+                       (multiFloorPath)? Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -3846,7 +3853,7 @@ directionWidgets.add(directionInstruction(
                                   setState(() {
                                     pathTypeSelected = 0;
                                   });
-                                   building.landmarkdata!.then((value) {
+                                  building.landmarkdata!.then((value) {
                                     calculateroute(value.landmarksMap!);
                                   });
                                 },
@@ -3872,7 +3879,7 @@ directionWidgets.add(directionInstruction(
                                   setState(() {
                                     pathTypeSelected = 1;
                                   });
-                                   building.landmarkdata!.then((value) {
+                                  building.landmarkdata!.then((value) {
                                     calculateroute(value.landmarksMap!);
                                   });
                                 },
@@ -3895,7 +3902,7 @@ directionWidgets.add(directionInstruction(
                               ),
                             ],
                           ),
-                        ),
+                        ):SizedBox(),
                         // ChipsChoice<String>.multiple(
                         //   value: optionsTags,
                         //   onChanged: (val) {

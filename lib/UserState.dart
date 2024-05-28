@@ -1,7 +1,7 @@
 import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwayplusnav/MotionModel.dart';
-import 'package:iwayplusnav/pathState.dart';
+import 'package:iwaymaps/MotionModel.dart';
+import 'package:iwaymaps/pathState.dart';
 
 import 'Cell.dart';
 import 'navigationTools.dart';

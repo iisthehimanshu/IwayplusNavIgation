@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/DATABASE/BOXES/LandMarkApiModelBox.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'package:iwaymaps/DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
 import 'RefreshTokenAPI.dart';

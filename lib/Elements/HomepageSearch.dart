@@ -6,9 +6,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
-import 'package:iwayplusnav/Elements/HomepageFilter.dart';
-import 'package:iwayplusnav/SourceAndDestinationPage.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/HomepageFilter.dart';
+import 'package:iwaymaps/SourceAndDestinationPage.dart';
 
 import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';

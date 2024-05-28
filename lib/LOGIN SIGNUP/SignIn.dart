@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +6,11 @@ import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/SignUp.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/SignUp.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';
@@ -95,21 +93,21 @@ class _SignInState extends State<SignIn> {
     });
   }
 
-  signInWithGoogle() async{
-    GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
-    GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
-
-    AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken
-    );
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    print('Google user name ${userCredential.user?.displayName}');
-
-    if(userCredential.user != null){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
-    }
-  }
+  // signInWithGoogle() async{
+  //   GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
+  //   GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
+  //
+  //   AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth?.accessToken,
+  //       idToken: googleAuth?.idToken
+  //   );
+  //   UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+  //   print('Google user name ${userCredential.user?.displayName}');
+  //
+  //   if(userCredential.user != null){
+  //     Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
+  //   }
+  // }
 
 
   void showpassword() {

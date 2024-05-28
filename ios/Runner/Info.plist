@@ -32,6 +32,16 @@
     <key>NSBluetoothPeripheralUsageDescription</key>
     <string>bluetooth</string>
 
+    <key>NSCalendarsUsageDescription</key>
+    <string>To add or access events to your calendar</string>
+    <key>NSContactsUsageDescription</key>
+    <string>To add access contact information</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>To play music</string>
+    <key>NSSiriUsageDescription</key>
+    <string>To add or access events to your calendar</string>
+
+
 
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes</string>
@@ -53,16 +63,6 @@
 	<string>Voice search</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>bluetooth-central</string>
-		<string>bluetooth-peripheral</string>
-		<string>external-accessory</string>
-		<string>fetch</string>
-		<string>location</string>
-		<string>nearby-interaction</string>
-		<string>processing</string>
-	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:collection/collection.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import '../buildingState.dart';
 
@@ -18,7 +18,9 @@ class BLueToothClass {
   StreamController<HashMap<int, HashMap<String, double>>> _binController = StreamController.broadcast();
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
+  bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+  late StreamSubscription<bool> _isScanningSubscription;
 
 
   PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue((a, b) => a.value.compareTo(b.value));
@@ -27,6 +29,19 @@ class BLueToothClass {
     return priorityQueue;
   }
 
+
+  BLueToothClass(){
+    try {
+      FlutterBluePlus.systemDevices;
+    } catch (e) {
+
+    }
+    try {
+      FlutterBluePlus.startScan();
+    } catch (e) {
+
+    }
+  }
 
   void startbin() {
     BIN[0] = HashMap<String, double>();
@@ -50,21 +65,25 @@ class BLueToothClass {
       _binController.stream;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-
+    print("himanshu 1");
     startbin();
-
+    print("himanshu 2");
     FlutterBluePlus.startScan();
-
+    print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
+      print("himanshu 4");
       for (ScanResult result in results) {
-        String MacId = "${result.device.platformName}";
-        int Rssi = result.rssi;
-        //print("mac $MacId    rssi $Rssi");
-        if (apibeaconmap.containsKey(MacId)) {
-          //print(MacId);
-          beacondetail[MacId] = Rssi * -1;
-          addtoBin(MacId, Rssi);
-          _binController.add(BIN); // Emitting event when BIN changes
+        if(result.device.platformName.length > 2){
+          print("himanshu 5 ${result}");
+          String MacId = "${result.device.platformName}";
+          int Rssi = result.rssi;
+          print("mac $MacId    rssi $Rssi");
+          if (apibeaconmap.containsKey(MacId)) {
+            //print(MacId);
+            beacondetail[MacId] = Rssi * -1;
+            addtoBin(MacId, Rssi);
+            _binController.add(BIN); // Emitting event when BIN changes
+          }
         }
       }
     });
@@ -74,56 +93,93 @@ class BLueToothClass {
 
 
 
-  void getDevicesList()async{
+  // void getDevicesList()async{
+  //   try {
+  //     _systemDevices = await FlutterBluePlus.systemDevices;
+  //     //print("system devices $_systemDevices");
+  //
+  //
+  //
+  //   } catch (e) {
+  //     print("System Devices Error: $e");
+  //   }
+  //   try {
+  //     await FlutterBluePlus.startScan();
+  //   } catch (e) {
+  //     print("System Devices Error: $e");
+  //   }
+  //
+  //
+  //
+  //
+  //   // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
+  //   //   _connectionState = state;
+  //   //   if (mounted) {
+  //   //     setState(() {});
+  //   //   }
+  //   // });
+  // }
+
+
+
+  // void strtScanningIos(HashMap<String, beacon> apibeaconmap){
+  //   print("scanning for IOS called");
+  //
+  //  // print(apibeaconmap);
+  //
+  //   startbin();
+  //   _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+  //
+  //     _scanResults = results;
+  //     for (ScanResult result in _scanResults) {
+  //       String MacId = "${result.device.platformName}";
+  //       int Rssi = result.rssi;
+  //       // print(result);
+  //       print("mac $MacId   rssi $Rssi");
+  //
+  //       if (apibeaconmap.containsKey(MacId)) {
+  //         beacondetail[MacId] = Rssi * -1;
+  //
+  //         addtoBin(MacId, Rssi);
+  //         _binController.add(BIN); // Emitting event when BIN changes
+  //       }
+  //     }
+  //    // print("scanneed results $_scanResults");
+  //    // getDevicesList(_scanResults,apibeaconmap);
+  //    // Future.delayed(Duration(seconds: 3));
+  //
+  //  //   getDevicesList();
+  //
+  //
+  //   }, onError: (e) {
+  //     print("Scan Error:, $e");
+  //   });
+  // }
+
+  int c = 0;
+
+  Future<void> startScanningIOS(HashMap<String, beacon> apibeaconmap) async {
+    startbin();
+
     try {
       _systemDevices = await FlutterBluePlus.systemDevices;
-      //print("system devices $_systemDevices");
-
-
-
     } catch (e) {
-      print("System Devices Error: $e");
+
     }
     try {
-      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+      await FlutterBluePlus.startScan();
     } catch (e) {
-      print("System Devices Error: $e");
+
     }
 
-
-
-
-    // _connectionStateSubscription = widget.result.device.connectionState.listen((state) {
-    //   _connectionState = state;
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // });
-  }
-
-
-
-  void strtScanningIos(HashMap<String, beacon> apibeaconmap){
-
-   // print(apibeaconmap);
-
-    startbin();
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
-    //  print("scanneed results $_scanResults");
-
-
-
-      getDevicesList();
-
-
-
-
+      print("mac $results");
       for (ScanResult result in _scanResults) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
         // print(result);
-            print("mac $MacId   rssi $Rssi");
+        print("mac $MacId   rssi $Rssi");
 
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
@@ -132,26 +188,27 @@ class BLueToothClass {
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
-
-
-
-
-     // Future.delayed(Duration(seconds: 3));
-
-   //   getDevicesList();
-
-
     }, onError: (e) {
-      print("Scan Error:, $e");
+
     });
+
+    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+      _isScanning = state;
+    });
+
+
+
+
   }
+
+
 
 
 
 
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
-    //_scanResultsSubscription.cancel();
+    _scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
     emptyBin();

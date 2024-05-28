@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/BuildingInfoScreen.dart';
+import 'package:iwaymaps/BuildingInfoScreen.dart';
 import '../API/buildingAllApi.dart';
 import '../Navigation.dart';
 
@@ -155,7 +155,7 @@ class buildingCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4,),
                     Text(
-                      "$Distance Km to Venue",
+                      Distance==0?"Your Current Venue":"$Distance Km to Venue",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 14,

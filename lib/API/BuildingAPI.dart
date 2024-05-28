@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/DATABASE/BOXES/BuildingAPIModelBox.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../APIMODELS/Building.dart';
 import '../Elements/HelperClass.dart';
 import 'RefreshTokenAPI.dart';

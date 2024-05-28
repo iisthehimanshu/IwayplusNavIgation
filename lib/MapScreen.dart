@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwayplusnav/MainScreen.dart';
+import 'package:iwaymaps/MainScreen.dart';
 import 'API/PatchApi.dart';
 import 'API/PolyLineApi.dart';
 import 'API/buildingAllApi.dart';
@@ -14,14 +14,14 @@ import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'Elements/HomepageSearch.dart';
-import 'package:iwayplusnav/buildingState.dart';
+import 'package:iwaymaps/buildingState.dart';
 import "package:google_maps_flutter_platform_interface/src/types/polyline.dart" as gmap;
-import 'package:iwayplusnav/APIMODELS/polylinedata.dart' as ply;
+import 'package:iwaymaps/APIMODELS/polylinedata.dart' as ply;
 import 'package:google_maps_flutter_platform_interface/src/types/polyline.dart' as gmappol;
 import 'package:geodesy/geodesy.dart' as geo;
-import 'package:iwayplusnav/navigationTools.dart';
+import 'package:iwaymaps/navigationTools.dart';
 import 'MODELS/GMapIconNameModel.dart';
-import 'package:iwayplusnav/buildingState.dart' as bs;
+import 'package:iwaymaps/buildingState.dart' as bs;
 
 
 

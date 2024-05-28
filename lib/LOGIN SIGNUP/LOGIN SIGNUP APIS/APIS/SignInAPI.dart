@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
-import 'package:iwayplusnav/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
 import '../../../API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';

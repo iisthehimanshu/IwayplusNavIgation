@@ -7,6 +7,7 @@ const List<MapLocale> LOCALES=[
   MapLocale('ta', LocaleData.TA), // Tamil
   MapLocale('te', LocaleData.TE), // Telugu
   MapLocale('pa', LocaleData.PA), // Punjabi
+  MapLocale('ne', LocaleData.NE), // Punjabi
 ];
 
 mixin LocaleData {
@@ -21,10 +22,7 @@ mixin LocaleData {
   static const String highContrastMode = 'highContrastMode';
   static const String personWithDisability = 'personWithDisability';
   static const String navigationSettings = 'navigationSettings';
-  static const String UserHeight = 'userHeight';
-
   static const String navigationMode = 'navigationMode';
-
   static const String orientationSetting = 'orientationSetting';
   static const String pathDetails = 'pathDetails';
   static const String naturalDirection = 'naturalDirection';
@@ -37,6 +35,10 @@ mixin LocaleData {
   static const String lowVision = 'Low Vision';
   static const String wheelchair = 'Wheelchair';
   static const String regular = 'Regular';
+  static const String userHeight = 'userHeight';
+  static const String less5Feet = '< 5 Feet';
+  static const String between56Feet = '5 to 6 Feet';
+  static const String more6Feet = '> 6 Feet';
 
   static const Map<String, dynamic> EN = {
     'title': 'Settings',
@@ -62,6 +64,10 @@ mixin LocaleData {
     'lowVision': 'Low Vision',
     'wheelchair': 'Wheelchair',
     'regular': 'Regular',
+    'userHeight': 'User Height',
+    '< 5 Feet':'< 5 Feet',
+    '5 to 6 Feet':'5 to 6 Feet',
+    '> 6 Feet':'> 6 Feet',
   };
 
   static const Map<String, dynamic> HI = {
@@ -88,6 +94,10 @@ mixin LocaleData {
     'lowVision': 'कम दृष्टि',
     'wheelchair': 'व्हीलचेयर',
     'regular': 'नियमित',
+    'userHeight': 'उपयोगकर्ता की ऊंचाई',
+    '< 5 Feet': '< 5 फीट',
+    '5 to 6 Feet': '5 से 6 फीट',
+    '> 6 Feet': '> 6 फीट'
   };
 
   static const Map<String, dynamic> TA = {
@@ -114,6 +124,10 @@ mixin LocaleData {
     'lowVision': 'குறைந்த கண்ணோட்டம்',
     'wheelchair': 'சுட்டி நாற்பந்து',
     'regular': 'நியமான',
+    'userHeight': 'பயனர் உயரம்',
+    '< 5 Feet': '< 5 அடி',
+    '5 to 6 Feet': '5 முதல் 6 அடி',
+    '> 6 Feet': '> 6 அடி',
   };
 
   static const Map<String, dynamic> TE = {
@@ -140,6 +154,10 @@ mixin LocaleData {
     'lowVision': 'కనుక వెనుక',
     'wheelchair': 'వీల్‌చేర్‌',
     'regular': 'నియమిత',
+    'userHeight': 'వాడుకరి ఎత్తు',
+    '< 5 Feet': '< 5 అడుగులు',
+    '5 to 6 Feet': '5 నుండి 6 అడుగులు',
+    '> 6 Feet': '> 6 అడుగులు'
   };
 
   static const Map<String, dynamic> PA = {
@@ -166,6 +184,39 @@ mixin LocaleData {
     'lowVision': 'ਘੱਟੀ ਦਿਮਾਗ',
     'wheelchair': 'ਵੀਲਚੇਅਰ',
     'regular': 'ਨਿਯਮਿਤ',
+    'userHeight': 'ਉਪਭੋਗਤਾ ਦੀ ਉਚਾਈ',
+    '< 5 Feet': '< 5 ਫੁੱਟ',
+    '5 to 6 Feet': '5 ਤੋਂ 6 ਫੁੱਟ',
+    '> 6 Feet': '> 6 ਫੁੱਟ',
+  };
+  static const Map<String, dynamic> NE = {
+    'title': 'सेटिङहरू',
+    'generalSettings': 'सामान्य सेटिङहरू',
+    'language': 'भाषा',
+    'pushNotification': 'पुष सूचना',
+    'appInformation': 'अनुप्रयोग जानकारी',
+    'updateAvailable': 'अद्यावधिक उपलब्ध',
+    'accessibilitySettings': 'पहुँचयोग्यता सेटिङहरू',
+    'highContrastMode': 'उच्च अन्तर विधि',
+    'personWithDisability': 'अपाङ्ग व्यक्ति',
+    'navigationSettings': 'नेभिगेसन सेटिङहरू',
+    'navigationMode': 'नेभिगेसन मोड',
+    'orientationSetting': 'ओरियन्टेसन सेटिङ',
+    'pathDetails': 'पथ विवरणहरू',
+    'naturalDirection': 'प्राकृतिक दिशा',
+    'clockDirection': 'घडी दिशा',
+    'focusMode': 'फोकस मोड',
+    'exploreMode': 'अन्वेषण मोड',
+    'distanceInMeters': 'मिटरमा दूरी',
+    'estimatedSteps': 'अनुमानित कदम',
+    'blind': 'अन्धो',
+    'lowVision': 'कम दृष्टि',
+    'wheelchair': 'ह्वीलचेयर',
+    'regular': 'नियमित',
+    'userHeight': 'प्रयोगकर्ता उचाइ',
+    '< 5 Feet': '< ५ फिट',
+    '5 to 6 Feet': '५ देखि ६ फिट',
+    '> 6 Feet': '> ६ फिट'
   };
 
 }

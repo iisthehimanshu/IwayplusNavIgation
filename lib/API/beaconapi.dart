@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwayplusnav/API/BuildingAPI.dart';
-import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/API/BuildingAPI.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import '../APIMODELS/beaconData.dart';
 import 'RefreshTokenAPI.dart';

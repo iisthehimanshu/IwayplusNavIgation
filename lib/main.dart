@@ -1,12 +1,10 @@
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/BuildingInfoScreen.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import 'package:iwayplusnav/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:iwaymaps/BuildingInfoScreen.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,7 +28,7 @@ import 'dart:io' show Platform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  //await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
@@ -75,25 +73,25 @@ class _MyAppState extends State<MyApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
 
 
-  Future<bool> _isUserAuthenticated() async {
-    // Check if the user is already signed in with Google
-    User? user = FirebaseAuth.instance.currentUser;
-
-    // If the user is signed in, return true
-    if (user != null) {
-      googleSignInUserName = user.displayName!;
-      print(user.metadata);
-      print(user.emailVerified);
-      print(user.phoneNumber);
-      print(user.photoURL);
-      print(user.tenantId);
-      print(user.refreshToken);
-
-      return true;
-    }
-    // If the user is not signed in, return false
-    return false;
-  }
+  // Future<bool> _isUserAuthenticated() async {
+  //   // Check if the user is already signed in with Google
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //
+  //   // If the user is signed in, return true
+  //   if (user != null) {
+  //     googleSignInUserName = user.displayName!;
+  //     print(user.metadata);
+  //     print(user.emailVerified);
+  //     print(user.phoneNumber);
+  //     print(user.photoURL);
+  //     print(user.tenantId);
+  //     print(user.refreshToken);
+  //
+  //     return true;
+  //   }
+  //   // If the user is not signed in, return false
+  //   return false;
+  // }
 
   @override
   void initState() {
@@ -144,7 +142,7 @@ requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(
-        future: _isUserAuthenticated(),
+        future: null,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();

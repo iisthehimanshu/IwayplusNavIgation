@@ -3,10 +3,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/MapScreen.dart';
-import 'package:iwayplusnav/ProfilePage.dart';
-import 'package:iwayplusnav/VenueSelectionScreen.dart';
-import 'package:iwayplusnav/Navigation.dart';
+import 'package:iwaymaps/MapScreen.dart';
+import 'package:iwaymaps/ProfilePage.dart';
+import 'package:iwaymaps/VenueSelectionScreen.dart';
+import 'package:iwaymaps/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'FavouriteScreen.dart';

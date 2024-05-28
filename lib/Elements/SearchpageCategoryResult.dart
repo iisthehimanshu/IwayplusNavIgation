@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:iwayplusnav/API/buildingAllApi.dart';
-import 'package:iwayplusnav/Elements/HelperClass.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import '../API/ladmarkApi.dart';
 import '../APIMODELS/landmark.dart';

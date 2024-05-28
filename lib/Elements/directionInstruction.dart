@@ -106,46 +106,47 @@ class _directionInstructionState extends State<directionInstruction> {
     return Column(
       children: [
         Container(
-          height: 45,
+          width: screenWidth,
           margin: EdgeInsets.only(top: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Semantics(
-                label: widget.direction + "${widget.distance} m",
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ExcludeSemantics(
-                      child: Text(
-                        widget.direction,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff0e0d0d),
-                          height: 25 / 16,
+              Expanded(
+                child: Semantics(
+                  label: widget.direction + "${widget.distance} m",
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ExcludeSemantics(
+                        child: Text(
+                          widget.direction,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff0e0d0d),
+                            height: 25 / 16,
+                          ),
+                          textAlign: TextAlign.left,
                         ),
-                        textAlign: TextAlign.left,
                       ),
-                    ),
-                    ExcludeSemantics(
-                      child: Text(
-                        (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8d8c8c),
-                          height: 20 / 14,
+                      ExcludeSemantics(
+                        child: Text(
+                          (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8d8c8c),
+                            height: 20 / 14,
+                          ),
+                          textAlign: TextAlign.left,
                         ),
-                        textAlign: TextAlign.left,
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-              Spacer(),
               Container(
                   height: 40,
                   width: 40,

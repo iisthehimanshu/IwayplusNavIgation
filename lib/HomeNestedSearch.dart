@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iwayplusnav/API/buildingAllApi.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 
 import 'APIMODELS/buildingAll.dart';
 import 'Elements/buildingCard.dart';

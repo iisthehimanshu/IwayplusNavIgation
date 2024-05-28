@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import 'package:iwayplusnav/BuildingInfoScreen.dart';
-import 'package:iwayplusnav/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'package:iwaymaps/BuildingInfoScreen.dart';
+import 'package:iwaymaps/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../DATABASE/BOXES/BuildingAPIModelBox.dart';

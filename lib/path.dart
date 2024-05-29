@@ -1079,31 +1079,32 @@ Future<List<int>> getFinalOptimizedPath(
     //
     //   }
     // }
+
+     for (int i = 0; i < tu.length - 1; i++) {
+      int x1 = tu[i] % numCols;
+      int y1 = tu[i] ~/ numCols;
+      int x2 = tu[i + 1] % numCols;
+      int y2 = tu[i + 1] ~/ numCols;
+
+      if (x1 + 1 == x2 || x1 - 1 == x2) {
+        int oldindex = x2 + y2 * numCols;
+        x2 = x2 - 1;
+        int index = x2 + y2 * numCols;
+        int oldInd = tu.indexOf(oldindex);
+        tu[oldInd] = index;
+      }
+      if (y1 + 1 == y2 || y1 - 1 == y2) {
+        int oldindex = x2 + y2 * numCols;
+        y2 = y2 - 1;
+        int index = x2 + y2 * numCols;
+        int oldInd = tu.indexOf(oldindex);
+        tu[oldInd] = index;
+      }
+    }
   }
 
   print("turns array after optimization");
-  for(int i=0;i<tu.length-1;i++){
-    int x1=tu[i] % numCols;
-    int y1 = tu[i] ~/ numCols;
-    int x2=tu[i+1] % numCols;
-    int y2 = tu[i+1] ~/ numCols;
-
-
-    if(x1+1==x2 || x1-1==x2){
-      int oldindex=x2+y2*numCols;
-      x2=x2-1;
-      int index=x2+y2*numCols;
-     int oldInd= tu.indexOf(oldindex);
-     tu[oldInd]=index;
-    }
-    if(y1+1==y2 || y1-1==y2){
-      int oldindex=x2+y2*numCols;
-      y2=y2-1;
-      int index=x2+y2*numCols;
-      int oldInd= tu.indexOf(oldindex);
-      tu[oldInd]=index;
-    }
-  }
+ 
 
 
   path = tools.generateCompletePath(tu, numCols, nonWalkableCells);

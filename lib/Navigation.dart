@@ -2977,7 +2977,7 @@ class _NavigationState extends State<Navigation> {
 
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
   int pathTypeSelected = 0;
-  bool multiFloorPath=false;
+  bool multiFloorPath = false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     print("landmarksMap");
@@ -3116,7 +3116,7 @@ class _NavigationState extends State<Navigation> {
                   bid: PathState.destinationBid);
               print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
-               setState(() {
+              setState(() {
                 multiFloorPath = true;
               });
               if (pathTypeSelected == 0) {
@@ -3708,7 +3708,7 @@ class _NavigationState extends State<Navigation> {
         children: [
           Container(
             margin: EdgeInsets.only(left: 16, top: 16),
-            height:(multiFloorPath)? 160:119,
+            height: (multiFloorPath) ? 160 : 119,
             width: screenWidth - 32,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -3844,65 +3844,67 @@ class _NavigationState extends State<Navigation> {
                           },
                         ),
 
-                       (multiFloorPath)? Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    pathTypeSelected = 0;
-                                  });
-                                  building.landmarkdata!.then((value) {
-                                    calculateroute(value.landmarksMap!);
-                                  });
-                                },
-                                child: Container(
-                                  width: 100,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                      color: (pathTypeSelected == 0)
-                                          ? Colors.cyan
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.all(10),
-                                  child: Text(
-                                    'Lift',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
+                        (multiFloorPath)
+                            ? Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          pathTypeSelected = 0;
+                                        });
+                                        building.landmarkdata!.then((value) {
+                                          calculateroute(value.landmarksMap!);
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 100,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                            color: (pathTypeSelected == 0)
+                                                ? Colors.cyan
+                                                : Colors.white,
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(20))),
+                                        alignment: Alignment.center,
+                                        margin: EdgeInsets.all(10),
+                                        child: Text(
+                                          'Lift',
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          pathTypeSelected = 1;
+                                        });
+                                        building.landmarkdata!.then((value) {
+                                          calculateroute(value.landmarksMap!);
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 100,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                            color: (pathTypeSelected == 1)
+                                                ? Colors.cyan
+                                                : Colors.white,
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(20))),
+                                        alignment: Alignment.center,
+                                        margin: EdgeInsets.all(10),
+                                        child: Text(
+                                          'Stair',
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    pathTypeSelected = 1;
-                                  });
-                                  building.landmarkdata!.then((value) {
-                                    calculateroute(value.landmarksMap!);
-                                  });
-                                },
-                                child: Container(
-                                  width: 100,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                      color: (pathTypeSelected == 1)
-                                          ? Colors.cyan
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.all(10),
-                                  child: Text(
-                                    'Stair',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ):SizedBox(),
+                              )
+                            : SizedBox(),
                         // ChipsChoice<String>.multiple(
                         //   value: optionsTags,
                         //   onChanged: (val) {
@@ -4053,6 +4055,7 @@ class _NavigationState extends State<Navigation> {
                                           Spacer(),
                                           IconButton(
                                               onPressed: () {
+                                                multiFloorPath = false;
                                                 showMarkers();
                                                 _isBuildingPannelOpen = true;
                                                 _isRoutePanelOpen = false;

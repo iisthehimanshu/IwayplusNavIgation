@@ -1103,11 +1103,25 @@ Future<List<int>> getFinalOptimizedPath(
     }
   }
 
+
+path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
+
   print("turns array after optimization");
+  for (int i = 0; i < tu.length; i++) {
+    int x = tu[i] % numCols;
+    int y = tu[i] ~/ numCols;
+    print("${x}-----${y}");
+  }
+   List<int> tu2 = [];
+  tu2.add(sourceX + sourceY * numCols);
+  tu2.addAll(tools.getTurnpoints(path, numCols));
+  tu2.add(destinationX + destinationY * numCols);
+
+  path = tools.generateCompletePath(tu2, numCols, nonWalkableCells);
  
 
 
-  path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
+ 
 
 
 

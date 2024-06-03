@@ -4,20 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'dart:math';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/CreateNewPassword.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/ForgetPassword.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignUpAPI.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/SignUp.dart';
+
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
+import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
-import 'SignIn.dart';
+import 'CreateNewPassword.dart';
+import 'LOGIN SIGNUP APIS/APIS/SignUpAPI.dart';
 
 class VerifyYourAccount extends StatefulWidget {
   final String previousScreen;
@@ -188,200 +183,231 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
               child: Icon(Icons.arrow_back)),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Semantics(
-                  label: "Verify your account, 60 seconds left",
-                  child: ExcludeSemantics(
-                    child: GestureDetector(
-                      onTap: (){
-                        startCountDown();
-                      },
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-                        width: double.infinity,
-                        child: Text(
-                          "Verify Your Account",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff000000),
-                            height: 30/24,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ),
-                  ),
+      body: Stack(
+          children: [SafeArea(
+            child: SingleChildScrollView(
+              physics: ScrollPhysics(),
+              child: Container(
+                height: (orientation == Orientation.portrait)
+                    ? screenHeight-37
+                    : screenWidth,
+                decoration: BoxDecoration(
+                  color: Color(0xffffffff),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 16,top: 8,right: 16),
-                  width: screenWidth,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Text(
-                          "Please enter the verification code we’ve sent you on ${finalSendingEmailORPhone}",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff242323),
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                    margin: EdgeInsets.only(top: 20, left: 16, right: 16),
-                    height: 58,
-                    padding: EdgeInsets.only(left: 12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: outlineheaderColor, width: 2),
-                      color: Color(0xfffffff),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Semantics(
-                      label: "Enter 6 digit OTP",
-                      child: ExcludeSemantics(
-                        child: TextFormField(
-                          focusNode: _focusNode1,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          controller: OTPEditingController,
-                          decoration: InputDecoration(
-                              hintText: 'OTP',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xffbdbdbd),
-                              ),
-                              border: InputBorder.none
-                          ),
-                          onChanged: (value) {
-                            OTPFieldListner();
-                            outlineheaderColorForPass = new Color(0xff49454f);
-                            outlineheaderColorForName = new Color(0xff49454f);
-                          },
-                        ),
-                      ),
-                    )
-                ),
-                ExcludeSemantics(
-                  child: Container(
-                    margin: EdgeInsets.only(left: 32,top: 4),
-                    child: Text(
-                      "Enter your 6-digit otp here",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff49454f),
-                        height: 16/12,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ),
-                Container(
-                    alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(top: 4,right: 26),
-                    child: Row(
-                      children: [
-                        Spacer(),
-                        Text(
-                          timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xff000000),
-                            height: 23/16,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                      ],
-                    )
-                ),
-                Container(
-                    margin: EdgeInsets.only(top: 20,right: 16,left: 16),
-                    child: SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  4.0), // Button border radius
-                            ),
-                            elevation: 0,
-                          ),
-                          // onPressed: loginclickable ? login : null,
-                          onPressed: () async {
-                            if(widget.previousScreen=='ForgetPassword' && OTPEditingController.text.length==6){
-                              print("sending");
-                              print(finalSendingEmailORPhone);
-                              print(widget.userEmailOrPhone);
-                              print(widget.userName);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CreateNewPassword(otp: (OTPEditingController.text.isNotEmpty)?OTPEditingController.text:'', user: finalSendingEmailORPhone)
+                child: Column(
+                  children: [
+                    Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Semantics(
+                                  label: "Verify your account, 60 seconds left",
+                                  child: ExcludeSemantics(
+                                    child: GestureDetector(
+                                      onTap: (){
+                                        startCountDown();
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
+                                        width: double.infinity,
+                                        child: Text(
+                                          "Verify Your Account",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xff000000),
+                                            height: 30/24,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              );
-                            }else if(OTPEditingController.text.isEmpty || OTPEditingController.text.length<6){
-                              HelperClass.showToast("Enter 6 Digit OTP");
-                            }
-                            else{
-                              HelperClass.showToast("Account created successfully");
-                              Navigator.pushAndRemoveUntil(context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignIn()
-                                ),(route) => false,
-                              );
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
+                                  child: Text(
+                                    "Please enter the verification code we’ve sent you on ${finalSendingEmailORPhone}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff242323),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
 
-                              // if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
-                              //   Navigator.pushAndRemoveUntil(context,
-                              //     MaterialPageRoute(
-                              //         builder: (context) => MainScreen(initialIndex: 0,)
-                              //     ),(route) => false,
-                              //   );
-                              // }else{
-                              //
-                              // }
-                            }
-                          },
-                          child: Center(
-                            child:
-                            Text(
-                              'Verify OTP',
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xffffffff),
-                              ),
+                                // Container(
+                                //   margin: EdgeInsets.only(left: 16,top: 8,right: 16),
+                                //   width: screenWidth,
+                                //   child: Column(
+                                //     crossAxisAlignment: CrossAxisAlignment.start,
+                                //     children: [
+                                //       Flexible(
+                                //         child: Container(
+                                //           child: Text(
+                                //             "Please enter the verification code we’ve sent you on ${finalSendingEmailORPhone}",
+                                //             style: const TextStyle(
+                                //               fontFamily: "Roboto",
+                                //               fontSize: 16,
+                                //               fontWeight: FontWeight.w400,
+                                //               color: Color(0xff242323),
+                                //             ),
+                                //             textAlign: TextAlign.left,
+                                //           ),
+                                //         ),
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
+                                Container(
+                                    margin: EdgeInsets.only(top: 20, left: 16, right: 16),
+                                    height: 58,
+                                    padding: EdgeInsets.only(left: 12),
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: outlineheaderColor, width: 2),
+                                      color: Color(0xfffffff),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Semantics(
+                                      label: "Enter 4 digit OTP",
+                                      child: ExcludeSemantics(
+                                        child: TextFormField(
+                                          focusNode: _focusNode1,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: <TextInputFormatter>[
+                                            FilteringTextInputFormatter.digitsOnly
+                                          ],
+                                          controller: OTPEditingController,
+                                          decoration: InputDecoration(
+                                              hintText: 'OTP',
+                                              hintStyle: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xffbdbdbd),
+                                              ),
+                                              border: InputBorder.none
+                                          ),
+                                          onChanged: (value) {
+                                            OTPFieldListner();
+                                            outlineheaderColorForPass = new Color(0xff49454f);
+                                            outlineheaderColorForName = new Color(0xff49454f);
+                                          },
+                                        ),
+                                      ),
+                                    )
+                                ),
+                                ExcludeSemantics(
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 32,top: 4),
+                                    child: Text(
+                                      "Enter your 4-digit otp here",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff49454f),
+                                        height: 16/12,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(top: 4,right: 26),
+                                    child: Row(
+                                      children: [
+                                        Spacer(),
+                                        Text(
+                                          timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff000000),
+                                            height: 23/16,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
+                                    )
+                                ),
+                                Container(
+                                    margin: EdgeInsets.only(top: 20,right: 16,left: 16),
+                                    child: SizedBox(
+                                        height: 48,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  4.0), // Button border radius
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                          // onPressed: loginclickable ? login : null,
+                                          onPressed: () async {
+                                            if(widget.previousScreen=='ForgetPassword' && OTPEditingController.text.length==4){
+                                              print("sending");
+                                              print(finalSendingEmailORPhone);
+                                              print(widget.userEmailOrPhone);
+                                              print(widget.userName);
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => CreateNewPassword(otp: (OTPEditingController.text.isNotEmpty)?OTPEditingController.text:'', user: finalSendingEmailORPhone)
+                                                ),
+                                              );
+                                            }else if(OTPEditingController.text.isEmpty || OTPEditingController.text.length<4){
+                                              HelperClass.showToast("Enter 4 Digit OTP");
+                                            }
+                                            else{
+
+                                              if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
+                                                Navigator.pushAndRemoveUntil(context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => SignIn(emailOrPhoneNumber: widget.userEmailOrPhone,password: widget.userPasword,)
+                                                  ),(route) => false,
+                                                );
+                                              }else{
+
+                                              }
+                                            }
+                                          },
+                                          child: Center(
+                                            child:
+                                            Text(
+                                              'Verify OTP',
+                                              style: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xffffffff),
+                                              ),
+                                            ),
+                                          ),
+                                        ))
+                                )
+                              ],
                             ),
                           ),
-                        ))
-                )
-              ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          )]
       ),
     );
   }

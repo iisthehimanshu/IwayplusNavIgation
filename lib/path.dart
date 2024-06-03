@@ -1062,10 +1062,10 @@ Future<List<int>> getFinalOptimizedPath(
       int oldArrayIndexAtTurn2=tu.indexOf(oldIndexAtTurn2);
 
       //turns array updated
-      tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
-      tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
-      print(res[i][0][0]+res[i][0][1]*numCols);
-      print(res[i][1][0]+res[i][1][1]*numCols);
+      if(oldArrayIndexAtTurn1!=-1 && oldArrayIndexAtTurn2!=-1){
+        tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
+        tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
+      }
 
 
     }

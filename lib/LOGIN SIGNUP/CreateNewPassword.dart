@@ -91,7 +91,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
 
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xffbdbdbd);
-
+  bool _obscureText = true;
+  bool _obscureText2 = true;
   Color outlineheaderColorForName = new Color(0xff49454f);
   Color outlineTextColorForName = new Color(0xff49454f);
   void nameFiledListner() {
@@ -185,14 +186,14 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   //   AuthCredential credential = GoogleAuthProvider.credential(
   //       accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
   //   UserCredential userCredential =
-  //   await FirebaseAuth.instance.signInWithCredential(credential);
+  //       await FirebaseAuth.instance.signInWithCredential(credential);
   //   print('Google user name ${userCredential.user?.displayName}');
   //
   //   if (userCredential.user != null) {
   //     Navigator.of(context).push(MaterialPageRoute(
   //         builder: (context) => MainScreen(
-  //           initialIndex: 0,
-  //         )));
+  //               initialIndex: 0,
+  //             )));
   //   }
   // }
 
@@ -285,26 +286,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                     ),
                                     textAlign: TextAlign.left,
                                   )),
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: 16, top: 8, right: 16),
-                                width: screenWidth,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Please create a new 8 character strong password for your account.",
-                                      style: TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4c4949),
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ],
-                                ),
-                              ),
+
                               Container(
                                 //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(
@@ -324,94 +306,121 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                         crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                         children: [
+
                                           Expanded(
                                             child: Semantics(
                                               label: "Enter new password",
                                               child: ExcludeSemantics(
-                                                child: TextFormField(
+                                                child: TextField(
                                                   focusNode: _focusNode1,
-                                                  controller:
-                                                  mailEditingController,
+                                                  controller: mailEditingController,
+                                                  obscureText: _obscureText, // Flag to show/hide password
                                                   decoration: InputDecoration(
-                                                      hintText: 'New Password',
-                                                      hintStyle: TextStyle(
-                                                        fontFamily: 'Roboto',
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                        FontWeight.w400,
-                                                        color:
-                                                        Color(0xffbdbdbd),
+                                                    hintText: 'New Password',
+                                                    hintStyle: TextStyle(
+                                                      fontFamily: 'Roboto',
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xffbdbdbd),
+                                                    ),
+                                                    border: InputBorder.none,
+                                                    suffixIcon: IconButton(
+                                                      icon: Icon(
+                                                        _obscureText ? Icons.visibility_off:Icons.visibility ,
+                                                        color: Colors.grey,
                                                       ),
-                                                      border: InputBorder.none
-                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          _obscureText = !_obscureText; // Toggle show/hide password
+                                                        });
+                                                      },
+                                                    ),
                                                   ),
                                                   onChanged: (value) {
                                                     emailFieldListner();
-                                                    outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
-                                                    outlineheaderColorForName =
-                                                    new Color(0xff49454f);
+                                                    outlineheaderColorForPass = new Color(0xff49454f);
+                                                    outlineheaderColorForName = new Color(0xff49454f);
                                                   },
                                                 ),
                                               ),
                                             ),
                                           ),
+
                                         ],
                                       ))),
+
                               Container(
-                                //color: Colors.amberAccent,
-                                  margin: EdgeInsets.only(
-                                      top: 20, left: 16, right: 16),
-                                  height: 58,
-                                  child: Container(
-                                      padding: EdgeInsets.only(left: 12),
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: outlineheaderColor,
-                                            width: 2),
-                                        color: Color(0xfffffff),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Semantics(
-                                              label: "Enter new password again",
-                                              child: ExcludeSemantics(
-                                                child: TextFormField(
-                                                  focusNode: _focusNode2,
-                                                  controller:
-                                                  confirmmailEditingController,
-                                                  decoration: InputDecoration(
-                                                      hintText:
-                                                      'Confirm Password',
-                                                      hintStyle: TextStyle(
-                                                        fontFamily: 'Roboto',
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                        FontWeight.w400,
-                                                        color:
-                                                        Color(0xffbdbdbd),
-                                                      ),
-                                                      border: InputBorder.none
-                                                    //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                margin: EdgeInsets.only(top: 20, left: 16, right: 16),
+                                height: 58,
+                                child: Container(
+                                  padding: EdgeInsets.only(left: 12),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: outlineheaderColor, width: 2),
+                                    color: Color(0xfffffff),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Semantics(
+                                          label: "Enter new password again",
+                                          child: ExcludeSemantics(
+                                            child: TextField(
+                                              focusNode: _focusNode2,
+                                              controller: confirmmailEditingController,
+                                              obscureText: _obscureText2,
+                                              decoration: InputDecoration(
+                                                hintText: 'Confirm Password',
+                                                hintStyle: TextStyle(
+                                                  fontFamily: 'Roboto',
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xffbdbdbd),
+                                                ),
+                                                border: InputBorder.none,
+                                                suffixIcon: IconButton(
+                                                  icon: Icon(
+                                                    _obscureText2 ? Icons.visibility_off:Icons.visibility ,
+                                                    color: Colors.grey,
                                                   ),
-                                                  onChanged: (value) {
-                                                    confirmemailFieldListner();
-                                                    outlineheaderColorForPass =
-                                                    new Color(0xff49454f);
-                                                    outlineheaderColorForName =
-                                                    new Color(0xff49454f);
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _obscureText2 = !_obscureText2; // Toggle show/hide password
+                                                    });
                                                   },
                                                 ),
                                               ),
+                                              onChanged: (value) {
+                                                confirmemailFieldListner();
+                                                outlineheaderColorForPass = Color(0xff49454f);
+                                                outlineheaderColorForName = Color(0xff49454f);
+                                              },
                                             ),
                                           ),
-                                        ],
-                                      ))),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              confirmmailEditingController.text.length<8?ExcludeSemantics(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 32, top: 4),
+                                  child: Text(
+                                    "8 characters password required.",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.red,
+                                      height: 16 / 12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              )                              :
                               ExcludeSemantics(
                                 child: Container(
                                   margin: EdgeInsets.only(left: 32, top: 4),
@@ -421,7 +430,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       fontFamily: "Roboto",
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
-                                      color: Color(0xff49454f),
+                                      color: Colors.green,
                                       height: 16 / 12,
                                     ),
                                     textAlign: TextAlign.left,

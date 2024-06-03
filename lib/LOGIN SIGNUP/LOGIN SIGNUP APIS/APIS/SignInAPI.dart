@@ -2,9 +2,8 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
+
 
 import '../../../API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
@@ -16,7 +15,7 @@ class SignInAPI{
 
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
-    final SigninBox = SignINAPIModelBox.getData();
+    // final SigninBox = SignINAPIModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
@@ -44,7 +43,7 @@ class SignInAPI{
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
-        print("printing box length ${SigninBox.length}");
+        // print("printing box length ${SigninBox.length}");
 
         var signInBox = Hive.box('SignInDatabase');
         signInBox.put("accessToken", responseBody["accessToken"]);
@@ -55,11 +54,11 @@ class SignInAPI{
         signInBox.put("roles", roles);
 
         //------STORING USER CREDENTIALS FROM DATABASE----------
-        UserCredentials().setAccessToken(signInBox.get("accessToken"));
-        UserCredentials().setRefreshToken(signInBox.get("refreshToken"));
-        List<dynamic> rolesList = signInBox.get("roles");
-        UserCredentials().setRoles(rolesList);
-        UserCredentials().setUserId(signInBox.get("userId"));
+        // UserCredentials.setAccessToken(signInBox.get("accessToken"));
+        // UserCredentials.setRefreshToken(signInBox.get("refreshToken"));
+        // List<dynamic> rolesList = signInBox.get("roles");
+        // UserCredentials.setRoles(rolesList);
+        // UserCredentials.setUserId(signInBox.get("userId"));
 
         //--------------------------------------------------------
 
@@ -85,7 +84,7 @@ class SignInAPI{
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
-    request.body = json.encode({"username": "${user}"});
+    request.body = json.encode({"username": "${user}", "digits":4,});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();

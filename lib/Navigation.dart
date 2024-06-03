@@ -3708,7 +3708,8 @@ class _NavigationState extends State<Navigation> {
         children: [
           Container(
             margin: EdgeInsets.only(left: 16, top: 16),
-            height: (multiFloorPath) ? 160 : 119,
+            height: 119,
+            //(multiFloorPath) ? 160 : 119,
             width: screenWidth - 32,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -3844,67 +3845,67 @@ class _NavigationState extends State<Navigation> {
                           },
                         ),
 
-                        (multiFloorPath)
-                            ? Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          pathTypeSelected = 0;
-                                        });
-                                        building.landmarkdata!.then((value) {
-                                          calculateroute(value.landmarksMap!);
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 100,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                            color: (pathTypeSelected == 0)
-                                                ? Colors.cyan
-                                                : Colors.white,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20))),
-                                        alignment: Alignment.center,
-                                        margin: EdgeInsets.all(10),
-                                        child: Text(
-                                          'Lift',
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          pathTypeSelected = 1;
-                                        });
-                                        building.landmarkdata!.then((value) {
-                                          calculateroute(value.landmarksMap!);
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 100,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                            color: (pathTypeSelected == 1)
-                                                ? Colors.cyan
-                                                : Colors.white,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20))),
-                                        alignment: Alignment.center,
-                                        margin: EdgeInsets.all(10),
-                                        child: Text(
-                                          'Stair',
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : SizedBox(),
+                        // (multiFloorPath)
+                        //     ? Center(
+                        //         child: Row(
+                        //           mainAxisAlignment: MainAxisAlignment.center,
+                        //           children: [
+                        //             GestureDetector(
+                        //               onTap: () {
+                        //                 setState(() {
+                        //                   pathTypeSelected = 0;
+                        //                 });
+                        //                 building.landmarkdata!.then((value) {
+                        //                   calculateroute(value.landmarksMap!);
+                        //                 });
+                        //               },
+                        //               child: Container(
+                        //                 width: 100,
+                        //                 height: 40,
+                        //                 decoration: BoxDecoration(
+                        //                     color: (pathTypeSelected == 0)
+                        //                         ? Colors.cyan
+                        //                         : Colors.white,
+                        //                     borderRadius: BorderRadius.all(
+                        //                         Radius.circular(20))),
+                        //                 alignment: Alignment.center,
+                        //                 margin: EdgeInsets.all(10),
+                        //                 child: Text(
+                        //                   'Lift',
+                        //                   style: TextStyle(color: Colors.black),
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //             GestureDetector(
+                        //               onTap: () {
+                        //                 setState(() {
+                        //                   pathTypeSelected = 1;
+                        //                 });
+                        //                 building.landmarkdata!.then((value) {
+                        //                   calculateroute(value.landmarksMap!);
+                        //                 });
+                        //               },
+                        //               child: Container(
+                        //                 width: 100,
+                        //                 height: 40,
+                        //                 decoration: BoxDecoration(
+                        //                     color: (pathTypeSelected == 1)
+                        //                         ? Colors.cyan
+                        //                         : Colors.white,
+                        //                     borderRadius: BorderRadius.all(
+                        //                         Radius.circular(20))),
+                        //                 alignment: Alignment.center,
+                        //                 margin: EdgeInsets.all(10),
+                        //                 child: Text(
+                        //                   'Stair',
+                        //                   style: TextStyle(color: Colors.black),
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ],
+                        //         ),
+                        //       )
+                        //     : SizedBox(),
                         // ChipsChoice<String>.multiple(
                         //   value: optionsTags,
                         //   onChanged: (val) {

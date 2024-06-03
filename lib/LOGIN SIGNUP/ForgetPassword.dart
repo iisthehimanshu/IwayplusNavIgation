@@ -6,10 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:upgrader/upgrader.dart';
-import 'package:lottie/lottie.dart' as lot;
+
 import '../MainScreen.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'SignIn.dart';
@@ -273,26 +270,41 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                     ),
                                     textAlign: TextAlign.left,
                                   )),
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: 16, top: 8, right: 16),
-                                width: screenWidth,
-                                child: const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
-                                      style: TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff242323),
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    )
-                                  ],
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
+                                child: Text(
+                                  "Enter your email or mobile number to verify",
+                                  style: TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff242323),
+                                  ),
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
+                              // Container(
+                              //   margin: EdgeInsets.only(
+                              //       left: 16, top: 8, right: 16),
+                              //   width: screenWidth,
+                              //   child: const Column(
+                              //     crossAxisAlignment: CrossAxisAlignment.start,
+                              //     children: [
+                              //       Flexible(
+                              //         child: Text(
+                              //           "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
+                              //           style: TextStyle(
+                              //             fontFamily: "Roboto",
+                              //             fontSize: 16,
+                              //             fontWeight: FontWeight.w400,
+                              //             color: Color(0xff242323),
+                              //           ),
+                              //           textAlign: TextAlign.left,
+                              //         ),
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                               Container(
                                 //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(

@@ -11,14 +11,13 @@ import 'guestloginapi.dart';
 
 class RefreshTokenAPI {
 
-  static String refreshToken = "";
   static String baseUrl = "https://dev.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff";
 
-  static void fetchPatchData() async {
+  static Future<String> refresh() async {
     var signInBox = Hive.box('SignInDatabase');
-    refreshToken = signInBox.get("refreshToken");
-    // print("refreshToken");
-    // print(refreshToken);
+    String refreshToken = signInBox.get("refreshToken");
+    print("refreshToken");
+    print(refreshToken);
 
     final Map<String, dynamic> data = {
       "refreshToken": refreshToken
@@ -34,12 +33,12 @@ class RefreshTokenAPI {
     if (response.statusCode == 200) {
       print("in refreshTOken");
       Map<String, dynamic> responseBody = json.decode(response.body);
+      final newAccessToken = responseBody["accessToken"];
 
-      String updatedAccessToken = responseBody["accessToken"];
-      signInBox.put('accessToken', updatedAccessToken);
 
-      print(responseBody);
-      return;
+
+
+      return newAccessToken;
     } else {
       print(Exception);
       print(response.statusCode);

@@ -85,7 +85,7 @@ class landmarkApi {
       // }
     } else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return landmarkApi().fetchLandmarkData();
       }
       print(response.statusCode);

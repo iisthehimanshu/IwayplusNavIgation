@@ -45,7 +45,7 @@ class OutBuildingData{
     }
     else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return OutBuildingData.outBuildingData(latitude1,longitude1,latitude2,longitude2);
       }
    // print(response.reasonPhrase);

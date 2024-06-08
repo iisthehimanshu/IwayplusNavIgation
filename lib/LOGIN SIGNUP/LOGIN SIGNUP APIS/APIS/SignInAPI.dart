@@ -73,7 +73,7 @@ class SignInAPI{
     } else {
       if (response.statusCode == 403) {
         print("In response.statusCode == 403");
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return SignInAPI().signIN(username,password);
       }
       print("Code is ${response.statusCode}");

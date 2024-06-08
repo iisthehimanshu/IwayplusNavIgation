@@ -63,7 +63,7 @@ class beaconapi {
       return beaconList;
     } else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return beaconapi().fetchBeaconData();
       }
       HelperClass.showToast("MishorError in Beacon API");

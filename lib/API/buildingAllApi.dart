@@ -60,7 +60,7 @@ class buildingAllApi {
       if (response.statusCode == 403) {
         print("In response.statusCode == 403");
         print(token);
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         print("newToken");
         token = signInBox.get("accessToken");
         return buildingAllApi().fetchBuildingAllData();

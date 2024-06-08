@@ -106,7 +106,7 @@ class PolyLineApi {
       return polylinedata.fromJson(responseBody);
     } else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return PolyLineApi().fetchPolyData();
       }
       print(response.statusCode);

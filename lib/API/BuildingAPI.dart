@@ -75,7 +75,7 @@ class BuildingAPI {
       return Building.fromJson(responseBody);
     } else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return BuildingAPI().fetchBuildData();
       }
       //HelperClass.showToast("MishorError in Building API");

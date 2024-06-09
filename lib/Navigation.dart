@@ -3903,8 +3903,8 @@ class _NavigationState extends State<Navigation> {
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
-
-
+                                              buildingAllApi.selectedID = PathState.sourceBid;
+                                              buildingAllApi.selectedBuildingID = PathState.sourceBid;
                                               user.Bid = PathState.sourceBid;
                                               user.floor =
                                                   PathState.sourceFloor;
@@ -3978,8 +3978,7 @@ class _NavigationState extends State<Navigation> {
                                                         user.pathobj.index + 1]
                                                     .lng
                                               ]);
-                                              buildingAllApi.selectedID = PathState.sourceBid;
-                                              buildingAllApi.selectedBuildingID = PathState.sourceBid;
+
                                             },
                                             child: !startingNavigation
                                                 ? Row(

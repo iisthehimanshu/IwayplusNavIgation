@@ -663,8 +663,10 @@ class _NavigationState extends State<Navigation> {
         nearestLandInfomation = tools.localizefindNearbyLandmark(
             apibeaconmap[nearestBeacon]!, value.landmarksMap!);
       });
-
-
+      setState(() {
+        buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
+        buildingAllApi.selectedBuildingID = apibeaconmap[nearestBeacon]!.buildingID!;
+      });
 
       List<int> localBeconCord = [];
       localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
@@ -1318,6 +1320,7 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
+
     sumMap.clear();
     setState(() {
       sumMap = btadapter.calculateAverage();
@@ -3900,6 +3903,8 @@ class _NavigationState extends State<Navigation> {
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
+
+
                                               user.Bid = PathState.sourceBid;
                                               user.floor =
                                                   PathState.sourceFloor;
@@ -3973,6 +3978,8 @@ class _NavigationState extends State<Navigation> {
                                                         user.pathobj.index + 1]
                                                     .lng
                                               ]);
+                                              buildingAllApi.selectedID = PathState.sourceBid;
+                                              buildingAllApi.selectedBuildingID = PathState.sourceBid;
                                             },
                                             child: !startingNavigation
                                                 ? Row(

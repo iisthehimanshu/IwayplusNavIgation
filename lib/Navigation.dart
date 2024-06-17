@@ -7,6 +7,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' as pac;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -15,6 +16,8 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/wayPointPath.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'directionClass.dart';
@@ -144,7 +147,7 @@ class _NavigationState extends State<Navigation> {
   bool checkedForPolyineUpdated = false;
   bool checkedForPatchDataUpdated = false;
   bool checkedForLandmarkDataUpdated = false;
-  PriorityQueue<MapEntry<String, double>> debugPQ = new PriorityQueue();
+  pac.PriorityQueue<MapEntry<String, double>> debugPQ = new pac.PriorityQueue();
 
   HashMap<String, beacon> apibeaconmap = HashMap();
   late FlutterTts flutterTts;
@@ -968,6 +971,7 @@ class _NavigationState extends State<Navigation> {
         .fetchPolyData(id: buildingAllApi.selectedBuildingID)
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
+      building.wayPoints = extractWaypoint(value);
       building.polyLineData = value;
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
@@ -1406,6 +1410,20 @@ class _NavigationState extends State<Navigation> {
         fitPolygonInScreen(patch.first);
       } catch (e) {}
     }
+  }
+
+  Map<int,List<Nodes>> extractWaypoint(polylinedata polyline){
+    Map<int,List<Nodes>> wayPoints = {};
+    polyline.polyline!.floors!.forEach((floor) {
+      floor.polyArray!.forEach((element) {
+        if(element.polygonType!.toLowerCase() == "waypoints"){
+          wayPoints.putIfAbsent(tools.alphabeticalToNumerical(element.floor!), () => []);
+          wayPoints[tools.alphabeticalToNumerical(element.floor!)]!.addAll(element.nodes!);
+        }
+      });
+    });
+    print("waypoint $wayPoints");
+    return wayPoints;
   }
 
   void createotherPatch(patchDataModel value) async {
@@ -3166,6 +3184,7 @@ class _NavigationState extends State<Navigation> {
       print(PathState.path.keys);
       print(pathMarkers.keys);
     }
+    _isLandmarkPanelOpen = false;
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
@@ -3214,6 +3233,8 @@ class _NavigationState extends State<Navigation> {
         building,
         floor,
         bid ?? "");
+
+    //List<int> path = findPathWithWaypoints(sourceX, sourceY, destinationX, destinationY, building.nonWalkable[bid]![floor]!, building.wayPoints[floor]!, numCols, numRows);
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     for (int i = 0; i < turns.length; i++) {
@@ -4205,13 +4226,19 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-  void alignMapToPath(List<double> A, List<double> B) {
-    mapState.tilt = 50;
-
+  void alignMapToPath(List<double> A, List<double> B)async{
+    mapState.tilt = 33.5;
+    List<double> val =
+    tools.localtoglobal(
+        user.showcoordX
+            .toInt(),
+        user.showcoordY
+            .toInt());
+    mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
-          target: mapState.target,
+          target:mapState.target,
           zoom: mapState.zoom,
           bearing: mapState.bearing!,
           tilt: mapState.tilt),
@@ -6139,44 +6166,85 @@ class _NavigationState extends State<Navigation> {
     print(zoom);
     if (building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
-      setState(() {
-        Markers.forEach((marker) {
-          List<String> words = marker.markerId.value.split(' ');
-          if (marker.markerId.value.contains("Room")) {
-            Marker _marker = customMarker.visibility(zoom > 20.5, marker);
-            updatedMarkers.add(_marker);
-          }
-          if (marker.markerId.value.contains("Rest")) {
-            Marker _marker = customMarker.visibility(zoom > 19, marker);
-            updatedMarkers.add(_marker);
-          }
-          if (marker.markerId.value.contains("Entry")) {
-            Marker _marker = customMarker.visibility(
-                (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
-            updatedMarkers.add(_marker);
-          }
-          if (marker.markerId.value.contains("Building")) {
-            Marker _marker = customMarker.visibility(zoom < 16.0, marker);
-            updatedMarkers.add(_marker);
-          }
-          if (marker.markerId.value.contains("Lift")) {
-            Marker _marker = customMarker.visibility(zoom > 19, marker);
-            updatedMarkers.add(_marker);
-          }
-          if (building.ignoredMarker.contains(words[1])) {
-            if (marker.markerId.value.contains("Door")) {
-              Marker _marker = customMarker.visibility(true, marker);
-              print(_marker);
-              updatedMarkers.add(_marker);
-            }
+      if(user.isnavigating){
+        setState(() {
+          Markers.forEach((marker) {
+            List<String> words = marker.markerId.value.split(' ');
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(false, marker);
               updatedMarkers.add(_marker);
             }
-          }
+            if (marker.markerId.value.contains("Rest")) {
+              Marker _marker = customMarker.visibility(false, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Entry")) {
+              Marker _marker = customMarker.visibility(
+                  false, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Building")) {
+              Marker _marker = customMarker.visibility(false, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Lift")) {
+              Marker _marker = customMarker.visibility(false, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (building.ignoredMarker.contains(words[1])) {
+              if (marker.markerId.value.contains("Door")) {
+                Marker _marker = customMarker.visibility(false, marker);
+                print(_marker);
+                updatedMarkers.add(_marker);
+              }
+              if (marker.markerId.value.contains("Room")) {
+                Marker _marker = customMarker.visibility(false, marker);
+                updatedMarkers.add(_marker);
+              }
+            }
+          });
+          Markers = updatedMarkers;
         });
-        Markers = updatedMarkers;
-      });
+      }else{
+        setState(() {
+          Markers.forEach((marker) {
+            List<String> words = marker.markerId.value.split(' ');
+            if (marker.markerId.value.contains("Room")) {
+              Marker _marker = customMarker.visibility(zoom > 20.5, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Rest")) {
+              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Entry")) {
+              Marker _marker = customMarker.visibility(
+                  (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Building")) {
+              Marker _marker = customMarker.visibility(zoom < 16.0, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (marker.markerId.value.contains("Lift")) {
+              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              updatedMarkers.add(_marker);
+            }
+            if (building.ignoredMarker.contains(words[1])) {
+              if (marker.markerId.value.contains("Door")) {
+                Marker _marker = customMarker.visibility(true, marker);
+                print(_marker);
+                updatedMarkers.add(_marker);
+              }
+              if (marker.markerId.value.contains("Room")) {
+                Marker _marker = customMarker.visibility(false, marker);
+                updatedMarkers.add(_marker);
+              }
+            }
+          });
+          Markers = updatedMarkers;
+        });
+      }
     }
   }
 
@@ -6293,6 +6361,7 @@ class _NavigationState extends State<Navigation> {
     building.landmarkdata!.then((land) {
       print("Himanshuchecker ${land.landmarksMap}");
       print("Himanshuchecker ${value[0]}");
+      building.selectedLandmarkID = land.landmarksMap![value[0]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {
@@ -6314,10 +6383,17 @@ class _NavigationState extends State<Navigation> {
       PathState.destinationBid = land.landmarksMap![value[1]]!.buildingID!;
       PathState.destinationFloor = land.landmarksMap![value[1]]!.floor!;
       PathState.destinationPolyID = value[1];
-
-      calculateroute(land.landmarksMap!).then((value) {
-        _isRoutePanelOpen = true;
+      setState(() {
+        calculatingPath = true;
+        _isLandmarkPanelOpen = true;
       });
+      Future.delayed(Duration(milliseconds: 500)).then((value){
+        calculatingPath = false;
+        calculateroute(land.landmarksMap!).then((value) {
+          _isRoutePanelOpen = true;
+        });
+      });
+
     });
   }
 
@@ -6782,8 +6858,7 @@ class _NavigationState extends State<Navigation> {
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
-                                    print(FlutterBluePlus.adapterStateNow.toString());
-                                    btadapter.startScanningIOS(apibeaconmap);
+                                    wsocket.sendmessg();
                                     // //print(PathState.connections);
                                     // building.floor[buildingAllApi
                                     //     .getStoredString()] = user.floor;

@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -71,8 +72,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-
-
+  wsocket soc = wsocket();
   // Future<bool> _isUserAuthenticated() async {
   //   // Check if the user is already signed in with Google
   //   User? user = FirebaseAuth.instance.currentUser;

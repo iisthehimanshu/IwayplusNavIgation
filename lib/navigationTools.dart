@@ -84,6 +84,37 @@ class tools {
         return 'Invalid number';
     }
   }
+
+  static int alphabeticalToNumerical(String word) {
+    switch (word) {
+      case 'ground':
+        return 0;
+      case 'first':
+        return 1;
+      case 'second':
+        return 2;
+      case 'third':
+        return 3;
+      case 'fourth':
+        return 4;
+      case 'fifth':
+        return 5;
+      case 'sixth':
+        return 6;
+      case 'seventh':
+        return 7;
+      case 'eighth':
+        return 8;
+      case 'ninth':
+        return 9;
+      case 'tenth':
+        return 10;
+      default:
+        return -1; // Using -1 to indicate an invalid input
+    }
+  }
+
+
   static bool gotBhart = false;
 
   static List<double> localtoglobal(int x, int y,
@@ -908,7 +939,40 @@ class tools {
     return angleDeg;
   }
 
-  static List<int> eightcelltransition(double angle) {
+  static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
+    int targetIndex = path.indexOf(targetCell);
+
+    if (targetIndex == -1) {
+      throw ArgumentError('Cell not found in the path');
+    }
+
+    // Count cells to the left with the same move function
+    int leftCount = 0;
+    for (int i = targetIndex - 1; i >= 0; i--) {
+      if (path[i].move == targetCell.move) {
+        leftCount++;
+      } else {
+        break;
+      }
+    }
+
+    // Count cells to the right with the same move function
+    int rightCount = 0;
+    for (int i = targetIndex + 1; i < path.length; i++) {
+      if (path[i].move == targetCell.move) {
+        rightCount++;
+      } else {
+        break;
+      }
+    }
+
+    // Position within the segment
+    int positionInSegment = leftCount + 1; // 1-based index
+
+    return [leftCount+rightCount+1, positionInSegment];
+  }
+
+  static List<int> eightcelltransition(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -939,7 +1003,7 @@ class tools {
     }
   }
 
-  static List<int> eightcelltransitionforTurns(double angle) {
+  static List<int> eightcelltransitionforTurns(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -971,7 +1035,7 @@ class tools {
   }
 
 
-  static List<int> fourcelltransition(double angle) {
+  static List<int> fourcelltransition(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -994,7 +1058,7 @@ class tools {
   }
 
 
-  static List<int> twocelltransitionvertical(double angle) {
+  static List<int> twocelltransitionvertical(double angle,{int? currPointer, int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -1003,7 +1067,17 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    if (angle >= 270 || angle <= 90) {
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle >= 270-(adjustmentAngle/2) || angle <= 90+(adjustmentAngle/2)) {
       return [0, -1];
     } else if (angle > 90 && angle <= 270) {
       return [0,1];
@@ -1012,7 +1086,7 @@ class tools {
     }
   }
 
-  static List<int> twocelltransitionhorizontal(double angle) {
+  static List<int> twocelltransitionhorizontal(double angle, {int? currPointer,int? totalCells}) {
     //print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
@@ -1022,7 +1096,17 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    if (angle > 180 && angle <= 360) {
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle > (180-(adjustmentAngle/2))  && angle <= 360+(adjustmentAngle/2)) {
       return [-1,0];
     } else if (angle > 0 && angle <= 180) {
       return [1,0];

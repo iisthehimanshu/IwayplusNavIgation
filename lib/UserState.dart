@@ -133,7 +133,8 @@ class UserState{
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
+      List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
+      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta,currPointer:p[1],totalCells:p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values = tools.localtoglobal(coordX, coordY);

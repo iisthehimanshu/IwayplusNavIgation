@@ -4,6 +4,7 @@ import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'APIMODELS/polylinedata.dart' as poly;
 
 class Building{
   Map<String,int> floor;
@@ -11,7 +12,7 @@ class Building{
   Map<String,Map<int, List<int>>> nonWalkable = Map();
 
   Map<String,Map<int,List<int>>> floorDimenssion = Map();
-
+  Map<int,List<poly.Nodes>> wayPoints = {};
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
   Future<land>? landmarkdata = null;

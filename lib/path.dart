@@ -253,10 +253,6 @@ class Node {
   int get hashCode => index.hashCode;
 }
 
-int count1 = 0;
-int count2 = 0;
-int count3 = 0;
-int count4 = 0;
 Future<List<int>> findBestPathAmongstBoth(
     int numRows,
     int numCols,
@@ -271,14 +267,20 @@ Future<List<int>> findBestPathAmongstBoth(
   int destinationX = destinationIndex % numCols;
   int destinationY = destinationIndex ~/ numCols;
 
-  List<int> p1 = findPath(
-      numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
-  p1 = await getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
-      destinationX, destinationY, building, floor,Bid);
-  List<int> p2 = findPath(
-      numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
-  p2 = await getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
-      destinationY, sourceX, sourceY, building, floor,Bid);
+  // List<int> p1 = findPath(
+  //     numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  // p1 = await getFinalOptimizedPath(p1, nonWalkableCells, numCols, sourceX, sourceY,
+  //     destinationX, destinationY, building, floor,Bid);
+  // List<int> p2 = findPath(
+  //     numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  // p2 = await getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
+  //     destinationY, sourceX, sourceY, building, floor,Bid);
+
+  List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
+  List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
+
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
   Map<int, int> p2turns = tools.getTurnMap(p2, numCols);
 
@@ -900,16 +902,228 @@ List<int> getOptiPath(Map<int, int> getTurns, int numCols, List<int> path) {
   return path;
 }
 
-Future<List<int>> getFinalOptimizedPath(
-    List<int> path,
-    List<int> nonWalkableCells,
-    int numCols,
-    int sourceX,
-    int sourceY,
-    int destinationX,
-    int destinationY,
-    Building building,
-    int floor,String Bid) async {
+// Future<List<int>> getFinalOptimizedPath(
+//     List<int> path,
+//     List<int> nonWalkableCells,
+//     int numCols,
+//     int sourceX,
+//     int sourceY,
+//     int destinationX,
+//     int destinationY,
+//     Building building,
+//     int floor,String Bid) async {
+//   List<List<int>> getPoints = [];
+//   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
+//
+//
+//   path = getOptiPath(getTurns, numCols, path);
+//
+//
+//   List<int> turns = tools.getTurnpoints(path, numCols);
+//
+//
+//   for (int i = 0; i < turns.length; i++) {
+//     int x = turns[i] % numCols;
+//     int y = turns[i] ~/ numCols;
+//
+//     getPoints.add([x, y]);
+//   }
+// //optimizing turnsss
+//   for (int i = 0; i < getPoints.length - 1; i++) {
+//     if (getPoints[i][0] != getPoints[i + 1][0] &&
+//         getPoints[i][1] != getPoints[i + 1][1]) {
+//       int dist =
+//           tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
+//       if (dist <= 15) {
+//
+//         //points of prev turn
+//         int index1 = getPoints[i][0] + getPoints[i][1] * numCols;
+//         int ind1 = path.indexOf(index1);
+//
+//         int prev = path[ind1 - 1];
+//
+//         int currX = index1 % numCols;
+//         int currY = index1 ~/ numCols;
+//
+//         int prevX = prev % numCols;
+//         int prevY = prev ~/ numCols;
+//
+//
+//         //straight line eqautaion1
+//         //y-prevY=(currY-prevY)/(currX-prevX)*(x-prevX);
+//
+//         //points of next turn;
+//         int index2 = getPoints[i + 1][0] + getPoints[i + 1][1] * numCols;
+//         int ind2 = path.indexOf(index2);
+//         int next = path[ind2 + 1];
+//
+//         int nextX = index2 % numCols;
+//         int nextY = index2 ~/ numCols;
+//
+//         int nextNextX = next % numCols;
+//         int nextNextY = next ~/ numCols;
+//
+//
+//         int ind3 = path.indexOf(index1 - 1);
+//
+//         List<int> intersectPoints = getIntersectionPoints(
+//             currX, currY, prevX, prevY, nextX, nextY, nextNextX, nextNextY);
+//
+//         if (intersectPoints.isNotEmpty) {
+//           //non walkabkle check
+//
+//           //first along the x plane
+//
+//           //intersecting points
+//           int x1 = intersectPoints[0];
+//           int y1 = intersectPoints[1];
+//
+//           //next point
+//           int x2 = nextX;
+//           int y2 = nextY;
+//
+//           bool isNonWalkablePoint = false;
+//
+//           while (x1 <= x2) {
+//             int pointIndex = x1 + y1 * numCols;
+//             if (nonWalkableCells.contains(pointIndex)) {
+//               isNonWalkablePoint = true;
+//               break;
+//             }
+//             x1 = x1 + 1;
+//           }
+//
+//           //along the y-axis
+//
+//           //next point
+//           int x3 = currX;
+//           int y3 = currY;
+//
+//           while (y1 >= y3) {
+//             int pointIndex = x3 + y1 * numCols;
+//             if (nonWalkableCells.contains(pointIndex)) {
+//               isNonWalkablePoint = true;
+//               break;
+//             }
+//             y1 = y1 - 1;
+//           }
+//
+//           if (isNonWalkablePoint == false) {
+//             path.removeRange(ind1, ind2);
+//
+//             int newIndex = intersectPoints[0] + intersectPoints[1] * numCols;
+//
+//
+//             path[ind1] = newIndex;
+//
+//             getPoints[i] = [intersectPoints[0], intersectPoints[1]];
+//
+//             getPoints.removeAt(i + 1);
+//           }
+//         }
+//
+//
+//         //print("${ind1}  ${ind2}  ${ind3}");
+//
+//         //path=getOptiPath(getTurns, numCols, path);
+//       }
+//     }
+//   }
+//
+//   List<int> tu = [];
+//   tu.add(sourceX + sourceY * numCols);
+//   tu.addAll(tools.getTurnpoints(path, numCols));
+//   tu.add(destinationX + destinationY * numCols);
+//   //print("ressssssssss");
+//   //creating a new array and gearting the path from it.
+//   //  path.clear();
+//   // //
+//   List<List<List<int>>> res=[];
+//   await optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells).then((value){
+//     res=value;
+//   });
+//   //print(res);
+//
+//   //print("turns array before optimization");
+//   for(int i=0;i<tu.length;i++){
+//     int x=tu[i] % numCols;
+//     int y = tu[i] ~/ numCols;
+//     //print("${x}-----${y}");
+//   }
+//
+//
+//   //removing prev turn points with new turn points.
+//   if(res.isNotEmpty){
+//     for(int i=0;i<res.length;i++)
+//     {
+//       int oldIndexAtTurn1=res[i][2][0]+res[i][2][1]*numCols;
+//       int oldIndexAtTurn2=res[i][3][0]+res[i][3][1]*numCols;
+//
+//       //print(oldIndexAtTurn1);
+//       //print(oldIndexAtTurn2);
+//       int oldArrayIndexAtTurn1=tu.indexOf(oldIndexAtTurn1);
+//       int oldArrayIndexAtTurn2=tu.indexOf(oldIndexAtTurn2);
+//
+//       //turns array updated
+//       tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
+//       tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
+//       //print(res[i][0][0]+res[i][0][1]*numCols);
+//       //print(res[i][1][0]+res[i][1][1]*numCols);
+//
+//
+//     }
+//
+//     // for(int i=0;i<tu.length;i++){
+//     //   if(tu.contains(tu[i]+1)){
+//     //
+//     //     tu.removeAt(2);
+//     //     tu.removeAt(3);
+//     //     tu.removeAt(4);
+//     //
+//     //   }
+//     // }
+//   }
+//
+//   //print("turns array after optimization");
+//   for(int i=0;i<tu.length-1;i++){
+//     int x1=tu[i] % numCols;
+//     int y1 = tu[i] ~/ numCols;
+//     int x2=tu[i+1] % numCols;
+//     int y2 = tu[i+1] ~/ numCols;
+//
+//
+//     if(x1+1==x2 || x1-1==x2){
+//       int oldindex=x2+y2*numCols;
+//       x2=x2-1;
+//       int index=x2+y2*numCols;
+//      int oldInd= tu.indexOf(oldindex);
+//      tu[oldInd]=index;
+//     }
+//     if(y1+1==y2 || y1-1==y2){
+//       int oldindex=x2+y2*numCols;
+//       y2=y2-1;
+//       int index=x2+y2*numCols;
+//       int oldInd= tu.indexOf(oldindex);
+//       tu[oldInd]=index;
+//     }
+//   }
+//
+//
+//   path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
+//
+//
+//
+//
+// // Future.delayed(Duration(milliseconds: 2000));
+//
+//   return path;
+// }
+
+
+
+List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
+    int numCols, int sourceX, int sourceY, int destinationX, int destinationY) {
+
   List<List<int>> getPoints = [];
   Map<int, int> getTurns = tools.getTurnMap(path, numCols);
 
@@ -931,7 +1145,7 @@ Future<List<int>> getFinalOptimizedPath(
     if (getPoints[i][0] != getPoints[i + 1][0] &&
         getPoints[i][1] != getPoints[i + 1][1]) {
       int dist =
-          tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
+      tools.calculateDistance(getPoints[i], getPoints[i + 1]).toInt();
       if (dist <= 15) {
 
         //points of prev turn
@@ -1021,101 +1235,32 @@ Future<List<int>> getFinalOptimizedPath(
         }
 
 
-        //print("${ind1}  ${ind2}  ${ind3}");
+        print("${ind1}  ${ind2}  ${ind3}");
 
         //path=getOptiPath(getTurns, numCols, path);
       }
     }
   }
-
   List<int> tu = [];
   tu.add(sourceX + sourceY * numCols);
   tu.addAll(tools.getTurnpoints(path, numCols));
   tu.add(destinationX + destinationY * numCols);
-  //print("ressssssssss");
+
   //creating a new array and gearting the path from it.
   //  path.clear();
   // //
-  List<List<List<int>>> res=[];
-  await optimizeDiagonalEntry(building,path,numCols,floor,Bid,nonWalkableCells).then((value){
-    res=value;
-  });
-  //print(res);
-
-  //print("turns array before optimization");
-  for(int i=0;i<tu.length;i++){
-    int x=tu[i] % numCols;
-    int y = tu[i] ~/ numCols;
-    //print("${x}-----${y}");
-  }
-
-
-  //removing prev turn points with new turn points.
-  if(res.isNotEmpty){
-    for(int i=0;i<res.length;i++)
-    {
-      int oldIndexAtTurn1=res[i][2][0]+res[i][2][1]*numCols;
-      int oldIndexAtTurn2=res[i][3][0]+res[i][3][1]*numCols;
-
-      //print(oldIndexAtTurn1);
-      //print(oldIndexAtTurn2);
-      int oldArrayIndexAtTurn1=tu.indexOf(oldIndexAtTurn1);
-      int oldArrayIndexAtTurn2=tu.indexOf(oldIndexAtTurn2);
-
-      //turns array updated
-      tu[oldArrayIndexAtTurn1]=res[i][0][0]+res[i][0][1]*numCols;
-      tu[oldArrayIndexAtTurn2]=res[i][1][0]+res[i][1][1]*numCols;
-      //print(res[i][0][0]+res[i][0][1]*numCols);
-      //print(res[i][1][0]+res[i][1][1]*numCols);
-
-
-    }
-
-    // for(int i=0;i<tu.length;i++){
-    //   if(tu.contains(tu[i]+1)){
-    //
-    //     tu.removeAt(2);
-    //     tu.removeAt(3);
-    //     tu.removeAt(4);
-    //
-    //   }
-    // }
-  }
-
-  //print("turns array after optimization");
-  for(int i=0;i<tu.length-1;i++){
-    int x1=tu[i] % numCols;
-    int y1 = tu[i] ~/ numCols;
-    int x2=tu[i+1] % numCols;
-    int y2 = tu[i+1] ~/ numCols;
-
-
-    if(x1+1==x2 || x1-1==x2){
-      int oldindex=x2+y2*numCols;
-      x2=x2-1;
-      int index=x2+y2*numCols;
-     int oldInd= tu.indexOf(oldindex);
-     tu[oldInd]=index;
-    }
-    if(y1+1==y2 || y1-1==y2){
-      int oldindex=x2+y2*numCols;
-      y2=y2-1;
-      int index=x2+y2*numCols;
-      int oldInd= tu.indexOf(oldindex);
-      tu[oldInd]=index;
-    }
-  }
-
-
-  path = tools.generateCompletePath(tu, numCols, nonWalkableCells);
+  path = tools.generateCompletePath(tu, numCols,nonWalkableCells);
 
 
 
 
-// Future.delayed(Duration(milliseconds: 2000));
+
 
   return path;
 }
+
+
+
 
 // List<int> findIntersection(List<int> p1, List<int> p2, List<int> p3, double m) {
 //   // Slope of the line passing through P3

@@ -46,12 +46,13 @@ class SignInAPI{
         // print("printing box length ${SigninBox.length}");
 
         var signInBox = Hive.box('SignInDatabase');
-        signInBox.put("accessToken", responseBody["accessToken"]);
+        signInBox.put("accessToken", "");
         signInBox.put("refreshToken", responseBody["refreshToken"]);
         signInBox.put("userId", responseBody["payload"]["userId"]);
         List<dynamic> roles = responseBody["payload"]["roles"];
-        print(responseBody["payload"]["roles"].runtimeType);
         signInBox.put("roles", roles);
+        print("checkingWrongStored");
+        print(signInBox.get("accessToken"));
 
         //------STORING USER CREDENTIALS FROM DATABASE----------
         // UserCredentials.setAccessToken(signInBox.get("accessToken"));

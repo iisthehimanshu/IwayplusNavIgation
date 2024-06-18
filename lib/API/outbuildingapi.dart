@@ -4,6 +4,7 @@ import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 
 import '../APIMODELS/outbuildingmodel.dart';
+import '../Elements/HelperClass.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 import "package:http/http.dart" as http;
@@ -12,16 +13,13 @@ class OutBuildingData{
 
  static Future<OutBuildingModel?> outBuildingData(double latitude1,double longitude1,double latitude2,double longitude2) async{
    var signInBox = Hive.box('SignInDatabase');
-   String token = signInBox.get("accessToken");
-
-
-
-
+   String accessToken = signInBox.get("accessToken");
+   String refreshToken = signInBox.get("refreshToken");
 
 
     var headers = {
       'Content-Type': 'application/json',
-      'x-access-token':'${token}'
+      'x-access-token':'${accessToken}'
     };
     var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
     request.body = json.encode({
@@ -39,16 +37,43 @@ class OutBuildingData{
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
+      print("OUTBUILDINGAPI DATA FROM API");
       var res=await http.Response.fromStream(response);
       return buildingData(res.body);
       // print(await response.stream.bytesToString());
-    }
-    else {
-      if (response.statusCode == 403) {
-        RefreshTokenAPI.refresh();
-        return OutBuildingData.outBuildingData(latitude1,longitude1,latitude2,longitude2);
+    }else if (response.statusCode == 403) {
+      print("OUTBUILDING API in error 403");
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+      var headers = {
+        'Content-Type': 'application/json',
+        'x-access-token':'${accessToken}'
+      };
+      var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
+      request.body = json.encode({
+        "source": {
+          "lat": latitude1,
+          "lng": longitude1
+        },
+        "destination": {
+          "lat": latitude2,
+          "lng": longitude2,
+        }
+      });
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode == 200) {
+        print("OUTBUILDINGAPI DATA FROM API AFTER 403");
+        var res=await http.Response.fromStream(response);
+        return buildingData(res.body);
+      }else{
+        print("OUTBUILDINGAPI DATA EMPTY FROM API AFTER 403");
+        return null;
       }
-   // print(response.reasonPhrase);
+    } else {
+      HelperClass.showToast("MishorError in Outbuilding API");
       return null;
     }
 

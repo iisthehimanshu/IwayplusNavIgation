@@ -34,8 +34,9 @@ class RefreshTokenAPI {
       print("in refreshTOken");
       Map<String, dynamic> responseBody = json.decode(response.body);
       final newAccessToken = responseBody["accessToken"];
-
-
+      print(signInBox.get("accessToken"));
+      signInBox.put("accessToken", newAccessToken);
+      print(signInBox.get("accessToken"));
 
 
       return newAccessToken;

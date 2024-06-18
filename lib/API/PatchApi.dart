@@ -19,7 +19,6 @@ class patchAPI {
   String refreshToken = signInBox.get("refreshToken");
 
 
-
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
     print("checking data");
     print(accessToken);
@@ -59,17 +58,35 @@ class patchAPI {
       return patchDataModel.fromJson(responseBody);
 
     }else if (response.statusCode == 403)  {
+      print("PATCH API in error 403");
       String newAccessToken = await RefreshTokenAPI.refresh();
       print('Refresh done');
-      setState(() {
-        
-      });
-      print(newAccessToken);
-      patchDataModel value = await fetchPatchData();
-      print('return $value');
+      accessToken = newAccessToken;
 
-      return value;
+      final response = await http.post(
+        Uri.parse(baseUrl), body: json.encode(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+
+        final patchData = PatchAPIModel(responseBody: responseBody);
+        PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
+        patchData.save();
+        print("PATCH API DATA FROM API AFTER 403");
+        return patchDataModel.fromJson(responseBody);
+
+      }else{
+        print("PATCH API EMPTY DATA FROM API AFTER 403");
+        patchDataModel patchData = patchDataModel();
+        return patchData;
+      }
     } else {
+      print("PATCH API in else error");
       print(Exception);
       throw Exception('Failed to load data');
     }

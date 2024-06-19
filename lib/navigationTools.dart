@@ -730,7 +730,7 @@ class tools {
   }
 
 
-  static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
@@ -764,7 +764,7 @@ class tools {
         }
       }
     });
-    late nearestLandInfo nearestLandmark;
+    nearestLandInfo? nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       nearestLandmark = entry.key;
@@ -910,11 +910,11 @@ class tools {
       i = 0;
       j = 1;
     }else if(Bid == "65d8833adb333f89456e6519"){
-      i=2;
-      j=3;
+      i=0;
+      j=1;
     }else if(Bid == "65d8835adb333f89456e687f"){
-      i = 2;
-      j = 3;
+      i = 0;
+      j = 1;
     }
 
     // Choose two adjacent corners
@@ -1077,7 +1077,7 @@ class tools {
 
     double adjustmentAngle = 360*adjustmentFactor;
 
-    if (angle >= 270-(adjustmentAngle/2) || angle <= 90+(adjustmentAngle/2)) {
+    if (angle >= 270 || angle <= 90) {
       return [0, -1];
     } else if (angle > 90 && angle <= 270) {
       return [0,1];
@@ -1106,7 +1106,7 @@ class tools {
 
     double adjustmentAngle = 360*adjustmentFactor;
 
-    if (angle > (180-(adjustmentAngle/2))  && angle <= 360+(adjustmentAngle/2)) {
+    if (angle > (180)  && angle <= 360) {
       return [-1,0];
     } else if (angle > 0 && angle <= 180) {
       return [1,0];

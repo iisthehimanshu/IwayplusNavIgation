@@ -57,8 +57,11 @@ class beaconapi {
       print("response.statusCode");
       print("beaconList $beaconList");
       final beaconData = BeaconAPIModel(responseBody: responseBody);
-      BeaconBox.put(beaconList[0].buildingID,beaconData);
-      beaconData.save();
+      if(beaconList.isNotEmpty){
+        BeaconBox.put(beaconList[0].buildingID,beaconData);
+        beaconData.save();
+      }
+
 
       return beaconList;
     } else {

@@ -272,8 +272,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           searcCategoryhResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons") {
-                if (value.name!.toLowerCase() == searchText.toLowerCase()) {
+              if (value.element!.type != "Floor" && value.element!.subType != "beacons" && (value.name != null || value.element!.subType != null) ) {
+                if (value.name!.toLowerCase() == searchText.toLowerCase() || value.element!.subType!.toLowerCase() == searchText.toLowerCase()) {
                   optionListItemBuildingName.add(value.buildingName!);
                   searcCategoryhResults.clear();
                   optionListItemBuildingName.forEach((element) {

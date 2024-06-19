@@ -18,6 +18,7 @@ class UserState{
   double lng;
   String key;
   double theta;
+  String? locationName;
   bool isnavigating;
   int showcoordX;
   int showcoordY;

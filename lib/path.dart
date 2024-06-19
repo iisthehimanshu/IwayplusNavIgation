@@ -225,6 +225,7 @@
 //   // });
 // }
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -276,9 +277,9 @@ Future<List<int>> findBestPathAmongstBoth(
   // p2 = await getFinalOptimizedPath(p2, nonWalkableCells, numCols, destinationX,
   //     destinationY, sourceX, sourceY, building, floor,Bid);
 
-  List<int> p1 = findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
+  List<int> p1 = await findPath(numRows, numCols, nonWalkableCells, sourceIndex, destinationIndex);
   p1 = getFinalOptimizedPath(p1, nonWalkableCells, numCols,  sourceX,    sourceY,    destinationX,    destinationY);
-  List<int> p2 = findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
+  List<int> p2 = await findPath(numRows, numCols, nonWalkableCells, destinationIndex, sourceIndex);
   p2 = getFinalOptimizedPath(p2, nonWalkableCells, numCols,destinationX,    destinationY,  sourceX,    sourceY);
 
   Map<int, int> p1turns = tools.getTurnMap(p1, numCols);
@@ -330,13 +331,13 @@ Future<List<int>> findBestPathAmongstBoth(
 
 }
 
-List<int> findPath(
+Future<List<int>> findPath(
   int numRows,
   int numCols,
   List<int> nonWalkableCells,
   int sourceIndex,
   int destinationIndex,
-) {
+)async{
   sourceIndex -= 1;
   destinationIndex -= 1;
 

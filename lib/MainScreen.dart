@@ -7,8 +7,9 @@ import 'package:iwaymaps/MapScreen.dart';
 import 'package:iwaymaps/ProfilePage.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/Navigation.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -21,9 +22,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   late int index;
-
   final screens = [
     VenueSelectionScreen(),
     MapScreen(),
@@ -37,9 +36,14 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     checkPermission();
     index = widget.initialIndex;
+    setIDforWebSocket();
   }
   checkPermission()async{
     await requestBluetoothConnectPermission();
+  }
+  void setIDforWebSocket()async{
+    final signInBox = await Hive.openBox('SignInDatabase');
+    wsocket.message["userId"] = signInBox.get("userId");
   }
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {

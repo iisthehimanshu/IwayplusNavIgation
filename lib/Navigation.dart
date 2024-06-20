@@ -2562,7 +2562,10 @@ class _NavigationState extends State<Navigation> {
                               snapshot
                                   .data!
                                   .landmarksMap![building.selectedLandmarkID]!
-                                  .name!,
+                                  .name??snapshot
+                                  .data!
+                                  .landmarksMap![building.selectedLandmarkID]!
+                                  .element!.subType!,
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 18,
@@ -2645,7 +2648,10 @@ class _NavigationState extends State<Navigation> {
                               PathState.destinationName = snapshot
                                   .data!
                                   .landmarksMap![building.selectedLandmarkID]!
-                                  .name!;
+                                  .name??snapshot
+                                  .data!
+                                  .landmarksMap![building.selectedLandmarkID]!
+                                  .element!.subType!;
                               PathState.destinationFloor = snapshot
                                   .data!
                                   .landmarksMap![building.selectedLandmarkID]!
@@ -2676,7 +2682,10 @@ class _NavigationState extends State<Navigation> {
                               PathState.destinationName = snapshot
                                   .data!
                                   .landmarksMap![building.selectedLandmarkID]!
-                                  .name!;
+                                  .name??snapshot
+                                  .data!
+                                  .landmarksMap![building.selectedLandmarkID]!
+                                  .element!.subType!;
                               PathState.destinationFloor = snapshot
                                   .data!
                                   .landmarksMap![building.selectedLandmarkID]!
@@ -2783,7 +2792,7 @@ class _NavigationState extends State<Navigation> {
                                   children: [
                                     TextSpan(
                                       text:
-                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name!}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name??snapshot.data!.landmarksMap![building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                     ),
                                   ],
                                 ),

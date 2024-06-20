@@ -1450,13 +1450,31 @@ List<Cell> findCorridorSegments(
       //print("$pos with first eight");
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
-      //print("$pos with twoverticle");
-      single
-          .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+      print("$pos with twoverticle");
+      if(nextcol>col){
+        single
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+      }else if(nextcol<col){
+        single
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+      }else{
+        single
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+      }
+
     } else if ((eastCollision && westCollision)) {
-      //print("$pos with twohorizontal");
-      single.add(
-          Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+      print("$pos with twohorizontal");
+      if(nextrow>row){
+        single.add(
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+      }else if(nextrow<row){
+        single.add(
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+      }else{
+        single.add(
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+      }
+
     } else if (collisionCount == 1) {
       //print("$pos with four");
       single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));

@@ -308,11 +308,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           searchResults.clear();
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons" && value.buildingID == buildingAllApi.selectedBuildingID) {
-                if (value.name!
-                    .toLowerCase()
+              if ( value.element!.subType != "beacons" && (value.name != null || value.element!.subType != null) && value.buildingID == buildingAllApi.selectedBuildingID) {
+                if ((value.name??value.element!.subType)!.toLowerCase()
                     .contains(searchText.toLowerCase())) {
-                  final nameList = [value.name!.toLowerCase()];
+                  final nameList = [(value.name??value.element!.subType)!.toLowerCase()];
                   final fuse = Fuzzy(
                     nameList,
                     options: FuzzyOptions(
@@ -336,7 +335,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         : print("");
                   });
                   searchResults.add(SearchpageResults(
-                    name: "${value.name}",
+                    name: "${(value.name??value.element!.subType)}",
                     location:
                         "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,

@@ -1826,7 +1826,7 @@ class _NavigationState extends State<Navigation> {
     setState(() {
       if (FloorPolyArray != null) {
         for (PolyArray polyArray in FloorPolyArray) {
-          if (polyArray.visibilityType == "visible") {
+          if (polyArray.visibilityType == "visible" && polyArray.polygonType!="Waypoints") {
             List<LatLng> coordinates = [];
 
             for (Nodes node in polyArray.nodes!) {
@@ -2472,7 +2472,8 @@ class _NavigationState extends State<Navigation> {
                     child: Container(
                         child: Text(
                       snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                          .name!,
+                          .name ?? snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                          .element!.subType!,
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,
@@ -3194,15 +3195,40 @@ class _NavigationState extends State<Navigation> {
 
 
 
-    // PathModel model = Building.waypoint.firstWhere((element) => element.floor == floor);
-    //
-    // Map<String, List<dynamic>> adjList = model.pathNetwork;
-    //
-    // var graph = Graph(adjList);
-    //
-    // //List<int> path = [];
-    // List<List<int>> path2 = graph.bfs(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
-    // print("path2 $path2");
+
+
+    List<int> path = [];
+
+    print("$sourceX, $sourceY, $destinationX, $destinationY");
+    try{
+      PathModel model = Building.waypoint.firstWhere((element) => element.floor == floor);
+      Map<String, List<dynamic>> adjList = model.pathNetwork;
+      var graph = Graph(adjList);
+      List<int> path2 = await graph.bfs(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
+      // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
+      //   path = path2;
+      //   print("path from waypoint $path");
+      // }else{
+      //   print("Faulty wayPoint path $path2");
+      //   throw Exception("wrong path");
+      // }
+      path = path2;
+      print("path from waypoint $path");
+    }catch(e){
+      print("inside exception $e");
+      List<int> path2 = await findPath(
+          numRows,
+          numCols,
+          building.nonWalkable[bid]![floor]!,
+          sourceIndex,
+          destinationIndex,
+      );
+      path2 = getFinalOptimizedPath(path2, building.nonWalkable[bid]![floor]!, numCols, sourceX, sourceY, destinationX, destinationY);
+      path = path2;
+      print("path from A* $path");
+    }
+    // // List<List<int>> path3 = await graph.bfs2(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
+    // print("path $path");
 
 
 
@@ -3210,15 +3236,14 @@ class _NavigationState extends State<Navigation> {
     //   path.add((element[1] * numCols)+element[0]);
     // });
 
-    List<int> path = await findBestPathAmongstBoth(
-        numRows,
-        numCols,
-        building.nonWalkable[bid]![floor]!,
-        sourceIndex,
-        destinationIndex,
-        building,
-        floor,
-        bid ?? "");
+
+    // List<int> path = await findPath(
+    //   numRows,
+    //   numCols,
+    //   building.nonWalkable[bid]![floor]!,
+    //   sourceIndex,
+    //   destinationIndex,
+    // );
 
 
 
@@ -3348,18 +3373,17 @@ class _NavigationState extends State<Navigation> {
 
 
     for (var node in path) {
-      if (!building.nonWalkable[bid]![floor]!.contains(node)) {
-        int row = (node%numCols); //divide by floor length
-        int col = (node~/numCols); //divide by floor length
-        if (bid != null) {
-          List<double> value =
-              tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+      int row = (node%numCols); //divide by floor length
+      int col = (node~/numCols); //divide by floor length
+      print("path4 $node : [$row,$col]");
+      if (bid != null) {
+        List<double> value =
+        tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
-          coordinates.add(LatLng(value[0], value[1]));
-        } else {
-          List<double> value = tools.localtoglobal(row, col);
-          coordinates.add(LatLng(value[0], value[1]));
-        }
+        coordinates.add(LatLng(value[0], value[1]));
+      } else {
+        List<double> value = tools.localtoglobal(row, col);
+        coordinates.add(LatLng(value[0], value[1]));
       }
     }
 
@@ -4299,63 +4323,69 @@ class _NavigationState extends State<Navigation> {
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
-    //implement the turn functionality.
-    if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
-      int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+    try{
+      //implement the turn functionality.
+      if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
+        int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
-      if (MotionModel.reached(user, col) == false) {
-        List<int> a = [user.showcoordX, user.showcoordY];
-        List<int> tval = tools.eightcelltransition(user.theta);
-        //print(tval);
-        List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
+        if (MotionModel.reached(user, col) == false) {
+          List<int> a = [user.showcoordX, user.showcoordY];
+          List<int> tval = tools.eightcelltransition(user.theta);
+          //print(tval);
+          List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
-        int index =
-            user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+          int index =
+          user.path.indexOf((user.showcoordY * col) + user.showcoordX);
 
-        int node = user.path[index + 1];
+          int node = user.path[index + 1];
 
-        List<int> c = [node % col, node ~/ col];
-        int val = tools.calculateAngleSecond(a, b, c).toInt();
-        //print("val $val");
+          List<int> c = [node % col, node ~/ col];
+          int val = tools.calculateAngleSecond(a, b, c).toInt();
+          //print("val $val");
 
-        // print("user corrds");
-        // print("${user.showcoordX}+" "+ ${user.showcoordY}");
+          // print("user corrds");
+          // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
-        // print("pointss matchedddd ${getPoints.contains(
-        //     [user.showcoordX, user.showcoordY])}");
-        for (int i = 0; i < getPoints.length; i++) {
-          // print("---length  = ${getPoints.length}");
-          // print("--- point  = ${getPoints[i]}");
-          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          // print("--- val  = $val");
-          // print("--- isPDRStop  = $isPdrStop");
+          // print("pointss matchedddd ${getPoints.contains(
+          //     [user.showcoordX, user.showcoordY])}");
+          for (int i = 0; i < getPoints.length; i++) {
+            // print("---length  = ${getPoints.length}");
+            // print("--- point  = ${getPoints[i]}");
+            // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+            // print("--- val  = $val");
+            // print("--- isPDRStop  = $isPdrStop");
 
-          //print("turn corrds");
+            //print("turn corrds");
 
-          //print("${getPoints[i][0]}, ${getPoints[i][1]}");
-          if (isPdrStop && val == 0) {
-            //print("points unmatchedddd");
+            //print("${getPoints[i][0]}, ${getPoints[i][1]}");
+            if (isPdrStop && val == 0) {
+              //print("points unmatchedddd");
 
-            Future.delayed(Duration(milliseconds: 1800))
-                .then((value) => {StartPDR()});
+              Future.delayed(Duration(milliseconds: 1800))
+                  .then((value) => {StartPDR()});
 
-            setState(() {
-              isPdrStop = false;
-            });
+              setState(() {
+                isPdrStop = false;
+              });
 
-            break;
-          }
-          if (getPoints[i][0] == user.showcoordX &&
-              getPoints[i][1] == user.showcoordY) {
-            //print("points matchedddddddd");
+              break;
+            }
+            if (getPoints[i][0] == user.showcoordX &&
+                getPoints[i][1] == user.showcoordY) {
+              //print("points matchedddddddd");
 
-            StopPDR();
-            getPoints.removeAt(i);
-            break;
+              StopPDR();
+              getPoints.removeAt(i);
+              break;
+            }
           }
         }
       }
+    }catch(e){
+
     }
+
+
 
     return Visibility(
         visible: _isnavigationPannelOpen,

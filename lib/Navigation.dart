@@ -183,6 +183,8 @@ class _NavigationState extends State<Navigation> {
   @override
   void initState() {
     super.initState();
+
+    //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
     setPdrThreshold();
@@ -664,10 +666,14 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.buildingID!);
 
       //nearestLandmark compute
-      await building.landmarkdata!.then((value) {
-        nearestLandInfomation = tools.localizefindNearbyLandmark(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-      });
+      try {
+        await building.landmarkdata!.then((value) {
+          nearestLandInfomation = tools.localizefindNearbyLandmark(
+              apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        });
+      }catch(e){
+        
+      }
       setState(() {
         buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
         buildingAllApi.selectedBuildingID = apibeaconmap[nearestBeacon]!.buildingID!;

@@ -2,6 +2,7 @@ import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 import 'Cell.dart';
 import 'navigationTools.dart';
@@ -131,6 +132,8 @@ class UserState{
   }
 
   Future<void> moveOneStep()async{
+    //wsocket.message["userPosition"]["X"]=coordX;
+
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;

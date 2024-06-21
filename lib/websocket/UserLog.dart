@@ -8,42 +8,42 @@ class wsocket{
     'transports': ['websocket'],
     'autoConnect': false,
   });
-
+//message ["userId"]=123456;
   static Map message = {
-    "userId": "665d551e1ae7caff923f053b",
+    "userId": null,
     "deviceInfo": {
       "sensors": {
-        "BLE": true,
-        "location": true,
-        "activity": true,
-        "compass": true
+        "BLE": null,
+        "location": null,
+        "activity": null,
+        "compass": null
       },
       "permissions": {
-        "BLE": true,
-        "location": true,
-        "activity": true,
-        "compass": true
+        "BLE": null,
+        "location": null,
+        "activity": null,
+        "compass": null
       },
-      "deviceManufacturer": "Google"
+      "deviceManufacturer": null
     },
     "AppInitialization": {
-      "BID": "65d887a5db333f89457145f6",
-      "buildingName": "Research Park main",
+      "BID": null,
+      "buildingName": null,
       "bleScanResults": {
-        "IW122": -65,
-        "IW123": -89
+        "IW122": null,
+        "IW123": null
       },
-      "localizedOn": "IW111"
+      "localizedOn": null
     },
     "userPosition": {
-      "X": 50,
-      "Y": 90,
-      "floor": 1
+      "X": null,
+      "Y": null,
+      "floor": null
     },
     "path": {
-      "source": "Main",
-      "destination": "iway",
-      "didPathForm": true
+      "source":null,
+      "destination": null,
+      "didPathForm": null
     }
   };
 

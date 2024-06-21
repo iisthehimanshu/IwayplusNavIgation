@@ -17,7 +17,7 @@ class Building{
   //Map<int,List<poly.Nodes>> wayPoints = {};
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
-  Future<land>? landmarkdata = null;
+    Future<land>? landmarkdata = null;
   List<beacon>? beacondata = null;
   String? selectedLandmarkID = null;
   Map<String,patchDataModel> patchData = Map();

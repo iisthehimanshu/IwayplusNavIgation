@@ -185,6 +185,9 @@ class _NavigationState extends State<Navigation> {
     super.initState();
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
+    _messageTimer=Timer.periodic(Duration(seconds: 5), (timer){
+      wsocket.sendmessg();
+    });
     setPdrThreshold();
 
     building.floor.putIfAbsent("", () => 0);
@@ -316,6 +319,7 @@ class _NavigationState extends State<Navigation> {
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
+      wsocket.message["deviceInfo"]["deviceManufacturer"]=manufacturer.toString();
       if (manufacturer.toLowerCase().contains("samsung")) {
         print("manufacture $manufacturer $step_threshold");
         step_threshold = 0.12;
@@ -382,7 +386,11 @@ class _NavigationState extends State<Navigation> {
   }
 
   void handleCompassEvents() {
+    
+
     compassSubscription = FlutterCompass.events!.listen((event) {
+      wsocket.message["deviceInfo"]["permissions"]["compass"]=true;
+      wsocket.message["deviceInfo"]["sensors"]["compass"]=true;
       double? compassHeading = event.heading!;
       setState(() {
         user.theta = compassHeading!;
@@ -404,7 +412,11 @@ class _NavigationState extends State<Navigation> {
                 compassHeading! - mapbearing, markers[user.Bid]![0]);
         }
       });
+    },onError: (error){
+      wsocket.message["deviceInfo"]["permissions"]["compass"]=false;
+      wsocket.message["deviceInfo"]["sensors"]["compass"]=false;
     });
+
   }
 
   void showToast(String mssg) {
@@ -479,10 +491,14 @@ class _NavigationState extends State<Navigation> {
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
+
     pdr.add(accelerometerEventStream().listen((AccelerometerEvent event) {
+
       if (pdr == null) {
         return; // Exit the event listener if subscription is canceled
       }
+      wsocket.message["deviceInfo"]["permissions"]["activity"]=true;
+      wsocket.message["deviceInfo"]["sensors"]["activity"]=true;
       // Apply low-pass filter
       filteredX = alpha * filteredX + (1 - alpha) * event.x;
       filteredY = alpha * filteredY + (1 - alpha) * event.y;
@@ -525,7 +541,10 @@ class _NavigationState extends State<Navigation> {
           lastValleyTime = DateTime.now().millisecondsSinceEpoch;
         });
       }
-    }));
+    },onError: (error) {
+      wsocket.message["deviceInfo"]["permissions"]["activity"]=false;
+     wsocket.message["deviceInfo"]["sensors"]["activity"]=false;
+    },));
   }
 
   Future<void> paintMarker(LatLng Location) async {
@@ -649,6 +668,8 @@ class _NavigationState extends State<Navigation> {
 
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
+
+    wsocket.message["AppInitialization"]["localizedOn"]=nearestBeacon;
     print("nearestBeacon : $nearestBeacon");
 
     final Uint8List userloc =
@@ -664,10 +685,15 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.buildingID!);
 
       //nearestLandmark compute
-      await building.landmarkdata!.then((value) {
-        nearestLandInfomation = tools.localizefindNearbyLandmark(
-            apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-      });
+      try{
+        await building.landmarkdata!.then((value) {
+          nearestLandInfomation = tools.localizefindNearbyLandmark(
+              apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        });
+      }catch(e){
+        print(Exception(e));
+      }
+
       setState(() {
         buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
         buildingAllApi.selectedBuildingID = apibeaconmap[nearestBeacon]!.buildingID!;
@@ -934,9 +960,13 @@ class _NavigationState extends State<Navigation> {
         await Permission.bluetoothScan.request();
     print("permissionStatus    ----   ${permissionStatus}");
     if (permissionStatus.isGranted) {
+      wsocket.message["deviceInfo"]["permissions"]["BLE"]=true;
+      wsocket.message["deviceInfo"]["sensors"]["BLE"]=true;
       print("Bluetooth permission is granted");
       // Permission granted, you can now perform Bluetooth operations
     } else {
+      wsocket.message["deviceInfo"]["permissions"]["BLE"]=false;
+      wsocket.message["deviceInfo"]["sensors"]["BLE"]=false;
       // Permission denied, handle accordingly
     }
   }
@@ -944,8 +974,13 @@ class _NavigationState extends State<Navigation> {
   Future<void> requestLocationPermission() async {
     final status = await Permission.locationWhenInUse.request();
     if (status.isGranted) {
+      wsocket.message["deviceInfo"]["permissions"]["location"]=true;
+      wsocket.message["deviceInfo"]["sensors"]["location"]=true;
       print('location permission granted');
-    } else {}
+    } else {
+      wsocket.message["deviceInfo"]["permissions"]["location"]=false;
+      wsocket.message["deviceInfo"]["sensors"]["location"]=false;
+    }
   }
 
   List<FilterInfoModel> landmarkListForFilter = [];
@@ -1052,9 +1087,15 @@ class _NavigationState extends State<Navigation> {
       print(isBlueToothLoading);
     });
 
-    await waypointapi().fetchwaypoint().then((value){
-      Building.waypoint = value;
-    });
+    try{
+      await waypointapi().fetchwaypoint().then((value){
+        Building.waypoint = value;
+      });
+    }catch(e){
+      print("wayPoint API ERROR");
+    }
+
+
 
     await beaconapi().fetchBeaconData().then((value) {
       print("beacondatacheck");
@@ -1109,13 +1150,18 @@ class _NavigationState extends State<Navigation> {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
-    await outBuilding().outbuilding(IDS).then((out) async {
-      if (out != null) {
-        buildingAllApi.outdoorID = out!.data!.campusId!;
-        buildingAllApi.allBuildingID[out!.data!.campusId!] =
-            geo.LatLng(0.0, 0.0);
-      }
-    });
+    try{
+      await outBuilding().outbuilding(IDS).then((out) async {
+        if (out != null) {
+          buildingAllApi.outdoorID = out!.data!.campusId!;
+          buildingAllApi.allBuildingID[out!.data!.campusId!] =
+              geo.LatLng(0.0, 0.0);
+        }
+      });
+    }catch(e){
+      print("Out Building API Error");
+    }
+
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       IDS.add(key);
@@ -2402,7 +2448,10 @@ class _NavigationState extends State<Navigation> {
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
-    clearPathVariables();
+    // if(user.isnavigating==false){
+    //   clearPathVariables();
+    // }
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -3198,7 +3247,7 @@ class _NavigationState extends State<Navigation> {
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-    
+
 
     print("numcol $numCols");
 
@@ -3256,13 +3305,21 @@ class _NavigationState extends State<Navigation> {
 
 
 
+if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
+  wsocket.message["path"]["didPathForm"]=false;
+}else{
+  wsocket.message["path"]["didPathForm"]=true;
+}
+
     List<int> turns = tools.getTurnpoints(path, numCols);
+    print("turnssss ${turns}");
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
       int y = turns[i] ~/ numCols;
       getPoints.add([x, y]);
     }
     getPoints.add([destinationX, destinationY]);
+    print("getPointss: ${getPoints}");
     List<Landmarks> nearbyPathLandmarks = [];
     building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
@@ -3378,9 +3435,6 @@ class _NavigationState extends State<Navigation> {
     }
 
     List<LatLng> coordinates = [];
-
-
-
     for (var node in path) {
       int row = (node%numCols); //divide by floor length
       int col = (node~/numCols); //divide by floor length
@@ -3654,7 +3708,9 @@ class _NavigationState extends State<Navigation> {
                           PathState.destinationPolyID = "";
                           singleroute.clear();
                           _isBuildingPannelOpen = true;
-                          clearPathVariables();
+                          if(user.isnavigating==false){
+                            clearPathVariables();
+                          }
                           setState(() {
                             Marker? temp = selectedroomMarker[
                                     buildingAllApi.getStoredString()]
@@ -3760,7 +3816,9 @@ class _NavigationState extends State<Navigation> {
                             PathState.path.clear();
                             pathMarkers.clear();
                             PathState.directions.clear();
-                            clearPathVariables();
+                            if(user.isnavigating==false){
+                              clearPathVariables();
+                            }
                             building.landmarkdata!.then((value) {
                               calculateroute(value.landmarksMap!);
                             });
@@ -3895,7 +3953,9 @@ class _NavigationState extends State<Navigation> {
                                                 singleroute.clear();
                                                 PathState.directions = [];
                                                 interBuildingPath.clear();
-                                                clearPathVariables();
+                                                if(user.isnavigating==false){
+                                                  clearPathVariables();
+                                                }
                                                 fitPolygonInScreen(patch.first);
                                               },
                                               icon: Semantics(
@@ -3948,6 +4008,11 @@ class _NavigationState extends State<Navigation> {
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
+
+                                              wsocket.message["path"]["source"]=PathState.sourceName;
+                                              wsocket.message["path"]["source"]=PathState.destinationName;
+
+
                                               buildingAllApi.selectedID = PathState.sourceBid;
                                               buildingAllApi.selectedBuildingID = PathState.sourceBid;
                                               user.Bid = PathState.sourceBid;
@@ -4291,6 +4356,7 @@ class _NavigationState extends State<Navigation> {
   bool isLift = false;
   final ScrollController _scrollController = ScrollController();
   Timer? _scrollTimer;
+  Timer? _messageTimer;
 
   void _startScrolling() {
     _scrollTimer = Timer.periodic(Duration(seconds: 5), (timer) {
@@ -4355,33 +4421,38 @@ class _NavigationState extends State<Navigation> {
           // print("user corrds");
           // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
-          // print("pointss matchedddd ${getPoints.contains(
-          //     [user.showcoordX, user.showcoordY])}");
-          for (int i = 0; i < getPoints.length; i++) {
-            // print("---length  = ${getPoints.length}");
-            // print("--- point  = ${getPoints[i]}");
-            // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-            // print("--- val  = $val");
-            // print("--- isPDRStop  = $isPdrStop");
+
+        print("pointss matchedddd ${getPoints}");
+        for (int i = 0; i < getPoints.length; i++) {
+          print("---length  = ${getPoints.length}");
+          print("--- point  = ${getPoints[i]}");
+          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          print("--- val  = $val");
+          print("--- isPDRStop  = $isPdrStop");
+
 
             //print("turn corrds");
 
-            //print("${getPoints[i][0]}, ${getPoints[i][1]}");
-            if (isPdrStop && val == 0) {
-              //print("points unmatchedddd");
 
-              Future.delayed(Duration(milliseconds: 1800))
-                  .then((value) => {StartPDR()});
+          //print("${getPoints[i][0]}, ${getPoints[i][1]}");
+          if (isPdrStop && val == 0) {
+            print("points unmatchedddd");
+
+            Future.delayed(Duration(milliseconds: 1500))
+                .then((value) => {StartPDR()});
+
 
               setState(() {
                 isPdrStop = false;
               });
 
-              break;
-            }
-            if (getPoints[i][0] == user.showcoordX &&
-                getPoints[i][1] == user.showcoordY) {
-              //print("points matchedddddddd");
+
+            break;
+          }
+          if (getPoints[i][0] == user.showcoordX &&
+              getPoints[i][1] == user.showcoordY) {
+            print("points matchedddddddd");
+
 
               StopPDR();
               getPoints.removeAt(i);
@@ -4504,6 +4575,7 @@ class _NavigationState extends State<Navigation> {
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  clearPathVariables();
                                   _isnavigationPannelOpen = false;
                                   user.reset();
                                   PathState = pathState.withValues(
@@ -4628,7 +4700,10 @@ class _NavigationState extends State<Navigation> {
                                     setState(() {
                                       rerouting = true;
                                     });
-                                    clearPathVariables();
+                                    if(user.isnavigating==false){
+                                      clearPathVariables();
+                                    }
+
                                     PathState.clear();
                                     PathState.sourceX = user.coordX;
                                     PathState.sourceY = user.coordY;
@@ -6591,8 +6666,9 @@ class _NavigationState extends State<Navigation> {
     }
     compassSubscription.cancel();
     flutterTts.cancelHandler;
-    _timer.cancel();
+    _timer?.cancel();
     btadapter.stopScanning();
+    _messageTimer?.cancel();
     super.dispose();
   }
 

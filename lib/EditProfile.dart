@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
-
+import 'package:quickalert/quickalert.dart';
 import 'ChangePassword.dart';
 
 
@@ -34,6 +34,8 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> getUserIDFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
+    print("signInBox.values");
+    print(signInBox.values);
 
     setState(() {
       userId = signInBox.get("userId");
@@ -44,6 +46,7 @@ class _EditProfileState extends State<EditProfile> {
     if (userId != null) {
       getUserDetails();
     } else {
+      print("User id is null");
     }
   }
   Future<void> getUserDetails() async {
@@ -65,8 +68,11 @@ class _EditProfileState extends State<EditProfile> {
       if (response.statusCode == 200) {
 
         Map<String, dynamic> responseBody = json.decode(response.body);
-        _emailController.text = responseBody["email"];
+        _emailController.text = responseBody["username"];
         originalName = responseBody["name"];
+
+        print("originalName");
+        print(originalName);
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
@@ -138,8 +144,49 @@ class _EditProfileState extends State<EditProfile> {
 
 
 
-  Future<void> updateUser() async {
+  // Future<void> updateUser() async {
+  //   final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+  //
+  //   try {
+  //     final response = await http.put(
+  //       Uri.parse(updateUrl),
+  //       body: json.encode({
+  //         "email": _emailController.text,
+  //         "name": _nameController.text,
+  //       }),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'x-access-token': '$accessToken',
+  //       },
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       // Handle successful update
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Name updated successfully')),
+  //       );
+  //       Navigator.pop(context);
+  //     } else if (response.statusCode == 403) {
+  //       // Access token expired, refresh token and retry the call
+  //       await refreshTokenAndRetry(updateUrl);
+  //     } else {
+  //       // Handle other status codes
+  //     }
+  //   } catch (e) {
+  //     // Handle errors
+  //   }
+  // }
+  Future<void> updateUser(BuildContext context) async {
     final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+
+    // Show a loading indicator
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.loading,
+      title: 'Updating',
+      text: 'Please wait...',
+      barrierDismissible: false,
+    );
 
     try {
       final response = await http.put(
@@ -154,19 +201,44 @@ class _EditProfileState extends State<EditProfile> {
         },
       );
 
+      Navigator.of(context).pop(); // Close the loading indicator
+
       if (response.statusCode == 200) {
-        // Handle successful update
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Name updated successfully')),
+        // Show success alert
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Success',
+          text: 'Name updated successfully',
+          confirmBtnText: 'OK',
+          onConfirmBtnTap: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
         );
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
         await refreshTokenAndRetry(updateUrl);
       } else {
         // Handle other status codes
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Error',
+          text: 'Failed to update name. Please try again.',
+          confirmBtnText: 'OK',
+        );
       }
     } catch (e) {
       // Handle errors
+      Navigator.of(context).pop(); // Close the loading indicator if an error occurs
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Error',
+        text: 'An error occurred while updating. Please try again.',
+        confirmBtnText: 'OK',
+      );
     }
   }
 
@@ -346,7 +418,7 @@ class _EditProfileState extends State<EditProfile> {
                       onPressed: () {
                         if (_nameController.text != originalName) {
                           // Call updateUser only if the name has changed
-                          updateUser();
+                          updateUser(context);
                         }
                       },
                       style: OutlinedButton.styleFrom(

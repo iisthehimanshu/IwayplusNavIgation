@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
-
 class SignUpAPI{
 
   final String baseUrl = "https://dev.iwayplus.in/auth/signup";
@@ -12,7 +10,7 @@ class SignUpAPI{
   Future<bool> signUP(String username,String name, String password,String OTP) async {
     final Map<String, dynamic> data = {
       "username": username,
-      "Name": name,
+      "name": name,
       "password": password,
       "otp": OTP
     };
@@ -28,7 +26,7 @@ class SignUpAPI{
     if (response.statusCode == 200) {
       var responseData = json.decode(response.body);
       if (responseData['status']) {
-       return true;
+        return true;
       } else {
         print("SignUpAPI--response.statusCode ${responseData['status']} ");
         HelperClass.showToast(responseData["message"]);

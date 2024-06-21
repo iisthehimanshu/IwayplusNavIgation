@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,17 +8,20 @@ import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/APIS/SignInAPI.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
-import 'package:iwaymaps/LOGIN%20SIGNUP/SignUp.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
+import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import 'ForgetPassword.dart';
+import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
+import 'SignUp.dart';
 
 class SignIn extends StatefulWidget {
-  const SignIn({super.key});
+  final String? emailOrPhoneNumber;
+  final String? password;
+
+  const SignIn({super.key, this.emailOrPhoneNumber, this.password});
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -34,7 +38,6 @@ class _SignInState extends State<SignIn> {
   String passvis = 'assets/LoginScreen_PasswordEye.svg';
   bool obsecure = true;
 
-
   Color button1 = new Color(0xff777777);
   Color text1 = new Color(0xff777777);
 
@@ -45,21 +48,40 @@ class _SignInState extends State<SignIn> {
   bool loginclickable = false;
   Color buttonBGColor = new Color(0xff8D8C8C);
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the fields with provided parameters if available
+    if (widget.emailOrPhoneNumber != null) {
+      mailEditingController.text = widget.emailOrPhoneNumber!;
+      emailFieldListner();
+    }
+    if (widget.password != null) {
+      passEditingController.text = widget.password!;
+      passwordFieldListner();
+    }
 
+    // Automatically sign in if both fields are populated
+    if (widget.emailOrPhoneNumber != null && widget.password != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _signIn();
+      });
+    }
+  }
 
-  void emailFieldListner(){
-    if(mailEditingController.text.length>0){
-      if(passEditingController.text.length>0){
+  void emailFieldListner() {
+    if (mailEditingController.text.length > 0) {
+      if (passEditingController.text.length > 0) {
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
         });
       }
       setState(() {
-        outlineheaderColor = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColor = Color(0xff24b9b0);// Change the button color to green
+        outlineheaderColor = Color(0xff24b9b0); // Change the button color to green
+        outlineTextColor = Color(0xff24b9b0); // Change the button color to green
       });
-    }else{
+    } else {
       setState(() {
         outlineheaderColor = Color(0xff49454f);
         outlineTextColor = Color(0xff49454f);
@@ -67,19 +89,20 @@ class _SignInState extends State<SignIn> {
       });
     }
   }
-  void passwordFieldListner(){
-    if(passEditingController.text.length>0){
-      if(mailEditingController.text.length>0){
+
+  void passwordFieldListner() {
+    if (passEditingController.text.length > 0) {
+      if (mailEditingController.text.length > 0) {
         setState(() {
           buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
         });
       }
       setState(() {
-        outlineheaderColorForPass = Color(0xff24b9b0);// Change the button color to green
-        outlineTextColorForPass = Color(0xff24b9b0);// Change the button color to green
+        outlineheaderColorForPass = Color(0xff24b9b0); // Change the button color to green
+        outlineTextColorForPass = Color(0xff24b9b0); // Change the button color to green
       });
-    }else{
+    } else {
       setState(() {
         outlineheaderColorForPass = Color(0xff49454f);
         outlineTextColorForPass = Color(0xff49454f);
@@ -87,49 +110,58 @@ class _SignInState extends State<SignIn> {
       });
     }
   }
-  void signINButtonControler(){
+
+  void signINButtonControler() {
     setState(() {
       buttonBGColor = Color(0xff24b9b0);
     });
   }
 
-  // signInWithGoogle() async{
-  //   GoogleSignInAccount? googlUser = await GoogleSignIn().signIn();
-  //   GoogleSignInAuthentication? googleAuth = await googlUser?.authentication;
-  //
-  //   AuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth?.accessToken,
-  //       idToken: googleAuth?.idToken
-  //   );
-  //   UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-  //   print('Google user name ${userCredential.user?.displayName}');
-  //
-  //   if(userCredential.user != null){
-  //     Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
-  //   }
-  // }
-
-
   void showpassword() {
     setState(() {
       obsecure = !obsecure;
-      obsecure
-          ? passvis = "assets/passnotvis.svg"
-          : passvis = "assets/passvis.svg";
+      obsecure ? passvis = "assets/LoginScreen_PasswordEye.svg" : passvis = "assets/trailing-icon.svg";
     });
   }
 
-  @override
-  void initstate() {
-    super.initState();
-
+  Future<void> _signIn() async {
+    if (mailEditingController.text.isEmpty && passEditingController.text.isEmpty) {
+      return HelperClass.showToast("Enter details");
+    }
+    String phoneNumberOEmail = '';
+    if (containsOnlyNumeric(mailEditingController.text)) {
+      phoneNumberOEmail += CountryCodeSelector().selectedCountryCode + mailEditingController.text;
+    } else {
+      phoneNumberOEmail += mailEditingController.text;
+    }
+    print("Signin api info send");
+    print(phoneNumberOEmail);
+    print(passEditingController.text);
+    SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
+    print("signInResponse.accessToken");
+    print(signInResponse?.refreshToken);
+    print(signInResponse?.accessToken);
+    if (signInResponse == null) {
+      setState(() {
+        passincorrect = true;
+      });
+      HelperClass.showToast("Invalid Username or Password");
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainScreen(initialIndex: 0),
+        ),
+            (route) => false,
+      );
+      HelperClass.showToast("Sign in successful");
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +171,6 @@ class _SignInState extends State<SignIn> {
     return UpgradeAlert(
       upgrader: Upgrader(
         minAppVersion: '',
-
       ),
       child: Scaffold(
           appBar: PreferredSize(
@@ -153,9 +184,7 @@ class _SignInState extends State<SignIn> {
             child: SingleChildScrollView(
               physics: ScrollPhysics(),
               child: Container(
-                height: (orientation == Orientation.portrait)
-                    ? screenHeight-37
-                    : screenWidth,
+                height: (orientation == Orientation.portrait) ? screenHeight - 37 : screenWidth,
                 decoration: BoxDecoration(
                   color: Color(0xffffffff),
                 ),
@@ -170,154 +199,154 @@ class _SignInState extends State<SignIn> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-
                                   Container(
-                                      margin: EdgeInsets.fromLTRB(16, 60, 0, 0),
-                                      child: Text(
-                                        "Sign in",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xff000000),
-                                          height: 30/24,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      )
+                                    margin: EdgeInsets.fromLTRB(16, 60, 0, 0),
+                                    child: Text(
+                                      "Sign in",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xff000000),
+                                        height: 30 / 24,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                                   Container(
-                                      child: Stack(
-                                          children: [
-                                            Container(
-                                              //color: Colors.amberAccent,
-                                                margin: EdgeInsets.only(top: 20,left: 16,right: 16),
-                                                height: 58,
-                                                child: Container(
-                                                    padding: EdgeInsets.only(left: 12),
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                          color: passincorrect
-                                                              ? Colors.redAccent
-                                                              : outlineheaderColorForPass,width: 2),
-                                                      color: Color(0xfffffff),
-                                                      borderRadius: BorderRadius.circular(4),
-                                                    ),
-                                                    child: Row(
-                                                      children: [
-                                                        containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
-                                                        Expanded(
-                                                          child: Semantics(
-                                                            label: "Enter email or phone number",
-                                                            child: ExcludeSemantics(
-                                                              child: TextFormField(
-                                                                autofillHints: [AutofillHints.username],
-                                                                focusNode: _focusNode1,
-                                                                controller: mailEditingController,
-                                                                decoration: InputDecoration(
-                                                                    hintText: 'Email or mobile number',
-                                                                    hintStyle: TextStyle(
-                                                                      fontFamily: 'Roboto',
-                                                                      fontSize: 14,
-                                                                      fontWeight: FontWeight.w400,
-                                                                      color: Color(0xffbdbdbd),
-                                                                    ),
-                                                                    border: InputBorder.none
-                                                                  //contentPadding: EdgeInsets.symmetric(vertical: 8)
-                                                                ),
-                                                                onChanged: (value) {
-                                                                  emailFieldListner();
-                                                                },
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ))
-                                            ),
-                                            ExcludeSemantics(
-                                              child: Container(
-                                                color: Colors.white,
-                                                padding: EdgeInsets.fromLTRB(3, 3, 3, 3),
-                                                margin: EdgeInsets.fromLTRB(26, 7, 0, 0),
-                                                child: Text(
-                                                  'Email or mobile number',
-                                                  textAlign: TextAlign.left,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: passincorrect
-                                                        ? Colors.redAccent
-                                                        : outlineTextColorForPass,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          ])),
-                                  Container(
-                                      child: Stack(children: [
+                                    child: Stack(
+                                      children: [
                                         Container(
-                                          margin: EdgeInsets.only(top: 20,left: 16,right: 16),
+                                          margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                           height: 58,
                                           child: Container(
-                                              padding: EdgeInsets.only(left: 12),
-                                              width: double.infinity,
-                                              height: 48,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: passincorrect
-                                                        ? Colors.redAccent
-                                                        : outlineheaderColorForPass,width: 2),
-                                                color: Color(0xfffffff),
-                                                borderRadius: BorderRadius.circular(4),
+                                            padding: EdgeInsets.only(left: 12),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: passincorrect ? Colors.redAccent : outlineheaderColorForPass,
+                                                width: 2,
                                               ),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Semantics(
-                                                      label:"Enter password",
-                                                      child: ExcludeSemantics(
-                                                        child: TextFormField(
-                                                          autofillHints: [AutofillHints.password],
-                                                          focusNode: _focusNode1_1,
-                                                          controller: passEditingController,
-                                                          obscureText: obsecure,
-                                                          decoration: InputDecoration(
-                                                              hintText: 'Password',
-                                                              hintStyle: TextStyle(
-                                                                fontFamily: 'Roboto',
-                                                                fontSize: 14,
-                                                                fontWeight: FontWeight.w400,
-                                                                color: Color(0xffbdbdbd),
-                                                              ),
-                                                              border: InputBorder.none
-                                                            //contentPadding: EdgeInsets.symmetric(vertical: 8)
+                                              color: Color(0xfffffff),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                containsOnlyNumeric(mailEditingController.text)
+                                                    ? CountryCodeSelector()
+                                                    : Text(""),
+                                                Expanded(
+                                                  child: Semantics(
+                                                    label: "Enter email or phone number",
+                                                    child: ExcludeSemantics(
+                                                      child: TextFormField(
+                                                        autofillHints: [AutofillHints.username],
+                                                        focusNode: _focusNode1,
+                                                        controller: mailEditingController,
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Email or mobile number',
+                                                          hintStyle: TextStyle(
+                                                            fontFamily: 'Roboto',
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xffbdbdbd),
                                                           ),
-                                                          onChanged: (value) {
-                                                            passwordFieldListner();
-                                                            setState(() {
-                                                              passincorrect = false;
-                                                            });
-                                                          },
+                                                          border: InputBorder.none,
                                                         ),
+                                                        onChanged: (value) {
+                                                          emailFieldListner();
+                                                        },
                                                       ),
                                                     ),
                                                   ),
-                                                  Semantics(
-                                                    label:'View Password',
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        showpassword();
-                                                      },
-                                                      child: Container(
-                                                        margin: EdgeInsets.only(right: 12),
-                                                        child: SvgPicture.asset(passvis),
-                                                        //SvgPicture.asset("assets/LoginScreen_PasswordEye.svg"),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        ExcludeSemantics(
+                                          child: Container(
+                                            color: Colors.white,
+                                            padding: EdgeInsets.fromLTRB(3, 3, 3, 3),
+                                            margin: EdgeInsets.fromLTRB(26, 7, 0, 0),
+                                            child: Text(
+                                              'Email or mobile number',
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                fontFamily: 'Roboto',
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: passincorrect ? Colors.redAccent : outlineTextColorForPass,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(top: 20, left: 16, right: 16),
+                                          height: 58,
+                                          child: Container(
+                                            padding: EdgeInsets.only(left: 12),
+                                            width: double.infinity,
+                                            height: 48,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: passincorrect ? Colors.redAccent : outlineheaderColorForPass,
+                                                width: 2,
+                                              ),
+                                              color: Color(0xfffffff),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Semantics(
+                                                    label: "Enter password",
+                                                    child: ExcludeSemantics(
+                                                      child: TextFormField(
+                                                        autofillHints: [AutofillHints.password],
+                                                        focusNode: _focusNode1_1,
+                                                        controller: passEditingController,
+                                                        obscureText: obsecure,
+                                                        decoration: InputDecoration(
+                                                          hintText: 'Password',
+                                                          hintStyle: TextStyle(
+                                                            fontFamily: 'Roboto',
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xffbdbdbd),
+                                                          ),
+                                                          border: InputBorder.none,
+                                                        ),
+                                                        onChanged: (value) {
+                                                          passwordFieldListner();
+                                                          setState(() {
+                                                            passincorrect = false;
+                                                          });
+                                                        },
                                                       ),
                                                     ),
                                                   ),
-                                                ],
-                                              )),
+                                                ),
+                                                Semantics(
+                                                  label: 'View Password',
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      showpassword();
+                                                    },
+                                                    child: Container(
+                                                      margin: EdgeInsets.only(right: 12),
+                                                      child: SvgPicture.asset(passvis),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                         ExcludeSemantics(
                                           child: Container(
@@ -331,125 +360,89 @@ class _SignInState extends State<SignIn> {
                                                 fontFamily: 'Roboto',
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
-                                                color: passincorrect
-                                                    ? Colors.redAccent
-                                                    : outlineTextColorForPass,
+                                                color: passincorrect ? Colors.redAccent : outlineTextColorForPass,
                                               ),
                                             ),
                                           ),
-                                        )
-                                      ])),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   Row(
                                     children: [
                                       passincorrect
                                           ? Container(
-                                          color: Colors.white,
-                                          margin: EdgeInsets.fromLTRB(26, 0, 0, 0),
+                                        color: Colors.white,
+                                        margin: EdgeInsets.fromLTRB(26, 0, 0, 0),
+                                        child: Text(
+                                          "Incorrect Details",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.red,
+                                            height: 20 / 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      )
+                                          : Container(),
+                                      Spacer(),
+                                      Container(
+                                        color: Colors.white,
+                                        margin: EdgeInsets.fromLTRB(0, 0, 26, 0),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ForgetPassword(),
+                                              ),
+                                            );
+                                          },
                                           child: Text(
-                                            "Incorrect Details",
+                                            "Forgot Password?",
                                             style: const TextStyle(
                                               fontFamily: "Roboto",
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
-                                              color: Colors.red,
+                                              color: Color(0xff24b9b0),
                                               height: 20 / 14,
                                             ),
                                             textAlign: TextAlign.center,
-                                          ))
-                                          : Container(),
-                                      Spacer(),
-                                      Container(
-                                          color: Colors.white,
-                                          margin: EdgeInsets.fromLTRB(0, 0, 26, 0),
-                                          child: TextButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => ForgetPassword(),
-                                                ),
-                                              );
-                                            },
-                                            child: Text(
-                                              "Forgot Password?",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff24b9b0),
-                                                height: 20 / 14,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          )),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   Container(
-                                      margin: EdgeInsets.only(top: 20,right: 16,left: 16),
-                                      child: SizedBox(
-                                          height: 48,
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                    4.0), // Button border radius
-                                              ),
-                                              elevation: 0,
+                                    margin: EdgeInsets.only(top: 20, right: 16, left: 16),
+                                    child: SizedBox(
+                                      height: 48,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Color(0xff777777),
+                                          backgroundColor: buttonBGColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(4.0),
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        onPressed: loginclickable ? _signIn : null,
+                                        child: Center(
+                                          child: Text(
+                                            'Sign in',
+                                            style: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
                                             ),
-                                            // onPressed: loginclickable ? login : null,
-                                            onPressed: () async {
-                                              if(mailEditingController.text.length==0 && passEditingController.text.length==0){
-                                                return HelperClass.showToast("Enter details");
-                                              }
-                                              String phoneNumberOEmail = '';
-                                              if(containsOnlyNumeric(mailEditingController.text)){
-                                                phoneNumberOEmail+=CountryCodeSelector().selectedCountryCode+mailEditingController.text;
-                                              }else{
-                                                phoneNumberOEmail+=mailEditingController.text;
-                                              }
-                                              print("Signin api info send");
-                                              print(phoneNumberOEmail);
-                                              print(passEditingController.text);
-                                              SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
-                                              print("signInResponse.accessToken");
-                                              print(signInResponse?.refreshToken);
-                                              print(signInResponse?.accessToken);
-                                              if(signInResponse == null){
-                                                setState(() {
-                                                  passincorrect = true;
-                                                });
-                                                HelperClass.showToast("Invalid Username or Password");
-                                              }else{
-                                                Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => MainScreen(initialIndex: 0,),
-                                                  ),
-                                                      (route) => false,
-                                                );
-                                                HelperClass.showToast("Sign in successful");
-                                              }
-                                            },
-                                            child: Center(
-                                              child:
-                                              // loginapifetching
-                                              //     ? Center(
-                                              //     child: lot.Lottie.asset(
-                                              //         "assets/loader.json"))
-                                              //     :
-                                              Text(
-                                                'Sign in',
-                                                style: TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Color(0xffffffff),
-                                                ),
-                                              ),
-                                            ),
-                                          ))
-                                  )
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -511,6 +504,7 @@ class _SignInState extends State<SignIn> {
                       //       )),
                       // ),
                       Container(
+                        margin: EdgeInsets.only(top:20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

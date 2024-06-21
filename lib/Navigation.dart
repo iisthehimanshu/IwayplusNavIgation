@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
 import 'package:collection/collection.dart' as pac;
 import 'package:flutter/rendering.dart';
@@ -107,6 +108,7 @@ class MyApp extends StatelessWidget {
 
 class Navigation extends StatefulWidget {
   String directLandID = "";
+  static bool bluetoothGranted = false;
 
   Navigation({this.directLandID = ''});
 
@@ -179,6 +181,7 @@ class _NavigationState extends State<Navigation> {
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork = false;
+
 
   @override
   void initState() {
@@ -431,7 +434,16 @@ class _NavigationState extends State<Navigation> {
     print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
+    await enableBT();
     //  await requestActivityPermission();
+  }
+  Future<void> enableBT() async {
+
+    BluetoothEnable.enableBluetooth.then((value) {
+      print("enableBTResponse");
+      print(value);
+    });
+
   }
 
   bool isPdr = false;
@@ -672,7 +684,7 @@ class _NavigationState extends State<Navigation> {
               apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         });
       }catch(e){
-        
+
       }
       setState(() {
         buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
@@ -937,12 +949,16 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+        await Permission.bluetoothScan .request();
     print("permissionStatus    ----   ${permissionStatus}");
+    print("permissionStatus    ----   ${permissionStatus.isDenied}");
+
     if (permissionStatus.isGranted) {
       print("Bluetooth permission is granted");
+      //widget.bluetoothGranted = true;
       // Permission granted, you can now perform Bluetooth operations
     } else {
+      //bluetoothGranted = false;
       // Permission denied, handle accordingly
     }
   }
@@ -1786,6 +1802,10 @@ class _NavigationState extends State<Navigation> {
           y2 = (y2 / 4).toInt();
 
           diff = [x2 - x1, y2 - y1];
+          print("checkingLift");
+          print(l1.id);
+          print(l2.id);
+
           print("11 ${[x1, y1]}");
           print("22 ${[x2, y2]}");
         }
@@ -3337,6 +3357,8 @@ class _NavigationState extends State<Navigation> {
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(floor),
             building.polyLineData!.polyline!.floors!);
+        print('WilsonCheckingCurrentFloor');
+        print(currFloorLifts);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];

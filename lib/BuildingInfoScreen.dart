@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:developer';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -63,6 +64,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       return "";
     }
   }
+  bool bluetoohEnabled = false;
 
   @override
   void initState() {
@@ -89,6 +91,35 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(dd.length);
   }
   var currentData;
+
+  Future<void> customEnableBT(BuildContext context) async {
+    String dialogTitle = "Hey! Please give me permission to use Bluetooth!";
+    bool displayDialogContent = true;
+    String dialogContent = "This app requires Bluetooth to connect to device.";
+    //or
+    // bool displayDialogContent = false;
+    // String dialogContent = "";
+    String cancelBtnText = "Nope";
+    String acceptBtnText = "Sure";
+    double dialogRadius = 10.0;
+    bool barrierDismissible = true; //
+
+    BluetoothEnable.customBluetoothRequest(
+        context,
+        dialogTitle,
+        displayDialogContent,
+        dialogContent,
+        cancelBtnText,
+        acceptBtnText,
+        dialogRadius,
+        barrierDismissible)
+        .then((value) {
+      print(value);
+    });
+    BluetoothEnable.enableBluetooth.then((value) {
+      print(value);
+    });
+  }
 
 
 
@@ -270,11 +301,19 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
 
                               child: ListTile(
 
-                                onTap: (){
+                                onTap: () async{
                                  // if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) ){
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    // while({
+                                    //
+                                    // }
+                                    // while(!bluetoohEnabled){
+                                    //
+                                    // }
+                                    //customEnableBT(context);
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

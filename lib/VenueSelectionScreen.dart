@@ -195,18 +195,18 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     );
   }
 
-  calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
-    // buildingsPos.clear();
-    // finalDist.clear();
-    for(int i=0;i<buildingsPos.length;i++){
-      int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
-      buildingsPos[i].dist=dist;
-      finalDist.add(dist);
-
-    }
-    // print("finalDist");
-    // print(finalDist);
-  }
+  // calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
+  //   // buildingsPos.clear();
+  //   // finalDist.clear();
+  //   for(int i=0;i<buildingsPos.length;i++){
+  //     int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
+  //     buildingsPos[i].dist=dist;
+  //     finalDist.add(dist);
+  //
+  //   }
+  //   // print("finalDist");
+  //   // print(finalDist);
+  // }
   List<VenueModel> buildingsPos=[];
   List<int> finalDist=[];
 
@@ -411,11 +411,11 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ListView.builder(
                           itemBuilder: (context,index){
 
-                            // var currentData = venueList[index];
+                             var currentData = venueList[index];
 
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
-                            var currentData = buildingsPos[index];
+                            //calcDistanceFromUser(buildingsPos,userLoc!);
+                            //buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            //var currentData = buildingsPos[index];
 
 
 
@@ -448,8 +448,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            //calcDistanceFromUser(buildingsPos,userLoc!);
+                            //buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Academic") {
                               return GestureDetector(
@@ -474,8 +474,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            //calcDistanceFromUser(buildingsPos,userLoc!);
+                            //buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Hospital") {
                               return GestureDetector(
@@ -519,8 +519,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         // ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                            //calcDistanceFromUser(buildingsPos,userLoc!);
+                            //buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Event") {
                               return GestureDetector(

@@ -22,7 +22,7 @@ class waypointapi {
     if(WayPointBox.containsKey(id??buildingAllApi.getStoredString())){
       print("WAYPOINT DATA FROM DATABASE");
       List<dynamic> responseBody = WayPointBox.get(id??buildingAllApi.getStoredString())!.responseBody;
-      List<PathModel> wayPointList = responseBody.map((data) => PathModel.fromJson(data as Map<String, dynamic>)).toList();
+      List<PathModel> wayPointList = responseBody.map((data) => PathModel.fromJson(data as Map<dynamic, dynamic>)).toList();
       print("building ${wayPointList[0].buildingID}");
       return wayPointList;
     }

@@ -136,6 +136,9 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
+    if(name == null && element!.subType!=null && element!.type != "Floor" && element!.subType != "beacons"){
+      name = element!.subType;
+    }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {

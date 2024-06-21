@@ -447,9 +447,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // //print("AAAAAA $a");
-    // //print("B $b");
-    // //print("C $c");
+    print("AAAAAA $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -575,6 +575,10 @@ class tools {
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
+
+    if(user.move == tools.twocelltransitionhorizontal || user.move == tools.twocelltransitionvertical){
+      tval = tools.fourcelltransition(theta);
+    }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
@@ -1085,7 +1089,7 @@ class tools {
   }
 
 
-  static List<int> twocelltransitionvertical(double angle,{int? currPointer, int? totalCells}) {
+  static List<int> twocelltransitionvertical1(double angle,{int? currPointer, int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -1104,16 +1108,52 @@ class tools {
 
     double adjustmentAngle = 360*adjustmentFactor;
 
-    if (angle >= 270 || angle <= 90) {
+    if (angle >= 260 || angle <= 100) {
       return [0, -1];
-    } else if (angle > 90 && angle <= 270) {
+    } else if (angle > 100 && angle <= 153) {
+      return [1,0];
+    } else if (angle > 153 && angle <= 207) {
       return [0,1];
+    } else if (angle > 207 && angle <= 260) {
+      return [-1,0];
     } else {
       return [0, 0];
     }
   }
 
-  static List<int> twocelltransitionhorizontal(double angle, {int? currPointer,int? totalCells}) {
+  static List<int> twocelltransitionvertical2(double angle,{int? currPointer, int? totalCells}) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle >= 333 || angle <= 27) {
+      return [0, -1];
+    } else if (angle > 27 && angle <= 80) {
+      return [1,0];
+    } else if (angle > 80 && angle <= 280) {
+      return [0,1];
+    } else if (angle > 280 && angle <= 333) {
+      return [-1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal1(double angle, {int? currPointer,int? totalCells}) {
     //print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
@@ -1133,7 +1173,81 @@ class tools {
 
     double adjustmentAngle = 360*adjustmentFactor;
 
-    if (angle > (180)  && angle <= 360) {
+    if (angle > (170)  && angle <= 10) {
+      return [-1,0];
+    } else if (angle > 10 && angle <= 63) {
+      return [0,-1];
+    } else if (angle > 63 && angle <= 117) {
+      return [1,0];
+    } else if (angle > 117 && angle <= 170) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal2(double angle, {int? currPointer,int? totalCells}) {
+    //print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle > (243)  && angle <= 297) {
+      return [-1,0];
+    } else if (angle > 297 && angle <= 350) {
+      return [0,-1];
+    } else if (angle > 350 && angle <= 190) {
+      return [1,0];
+    } else if (angle > 190 && angle <= 243) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionvertical(double angle,{int? currPointer,int? totalCells}) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    if (angle >= 270 || angle <= 90) {
+      return [0, -1];
+    } else if (angle > 90 && angle <= 270) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal(double angle,{int? currPointer,int? totalCells}) {
+    print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    if (angle > 180 && angle <= 360) {
       return [-1,0];
     } else if (angle > 0 && angle <= 180) {
       return [1,0];

@@ -272,7 +272,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                               ).then((value){
                                 setState(() {
                                   widget.DestinationID = value;
-                                  DestinationName = landmarkData.landmarksMap![value]!.name!;
+                                  DestinationName = landmarkData.landmarksMap![value]!.name??landmarkData.landmarksMap![value]!.element!.subType!;
                                   if(widget.SourceID != "" && widget.DestinationID != ""){
                                     print("h4");
                                     Navigator.pop(context,[widget.SourceID,widget.DestinationID]);

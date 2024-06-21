@@ -23,9 +23,21 @@ class MotionModel{
       return false;
     }
 
-    if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>10){
-       reroute();
+    try{
+      if(user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>20){
+          reroute();
+        }
+      }else{
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>10){
+          reroute();
+        }
+      }
+    }catch(e){
+
     }
+
+
 
     return true;
   }

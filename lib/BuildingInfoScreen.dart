@@ -22,6 +22,7 @@ import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
@@ -257,10 +258,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
-
-
                           currentData.geofencing;
-                          print(widget.currentLatLng!.latitude);
 
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
@@ -272,6 +270,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
 
                                 onTap: (){
                                   if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) ){
+                                    wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
+                                    wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
@@ -283,6 +284,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     );
                                  }else{
                                     if(widget.dist==0 && currentData.geofencing){
+
+                                      wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
+                                      wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
                                       buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                       buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                       buildingAllApi.setStoredAllBuildingID(allBuildingID);

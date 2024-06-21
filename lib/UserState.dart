@@ -6,6 +6,7 @@ import 'package:iwaymaps/pathState.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 import 'package:geodesy/geodesy.dart' as geo;
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 
 class UserState{
@@ -131,6 +132,9 @@ class UserState{
   }
 
   Future<void> moveOneStep()async{
+    wsocket.message["userPosition"]["X"]=coordX;
+    wsocket.message["userPosition"]["Y"]=coordY;
+    wsocket.message["userPosition"]["floor"]=floor;
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;

@@ -113,12 +113,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      //  btadapter.startScanning(Building.apibeaconmap);
-      // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-      //
-      //   listenToBin();
-      //
-      // });
+       btadapter.startScanning(Building.apibeaconmap);
+      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+
+        listenToBin();
+
+      });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -267,7 +267,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           } else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.2) {
+              highestweight >= 0.8) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -667,7 +667,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 getNextCustomIcon(turnDirection)
               ],
             ),
-          ):Container()
+          ):Container(),
+
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

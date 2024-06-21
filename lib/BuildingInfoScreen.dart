@@ -284,7 +284,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     );
                                  }else{
                                     if(widget.dist==0 && currentData.geofencing){
-
                                       wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
                                       wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
                                       buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);

@@ -4401,7 +4401,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           if (isPdrStop && val == 0) {
             print("points unmatchedddd");
 
-            Future.delayed(Duration(milliseconds: 1800))
+            Future.delayed(Duration(milliseconds: 1500))
                 .then((value) => {StartPDR()});
 
             setState(() {

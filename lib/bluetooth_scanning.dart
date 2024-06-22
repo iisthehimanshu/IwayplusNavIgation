@@ -8,6 +8,7 @@ import '../buildingState.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'APIMODELS/beaconData.dart';
 import 'Elements/HelperClass.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
@@ -65,21 +66,22 @@ class BLueToothClass {
       _binController.stream;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-    print("himanshu 1");
 
+   // print("himanshu 1");
 
     startbin();
-    print("himanshu 2");
+   // print("himanshu 2");
     FlutterBluePlus.startScan();
-    print("himanshu 3");
+  //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-      print("himanshu 4");
+     // print("himanshu 4");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           //print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           //print("mac $MacId    rssi $Rssi");
+          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
             beacondetail[MacId] = Rssi * -1;
@@ -219,14 +221,11 @@ class BLueToothClass {
 
   void emptyBin() {
     for (int i = 0; i < BIN.length; i++) {
-
       BIN[i]!.clear();
     }
     //HelperClass.showToast(BIN.toString());
     numberOfSample.clear();
     rs.clear();
-
-
   }
 
   void addtoBin(String MacId, int rssi) {

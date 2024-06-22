@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'APIMODELS/beaconData.dart';
@@ -280,27 +281,33 @@ class tools {
     return sqrt(dist);
   }
 
-  static String angleToClocks(double angle) {
+ static String angleToClocks(double angle) {
     if (angle < 0) {
       angle = angle + 360;
     }
-
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
-      return "Straight";
+      return (currentDir == 'Natural Direction') ? "Straight" : "12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
-      return "Slight Right";
+      return (currentDir == 'Natural Direction')
+          ? "Slight Right"
+          : "1-2 o'clock";
     } else if (angle > 67.5 && angle <= 112.5) {
-      return "Right";
+      return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
     } else if (angle > 112.5 && angle <= 157.5) {
-      return "Sharp Right";
+      return (currentDir == 'Natural Direction')
+          ? "Sharp Right"
+          : "4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
-      return "U Turn";
+      return (currentDir == 'Natural Direction') ? "U Turn" : "6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
-      return "Sharp Left";
+      return (currentDir == 'Natural Direction') ? "Sharp Left" : "7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
-      return "Left";
+      return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
-      return "Slight Left";
+      return (currentDir == 'Natural Direction')
+          ? "Slight Left"
+          : "10-11 o'clock";
     } else {
       return "None";
     }
@@ -310,23 +317,39 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
-      return "on your front";
+      return (currentDir == 'Natural Direction')
+          ? "on your front"
+          : "on 12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
-      return "on your Slight Right";
+      return (currentDir == 'Natural Direction')
+          ? "on your Slight Right"
+          : "on 1-2 o'clock";
     } else if (angle > 67.5 && angle <= 112.5) {
-      return "on your Right";
+      return (currentDir == 'Natural Direction')
+          ? "on your Right"
+          : "on 3 o'clock";
     } else if (angle > 112.5 && angle <= 157.5) {
-      return "on your Sharp Right";
+      return (currentDir == 'Natural Direction')
+          ? "on your Sharp Right"
+          : "on 4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
-      return "on your back";
+      return (currentDir == 'Natural Direction')
+          ? "on your back"
+          : "on 6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
-      return "on your Sharp Left";
+      return (currentDir == 'Natural Direction')
+          ? "on your Sharp Left"
+          : "on 7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
-      return "on your Left";
+      return (currentDir == 'Natural Direction')
+          ? "on your Left"
+          : "on 9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
-      return "on your Slight Left";
+      return (currentDir == 'Natural Direction')
+          ? "on your Slight Left"
+          : "on 10-11 o'clock";
     } else {
       return "on your None";
     }
@@ -336,32 +359,36 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 315 || angle <= 45) {
-      return "on your front";
+      return (currentDir == 'Natural Direction')
+          ? "on your Front"
+          : "on 12 o'clock";
     } else if (angle > 45 && angle <= 180) {
-      return "on your Right";
+      return (currentDir == 'Natural Direction')
+          ? "on your Right"
+          : "3 o'clock";
     } else if (angle > 180 && angle <= 315) {
-      return "on your Left";
+      return (currentDir == 'Natural Direction') ? "on your Left" : "9 o'clock";
     } else {
-      return "on your Front";
+      return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
     }
   }
-
 
   static String angleToClocksForNearestLandmarkToBeacon(double angle) {
     if (angle < 0) {
       angle = angle + 360;
     }
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
 
     if ((angle >= 315 && angle <= 360) || (angle >= 0 && angle <= 45)) {
-      return "Front";
+      return (currentDir == 'Natural Direction') ? "Front" : "12 o'clock";
     } else if (angle > 45 && angle <= 135) {
-      return "Right";
+      return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
     } else if (angle > 135 && angle <= 225) {
-      return "Back";
+      return (currentDir == 'Natural Direction') ? "Back" : "6 o'clock";
     } else if (angle > 225 && angle < 315) {
-      return "Left";
+      return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
     } else {
       return "None";
     }

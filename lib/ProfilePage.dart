@@ -32,33 +32,65 @@ class _ProfilePageState extends State<ProfilePage> {
   String? accessToken;
   String? refreshToken;
   String? originalName;
+  String? name;
+  String? emailAddress;
+  String? username;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     // Retrieve user ID from Hive
-    getUserIDFromHive();
+    getUserDataFromHive();
   }
 
-  Future<void> getUserIDFromHive() async {
-    final signInBox = await Hive.openBox('SignInDatabase');
+  Future<void> logout() async {
+    final String logoutUrl = "https://dev.iwayplus.in/api/refreshToken/delete";
 
-    setState(() {
-      userId = signInBox.get("userId");
-      accessToken = signInBox.get('accessToken');
-      refreshToken = signInBox.get('refreshToken');
-    });
+    try {
+      final response = await http.delete(
+        Uri.parse(logoutUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (userId != null) {
-      getUserDetails();
-    } else {
+      if (response.statusCode == 200) {
+        final signInBox = await Hive.openBox('SignInDatabase');
+        await signInBox.clear();
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SignIn()),
+        );
+      } else {
+        print('error deleting');
+        CircularProgressIndicator();
+      }
+    } catch (e) {
+      // Handle errors
     }
   }
-  Future<void> getUserDetails() async {
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
     setState(() {
-      isLoading = true;
+      userId = signInBox.get("userId");
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
     });
+
+    if (userId != null && accessToken != null && refreshToken != null) {
+      // If user ID, access token, and refresh token are available, call API
+      getUserDetails();
+    } else {
+      // Handle case where user ID, access token, or refresh token is missing
+    }
+  }
+
+  Future<void> getUserDetails() async {
     final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
 
     try {
@@ -72,26 +104,21 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       if (response.statusCode == 200) {
-
         Map<String, dynamic> responseBody = json.decode(response.body);
-        _emailController.text = responseBody["email"];
-        originalName = responseBody["name"];
-        _nameController.text = originalName!;
+        setState(() {
+          name = responseBody["name"];
+          emailAddress = responseBody["email"];
+          username = responseBody["username"];
+        });
       } else if (response.statusCode == 403) {
-        // Access token expired, refresh token and retry the call
         await refreshTokenAndRetryForGetUserDetails(baseUrl);
+
       } else {
-        print(response.statusCode);
       }
     } catch (e) {
       // Handle errors
-    }finally {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
-
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
     final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
 
@@ -112,36 +139,17 @@ class _ProfilePageState extends State<ProfilePage> {
           accessToken = newAccessToken;
         });
 
-        await getUserDetailsWithNewToken(baseUrl);
+        // Save the new access token to Hive
+        final signInBox = await Hive.openBox('SignInDatabase');
+        signInBox.put('accessToken', accessToken);
+
+        // Retry the getUserDetails call with the new access token
+        await getUserDetails();
       } else {
         // Handle token refresh failure
       }
     } catch (e) {
       // Handle errors
-    }
-  }
-
-  Future<void> getUserDetailsWithNewToken(String baseUrl) async {
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        _emailController.text = responseBody["email"];
-        originalName = responseBody["name"];
-        _nameController.text = originalName!;
-      } else {
-        // Handle other status codes after token refresh
-      }
-    } catch (e) {
-      // Handle errors after token refresh
     }
   }
   @override
@@ -203,7 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              '${_nameController.text} ',
+                              name??'user',
                               style: TextStyle(
                                 color: Color(0xFF18181B),
                                 fontSize: 16,
@@ -221,7 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               padding: const EdgeInsets.symmetric(horizontal: 8.0),
                               child: Text(
 
-                                '${_emailController.text}',
+                                username??'loading..',
                                 style: TextStyle(
 
                                   color: Color(0xFF8D8C8C),

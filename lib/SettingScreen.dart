@@ -10,6 +10,11 @@ import 'Elements/locales.dart';
 
 // import '../../Elements/locales.dart';
 
+
+
+
+
+
 class SettingScreen extends StatefulWidget {
   @override
   State<SettingScreen> createState() => _SettingScreenState();
@@ -65,39 +70,39 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials().getUserPathDetails());
   }
 
-  final List<bool> _selectedDisability = <bool>[true, false, false, false];
+  final List<bool> _selectedDisability = <bool>[true, false, false];
   final List<bool> _selectedHeight = <bool>[true, false, false];
-  List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
-  List<Widget> disability = <Widget>[
-    Text(
-        'Blind'
-      // LocaleData.blind.getString(context),
-    ),
-    Text('Low Vision'
-      // LocaleData.lowVision.getString(context),
-    ),
-    Text('Wheelchair'
-      // LocaleData.wheelchair.getString(context),
-    ),
-    Text(
-      'Regular',
-      // LocaleData.regular.getString(context),
-    ),
-  ];
-  List<String> StringHeight = ["< 5 Feet","5 to 6 Feet","> 6 Feet"];
-  List<Widget> height = <Widget>[
-    Text(
-      // LocaleData.less5Feet.getString(context),
-        '< 5 Feet'
-
-    ),
-    Text('5 to 6 Feet'
-
-    ),
-    Text('> 6 Feet'
-
-    )
-  ];
+  // List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
+  // List<Widget> disability = <Widget>[
+  //   Text(
+  //       'Blind'
+  //     // LocaleData.blind.getString(context),
+  //   ),
+  //   Text('Low Vision'
+  //     // LocaleData.lowVision.getString(context),
+  //   ),
+  //   Text('Wheelchair'
+  //     // LocaleData.wheelchair.getString(context),
+  //   ),
+  //   Text(
+  //     'Regular',
+  //     // LocaleData.regular.getString(context),
+  //   ),
+  // ];
+  // List<String> StringHeight = ["< 5 Feet","5 to 6 Feet","> 6 Feet"];
+  // List<Widget> height = <Widget>[
+  //   Text(
+  //       // LocaleData.less5Feet.getString(context),
+  //       '< 5 Feet'
+  //
+  //   ),
+  //   Text('5 to 6 Feet'
+  //
+  //   ),
+  //   Text('> 6 Feet'
+  //
+  //   )
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -424,67 +429,119 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
             ),
+
             DisabilityswitchValue
-                ? Container(
-              height: 56,
-              width: MediaQuery.sizeOf(context).width * 0.84,
+                ?  Container(
+              height: 40,
+              // margin: EdgeInsets.only(left: 18),
+              // width: MediaQuery.sizeOf(context).width*0.9,
+              // alignment: Alignment.center,
               child: Container(
                 // padding: EdgeInsets.all(20.0),
-                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  border:
-                  Border.all(color: Color(0xff0B6B94), width: 1.0),
+                  border: Border.all(color: Color(0xff0B6B94), width: 1.0),
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: ToggleButtons(
-                    direction: Axis.horizontal,
-                    onPressed: (int index) {
-                      UserCredentials().setUserPersonWithDisability(StringDisability[index]);
-                      print("UserCredentials()().getUserPersonWithDisability()");
-                      print(UserCredentials().getUserPersonWithDisability());
-                      setState(() {
-                        for (int i = 0;
-                        i < _selectedDisability.length;
-                        i++) {
-                          _selectedDisability[i] = i == index;
-                        }
-                      });
-                    },
-                    borderRadius:
-                    const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Color(0xff0B6B94),
-                    borderColor: Colors.white,
-                    selectedColor: Colors.white,
-                    // disabledColor: Color(0xff0B6B94),
-                    fillColor: Color(0xff0B6B94),
-                    color: Color(0xff0B6B94),
-                    constraints: BoxConstraints(
-                        minWidth: MediaQuery.sizeOf(context).width * 0.2,
-                        minHeight: 40
-                      // minHeight: 15.0,
-                      // minWidth: 15.0,
-                    ),
-                    isSelected: _selectedDisability,
-                    // children: disability,
-                    children: [
-                      for (int i = 0; i < disability.length; i++)
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 6,
-                            ),
-                            disability.elementAt(i),
-                            SizedBox(width: 6),
-                          ],
-                        ),
-                    ],
+                child: ToggleButtons(
+                  direction: Axis.horizontal,
+                  onPressed: (int index) {
+
+                    setState(() {
+                      for (int i = 0; i < _selectedDisability.length; i++) {
+                        _selectedDisability[i] = i == index;
+                      }
+                    });
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  selectedBorderColor: Color(0xff0B6B94),
+                  borderColor: Colors.white,
+                  selectedColor: Colors.white,
+                  // disabledColor: Color(0xff0B6B94),
+                  fillColor: Color(0xff0B6B94),
+                  color: Color(0xff0B6B94),
+                  constraints: BoxConstraints(
+                      minWidth: MediaQuery.sizeOf(context).width * 0.295,
+                      minHeight: 46
+                    // minHeight: 15.0,
+                    // minWidth: 15.0,
                   ),
+                  isSelected: _selectedDisability,
+                  // children: disability,
+                  children: [
+                    Text(
+                        LocaleData.blind
+                    ),
+                    Text(
+                        LocaleData.lowVision
+                    ),
+                    Text(
+                        LocaleData.wheelchair
+                    ),
+
+                  ],
                 ),
               ),
             )
+            // Container(
+            //   height: 56,
+            //   width: MediaQuery.sizeOf(context).width * 0.9,
+            //   child: Container(
+            //     // padding: EdgeInsets.all(20.0),
+            //     // decoration: BoxDecoration(
+            //     //   border:
+            //     //   Border.all(color: Color(0xff0B6B94), width: 2.0),
+            //     //   borderRadius: BorderRadius.circular(10.0),
+            //     // ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.all(8.0),
+            //       child: ToggleButtons(
+            //         direction: Axis.horizontal,
+            //         onPressed: (int index) {
+            //           UserCredentials().setUserPersonWithDisability(StringDisability[index]);
+            //           print("UserCredentials()().getUserPersonWithDisability()");
+            //           print(UserCredentials().getUserPersonWithDisability());
+            //           setState(() {
+            //             for (int i = 0;
+            //             i < _selectedDisability.length;
+            //             i++) {
+            //               _selectedDisability[i] = i == index;
+            //             }
+            //           });
+            //         },
+            //         borderRadius:
+            //         const BorderRadius.all(Radius.circular(8)),
+            //         selectedBorderColor: Color(0xff0B6B94),
+            //         borderColor: Colors.white,
+            //         selectedColor: Colors.white,
+            //         // disabledColor: Color(0xff0B6B94),
+            //         fillColor: Color(0xff0B6B94),
+            //         color: Color(0xff0B6B94),
+            //         constraints: BoxConstraints(
+            //             minWidth: MediaQuery.sizeOf(context).width * 0.2,
+            //             minHeight: 40
+            //           // minHeight: 15.0,
+            //           // minWidth: 15.0,
+            //         ),
+            //         isSelected: _selectedDisability,
+            //         // children: disability,
+            //         children: [
+            //           for (int i = 0; i < disability.length; i++)
+            //             Row(
+            //               children: [
+            //                 SizedBox(
+            //                   width: 6,
+            //                 ),
+            //                 disability.elementAt(i),
+            //                 SizedBox(width: 6),
+            //               ],
+            //             ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // )
                 : Container(),
+            SizedBox(height: 16,),
             Container(
               width: MediaQuery.sizeOf(context).width,
               height: 48,
@@ -549,7 +606,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
             ),
             Container(
-              height: 38,
+              height: 40,
               // margin: EdgeInsets.only(left: 18),
               // width: MediaQuery.sizeOf(context).width*0.9,
               // alignment: Alignment.center,
@@ -562,9 +619,9 @@ class _SettingScreenState extends State<SettingScreen> {
                 child: ToggleButtons(
                   direction: Axis.horizontal,
                   onPressed: (int index) {
-                    print("UserHeight");
-                    print(height[index]);
-                    print(StringHeight[index]);
+                    // print("UserHeight");
+                    // print(height[index]);
+                    // print(StringHeight[index]);
 
                     setState(() {
                       for (int i = 0; i < _selectedHeight.length; i++) {

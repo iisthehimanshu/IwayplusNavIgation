@@ -10,40 +10,42 @@ class wsocket{
   });
 //message ["userId"]=123456;
   static Map message = {
-    "userId": null,
+
+    "userId": "",
     "deviceInfo": {
       "sensors": {
-        "BLE": null,
-        "location": null,
-        "activity": null,
-        "compass": null
+        "BLE": false,
+        "location": false,
+        "activity": false,
+        "compass": false
       },
       "permissions": {
-        "BLE": null,
-        "location": null,
-        "activity": null,
-        "compass": null
+        "BLE": false,
+        "location": false,
+        "activity": false,
+        "compass": false
       },
-      "deviceManufacturer": null
+      "deviceManufacturer": ""
     },
     "AppInitialization": {
-      "BID": null,
-      "buildingName": null,
+      "BID": "",
+      "buildingName": "",
       "bleScanResults": {
-        "IW122": null,
-        "IW123": null
+        "IW122": 0,
+        "IW123": 0,
       },
-      "localizedOn": null
+      "localizedOn": ""
     },
     "userPosition": {
-      "X": null,
-      "Y": null,
-      "floor": null
+      "X": 0,
+      "Y": 0,
+      "floor": 0
     },
     "path": {
-      "source":null,
-      "destination": null,
-      "didPathForm": null
+      "source": "",
+      "destination": "",
+      "didPathForm": false
+
     }
   };
 

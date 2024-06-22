@@ -113,12 +113,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-      //  btadapter.startScanning(Building.apibeaconmap);
-      // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-      //
-      //   listenToBin();
-      //
-      // });
+       btadapter.startScanning(Building.apibeaconmap);
+      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+
+        listenToBin();
+
+      });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -257,6 +257,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
+          //widget.user.pathobj.destinationFloor
           if (widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor) {
 
             //print("workingg 5");
@@ -264,10 +265,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon,render: false);
             return true;
+          }
 
-          } else if (widget.user.floor ==
+          // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
+          //   widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+          //   speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
+          //   widget.paint(nearestBeacon,render: false);
+          //   return true;
+          // }
+
+          else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.2) {
+              highestweight >= 1.1) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -598,7 +607,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             padding: EdgeInsets.only(top: 8,bottom: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
-              color: widget.user.pathobj.directions[DirectionIndex].isDestination?Colors.blue:DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey,
+              color:(widget.user.pathobj.directions.isNotEmpty)? widget.user.pathobj.directions[DirectionIndex].isDestination?Colors.blue:DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey:Colors.grey,
 
             ),
             child: Row(
@@ -667,7 +676,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 getNextCustomIcon(turnDirection)
               ],
             ),
-          ):Container()
+          ):Container(),
+
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

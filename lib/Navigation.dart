@@ -3046,9 +3046,14 @@ class _NavigationState extends State<Navigation> {
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+        print(PathState.sourcePolyID!);
+        print(landmarksMap[PathState.sourcePolyID]!.lifts);
+        print(landmarksMap[PathState.destinationPolyID]!.lifts!);
         List<CommonLifts> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
+
+        print(commonlifts);
 
         await fetchroute(
             commonlifts[0].x2!,
@@ -3226,7 +3231,7 @@ class _NavigationState extends State<Navigation> {
       distance = double.parse(distance.toStringAsFixed(1));
       if (PathState.destinationName == "Your current location") {
         speak(
-            "${nearestLandInfomation==null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click Start to Navigate.");
+            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click Start to Navigate.");
       } else {
         speak(
             "${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
@@ -3313,6 +3318,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     print("turnssss ${turns}");
+    getPoints.add([sourceX, sourceX]);
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
       int y = turns[i] ~/ numCols;
@@ -3589,11 +3595,14 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     List<Widget> directionWidgets = [];
     directionWidgets.clear();
     if (PathState.directions.isNotEmpty) {
-      directionWidgets.add(directionInstruction(
-          direction: "Go Straight",
-          distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
-              .ceil()
-              .toString()));
+      if(PathState.directions[0].distanceToNextTurn!=null){
+        directionWidgets.add(directionInstruction(
+            direction: "Go Straight",
+            distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
+                .ceil()
+                .toString()));
+      }
+
       for (int i = 1; i < PathState.directions.length; i++) {
         if(!PathState.directions[i].isDestination){
           if (PathState.directions[i].nearbyLandmark != null) {
@@ -4422,13 +4431,13 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
 
-        print("pointss matchedddd ${getPoints}");
+        // print("pointss matchedddd ${getPoints}");
         for (int i = 0; i < getPoints.length; i++) {
-          print("---length  = ${getPoints.length}");
-          print("--- point  = ${getPoints[i]}");
-          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          print("--- val  = $val");
-          print("--- isPDRStop  = $isPdrStop");
+          // print("---length  = ${getPoints.length}");
+          // print("--- point  = ${getPoints[i]}");
+          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          // print("--- val  = $val");
+          // print("--- isPDRStop  = $isPdrStop");
 
 
             //print("turn corrds");
@@ -6409,9 +6418,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    setState(() {
-      focusturnArrow.clear();
+    Future.delayed(Duration.zero, () async {
+      setState(() {
+        focusturnArrow.clear();
+      });
     });
+
 
     // setState(() {
     if (markers.length > 0) {

@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
 import 'package:collection/collection.dart' as pac;
 import 'package:flutter/rendering.dart';
@@ -107,6 +108,7 @@ class MyApp extends StatelessWidget {
 
 class Navigation extends StatefulWidget {
   String directLandID = "";
+  static bool bluetoothGranted = false;
 
   Navigation({this.directLandID = ''});
 
@@ -180,9 +182,12 @@ class _NavigationState extends State<Navigation> {
   bool isCalibrating = false;
   bool excludeFloorSemanticWork = false;
 
+
   @override
   void initState() {
     super.initState();
+
+    //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
     _messageTimer=Timer.periodic(Duration(seconds: 5), (timer){
@@ -441,7 +446,16 @@ class _NavigationState extends State<Navigation> {
     print("running");
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
+    await enableBT();
     //  await requestActivityPermission();
+  }
+  Future<void> enableBT() async {
+
+    BluetoothEnable.enableBluetooth.then((value) {
+      print("enableBTResponse");
+      print(value);
+    });
+
   }
 
   bool isPdr = false;
@@ -685,14 +699,18 @@ class _NavigationState extends State<Navigation> {
           apibeaconmap[nearestBeacon]!.buildingID!);
 
       //nearestLandmark compute
+
       try{
+
         await building.landmarkdata!.then((value) {
           nearestLandInfomation = tools.localizefindNearbyLandmark(
               apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         });
       }catch(e){
+
         print(Exception(e));
       }
+
 
       setState(() {
         buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
@@ -718,16 +736,21 @@ class _NavigationState extends State<Navigation> {
             tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
             building.polyLineData!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        print("dvalue");
+        print(dvalue);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
+        print(values);
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
       }
+      print("values");
+      print(values);
 
 
       mapState.target = LatLng(values[0], values[1]);
@@ -773,11 +796,12 @@ class _NavigationState extends State<Navigation> {
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
+        List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
+            position: LatLng(ls[0], ls[1]),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
@@ -957,16 +981,21 @@ class _NavigationState extends State<Navigation> {
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+        await Permission.bluetoothScan .request();
     print("permissionStatus    ----   ${permissionStatus}");
+    print("permissionStatus    ----   ${permissionStatus.isDenied}");
+
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["permissions"]["BLE"]=true;
       wsocket.message["deviceInfo"]["sensors"]["BLE"]=true;
       print("Bluetooth permission is granted");
+      //widget.bluetoothGranted = true;
       // Permission granted, you can now perform Bluetooth operations
     } else {
+
       wsocket.message["deviceInfo"]["permissions"]["BLE"]=false;
       wsocket.message["deviceInfo"]["sensors"]["BLE"]=false;
+
       // Permission denied, handle accordingly
     }
   }
@@ -1556,8 +1585,22 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
+  Set<Polygon> _polygon = Set();
+
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
+    _polygon.clear(); // Clear existing markers
+    print("WilsonInSelected");
+    print(polygonPoints);
+    _polygon.add(
+        Polygon(
+          polygonId: PolygonId("$polygonPoints"),
+          points: polygonPoints,
+          fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+          strokeColor: Colors.blue,
+          strokeWidth: 2,
+        )
+    );// Clear existing markers
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
@@ -1826,6 +1869,10 @@ class _NavigationState extends State<Navigation> {
           y2 = (y2 / 4).toInt();
 
           diff = [x2 - x1, y2 - y1];
+          print("checkingLift");
+          print(diff);
+          print(l2.id);
+
           print("11 ${[x1, y1]}");
           print("22 ${[x2, y2]}");
         }
@@ -2254,7 +2301,7 @@ class _NavigationState extends State<Navigation> {
               },
               infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: '${landmarks[i].properties!.polyId}',
+                  // snippet: '${landmarks[i].properties!.polyId}',
                   // Replace with additional information
                   onTap: () {
                     print("Info Window ");
@@ -2275,7 +2322,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2292,7 +2339,7 @@ class _NavigationState extends State<Navigation> {
           });
         } else if (landmarks[i].name != null &&
             landmarks[i].name!.toLowerCase().contains("lift") &&
-            landmarks[i].element!.subType != "room door") {
+            landmarks[i].element!.subType == "lift") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -2306,7 +2353,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2335,9 +2382,10 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
+                    print("checking--${landmarks[i].name}");
                     if (building.selectedLandmarkID !=
                         landmarks[i].properties!.polyId) {
                       building.selectedLandmarkID =
@@ -2365,7 +2413,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2395,7 +2443,7 @@ class _NavigationState extends State<Navigation> {
                 visible: true,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2502,6 +2550,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _polygon.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2538,6 +2587,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _polygon.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2684,6 +2734,7 @@ class _NavigationState extends State<Navigation> {
                         ),
                         child: TextButton(
                           onPressed: () async {
+                            _polygon.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -3394,6 +3445,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(floor),
             building.polyLineData!.polyline!.floors!);
+        print('WilsonCheckingCurrentFloor');
+        print(currFloorLifts);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
@@ -6745,7 +6798,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
                             polygons: patch
                                 .union(getCombinedPolygons())
-                                .union(otherpatch),
+                                .union(otherpatch).union(_polygon),
                             polylines: singleroute[building.floor[
                                         buildingAllApi.getStoredString()]] !=
                                     null
@@ -6926,6 +6979,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       ? Colors.white
                                                       : Color(0xff24b9b0),
                                               onTap: () {
+                                                _polygon.clear();
                                                 building.floor[buildingAllApi
                                                     .getStoredString()] = i;
                                                 createRooms(
@@ -6976,6 +7030,20 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+                                    enableBT();
+                                    _timer = Timer.periodic(
+                                        Duration(milliseconds: 9000), (timer) {
+                                      localizeUser().then((value) => {
+                                      print(
+                                      "localize user is calling itself....."),
+                                      _timer.cancel()
+                                      });
+
+
+
+                                    });
+                                   // _timer.cancel();
+                                    //localizeUser();
                                     //wsocket.sendmessg();
                                     // //print(PathState.connections);
                                     building.floor[buildingAllApi

@@ -66,7 +66,9 @@ class BLueToothClass {
       _binController.stream;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
+
    // print("himanshu 1");
+
     startbin();
    // print("himanshu 2");
     FlutterBluePlus.startScan();

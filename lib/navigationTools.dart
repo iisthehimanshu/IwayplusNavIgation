@@ -120,8 +120,10 @@ class tools {
 
   static List<double> localtoglobal(int x, int y,
       {PDM.patchDataModel? patchData = null}) {
+
     x = x - UserState.xdiff;
     y = y - UserState.ydiff;
+
     ////print("Wilsonlocaltoglobal started");
     PDM.patchDataModel Data = PDM.patchDataModel();
     if (patchData != null) {

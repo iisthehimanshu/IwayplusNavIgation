@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/APIMODELS/patchDataModel.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'package:iwaymaps/Navigation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
@@ -62,6 +65,11 @@ class patchAPI {
   }
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+
+    bleScan();
+
+    print("checkingPer${permissionStatus}");
 
     token = signInBox.get("accessToken");
     print("patch");
@@ -104,4 +112,28 @@ class patchAPI {
       throw Exception('Failed to load data');
     }
   }
-}
+  void bleScan() async {
+    print("bleScan");
+
+    //Ask for runtime permissions if necessary.
+    var status = await Permission.bluetooth.request();
+    if (status.isPermanentlyDenied) {
+
+      return;
+    }
+
+    status = await Permission.bluetoothConnect.request();
+    if (status.isPermanentlyDenied) {
+
+      return;
+    }
+
+    status = await Permission.bluetoothScan.request();
+    if (status.isPermanentlyDenied) {
+
+      return;
+    }
+
+  }
+
+  }

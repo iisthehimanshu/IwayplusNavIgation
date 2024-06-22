@@ -8,8 +8,9 @@ class wsocket{
     'transports': ['websocket'],
     'autoConnect': false,
   });
-
+//message ["userId"]=123456;
   static Map message = {
+
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -44,6 +45,7 @@ class wsocket{
       "source": "",
       "destination": "",
       "didPathForm": false
+
     }
   };
 

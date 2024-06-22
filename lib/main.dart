@@ -12,7 +12,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
+import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'Elements/UserCredential.dart';
 import 'Elements/locales.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
@@ -49,6 +51,13 @@ Future<void> main() async {
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
   Hive.registerAdapter(SignINAPIModelAdapter());
   await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+  Hive.registerAdapter(OutDoorModelAdapter());
+  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+  Hive.registerAdapter(WayPointModelAdapter());
+  await Hive.openBox<WayPointModel>('WayPointModelFile');
+
+
+
   // await Firebase.initializeApp();
 
   await Hive.openBox('Favourites');

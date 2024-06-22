@@ -17,7 +17,7 @@ class PathModel {
     required this.v,
   });
 
-  factory PathModel.fromJson(Map<String, dynamic> json) {
+  factory PathModel.fromJson(Map<dynamic, dynamic> json) {
     return PathModel(
       id: json['_id'],
       buildingID: json['building_ID'],

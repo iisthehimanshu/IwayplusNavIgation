@@ -710,16 +710,21 @@ class _NavigationState extends State<Navigation> {
             tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
             building.polyLineData!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        print("dvalue");
+        print(dvalue);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
+        print(values);
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
             apibeaconmap[nearestBeacon]!.coordinateY!);
       }
+      print("values");
+      print(values);
 
 
       mapState.target = LatLng(values[0], values[1]);
@@ -765,11 +770,12 @@ class _NavigationState extends State<Navigation> {
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
+        List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
+            position: LatLng(ls[0], ls[1]),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
@@ -1532,8 +1538,22 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
+  Set<Polygon> _polygon = Set();
+
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
+    _polygon.clear(); // Clear existing markers
+    print("WilsonInSelected");
+    print(polygonPoints);
+    _polygon.add(
+        Polygon(
+          polygonId: PolygonId("$polygonPoints"),
+          points: polygonPoints,
+          fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+          strokeColor: Colors.blue,
+          strokeWidth: 2,
+        )
+    );// Clear existing markers
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
@@ -1803,7 +1823,7 @@ class _NavigationState extends State<Navigation> {
 
           diff = [x2 - x1, y2 - y1];
           print("checkingLift");
-          print(l1.id);
+          print(diff);
           print(l2.id);
 
           print("11 ${[x1, y1]}");
@@ -2234,7 +2254,7 @@ class _NavigationState extends State<Navigation> {
               },
               infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: '${landmarks[i].properties!.polyId}',
+                  // snippet: '${landmarks[i].properties!.polyId}',
                   // Replace with additional information
                   onTap: () {
                     print("Info Window ");
@@ -2255,7 +2275,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2272,7 +2292,7 @@ class _NavigationState extends State<Navigation> {
           });
         } else if (landmarks[i].name != null &&
             landmarks[i].name!.toLowerCase().contains("lift") &&
-            landmarks[i].element!.subType != "room door") {
+            landmarks[i].element!.subType == "lift") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -2286,7 +2306,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2315,9 +2335,10 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
+                    print("checking--${landmarks[i].name}");
                     if (building.selectedLandmarkID !=
                         landmarks[i].properties!.polyId) {
                       building.selectedLandmarkID =
@@ -2345,7 +2366,7 @@ class _NavigationState extends State<Navigation> {
                 visible: false,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2375,7 +2396,7 @@ class _NavigationState extends State<Navigation> {
                 visible: true,
                 infoWindow: InfoWindow(
                   title: landmarks[i].name,
-                  snippet: 'Additional Information',
+                  // snippet: 'Additional Information',
                   // Replace with additional information
                   onTap: () {
                     if (building.selectedLandmarkID !=
@@ -2479,6 +2500,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _polygon.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2515,6 +2537,7 @@ class _NavigationState extends State<Navigation> {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _polygon.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2661,6 +2684,7 @@ class _NavigationState extends State<Navigation> {
                         ),
                         child: TextButton(
                           onPressed: () async {
+                            _polygon.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -6685,7 +6709,7 @@ class _NavigationState extends State<Navigation> {
 
                             polygons: patch
                                 .union(getCombinedPolygons())
-                                .union(otherpatch),
+                                .union(otherpatch).union(_polygon),
                             polylines: singleroute[building.floor[
                                         buildingAllApi.getStoredString()]] !=
                                     null
@@ -6866,6 +6890,7 @@ class _NavigationState extends State<Navigation> {
                                                       ? Colors.white
                                                       : Color(0xff24b9b0),
                                               onTap: () {
+                                                _polygon.clear();
                                                 building.floor[buildingAllApi
                                                     .getStoredString()] = i;
                                                 createRooms(
@@ -6916,6 +6941,20 @@ class _NavigationState extends State<Navigation> {
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+                                    enableBT();
+                                    _timer = Timer.periodic(
+                                        Duration(milliseconds: 9000), (timer) {
+                                      localizeUser().then((value) => {
+                                      print(
+                                      "localize user is calling itself....."),
+                                      _timer.cancel()
+                                      });
+
+
+
+                                    });
+                                   // _timer.cancel();
+                                    //localizeUser();
                                     //wsocket.sendmessg();
                                     // //print(PathState.connections);
                                     building.floor[buildingAllApi

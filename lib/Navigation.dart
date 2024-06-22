@@ -3318,6 +3318,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     print("turnssss ${turns}");
+    getPoints.add([sourceX, sourceX]);
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
       int y = turns[i] ~/ numCols;
@@ -4430,13 +4431,13 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           // print("${user.showcoordX}+" "+ ${user.showcoordY}");
 
 
-        print("pointss matchedddd ${getPoints}");
+        // print("pointss matchedddd ${getPoints}");
         for (int i = 0; i < getPoints.length; i++) {
-          print("---length  = ${getPoints.length}");
-          print("--- point  = ${getPoints[i]}");
-          print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-          print("--- val  = $val");
-          print("--- isPDRStop  = $isPdrStop");
+          // print("---length  = ${getPoints.length}");
+          // print("--- point  = ${getPoints[i]}");
+          // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+          // print("--- val  = $val");
+          // print("--- isPDRStop  = $isPdrStop");
 
 
             //print("turn corrds");
@@ -6417,9 +6418,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     PathState.destinationPolyID = "";
     singleroute.clear();
     fitPolygonInScreen(patch.first);
-    setState(() {
-      focusturnArrow.clear();
+    Future.delayed(Duration.zero, () async {
+      setState(() {
+        focusturnArrow.clear();
+      });
     });
+
 
     // setState(() {
     if (markers.length > 0) {

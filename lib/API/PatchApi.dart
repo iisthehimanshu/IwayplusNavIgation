@@ -66,7 +66,11 @@ class patchAPI {
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
 
-
+    // final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
+    //
+    // bleScan();
+    //
+    // print("checkingPer${permissionStatus}");
 
     token = signInBox.get("accessToken");
     print("patch");

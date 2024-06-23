@@ -21,6 +21,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'directionClass.dart';
@@ -1020,6 +1021,8 @@ class _NavigationState extends State<Navigation> {
 
   void apiCalls() async {
     print("working 1");
+    //await DataVersionApi().fetchDataVersionApiData();
+
     await patchAPI()
         .fetchPatchData(id: buildingAllApi.selectedBuildingID)
         .then((value) {

@@ -65,11 +65,8 @@ class patchAPI {
   }
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
-    bleScan();
 
-    print("checkingPer${permissionStatus}");
 
     token = signInBox.get("accessToken");
     print("patch");
@@ -111,29 +108,6 @@ class patchAPI {
       print(Exception);
       throw Exception('Failed to load data');
     }
-  }
-  void bleScan() async {
-    print("bleScan");
-
-    //Ask for runtime permissions if necessary.
-    var status = await Permission.bluetooth.request();
-    if (status.isPermanentlyDenied) {
-
-      return;
-    }
-
-    status = await Permission.bluetoothConnect.request();
-    if (status.isPermanentlyDenied) {
-
-      return;
-    }
-
-    status = await Permission.bluetoothScan.request();
-    if (status.isPermanentlyDenied) {
-
-      return;
-    }
-
   }
 
   }

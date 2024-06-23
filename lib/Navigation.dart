@@ -116,7 +116,7 @@ class Navigation extends StatefulWidget {
   State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<Navigation> {
+class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   MapState mapState = new MapState();
   Timer? PDRTimer;
   Timer? _exploreModeTimer;
@@ -194,6 +194,15 @@ class _NavigationState extends State<Navigation> {
       wsocket.sendmessg();
     });
     setPdrThreshold();
+    // _controller = AnimationController(
+    //   duration: const Duration(seconds: 2),
+    //   vsync: this,
+    // )..repeat(reverse: true);
+    // Create the animation
+    // _animation = Tween<double>(begin: 0, end: 10).animate(_controller)
+    //   ..addListener(() {
+    //     _updateCircle();
+    //   });
 
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
@@ -680,6 +689,9 @@ class _NavigationState extends State<Navigation> {
     paintUser(nearestBeacon, speakTTS: false);
   }
 
+  // late AnimationController _controller;
+  // late Animation<double> _animation;
+
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
 
@@ -706,8 +718,9 @@ class _NavigationState extends State<Navigation> {
           nearestLandInfomation = tools.localizefindNearbyLandmark(
               apibeaconmap[nearestBeacon]!, value.landmarksMap!);
         });
-      }catch(e){
 
+      }catch(e){
+        print("inside catch");
         print(Exception(e));
       }
 
@@ -725,6 +738,8 @@ class _NavigationState extends State<Navigation> {
 
       pathState().beaconCords = localBeconCord;
 
+
+
       List<double> values = [];
 
       //floor alignment
@@ -735,6 +750,14 @@ class _NavigationState extends State<Navigation> {
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
             building.polyLineData!.polyline!.floors!);
+        print("print cubicle data");
+        for(int i=0;i<prevFloorLifts.length;i++){
+          print(prevFloorLifts[i].name);
+        }
+        print("data2");
+        for(int i=0;i<currFloorLifts.length;i++){
+          print(currFloorLifts[i].name);
+        }
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         print("dvalue");
         print(dvalue);
@@ -757,16 +780,29 @@ class _NavigationState extends State<Navigation> {
 
       user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
       user.locationName = apibeaconmap[nearestBeacon]!.name;
-      user.lat =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
-      user.lng =
-          double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+
+
+
+          //double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+
+          //double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+      //did this change over here UDIT...
       user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+      user.lat =ls[0];
+      user.lng =ls[1];
+
+
+
       if(nearestLandInfomation != null && nearestLandInfomation!.doorX != null){
         user.coordX = nearestLandInfomation!.doorX!;
         user.coordY = nearestLandInfomation!.doorY!;
         List<double> latlng = tools.localtoglobal(nearestLandInfomation!.doorX!, nearestLandInfomation!.doorY!,patchData: building.patchData[nearestLandInfomation!.buildingID]);
+        print("latlnghhjhj");
+        print(latlng);
         user.lat = latlng[0];
         user.lng = latlng[1];
         user.locationName = nearestLandInfomation!.name??nearestLandInfomation!.element!.subType;
@@ -796,12 +832,12 @@ class _NavigationState extends State<Navigation> {
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
-        List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+        //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
-            position: LatLng(ls[0], ls[1]),
+            position: LatLng(user.lat, user.lng),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
@@ -811,6 +847,16 @@ class _NavigationState extends State<Navigation> {
             icon: BitmapDescriptor.fromBytes(userlocdebug),
             anchor: Offset(0.5, 0.829),
           ));
+          // circles.add(
+          //   Circle(
+          //     circleId: CircleId("circle"),
+          //     center: LatLng(user.lat,user.lng),
+          //     radius: _animation.value,
+          //     strokeWidth: 1,
+          //     strokeColor: Colors.blue,
+          //     fillColor: Colors.lightBlue.withOpacity(0.2),
+          //   ),
+          // );
         } else {
           user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
           markers.putIfAbsent(user.Bid, () => []);
@@ -1275,6 +1321,21 @@ class _NavigationState extends State<Navigation> {
     });
     print("Circular progress stop");
   }
+  // void _updateCircle() {
+  //   final Circle updatedCircle = Circle(
+  //     circleId: CircleId("circle"),
+  //     center: LatLng(user.lat, user.lng),
+  //     radius: _animation.value,
+  //     strokeWidth: 1,
+  //     strokeColor: Colors.blue,
+  //     fillColor: Colors.lightBlue.withOpacity(0.2),
+  //   );
+  //
+  //   setState(() {
+  //     circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+  //     circles.add(updatedCircle);
+  //   });
+  // }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371; // Radius of the earth in kilometers
@@ -1342,7 +1403,7 @@ class _NavigationState extends State<Navigation> {
     btadapter.stopScanning();
 
     // sumMap = btadapter.calculateAverage();
-    paintUser(nearestBeacon);
+    paintUser("IW448");
 
     //emptying the bin manually
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -1828,7 +1889,7 @@ class _NavigationState extends State<Navigation> {
     floorData.forEach((Element) {
       if (Element.floor == floor) {
         Element.polyArray!.forEach((element) {
-          if (element.cubicleName!.toLowerCase().contains("lift")) {
+          if (element.name!.toLowerCase().contains("lift")) {
             lifts.add(element);
           }
         });
@@ -1844,9 +1905,12 @@ class _NavigationState extends State<Navigation> {
       for (int y = 0; y < list2.length; y++) {
         PolyArray l1 = list1[i];
         PolyArray l2 = list2[y];
-        if (l1.cubicleName!.toLowerCase() != "lift" &&
-            l2.cubicleName!.toLowerCase() != "lift" &&
-            l1.cubicleName == l2.cubicleName) {
+
+
+        if (l1.name!.toLowerCase() == "lift-1" &&
+            l2.name!.toLowerCase() == "lift-1" &&
+            l1.name == l2.name) {
+
           print("i ${l1.cubicleName}");
           print("y ${l2.cubicleName}");
           int x1 = 0;
@@ -4015,9 +4079,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                 singleroute.clear();
                                                 PathState.directions = [];
                                                 interBuildingPath.clear();
-                                                if(user.isnavigating==false){
+                                              //  if(user.isnavigating==false){
                                                   clearPathVariables();
-                                                }
+                                                //}
                                                 fitPolygonInScreen(patch.first);
                                               },
                                               icon: Semantics(
@@ -4637,6 +4701,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  focusturnArrow.clear();
                                   clearPathVariables();
                                   _isnavigationPannelOpen = false;
                                   user.reset();
@@ -4762,9 +4827,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                     setState(() {
                                       rerouting = true;
                                     });
-                                    if(user.isnavigating==false){
+                                  //  if(user.isnavigating==false){
                                       clearPathVariables();
-                                    }
+                                   // }
 
                                     PathState.clear();
                                     PathState.sourceX = user.coordX;
@@ -6460,6 +6525,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
   }
 
   void closeNavigation() {
+    clearPathVariables();
     StopPDR();
     _isnavigationPannelOpen = false;
     user.reset();
@@ -6628,10 +6694,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
       }
 
       //List<LatLng> coordinates = [];
-      BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(44, 44)),
-        'assets/greytorch.png',
-      );
+      final Uint8List greytorch =
+      await getImagesFromMarker('assets/previewarrow.png', 75);
+      // BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
+      //   ImageConfiguration(size: Size(15, 15)),
+      //   'assets/previewarrow.png',
+      // );
       // for(int a = i;a>i-5;a--){
       //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
       //     break;
@@ -6675,7 +6743,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
         focusturnArrow.add(Marker(
             markerId: MarkerId("focusturn"),
             position: LatLng(latlng[0], latlng[1]),
-            icon: greytorch,
+            icon: BitmapDescriptor.fromBytes(greytorch),
             anchor: Offset(0.5, 0.5)));
       });
 
@@ -6722,6 +6790,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     //   }
     // });
   }
+  Set<Circle> circles = Set();
+
 
   @override
   void dispose() {
@@ -6734,6 +6804,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();
+    // _controller.dispose();
+
     super.dispose();
   }
 
@@ -6845,6 +6917,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                             onCameraMoveStarted: () {
                               mapState.interaction2 = false;
                             },
+                            // circles: circles,
                           ),
                         ),
                       ),

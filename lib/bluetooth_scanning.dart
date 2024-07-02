@@ -200,9 +200,6 @@ class BLueToothClass {
       _isScanning = state;
     });
 
-
-
-
   }
 
 

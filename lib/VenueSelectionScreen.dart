@@ -18,6 +18,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/BuildingAPI.dart';
 import 'package:iwaymaps/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -258,13 +259,15 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 final LandMarkBox = LandMarkApiModelBox.getData();
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
+                final WayPointBox = WayPointModeBOX.getData();
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
                 LandMarkBox.clear();
                 PatchBox.clear();
                 PolyLineBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length}");
+                WayPointBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length}");
 
               },
             ),

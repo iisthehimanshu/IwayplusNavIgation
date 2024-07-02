@@ -1,9 +1,12 @@
+import 'dart:collection';
+
 import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 
+import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 import 'package:geodesy/geodesy.dart' as geo;
@@ -79,6 +82,7 @@ class UserState{
   // }
 
   Future<void> move()async{
+
 
 
     moveOneStep();
@@ -262,6 +266,9 @@ class UserState{
   Future<void> moveToFloor(int fl)async{
     floor = fl;
     if(pathobj.Cellpath[fl] != null){
+
+      // coordX=coordinateX!;
+      // coordY=coordinateY!;
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
       List<double> values = tools.localtoglobal(coordX, coordY);

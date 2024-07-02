@@ -195,15 +195,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       wsocket.sendmessg();
     });
     setPdrThreshold();
-    // _controller = AnimationController(
-    //   duration: const Duration(seconds: 2),
-    //   vsync: this,
-    // )..repeat(reverse: true);
-    // Create the animation
-    // _animation = Tween<double>(begin: 0, end: 10).animate(_controller)
-    //   ..addListener(() {
-    //     _updateCircle();
-    //   });
+
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+
+
+   // Create the animation
+    _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+      ..addListener(() {
+        _updateCircle();
+      });
 
     building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
@@ -690,8 +694,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     paintUser(nearestBeacon, speakTTS: false);
   }
 
-  // late AnimationController _controller;
-  // late Animation<double> _animation;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
@@ -807,6 +811,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         user.lat = latlng[0];
         user.lng = latlng[1];
         user.locationName = nearestLandInfomation!.name??nearestLandInfomation!.element!.subType;
+      }else if(nearestLandInfomation != null && nearestLandInfomation!.doorX == null){
+        user.coordX = nearestLandInfomation!.coordinateX!;
+        user.coordY = nearestLandInfomation!.coordinateY!;
+        List<double> latlng = tools.localtoglobal(nearestLandInfomation!.coordinateX!, nearestLandInfomation!.coordinateY!,patchData: building.patchData[nearestLandInfomation!.buildingID]);
+        print("latlnghhjhj");
+        print(latlng);
+        user.lat = latlng[0];
+        user.lng = latlng[1];
+        user.locationName = nearestLandInfomation!.name??nearestLandInfomation!.element!.subType;
       }
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
@@ -848,16 +861,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             icon: BitmapDescriptor.fromBytes(userlocdebug),
             anchor: Offset(0.5, 0.829),
           ));
-          // circles.add(
-          //   Circle(
-          //     circleId: CircleId("circle"),
-          //     center: LatLng(user.lat,user.lng),
-          //     radius: _animation.value,
-          //     strokeWidth: 1,
-          //     strokeColor: Colors.blue,
-          //     fillColor: Colors.lightBlue.withOpacity(0.2),
-          //   ),
-          // );
+          circles.add(
+            Circle(
+              circleId: CircleId("circle"),
+              center: LatLng(user.lat,user.lng),
+              radius: _animation.value,
+              strokeWidth: 1,
+              strokeColor: Colors.blue,
+              fillColor: Colors.lightBlue.withOpacity(0.2),
+            ),
+          );
         } else {
           user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
           markers.putIfAbsent(user.Bid, () => []);
@@ -971,6 +984,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   void moveUser() async {
+    print("User is moving");
     final Uint8List userloc =
     await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
@@ -1324,21 +1338,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
     print("Circular progress stop");
   }
-  // void _updateCircle() {
-  //   final Circle updatedCircle = Circle(
-  //     circleId: CircleId("circle"),
-  //     center: LatLng(user.lat, user.lng),
-  //     radius: _animation.value,
-  //     strokeWidth: 1,
-  //     strokeColor: Colors.blue,
-  //     fillColor: Colors.lightBlue.withOpacity(0.2),
-  //   );
-  //
-  //   setState(() {
-  //     circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
-  //     circles.add(updatedCircle);
-  //   });
-  // }
+  void _updateCircle() {
+    final Circle updatedCircle = Circle(
+      circleId: CircleId("circle"),
+      center: LatLng(user.lat, user.lng),
+      radius: _animation.value,
+      strokeWidth: 1,
+      strokeColor: Colors.blue,
+      fillColor: Colors.lightBlue.withOpacity(0.2),
+    );
+
+    setState(() {
+      circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+      circles.add(updatedCircle);
+    });
+  }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371; // Radius of the earth in kilometers
@@ -1406,7 +1420,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     btadapter.stopScanning();
 
     // sumMap = btadapter.calculateAverage();
-    paintUser("IW448");
+    paintUser(nearestBeacon);
+    Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+    _controller.stop(),
+    });
+
 
     //emptying the bin manually
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -1444,7 +1462,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       firstValue = sortedsumMap.entries.first.key;
 
 
-      if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.5) {
+      if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.4) {
         btadapter.stopScanning();
 
         await building.landmarkdata!.then((value){
@@ -1654,6 +1672,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
+    circles.clear();
     print("WilsonInSelected");
     print(polygonPoints);
     _polygon.add(
@@ -2618,6 +2637,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
+                          circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2655,6 +2675,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
+                          circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -2802,6 +2823,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                         child: TextButton(
                           onPressed: () async {
                             _polygon.clear();
+                            circles.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -3119,6 +3141,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+    circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3370,8 +3393,53 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
+    // List<List<int>> offsets = [
+    //   [-1, -1], // Top-left
+    //   [-1, 0],  // Top
+    //   [-1, 1],  // Top-right
+    //   [0, -1],  // Left
+    //   [0, 1],   // Right
+    //   [1, -1],  // Bottom-left
+    //   [1, 0],   // Bottom
+    //   [1, 1]    // Bottom-right
+    // ];
+    print("all landmarks");
+    // building.landmarkdata!.then((value) {
+    //   value.landmarksMap!.forEach((key, value) {
+    //     // if(value.properties!.node==null){
+    //     //   print("nodenull${value.name}");
+    //     //
+    //     // }
+    //
+    //     if(value.doorX==null && value.element!.type!="floor" ){
+    //
+    //       if(building.nonWalkable[bid]![floor]!.contains(value.coordinateX!+value.coordinateY!*numCols)){
+    //         print("${value.name} ${value.coordinateX}");
+    //       }
+    //     }else{
+    //
+    //       if(building.nonWalkable[bid]![floor]!.contains(value.doorX!+value.doorY!*numCols)){
+    //         print(value.name);
+    //       }
+    //
+    //     }
+    //   });
+    // });
 
 
+    if(building.nonWalkable[bid]![floor]!.contains(destinationY*numCols+destinationX)){
+      print("DestinationinNonWalkable");
+
+
+
+
+
+    }
+    if(building.nonWalkable[bid]![floor]!.contains(sourceY*numCols+sourceX)){
+      print("SourceNonWalkable");
+
+
+    }
     print("numcol $numCols");
 
 
@@ -3381,6 +3449,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     List<int> path = [];
 
     print("$sourceX, $sourceY, $destinationX, $destinationY");
+
     try{
       PathModel model = Building.waypoint.firstWhere((element) => element.floor == floor);
       Map<String, List<dynamic>> adjList = model.pathNetwork;
@@ -3396,7 +3465,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       path = path2;
       print("path from waypoint $path");
     }catch(e){
+
       print("inside exception $e");
+
       List<int> path2 = await findPath(
           numRows,
           numCols,
@@ -3408,6 +3479,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       path = path2;
       print("path from A* $path");
     }
+
     // // List<List<int>> path3 = await graph.bfs2(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
     // print("path $path");
 
@@ -3436,7 +3508,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
     List<int> turns = tools.getTurnpoints(path, numCols);
     print("turnssss ${turns}");
-    getPoints.add([sourceX, sourceX]);
+    int newSourceX=path[0]% numCols;
+    int newSourceY=path[0]~/ numCols;
+    getPoints.add([newSourceX, newSourceY]);
     for (int i = 0; i < turns.length; i++) {
       int x = turns[i] % numCols;
       int y = turns[i] ~/ numCols;
@@ -4161,6 +4235,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                 final Uint8List userlocdebug =
                                                 await getImagesFromMarker('assets/tealtorch.png', 35);
 
+
                                                 setState(() {
                                                   markers.clear();
                                                   List<double> val =
@@ -4192,6 +4267,16 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                     icon: BitmapDescriptor.fromBytes(userlocdebug),
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
+                                                  // circles.add(
+                                                  //   Circle(
+                                                  //     circleId: CircleId("circle"),
+                                                  //     center: LatLng(user.lat,user.lng),
+                                                  //     radius: _animation.value,
+                                                  //     strokeWidth: 1,
+                                                  //     strokeColor: Colors.blue,
+                                                  //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                  //   ),
+                                                  // );
                                                 });
                                               });
                                               _isRoutePanelOpen = false;
@@ -4560,12 +4645,13 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           // print("--- isPDRStop  = $isPdrStop");
 
 
+
             //print("turn corrds");
 
 
           //print("${getPoints[i][0]}, ${getPoints[i][1]}");
           if (isPdrStop && val == 0) {
-            print("points unmatchedddd");
+           // print("points unmatchedddd");
 
             Future.delayed(Duration(milliseconds: 1500))
                 .then((value) => {StartPDR()});
@@ -4580,7 +4666,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           }
           if (getPoints[i][0] == user.showcoordX &&
               getPoints[i][1] == user.showcoordY) {
-            print("points matchedddddddd");
+           // print("points matchedddddddd");
 
 
               StopPDR();
@@ -6257,7 +6343,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     //filterItems();
 
     return Visibility(
-        visible: _isBuildingPannelOpen,
+        visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(
           excludeSemantics: true,
           child: SlidingUpPanel(
@@ -6807,7 +6893,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();
-    // _controller.dispose();
+    _controller.dispose();
 
     super.dispose();
   }
@@ -6920,7 +7006,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                             onCameraMoveStarted: () {
                               mapState.interaction2 = false;
                             },
-                            // circles: circles,
+                            circles: circles,
                           ),
                         ),
                       ),
@@ -7056,6 +7142,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       : Color(0xff24b9b0),
                                               onTap: () {
                                                 _polygon.clear();
+                                                circles.clear();
                                                 building.floor[buildingAllApi
                                                     .getStoredString()] = i;
                                                 createRooms(
@@ -7207,58 +7294,6 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                 backgroundColor: Color(
                                     0xff24B9B0), // Set the background color of the FAB
                               ):Container(), // Adjust the height as needed// Adjust the height as needed
-
-                              // FloatingActionButton(
-                              //   onPressed: (){
-                              //     print("checkingBuildingfloor");
-                              //     //building.floor == 0 ? 'G' : '${building.floor}',
-                              //     print(building.floor);
-                              //     int firstKey = building.floor.values.first;
-                              //     print(firstKey);
-                              //     print(singleroute[building.floor.values.first]);
-                              //
-                              //     print(singleroute.keys);
-                              //     print(singleroute.values);
-                              //     print(building.floor[buildingAllApi.getStoredString()]);
-                              //     print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                              //   },
-                              //   child: Icon(Icons.add)
-                              // ),
-                              // FloatingActionButton(
-                              //   onPressed: () async {
-                              //
-                              // StopPDR();
-                              //
-                              //
-                              //
-                              //     // if (user.initialallyLocalised) {
-                              //     //   setState(() {
-                              //     //     isLiveLocalizing = !isLiveLocalizing;
-                              //     //   });
-                              //     //
-                              //     //   Timer.periodic(
-                              //     //       Duration(milliseconds: 6000),
-                              //     //           (timer) async {
-                              //     //         print(resBeacons);
-                              //     //         btadapter.startScanning(resBeacons);
-                              //     //         Future.delayed(Duration(milliseconds: 4000)).then((value) => {
-                              //     //           //c(resBeacons)
-                              //     //         });
-                              //     //
-                              //     //       });
-                              //     //
-                              //     // }
-                              //
-                              //   },
-                              //   child: Icon(
-                              //     Icons.location_history_sharp,
-                              //     color: (isLiveLocalizing)
-                              //         ? Colors.cyan
-                              //         : Colors.black,
-                              //   ),
-                              //   backgroundColor: Colors
-                              //       .white, // Set the background color of the FAB
-                              // ),
                             ],
                           ),
                         ),

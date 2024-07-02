@@ -115,6 +115,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
        btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+        print("WilsonCalled");
 
         listenToBin();
 
@@ -252,17 +253,24 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     ////print("$nearestBeacon   $highestweight");
 
-  //print("nearest${nearestBeacon}");
+  // print("nearest${nearestBeacon}");
     if(nearestBeacon !=""){
+      print("WilsonInsideCall");
 
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
+        print("WilsonInsideCall2");
+        print(widget.user.key);
+        print(Building.apibeaconmap[nearestBeacon]!.sId);
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
+          print("WilsonInsideCall3");
+
           //widget.user.pathobj.destinationFloor
           if (widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor) {
 
-            //print("workingg 5");
+            print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
+            //need to render on beacon for aiims jammu
             widget.paint(nearestBeacon,render: false);
             return true;
           }
@@ -276,7 +284,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.1) {
+              highestweight >= 1.2) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -289,7 +297,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ];
             double d = tools.calculateDistance(beaconcoord, usercoord);
             if (d < 5) {
-              //print("workingg 1");
+              print("workingg 1");
               //near to user so nothing to do
               return true;
             } else {
@@ -311,13 +319,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               });
 
               if (distanceFromPath > 10) {
-                //print("workingg 3");
+                print("workingg 3");
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
                 widget.reroute;
                 return false; //away from path
               } else {
-                //print("workingg 4");
+                print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 speak("${widget.direction} ${(widget.distance /
                     UserState.stepSize).ceil()} steps");
@@ -338,7 +346,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
       }else{
-        //print("workingg 6");
+        print("WilsonInsideCall4");
+
+        print("workingg 6");
         //print("listening");
         //print("inelese");
 

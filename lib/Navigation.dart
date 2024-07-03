@@ -148,6 +148,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   bool _isnavigationPannelOpen = false;
   bool _isreroutePannelOpen = false;
   bool _isBuildingPannelOpen = true;
+  bool initalLocalizeBool=true;
   bool _isFilterPanelOpen = false;
   bool checkedForPolyineUpdated = false;
   bool checkedForPatchDataUpdated = false;
@@ -918,7 +919,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       // print("final value");
       // print(finalvalue);
       if (user.isnavigating == false) {
-        detected = true;
+        detected = !detected;
+        initalLocalizeBool=false;
         if(!_isExploreModePannelOpen){
           _isBuildingPannelOpen = true;
         }
@@ -4212,6 +4214,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                           child: TextButton(
                                             onPressed: () async {
 
+                                              //detected=false;
+
                                               wsocket.message["path"]["source"]=PathState.sourceName;
                                               wsocket.message["path"]["source"]=PathState.destinationName;
 
@@ -6341,7 +6345,6 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     double screenHeight = MediaQuery.of(context).size.height;
     //fetchlist();
     //filterItems();
-
     return Visibility(
         visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(

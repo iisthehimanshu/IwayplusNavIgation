@@ -962,6 +962,14 @@ class tools {
     }else if(Bid == "65d8835adb333f89456e687f"){
       i = 0;
       j = 1;
+    }else if(Bid == "66794105b80a6778c53c4856"){
+      //0,1
+      //1,2
+      //2,3
+      //1,3
+      //2,1
+      i=2;
+      j=3;
     }
 
     // Choose two adjacent corners

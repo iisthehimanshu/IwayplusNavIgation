@@ -68,6 +68,7 @@ Future<void> main() async {
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
+  await Hive.openBox('VersionData');
   runApp(const MyApp());
 }
 

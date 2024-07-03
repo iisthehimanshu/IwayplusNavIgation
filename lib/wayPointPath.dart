@@ -162,12 +162,15 @@ class Graph {
     }
     print("l2 $l2");
     if((temppath[e][1]*numCols)+temppath[e][0] != (destinationY*numCols)+destinationX){
-      await findPath(numRows, numCols, nonWalkableCells, ((temppath[e][1]*numCols)+temppath[e][0]), ((destinationY*numCols) + destinationX)).then((value){
-        //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-        print("path inside 2 $value");
-        l3 = value;
-        print("l3 $l3");
-      });
+
+        await findPath(numRows, numCols, nonWalkableCells, ((temppath[e][1]*numCols)+temppath[e][0]), ((destinationY*numCols) + destinationX)).then((value){
+          //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+          print("path inside 2 $value");
+          l3 = value;
+          print("l3 $l3");
+        });
+
+
     }
 
     return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);

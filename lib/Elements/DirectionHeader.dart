@@ -396,6 +396,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
+    if(widget.user.path[widget.user.pathobj.index] == 30709){
+      widget.user.move();
+      widget.user.move();
+
+      tools.angleBetweenBuildingAndNorth(widget.user.pathobj.destinationBid);
+    }
+
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{

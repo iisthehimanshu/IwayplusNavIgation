@@ -80,7 +80,7 @@ class BLueToothClass {
           //print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          //print("mac $MacId    rssi $Rssi");
+          print("mac $MacId    rssi $Rssi");
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);

@@ -1234,7 +1234,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         Building.waypoint = value;
       });
     }catch(e){
-      print("wayPoint API ERROR");
+      print("wayPoint API ERROR ");
     }
     
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
@@ -1267,6 +1267,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             createotherPatch(value);
           } else {}
         });
+
+        try{
+          await waypointapi().fetchwaypoint(id: key).then((value){
+            Building.waypoint.addAll(value);
+          });
+        }catch(e){
+          print("wayPoint API ERROR ");
+        }
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
           if (key == buildingAllApi.outdoorID) {
@@ -1325,9 +1333,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
+
         // await beaconapi().fetchBeaconData(id: key).then((value) {
         //   building.beacondata?.addAll(value);
         // });
+
       }
     });
 
@@ -1781,7 +1791,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       southwest: LatLng(minLat, minLng),
       northeast: LatLng(maxLat, maxLng),
     );
-    _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 0));
+    //_googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 0));
   }
 
   LatLng calculateBoundsCenter(LatLngBounds bounds) {
@@ -3225,6 +3235,136 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                   PathState.destinationFloor]![0])
         };
       }
+    } else if(PathState.sourceBid == "66794105b80a6778c53c4856" || PathState.destinationBid == "66794105b80a6778c53c4856") {
+      print("calculateroute else statement");
+      double sourceEntrylat = 0;
+      double sourceEntrylng = 0;
+      double destinationEntrylat = 0;
+      double destinationEntrylng = 0;
+
+      building.landmarkdata!.then((land) async {
+        for (int i = 0; i < land.landmarks!.length; i++) {
+          Landmarks element = land.landmarks![i];
+          if (element.element!.subType != null &&
+              element.name!.contains("IW408") &&
+              element.buildingID == PathState.destinationBid) {
+            destinationEntrylat = double.parse(element.properties!.latitude!);
+            destinationEntrylng = double.parse(element.properties!.longitude!);
+            if (element.floor == PathState.destinationFloor) {
+              await fetchroute(
+                  element.coordinateX!,
+                  element.coordinateY!,
+                  PathState.destinationX,
+                  PathState.destinationY,
+                  PathState.destinationFloor,
+                  bid: PathState.destinationBid);
+            } else if (element.floor != PathState.destinationFloor) {
+              List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
+                  landmarksMap[PathState.destinationPolyID]!.lifts!);
+              await fetchroute(
+                  commonlifts[0].x2!,
+                  commonlifts[0].y2!,
+                  PathState.destinationX,
+                  PathState.destinationY,
+                  PathState.destinationFloor,
+                  bid: PathState.destinationBid);
+              await fetchroute(element.coordinateX!, element.coordinateY!,
+                  commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
+                  bid: PathState.destinationBid);
+
+              PathState.connections[PathState.destinationBid] = {
+                element.floor!: calculateindex(
+                    commonlifts[0].x1!,
+                    commonlifts[0].y1!,
+                    building.floorDimenssion[PathState.destinationBid]![
+                    element.floor!]![0]),
+                PathState.destinationFloor: calculateindex(
+                    commonlifts[0].x2!,
+                    commonlifts[0].y2!,
+                    building.floorDimenssion[PathState.destinationBid]![
+                    PathState.destinationFloor]![0])
+              };
+            }
+            break;
+          }
+        }
+        // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
+        // double sourceLat=double.parse(source.properties!.latitude!);
+        // double sourceLng=double.parse(source.properties!.longitude!);
+        //
+        //
+        // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
+        // double destinationLat=double.parse(source.properties!.latitude!);
+        // double destinationLng=double.parse(source.properties!.longitude!);
+
+        for (int i = 0; i < land.landmarks!.length; i++) {
+          Landmarks element = land.landmarks![i];
+          if (element.element!.subType != null &&
+              element.name!.contains("IW408") &&
+              element.buildingID == PathState.sourceBid) {
+            sourceEntrylat = double.parse(element.properties!.latitude!);
+            sourceEntrylng = double.parse(element.properties!.longitude!);
+            if (PathState.sourceFloor == element.floor) {
+              await fetchroute(PathState.sourceX, PathState.sourceY,
+                  element.coordinateX!, element.coordinateY!, element.floor!,
+                  bid: PathState.sourceBid);
+            } else if (PathState.sourceFloor != element.floor) {
+              List<CommonLifts> commonlifts = findCommonLifts(
+                  landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
+
+              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+                  element.coordinateX!, element.coordinateY!, element.floor!,
+                  bid: PathState.sourceBid);
+              await fetchroute(PathState.sourceX, PathState.sourceY,
+                  commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+                  bid: PathState.sourceBid);
+
+              PathState.connections[PathState.sourceBid] = {
+                PathState.sourceFloor: calculateindex(
+                    commonlifts[0].x1!,
+                    commonlifts[0].y1!,
+                    building.floorDimenssion[PathState.sourceBid]![
+                    PathState.sourceFloor]![0]),
+                element.floor!: calculateindex(
+                    commonlifts[0].x2!,
+                    commonlifts[0].y2!,
+                    building.floorDimenssion[PathState.sourceBid]![
+                    element.floor!]![0])
+              };
+            }
+            break;
+          }
+        }
+
+        OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
+            sourceEntrylat,
+            sourceEntrylng,
+            destinationEntrylat,
+            destinationEntrylng);
+        print("build data: $buildData");
+
+        List<LatLng> coords = [];
+        if (buildData != null) {
+          int len = buildData!.data!.path!.length;
+          for (int i = 0; i < len; i++) {
+            coords.add(LatLng(buildData!.data!.path![i].lat!,
+                buildData!.data!.path![i].lng!));
+          }
+
+          List<String> key = [PathState.sourceBid, PathState.destinationBid];
+          interBuildingPath[key] = Set();
+          interBuildingPath[key]!.add(gmap.Polyline(
+            polylineId: PolylineId("InterBuilding"),
+            points: coords,
+            color: Colors.red,
+            width: 1,
+          ));
+        }
+      });
+      print("AIMS JAMMU building detected");
+
+      print(PathState.path.keys);
+      print(pathMarkers.keys);
     } else {
       print("calculateroute else statement");
       double sourceEntrylat = 0;
@@ -3235,7 +3375,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       building.landmarkdata!.then((land) async {
         for (int i = 0; i < land.landmarks!.length; i++) {
           Landmarks element = land.landmarks![i];
-          print("running destination location");
           if (element.element!.subType != null &&
               element.element!.subType!.toLowerCase().contains("entry") &&
               element.buildingID == PathState.destinationBid) {
@@ -3249,7 +3388,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                   PathState.destinationY,
                   PathState.destinationFloor,
                   bid: PathState.destinationBid);
-              print("running destination location no lift run");
             } else if (element.floor != PathState.destinationFloor) {
               List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
                   landmarksMap[PathState.destinationPolyID]!.lifts!);
@@ -3291,7 +3429,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         for (int i = 0; i < land.landmarks!.length; i++) {
           Landmarks element = land.landmarks![i];
-          print("running source location");
           if (element.element!.subType != null &&
               element.element!.subType!.toLowerCase().contains("entry") &&
               element.buildingID == PathState.sourceBid) {
@@ -3301,7 +3438,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   element.coordinateX!, element.coordinateY!, element.floor!,
                   bid: PathState.sourceBid);
-              print("running source location no lift run");
             } else if (PathState.sourceFloor != element.floor) {
               List<CommonLifts> commonlifts = findCommonLifts(
                   landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
@@ -3396,79 +3532,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-    // List<List<int>> offsets = [
-    //   [-1, -1], // Top-left
-    //   [-1, 0],  // Top
-    //   [-1, 1],  // Top-right
-    //   [0, -1],  // Left
-    //   [0, 1],   // Right
-    //   [1, -1],  // Bottom-left
-    //   [1, 0],   // Bottom
-    //   [1, 1]    // Bottom-right
-    // ];
-    print("all landmarks");
-    // building.landmarkdata!.then((value) {
-    //   value.landmarksMap!.forEach((key, value) {
-    //     // if(value.properties!.node==null){
-    //     //   print("nodenull${value.name}");
-    //     //
-    //     // }
-    //
-    //     if(value.doorX==null && value.element!.type!="floor" ){
-    //
-    //       if(building.nonWalkable[bid]![floor]!.contains(value.coordinateX!+value.coordinateY!*numCols)){
-    //         print("${value.name} ${value.coordinateX}");
-    //       }
-    //     }else{
-    //
-    //       if(building.nonWalkable[bid]![floor]!.contains(value.doorX!+value.doorY!*numCols)){
-    //         print(value.name);
-    //       }
-    //
-    //     }
-    //   });
-    // });
 
-
-    if(building.nonWalkable[bid]![floor]!.contains(destinationY*numCols+destinationX)){
-      print("DestinationinNonWalkable");
-
-
-
-
-
-    }
-    if(building.nonWalkable[bid]![floor]!.contains(sourceY*numCols+sourceX)){
-      print("SourceNonWalkable");
-
-
-    }
     print("numcol $numCols");
-
-
-
-
 
     List<int> path = [];
 
     print("$sourceX, $sourceY, $destinationX, $destinationY");
 
     try{
-      PathModel model = Building.waypoint.firstWhere((element) => element.floor == floor);
+      PathModel model = Building.waypoint.firstWhere((element) => (element.floor == floor && element.buildingID == bid));
       Map<String, List<dynamic>> adjList = model.pathNetwork;
       var graph = Graph(adjList);
       List<int> path2 = await graph.bfs(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
-      // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
-      //   path = path2;
-      //   print("path from waypoint $path");
-      // }else{
-      //   print("Faulty wayPoint path $path2");
-      //   throw Exception("wrong path");
-      // }
       path = path2;
       print("path from waypoint $path");
     }catch(e){
-
       print("inside exception $e");
 
       List<int> path2 = await findPath(
@@ -3557,7 +3635,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     });
 
     List<Cell> Cellpath =
-        findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols);
+        findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols,bid);
+    print("cellapth $Cellpath");
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -3638,10 +3717,11 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     }
 
     List<LatLng> coordinates = [];
+    print("patchdatainfetchroute ${building.patchData[bid]}");
     for (var node in path) {
       int row = (node%numCols); //divide by floor length
       int col = (node~/numCols); //divide by floor length
-      print("path4 $node : [$row,$col]");
+
       if (bid != null) {
         List<double> value =
         tools.localtoglobal(row, col, patchData: building.patchData[bid]);
@@ -4230,6 +4310,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                               user.isnavigating = true;
                                               user.Cellpath =
                                                   PathState.singleCellListPath;
+                                              PathState.singleCellListPath.forEach((element) {
+                                                print("debug ${element.x}, ${element.y}   ${element.bid}");
+                                              });
                                               user
                                                   .moveToStartofPath()
                                                   .then((value) async {

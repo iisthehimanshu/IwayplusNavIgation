@@ -24,6 +24,7 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 
@@ -213,7 +214,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
-      speak("Loading maps");
+      // speak("Loading maps");
     });
     print("Circular progress bar");
     //  calibrate();
@@ -751,10 +752,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       if (apibeaconmap[nearestBeacon]!.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[buildingAllApi.getStoredString()]!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[buildingAllApi.getStoredString()]!.polyline!.floors!);
         print("print cubicle data");
         for(int i=0;i<prevFloorLifts.length;i++){
           print(prevFloorLifts[i].name);
@@ -891,7 +892,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
             apibeaconmap[nearestBeacon]!.floor!;
         createRooms(
-            building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+            building.polylinedatamap[buildingAllApi.getStoredString()]!, apibeaconmap[nearestBeacon]!.floor!);
         building.landmarkdata!.then((value) {
           createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
         });
@@ -928,7 +929,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       if (nearestLandInfomation == null) {
         //updating user pointer
         building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!,
+        createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!,
             building.floor[buildingAllApi.getStoredString()]!);
         if (pathMarkers[user.floor] != null) {
           setCameraPosition(pathMarkers[user.floor]!);
@@ -1080,7 +1081,56 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   // Initially set to true to show loader
 
   void apiCalls() async {
+    await speak("Loading maps");
+
     print("working 1");
+    building.beacondata ??= [];
+    var buildingMap = await buildingAllApi.getStoredAllBuildingID();
+    for(var entry in buildingMap.entries){
+      var key = entry.key;
+      await beaconapi().fetchBeaconData(key).then((value) {
+        print("apibeaconmap ${apibeaconmap.length}");
+        print("value of $key ${value.length}");
+        if(value.isNotEmpty){
+          building.beacondata!.addAll(value);
+          for (int i = 0; i < value.length; i++) {
+            beacon beacons = value[i];
+            if (beacons.name != null) {
+              apibeaconmap[beacons.name!] = beacons;
+            }
+          }
+          Building.apibeaconmap = apibeaconmap;
+          setState(() {
+            resBeacons = apibeaconmap;
+          });
+        }
+        print("apibeaconmap2 ${apibeaconmap.length}");
+      });
+    }
+    if (Platform.isAndroid) {
+      print("starting scanning for android");
+      print("apibeaconmapinsideAndroid ${apibeaconmap.length}");
+      btadapter.startScanning(apibeaconmap);
+    } else {
+      print("starting scanning for IOS");
+      btadapter.startScanningIOS(apibeaconmap);
+      // btadapter.strtScanningIos(apibeaconmap);
+      // btadapter.getDevicesList();
+    }
+
+    late Timer _timer;
+    //please wait
+    //searching your location
+    await Future.delayed(Duration(seconds: 1));
+    speak("Please wait");
+    speak("Searching your location. .");
+
+    _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
+      localizeUser();
+
+      print("localize user is calling itself.....");
+      _timer.cancel();
+    });
     //await DataVersionApi().fetchDataVersionApiData();
 
     await patchAPI()
@@ -1186,54 +1236,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     }catch(e){
       print("wayPoint API ERROR");
     }
-
-
-
-    await beaconapi().fetchBeaconData().then((value) {
-      print("beacondatacheck");
-
-      building.beacondata = value;
-      for (int i = 0; i < value.length; i++) {
-        print(value[i].name);
-        beacon beacons = value[i];
-        if (beacons.name != null) {
-          apibeaconmap[beacons.name!] = beacons;
-        }
-      }
-      Building.apibeaconmap = apibeaconmap;
-
-      print("scanningggg starteddddd");
-
-      if (Platform.isAndroid) {
-        print("starting scanning for android");
-        btadapter.startScanning(apibeaconmap);
-      } else {
-        print("starting scanning for IOS");
-        btadapter.startScanningIOS(apibeaconmap);
-        // btadapter.strtScanningIos(apibeaconmap);
-        // btadapter.getDevicesList();
-      }
-
-       //btadapter.startScanning(apibeaconmap);
-      setState(() {
-        resBeacons = apibeaconmap;
-      });
-      // print("printing bin");
-      // btadapter.printbin();
-      late Timer _timer;
-      //please wait
-      //searching your location
-
-      speak("Please wait");
-      speak("Searching your location. .");
-
-      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
-
-        print("localize user is calling itself.....");
-        _timer.cancel();
-      });
-    });
+    
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
@@ -1273,7 +1276,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           }
           building.polylinedatamap[key] = value;
           building.numberOfFloors[key] = value.polyline!.floors!.length;
-          //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
+          //building.polylinedatamap[buildingAllApi.getStoredString()]!.polyline!.mergePolyline(value.polyline!.floors);
         });
 
         await landmarkApi().fetchLandmarkData(id: key).then((value) async {
@@ -1322,9 +1325,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
-        await beaconapi().fetchBeaconData(id: key).then((value) {
-
-        });
+        // await beaconapi().fetchBeaconData(id: key).then((value) {
+        //   building.beacondata?.addAll(value);
+        // });
       }
     });
 
@@ -3173,7 +3176,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             PathState.destinationFloor,
             bid: PathState.destinationBid);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!,
+        createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!,
             building.floor[buildingAllApi.getStoredString()]!);
 
         building.landmarkdata!.then((value) {
@@ -3582,10 +3585,10 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
       if (floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[buildingAllApi.getStoredString()]!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(floor),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[buildingAllApi.getStoredString()]!.polyline!.floors!);
         print('WilsonCheckingCurrentFloor');
         print(currFloorLifts);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -3674,7 +3677,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     // });
 
     building.floor[bid!] = floor;
-    createRooms(building.polyLineData!, floor);
+    createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!, floor);
     return path;
   }
 
@@ -6808,7 +6811,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
       if (turn.floor != null &&
           building.floor[buildingAllApi.getStoredString()] != turn.floor) {
         building.floor[buildingAllApi.getStoredString()] = turn.floor!;
-        createRooms(building.polyLineData!,
+        createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!,
             building.floor[buildingAllApi.getStoredString()]!);
       }
 
@@ -7212,7 +7215,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                     building.floor[buildingAllApi
                                         .getStoredString()] = user.floor;
                                     createRooms(
-                                        building.polyLineData!,
+                                        building.polylinedatamap[buildingAllApi.getStoredString()]!,
                                         building.floor[
                                             buildingAllApi.getStoredString()]!);
                                     if (pathMarkers[user.floor] != null) {

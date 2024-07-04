@@ -17,26 +17,24 @@ class beaconapi {
   var signInBox = Hive.box('SignInDatabase');
   String token = "";
 
-  Future<List<beacon>> fetchBeaconData({String? id}) async {
+  Future<List<beacon>> fetchBeaconData(String id) async {
     print("beacon");
     token = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
-    if(BeaconBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(BeaconBox.containsKey(id)){
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);
-      List<dynamic> responseBody = BeaconBox.get(buildingAllApi.getStoredString())!.responseBody;
-      List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-      return beaconList;
+      if( BeaconBox.get(id) != null){
+        List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
+        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
+        return beaconList;
+      }
+
     }
 
-    print("Mishor");
-    print(id);
-    print(buildingAllApi.getStoredString());
-    print(buildingAllApi.getStoredString().runtimeType);
-
     final Map<String, dynamic> data = {
-      "buildingId": id??buildingAllApi.getStoredString(),
+      "buildingId": id,
     };
     print("Mishordata");
     print(data);
@@ -66,8 +64,8 @@ class beaconapi {
       return beaconList;
     } else {
       if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
-        return beaconapi().fetchBeaconData();
+        // RefreshTokenAPI.fetchPatchData();
+        // return beaconapi().fetchBeaconData();
       }
       HelperClass.showToast("MishorError in Beacon API");
       print(Exception);

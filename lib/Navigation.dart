@@ -1395,6 +1395,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     String nearestBeacon = "";
     print("btadapter.BIN");
     print(btadapter.BIN);
+    print('checkingbeacon');
+    print(apibeaconmap);
+
 
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {

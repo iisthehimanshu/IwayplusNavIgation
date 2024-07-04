@@ -28,7 +28,7 @@ class patchAPI {
     print(refreshToken);
 
 
-    token = signInBox.get("accessToken");
+    accessToken = signInBox.get("accessToken");
 
     final PatchBox = PatchAPIModelBox.getData();
     if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){

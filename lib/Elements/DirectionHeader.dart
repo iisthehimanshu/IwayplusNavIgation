@@ -66,7 +66,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -113,7 +113,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-       btadapter.startScanning(Building.apibeaconmap);
+      btadapter.startScanning(Building.apibeaconmap);
       _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
         print("WilsonCalled");
 
@@ -135,11 +135,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
-          
+
           speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
-         
+
           speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
           widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
 
@@ -253,7 +253,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     ////print("$nearestBeacon   $highestweight");
 
-  // print("nearest${nearestBeacon}");
+    // print("nearest${nearestBeacon}");
     if(nearestBeacon !=""){
       print("WilsonInsideCall");
 
@@ -396,13 +396,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
-    if(widget.user.path[widget.user.pathobj.index] == 30709){
-      widget.user.move();
-      widget.user.move();
-
-      tools.angleBetweenBuildingAndNorth(widget.user.pathobj.destinationBid);
-    }
-
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
@@ -431,7 +424,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
           if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
-          DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
+            DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
         }
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
@@ -756,7 +749,7 @@ class scrollableDirection extends StatelessWidget {
 
   String chooseSteps(){
     if(listOfDirections[DirectionIndex].isDestination){
-     return "";
+      return "";
     }else if(DirectionIndex == nextTurnIndex){
       return '$steps Steps';
     }else{
@@ -766,7 +759,7 @@ class scrollableDirection extends StatelessWidget {
 
   Icon chooseIcon(){
     if(listOfDirections[DirectionIndex].isDestination){
-     return Icon(Icons.place_rounded,color: Colors.white,size: 40,);
+      return Icon(Icons.place_rounded,color: Colors.white,size: 40,);
     }else if(DirectionIndex == nextTurnIndex){
       return i;
     }else{
@@ -830,4 +823,3 @@ class scrollableDirection extends StatelessWidget {
     );
   }
 }
-

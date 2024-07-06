@@ -1450,7 +1450,7 @@ List<Cell> findCorridorSegments(
       //print("$pos with first eight");
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
-      //print("$pos with twoverticle");
+      print("$pos with twoverticle");
       if(nextcol>col){
         single
             .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
@@ -1463,7 +1463,7 @@ List<Cell> findCorridorSegments(
       }
 
     } else if ((eastCollision && westCollision)) {
-     // print("$pos with twohorizontal");
+      print("$pos with twohorizontal");
       if(nextrow>row){
         single.add(
             Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));

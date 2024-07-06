@@ -954,14 +954,14 @@ class tools {
     int i = 0;
     int j = 1;
     if(Bid  == "65d8825cdb333f89456d0562"){
-      i = 0;
-      j = 1;
+      i = 2;
+      j = 3;
     }else if(Bid == "65d8833adb333f89456e6519"){
-      i=0;
-      j=1;
+      i=2;
+      j=3;
     }else if(Bid == "65d8835adb333f89456e687f"){
-      i = 0;
-      j = 1;
+      i = 2;
+      j = 3;
     }else if(Bid == "66794105b80a6778c53c4856"){
       //0,1
       //1,2
@@ -994,6 +994,7 @@ class tools {
     }
 
     AngleBetweenBuildingandGlobalNorth = angleDeg;
+    print("buildingAngle set to $angleDeg");
     return angleDeg;
   }
 

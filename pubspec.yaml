@@ -83,6 +83,8 @@ dependencies:
   web_socket_channel: ^2.4.5
   socket_io_client: ^2.0.3+1
   bluetooth_enable_fork: ^0.1.6
+  fluster: ^1.2.0
+  flutter_cache_manager:
 
 
 

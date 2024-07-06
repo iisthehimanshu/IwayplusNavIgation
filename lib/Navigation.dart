@@ -5,10 +5,12 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
 import 'package:collection/collection.dart' as pac;
+import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -24,6 +26,8 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'CLUSTERING/MapHelper.dart';
+import 'CLUSTERING/MapMarkers.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
@@ -183,6 +187,247 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork = false;
+
+
+  //-----------------------------------------------------------------------------------------
+  /// Set of displayed markers and cluster markers on the map
+  final Set<Marker> _markers = Set();
+
+  /// Minimum zoom at which the markers will cluster
+  final int _minClusterZoom = 0;
+
+  /// Maximum zoom at which the markers will cluster
+  final int _maxClusterZoom = 19;
+
+  /// [Fluster] instance used to manage the clusters
+  Fluster<MapMarker>? _clusterManager;
+
+  /// Current map zoom. Initial zoom will be 15, street level
+  double _currentZoom = 15;
+
+  /// Map loading flag
+  bool _isMapLoading = true;
+
+  /// Markers loading flag
+  bool _areMarkersLoading = true;
+
+  /// Url image used on normal markers
+  final String _markerImageUrl =
+      'https://img.icons8.com/office/80/000000/marker.png';
+
+  /// Color of the cluster circle
+  final Color _clusterColor = Color(0xfffddaa9);
+
+  /// Color of the cluster text
+  final Color _clusterTextColor = Colors.white;
+
+  /// Example marker coordinates
+  final Map<LatLng, String> _markerLocationsMap = {};
+  final Map<LatLng, String> _markerLocationsMapLanName = {};
+  static Future<ui.Image> loadImage(Uint8List imgBytes) async {
+    final Completer<ui.Image> completer = Completer();
+    ui.decodeImageFromList(imgBytes, (ui.Image img) {
+      completer.complete(img);
+    });
+    return completer.future;
+  }
+  static Future<BitmapDescriptor> getImageMarker(
+      int clusterSize,
+      Color clusterColor,
+      Color textColor,
+      int width,
+      String text,
+      String iconPath,
+      ) async {
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint circlePaint = Paint()..color = clusterColor;
+    final TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    final double radius = width / 2;
+    final double rectWidth = 160.0; // Width of the rectangle
+    final double rectHeight = 80.0; // Height of the rectangle
+    final double spacing = 15.0; // Spacing between the rectangle and icon
+    final ByteData byteData = await rootBundle.load(iconPath);
+    final Uint8List iconBytes = byteData.buffer.asUint8List();
+    final ui.Image iconImage = await loadImage(iconBytes);
+    final double iconSize = radius * 2.5; // Adjust the size as needed
+    final double iconX = radius - iconSize / 2;
+    final double iconY = rectHeight + spacing;
+
+    // Draw rectangle above the icon
+    final double rectX = (rectWidth) / 2;
+    final double rectY = -5;
+    final double borderRadius = 10.0; // Adjust the border radius as needed
+    final Paint rectanglePaint = Paint()..color = Colors.black26;
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        -10,
+        rectY,
+        rectX + rectWidth,
+        rectY + rectHeight,
+        Radius.circular(borderRadius),
+      ),
+      rectanglePaint,
+    );
+
+    // Draw venue text inside rectangle
+    textPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontFamily: "Roboto",
+        fontSize: 38,
+        fontWeight: FontWeight.w500,
+        color: Colors.yellow,
+        height: 20 / 14,
+      ),
+    );
+
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(-10, rectY + (rectHeight - textPainter.height) / 2),
+    );
+
+    // Draw icon
+    paintImage(
+      canvas: canvas,
+      image: iconImage,
+      rect: Rect.fromLTWH(iconX, iconY, iconSize, iconSize),
+    );
+
+    // textPainter.layout();
+    // textPainter.paint(
+    //   canvas,
+    //   Offset(radius - textPainter.width / 2, radius - textPainter.height / 2),
+    // );
+
+    final image = await pictureRecorder.endRecording().toImage(
+      rectWidth.toInt(),
+      (rectHeight + spacing + iconSize).toInt(),
+    );
+    final data = await image.toByteData(format: ImageByteFormat.png);
+
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+  }
+
+  /// Inits [Fluster] and all the markers with network images and updates the loading state.
+  void _initMarkers() async {
+    final List<MapMarker> markers = [];
+
+    for (LatLng keys in _markerLocationsMap.keys) {
+      final String values = _markerLocationsMap[keys]!;
+      final String LandmarkValue = _markerLocationsMapLanName[keys]!;
+
+      // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
+      // print("values$values");
+      final BitmapDescriptor markerImage = await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+      //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
+
+      if(values=='Lift'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue
+          ),
+        );
+      }else if(values=='Entry'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/log-in.png', 65);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue
+          ),
+        );
+      }else if(values=='Female'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/Femaletoilet.png', 65);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue
+          ),
+        );
+      }else if(values=='Male'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/Maletoilet.png', 65);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue
+          ),
+        );
+      }
+
+
+
+      // markers.add(
+      //   MapMarker(
+      //     id: keys.toString(),
+      //     position: keys,
+      //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
+      //   ),
+      // );
+    }
+
+    _clusterManager = await MapHelper.initClusterManager(
+      markers,
+      _minClusterZoom,
+      _maxClusterZoom,
+    );
+
+    await _updateMarkers11();
+  }
+
+  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
+  /// updates state.
+  Future<void> _updateMarkers11([double? updatedZoom]) async {
+    if (_clusterManager == null || updatedZoom == _currentZoom) return;
+
+    if (updatedZoom != null) {
+      _currentZoom = updatedZoom;
+    }
+
+    setState(() {
+      _areMarkersLoading = true;
+    });
+
+    final updatedMarkers = await MapHelper.getClusterMarkers(
+      _clusterManager,
+      _currentZoom,
+      _clusterColor,
+      _clusterTextColor,
+      70,
+    );
+
+    _markers
+      ..clear()
+      ..addAll(updatedMarkers);
+    print("_markers.length");
+    print(_markers.length);
+
+    setState(() {
+      _areMarkersLoading = false;
+    });
+  }
+  Future<Uint8List> getIconBytes(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    final Uint8List bytes = (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+    return bytes;
+  }
+  //--------------------------------------------------------------------------------------
+
 
 
   @override
@@ -2374,6 +2619,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   void createMarkers(land _landData, int floor) async {
     Markers.clear();
+    _markerLocationsMap.clear();
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
@@ -2388,9 +2634,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           //   getImagesFromMarker('assets/location_on.png',50),
           // );
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/location_on.png', 55);
+          await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!);
+          //_markerLocations.add(LatLng(value[0],value[1]));
 
           Markers.add(Marker(
               markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
@@ -2413,10 +2660,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/dooricon.png', 45);
+          await getImagesFromMarker('assets/dooricon.png', 45);
           setState(() {
             List<double> value =
-                tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
+            tools.localtoglobal(landmarks[i].doorX!, landmarks[i].doorY!);
             Markers.add(Marker(
                 markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
                 position: LatLng(value[0], value[1]),
@@ -2441,135 +2688,162 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           });
         } else if (landmarks[i].name != null &&
             landmarks[i].name!.toLowerCase().contains("lift") &&
-            landmarks[i].element!.subType == "lift") {
+            landmarks[i].element!.subType != "room door") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/entry.png', 75);
+          await getImagesFromMarker('assets/entry.png', 75);
+
 
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
-            Markers.add(Marker(
-                markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                visible: false,
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
-                  },
-                )));
+
+            // _markerLocations[LatLng(value[0], value[1])] = '1';
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+            // _markers!.add(Marker(
+            //   markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
+            //   position: LatLng(value[0], value[1]),
+            //   icon: BitmapDescriptor.fromBytes(iconMarker),
+            // ));
+
+            // Markers.add(Marker(
+            //     markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
+            //     position: LatLng(value[0], value[1]),
+            //     icon: BitmapDescriptor.fromBytes(iconMarker),
+            //     visible: false,
+            //     infoWindow: InfoWindow(
+            //       title: landmarks[i].name,
+            //       snippet: 'Additional Information',
+            //       // Replace with additional information
+            //       onTap: () {
+            //         if (building.selectedLandmarkID !=
+            //             landmarks[i].properties!.polyId) {
+            //           building.selectedLandmarkID =
+            //               landmarks[i].properties!.polyId;
+            //           _isRoutePanelOpen = false;
+            //           singleroute.clear();
+            //           _isLandmarkPanelOpen = true;
+            //           addselectedMarker(LatLng(value[0], value[1]));
+            //         }
+            //       },
+            //     ))
+            // );
           });
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/6.png', 65);
+          await getImagesFromMarker('assets/6.png', 65);
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
-            Markers.add(Marker(
-                markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                visible: false,
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    print("checking--${landmarks[i].name}");
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
-                  },
-                )));
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+            // Markers.add(Marker(
+            //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
+            //     position: LatLng(value[0], value[1]),
+            //     icon: BitmapDescriptor.fromBytes(iconMarker),
+            //     visible: false,
+            //     infoWindow: InfoWindow(
+            //       title: landmarks[i].name,
+            //       snippet: 'Additional Information',
+            //       // Replace with additional information
+            //       onTap: () {
+            //         if (building.selectedLandmarkID !=
+            //             landmarks[i].properties!.polyId) {
+            //           building.selectedLandmarkID =
+            //               landmarks[i].properties!.polyId;
+            //           _isRoutePanelOpen = false;
+            //           singleroute.clear();
+            //           _isLandmarkPanelOpen = true;
+            //           addselectedMarker(LatLng(value[0], value[1]));
+            //         }
+            //       },
+            //     )));
           });
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/4.png', 65);
+          await getImagesFromMarker('assets/4.png', 65);
 
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
-            Markers.add(Marker(
-                markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                visible: false,
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
-                  },
-                )));
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+            // Markers.add(Marker(
+            //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
+            //     position: LatLng(value[0], value[1]),
+            //     icon: BitmapDescriptor.fromBytes(iconMarker),
+            //     visible: false,
+            //     infoWindow: InfoWindow(
+            //       title: landmarks[i].name,
+            //       snippet: 'Additional Information',
+            //       // Replace with additional information
+            //       onTap: () {
+            //         if (building.selectedLandmarkID !=
+            //             landmarks[i].properties!.polyId) {
+            //           building.selectedLandmarkID =
+            //               landmarks[i].properties!.polyId;
+            //           _isRoutePanelOpen = false;
+            //           singleroute.clear();
+            //           _isLandmarkPanelOpen = true;
+            //           addselectedMarker(LatLng(value[0], value[1]));
+            //         }
+            //       },
+            //     )));
           });
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/1.png', 90);
+          await getImagesFromMarker('assets/1.png', 90);
 
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!);
-            Markers.add(Marker(
-                markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                visible: true,
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
-                  },
-                ),
-                onTap: () {
-                  if (building.selectedLandmarkID !=
-                      landmarks[i].properties!.polyId) {
-                    building.selectedLandmarkID =
-                        landmarks[i].properties!.polyId;
-                    _isRoutePanelOpen = false;
-                    singleroute.clear();
-                    _isLandmarkPanelOpen = true;
-                    addselectedMarker(LatLng(value[0], value[1]));
-                  }
-                }));
+            // _markerLocations[LatLng(value[0], value[1])] = '1';
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+            // _markers!.add(Marker(
+            //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
+            //   position: LatLng(value[0], value[1]),
+            //   icon: BitmapDescriptor.fromBytes(iconMarker),
+            // ));
+
+
+
+
+            // Markers.add(Marker(
+            //     markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
+            //     position: LatLng(value[0], value[1]),
+            //     icon: BitmapDescriptor.fromBytes(iconMarker),
+            //     visible: true,
+            //     infoWindow: InfoWindow(
+            //       title: landmarks[i].name,
+            //       snippet: 'Additional Information',
+            //       // Replace with additional information
+            //       onTap: () {
+            //         if (building.selectedLandmarkID !=
+            //             landmarks[i].properties!.polyId) {
+            //           building.selectedLandmarkID =
+            //               landmarks[i].properties!.polyId;
+            //           _isRoutePanelOpen = false;
+            //           singleroute.clear();
+            //           _isLandmarkPanelOpen = true;
+            //           addselectedMarker(LatLng(value[0], value[1]));
+            //         }
+            //       },
+            //     ),
+            //     onTap: () {
+            //       if (building.selectedLandmarkID !=
+            //           landmarks[i].properties!.polyId) {
+            //         building.selectedLandmarkID =
+            //             landmarks[i].properties!.polyId;
+            //         _isRoutePanelOpen = false;
+            //         singleroute.clear();
+            //         _isLandmarkPanelOpen = true;
+            //         addselectedMarker(LatLng(value[0], value[1]));
+            //       }
+            //     }));
           });
         } else {}
       }
@@ -7056,7 +7330,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                     building.floor[
                                         buildingAllApi.getStoredString()]]!)
                                 : getCombinedPolylines(),
-                            markers: getCombinedMarkers().union(focusturnArrow),
+                            markers: getCombinedMarkers().union(_markers).union(focusturnArrow),
                             onTap: (x) {
                               mapState.interaction = true;
                             },
@@ -7073,6 +7347,10 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                               if (patch.isNotEmpty) {
                                 fitPolygonInScreen(patch.first);
                               }
+                              setState(() {
+                                _isMapLoading = false;
+                              });
+                              _initMarkers();
                             },
                             onCameraMove: (CameraPosition cameraPosition) {
                               print("plpl ${cameraPosition.tilt}");
@@ -7086,6 +7364,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                 _updateMarkers(cameraPosition.zoom);
                                 //_updateBuilding(cameraPosition.zoom);
                               }
+                              _updateMarkers11(cameraPosition.zoom);
+
                             },
                             onCameraIdle: () {
                               if (!mapState.interaction) {

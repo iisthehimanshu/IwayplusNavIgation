@@ -1302,9 +1302,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       _timer.cancel();
     });
     //await DataVersionApi().fetchDataVersionApiData();
-
+    String openBuildingID = "";
+    if(nearestLandInfomation != null){
+      openBuildingID = nearestLandInfomation!.buildingID!;
+    }else{
+      openBuildingID = buildingAllApi.selectedBuildingID;
+    }
     await patchAPI()
-        .fetchPatchData(id: buildingAllApi.selectedBuildingID)
+        .fetchPatchData(id: openBuildingID)
         .then((value) {
       print("${value.patchData.toString()}");
       building.patchData[value.patchData!.buildingID!] = value;
@@ -1318,7 +1323,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
     print("working 2");
     await PolyLineApi()
-        .fetchPolyData(id: buildingAllApi.selectedBuildingID)
+        .fetchPolyData(id: openBuildingID)
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
@@ -1327,10 +1332,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
       createRooms(value, 0);
     });
-    building.floor[buildingAllApi.selectedBuildingID] = 0;
+    building.floor[openBuildingID] = 0;
     print("working 3");
     building.landmarkdata = landmarkApi()
-        .fetchLandmarkData(id: buildingAllApi.selectedBuildingID)
+        .fetchLandmarkData(id: openBuildingID)
         .then((value) {
       print("Himanshuchecker ids ${value.landmarks![0].name}");
       Map<int, LatLng> coordinates = {};
@@ -1350,7 +1355,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+          value.landmarks![i].properties!.nonWalkableGrids!.join(',');
           RegExp regExp = RegExp(r'\d+');
           Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
           for (Match match in matches) {
@@ -1367,15 +1372,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           localizedData.nonWalkable = currrentnonWalkable;
 
           Map<int, List<int>> currentfloorDimenssion =
-              building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
+              building.floorDimenssion[openBuildingID] ??
                   Map();
           currentfloorDimenssion[value.landmarks![i].floor!] = [
             value.landmarks![i].properties!.floorLength!,
             value.landmarks![i].properties!.floorBreadth!
           ];
 
-          building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-              currentfloorDimenssion!;
+          building.floorDimenssion[openBuildingID] =
+          currentfloorDimenssion!;
           localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
           print("fetch route--  ${building.floorDimenssion}");
@@ -1406,7 +1411,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     }catch(e){
       print("wayPoint API ERROR ");
     }
-    
+
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
@@ -1474,7 +1479,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             if (value.landmarks![i].element!.type == "Floor") {
               List<int> allIntegers = [];
               String jointnonwalkable =
-                  value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
               RegExp regExp = RegExp(r'\d+');
               Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
               for (Match match in matches) {
@@ -1493,7 +1498,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                 value.landmarks![i].properties!.floorBreadth!
               ];
               building.floorDimenssion[key] = currentfloorDimenssion!;
-             // print("fetch route--  ${building.floorDimenssion}");
+              // print("fetch route--  ${building.floorDimenssion}");
 
               // building.floorDimenssion[value.landmarks![i].floor!] = [
               //   value.landmarks![i].properties!.floorLength!,
@@ -1511,7 +1516,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       }
     });
 
-    buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
+    buildingAllApi.setStoredString(openBuildingID);
     await Future.delayed(Duration(seconds: 3));
     setState(() {
       isLoading = false;
@@ -1520,6 +1525,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+
+
+
   }
   void _updateCircle() {
     final Circle updatedCircle = Circle(

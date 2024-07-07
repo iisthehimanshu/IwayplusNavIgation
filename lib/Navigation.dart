@@ -191,7 +191,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   //-----------------------------------------------------------------------------------------
   /// Set of displayed markers and cluster markers on the map
-  final Set<Marker> _markers = Set();
+  Set<Marker> _markers = Set();
+
+  bool markerSldShown = true;
 
   /// Minimum zoom at which the markers will cluster
   final int _minClusterZoom = 0;
@@ -224,98 +226,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   /// Example marker coordinates
   final Map<LatLng, String> _markerLocationsMap = {};
   final Map<LatLng, String> _markerLocationsMapLanName = {};
-  static Future<ui.Image> loadImage(Uint8List imgBytes) async {
-    final Completer<ui.Image> completer = Completer();
-    ui.decodeImageFromList(imgBytes, (ui.Image img) {
-      completer.complete(img);
-    });
-    return completer.future;
-  }
-  static Future<BitmapDescriptor> getImageMarker(
-      int clusterSize,
-      Color clusterColor,
-      Color textColor,
-      int width,
-      String text,
-      String iconPath,
-      ) async {
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-    final Paint circlePaint = Paint()..color = clusterColor;
-    final TextPainter textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
 
-    final double radius = width / 2;
-    final double rectWidth = 160.0; // Width of the rectangle
-    final double rectHeight = 80.0; // Height of the rectangle
-    final double spacing = 15.0; // Spacing between the rectangle and icon
-    final ByteData byteData = await rootBundle.load(iconPath);
-    final Uint8List iconBytes = byteData.buffer.asUint8List();
-    final ui.Image iconImage = await loadImage(iconBytes);
-    final double iconSize = radius * 2.5; // Adjust the size as needed
-    final double iconX = radius - iconSize / 2;
-    final double iconY = rectHeight + spacing;
-
-    // Draw rectangle above the icon
-    final double rectX = (rectWidth) / 2;
-    final double rectY = -5;
-    final double borderRadius = 10.0; // Adjust the border radius as needed
-    final Paint rectanglePaint = Paint()..color = Colors.black26;
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        -10,
-        rectY,
-        rectX + rectWidth,
-        rectY + rectHeight,
-        Radius.circular(borderRadius),
-      ),
-      rectanglePaint,
-    );
-
-    // Draw venue text inside rectangle
-    textPainter.text = TextSpan(
-      text: text,
-      style: TextStyle(
-        fontFamily: "Roboto",
-        fontSize: 38,
-        fontWeight: FontWeight.w500,
-        color: Colors.yellow,
-        height: 20 / 14,
-      ),
-    );
-
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(-10, rectY + (rectHeight - textPainter.height) / 2),
-    );
-
-    // Draw icon
-    paintImage(
-      canvas: canvas,
-      image: iconImage,
-      rect: Rect.fromLTWH(iconX, iconY, iconSize, iconSize),
-    );
-
-    // textPainter.layout();
-    // textPainter.paint(
-    //   canvas,
-    //   Offset(radius - textPainter.width / 2, radius - textPainter.height / 2),
-    // );
-
-    final image = await pictureRecorder.endRecording().toImage(
-      rectWidth.toInt(),
-      (rectHeight + spacing + iconSize).toInt(),
-    );
-    final data = await image.toByteData(format: ImageByteFormat.png);
-
-    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
-  }
 
   /// Inits [Fluster] and all the markers with network images and updates the loading state.
   void _initMarkers() async {
     final List<MapMarker> markers = [];
+
+
 
     for (LatLng keys in _markerLocationsMap.keys) {
       final String values = _markerLocationsMap[keys]!;
@@ -378,12 +295,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       //   ),
       // );
     }
+    print("markers.lennn");
+    print(markers);
 
     _clusterManager = await MapHelper.initClusterManager(
       markers,
       _minClusterZoom,
       _maxClusterZoom,
     );
+    print("_clusterManager?.radius");
+    print(_clusterManager);
 
     await _updateMarkers11();
   }
@@ -391,33 +312,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   /// Gets the markers and clusters to be displayed on the map for the current zoom level and
   /// updates state.
   Future<void> _updateMarkers11([double? updatedZoom]) async {
-    if (_clusterManager == null || updatedZoom == _currentZoom) return;
+    if(updatedZoom! > 15.5 ) {
+      if (_clusterManager == null || updatedZoom == _currentZoom) return;
 
-    if (updatedZoom != null) {
-      _currentZoom = updatedZoom;
+      if (updatedZoom != null) {
+        _currentZoom = updatedZoom;
+      }
+
+      setState(() {
+        _areMarkersLoading = true;
+      });
+
+      final updatedMarkers = await MapHelper.getClusterMarkers(
+        _clusterManager,
+        _currentZoom,
+        _clusterColor,
+        _clusterTextColor,
+        70,
+      );
+
+
+      _markers
+        ..clear()
+        ..addAll(updatedMarkers);
+
+
+      setState(() {
+        _areMarkersLoading = false;
+      });
     }
 
-    setState(() {
-      _areMarkersLoading = true;
-    });
-
-    final updatedMarkers = await MapHelper.getClusterMarkers(
-      _clusterManager,
-      _currentZoom,
-      _clusterColor,
-      _clusterTextColor,
-      70,
-    );
-
-    _markers
-      ..clear()
-      ..addAll(updatedMarkers);
-    print("_markers.length");
-    print(_markers.length);
-
-    setState(() {
-      _areMarkersLoading = false;
-    });
   }
   Future<Uint8List> getIconBytes(String path, int width) async {
     ByteData data = await rootBundle.load(path);
@@ -427,6 +351,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     return bytes;
   }
   //--------------------------------------------------------------------------------------
+
 
 
 
@@ -2618,8 +2543,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   void createMarkers(land _landData, int floor) async {
-    Markers.clear();
+    _markers.clear();
     _markerLocationsMap.clear();
+    _markerLocationsMapLanName.clear();
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
@@ -2856,6 +2782,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         visible: false,
       ));
     });
+    _initMarkers();
+
   }
 
   void toggleLandmarkPanel() {
@@ -4571,6 +4499,11 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
+                                              setState(() {
+                                                _markers.clear();
+                                                markerSldShown = false;
+                                              });
+
 
                                               wsocket.message["path"]["source"]=PathState.sourceName;
                                               wsocket.message["path"]["source"]=PathState.destinationName;
@@ -5153,6 +5086,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  markerSldShown = true;
                                   focusturnArrow.clear();
                                   clearPathVariables();
                                   _isnavigationPannelOpen = false;
@@ -6804,10 +6738,10 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
         return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
-                    .union(Set<Marker>.of(markers[user.Bid] ?? [])))
-                .union(Markers)
+            .union(Set<Marker>.of(markers[user.Bid] ?? [])))
+            .union(Markers)
             : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers);
       }
     } else {
@@ -6819,9 +6753,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
         return marker.union(Markers);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!)
-                .union(Markers)
+            .union(Markers)
             : Markers;
       }
     }
@@ -6848,11 +6782,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
   void _updateMarkers(double zoom) {
     print(zoom);
+
     if (building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
       if(user.isnavigating){
         setState(() {
-          Markers.forEach((marker) {
+          _markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(false, marker);
@@ -6887,11 +6822,11 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               }
             }
           });
-          Markers = updatedMarkers;
+          _markers = updatedMarkers;
         });
       }else{
         setState(() {
-          Markers.forEach((marker) {
+          _markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(zoom > 20.5, marker);
@@ -6926,7 +6861,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               }
             }
           });
-          Markers = updatedMarkers;
+          _markers = updatedMarkers;
         });
       }
     }
@@ -7361,11 +7296,30 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                 mapState.zoom = cameraPosition.zoom;
                               }
                               if (true) {
-                                _updateMarkers(cameraPosition.zoom);
+                                // _updateMarkers(cameraPosition.zoom);
                                 //_updateBuilding(cameraPosition.zoom);
                               }
-                              _updateMarkers11(cameraPosition.zoom);
+                              // _updateMarkers(cameraPosition.zoom);
+                              if(cameraPosition.zoom < 17){
+                                _markers.clear();
+                                markerSldShown = false;
+                              }else{
+                                if(user.isnavigating){
+                                  _markers.clear();
+                                  markerSldShown = false;
+                                }else{
+                                  markerSldShown = true;
+                                }
+                              }
+                              if(markerSldShown){
+                                _updateMarkers11(cameraPosition.zoom);
+                              }else{
+                                print("Notshow");
+                              }
 
+                              // _updateEntryMarkers11(cameraPosition.zoom);
+                              //_markerLocations.clear();
+                              print("Zoom level: ${cameraPosition.zoom}");
                             },
                             onCameraIdle: () {
                               if (!mapState.interaction) {
@@ -7512,6 +7466,11 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                               onTap: () {
                                                 _polygon.clear();
                                                 circles.clear();
+                                                // _markers.clear();
+                                                // _markerLocationsMap.clear();
+                                                // _markerLocationsMapLanName.clear();
+
+
                                                 building.floor[buildingAllApi
                                                     .getStoredString()] = i;
                                                 createRooms(
@@ -7531,7 +7490,10 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                     building.floor[buildingAllApi
                                                         .getStoredString()]!,
                                                   );
+
+
                                                 });
+
                                               },
                                             );
                                           },

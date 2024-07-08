@@ -1698,6 +1698,7 @@ class tools {
     Landmarks s = points.where((element) => element.properties!.polyId == sourceid).first;
     Landmarks d = points.where((element) => element.properties!.polyId == destinationid).first;
     Poi source = Poi(double.parse(s.properties!.latitude!), double.parse(s.properties!.longitude!));
+    Poi destination = Poi(double.parse(d.properties!.latitude!), double.parse(d.properties!.longitude!));
     List<double> sourceToDestination = latLongToCartesian(
         destination.latitude - source.latitude,
         destination.longitude - source.longitude
@@ -1710,7 +1711,7 @@ class tools {
       if(point.element!.subType != null &&
           point.element!.subType == "main entry" &&
           point.name!.toLowerCase().contains("entry") &&
-          point.buildingID == placeBid){
+          point.buildingID == s.buildingID){
         List<double> sourceToPoint = latLongToCartesian(
             double.parse(point.properties!.latitude!) - source.latitude,
             double.parse(point.properties!.longitude!) - source.longitude

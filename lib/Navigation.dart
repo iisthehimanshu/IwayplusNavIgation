@@ -3258,7 +3258,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       building.landmarkdata!.then((land) async {
 
-        Landmarks element = tools.findMinAnglePoint(Poi(PathState.sour, longitude)
+        Landmarks element = tools.findMinAnglePoint(PathState.sourceBid, PathState.destinationBid, land.landmarks!);
 
           List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
           destinationEntrylat = dv[0];
@@ -3313,7 +3313,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
 
-        Landmarks element2  = tools.findNearestEntry(land.landmarks!, [PathState.sourceX,PathState.sourceY],PathState.sourceBid)!;
+        Landmarks element2  = tools.findMinAnglePoint(PathState.destinationBid, PathState.sourceBid, land.landmarks!);
 
           List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
           sourceEntrylat = sv[0];

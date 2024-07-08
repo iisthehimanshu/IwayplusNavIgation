@@ -152,7 +152,7 @@ class UserState{
 
     if(isnavigating){
       checkForMerge();
-      if(pathobj.index + 1 == ListofPaths[buildingNumber].length){
+      if(pathobj.index + 3 == ListofPaths[buildingNumber].length){
         pathobj.index = 2;
         buildingNumber --;
         moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);

@@ -31,7 +31,8 @@ class pathState {
   List<int> beaconCords = [];
   static List<Landmarks> nearbyLandmarks = [];
   Map<int,Landmarks> associateTurnWithLandmark = Map();
-
+  String? SourceExitPolyid;
+  String? DestinationEntryPolyid;
   // Default constructor without arguments
   pathState();
 

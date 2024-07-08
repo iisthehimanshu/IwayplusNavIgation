@@ -975,55 +975,63 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
-  static double angleBetweenBuildingAndNorth(String Bid) {
-    // Assuming corners is a list of Point objects representing coordinates of the building corners
-
-    int i = 0;
-    int j = 1;
-    if(Bid  == "65d8825cdb333f89456d0562"){
-      i = 2;
-      j = 3;
-    }else if(Bid == "65d8833adb333f89456e6519"){
-      i=2;
-      j=3;
-    }else if(Bid == "65d8835adb333f89456e687f"){
-      i = 2;
-      j = 3;
-    }else if(Bid == "66794105b80a6778c53c4856"){
-      //0,1
-      //1,2
-      //2,3
-      //1,3
-      //2,1
-      i=0;
-      j=1;
-    }else if(Bid == "6675792ca3119bff0e732f61"){
-      i=2;
-      j=3;
+  static void setBuildingAngle(String angle){
+    AngleBetweenBuildingandGlobalNorth = double.parse(angle);
+    AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
+    if(AngleBetweenBuildingandGlobalNorth>360){
+      AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
     }
-
-    // Choose two adjacent corners
-    Point<double> corner1 = corners[i]; //0 for RNI   2 for Ashoka
-    Point<double> corner2 = corners[j]; //1 for RNI   3 for Ashoka
-
-    // Calculate the slope
-    double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
-
-    // Calculate the angle in radians
-    double angleRad = atan(slope);
-
-    // Convert angle to degrees
-    double angleDeg = angleRad * (180 / pi);
-
-    // Adjust for the correct quadrant
-    if (angleDeg < 0) {
-      angleDeg += 360;
-    }
-
-    AngleBetweenBuildingandGlobalNorth = angleDeg;
-    print("buildingAngle set to $angleDeg");
-    return angleDeg;
   }
+
+  // static double angleBetweenBuildingAndNorth(String Bid) {
+  //   // Assuming corners is a list of Point objects representing coordinates of the building corners
+  //
+  //   int i = 0;
+  //   int j = 1;
+  //   if(Bid  == "65d8825cdb333f89456d0562"){
+  //     i = 2;
+  //     j = 3;
+  //   }else if(Bid == "65d8833adb333f89456e6519"){
+  //     i=2;
+  //     j=3;
+  //   }else if(Bid == "65d8835adb333f89456e687f"){
+  //     i = 2;
+  //     j = 3;
+  //   }else if(Bid == "66794105b80a6778c53c4856"){
+  //     //0,1
+  //     //1,2
+  //     //2,3
+  //     //1,3
+  //     //2,1
+  //     i=0;
+  //     j=1;
+  //   }else if(Bid == "6675792ca3119bff0e732f61"){
+  //     i=2;
+  //     j=3;
+  //   }
+  //
+  //   // Choose two adjacent corners
+  //   Point<double> corner1 = corners[i]; //0 for RNI   2 for Ashoka
+  //   Point<double> corner2 = corners[j]; //1 for RNI   3 for Ashoka
+  //
+  //   // Calculate the slope
+  //   double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
+  //
+  //   // Calculate the angle in radians
+  //   double angleRad = atan(slope);
+  //
+  //   // Convert angle to degrees
+  //   double angleDeg = angleRad * (180 / pi);
+  //
+  //   // Adjust for the correct quadrant
+  //   if (angleDeg < 0) {
+  //     angleDeg += 360;
+  //   }
+  //
+  //   AngleBetweenBuildingandGlobalNorth = angleDeg;
+  //   print("buildingAngle set to $angleDeg");
+  //   return angleDeg;
+  // }
 
   static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
     int targetIndex = path.indexOf(targetCell);
@@ -1643,6 +1651,8 @@ class tools {
     }
     return true;
   }
+
+  static Landmarks findNearestEntry(List<Landmarks>)
 
 }
 class nearestLandInfo{

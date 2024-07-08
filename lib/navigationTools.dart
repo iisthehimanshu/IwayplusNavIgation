@@ -1652,7 +1652,22 @@ class tools {
     return true;
   }
 
-  static Landmarks findNearestEntry(List<Landmarks>)
+  static Landmarks? findNearestEntry(List<Landmarks> listOfLandmarks, List<int> place, String placeBid ){
+    double distance = 100000;
+    Landmarks? nearestEntry;
+    for (Landmarks element in listOfLandmarks) {
+      if(element.element!.subType != null &&
+          element.name!.toLowerCase().contains("entry") &&
+          element.buildingID == placeBid){
+        double d = calculateDistance([element.coordinateX!,element.coordinateY!], place);
+        if(d<distance){
+          distance = d;
+          nearestEntry = element;
+        }
+      }
+    }
+    return nearestEntry;
+  }
 
 }
 class nearestLandInfo{

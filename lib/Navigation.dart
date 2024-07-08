@@ -3254,57 +3254,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       double destinationEntrylat = 0;
       double destinationEntrylng = 0;
 
+
+
       building.landmarkdata!.then((land) async {
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          if (element.element!.subType != null &&
-              (element.name!.contains("AC-04 Entry 2") || element.name!.contains("Entry/Exit (Resident Block-S3)")) &&
-              element.buildingID == PathState.destinationBid) {
-            List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
-            destinationEntrylat = dv[0];
-            destinationEntrylng = dv[1];
-            PathState.DestinationEntryPolyid = element.properties!.polyId;
-            if (element.floor == PathState.destinationFloor) {
-              await fetchroute(
-                  element.coordinateX!,
-                  element.coordinateY!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  false,true,
-                  bid: PathState.destinationBid);
-            } else if (element.floor != PathState.destinationFloor) {
-              List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
-                  landmarksMap[PathState.destinationPolyID]!.lifts!);
-              await fetchroute(
+        Landmarks element = tools.findNearestEntry(land.landmarks!, [PathState.destinationX,PathState.destinationY], PathState.destinationBid)!;
+        ()async{
+          List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
+          destinationEntrylat = dv[0];
+          destinationEntrylng = dv[1];
+          PathState.DestinationEntryPolyid = element.properties!.polyId;
+          if (element.floor == PathState.destinationFloor) {
+            await fetchroute(
+                element.coordinateX!,
+                element.coordinateY!,
+                PathState.destinationX,
+                PathState.destinationY,
+                PathState.destinationFloor,
+                false,true,
+                bid: PathState.destinationBid);
+          } else if (element.floor != PathState.destinationFloor) {
+            List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
+                landmarksMap[PathState.destinationPolyID]!.lifts!);
+            await fetchroute(
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                PathState.destinationX,
+                PathState.destinationY,
+                PathState.destinationFloor,
+                true,true,
+                bid: PathState.destinationBid);
+            await fetchroute(element.coordinateX!, element.coordinateY!,
+                commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
+                false,true,
+                bid: PathState.destinationBid);
+
+            PathState.connections[PathState.destinationBid] = {
+              element.floor!: calculateindex(
+                  commonlifts[0].x1!,
+                  commonlifts[0].y1!,
+                  building.floorDimenssion[PathState.destinationBid]![
+                  element.floor!]![0]),
+              PathState.destinationFloor: calculateindex(
                   commonlifts[0].x2!,
                   commonlifts[0].y2!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  true,true,
-                  bid: PathState.destinationBid);
-              await fetchroute(element.coordinateX!, element.coordinateY!,
-                  commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                  false,true,
-                  bid: PathState.destinationBid);
-
-              PathState.connections[PathState.destinationBid] = {
-                element.floor!: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                    element.floor!]![0]),
-                PathState.destinationFloor: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                    PathState.destinationFloor]![0])
-              };
-            }
-            break;
+                  building.floorDimenssion[PathState.destinationBid]![
+                  PathState.destinationFloor]![0])
+            };
           }
-        }
+        };
+
         // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
         // double sourceLat=double.parse(source.properties!.latitude!);
         // double sourceLng=double.parse(source.properties!.longitude!);
@@ -3314,6 +3312,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
 
+        Landmarks element2  = tools.findNearestEntry(land.landmarks!, [PathState.sourceX,PathState.sourceY],PathState.sourceBid)!;
+        ()async{
+
+        };
         for (int i = 0; i < land.landmarks!.length; i++) {
           Landmarks element = land.landmarks![i];
           if (element.element!.subType != null &&

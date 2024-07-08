@@ -3247,7 +3247,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               PathState.destinationFloor]![0])
         };
       }
-    } else if(PathState.sourceBid == "65d8835adb333f89456e687f" || PathState.destinationBid == "65d8835adb333f89456e687f") {
+    } else{
       print("calculateroute else statement");
       double sourceEntrylat = 0;
       double sourceEntrylng = 0;
@@ -3257,8 +3257,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
 
       building.landmarkdata!.then((land) async {
-        Landmarks element = tools.findNearestEntry(land.landmarks!, [PathState.destinationX,PathState.destinationY], PathState.destinationBid)!;
-        ()async{
+
+        Landmarks element = tools.findMinAnglePoint(Poi(PathState.sour, longitude)
+
           List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
           destinationEntrylat = dv[0];
           destinationEntrylng = dv[1];
@@ -3301,7 +3302,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                   PathState.destinationFloor]![0])
             };
           }
-        };
+
 
         // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
         // double sourceLat=double.parse(source.properties!.latitude!);
@@ -3313,52 +3314,44 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // double destinationLng=double.parse(source.properties!.longitude!);
 
         Landmarks element2  = tools.findNearestEntry(land.landmarks!, [PathState.sourceX,PathState.sourceY],PathState.sourceBid)!;
-        ()async{
 
-        };
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          if (element.element!.subType != null &&
-              (element.name!.contains("AC-04 Entry 2") || element.name!.contains("Entry/Exit (Resident Block-S3)")) &&
-              element.buildingID == PathState.sourceBid) {
-            List<double> sv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
-            sourceEntrylat = sv[0];
-            sourceEntrylng = sv[1];
-            PathState.SourceExitPolyid = element.properties!.polyId;
-            if (PathState.sourceFloor == element.floor) {
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  true,false,
-                  bid: PathState.sourceBid);
-            } else if (PathState.sourceFloor != element.floor) {
-              List<CommonLifts> commonlifts = findCommonLifts(
-                  landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
+          List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
+          sourceEntrylat = sv[0];
+          sourceEntrylng = sv[1];
+          PathState.SourceExitPolyid = element2.properties!.polyId;
+          if (PathState.sourceFloor == element2.floor) {
+            await fetchroute(PathState.sourceX, PathState.sourceY,
+                element2.coordinateX!, element2.coordinateY!, element2.floor!,
+                true,false,
+                bid: PathState.sourceBid);
+          } else if (PathState.sourceFloor != element2.floor) {
+            List<CommonLifts> commonlifts = findCommonLifts(
+                landmarksMap[PathState.sourcePolyID]!.lifts!, element2.lifts!);
 
-              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  true,false,
-                  bid: PathState.sourceBid);
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                  true,true,
-                  bid: PathState.sourceBid);
+            await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+                element2.coordinateX!, element2.coordinateY!, element2.floor!,
+                true,false,
+                bid: PathState.sourceBid);
+            await fetchroute(PathState.sourceX, PathState.sourceY,
+                commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+                true,true,
+                bid: PathState.sourceBid);
 
-              PathState.connections[PathState.sourceBid] = {
-                PathState.sourceFloor: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                    PathState.sourceFloor]![0]),
-                element.floor!: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                    element.floor!]![0])
-              };
-            }
-            break;
+            PathState.connections[PathState.sourceBid] = {
+              PathState.sourceFloor: calculateindex(
+                  commonlifts[0].x1!,
+                  commonlifts[0].y1!,
+                  building.floorDimenssion[PathState.sourceBid]![
+                  PathState.sourceFloor]![0]),
+              element2.floor!: calculateindex(
+                  commonlifts[0].x2!,
+                  commonlifts[0].y2!,
+                  building.floorDimenssion[PathState.sourceBid]![
+                  element2.floor!]![0])
+            };
           }
-        }
+
+
         OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
             sourceEntrylat,
             sourceEntrylng,
@@ -3386,142 +3379,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         }
       });
       print("AIMS JAMMU building detected");
-
-      print(PathState.path.keys);
-      print(pathMarkers.keys);
-    } else {
-      print("calculateroute else statement");
-      double sourceEntrylat = 0;
-      double sourceEntrylng = 0;
-      double destinationEntrylat = 0;
-      double destinationEntrylng = 0;
-
-      building.landmarkdata!.then((land) async {
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          if (element.element!.subType != null &&
-              element.element!.subType!.toLowerCase().contains("entry") &&
-              element.buildingID == PathState.destinationBid) {
-            destinationEntrylat = double.parse(element.properties!.latitude!);
-            destinationEntrylng = double.parse(element.properties!.longitude!);
-            if (element.floor == PathState.destinationFloor) {
-              await fetchroute(
-                  element.coordinateX!,
-                  element.coordinateY!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  false,true,
-                  bid: PathState.destinationBid);
-            } else if (element.floor != PathState.destinationFloor) {
-              List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
-                  landmarksMap[PathState.destinationPolyID]!.lifts!);
-              await fetchroute(
-                  commonlifts[0].x2!,
-                  commonlifts[0].y2!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  true,true,
-                  bid: PathState.destinationBid);
-              await fetchroute(element.coordinateX!, element.coordinateY!,
-                  commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                  false,true,
-                  bid: PathState.destinationBid);
-
-              PathState.connections[PathState.destinationBid] = {
-                element.floor!: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                    element.floor!]![0]),
-                PathState.destinationFloor: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                    PathState.destinationFloor]![0])
-              };
-            }
-            break;
-          }
-        }
-        // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
-        // double sourceLat=double.parse(source.properties!.latitude!);
-        // double sourceLng=double.parse(source.properties!.longitude!);
-        //
-        //
-        // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
-        // double destinationLat=double.parse(source.properties!.latitude!);
-        // double destinationLng=double.parse(source.properties!.longitude!);
-
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          if (element.element!.subType != null &&
-              element.element!.subType!.toLowerCase().contains("entry") &&
-              element.buildingID == PathState.sourceBid) {
-            sourceEntrylat = double.parse(element.properties!.latitude!);
-            sourceEntrylng = double.parse(element.properties!.longitude!);
-            if (PathState.sourceFloor == element.floor) {
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  true,false,
-                  bid: PathState.sourceBid);
-            } else if (PathState.sourceFloor != element.floor) {
-              List<CommonLifts> commonlifts = findCommonLifts(
-                  landmarksMap[PathState.sourcePolyID]!.lifts!, element.lifts!);
-
-              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  true,false,
-                  bid: PathState.sourceBid);
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                  true,true,
-                  bid: PathState.sourceBid);
-
-              PathState.connections[PathState.sourceBid] = {
-                PathState.sourceFloor: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                    PathState.sourceFloor]![0]),
-                element.floor!: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                    element.floor!]![0])
-              };
-            }
-            break;
-          }
-        }
-
-        // OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
-        //     sourceEntrylat,
-        //     sourceEntrylng,
-        //     destinationEntrylat,
-        //     destinationEntrylng);
-        // print("build data: $buildData");
-        //
-        // List<LatLng> coords = [];
-        // if (buildData != null) {
-        //   int len = buildData!.data!.path!.length;
-        //   for (int i = 0; i < len; i++) {
-        //     coords.add(LatLng(buildData!.data!.path![i].lat!,
-        //         buildData!.data!.path![i].lng!));
-        //   }
-        //
-        //   List<String> key = [PathState.sourceBid, PathState.destinationBid];
-        //   interBuildingPath[key] = Set();
-        //   interBuildingPath[key]!.add(gmap.Polyline(
-        //     polylineId: PolylineId("InterBuilding"),
-        //     points: coords,
-        //     color: Colors.red,
-        //     width: 1,
-        //   ));
-        // }
-      });
-      print("different building detected");
 
       print(PathState.path.keys);
       print(pathMarkers.keys);

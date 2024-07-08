@@ -1657,6 +1657,7 @@ class tools {
     Landmarks? nearestEntry;
     for (Landmarks element in listOfLandmarks) {
       if(element.element!.subType != null &&
+          element.element!.subType == "main entry" &&
           element.name!.toLowerCase().contains("entry") &&
           element.buildingID == placeBid){
         double d = calculateDistance([element.coordinateX!,element.coordinateY!], place);
@@ -1669,7 +1670,75 @@ class tools {
     return nearestEntry;
   }
 
+  static double degreesToRadians(double degrees) {
+    return degrees * pi / 180.0;
+  }
+
+// Function to convert lat/long to Cartesian coordinates
+  static List<double> latLongToCartesian(double lat, double lon) {
+    double latRad = degreesToRadians(lat);
+    double lonRad = degreesToRadians(lon);
+    return [
+      cos(latRad) * cos(lonRad),
+      cos(latRad) * sin(lonRad),
+      sin(latRad)
+    ];
+  }
+
+// Function to calculate the angle between two vectors
+  static double calculateA(List<double> v1, List<double> v2) {
+    double dotProduct = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+    double magnitudeV1 = sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2]);
+    double magnitudeV2 = sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]);
+    return acos(dotProduct / (magnitudeV1 * magnitudeV2));
+  }
+
+// Function to find the point with the minimum angle
+  static Landmarks findMinAnglePoint(String sourceid, String destinationid, List<Landmarks> points) {
+    Landmarks s = points.where((element) => element.properties!.polyId == sourceid).first;
+    Landmarks d = points.where((element) => element.properties!.polyId == destinationid).first;
+    Poi source = Poi(double.parse(s.properties!.latitude!), double.parse(s.properties!.longitude!));
+    List<double> sourceToDestination = latLongToCartesian(
+        destination.latitude - source.latitude,
+        destination.longitude - source.longitude
+    );
+
+    double minAngle = double.infinity;
+    Landmarks? minAnglePoint;
+
+    for (Landmarks point in points) {
+      if(point.element!.subType != null &&
+          point.element!.subType == "main entry" &&
+          point.name!.toLowerCase().contains("entry") &&
+          point.buildingID == placeBid){
+        List<double> sourceToPoint = latLongToCartesian(
+            double.parse(point.properties!.latitude!) - source.latitude,
+            double.parse(point.properties!.longitude!) - source.longitude
+        );
+
+        double angle = calculateA(sourceToDestination, sourceToPoint);
+
+        if (angle < minAngle) {
+          minAngle = angle;
+          minAnglePoint = point;
+        }
+      }
+    }
+
+    return minAnglePoint!;
+  }
+
+
+
 }
+
+class Poi {
+  final double latitude;
+  final double longitude;
+
+  Poi(this.latitude, this.longitude);
+}
+
 class nearestLandInfo{
   Element? element;
   // Properties? properties;

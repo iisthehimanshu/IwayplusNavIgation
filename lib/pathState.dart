@@ -11,8 +11,12 @@ class pathState {
   String destinationName = "";
   int sourceX = 0;
   int sourceY = 0;
+  double sourceLat = 0.0;
+  double sourceLng = 0.0;
   int destinationX = 0;
   int destinationY = 0;
+  double destinationLat = 0.0;
+  double destinationLng = 0.0;
   int sourceFloor = 0;
   int destinationFloor = 0;
   Map<int, List<int>> path = {};

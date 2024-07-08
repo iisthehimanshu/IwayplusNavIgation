@@ -437,26 +437,16 @@ class tools {
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
 
 
-    // //print("ab----${ab}");
-    // //print("ac-----${ac}");
-
-    // Calculate the dot product of the two vectors
-    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
-
-    // Calculate the magnitude of each vector
-    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
-    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
-
-    // Calculate the cosine of the angle between the two vectors
-    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
-
-    // Calculate the angle in radians
-    double angleInRadians = acos(cosineTheta);
+    // Calculate the angle between the two vectors in radians
+    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
 
     // Convert radians to degrees
     double angleInDegrees = angleInRadians * 180 / pi;
 
-    // //print(angleInDegrees);
+    // Ensure the angle is within [0, 360] degrees
+    if (angleInDegrees < 0) {
+      angleInDegrees += 360;
+    }
 
     return angleInDegrees;
   }

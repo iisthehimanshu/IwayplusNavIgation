@@ -3254,6 +3254,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           if (element.element!.subType != null &&
               (element.name!.contains("AC-04 Entry ") || element.name!.contains("Entry/Exit (Resident Block-S3)")) &&
               element.buildingID == PathState.destinationBid) {
+            List<double> dv =
             destinationEntrylat = double.parse(element.properties!.latitude!);
             destinationEntrylng = double.parse(element.properties!.longitude!);
             if (element.floor == PathState.destinationFloor) {
@@ -3308,8 +3309,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           if (element.element!.subType != null &&
               (element.name!.contains("AC-04 Entry 4") || element.name!.contains("Entry/Exit (Resident Block-S3)")) &&
               element.buildingID == PathState.sourceBid) {
-            sourceEntrylat = double.parse(element.properties!.latitude!);
-            sourceEntrylng = double.parse(element.properties!.longitude!);
+            List<double> sv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
+            sourceEntrylat = sv[0];
+            sourceEntrylng = sv[1];
             if (PathState.sourceFloor == element.floor) {
               await fetchroute(PathState.sourceX, PathState.sourceY,
                   element.coordinateX!, element.coordinateY!, element.floor!,
@@ -3341,7 +3343,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             break;
           }
         }
-
         OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
             sourceEntrylat,
             sourceEntrylng,
@@ -3356,14 +3357,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             coords.add(LatLng(buildData!.data!.path![i].lat!,
                 buildData!.data!.path![i].lng!));
           }
-
+          print(coords);
           List<String> key = [PathState.sourceBid, PathState.destinationBid];
-          interBuildingPath[key] = Set();
-          interBuildingPath[key]!.add(gmap.Polyline(
-            polylineId: PolylineId("InterBuilding"),
+          singleroute.putIfAbsent(0, () => Set());
+          singleroute[0]?.add(gmap.Polyline(
+            polylineId: PolylineId("${buildData.data!.pathId}"),
             points: coords,
             color: Colors.red,
-            width: 1,
+            width: 5,
           ));
         }
       });
@@ -7153,7 +7154,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       user.Bid]![user.floor]!,
                                                   reroute);
                                           if (isvalid) {
-                                            user.moveOneStep().then((value) {
+                                            user.move().then((value) {
                                               renderHere();
                                             });
                                           } else {

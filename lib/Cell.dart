@@ -10,4 +10,12 @@ class Cell{
 
   Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, {this.ttsEnabled = true});
 
+  static void printList(List<Cell> list){
+    List<List<int>> intList = [];
+    for(Cell c in list){
+      intList.add([c.x,c.y]);
+    }
+    print(intList);
+  }
+
 }

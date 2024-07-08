@@ -410,12 +410,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if (widget.user.pathobj.index + 1 == path.length) {
       a = tools.calculateAnglefifthForMultiBuilding(
           path[widget.user.pathobj.index - 1],
-          [widget.user.coordX + v[0], widget.user.coordY + v[1]],
+          [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
           path[widget.user.pathobj.index]);
     } else {
       a = tools.calculateAnglefifthForMultiBuilding(
           path[widget.user.pathobj.index],
-          [widget.user.coordX + v[0], widget.user.coordY + v[1]],
+          [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
           path[widget.user.pathobj.index + 1]);
     }
     widget.direction = tools.angleToClocks(a);

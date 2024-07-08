@@ -3258,7 +3258,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       building.landmarkdata!.then((land) async {
 
-        Landmarks element = tools.findMinAnglePoint(PathState.sourceBid, PathState.destinationBid, land.landmarks!);
+        Landmarks element = tools.findMinAnglePoint(PathState.destinationPolyID, PathState.sourcePolyID, land.landmarks!,1);
+        print("source entry found is ${element.sId} ${element.name} [${element.coordinateX},${element.coordinateY}]");
 
           List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
           destinationEntrylat = dv[0];
@@ -3313,7 +3314,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
 
-        Landmarks element2  = tools.findMinAnglePoint(PathState.destinationBid, PathState.sourceBid, land.landmarks!);
+        Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,2);
+          print("destination entry found is ${element2.sId} ${element2.name} [${element2.coordinateX},${element2.coordinateY}]");
 
           List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
           sourceEntrylat = sv[0];
@@ -3369,13 +3371,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           coords.add(LatLng(destinationEntrylat, destinationEntrylng));
           print(coords);
           List<String> key = [PathState.sourceBid, PathState.destinationBid];
-          singleroute.putIfAbsent(0, () => Set());
-          singleroute[0]?.add(gmap.Polyline(
-            polylineId: PolylineId(buildData.pathId),
-            points: coords,
-            color: Colors.blue,
-            width: 5,
-          ));
+          setState(() {
+            singleroute.putIfAbsent(0, () => Set());
+            singleroute[0]?.add(gmap.Polyline(
+              polylineId: PolylineId(buildData.pathId),
+              points: coords,
+              color: Colors.blue,
+              width: 5,
+            ));
+          });
         }
       });
       print("AIMS JAMMU building detected");
@@ -3421,7 +3425,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
 
-    print("numcol $numCols");
+    print("numcol $numCols [$sourceX,$sourceY]  [$destinationX,$destinationY]");
 
     List<int> path = [];
 

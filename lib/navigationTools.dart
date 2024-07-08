@@ -1685,44 +1685,70 @@ class tools {
     ];
   }
 
-// Function to calculate the angle between two vectors
-  static double calculateA(List<double> v1, List<double> v2) {
+// Function to calculate the signed angle between two vectors in clockwise direction
+  static double calculateSignedAngle(List<double> v1, List<double> v2) {
     double dotProduct = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-    double magnitudeV1 = sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2]);
-    double magnitudeV2 = sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]);
-    return acos(dotProduct / (magnitudeV1 * magnitudeV2));
+    double crossProductX = v1[1] * v2[2] - v1[2] * v2[1];
+    double crossProductY = v1[2] * v2[0] - v1[0] * v2[2];
+    double crossProductZ = v1[0] * v2[1] - v1[1] * v2[0];
+    double crossProductMagnitude = sqrt(crossProductX * crossProductX + crossProductY * crossProductY + crossProductZ * crossProductZ);
+
+    double angle = atan2(crossProductMagnitude, dotProduct);
+
+    // Determine the sign of the angle
+    if (crossProductZ < 0) {
+      angle = 2 * pi - angle;
+    }
+
+    return angle;
   }
 
 // Function to find the point with the minimum angle
-  static Landmarks findMinAnglePoint(String sourceid, String destinationid, List<Landmarks> points) {
+  static Landmarks findMinAnglePoint(String sourceid, String destinationid, List<Landmarks> points, int n, {bool ramp = false}) {
     Landmarks s = points.where((element) => element.properties!.polyId == sourceid).first;
     Landmarks d = points.where((element) => element.properties!.polyId == destinationid).first;
     Poi source = Poi(double.parse(s.properties!.latitude!), double.parse(s.properties!.longitude!));
     Poi destination = Poi(double.parse(d.properties!.latitude!), double.parse(d.properties!.longitude!));
-    List<double> sourceToDestination = latLongToCartesian(
-        destination.latitude - source.latitude,
-        destination.longitude - source.longitude
-    );
+    List<double> sourceCartesian = latLongToCartesian(source.latitude, source.longitude);
+    List<double> destinationCartesian = latLongToCartesian(destination.latitude, destination.longitude);
+    List<double> sourceToDestination = [
+      destinationCartesian[0] - sourceCartesian[0],
+      destinationCartesian[1] - sourceCartesian[1],
+      destinationCartesian[2] - sourceCartesian[2],
+    ];
 
-    double minAngle = double.infinity;
+    double minAngle = n==1?10000:0;
     Landmarks? minAnglePoint;
 
     for (Landmarks point in points) {
       if(point.element!.subType != null &&
           point.element!.subType == "main entry" &&
           point.name!.toLowerCase().contains("entry") &&
+          point.name!.toLowerCase().contains("ramp") == ramp &&
           point.buildingID == s.buildingID){
-        List<double> sourceToPoint = latLongToCartesian(
-            double.parse(point.properties!.latitude!) - source.latitude,
-            double.parse(point.properties!.longitude!) - source.longitude
-        );
+        List<double> pointCartesian = latLongToCartesian(double.parse(point.properties!.latitude!), double.parse(point.properties!.longitude!));
+        List<double> sourceToPoint = [
+          pointCartesian[0] - sourceCartesian[0],
+          pointCartesian[1] - sourceCartesian[1],
+          pointCartesian[2] - sourceCartesian[2],
+        ];
 
-        double angle = calculateA(sourceToDestination, sourceToPoint);
+        double angle = calculateSignedAngle(sourceToDestination, sourceToPoint);
+        print("angle for ${point.name} ${point.sId} $angle");
 
-        if (angle < minAngle) {
-          minAngle = angle;
-          minAnglePoint = point;
+        if(n == 1){
+          if (angle < minAngle) {
+            minAngle = angle;
+            minAnglePoint = point;
+          }
+        }else{
+          if (angle > minAngle) {
+            minAngle = angle;
+            minAnglePoint = point;
+          }
         }
+
+
       }
     }
 

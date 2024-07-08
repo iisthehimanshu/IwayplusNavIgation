@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 
 import '../APIMODELS/outbuildingmodel.dart';
 import 'RefreshTokenAPI.dart';
@@ -23,24 +24,19 @@ class OutBuildingData{
       'Content-Type': 'application/json',
       'x-access-token':'${token}'
     };
-    var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
+    var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/outdoor-wayfinding/'));
     request.body = json.encode({
-      "source": {
-        "lat": latitude1,
-        "lng": longitude1
-      },
-      "destination": {
-        "lat": latitude2,
-        "lng": longitude2,
-      }
+      "campusId": buildingAllApi.outdoorID,
+      "source": [longitude1, latitude1],
+      "destination": [longitude2, latitude2]
     });
     request.headers.addAll(headers);
-
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
       var res=await http.Response.fromStream(response);
-      return buildingData(res.body);
+      Map<String, dynamic> jsonMap = json.decode(res.body);
+      return OutBuildingModel.fromJson(jsonMap);
       // print(await response.stream.bytesToString());
     }
     else {

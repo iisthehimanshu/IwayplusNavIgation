@@ -3254,9 +3254,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           if (element.element!.subType != null &&
               (element.name!.contains("AC-04 Entry ") || element.name!.contains("Entry/Exit (Resident Block-S3)")) &&
               element.buildingID == PathState.destinationBid) {
-            List<double> dv =
-            destinationEntrylat = double.parse(element.properties!.latitude!);
-            destinationEntrylng = double.parse(element.properties!.longitude!);
+            List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
+            destinationEntrylat = dv[0];
+            destinationEntrylng = dv[1];
             if (element.floor == PathState.destinationFloor) {
               await fetchroute(
                   element.coordinateX!,
@@ -3352,16 +3352,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         List<LatLng> coords = [];
         if (buildData != null) {
-          int len = buildData!.data!.path!.length;
+          int len = buildData.path.length;
           for (int i = 0; i < len; i++) {
-            coords.add(LatLng(buildData!.data!.path![i].lat!,
-                buildData!.data!.path![i].lng!));
+            coords.add(LatLng(buildData.path[i][1],
+                buildData.path[i][0]));
           }
           print(coords);
           List<String> key = [PathState.sourceBid, PathState.destinationBid];
           singleroute.putIfAbsent(0, () => Set());
           singleroute[0]?.add(gmap.Polyline(
-            polylineId: PolylineId("${buildData.data!.pathId}"),
+            polylineId: PolylineId(buildData.pathId),
             points: coords,
             color: Colors.red,
             width: 5,

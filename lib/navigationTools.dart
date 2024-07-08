@@ -424,6 +424,43 @@ class tools {
     return angle;
   }
 
+  static double calculateAnglefifthForMultiBuilding(Cell node1, List<int> node2, Cell node3) {
+    List<int> a = [node1.x , node1.y];
+    List<int> b = node2;
+    List<int> c = [node3.x , node3.y];
+
+    print("AA $a");
+    print("B $b");
+    print("C $c");
+
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ac = [c[0] - a[0], c[1] - a[1]];
+
+
+    // //print("ab----${ab}");
+    // //print("ac-----${ac}");
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ac[0].toDouble() + ab[1] * ac[1].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+    // //print(angleInDegrees);
+
+    return angleInDegrees;
+  }
+
   static double toRadians(double degree) {
     return degree * pi / 180.0;
   }
@@ -449,9 +486,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    print("AAAAAA $a");
-    print("B $b");
-    print("C $c");
+    // print("AAAAAA $a");
+    // print("B $b");
+    // print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -625,10 +662,10 @@ class tools {
 
 
 
-  static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
+  static double calculateAngleThird(List<int> a, Cell node2 , Cell node3) {
 
-    List<int> b = [node2 % cols , node2 ~/cols];
-    List<int> c = [node3 % cols , node3 ~/cols];
+    List<int> b = [node2.x , node2.y];
+    List<int> c = [node3.x , node3.y];
 
     // //print("A $a");
     // //print("B $b");
@@ -1393,6 +1430,46 @@ class tools {
     return res;
   }
 
+  static List<int> getTurnpointsForMultiBuilding(List<List<Cell>> pathNodes){
+    List<int> res=[];
+
+
+    for(int j=0;j<pathNodes.length;j++){
+      for(int i=1;i<pathNodes[j].length-2;i++){
+        int currPos = pathNodes[j][i].node;
+
+        int x1 = pathNodes[j][i].x;
+        int y1 = pathNodes[j][i].y;
+
+        int x2 = pathNodes[j][i+1].x;
+        int y2 = pathNodes[j][i+1].y;
+
+        int x3 = pathNodes[j][i-1].x;
+        int y3 = pathNodes[j][i-1].y;
+
+        int prevDeltaX=x1-x3;
+        int prevDeltaY=y1-y3;
+        int nextDeltaX=x2-x1;
+        int nextDeltaY=y2-y1;
+
+        if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+          if(prevDeltaX==0 && nextDeltaX==0){
+
+          }else if(prevDeltaY==0 && nextDeltaY==0){
+
+          }else{
+            res.add(currPos);
+          }
+
+        }
+
+
+      }
+    }
+    return res;
+  }
+
+
   static List<Cell> getCellTurnpoints(List<Cell> pathNodes,int numCols){
     List<Cell> res=[];
 
@@ -1558,18 +1635,12 @@ class tools {
     return res;
   }
 
-  static int distancebetweennodes(int node1, int node2, int numCols){
-    int x1 = node1 % numCols;
-    int y1 = node1 ~/ numCols;
+  static int distancebetweennodes(Cell node1, Cell node2, List<Cell> path){
 
-    int x2 = node2 % numCols;
-    int y2 = node2 ~/ numCols;
+    int i1 = path.indexWhere((element) => element.node == node1.node);
+    int i2 = path.indexWhere((element) => element.node == node2.node);
 
-    // //print("@@@@@ $x1,$y1");
-    // //print("&&&&& $x2,$y2");
-    int rowDifference = x2 - x1;
-    int colDifference = y2 - y1;
-    return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
+    return i1-i2;
   }
 
   static bool allElementsAreSame(List list) {

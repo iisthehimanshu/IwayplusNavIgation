@@ -38,6 +38,7 @@ class UserState{
   List<int> offPathDistance = [];
   int buildingNumber = 0;
   double d = 1;
+  List<double> p = [];
   bool isInRealWorld = false;
   static int xdiff = 0;
   static int ydiff = 0;
@@ -291,6 +292,7 @@ class UserState{
         lng = newPos['longitude']!;
         customRender([lat,lng]);
         List<double> v = tools.localtoglobal(ListofPaths[buildingNumber-1][2].x, ListofPaths[buildingNumber-1][2].y, patchData: patchData[ListofPaths[buildingNumber-1][2].bid]);
+        p=v;
         this.d = tools.calculateDistanceBetweenLatLng(lat, lng, v[0], v[1]);
         print("distance is ddd ${this.d} ${ListofPaths[buildingNumber-1][2].bid}");
         if(this.d<=3){

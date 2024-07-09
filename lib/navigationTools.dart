@@ -430,6 +430,65 @@ class tools {
     return angle;
   }
 
+  static double calculateAngleBetweenVectors(double latA, double lonA, double latB, double lonB, double angle) {
+    Map<String, double> c = computeNewPosition(latA, lonA, angle, 3);
+    // Convert all latitudes and longitudes from degrees to radians
+    latA = degreesToRadians(latA);
+    lonA = degreesToRadians(lonA);
+    latB = degreesToRadians(latB);
+    lonB = degreesToRadians(lonB);
+    double latC = degreesToRadians(c['latitude']!);
+    double lonC = degreesToRadians(c['longitude']!);
+
+    // Convert lat/lon to Cartesian coordinates (X, Y, Z)
+    var ax = cos(latA) * cos(lonA);
+    var ay = cos(latA) * sin(lonA);
+    var az = sin(latA);
+
+    var bx = cos(latB) * cos(lonB);
+    var by = cos(latB) * sin(lonB);
+    var bz = sin(latB);
+
+    var cx = cos(latC) * cos(lonC);
+    var cy = cos(latC) * sin(lonC);
+    var cz = sin(latC);
+
+    // Compute vector AB and AC
+    var abx = bx - ax;
+    var aby = by - ay;
+    var abz = bz - az;
+
+    var acx = cx - ax;
+    var acy = cy - ay;
+    var acz = cz - az;
+
+    // Compute the cross product of vectors AB and AC
+    var crossProductX = aby * acz - abz * acy;
+    var crossProductY = abz * acx - abx * acz;
+    var crossProductZ = abx * acy - aby * acx;
+
+    // Compute the dot product of vectors AB and AC
+    var dotProduct = abx * acx + aby * acy + abz * acz;
+
+    // Compute the magnitudes of vectors AB and AC
+    var magnitudeAB = sqrt(abx * abx + aby * aby + abz * abz);
+    var magnitudeAC = sqrt(acx * acx + acy * acy + acz * acz);
+
+    // Compute the angle between vectors AB and AC
+    var angleRadians = atan2(sqrt(crossProductX * crossProductX + crossProductY * crossProductY + crossProductZ * crossProductZ), dotProduct);
+
+    // Convert the angle from radians to degrees
+    var angleDegrees = radiansToDegrees(angleRadians);
+
+    // Ensure the angle is between 0 and 360 degrees
+    if (crossProductZ < 0) {
+      angleDegrees = 360 - angleDegrees;
+    }
+
+    return angleDegrees;
+  }
+
+
   static double calculateAnglefifthForMultiBuilding(Cell node1, List<int> node2, Cell node3) {
     List<int> a = [node1.x , node1.y];
     List<int> b = node2;

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class customMarker {
@@ -20,6 +21,17 @@ class customMarker {
         icon: marker.icon,
         rotation: marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
         anchor: marker.anchor
+    );
+  }
+
+  static Circle moveCircle(LatLng position , Circle circle ) {
+    return Circle(
+        circleId: circle.circleId,
+        center: position,
+       radius: 5,
+      strokeWidth: 1,
+      strokeColor: Colors.blue,
+      fillColor: Colors.lightBlue.withOpacity(0.2),
     );
   }
 

@@ -473,7 +473,27 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     }else{
       widget.distance = widget.user.d.ceil();
+      double a = tools.calculateAngleBetweenVectors(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1], widget.user.theta);
+      widget.direction = tools.angleToClocks(a);
+      if (oldWidget.direction != widget.direction) {
+        if (oldWidget.direction == "Straight") {
+          Vibration.vibrate();
 
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
+
+          speak("Turn ${widget.direction}");
+          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        } else if (widget.direction == "Straight") {
+          Vibration.vibrate();
+
+          speak(
+              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
+        }
+      }
     }
 
 

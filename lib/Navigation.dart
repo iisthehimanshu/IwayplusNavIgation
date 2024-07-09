@@ -661,6 +661,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     setState(() {
       if (markers.length > 0) {
 
+
+
         markers[user.Bid]?[0] = customMarker.move(
             pos, markers[user.Bid]![0]);
 
@@ -675,7 +677,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         markers[user.Bid]?[1] = customMarker.move(
             pos, markers[user.Bid]![1]);
+
+        circles.clear();
+        circles.add(
+          Circle(
+            circleId: CircleId("circle"),
+            center: pos,
+            radius: _animation.value,
+            strokeWidth: 1,
+            strokeColor: Colors.blue,
+            fillColor: Colors.lightBlue.withOpacity(0.2),
+          ),
+        );
       }
+
     });
   }
 

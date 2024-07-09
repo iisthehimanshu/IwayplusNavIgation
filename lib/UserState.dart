@@ -161,6 +161,7 @@ class UserState{
         coordY = ListofPaths[buildingNumber][2].y;
         showcoordX = coordX;
         showcoordY = coordY;
+
       }
       pathobj.index = pathobj.index + 1;
       List<int> transitionvalue = ListofPaths[buildingNumber][pathobj.index].move(theta);

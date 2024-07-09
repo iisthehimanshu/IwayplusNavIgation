@@ -18,6 +18,7 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/testfile.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -7199,9 +7200,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                 child: FloatingActionButton(
                                   onPressed: () async {
                                     //user.pri();
-                                    pathMarkers[0]!.forEach((element) {
-                                      print("location of marker ${element.markerId.value} is ${element.position}");
-                                    });
+                                    // pathMarkers[0]!.forEach((element) {
+                                    //   print("location of marker ${element.markerId.value} is ${element.position}");
+                                    // });
+                                    List<double> a = tools.localtoglobal(24, 67);
+                                    print("[24,67] will be $a");
+                                    print("and reverse will be ${testfile.globalToLocal(a[0],a[1])}}");
                                    // _timer.cancel();
                                     //localizeUser();
                                     //wsocket.sendmessg();

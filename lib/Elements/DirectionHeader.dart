@@ -403,73 +403,79 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
+    if(!widget.user.isInRealWorld){
+      List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
-    List<int> v = tools.eightcelltransition(widget.user.theta);
-    double a = 0;
-    if (widget.user.pathobj.index + 1 == path.length) {
-      a = tools.calculateAnglefifthForMultiBuilding(
-          path[widget.user.pathobj.index - 1],
-          [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
-          path[widget.user.pathobj.index]);
-    } else {
-      a = tools.calculateAnglefifthForMultiBuilding(
-          path[widget.user.pathobj.index],
-          [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
-          path[widget.user.pathobj.index + 1]);
-    }
-    widget.direction = tools.angleToClocks(a);
-    List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
-    if (remainingPath.isEmpty) {
-      remainingPath.add(path.last);
-    }
-    Cell nextTurn = findNextTurn(remainingPath);
-    widget.distance = tools.distancebetweennodes(
-        nextTurn, path[widget.user.pathobj.index], path);
-    print("distance ${widget.distance}");
-    if (oldWidget.direction != widget.direction) {
-      if (oldWidget.direction == "Straight") {
-        Vibration.vibrate();
-
-        // if(nextTurn == turnPoints.last){
-        //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-        // }else{
-        //   speak("${widget.direction} ${widget.distance} meter");
-        // }
-
-        speak("Turn ${widget.direction}");
-        //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-      } else if (widget.direction == "Straight") {
-        Vibration.vibrate();
-
-        speak(
-            "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
+      List<int> v = tools.eightcelltransition(widget.user.theta);
+      double a = 0;
+      if (widget.user.pathobj.index + 1 == path.length) {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index - 1],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index]);
+      } else {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index + 1]);
       }
-    }
+      widget.direction = tools.angleToClocks(a);
+      List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
+      if (remainingPath.isEmpty) {
+        remainingPath.add(path.last);
+      }
+      Cell nextTurn = findNextTurn(remainingPath);
+      widget.distance = tools.distancebetweennodes(
+          nextTurn, path[widget.user.pathobj.index], path);
+      print("distance ${widget.distance}");
+      if (oldWidget.direction != widget.direction) {
+        if (oldWidget.direction == "Straight") {
+          Vibration.vibrate();
 
-    try{
-      if((widget.distance/UserState.stepSize).ceil() == 7){
-        if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
-          int index = path.indexWhere((element) => element == nextTurn);
-          String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index-1].x , path[index-1].y], path[index+1]));
-          print("direc mila $direc");
-          print("index mila $index");
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
+
+          speak("Turn ${widget.direction}");
+          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        } else if (widget.direction == "Straight") {
+          Vibration.vibrate();
 
           speak(
-              "Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
-          //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
-        } else {
-          int index = path.indexWhere((element) => element == nextTurn);
-          print("index mila $index");
-          String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]));
-          print("direc mila $direc");
-          speak("Approaching ${direc} turn");
-          widget.user.move();
+              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
         }
       }
-    }catch(e){
-      print("approaching turn issue");
+
+      try{
+        if((widget.distance/UserState.stepSize).ceil() == 7){
+          if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
+            int index = path.indexWhere((element) => element == nextTurn);
+            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index-1].x , path[index-1].y], path[index+1]));
+            print("direc mila $direc");
+            print("index mila $index");
+
+            speak(
+                "Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+            //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+          } else {
+            int index = path.indexWhere((element) => element == nextTurn);
+            print("index mila $index");
+            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]));
+            print("direc mila $direc");
+            speak("Approaching ${direc} turn");
+            widget.user.move();
+          }
+        }
+      }catch(e){
+        print("approaching turn issue");
+      }
+    }else{
+      widget.distance = widget.user.d.ceil();
+
     }
+
 
 
   }

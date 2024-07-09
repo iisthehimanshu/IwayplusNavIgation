@@ -37,6 +37,7 @@ class UserState{
   String Bid ;
   List<int> offPathDistance = [];
   int buildingNumber = 0;
+  double d = 1;
   bool isInRealWorld = false;
   static int xdiff = 0;
   static int ydiff = 0;
@@ -163,12 +164,12 @@ class UserState{
         }else{
           pathobj.index = 2;
           buildingNumber --;
+          moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);
           Bid = ListofPaths[buildingNumber][2].bid!;
           coordX = ListofPaths[buildingNumber][2].x;
           coordY = ListofPaths[buildingNumber][2].y;
           showcoordX = coordX;
           showcoordY = coordY;
-          moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);
         }
       }
       if(!isInRealWorld){
@@ -290,23 +291,22 @@ class UserState{
         lng = newPos['longitude']!;
         customRender([lat,lng]);
         List<double> v = tools.localtoglobal(ListofPaths[buildingNumber-1][2].x, ListofPaths[buildingNumber-1][2].y, patchData: patchData[ListofPaths[buildingNumber-1][2].bid]);
-        double d = tools.calculateDistanceBetweenLatLng(lat, lng, v[0], v[1]);
-        print("distance is ddd $d ${ListofPaths[buildingNumber-1][2].bid}");
-        if(d<=3){
+        this.d = tools.calculateDistanceBetweenLatLng(lat, lng, v[0], v[1]);
+        print("distance is ddd ${this.d} ${ListofPaths[buildingNumber-1][2].bid}");
+        if(this.d<=3){
           isInRealWorld = false;
           pathobj.index = 2;
           buildingNumber --;
+          moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);
           Bid = ListofPaths[buildingNumber][2].bid!;
           coordX = ListofPaths[buildingNumber][2].x;
           coordY = ListofPaths[buildingNumber][2].y;
           showcoordX = coordX;
           showcoordY = coordY;
-          moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);
         }
       }
     }else{
       pathobj.index = pathobj.index + 1;
-
       List<int> transitionvalue = tools.eightcelltransition(this.theta);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];

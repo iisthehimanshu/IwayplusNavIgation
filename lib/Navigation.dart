@@ -3381,6 +3381,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               width: 5,
             ));
           });
+
+          for(LatLng c in coords){
+
+          }
         }
       });
       print("AIMS JAMMU building detected");
@@ -7203,9 +7207,6 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                     // pathMarkers[0]!.forEach((element) {
                                     //   print("location of marker ${element.markerId.value} is ${element.position}");
                                     // });
-                                    List<double> a = tools.localtoglobal(24, 67);
-                                    print("[24,67] will be $a");
-                                    print("and reverse will be ${testfile.globalToLocal(a[0],a[1])}}");
                                    // _timer.cancel();
                                     //localizeUser();
                                     //wsocket.sendmessg();

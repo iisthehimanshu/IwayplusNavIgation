@@ -135,6 +135,12 @@ class tools {
     } else {
       Data = globalData;
     }
+
+    if(x<0 || y<0){
+      var result = CoordinateConverter.localToGlobal(x.toDouble(), y.toDouble(), Data.patchData!.toJson());
+      return[result["lat"]!,result["lng"]!];
+    }
+
     int floor = 0;
 
     List<double> diff = [
@@ -1828,5 +1834,74 @@ class Element {
     data['type'] = this.type;
     data['subType'] = this.subType;
     return data;
+  }
+}
+
+class CoordinateConverter {
+
+
+  // Function to convert local coordinates to global coordinates
+  static Map<String, double> localToGlobal(double localLat, double localLng, Map<dynamic, dynamic> patchData) {
+    List<Map<String, dynamic>> coordinates = patchData['coordinates'];
+    String buildingAngle = patchData['buildingAngle'];
+
+    double angleRad = _degreesToRadians(double.parse(buildingAngle));
+
+    // Find the translation components
+    var globalRef = coordinates[0]['globalRef'];
+    var localRef = coordinates[0]['localRef'];
+    double originX = double.parse(globalRef['lat']);
+    double originY = double.parse(globalRef['lng']);
+    double localOriginX = double.parse(localRef['lat']);
+    double localOriginY = double.parse(localRef['lng']);
+
+    // Translate local coordinates to the global reference frame
+    double translatedX = localLat - localOriginX;
+    double translatedY = localLng - localOriginY;
+
+    // Apply rotation
+    double rotatedX = translatedX * cos(angleRad) - translatedY * sin(angleRad);
+    double rotatedY = translatedX * sin(angleRad) + translatedY * cos(angleRad);
+
+    // Convert to global coordinates
+    double globalX = originX + rotatedX;
+    double globalY = originY + rotatedY;
+
+    return {'lat': globalX, 'lng': globalY};
+  }
+
+  // Function to convert global coordinates to local coordinates (reverse)
+  static Map<String, double> globalToLocal(double globalLat, double globalLng,Map<String, dynamic> patchData) {
+    List<Map<String, dynamic>> coordinates = patchData['coordinates'];
+    String buildingAngle = patchData['buildingAngle'];
+
+    double angleRad = _degreesToRadians(double.parse(buildingAngle));
+
+    // Find the translation components
+    var globalRef = coordinates[0]['globalRef'];
+    var localRef = coordinates[0]['localRef'];
+    double originX = double.parse(globalRef['lat']);
+    double originY = double.parse(globalRef['lng']);
+    double localOriginX = double.parse(localRef['lat']);
+    double localOriginY = double.parse(localRef['lng']);
+
+    // Translate global coordinates to the local reference frame
+    double translatedX = globalLat - originX;
+    double translatedY = globalLng - originY;
+
+    // Apply inverse rotation
+    double rotatedX = translatedX * cos(angleRad) + translatedY * sin(angleRad);
+    double rotatedY = -translatedX * sin(angleRad) + translatedY * cos(angleRad);
+
+    // Convert to local coordinates
+    double localX = rotatedX + localOriginX;
+    double localY = rotatedY + localOriginY;
+
+    return {'lat': localX, 'lng': localY};
+  }
+
+  // Helper function to convert degrees to radians
+  static double _degreesToRadians(double degrees) {
+    return degrees * pi / 180.0;
   }
 }

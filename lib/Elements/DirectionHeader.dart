@@ -308,14 +308,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               int? indexOnPath = null;
               int numCols = widget
                   .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
-              widget.user.path.forEach((node) {
-                List<int> pathcoord = [node % numCols, node ~/ numCols];
+              widget.user.ListofPaths[widget.user.buildingNumber].forEach((node) {
+                List<int> pathcoord = [node.x, node.y];
                 double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                 if (d1 < distanceFromPath) {
                   distanceFromPath = d1.toInt();
                   //print("node on path $node");
                   //print("distanceFromPath $distanceFromPath");
-                  indexOnPath = widget.user.path.indexOf(node);
+                  indexOnPath = widget.user.ListofPaths[widget.user.buildingNumber].indexOf(node);
                   //print(indexOnPath);
                 }
               });

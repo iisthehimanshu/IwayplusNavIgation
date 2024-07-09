@@ -656,6 +656,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
   }
 
+  void customRender(List<double> newpos) {
+    LatLng pos = LatLng(newpos[0], newpos[1]);
+    setState(() {
+      if (markers.length > 0) {
+
+        markers[user.Bid]?[0] = customMarker.move(
+            pos, markers[user.Bid]![0]);
+
+        mapState.target = pos;
+        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: mapState.target,
+              zoom: mapState.zoom,
+              bearing: mapState.bearing!,
+              tilt: mapState.tilt),
+        ));
+
+        markers[user.Bid]?[1] = customMarker.move(
+            pos, markers[user.Bid]![1]);
+      }
+    });
+  }
+
   void onStepCount() {
     setState(() {
       if (_userAccelerometerEvent?.y != null) {
@@ -855,6 +878,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
+      UserState.customRender = customRender;
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -1204,7 +1228,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
     try{
       await waypointapi().fetchwaypoint().then((value){
-        Building.waypoint = value;
+        Building.waypoint[buildingAllApi.selectedBuildingID] = value;
       });
     }catch(e){
       print("wayPoint API ERROR");
@@ -1286,8 +1310,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           if (key == buildingAllApi.outdoorID) {
             building.floorDimenssion[buildingAllApi.outdoorID] = {1:[int.parse(value.patchData!.length!),int.parse(value.patchData!.breadth!)]};
             createotherPatch(value);
-          } else {}
+          } else if(buildingAllApi.outdoorID == "") {
+            createotherPatch(value);
+          }
         });
+
+        try{
+          await waypointapi().fetchwaypoint(id: key).then((value){
+            Building.waypoint[key] = value;
+          });
+        }catch(e){
+          print("wayPoint API ERROR");
+        }
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
           if (key == buildingAllApi.outdoorID) {
@@ -3384,8 +3418,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           });
           List<Cell> interBuildingPath = [];
           for(LatLng c in coords){
-            interBuildingPath.add(Cell(node, x, y, (angle, {currPointer, totalCells}) => null, lat, lng, bid))
+            Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
+            int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
+            interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
           }
+          // PathState.listofPaths.insert(1, interBuildingPath);
         }
       });
       print("AIMS JAMMU building detected");
@@ -3438,7 +3475,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     print("$sourceX, $sourceY, $destinationX, $destinationY");
 
     try{
-      PathModel model = Building.waypoint.firstWhere((element) => (element.floor == floor && element.buildingID == bid));
+      PathModel model = Building.waypoint[bid]!.firstWhere((element) => (element.floor == floor && element.buildingID == bid));
       Map<String, List<dynamic>> adjList = model.pathNetwork;
       var graph = Graph(adjList);
       List<int> path2 = await graph.bfs(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
@@ -7062,7 +7099,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                   reroute);
                                           if (isvalid) {
                                             user.move().then((value) {
-                                              renderHere();
+                                              if(!user.isInRealWorld){
+                                                renderHere();
+                                              }
                                             });
                                           } else {
                                             if (user.isnavigating) {
@@ -7204,6 +7243,12 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+
+                                    Map<String, double> newPos = tools.computeNewPosition(user.lat, user.lng, user.theta, 2);
+                                    user.lat = newPos['latitude']!;
+                                    user.lng = newPos['longitude']!;
+                                    customRender([user.lat, user.lng]);
+
                                     //user.pri();
                                     // pathMarkers[0]!.forEach((element) {
                                     //   print("location of marker ${element.markerId.value} is ${element.position}");

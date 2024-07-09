@@ -136,7 +136,7 @@ class tools {
       Data = globalData;
     }
 
-    if(x<0 || y<0){
+    if(x>=100000000 || y>=100000000){
       var result = CoordinateConverter.localToGlobal(x.toDouble(), y.toDouble(), Data.patchData!.toJson());
       return[result["lat"]!,result["lng"]!];
     }
@@ -1709,6 +1709,56 @@ class tools {
     return angle;
   }
 
+  static double radiansToDegrees(double radians) {
+    return radians * 180.0 / pi;
+  }
+
+  static Map<String, double> computeNewPosition(double latitude, double longitude, double angle, double distance) {
+    double earthRadius = 20925646.3 ;
+    // Convert latitude and longitude from degrees to radians
+    double latRad = degreesToRadians(latitude);
+    double lonRad = degreesToRadians(longitude);
+    double bearing = degreesToRadians(angle);
+
+    // Calculate the new latitude
+    double newLatRad = asin(sin(latRad) * cos(distance / earthRadius) +
+        cos(latRad) * sin(distance / earthRadius) * cos(bearing));
+
+    // Calculate the new longitude
+    double newLonRad = lonRad + atan2(sin(bearing) * sin(distance / earthRadius) * cos(latRad),
+        cos(distance / earthRadius) - sin(latRad) * sin(newLatRad));
+
+    // Convert the new latitude and longitude from radians to degrees
+    double newLat = radiansToDegrees(newLatRad);
+    double newLon = radiansToDegrees(newLonRad);
+
+    return {'latitude': newLat, 'longitude': newLon};
+  }
+
+  static double calculateDistanceBetweenLatLng(double lat1, double lon1, double lat2, double lon2) {
+    double earthRadiusMeters = 6378137.0;
+    // Convert latitude and longitude from degrees to radians
+    double lat1Rad = degreesToRadians(lat1);
+    double lon1Rad = degreesToRadians(lon1);
+    double lat2Rad = degreesToRadians(lat2);
+    double lon2Rad = degreesToRadians(lon2);
+
+    // Haversine formula
+    double dLat = lat2Rad - lat1Rad;
+    double dLon = lon2Rad - lon1Rad;
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1Rad) * cos(lat2Rad) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    // Distance in meters
+    double distance = earthRadiusMeters * c;
+
+    return distance;
+  }
+
 // Function to find the point with the minimum angle
   static Landmarks findMinAnglePoint(String sourceid, String destinationid, List<Landmarks> points, int n, {bool ramp = false}) {
     Landmarks s = points.where((element) => element.properties!.polyId == sourceid).first;
@@ -1839,40 +1889,17 @@ class Element {
 
 class CoordinateConverter {
 
+  static Map<List<int>,List<double>> mapping = {};
 
   // Function to convert local coordinates to global coordinates
   static Map<String, double> localToGlobal(double localLat, double localLng, Map<dynamic, dynamic> patchData) {
-    List<Map<String, dynamic>> coordinates = patchData['coordinates'];
-    String buildingAngle = patchData['buildingAngle'];
-
-    double angleRad = _degreesToRadians(double.parse(buildingAngle));
-
-    // Find the translation components
-    var globalRef = coordinates[0]['globalRef'];
-    var localRef = coordinates[0]['localRef'];
-    double originX = double.parse(globalRef['lat']);
-    double originY = double.parse(globalRef['lng']);
-    double localOriginX = double.parse(localRef['lat']);
-    double localOriginY = double.parse(localRef['lng']);
-
-    // Translate local coordinates to the global reference frame
-    double translatedX = localLat - localOriginX;
-    double translatedY = localLng - localOriginY;
-
-    // Apply rotation
-    double rotatedX = translatedX * cos(angleRad) - translatedY * sin(angleRad);
-    double rotatedY = translatedX * sin(angleRad) + translatedY * cos(angleRad);
-
-    // Convert to global coordinates
-    double globalX = originX + rotatedX;
-    double globalY = originY + rotatedY;
-
-    return {'lat': globalX, 'lng': globalY};
+    List<double> v = mapping[[localLat,localLng]]!;
+    return {'lat': v[0], 'lng': v[1]};
   }
 
   // Function to convert global coordinates to local coordinates (reverse)
-  static Map<String, double> globalToLocal(double globalLat, double globalLng,Map<String, dynamic> patchData) {
-    List<Map<String, dynamic>> coordinates = patchData['coordinates'];
+  static Map<String, double> globalToLocal(double globalLat, double globalLng,Map<dynamic, dynamic> patchData) {
+    List<Map<dynamic, dynamic>> coordinates = patchData['coordinates'];
     String buildingAngle = patchData['buildingAngle'];
 
     double angleRad = _degreesToRadians(double.parse(buildingAngle));
@@ -1897,7 +1924,9 @@ class CoordinateConverter {
     double localX = rotatedX + localOriginX;
     double localY = rotatedY + localOriginY;
 
-    return {'lat': localX, 'lng': localY};
+    mapping[[(1000000000+(localX*-1)).round().toInt(),(1000000000+(localY*-1)).round().toInt()]] = [globalLat,globalLng];
+
+    return {'lat': 1000000000+(localX*-1), 'lng': 1000000000+(localY*-1)};
   }
 
   // Helper function to convert degrees to radians

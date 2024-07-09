@@ -1284,6 +1284,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
           if (key == buildingAllApi.outdoorID) {
+            building.floorDimenssion[buildingAllApi.outdoorID] = {1:[int.parse(value.patchData!.length!),int.parse(value.patchData!.breadth!)]};
             createotherPatch(value);
           } else {}
         });
@@ -3381,9 +3382,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               width: 5,
             ));
           });
-
+          List<Cell> interBuildingPath = [];
           for(LatLng c in coords){
-
+            interBuildingPath.add(Cell(node, x, y, (angle, {currPointer, totalCells}) => null, lat, lng, bid))
           }
         }
       });

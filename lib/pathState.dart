@@ -1,3 +1,4 @@
+import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/Cell.dart';
 
 import 'APIMODELS/landmark.dart';
@@ -19,6 +20,7 @@ class pathState {
   double destinationLng = 0.0;
   int sourceFloor = 0;
   int destinationFloor = 0;
+  List<List<double>> realWorldCoordinates = [];
   Map<int, List<int>> path = {};
   Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];

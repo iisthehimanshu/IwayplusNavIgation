@@ -1794,8 +1794,11 @@ class tools {
     return {'latitude': newLat, 'longitude': newLon};
   }
 
-  static double calculateDistanceBetweenLatLng(double lat1, double lon1, double lat2, double lon2) {
+  static double calculateDistanceBetweenLatLng(double lat1, double lon1, double lat2, double lon2, {bool inFeet = false}) {
     double earthRadiusMeters = 6378137.0;
+    if(inFeet){
+      earthRadiusMeters = 20925646.3;
+    }
     // Convert latitude and longitude from degrees to radians
     double lat1Rad = degreesToRadians(lat1);
     double lon1Rad = degreesToRadians(lon1);
@@ -1816,6 +1819,38 @@ class tools {
     double distance = earthRadiusMeters * c;
 
     return distance;
+  }
+
+
+// Function to insert intermediate points between given points
+  static List<List<double>> insertIntermediatePoints(List<List<double>> points, double intervalFeet) {
+    List<List<double>> result = [];
+
+    for (int i = 0; i < points.length - 1; i++) {
+      double lat1 = points[i][1];
+      double lon1 = points[i][0];
+      double lat2 = points[i + 1][1];
+      double lon2 = points[i + 1][0];
+
+      result.add([lat1, lon1]);
+
+      double distance = calculateDistanceBetweenLatLng(lat1, lon1, lat2, lon2,inFeet: true);
+      int numPointsToInsert = (distance / intervalFeet).floor();
+
+      for (int j = 1; j <= numPointsToInsert; j++) {
+        double fraction = j / (numPointsToInsert + 1);
+        double angle = atan2(lon2 - lon1, lat2 - lat1) * 180.0 / pi;
+
+        Map<String, double> newPosition = computeNewPosition(lat1, lon1, angle, fraction * distance);
+
+        result.add([newPosition['latitude']!, newPosition['longitude']!]);
+      }
+    }
+
+    // Add the last point
+    result.add([points.last[1], points.last[0]]);
+
+    return result;
   }
 
 // Function to find the point with the minimum angle

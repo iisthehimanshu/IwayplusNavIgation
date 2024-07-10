@@ -127,31 +127,46 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     listenToBin();
     //
     //   });
-    //   List<Cell> remainingPath = widget.user.ListofPaths[widget.user.buildingNumber].sublist(widget.user.pathobj.index+1);
-    //   int nextTurn = findNextTurn(turnPoints, remainingPath);
-    //   widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.ListofPaths);
-    //   double angle = 0.0;
-    //   if(widget.user.pathobj.index<widget.user.path.length-1){
-    //     //print("p1 $angle");
-    //     angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-    //     //print("p2 $angle");
-    //   }
-    //
-    //   //print("angleeeeee $angle")  ;
-    //   setState(() {
-    //     widget.direction = tools.angleToClocks(angle);
-    //     if(widget.direction == "Straight"){
-    //       widget.direction = "Go Straight";
-    //
-    //       speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-    //     }else{
-    //       widget.direction = "Turn ${widget.direction}, and Go Straight";
-    //
-    //       speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
-    //       widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
-    //
-    //     }
-    //   });
+    if(!widget.user.isInRealWorld){
+      List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
+
+      List<int> v = tools.eightcelltransition(widget.user.theta);
+      double a = 0;
+      if (widget.user.pathobj.index + 1 == path.length) {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index - 1],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index]);
+      } else {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index + 1]);
+      }
+      widget.direction = tools.angleToClocks(a);
+      List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
+      if (remainingPath.isEmpty) {
+        remainingPath.add(path.last);
+      }
+      Cell nextTurn = findNextTurn(remainingPath);
+      widget.distance = tools.distancebetweennodes(
+          nextTurn, path[widget.user.pathobj.index], path);
+      }
+
+      //print("angleeeeee $angle")  ;
+      setState(() {
+        if(widget.direction == "Straight"){
+          widget.direction = "Go Straight";
+
+          speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        }else{
+          widget.direction = "Turn ${widget.direction}, and Go Straight";
+
+          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
+          widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
+
+        }
+      });
     //
     // }
   }
@@ -472,7 +487,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print("approaching turn issue");
       }
     }else{
-      widget.distance = widget.user.d.ceil();
+      widget.distance = tools.calculateDistanceBetweenLatLng(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1],inFeet: true).ceil()-UserState.stepSize.toInt();
       double a = tools.calculateAngleBetweenVectors(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1], widget.user.theta);
       widget.direction = tools.angleToClocks(a);
       if (oldWidget.direction != widget.direction) {
@@ -732,28 +747,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(
-                      onPressed: () {
-                        //   setState(() {
-                        //   if(DirectionIndex - 1 >=1){
-                        //     DirectionIndex--;
-                        //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                        //     if(DirectionIndex == nextTurnIndex){
-                        //       widget.clearFocusTurnArrow();
-                        //     }
-                        //   }
-                        // });
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios_new,
-                        color: DirectionIndex - 1 >= 1
-                            ? Colors.white
-                            : Colors.grey,
-                      )),
-                ),
+                // Container(
+                //   width: 44,
+                //   height: 44,
+                //   child: IconButton(
+                //       onPressed: () {
+                //         //   setState(() {
+                //         //   if(DirectionIndex - 1 >=1){
+                //         //     DirectionIndex--;
+                //         //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                //         //     if(DirectionIndex == nextTurnIndex){
+                //         //       widget.clearFocusTurnArrow();
+                //         //     }
+                //         //   }
+                //         // });
+                //       },
+                //       icon: Icon(
+                //         Icons.arrow_back_ios_new,
+                //         color: DirectionIndex - 1 >= 1
+                //             ? Colors.white
+                //             : Colors.grey,
+                //       )),
+                // ),
                 const SizedBox(
                   width: 8,
                 ),
@@ -768,33 +783,33 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 const SizedBox(
                   width: 8,
                 ),
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(
-                      onPressed: () {
-                        //   setState(() {
-                        //   if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                        //     DirectionIndex++;
-                        //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                        //     if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                        //       DirectionIndex++;
-                        //     }
-                        //     if(DirectionIndex == nextTurnIndex){
-                        //       widget.clearFocusTurnArrow();
-                        //     }
-                        //   }
-                        // });
-                      },
-                      icon: Icon(
-                        Icons.arrow_forward_ios_outlined,
-                        color: DirectionIndex + 1 <
-                                widget.user.pathobj.directions.length
-                            ? Colors.white
-                            : Colors.grey,
-                        size: 24,
-                      )),
-                )
+                // Container(
+                //   width: 44,
+                //   height: 44,
+                //   child: IconButton(
+                //       onPressed: () {
+                //         //   setState(() {
+                //         //   if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                //         //     DirectionIndex++;
+                //         //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                //         //     if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                //         //       DirectionIndex++;
+                //         //     }
+                //         //     if(DirectionIndex == nextTurnIndex){
+                //         //       widget.clearFocusTurnArrow();
+                //         //     }
+                //         //   }
+                //         // });
+                //       },
+                //       icon: Icon(
+                //         Icons.arrow_forward_ios_outlined,
+                //         color: DirectionIndex + 1 <
+                //                 widget.user.pathobj.directions.length
+                //             ? Colors.white
+                //             : Colors.grey,
+                //         size: 24,
+                //       )),
+                // )
               ],
             ),
           ),

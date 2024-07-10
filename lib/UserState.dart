@@ -39,6 +39,7 @@ class UserState{
   int buildingNumber = 0;
   double d = 1;
   List<double> p = [];
+  List<List<double>> realWorldCoordinates = [];
   bool isInRealWorld = false;
   static int xdiff = 0;
   static int ydiff = 0;
@@ -161,7 +162,9 @@ class UserState{
       if(pathobj.index + 3 == ListofPaths[buildingNumber].length && !isInRealWorld){
         if(ListofPaths[buildingNumber-1].isNotEmpty && ListofPaths[buildingNumber][0].bid != ListofPaths[buildingNumber-1][0].bid){
           print("toogleed");
+          p = realWorldCoordinates[1];
           isInRealWorld = !isInRealWorld;
+
         }else{
           pathobj.index = 2;
           buildingNumber --;
@@ -292,7 +295,14 @@ class UserState{
         lng = newPos['longitude']!;
         customRender([lat,lng]);
         List<double> v = tools.localtoglobal(ListofPaths[buildingNumber-1][2].x, ListofPaths[buildingNumber-1][2].y, patchData: patchData[ListofPaths[buildingNumber-1][2].bid]);
-        p=v;
+        int index = realWorldCoordinates.indexWhere((element) => element == p);
+        if(index+1<realWorldCoordinates.length){
+          double dis = tools.calculateDistanceBetweenLatLng(lat, lng, p[0], p[1]);
+          if(dis<=1){
+            p = realWorldCoordinates[index+1];
+            print("changed to $p");
+          }
+        }
         this.d = tools.calculateDistanceBetweenLatLng(lat, lng, v[0], v[1]);
         print("distance is ddd ${this.d} ${ListofPaths[buildingNumber-1][2].bid}");
         if(this.d<=3){

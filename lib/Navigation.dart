@@ -143,6 +143,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   Map<String, List<Marker>> markers = Map();
   Building building = Building(floor: Map(), numberOfFloors: Map());
   Map<int, Set<gmap.Polyline>> singleroute = {};
+  Set<gmap.Marker> realWorldPath = Set();
   Map<int, Set<Marker>> dottedSingleRoute = {};
   BLueToothClass btadapter = new BLueToothClass();
   bool _isLandmarkPanelOpen = false;
@@ -203,7 +204,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat(reverse: true);
-
 
    // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
@@ -631,6 +631,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   void renderHere() {
     setState(() {
+      circles.clear();
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
@@ -638,7 +639,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
-
+        mapState.zoom = 22;
         mapState.target = LatLng(lvalue[0], lvalue[1]);
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -683,7 +684,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           Circle(
             circleId: CircleId("circle"),
             center: pos,
-            radius: _animation.value,
+            radius: 5,
             strokeWidth: 1,
             strokeColor: Colors.blue,
             fillColor: Colors.lightBlue.withOpacity(0.2),
@@ -2154,6 +2155,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           PathState.sourcePolyID = "";
                           PathState.destinationPolyID = "";
                           singleroute.clear();
+                          realWorldPath.clear();
                           user.isnavigating = false;
                           _isnavigationPannelOpen = false;
                           building.selectedLandmarkID = polyArray.id;
@@ -2162,6 +2164,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           _isBuildingPannelOpen = false;
                           _isRoutePanelOpen = false;
                           singleroute.clear();
+                          realWorldPath.clear();
                           _isLandmarkPanelOpen = true;
                           PathState.directions = [];
                           interBuildingPath.clear();
@@ -2490,6 +2493,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
+                          realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2521,6 +2525,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
+                          realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2551,6 +2556,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
+                          realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2581,6 +2587,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
+                          realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2611,6 +2618,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
+                          realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2623,6 +2631,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                         landmarks[i].properties!.polyId;
                     _isRoutePanelOpen = false;
                     singleroute.clear();
+                          realWorldPath.clear();
                     _isLandmarkPanelOpen = true;
                     addselectedMarker(LatLng(value[0], value[1]));
                   }
@@ -3222,6 +3231,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     print(landmarksMap[PathState.sourcePolyID]!.buildingID);
 
     singleroute.clear();
+                          realWorldPath.clear();
     pathMarkers.clear();
     PathState.destinationX =
     landmarksMap[PathState.destinationPolyID]!.coordinateX!;
@@ -3411,15 +3421,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             destinationEntrylat,
             destinationEntrylng);
         print("build data: $buildData");
-
+        PathState.realWorldCoordinates.clear();
         List<LatLng> coords = [LatLng(sourceEntrylat, sourceEntrylng)];
+        final Uint8List realWorldPathMarker =
+        await getImagesFromMarker('assets/rw.png', 30);
+        PathState.realWorldCoordinates.add([sourceEntrylat,sourceEntrylng]);
+        // realWorldPath.add(Marker(
+        //   markerId: MarkerId('rw [$sourceEntrylat,$sourceEntrylng]'),
+        //   position: LatLng(sourceEntrylat,
+        //       sourceEntrylng),
+        //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
+        // ),);
+
         if (buildData != null) {
+
           int len = buildData.path.length;
           for (int i = 0; i < len; i++) {
+            // realWorldPath.add(Marker(
+            //   markerId: MarkerId('rw [${buildData.path[i][1]},${buildData.path[i][0]}]'),
+            //   position: LatLng(buildData.path[i][1],
+            //       buildData.path[i][0]),
+            //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
+            // ),);
             coords.add(LatLng(buildData.path[i][1],
                 buildData.path[i][0]));
+            PathState.realWorldCoordinates.add([buildData.path[i][1],buildData.path[i][0]]);
           }
           coords.add(LatLng(destinationEntrylat, destinationEntrylng));
+          PathState.realWorldCoordinates.add([destinationEntrylat,destinationEntrylng]);
           print(coords);
           List<String> key = [PathState.sourceBid, PathState.destinationBid];
           setState(() {
@@ -3427,16 +3456,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             singleroute[0]?.add(gmap.Polyline(
               polylineId: PolylineId(buildData.pathId),
               points: coords,
-              color: Colors.blue,
+              color: Colors.red,
               width: 5,
             ));
           });
-          List<Cell> interBuildingPath = [];
-          for(LatLng c in coords){
-            Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
-            int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
-            interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
-          }
+          // List<Cell> interBuildingPath = [];
+          // for(LatLng c in coords){
+          //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
+          //   int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
+          //   interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
+          // }
           // PathState.listofPaths.insert(1, interBuildingPath);
         }
       });
@@ -3953,6 +3982,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                           PathState.sourcePolyID = "";
                           PathState.destinationPolyID = "";
                           singleroute.clear();
+                          realWorldPath.clear();
                           _isBuildingPannelOpen = true;
                           if(user.isnavigating==false){
                             clearPathVariables();
@@ -4197,6 +4227,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                 PathState.sourceBid = "";
                                                 PathState.destinationBid = "";
                                                 singleroute.clear();
+                          realWorldPath.clear();
                                                 PathState.directions = [];
                                                 interBuildingPath.clear();
                                               //  if(user.isnavigating==false){
@@ -4263,6 +4294,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                               buildingAllApi.selectedID = PathState.sourceBid;
                                               buildingAllApi.selectedBuildingID = PathState.sourceBid;
                                               user.Bid = PathState.sourceBid;
+                                              user.realWorldCoordinates = PathState.realWorldCoordinates;
                                               user.floor =
                                                   PathState.sourceFloor;
                                               user.pathobj = PathState;
@@ -4849,6 +4881,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                   PathState.sourcePolyID = "";
                                   PathState.destinationPolyID = "";
                                   singleroute.clear();
+                          realWorldPath.clear();
                                   fitPolygonInScreen(patch.first);
                                   setState(() {
                                     if (markers.length > 0) {
@@ -6485,14 +6518,14 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
         });
 
         // print(Set<Marker>.of(markers[user.Bid]!));
-        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
+        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? []))).union(realWorldPath);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
                     .union(Set<Marker>.of(markers[user.Bid] ?? [])))
-                .union(Markers)
-            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers);
+                .union(Markers).union(realWorldPath)
+            : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers).union(realWorldPath);
       }
     } else {
       if (_isLandmarkPanelOpen) {
@@ -6682,6 +6715,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
     singleroute.clear();
+                          realWorldPath.clear();
     fitPolygonInScreen(patch.first);
     Future.delayed(Duration.zero, () async {
       setState(() {
@@ -6715,6 +6749,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
           building.selectedLandmarkID = ID;
           singleroute.clear();
+                          realWorldPath.clear();
           _isRoutePanelOpen = DirectlyStartNavigation;
           _isLandmarkPanelOpen = !DirectlyStartNavigation;
           List<double> pvalues = tools.localtoglobal(

@@ -25,7 +25,7 @@ class Building{
   List<String> ignoredMarker = [];
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
-  static List<PathModel> waypoint = [];
+  static Map<String,List<PathModel>> waypoint = {};
   Building({required this.floor,required this.numberOfFloors});
 
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/navigationTools.dart';
 import 'package:vibration/vibration.dart';
 
+import '../Cell.dart';
 import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
@@ -19,7 +19,6 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
-
 
 class DirectionHeader extends StatefulWidget {
   String direction;
@@ -33,23 +32,34 @@ class DirectionHeader extends StatefulWidget {
   final Function() moveUser;
   final Function() closeNavigation;
   final Function(dc.direction turn) focusOnTurn;
-  final Function()clearFocusTurnArrow;
+  final Function() clearFocusTurnArrow;
 
-
-
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn,required this.clearFocusTurnArrow}){
-    try{
+  DirectionHeader(
+      {this.distance = 0,
+      required this.user,
+      this.direction = "",
+      required this.paint,
+      required this.repaint,
+      required this.reroute,
+      required this.moveUser,
+      required this.closeNavigation,
+      required this.isRelocalize,
+      this.getSemanticValue = '',
+      required this.focusOnTurn,
+      required this.clearFocusTurnArrow}) {
+    try {
       double angle = tools.calculateAngleBWUserandCellPath(
-          user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
+          user.Cellpath[0],
+          user.Cellpath[1],
+          user.pathobj.numCols![user.Bid]![user.floor]!,
+          user.theta);
       direction = tools.angleToClocks(angle);
-      if(direction == "Straight"){
+      if (direction == "Straight") {
         direction = "Go Straight";
-      }else{
+      } else {
         direction = "Turn ${direction}, and Go Straight";
       }
-    }catch(e){
-
-    }
+    } catch (e) {}
   }
 
   @override
@@ -63,25 +73,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   String turnDirection = "";
   List<Widget> DirectionWidgetList = [];
 
-
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
 
-    for(int i = 0; i<widget.user.pathobj.directions.length ; i++){
+    for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
       //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
-
     }
-
 
     btadapter.emptyBin();
     for (int i = 0; i < btadapter.BIN.length; i++) {
-      if(btadapter.BIN[i]!.isNotEmpty){
+      if (btadapter.BIN[i]!.isNotEmpty) {
         btadapter.BIN[i]!.forEach((key, value) {
           key = "";
           value = 0.0;
@@ -109,47 +116,60 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     btadapter.rs.clear();
     Building.thresh = "";
 
-    widget.getSemanticValue="";
-    if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
-      turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+    widget.getSemanticValue = "";
+    // if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
+    //   turnPoints = tools.getTurnpointsForMultiBuilding(widget.user.ListofPaths);
+    //
+    //   (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
+    //   btadapter.startScanning(Building.apibeaconmap);
+    //   _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+    //     print("WilsonCalled");
+    //
+    //     listenToBin();
+    //
+    //   });
+    if(!widget.user.isInRealWorld){
+      List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
-      (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-       btadapter.startScanning(Building.apibeaconmap);
-      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        print("WilsonCalled");
-
-        listenToBin();
-
-      });
-      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-      int nextTurn = findNextTurn(turnPoints, remainingPath);
-      widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-      double angle = 0.0;
-      if(widget.user.pathobj.index<widget.user.path.length-1){
-        //print("p1 $angle");
-        angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-        //print("p2 $angle");
+      List<int> v = tools.eightcelltransition(widget.user.theta);
+      double a = 0;
+      if (widget.user.pathobj.index + 1 == path.length) {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index - 1],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index]);
+      } else {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index + 1]);
+      }
+      widget.direction = tools.angleToClocks(a);
+      List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
+      if (remainingPath.isEmpty) {
+        remainingPath.add(path.last);
+      }
+      Cell nextTurn = findNextTurn(remainingPath);
+      widget.distance = tools.distancebetweennodes(
+          nextTurn, path[widget.user.pathobj.index], path);
       }
 
       //print("angleeeeee $angle")  ;
       setState(() {
-        widget.direction = tools.angleToClocks(angle);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
-          
+
           speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         }else{
           widget.direction = "Turn ${widget.direction}, and Go Straight";
-         
+
           speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
           widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
 
         }
       });
-
-    }
-
-
+    //
+    // }
   }
 
   @override
@@ -158,20 +178,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     super.dispose();
   }
 
-  String getgetSemanticValue(){
+  String getgetSemanticValue() {
     return widget.getSemanticValue;
   }
 
-
-  String debuglastNearestbeacon="";
-  String debuglNearestbeacon="";
-  Map<String, double> sortedsumMap={};
+  String debuglastNearestbeacon = "";
+  String debuglNearestbeacon = "";
+  Map<String, double> sortedsumMap = {};
   Map<String, double> sumMap = {};
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
 
-  bool listenToBin(){
+  bool listenToBin() {
     double highestweight = 0;
     String nearestBeacon = "";
     sumMap.clear();
@@ -179,14 +198,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     sortedsumMap.clear();
     //print("sortedsumMapcleared $sortedsumMap");
 
-
     sumMap.forEach((key, value) {
-      if(highestweight<value){
+      if (highestweight < value) {
         nearestBeacon = key;
         highestweight = value;
       }
     });
-
 
     setState(() {
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
@@ -203,7 +220,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // });
     // //print("-90---   ${sumMap.length}");
     // //print("checkingavgmap   ${sumMap}");
-
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
@@ -246,19 +262,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // });
     setState(() {
       debuglNearestbeacon = nearestBeacon;
-      if(debuglastNearestbeacon != nearestBeacon){
+      if (debuglastNearestbeacon != nearestBeacon) {
         debuglastNearestbeacon = nearestBeacon;
       }
-
     });
 
     ////print("$nearestBeacon   $highestweight");
 
-  // print("nearest${nearestBeacon}");
-    if(nearestBeacon !=""){
+    // print("nearest${nearestBeacon}");
+    if (nearestBeacon != "") {
       print("WilsonInsideCall");
 
-      if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
+      if (widget
+              .user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] !=
+          null) {
         print("WilsonInsideCall2");
         print(widget.user.key);
         print(Building.apibeaconmap[nearestBeacon]!.sId);
@@ -266,13 +283,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           print("WilsonInsideCall3");
 
           //widget.user.pathobj.destinationFloor
-          if (widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor) {
-
+          if (widget.user.floor !=
+              Building.apibeaconmap[nearestBeacon]!.floor) {
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-            speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
+            speak(
+                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             //need to render on beacon for aiims jammu
-            widget.paint(nearestBeacon,render: false);
+            widget.paint(nearestBeacon, render: false);
             return true;
           }
 
@@ -284,6 +302,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           else if (widget.user.floor ==
+
               Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight >= 1.3) {
 
@@ -314,16 +333,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               //print("workingg 2");
               int distanceFromPath = 100000000;
               int? indexOnPath = null;
-              int numCols = widget.user.pathobj.numCols![widget.user
-                  .Bid]![widget.user.floor]!;
-              widget.user.path.forEach((node) {
-                List<int> pathcoord = [node % numCols, node ~/ numCols];
+              int numCols = widget
+                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
+              widget.user.ListofPaths[widget.user.buildingNumber].forEach((node) {
+                List<int> pathcoord = [node.x, node.y];
                 double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                 if (d1 < distanceFromPath) {
                   distanceFromPath = d1.toInt();
                   //print("node on path $node");
                   //print("distanceFromPath $distanceFromPath");
-                  indexOnPath = widget.user.path.indexOf(node);
+                  indexOnPath = widget.user.ListofPaths[widget.user.buildingNumber].indexOf(node);
                   //print(indexOnPath);
                 }
               });
@@ -337,14 +356,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               } else {
                 print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                speak("${widget.direction} ${(widget.distance /
-                    UserState.stepSize).ceil()} steps");
+                speak(
+                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} steps");
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 return true; //moved on path
               }
             }
-
 
             //print("d $d");
             //print("widget.user.key ${widget.user.key}");
@@ -353,9 +371,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //print(nearestBeacon);
           }
         }
-
-
-      }else{
+      } else {
         print("WilsonInsideCall4");
 
         print("workingg 6");
@@ -372,189 +388,293 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     // btadapter.emptyBin();
 
-
     return false;
   }
 
-
-  FlutterTts flutterTts = FlutterTts() ;
+  FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg) async {
     await flutterTts.setSpeechRate(0.6);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
 
-  int findNextTurn(List<int> turns, List<int> path) {
-    // Iterate through the sorted list
-    for (int i = 0; i < path.length; i++) {
-      for(int j = 0; j< turns.length; j++){
-        if(path[i] == turns[j]){
+  Cell findNextTurn(List<Cell> path) {
+    for (int i = 1; i < path.length - 2; i++) {
+      int currPos = path[i].node;
+
+      int x1 = path[i].x;
+      int y1 = path[i].y;
+
+      int x2 = path[i + 1].x;
+      int y2 = path[i + 1].y;
+
+      int x3 = path[i - 1].x;
+      int y3 = path[i - 1].y;
+
+      int prevDeltaX = x1 - x3;
+      int prevDeltaY = y1 - y3;
+      int nextDeltaX = x2 - x1;
+      int nextDeltaY = y2 - y1;
+
+      if ((prevDeltaX != nextDeltaX) || (prevDeltaY != nextDeltaY)) {
+        if (prevDeltaX == 0 && nextDeltaX == 0) {
+        } else if (prevDeltaY == 0 && nextDeltaY == 0) {
+        } else {
           return path[i];
         }
       }
     }
-
-    // If no number is greater than the target, return null
-    if(path.length >= widget.user.pathobj.index){
-      return path[widget.user.pathobj.index];
-    }else{
-      return 0;
-    }
+    return path.last;
   }
 
   @override
-  void didUpdateWidget(DirectionHeader oldWidget){
+  void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if(!widget.user.isInRealWorld){
+      List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
-    // if(widget.user.path[widget.user.pathobj.index] == 30709){
-    //   widget.user.move();
-    //   widget.user.move();
-    //
-    //   tools.angleBetweenBuildingAndNorth(widget.user.pathobj.destinationBid);
-    // }
+      List<int> v = tools.eightcelltransition(widget.user.theta);
+      double a = 0;
+      if (widget.user.pathobj.index + 1 == path.length) {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index - 1],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index]);
+      } else {
+        a = tools.calculateAnglefifthForMultiBuilding(
+            path[widget.user.pathobj.index],
+            [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
+            path[widget.user.pathobj.index + 1]);
+      }
+      widget.direction = tools.angleToClocks(a);
+      List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
+      if (remainingPath.isEmpty) {
+        remainingPath.add(path.last);
+      }
+      Cell nextTurn = findNextTurn(remainingPath);
+      widget.distance = tools.distancebetweennodes(
+          nextTurn, path[widget.user.pathobj.index], path);
+      print("distance ${widget.distance}");
+      if (oldWidget.direction != widget.direction) {
+        if (oldWidget.direction == "Straight") {
+          Vibration.vibrate();
 
-    if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
 
+
+          speak("Turn ${widget.direction}");
+          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        } else if (widget.direction == "Straight") {
+          Vibration.vibrate();
+
+
+          speak(
+              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
+        }
+      }
+
+      try{
+        if((widget.distance/UserState.stepSize).ceil() == 7){
+          if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
+            int index = path.indexWhere((element) => element == nextTurn);
+            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index-1].x , path[index-1].y], path[index+1]));
+            print("direc mila $direc");
+            print("index mila $index");
+
+            speak(
+                "Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+            //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+          } else {
+            int index = path.indexWhere((element) => element == nextTurn);
+            print("index mila $index");
+            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]));
+            print("direc mila $direc");
+            speak("Approaching ${direc} turn");
+            widget.user.move();
+          }
+        }
+      }catch(e){
+        print("approaching turn issue");
+      }
     }else{
+      widget.distance = tools.calculateDistanceBetweenLatLng(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1],inFeet: true).ceil()-UserState.stepSize.toInt();
+      double a = tools.calculateAngleBetweenVectors(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1], widget.user.theta);
+      widget.direction = tools.angleToClocks(a);
+      if (oldWidget.direction != widget.direction) {
+        if (oldWidget.direction == "Straight") {
+          Vibration.vibrate();
 
-      if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
 
-        speak("You have reached ${widget.user.pathobj.destinationName}");
-        widget.closeNavigation();
-      }else{
-        widget.user.pathobj.connections.forEach((key, value) {
-          value.forEach((inkey, invalue) {
-            if(widget.user.path[widget.user.pathobj.index] == invalue){
-              widget.direction = "You have reached ";
-            }
-          });
-        });
+          speak("Turn ${widget.direction}");
+          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        } else if (widget.direction == "Straight") {
+          Vibration.vibrate();
 
-
-
-
-        List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-        int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print(nextTurn);
-        print(remainingPath);
-        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
-
-        if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
-          if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
-          DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
-        }
-        widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-
-        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-        widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
-        int index = widget.user.path.indexOf(nextTurn);
-        //print("index $index");
-        double a =0;
-        if(index+1 == widget.user.path.length){
-          a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-        }else{
-          a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-        }
-
-        String direc = tools.angleToClocks(a);
-        turnDirection = direc;
-        if(nextTurn == turnPoints.last && widget.distance == 7){
-          double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-          speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
-        }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
-          if(!direc.contains("slight")){
-
-            if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
-              speak("Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
-              //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
-            }else{
-              speak("Approaching ${direc} turn");
-              widget.user.move();
-            }
-          }
-        }
-
-
-        if(oldWidget.direction != widget.direction){
-
-          if(oldWidget.direction == "Straight"){
-
-            Vibration.vibrate();
-
-
-            // if(nextTurn == turnPoints.last){
-            //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-            // }else{
-            //   speak("${widget.direction} ${widget.distance} meter");
-            // }
-
-            speak("Turn ${widget.direction}");
-            //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-
-
-          }else if(widget.direction == "Straight"){
-
-
-
-            Vibration.vibrate();
-
-            speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-          }
+          speak(
+              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
         }
       }
     }
+
+
+
   }
 
+  // @override
+  // void didUpdateWidget(DirectionHeader oldWidget){
+  //   super.didUpdateWidget(oldWidget);
+  //
+  //   if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
+  //
+  //   }else{
+  //
+  //     if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
+  //
+  //       speak("You have reached ${widget.user.pathobj.destinationName}");
+  //       widget.closeNavigation();
+  //     }else{
+  //       widget.user.pathobj.connections.forEach((key, value) {
+  //         value.forEach((inkey, invalue) {
+  //           if(widget.user.path[widget.user.pathobj.index] == invalue){
+  //             widget.direction = "You have reached ";
+  //           }
+  //         });
+  //       });
+  //
+  //
+  //
+  //
+  //       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
+  //       int nextTurn = findNextTurn(turnPoints, remainingPath);
+  //       print(nextTurn);
+  //       print(remainingPath);
+  //       nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
+  //
+  //       if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
+  //         if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
+  //           DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
+  //       }
+  //       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+  //
+  //       double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+  //       widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
+  //       int index = widget.user.path.indexOf(nextTurn);
+  //       //print("index $index");
+  //       double a =0;
+  //       if(index+1 == widget.user.path.length){
+  //         a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+  //       }else{
+  //         a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+  //       }
+  //
+  //       String direc = tools.angleToClocks(a);
+  //       turnDirection = direc;
+  //       if(nextTurn == turnPoints.last && widget.distance == 7){
+  //         double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+  //         speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle)}");
+  //       }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
+  //         if(!direc.contains("slight")){
+  //
+  //           if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
+  //             speak("Approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+  //             //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+  //           }else{
+  //             speak("Approaching ${direc} turn");
+  //             widget.user.move();
+  //           }
+  //         }
+  //       }
+  //
+  //
+  //       if(oldWidget.direction != widget.direction){
+  //
+  //         if(oldWidget.direction == "Straight"){
+  //
+  //           Vibration.vibrate();
+  //
+  //
+  //           // if(nextTurn == turnPoints.last){
+  //           //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+  //           // }else{
+  //           //   speak("${widget.direction} ${widget.distance} meter");
+  //           // }
+  //
+  //           speak("Turn ${widget.direction}");
+  //           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+  //
+  //
+  //         }else if(widget.direction == "Straight"){
+  //
+  //
+  //
+  //           Vibration.vibrate();
+  //
+  //           speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
   static Icon getCustomIcon(String direction) {
-    if(direction == "Straight"){
+    if (direction == "Straight") {
       return Icon(
         Icons.straight,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Slight Right"){
+    } else if (direction == "Slight Right") {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Right"){
+    } else if (direction == "Right") {
       return Icon(
         Icons.turn_right,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Sharp Right"){
+    } else if (direction == "Sharp Right") {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "U Turn"){
+    } else if (direction == "U Turn") {
       return Icon(
         Icons.u_turn_right,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Sharp Left"){
+    } else if (direction == "Sharp Left") {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Left"){
+    } else if (direction == "Left") {
       return Icon(
         Icons.turn_left,
         color: Colors.white,
         size: 40,
       );
-    }else if(direction == "Slight Left"){
+    } else if (direction == "Slight Left") {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.white,
         size: 40,
       );
-    }else{
+    } else {
       return Icon(
         Icons.check_box_outline_blank,
         color: Colors.white,
@@ -564,55 +684,55 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   Icon getNextCustomIcon(String direction) {
-    if(direction == "Straight"){
+    if (direction == "Straight") {
       return Icon(
         Icons.straight,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Slight Right"){
+    } else if (direction == "Slight Right") {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Right"){
+    } else if (direction == "Right") {
       return Icon(
         Icons.turn_right,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Sharp Right"){
+    } else if (direction == "Sharp Right") {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "U Turn"){
+    } else if (direction == "U Turn") {
       return Icon(
         Icons.u_turn_right,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Sharp Left"){
+    } else if (direction == "Sharp Left") {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Left"){
+    } else if (direction == "Left") {
       return Icon(
         Icons.turn_left,
         color: Colors.white,
         size: 23,
       );
-    }else if(direction == "Slight Left"){
+    } else if (direction == "Slight Left") {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.white,
         size: 23,
       );
-    }else{
+    } else {
       return Icon(
         Icons.check_box_outline_blank,
         color: Colors.white,
@@ -631,93 +751,130 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.only(top: 8,bottom: 8),
+            padding: EdgeInsets.only(top: 8, bottom: 8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16),bottomRight: Radius.circular(16)),
-              color:(widget.user.pathobj.directions.isNotEmpty)? widget.user.pathobj.directions[DirectionIndex].isDestination?Colors.blue:DirectionIndex == nextTurnIndex ?Color(0xff01544F):Colors.grey:Colors.grey,
-
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16)),
+              color: Color(0xff01544F),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex - 1 >=1){
-                      DirectionIndex--;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
-                      }
-                    }
-                  });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
+                // Container(
+                //   width: 44,
+                //   height: 44,
+                //   child: IconButton(
+                //       onPressed: () {
+                //         //   setState(() {
+                //         //   if(DirectionIndex - 1 >=1){
+                //         //     DirectionIndex--;
+                //         //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                //         //     if(DirectionIndex == nextTurnIndex){
+                //         //       widget.clearFocusTurnArrow();
+                //         //     }
+                //         //   }
+                //         // });
+                //       },
+                //       icon: Icon(
+                //         Icons.arrow_back_ios_new,
+                //         color: DirectionIndex - 1 >= 1
+                //             ? Colors.white
+                //             : Colors.grey,
+                //       )),
+                // ),
+                const SizedBox(
+                  width: 8,
                 ),
-                const SizedBox(width: 8,),
-                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user),
-                const SizedBox(width: 8,),
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                      DirectionIndex++;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                        DirectionIndex++;
-                      }
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
-                      }
-                    }
-                  });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
-                )
+                scrollableDirection(
+                    "${widget.direction}",
+                    '${(widget.distance / UserState.stepSize).ceil()}',
+                    getCustomIcon(widget.direction),
+                    DirectionIndex,
+                    nextTurnIndex,
+                    widget.user.pathobj.directions,
+                    widget.user),
+                const SizedBox(
+                  width: 8,
+                ),
+                // Container(
+                //   width: 44,
+                //   height: 44,
+                //   child: IconButton(
+                //       onPressed: () {
+                //         //   setState(() {
+                //         //   if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                //         //     DirectionIndex++;
+                //         //     widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                //         //     if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                //         //       DirectionIndex++;
+                //         //     }
+                //         //     if(DirectionIndex == nextTurnIndex){
+                //         //       widget.clearFocusTurnArrow();
+                //         //     }
+                //         //   }
+                //         // });
+                //       },
+                //       icon: Icon(
+                //         Icons.arrow_forward_ios_outlined,
+                //         color: DirectionIndex + 1 <
+                //                 widget.user.pathobj.directions.length
+                //             ? Colors.white
+                //             : Colors.grey,
+                //         size: 24,
+                //       )),
+                // )
               ],
             ),
           ),
-          DirectionIndex == nextTurnIndex?Container(
-            width: 98,
-            height: 39,
-            margin: EdgeInsets.only(left: 9,top: 5),
-            padding: EdgeInsets.only(left: 16,right: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              color: Color(0xff013633),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  "Then",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xffFFFFFF),
-                    height: 25/16,
+          DirectionIndex == nextTurnIndex
+              ? Container(
+                  width: 98,
+                  height: 39,
+                  margin: EdgeInsets.only(left: 9, top: 5),
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    color: Color(0xff013633),
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                SizedBox(width: 6,),
-                // Text(DirectionIndex.toString()),
-                // Text(nextTurnIndex.toString())
-                getNextCustomIcon(turnDirection)
-              ],
-            ),
-          ):Container(),
 
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(ShowsumMap.toString()),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Then",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xffFFFFFF),
+                          height: 25 / 16,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                      SizedBox(
+                        width: 6,
+                      ),
+                      // Text(DirectionIndex.toString()),
+                      // Text(nextTurnIndex.toString())
+                      getNextCustomIcon(turnDirection)
+                    ],
+                  ),
+                )
+              : Container(),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(ShowsumMap.toString()),
+                ],
+              ),
+            ),
+          ),
+
         ],
       ),
     );
@@ -733,10 +890,11 @@ class scrollableDirection extends StatelessWidget {
   List<direction> listOfDirections;
   UserState user;
 
-  scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user);
+  scrollableDirection(this.Direction, this.steps, this.i, this.DirectionIndex,
+      this.nextTurnIndex, this.listOfDirections, this.user);
 
-  String chooseDirection(){
-    if(listOfDirections[DirectionIndex].isDestination){
+  String chooseDirection() {
+    if (listOfDirections[DirectionIndex].isDestination) {
       double? angle;
       if (user.pathobj.singleCellListPath.isNotEmpty) {
         int l = user.pathobj.singleCellListPath.length;
@@ -751,36 +909,42 @@ class scrollableDirection extends StatelessWidget {
           user.pathobj.destinationY
         ]);
       }
-      return angle!=null?"${listOfDirections[DirectionIndex].turnDirection} will be ${tools.angleToClocks3(angle)}":
-      "${listOfDirections[DirectionIndex].turnDirection} will be on your front";
-    }else if(DirectionIndex == nextTurnIndex){
-      return "${Direction == "Straight"?"Go Straight":"Turn ${Direction}, and Go Straight"}";
-    }else{
-      if(DirectionIndex<listOfDirections.length){
-        return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
-      }else{
-        return "${listOfDirections[DirectionIndex-1].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex-1].turnDirection}, and Go Straight"}";
+      return angle != null
+          ? "${listOfDirections[DirectionIndex].turnDirection} will be ${tools.angleToClocks3(angle)}"
+          : "${listOfDirections[DirectionIndex].turnDirection} will be on your front";
+    } else if (DirectionIndex == nextTurnIndex) {
+      return "${Direction == "Straight" ? "Go Straight" : "Turn ${Direction}, and Go Straight"}";
+    } else {
+      if (DirectionIndex < listOfDirections.length) {
+        return "${listOfDirections[DirectionIndex].turnDirection == "Straight" ? "Go Straight" : "Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
+      } else {
+        return "${listOfDirections[DirectionIndex - 1].turnDirection == "Straight" ? "Go Straight" : "Turn ${listOfDirections[DirectionIndex - 1].turnDirection}, and Go Straight"}";
       }
     }
   }
 
-  String chooseSteps(){
-    if(listOfDirections[DirectionIndex].isDestination){
-     return "";
-    }else if(DirectionIndex == nextTurnIndex){
+  String chooseSteps() {
+    if (listOfDirections[DirectionIndex].isDestination) {
+      return "";
+    } else if (DirectionIndex == nextTurnIndex) {
       return '$steps Steps';
-    }else{
-      return '${((listOfDirections[DirectionIndex].distanceToNextTurn??1)/UserState.stepSize).ceil()} Steps';
+    } else {
+      return '${((listOfDirections[DirectionIndex].distanceToNextTurn ?? 1) / UserState.stepSize).ceil()} Steps';
     }
   }
 
-  Icon chooseIcon(){
-    if(listOfDirections[DirectionIndex].isDestination){
-     return Icon(Icons.place_rounded,color: Colors.white,size: 40,);
-    }else if(DirectionIndex == nextTurnIndex){
+  Icon chooseIcon() {
+    if (listOfDirections[DirectionIndex].isDestination) {
+      return Icon(
+        Icons.place_rounded,
+        color: Colors.white,
+        size: 40,
+      );
+    } else if (DirectionIndex == nextTurnIndex) {
       return i;
-    }else{
-      return _DirectionHeaderState.getCustomIcon(listOfDirections[DirectionIndex].turnDirection!);
+    } else {
+      return _DirectionHeaderState.getCustomIcon(
+          listOfDirections[DirectionIndex].turnDirection!);
     }
   }
 
@@ -788,20 +952,19 @@ class scrollableDirection extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    return  Expanded(
-
+    return Expanded(
       child: Row(
         children: [
           Expanded(
             child: Center(
               child: Text(
-                chooseDirection(),
+                "${Direction == "Straight" ? "Go Straight" : "Turn ${Direction}, and Go Straight"}",
                 style: const TextStyle(
                   fontFamily: "Roboto",
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
-                  height: 30/24,
+                  height: 30 / 24,
                 ),
               ),
             ),
@@ -815,14 +978,14 @@ class scrollableDirection extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                listOfDirections[DirectionIndex].isDestination?Container():Text(
-                  chooseSteps(),
+                Text(
+                  steps,
                   style: const TextStyle(
                     fontFamily: "Roboto",
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     color: Colors.white,
-                    height: 26/16,
+                    height: 26 / 16,
                   ),
                 ),
                 SizedBox(
@@ -835,9 +998,9 @@ class scrollableDirection extends StatelessWidget {
                 ),
               ],
             ),
-          )],
+          )
+        ],
       ),
     );
   }
 }
-

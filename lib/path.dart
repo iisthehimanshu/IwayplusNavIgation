@@ -1406,7 +1406,7 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<int> path, List<int> nonWalkable, int numCols) {
+    List<int> path, List<int> nonWalkable, int numCols,String? bid) {
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
@@ -1442,49 +1442,49 @@ List<Cell> findCorridorSegments(
     // Check if any two opposite directions collide with non-walkable cells
     if (i == 0) {
       //print("$pos with first cell");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid));
     } else if (nextrow != row && nextcol != col) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
       if(nextcol>col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
       }else if(nextcol<col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
       }else{
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
       }
 
     } else if ((eastCollision && westCollision)) {
       print("$pos with twohorizontal");
       if(nextrow>row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
       }else if(nextrow<row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
       }else{
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
       }
 
     } else if (collisionCount == 1) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid));
     } else if ((!northCollision && !southCollision) &&
         (!eastCollision && !westCollision)) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid));
     } else {
       //print("$pos with second eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid));
     }
   }
 

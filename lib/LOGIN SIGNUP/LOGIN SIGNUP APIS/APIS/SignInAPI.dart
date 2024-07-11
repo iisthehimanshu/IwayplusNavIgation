@@ -50,8 +50,9 @@ class SignInAPI{
         signInBox.put("refreshToken", responseBody["refreshToken"]);
         signInBox.put("userId", responseBody["payload"]["userId"]);
         List<dynamic> roles = responseBody["payload"]["roles"];
-        print(responseBody["payload"]["roles"].runtimeType);
         signInBox.put("roles", roles);
+        print("checkingWrongStored");
+        print(signInBox.get("accessToken"));
 
         //------STORING USER CREDENTIALS FROM DATABASE----------
         // UserCredentials.setAccessToken(signInBox.get("accessToken"));
@@ -73,7 +74,7 @@ class SignInAPI{
     } else {
       if (response.statusCode == 403) {
         print("In response.statusCode == 403");
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return SignInAPI().signIN(username,password);
       }
       print("Code is ${response.statusCode}");

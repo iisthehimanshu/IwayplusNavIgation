@@ -12,11 +12,12 @@ import 'guestloginapi.dart';
 
 class BuildingAPI {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/get/venue";
-  var signInBox = Hive.box('SignInDatabase');
-  String token = "";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
 
   Future<Building> fetchBuildData() async {
-    token = signInBox.get("accessToken");
+    accessToken = signInBox.get("accessToken");
     print("buildingapi");
     // final LandMarkBox = LandMarkApiModelBox.getData();
     //
@@ -49,7 +50,7 @@ class BuildingAPI {
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token
+        'x-access-token': accessToken
       },
     );
     print("response code in land is ${response.statusCode}");
@@ -73,14 +74,47 @@ class BuildingAPI {
       BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
       BuildingData.save();
       return Building.fromJson(responseBody);
-    } else {
-      if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
-        return BuildingAPI().fetchBuildData();
+    }else if (response.statusCode == 403) {
+      print('BUILDING DATA API in error 403');
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        body: json.encode(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken
+        },
+      );
+      if (response.statusCode == 200) {
+        Map<String,dynamic> responseBody = json.decode(response.body);
+        final BuildingData = BuildingAPIModel(responseBody: responseBody);
+
+        print(responseBody);
+        print('BUILDING DATA FROM API AFTER 403');
+        // print(LandMarkBox.length);
+        //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
+        //print(demoresponseBody?.responseBody);
+        // LandMarkBox.put(buildingAllApi.getStoredString(),landmarkData);
+
+        // print(LandMarkBox.length);
+        // print('TESTING LANDMARK API DATABASE OVER');
+        //landmarkData.save();
+
+        //print("object ${responseBody['landmarks'][0].runtimeType}");
+
+        BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
+        BuildingData.save();
+        return Building.fromJson(responseBody);
+      }else{
+        print('BUILDING DATA EMPTY FROM API AFTER 403');
+        Building buildingData = Building();
+        return buildingData;
       }
-      //HelperClass.showToast("MishorError in Building API");
-      print(response.statusCode);
-      print(response.body);
+    } else {
+      HelperClass.showToast("MishorError in Building API");
       throw Exception('Failed to load data');
     }
   }

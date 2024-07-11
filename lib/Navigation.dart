@@ -1610,7 +1610,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     try {
       await waypointapi().fetchwaypoint().then((value) {
-        Building.waypoint = value;
+        Building.waypoint[buildingAllApi.getStoredString()] = value;
       });
     } catch (e) {
       print("wayPoint API ERROR ");
@@ -1622,6 +1622,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
 
     List<String> IDS = [];
+
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
@@ -1643,21 +1644,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
           if (key == buildingAllApi.outdoorID) {
-            building.floorDimenssion[buildingAllApi.outdoorID] = {1:[int.parse(value.patchData!.length!),int.parse(value.patchData!.breadth!)]};
+            building.floorDimenssion[buildingAllApi.outdoorID] = {
+              1: [
+                int.parse(value.patchData!.length!),
+                int.parse(value.patchData!.breadth!)
+              ]
+            };
             createotherPatch(value);
-          } else if(buildingAllApi.outdoorID == "") {
+          } else if (buildingAllApi.outdoorID == "") {
             createotherPatch(value);
           }
         });
 
 
-        try{
-          await waypointapi().fetchwaypoint(id: key).then((value){
+        try {
+          await waypointapi().fetchwaypoint(id: key).then((value) {
             Building.waypoint[key] = value;
           });
-        }catch(e){
+        } catch (e) {
           print("wayPoint API ERROR");
-
         }
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
@@ -1717,18 +1722,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
-        
 
-    buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      isLoading = false;
-      isBlueToothLoading = false;
-      print("isBlueToothLoading");
-      print(isBlueToothLoading);
-    });
-    print("Circular progress stop");
-  }
+
+        buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
+        await Future.delayed(Duration(seconds: 3));
+        setState(() {
+          isLoading = false;
+          isBlueToothLoading = false;
+          print("isBlueToothLoading");
+          print(isBlueToothLoading);
+        });
+        print("Circular progress stop");
+      }
+    });}
 
   void _updateCircle() {
     final Circle updatedCircle = Circle(

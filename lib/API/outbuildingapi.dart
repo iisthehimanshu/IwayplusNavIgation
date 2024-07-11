@@ -12,8 +12,8 @@ import "package:http/http.dart" as http;
 
 class OutBuildingData{
 
- static Future<OutBuildingModel?> outBuildingData(double latitude1,double longitude1,double latitude2,double longitude2) async{
-   var signInBox = Hive.box('SignInDatabase');
+  static Future<OutBuildingModel?> outBuildingData(double latitude1,double longitude1,double latitude2,double longitude2) async{
+    var signInBox = Hive.box('SignInDatabase');
    String accessToken = signInBox.get("accessToken");
    String refreshToken = signInBox.get("refreshToken");
 
@@ -63,7 +63,7 @@ class OutBuildingData{
       if (response.statusCode == 200) {
         print("OUTBUILDINGAPI DATA FROM API AFTER 403");
         var res=await http.Response.fromStream(response);
-        return buildingData(res.body);
+        return OutBuildingModel.fromJson(json.decode(res.body));
       }else{
         print("OUTBUILDINGAPI DATA EMPTY FROM API AFTER 403");
         return null;

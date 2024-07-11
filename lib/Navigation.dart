@@ -93,6 +93,8 @@ import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
 import '../Elements/DirectionHeader.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import '../Elements/locales.dart';
 
 void main() {
   runApp(MyApp());
@@ -102,7 +104,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Navigation(),
+      home: Navigation(context: context,),
     );
   }
 }
@@ -110,8 +112,9 @@ class MyApp extends StatelessWidget {
 class Navigation extends StatefulWidget {
   String directLandID = "";
   static bool bluetoothGranted = false;
+  BuildContext context;
 
-  Navigation({this.directLandID = ''});
+  Navigation({this.directLandID = '',required this.context});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -183,13 +186,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   List<double> accelerationMagnitudes = [];
   bool isCalibrating = false;
   bool excludeFloorSemanticWork = false;
+  late FlutterLocalization _flutterLocalization;
+  late String _currentLocale = '';
 
 
   @override
   void initState() {
     super.initState();
 
-    //add a timer of duration 5sec
+    _flutterLocalization = FlutterLocalization.instance;
+    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+  print("_currentLocale");
+    print(_currentLocale);
+
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
     _messageTimer=Timer.periodic(Duration(seconds: 5), (timer){
@@ -214,7 +223,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
-      speak("Loading maps");
+      speak("${LocaleData.loadingMaps.getString(widget.context)}");
     });
     print("Circular progress bar");
     //  calibrate();
@@ -406,11 +415,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   void handleCompassEvents() {
-    
 
+    //_fetchInitialCompassData();
     compassSubscription = FlutterCompass.events!.listen((event) {
       wsocket.message["deviceInfo"]["permissions"]["compass"]=true;
       wsocket.message["deviceInfo"]["sensors"]["compass"]=true;
+
       double? compassHeading = event.heading!;
       setState(() {
         user.theta = compassHeading!;
@@ -439,6 +449,65 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   }
 
+  Timer? _retryTimer;
+  void _fetchInitialCompassData() async {
+    double? _accuracy=0.0;
+    try {
+      CompassEvent? initialData = await FlutterCompass.events!.first;
+      if (initialData != null) {
+        setState(() {
+          _accuracy = initialData.accuracy;
+        });
+        print("accuracy ${_accuracy}");
+        print(_accuracy);
+        getAccuracyStatus(_accuracy);
+      } else {
+        _retryFetch();
+      }
+    } catch (e) {
+      _retryFetch();
+    }
+  }
+  String getAccuracyStatus(double? accuracy) {
+    print("acccuracy");
+    print(accuracy);
+    if (accuracy == null) return 'Unknown';
+
+    if (accuracy <= 5) {
+      return 'High';
+    } else if (accuracy <= 10) {
+      return 'Medium';
+    } else {
+_showLowAccuracyDialog();
+      return 'Low';
+    }
+  }
+  void _showLowAccuracyDialog() {
+    showDialog(
+
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Low Accuracy Warning'),
+          content: Image.asset("assets/calibrate.gif",height: 200,width: 200,),
+          backgroundColor: Colors.white,
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _retryFetch() {
+    _retryTimer = Timer(Duration(seconds: 1), _fetchInitialCompassData);
+  }
+
   void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -452,7 +521,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   Future<void> speak(String msg) async {
-    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setSpeechRate(0.5);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
@@ -551,7 +620,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
-            user.move().then((value) {
+            user.move(context).then((value) {
               renderHere();
             });
           } else {
@@ -649,7 +718,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
-            user.move().then((value) {
+            user.move(context).then((value) {
               setState(() {
                 if (markers.length > 0) {
                   markers[user.Bid]![0] = customMarker.move(
@@ -682,7 +751,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       // print("value----");
       // print(value);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value,context);
       // print(finalvalue);
       finalDirections.add(finalvalue);
     }
@@ -909,7 +978,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       mapState.zoom = 22;
       print("value----");
       print(value);
-      String? finalvalue = value == 0? null:tools.angleToClocksForNearestLandmarkToBeacon(value);
+      String? finalvalue = value == 0? null:tools.angleToClocksForNearestLandmarkToBeacon(value,context);
 
       // double value =
       //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
@@ -949,20 +1018,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}");
+                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)}, ${LocaleData.near.getString(context)} ${user.locationName}");
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}");
+                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)},${user.locationName} ${LocaleData.isonyour.getString(context)} ${finalvalue}");
           }
         }
       } else {
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}");
+                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)}, ${LocaleData.near.getString(context)} ${user.locationName}");
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}");
+                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)},${user.locationName} ${LocaleData.isonyour.getString(context)} ${finalvalue}");
           }
         }
       }
@@ -976,8 +1045,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           ),
         );
       }
+      if(!DebugToggle.Slider){
+        _fetchInitialCompassData();
+      }
     } else {
-      if (speakTTS) speak("Unable to find your location");
+      if (speakTTS) speak("${LocaleData.unabletofindyourlocation.getString(context)}");
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
@@ -1039,7 +1111,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       }
     });
     speak(
-        "You are going away from the path. Click Reroute to Navigate from here. ");
+        "${LocaleData.youaregoingawayfromthepath.getString(context)} ");
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -1132,7 +1204,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+          value.landmarks![i].properties!.nonWalkableGrids!.join(',');
           RegExp regExp = RegExp(r'\d+');
           Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
           for (Match match in matches) {
@@ -1157,7 +1229,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           ];
 
           building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-              currentfloorDimenssion!;
+          currentfloorDimenssion!;
           localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
           print("fetch route--  ${building.floorDimenssion}");
@@ -1191,7 +1263,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
 
 
-    await beaconapi().fetchBeaconData().then((value) {
+
+    await beaconapi().fetchBeaconData(buildingAllApi.selectedBuildingID).then((value) {
+
       print("beacondatacheck");
 
       building.beacondata = value;
@@ -1216,7 +1290,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // btadapter.getDevicesList();
       }
 
+
        //btadapter.startScanning(apibeaconmap);
+
       setState(() {
         resBeacons = apibeaconmap;
       });
@@ -1226,8 +1302,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       //please wait
       //searching your location
 
-      speak("Please wait");
-      speak("Searching your location. .");
+      speak("${LocaleData.plswait.getString(widget.context)}");
+      speak("${LocaleData.searchingyourlocation.getString(widget.context)}");
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -1295,7 +1371,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             if (value.landmarks![i].element!.type == "Floor") {
               List<int> allIntegers = [];
               String jointnonwalkable =
-                  value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
               RegExp regExp = RegExp(r'\d+');
               Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
               for (Match match in matches) {
@@ -1314,7 +1390,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                 value.landmarks![i].properties!.floorBreadth!
               ];
               building.floorDimenssion[key] = currentfloorDimenssion!;
-             // print("fetch route--  ${building.floorDimenssion}");
+              // print("fetch route--  ${building.floorDimenssion}");
 
               // building.floorDimenssion[value.landmarks![i].floor!] = [
               //   value.landmarks![i].properties!.floorLength!,
@@ -1324,7 +1400,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
-        await beaconapi().fetchBeaconData(id: key).then((value) {
+
+        await beaconapi().fetchBeaconData(key).then((value) {
+
 
         });
       }
@@ -2833,7 +2911,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                               PathState.sourceFloor = user.floor;
                               PathState.sourcePolyID = user.key;
                               print("object ${PathState.sourcePolyID}");
-                              PathState.sourceName = "Your current location";
+                              PathState.sourceName = "${LocaleData.yourcurrentloc.getString(context)}";
                               PathState.destinationPolyID =
                                   building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
@@ -3372,12 +3450,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       distance = distance * 0.3048;
       distance = double.parse(distance.toStringAsFixed(1));
-      if (PathState.destinationName == "Your current location") {
+      if (PathState.destinationName == "${LocaleData.yourcurrentloc.getString(context)}") {
         speak(
-            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click Start to Navigate.");
+              "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} ${LocaleData.iss.getString(widget.context)} $distance ${LocaleData.meteraway.getString(widget.context)}. ${LocaleData.clickstarttonavigate.getString(widget.context)}");
       } else {
         speak(
-            "${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
+            "${PathState.destinationName} ${LocaleData.iss.getString(widget.context)} $distance ${LocaleData.meteraway.getString(widget.context)}. ${LocaleData.clickstarttonavigate.getString(widget.context)}");
       }
     }
   }
@@ -3541,7 +3619,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
-            path, numCols, value, floor, bid ?? "", PathState));
+            path, numCols, value, floor, bid ?? "", PathState,context));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -3793,37 +3871,37 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     if (PathState.directions.isNotEmpty) {
       if(PathState.directions[0].distanceToNextTurn!=null){
         directionWidgets.add(directionInstruction(
-            direction: "Go Straight",
+            direction: '${LocaleData.gostraight.getString(context)}',
             distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
                 .ceil()
-                .toString()));
+                .toString(),context: context));
       }
 
       for (int i = 1; i < PathState.directions.length; i++) {
         if(!PathState.directions[i].isDestination){
           if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == "Straight"
-                    ? "Go Straight"
-                    : "Turn ${PathState.directions[i].turnDirection!} from ${PathState.directions[i].nearbyLandmark!.name!}, and Go Straight",
+                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                    ? '${LocaleData.gostraight.getString(context)}'
+                    : "'${LocaleData.turn.getString(context)}' ${PathState.directions[i].turnDirection!} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!}, ${LocaleData.and.getString(context)} '${LocaleData.gostraight.getString(context)}'",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
                     .ceil()
-                    .toString()));
+                    .toString(),context: context));
           } else {
             if (PathState.directions[i].node == -1) {
               directionWidgets.add(directionInstruction(
                   direction: "${PathState.directions[i].turnDirection!}",
                   distance:
-                  "and go to ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} floor"));
+                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
             } else {
               directionWidgets.add(directionInstruction(
-                  direction: PathState.directions[i].turnDirection == "Straight"
-                      ? "Go Straight"
-                      : "Turn ${PathState.directions[i].turnDirection!}, and Go Straight",
+                  direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                      ? '${LocaleData.gostraight.getString(context)}'
+                      : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                   distance:
                   (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
                       .ceil()
-                      .toString()));
+                      .toString(),context: context,));
             }
           }
         }
@@ -4320,7 +4398,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       ),
                                                       SizedBox(width: 8),
                                                       Text(
-                                                        "Start",
+                                             '${LocaleData.start.getString(context)}',
                                                         style: TextStyle(
                                                           color: Colors.black,
                                                         ),
@@ -4383,9 +4461,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                           .isAttached
                                                       ? _routeDetailPannelController
                                                               .isPanelClosed
-                                                          ? "Steps"
-                                                          : "Map"
-                                                      : "Steps",
+                                                          ? "${LocaleData.steps.getString(context)}"
+                                                          : "${LocaleData.maps.getString(context)}"
+                                                      : "${LocaleData.steps.getString(context)}",
                                                   style: TextStyle(
                                                     color: Colors.black,
                                                   ),
@@ -4492,7 +4570,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                     "Your are heading towards ",
                                                 child: Text(
                                                   angle != null
-                                                      ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
+                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)} ${tools.angleToClocks3(angle,context)}"
                                                       : PathState.destinationName,
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
@@ -4737,7 +4815,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                               Semantics(
                                                 label: "Travel time",
                                                 child: Text(
-                                                  "${time.toInt()} min",
+                                                  "${time.toInt()} ${LocaleData.min.getString(context)}",
                                                   style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 20,
@@ -4787,7 +4865,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                           ),
                           Container(
                             height: 40,
-                            width: 56,
+                            width: 66,
                             decoration: BoxDecoration(
                               color: Color(0xffDF3535),
                               borderRadius: BorderRadius.circular(20.0),
@@ -4819,13 +4897,14 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                   });
                                 },
                                 child: Text(
-                                  "Exit",
+                                  '${LocaleData.exit.getString(context)}',
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Color(0xffFFFFFF),
-                                    height: 20 / 14,
+                                    height: 20 / 13,
+
                                   ),
                                   textAlign: TextAlign.left,
                                 )),
@@ -4851,6 +4930,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               closeNavigation: closeNavigation,
               isRelocalize: false,
               focusOnTurn: focusOnTurn, clearFocusTurnArrow: clearFocusTurnArrow,
+              context: context,
             )
           ],
         ));
@@ -4932,7 +5012,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                     PathState.sourceFloor = user.floor;
                                     PathState.sourcePolyID = user.key;
                                     PathState.sourceName =
-                                        "Your current location";
+                                        "${LocaleData.yourcurrentloc.getString(context)}";
                                     building.landmarkdata!.then((value) async {
                                       await calculateroute(value.landmarksMap!)
                                           .then((value) {
@@ -4980,8 +5060,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                     PathState.sourceFloor]![1],
                                                 numCols);
                                         if (angle != 0) {
-                                          speak("Turn " +
-                                              tools.angleToClocks(angle));
+                                          speak("${LocaleData.turn.getString(widget.context)}" +
+                                              tools.angleToClocks(angle,context));
                                         } else {}
 
                                         mapState.tilt = 50;
@@ -6891,12 +6971,13 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
-    compassSubscription.cancel();
+    compassSubscription!.cancel();
     flutterTts.cancelHandler;
     _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();
     _controller.dispose();
+    _retryTimer!.cancel();
 
     super.dispose();
   }
@@ -7059,7 +7140,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       user.Bid]![user.floor]!,
                                                   reroute);
                                           if (isvalid) {
-                                            user.move().then((value) {
+                                            user.move(context).then((value) {
                                               renderHere();
                                             });
                                           } else {
@@ -7267,7 +7348,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                         _isBuildingPannelOpen = true;
                                         lastBeaconValue = "";
                                       }else{
-                                        speak("Explore Mode Enabled");
+                                        speak("${LocaleData.exploremodenabled.getString(widget.context)}");
                                         isLiveLocalizing = true;
                                         HelperClass.showToast(
                                             "Explore mode enabled");

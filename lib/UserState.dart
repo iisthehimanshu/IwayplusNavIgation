@@ -81,11 +81,11 @@ class UserState{
   //
   // }
 
-  Future<void> move()async{
+  Future<void> move(context)async{
 
 
 
-    moveOneStep();
+    moveOneStep(context);
 
 
 
@@ -121,22 +121,17 @@ class UserState{
           movementAllowed = false;
         }
       }
-
-
-
       if(movementAllowed){
-        moveOneStep();
+        moveOneStep(context);
       }else if(!movementAllowed){
         return;
       }
     }
-
     if(stepSize.toInt() != stepSize){
-
     }
   }
 
-  Future<void> moveOneStep()async{
+  Future<void> moveOneStep(context)async{
 
     wsocket.message["userPosition"]["X"]=coordX;
     wsocket.message["userPosition"]["Y"]=coordY;
@@ -216,7 +211,7 @@ class UserState{
           }else{
             if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
               double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
-              speak("${element.name} is on your ${tools.angleToClocks(agl)}");
+              speak("${element.name} is on your ${tools.angleToClocks(agl,context)}");
               pathState.nearbyLandmarks.remove(element);
             }
           }

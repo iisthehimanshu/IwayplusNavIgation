@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import 'package:iwaymaps/navigationTools.dart';
@@ -301,13 +302,24 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           else if (widget.user.floor ==
-                  Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.2) {
+
+              Building.apibeaconmap[nearestBeacon]!.floor &&
+              highestweight >= 1.3) {
+
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
               Building.apibeaconmap[nearestBeacon]!.coordinateY!
             ];
+            Building.apibeaconmap[nearestBeacon]!.sId;
+            var dataBox = BuildingAPIModelBox.getData();
+            dataBox.keys;
+            dataBox.values;
+            for(var keys in dataBox.keys){
+
+            }
+
+
             List<int> usercoord = [
               widget.user.showcoordX,
               widget.user.showcoordY
@@ -453,10 +465,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
+
           speak("Turn ${widget.direction}");
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == "Straight") {
           Vibration.vibrate();
+
 
           speak(
               "Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps");
@@ -823,6 +837,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     color: Color(0xff013633),
                   ),
+
                   child: Row(
                     children: [
                       Text(
@@ -859,6 +874,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ),
             ),
           ),
+
         ],
       ),
     );

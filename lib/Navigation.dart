@@ -691,7 +691,7 @@ _showLowAccuracyDialog();
   }
 
   Future<void> speak(String msg) async {
-    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
@@ -790,7 +790,7 @@ _showLowAccuracyDialog();
                 building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
-              user.move().then((value) {
+              user.move(context).then((value) {
                 renderHere();
               });
             } else {
@@ -1438,8 +1438,8 @@ _showLowAccuracyDialog();
               PathState.sourceFloor]![1],
               numCols);
           if (angle != 0) {
-            speak("Turn " +
-                tools.angleToClocks(angle));
+            speak("${LocaleData.turn.getString(context)} " +
+                tools.angleToClocks(angle,context));
           } else {}
 
           mapState.tilt = 50;
@@ -1535,7 +1535,7 @@ _showLowAccuracyDialog();
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation1, animation2) => Navigation(),
+        pageBuilder: (context, animation1, animation2) => Navigation(context: context,),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -1583,8 +1583,8 @@ _showLowAccuracyDialog();
     //please wait
     //searching your location
     await Future.delayed(Duration(seconds: 1));
-    speak("Please wait");
-    speak("Searching your location. .");
+    speak("${LocaleData.plswait.getString(context)}");
+    speak("${LocaleData.searchingyourlocation.getString(context)}");
 
     _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
       localizeUser();
@@ -7924,7 +7924,6 @@ _showLowAccuracyDialog();
                               !user.isnavigating?FloatingActionButton(
                                 onPressed: () async {
                                   if (user.initialallyLocalised) {
-
                                     setState(() {
                                       if (isLiveLocalizing) {
                                         isLiveLocalizing = false;
@@ -7934,29 +7933,32 @@ _showLowAccuracyDialog();
                                         _isExploreModePannelOpen = false;
                                         _isBuildingPannelOpen = true;
                                         lastBeaconValue = "";
-                                      }else{
+                                      } else {
                                         speak("${LocaleData.exploremodenabled.getString(widget.context)}");
                                         isLiveLocalizing = true;
                                         HelperClass.showToast(
                                             "Explore mode enabled");
-                                        _exploreModeTimer = Timer.periodic(
-                                            Duration(milliseconds: 5000),
-                                                (timer) async {
-                                              btadapter.startScanning(resBeacons);
-                                              Future.delayed(
-                                                  Duration(milliseconds: 2000))
-                                                  .then((value) => {
-                                                realTimeReLocalizeUser(
-                                                    resBeacons)
-                                                // listenToBin()
-
-                                              });
-                                              _isBuildingPannelOpen = false;
-                                              _isExploreModePannelOpen = true;
-                                            }
-                                          });
-                                        }
-                                      },
+                                        _exploreModeTimer =
+                                            Timer.periodic(
+                                                Duration(
+                                                    milliseconds: 5000),
+                                                    (timer) async {
+                                                  btadapter
+                                                      .startScanning(resBeacons);
+                                                  Future.delayed(Duration(
+                                                      milliseconds: 2000))
+                                                      .then((value) => {
+                                                    realTimeReLocalizeUser(
+                                                        resBeacons)
+                                                    // listenToBin()
+                                                  });
+                                                });
+                                        _isBuildingPannelOpen = false;
+                                        _isExploreModePannelOpen = true;
+                                      }
+                                    });
+                                  }
+                                },
                                       child: SvgPicture.asset(
                                         "assets/Navigation_RTLIcon.svg",
                                         // color:

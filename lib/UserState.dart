@@ -286,7 +286,7 @@ class UserState{
                     element.coordinateY!
                   ]);
                   speak(
-                      "${element.name} is on your ${tools.angleToClocks(agl)}");
+                      "${element.name} is on your ${tools.angleToClocks(agl,context)}");
                   pathState.nearbyLandmarks.remove(element);
                 }
               }

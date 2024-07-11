@@ -8,6 +8,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import '../APIMODELS/beaconData.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
@@ -26,7 +27,7 @@ class beaconapi {
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);
-      if( BeaconBox.get(id) != null){
+      if(BeaconBox.get(id) != null && !VersionInfo.landmarksDataVersionUpdate){
         List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         return beaconList;

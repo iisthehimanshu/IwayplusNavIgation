@@ -5,6 +5,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
 import '../Elements/HelperClass.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
@@ -23,7 +24,7 @@ class landmarkApi {
     print("landmark");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.landmarksDataVersionUpdate){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;

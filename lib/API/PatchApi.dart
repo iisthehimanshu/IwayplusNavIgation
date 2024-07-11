@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
@@ -31,7 +32,7 @@ class patchAPI {
     accessToken = signInBox.get("accessToken");
 
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.patchDataVersionUpdate){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;

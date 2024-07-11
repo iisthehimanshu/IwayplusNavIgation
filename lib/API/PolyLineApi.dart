@@ -8,6 +8,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../Elements/HelperClass.dart';
+import '../VersioInfo.dart';
 import 'guestloginapi.dart';
 
 class PolyLineApi {
@@ -25,7 +26,7 @@ class PolyLineApi {
     final PolyLineBox = PolylineAPIModelBOX.getData();
     accessToken = signInBox.get("accessToken");
 
-    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.polylineDataVersionUpdate){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;

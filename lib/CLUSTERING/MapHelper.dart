@@ -148,6 +148,7 @@ class MapHelper {
       List<MapMarker> markers,
       int minZoom,
       int maxZoom,
+      GoogleMapController? mapController,
       ) async {
     return Fluster<MapMarker>(
       minZoom: minZoom,
@@ -168,6 +169,7 @@ class MapHelper {
             clusterId: cluster.id,
             pointsSize: cluster.pointsSize,
             childMarkerId: cluster.childMarkerId, icon: null, Landmarkname: '',
+            mapController: mapController,
           ),
     );
   }
@@ -180,6 +182,7 @@ class MapHelper {
       Color clusterColor,
       Color clusterTextColor,
       int clusterWidth,
+      GoogleMapController? mapController,
       ) {
     if (clusterManager == null) return Future.value([]);
 
@@ -187,8 +190,6 @@ class MapHelper {
       [-180, -85, 180, 85],
       currentZoom.toInt(),
     ).map((mapMarker) async {
-      print("Checking cluster name");
-      print(mapMarker.Landmarkname);
 
       if (mapMarker.isCluster!) {
         mapMarker.icon = await _getClusterMarker(
@@ -199,6 +200,8 @@ class MapHelper {
           'assets/pyramids.png',
         );
       }
+      mapMarker.mapController = mapController;
+
 
       return mapMarker.toMarker();
     }).toList());

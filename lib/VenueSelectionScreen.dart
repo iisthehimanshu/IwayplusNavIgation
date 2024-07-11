@@ -23,17 +23,21 @@ import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'API/DataVersionApi.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/Building.dart';
+import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'BuildingInfoScreen.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'DATABASE/BOXES/OutDoorModelBOX.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'HomeNestedSearch.dart';
+import 'VersioInfo.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -57,6 +61,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
+
     getLocs();
     apiCall();
 
@@ -66,6 +71,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
   }
+
 
   void getLocs()async{
     setState(() {
@@ -104,6 +110,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   }
 
   void apiCall() async  {
+
     // print('Running api');
     //await Future.delayed(Duration(milliseconds: 1300));
     await buildingAllApi().fetchBuildingAllData().then((value) {
@@ -260,6 +267,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
                 final WayPointBox = WayPointModeBOX.getData();
+                final OutBuildingBox = OutDoorModeBOX.getData();
+
+
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
@@ -267,6 +277,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 PatchBox.clear();
                 PolyLineBox.clear();
                 WayPointBox.clear();
+                OutBuildingBox.clear();
                 showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length}");
 
               },

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import 'package:iwaymaps/navigationTools.dart';
@@ -284,13 +285,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.2) {
+              highestweight >= 1.3) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
               Building.apibeaconmap[nearestBeacon]!.coordinateY!
             ];
+            Building.apibeaconmap[nearestBeacon]!.sId;
+            var dataBox = BuildingAPIModelBox.getData();
+            dataBox.keys;
+            dataBox.values;
+            for(var keys in dataBox.keys){
+
+            }
+
+
             List<int> usercoord = [
               widget.user.showcoordX,
               widget.user.showcoordY
@@ -396,12 +406,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
-    if(widget.user.path[widget.user.pathobj.index] == 30709){
-      widget.user.move();
-      widget.user.move();
-
-      tools.angleBetweenBuildingAndNorth(widget.user.pathobj.destinationBid);
-    }
+    // if(widget.user.path[widget.user.pathobj.index] == 30709){
+    //   widget.user.move();
+    //   widget.user.move();
+    //
+    //   tools.angleBetweenBuildingAndNorth(widget.user.pathobj.destinationBid);
+    // }
 
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
@@ -695,19 +705,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ):Container(),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

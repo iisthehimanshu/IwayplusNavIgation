@@ -10,6 +10,7 @@ import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
@@ -32,7 +33,7 @@ class buildingAllApi {
     print("checking wilson");
     print(accessToken);
 
-    if(BuildingAllBox.length!=0){
+    if(BuildingAllBox.length!=0  && !VersionInfo.buildingDataVersionUpdate){
       print("BUILDINGALL API DATA FROM DATABASE");
       print(BuildingAllBox.length);
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;

@@ -1080,7 +1080,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
   }
 
-  void reroute() {
+  void reroute()async{
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -1098,8 +1098,119 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
     });
-    speak(
-        "You are going away from the path. Click Reroute to Navigate from here. ");
+    // speak(
+    //     "You are going away from the path. Click Reroute to Navigate from here. ");
+    if (!rerouting) {
+      setState(() {
+        rerouting = true;
+      });
+      //  if(user.isnavigating==false){
+      clearPathVariables();
+      // }
+
+      PathState.clear();
+      PathState.sourceX = user.coordX;
+      PathState.sourceY = user.coordY;
+      user.showcoordX = user.coordX;
+      user.showcoordY = user.coordY;
+      PathState.sourceFloor = user.floor;
+      PathState.sourcePolyID = user.key;
+      PathState.sourceName =
+      "Your current location";
+      building.landmarkdata!.then((value) async {
+        await calculateroute(value.landmarksMap!)
+            .then((value) {
+          user.pathobj = PathState;
+          user.path = PathState.path.values
+              .expand((list) => list)
+              .toList();
+          user.Cellpath =
+              PathState.singleCellListPath;
+          user.pathobj.index = 0;
+          user.isnavigating = true;
+          user.moveToStartofPath().then((value) {
+            setState(() {
+              if (markers.length > 0) {
+                markers[user.Bid]?[
+                0] =
+                    customMarker.move(
+                        LatLng(
+                            tools.localtoglobal(
+                                user.showcoordX
+                                    .toInt(),
+                                user.showcoordY
+                                    .toInt())[0],
+                            tools.localtoglobal(
+                                user.showcoordX
+                                    .toInt(),
+                                user.showcoordY
+                                    .toInt())[1]),
+                        markers[user.Bid]![0]);
+              }
+            });
+          });
+          _isRoutePanelOpen = false;
+          building.selectedLandmarkID = null;
+          _isnavigationPannelOpen = true;
+          _isreroutePannelOpen = false;
+          user.ListofPaths = PathState.listofPaths;
+          user.patchData = building.patchData;
+          user.buildingNumber = PathState.listofPaths.length-1;
+          buildingAllApi.selectedID = PathState.sourceBid;
+          buildingAllApi.selectedBuildingID = PathState.sourceBid;
+          user.Bid = PathState.sourceBid;
+          user.realWorldCoordinates = PathState.realWorldCoordinates;
+          user.floor =
+              PathState.sourceFloor;
+          user.pathobj = PathState;
+          user.path =
+              PathState.singleListPath;
+          user.isnavigating = true;
+          user.Cellpath =
+              PathState.singleCellListPath;
+          int numCols = building.floorDimenssion[
+          PathState
+              .sourceBid]![PathState
+              .sourceFloor]![0]; //floor length
+          double angle =
+          tools.calculateAngleBWUserandPath(
+              user,
+              PathState.path[
+              PathState.sourceFloor]![1],
+              numCols);
+          if (angle != 0) {
+            speak("Turn " +
+                tools.angleToClocks(angle));
+          } else {}
+
+          mapState.tilt = 50;
+
+          mapState.bearing =
+              tools.calculateBearing([
+                user.lat,
+                user.lng
+              ], [
+                PathState
+                    .singleCellListPath[
+                user.pathobj.index + 1]
+                    .lat,
+                PathState
+                    .singleCellListPath[
+                user.pathobj.index + 1]
+                    .lng
+              ]);
+          _googleMapController.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                    target: mapState.target,
+                    zoom: mapState.zoom,
+                    bearing: mapState.bearing!,
+                    tilt: mapState.tilt),
+              ));
+        });
+      });
+      rerouting = false;
+    }
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -3224,14 +3335,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     circles.clear();
-    print("landmarksMap");
-    print(landmarksMap.keys);
-    print(landmarksMap.values);
-    print(landmarksMap[PathState.destinationPolyID]!.buildingID);
-    print(landmarksMap[PathState.sourcePolyID]!.buildingID);
-
     singleroute.clear();
                           realWorldPath.clear();
+                          PathState.realWorldCoordinates.clear();
+                          PathState.listofPaths.clear();
     pathMarkers.clear();
     PathState.destinationX =
     landmarksMap[PathState.destinationPolyID]!.coordinateX!;
@@ -5045,6 +5152,21 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                         building.selectedLandmarkID = null;
                                         _isnavigationPannelOpen = true;
                                         _isreroutePannelOpen = false;
+                                        user.ListofPaths = PathState.listofPaths;
+                                        user.patchData = building.patchData;
+                                        user.buildingNumber = PathState.listofPaths.length-1;
+                                        buildingAllApi.selectedID = PathState.sourceBid;
+                                        buildingAllApi.selectedBuildingID = PathState.sourceBid;
+                                        user.Bid = PathState.sourceBid;
+                                        user.realWorldCoordinates = PathState.realWorldCoordinates;
+                                        user.floor =
+                                            PathState.sourceFloor;
+                                        user.pathobj = PathState;
+                                        user.path =
+                                            PathState.singleListPath;
+                                        user.isnavigating = true;
+                                        user.Cellpath =
+                                            PathState.singleCellListPath;
                                         int numCols = building.floorDimenssion[
                                             PathState
                                                 .sourceBid]![PathState

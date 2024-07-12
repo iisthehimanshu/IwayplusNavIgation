@@ -88,6 +88,8 @@ mixin LocaleData {
   static const String meteraway='meter away';
   static const String clickstarttonavigate= 'Click Start to Navigate';
  static const String exploremodenabled= 'Explore Mode Enabled';
+ static const String direction='Direction';
+ static const String turnfrm='turn from';
 
 
 
@@ -168,7 +170,10 @@ mixin LocaleData {
     'is': 'is',
     'meter away': 'meter away',
     'Click Start to Navigate' : 'Click Start to Navigate',
-    'Explore Mode Enabled' : 'Explore Mode Enabled'
+    'Explore Mode Enabled' : 'Explore Mode Enabled',
+    'Direction':'Direction',
+    'turn from':'turn from',
+
 
 
 
@@ -210,13 +215,13 @@ mixin LocaleData {
     'U Turn': 'यू टर्न',
     'Sharp Left': 'तेज़ बाएं',
     'Left': 'बाएं',
-    'Slight Right': 'हल्का दायें मुड़िये',
+    'Slight Right': 'हल्का दायें',
     'Slight Left': 'हल्का बाएं',
     'Sharp Right': 'तेज़ दाएं',
     'Then': 'फिर',
     'Go Straight': 'सीधे जाएं',
     'and': 'और',
-    'Turn': '',
+    'Turn': 'मूड़े',
     'Steps': 'कदम',
     'will be on your front': 'आपके सामने होगा',
     'on your Front': 'आपके सामने',
@@ -230,7 +235,7 @@ mixin LocaleData {
     'go to': 'जाओ',
     'from': 'से',
     'Exit': 'निकास',
-    'Start' :'स्टार्ट करें',
+    'Start' :'प्राम्भ करे',
     'min': 'मिनट',
     'Take': 'लें',
   'Maps' : 'नक्शा',
@@ -252,7 +257,9 @@ mixin LocaleData {
     'is': 'है',
     'meter away': 'मीटर दूर',
     'Click Start to Navigate' : 'नेविगेट करने के लिए स्टार्ट पर क्लिक करें',
-    'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम'
+    'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
+  'Direction':'दिशा',
+  'turn from':'से मुड़ो',
   };
 
   static const Map<String, dynamic> TA = {

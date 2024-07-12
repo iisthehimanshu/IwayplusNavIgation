@@ -101,6 +101,7 @@ import 'package:lottie/lottie.dart' as lott;
 import '../Elements/DirectionHeader.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import '../Elements/locales.dart';
+import 'package:translator/translator.dart';
 
 void main() {
   runApp(MyApp());
@@ -245,7 +246,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
       // print("values$values");
       final BitmapDescriptor markerImage =
-          await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+      await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
       //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
       if (values == 'Lift') {
@@ -261,7 +262,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Entry') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/log-in.png', 65);
+        await getImagesFromMarker('assets/log-in.png', 65);
         try {
           markers.add(
             MapMarker(
@@ -277,7 +278,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
       } else if (values == 'Female') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Femaletoilet.png', 65);
+        await getImagesFromMarker('assets/Femaletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -289,7 +290,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Male') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Maletoilet.png', 65);
+        await getImagesFromMarker('assets/Maletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -354,9 +355,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
     final Uint8List bytes =
-        (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-            .buffer
-            .asUint8List();
+    (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
     return bytes;
   }
   //--------------------------------------------------------------------------------------
@@ -367,7 +368,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-  print("_currentLocale");
+    print("_currentLocale");
     print(_currentLocale);
 
     //PolylineTestClass.polylineSet.clear();
@@ -393,7 +394,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("${LocaleData.loadingMaps.getString(widget.context)}");
+      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
 
     });
     print("Circular progress bar");
@@ -414,19 +415,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-            (UserAccelerometerEvent event) {
-          final now = DateTime.now();
-          // setState(() {
-          //   _userAccelerometerEvent = event;
-          //   if (_userAccelerometerUpdateTime != null) {
-          //     final interval = now.difference(_userAccelerometerUpdateTime!);
-          //     if (interval > _ignoreDuration) {
-          //       _userAccelerometerLastInterval = interval.inMilliseconds;
-          //     }
-          //   }
-          // });
-          _userAccelerometerUpdateTime = now;
-        }, onError: (e) {
+                (UserAccelerometerEvent event) {
+              final now = DateTime.now();
+              // setState(() {
+              //   _userAccelerometerEvent = event;
+              //   if (_userAccelerometerUpdateTime != null) {
+              //     final interval = now.difference(_userAccelerometerUpdateTime!);
+              //     if (interval > _ignoreDuration) {
+              //       _userAccelerometerLastInterval = interval.inMilliseconds;
+              //     }
+              //   }
+              // });
+              _userAccelerometerUpdateTime = now;
+            }, onError: (e) {
           showDialog(
               context: context,
               builder: (context) {
@@ -475,7 +476,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     accelerometerEvents.listen((AccelerometerEvent event) {
       double magnitude =
-          sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       setState(() {
         accelerationMagnitudes.add(magnitude);
       });
@@ -503,8 +504,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       double mean = accelerationMagnitudes.reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double variance = accelerationMagnitudes
-              .map((x) => (x - mean) * (x - mean))
-              .reduce((a, b) => a + b) /
+          .map((x) => (x - mean) * (x - mean))
+          .reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double standardDeviation = sqrt(variance);
       // Adjust multiplier as needed for sensitivity
@@ -648,7 +649,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else if (accuracy <= 10) {
       return 'Medium';
     } else {
-_showLowAccuracyDialog();
+      _showLowAccuracyDialog();
       return 'Low';
     }
   }
@@ -690,10 +691,11 @@ _showLowAccuracyDialog();
     );
   }
 
-  Future<void> speak(String msg) async {
+  Future<void> speak(String msg,String lngcode) async {
+    var translation=await msg.translate(to:lngcode);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
-    await flutterTts.speak(msg);
+    await flutterTts.speak(translation.toString());
   }
 
   void checkPermissions() async {
@@ -760,7 +762,7 @@ _showLowAccuracyDialog();
   void pdrstepCount() {
 
     pdr.add(accelerometerEventStream().listen(
-      (AccelerometerEvent event) {
+          (AccelerometerEvent event) {
         if (pdr == null) {
           return; // Exit the event listener if subscription is canceled
         }
@@ -820,9 +822,9 @@ _showLowAccuracyDialog();
 
   Future<void> paintMarker(LatLng Location) async {
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-        await getImagesFromMarker('assets/tealtorch.png', 35);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
     if (markers.containsKey(user.Bid)) {
       markers[user.Bid]?.add(Marker(
@@ -891,7 +893,7 @@ _showLowAccuracyDialog();
         ));
 
         List<double> ldvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
+        tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
@@ -1002,9 +1004,9 @@ _showLowAccuracyDialog();
     print("nearestBeacon : $nearestBeacon");
 
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-        await getImagesFromMarker('assets/tealtorch.png', 35);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
     if (apibeaconmap[nearestBeacon] != null) {
       //buildingAngle compute
@@ -1027,7 +1029,7 @@ _showLowAccuracyDialog();
       setState(() {
         buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
         buildingAllApi.selectedBuildingID =
-            apibeaconmap[nearestBeacon]!.buildingID!;
+        apibeaconmap[nearestBeacon]!.buildingID!;
       });
 
       List<int> localBeconCord = [];
@@ -1089,7 +1091,7 @@ _showLowAccuracyDialog();
       user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
       List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
           patchData:
-              building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+          building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
       user.lat = ls[0];
       user.lng = ls[1];
 
@@ -1191,7 +1193,7 @@ _showLowAccuracyDialog();
         }
 
         building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
-            apibeaconmap[nearestBeacon]!.floor!;
+        apibeaconmap[nearestBeacon]!.floor!;
         createRooms(building.polylinedatamap[buildingAllApi.getStoredString()]!,
             apibeaconmap[nearestBeacon]!.floor!);
         building.landmarkdata!.then((value) {
@@ -1261,20 +1263,21 @@ _showLowAccuracyDialog();
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)}, ${LocaleData.near.getString(context)} ${user.locationName}");
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}",_currentLocale);
           } else {
             speak(
-                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)},${user.locationName} ${LocaleData.isonyour.getString(context)} ${finalvalue}");
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
           }
         }
       } else {
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)}, ${LocaleData.near.getString(context)} ${user.locationName}");
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}",_currentLocale);
+
           } else {
             speak(
-                "${LocaleData.youareon.getString(context)} ${tools.numericalToAlphabetical(user.floor)} ${LocaleData.floor.getString(context)},${user.locationName} ${LocaleData.isonyour.getString(context)} ${finalvalue}");
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
           }
         }
       }
@@ -1292,7 +1295,7 @@ _showLowAccuracyDialog();
         _fetchInitialCompassData();
       }
     } else {
-      if (speakTTS) speak("${LocaleData.unabletofindyourlocation.getString(context)}");
+      if (speakTTS) speak("Unable to find your location",_currentLocale);
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
@@ -1303,9 +1306,9 @@ _showLowAccuracyDialog();
   void moveUser() async {
     print("User is moving");
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+    await getImagesFromMarker('assets/userloc0.png', 80);
     final Uint8List userlocdebug =
-        await getImagesFromMarker('assets/tealtorch.png', 35);
+    await getImagesFromMarker('assets/tealtorch.png', 35);
 
     LatLng userlocation = LatLng(user.lat, user.lng);
     mapState.target = LatLng(user.lat, user.lng);
@@ -1348,13 +1351,13 @@ _showLowAccuracyDialog();
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+        tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
     });
 
-   // speak(
+    // speak(
     //    "${LocaleData.youaregoingawayfromthepath.getString(context)} ");
 
     // speak(
@@ -1439,7 +1442,7 @@ _showLowAccuracyDialog();
               numCols);
           if (angle != 0) {
             speak("${LocaleData.turn.getString(context)} " +
-                tools.angleToClocks(angle,context));
+                tools.angleToClocks(angle,context),_currentLocale);
           } else {}
 
           mapState.tilt = 50;
@@ -1475,7 +1478,7 @@ _showLowAccuracyDialog();
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+    await Permission.bluetoothScan.request();
     print("permissionStatus    ----   ${permissionStatus}");
     print("permissionStatus    ----   ${permissionStatus.isDenied}");
 
@@ -1583,8 +1586,8 @@ _showLowAccuracyDialog();
     //please wait
     //searching your location
     await Future.delayed(Duration(seconds: 1));
-    speak("${LocaleData.plswait.getString(context)}");
-    speak("${LocaleData.searchingyourlocation.getString(context)}");
+    speak("Please Wait",_currentLocale);
+    speak("Searching your location...",_currentLocale);
 
     _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
       localizeUser();
@@ -1915,8 +1918,8 @@ _showLowAccuracyDialog();
     // sumMap = btadapter.calculateAverage();
     paintUser(nearestBeacon);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-          _controller.stop(),
-        });
+      _controller.stop(),
+    });
 
     //emptying the bin manually
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -2006,12 +2009,12 @@ _showLowAccuracyDialog();
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -2070,12 +2073,12 @@ _showLowAccuracyDialog();
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       setState(() {
@@ -2107,7 +2110,7 @@ _showLowAccuracyDialog();
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -2141,7 +2144,7 @@ _showLowAccuracyDialog();
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -2479,7 +2482,7 @@ _showLowAccuracyDialog();
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
-          findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
+      findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
           tools.numericalToAlphabetical(floor), value.polyline!.floors!);
       List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -2509,10 +2512,10 @@ _showLowAccuracyDialog();
               coordinates.add(LatLng(
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                          building.patchData[value.polyline!.buildingID])[0],
+                      building.patchData[value.polyline!.buildingID])[0],
                   tools.localtoglobal(node.coordx!, node.coordy!,
                       patchData:
-                          building.patchData[value.polyline!.buildingID])[1]));
+                      building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
               closedpolygons.putIfAbsent(
@@ -2531,9 +2534,9 @@ _showLowAccuracyDialog();
                         "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
                     points: coordinates,
                     color: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.black,
                     width: 1,
                     onTap: () {
@@ -2552,9 +2555,9 @@ _showLowAccuracyDialog();
 
                     strokeColor: Colors.black,
                     fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Color(0xffE5F9FF),
                     consumeTapEvents: true,
                     onTap: () {
@@ -2607,9 +2610,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffC2F1D5),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2629,9 +2632,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFFFF00),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2649,9 +2652,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff0000FF),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2669,9 +2672,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFF69B4),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2691,9 +2694,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFF4500),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2713,9 +2716,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff00FFFF),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2735,9 +2738,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffCCCCCC),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2755,9 +2758,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff800000),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2775,9 +2778,9 @@ _showLowAccuracyDialog();
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff333333),
                       onTap: () {
                         print("polyArray.id! ${polyArray.id!}");
@@ -2796,9 +2799,9 @@ _showLowAccuracyDialog();
                       print("polyArray.id! ${polyArray.id!}");
                     },
                     fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.black.withOpacity(0.2),
                   ));
                 }
@@ -2814,9 +2817,9 @@ _showLowAccuracyDialog();
                     // Modify the color and opacity based on the selectedRoomId
                     strokeColor: Colors.black,
                     fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Color(0xffCCCCCC),
                     consumeTapEvents: true,
                     onTap: () {
@@ -2828,9 +2831,9 @@ _showLowAccuracyDialog();
                   polylineId: PolylineId(polyArray.id!),
                   points: coordinates,
                   color: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                      polyArray.cubicleColor != "undefined"
                       ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                      '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                       : Colors.black,
                   width: 1,
                   onTap: () {
@@ -2872,7 +2875,7 @@ _showLowAccuracyDialog();
           //   getImagesFromMarker('assets/location_on.png',50),
           // );
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/pin.png', 50);
+          await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,patchData: building.patchData[buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
@@ -2898,7 +2901,7 @@ _showLowAccuracyDialog();
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/dooricon.png', 45);
+          await getImagesFromMarker('assets/dooricon.png', 45);
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,patchData: building.patchData[buildingAllApi.getStoredString()]);
@@ -2918,7 +2921,7 @@ _showLowAccuracyDialog();
                           landmarks[i].properties!.polyId;
                       _isRoutePanelOpen = false;
                       singleroute.clear();
-                          realWorldPath.clear();
+                      realWorldPath.clear();
                       _isLandmarkPanelOpen = true;
                       addselectedMarker(LatLng(value[0], value[1]));
                     }
@@ -2929,7 +2932,7 @@ _showLowAccuracyDialog();
             landmarks[i].name!.toLowerCase().contains("lift") &&
             landmarks[i].element!.subType != "room door") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/entry.png', 75);
+          await getImagesFromMarker('assets/entry.png', 75);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -2939,7 +2942,7 @@ _showLowAccuracyDialog();
             // _markerLocations[LatLng(value[0], value[1])] = '1';
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
+            landmarks[i].name!;
             // _markers!.add(Marker(
             //   markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
             //   position: LatLng(value[0], value[1]),
@@ -2973,14 +2976,14 @@ _showLowAccuracyDialog();
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/6.png', 65);
+          await getImagesFromMarker('assets/6.png', 65);
           setState(() {
             List<double> value = tools.localtoglobal(
 
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,patchData: building.patchData[buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
+            landmarks[i].name!;
             // Markers.add(Marker(
             //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
             //     position: LatLng(value[0], value[1]),
@@ -3007,7 +3010,7 @@ _showLowAccuracyDialog();
         } else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Female") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/4.png', 65);
+          await getImagesFromMarker('assets/4.png', 65);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -3015,7 +3018,7 @@ _showLowAccuracyDialog();
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,patchData: building.patchData[buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
+            landmarks[i].name!;
             // Markers.add(Marker(
             //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
             //     position: LatLng(value[0], value[1]),
@@ -3042,7 +3045,7 @@ _showLowAccuracyDialog();
         } else if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "main entry") {
           final Uint8List iconMarker =
-              await getImagesFromMarker('assets/1.png', 90);
+          await getImagesFromMarker('assets/1.png', 90);
 
           setState(() {
             List<double> value = tools.localtoglobal(
@@ -3051,7 +3054,7 @@ _showLowAccuracyDialog();
             // _markerLocations[LatLng(value[0], value[1])] = '1';
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
+            landmarks[i].name!;
             print("_markerLocationsMap");
             print("$_markerLocationsMap");
             // _markers!.add(Marker(
@@ -3198,21 +3201,21 @@ _showLowAccuracyDialog();
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
                               .name ??
-                          snapshot
-                              .data!
-                              .landmarksMap![building.selectedLandmarkID]!
-                              .element!
-                              .subType!,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8e8d8d),
-                        height: 25 / 16,
-                      ),
-                    )),
+                              snapshot
+                                  .data!
+                                  .landmarksMap![building.selectedLandmarkID]!
+                                  .element!
+                                  .subType!,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8e8d8d),
+                            height: 25 / 16,
+                          ),
+                        )),
                   ),
                   Container(
                     height: 48,
@@ -3293,14 +3296,14 @@ _showLowAccuracyDialog();
                           child: Semantics(
                             child: Text(
                               snapshot
-                                      .data!
-                                      .landmarksMap![
-                                          building.selectedLandmarkID]!
-                                      .name ??
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .name ??
                                   snapshot
                                       .data!
                                       .landmarksMap![
-                                          building.selectedLandmarkID]!
+                                  building.selectedLandmarkID]!
                                       .element!
                                       .subType!,
                               style: const TextStyle(
@@ -3320,7 +3323,7 @@ _showLowAccuracyDialog();
                           left: 17,
                         ),
                         child: Text(
-                          "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
+                          "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 16,
@@ -3383,16 +3386,16 @@ _showLowAccuracyDialog();
                               print("object ${PathState.sourcePolyID}");
                               PathState.sourceName = "${LocaleData.yourcurrentloc.getString(context)}";
                               PathState.destinationPolyID =
-                                  building.selectedLandmarkID!;
+                              building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
-                                      .data!
-                                      .landmarksMap![
-                                          building.selectedLandmarkID]!
-                                      .name ??
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .name ??
                                   snapshot
                                       .data!
                                       .landmarksMap![
-                                          building.selectedLandmarkID]!
+                                  building.selectedLandmarkID]!
                                       .element!
                                       .subType!;
                               PathState.destinationFloor = snapshot
@@ -3421,16 +3424,16 @@ _showLowAccuracyDialog();
                             } else {
                               PathState.sourceName = "Choose Starting Point";
                               PathState.destinationPolyID =
-                                  building.selectedLandmarkID!;
+                              building.selectedLandmarkID!;
                               PathState.destinationName = snapshot
-                                      .data!
-                                      .landmarksMap![
-                                          building.selectedLandmarkID]!
-                                      .name ??
+                                  .data!
+                                  .landmarksMap![
+                              building.selectedLandmarkID]!
+                                  .name ??
                                   snapshot
                                       .data!
                                       .landmarksMap![
-                                          building.selectedLandmarkID]!
+                                  building.selectedLandmarkID]!
                                       .element!
                                       .subType!;
                               PathState.destinationFloor = snapshot
@@ -3444,7 +3447,7 @@ _showLowAccuracyDialog();
                                       builder: (context) =>
                                           SourceAndDestinationPage(
                                             DestinationID:
-                                                PathState.destinationPolyID,
+                                            PathState.destinationPolyID,
                                           ))).then((value) {
                                 if (value != null) {
                                   fromSourceAndDestinationPage(value);
@@ -3453,29 +3456,29 @@ _showLowAccuracyDialog();
                             }
                           },
                           child: (!calculatingPath)
-                              ? const Row(
-                                  //  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.directions,
-                                      color: Colors.black,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Direction",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    )
-                                  ],
-                                )
-                              : Container(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
+                              ? Row(
+                            //  mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.directions,
+                                color: Colors.black,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "${LocaleData.direction.getString(context)}",
+                                style: TextStyle(
+                                  color: Colors.black,
                                 ),
+                              )
+                            ],
+                          )
+                              : Container(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                       Container(
@@ -3539,7 +3542,7 @@ _showLowAccuracyDialog();
                                   children: [
                                     TextSpan(
                                       text:
-                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name ?? snapshot.data!.landmarksMap![building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name ?? snapshot.data!.landmarksMap![building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
                                     ),
                                   ],
                                 ),
@@ -3549,111 +3552,111 @@ _showLowAccuracyDialog();
                         ),
                       ),
                       snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                                  .properties!.contactNo !=
-                              null
+                          .properties!.contactNo !=
+                          null
                           ? Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    width: 1.0,
-                                    color: Color(0xffebebeb),
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              width: 1.0,
+                              color: Color(0xffebebeb),
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(right: 16),
+                              width: 32,
+                              height: 32,
+                              child: Icon(
+                                Icons.call,
+                                color: Color(0xff24B9B0),
+                                size: 24,
+                              ),
+                            ),
+                            Container(
+                              width: screenWidth - 100,
+                              margin: EdgeInsets.only(top: 8),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff4a4545),
+                                    height: 25 / 16,
                                   ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 16),
-                                    width: 32,
-                                    height: 32,
-                                    child: Icon(
-                                      Icons.call,
-                                      color: Color(0xff24B9B0),
-                                      size: 24,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
+                            ),
+                          ],
+                        ),
+                      )
                           : Container(),
                       snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                                      .properties!.email !=
-                                  "" &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![
-                                          building.selectedLandmarkID]!
-                                      .properties!
-                                      .email !=
-                                  null
+                          .properties!.email !=
+                          "" &&
+                          snapshot
+                              .data!
+                              .landmarksMap![
+                          building.selectedLandmarkID]!
+                              .properties!
+                              .email !=
+                              null
                           ? Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        width: 1.0, color: Color(0xffebebeb))),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      margin: EdgeInsets.only(right: 16),
-                                      width: 32,
-                                      height: 32,
-                                      child: Icon(
-                                        Icons.mail_outline,
-                                        color: Color(0xff24B9B0),
-                                        size: 24,
-                                      )),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  width: 1.0, color: Color(0xffebebeb))),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(right: 16),
+                                width: 32,
+                                height: 32,
+                                child: Icon(
+                                  Icons.mail_outline,
+                                  color: Color(0xff24B9B0),
+                                  size: 24,
+                                )),
+                            Container(
+                              width: screenWidth - 100,
+                              margin: EdgeInsets.only(top: 8),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff4a4545),
+                                    height: 25 / 16,
                                   ),
-                                ],
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                      "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                    ),
+                                  ],
+                                ),
                               ),
-                            )
+                            ),
+                          ],
+                        ),
+                      )
                           : Container(),
                     ],
                   ),
@@ -3701,9 +3704,9 @@ _showLowAccuracyDialog();
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
     circles.clear();
     singleroute.clear();
-                          realWorldPath.clear();
-                          PathState.realWorldCoordinates.clear();
-                          PathState.listofPaths.clear();
+    realWorldPath.clear();
+    PathState.realWorldCoordinates.clear();
+    PathState.listofPaths.clear();
     pathMarkers.clear();
     PathState.destinationX =
     landmarksMap[PathState.destinationPolyID]!.coordinateX!;
@@ -3794,50 +3797,50 @@ _showLowAccuracyDialog();
         Landmarks element = tools.findMinAnglePoint(PathState.destinationPolyID, PathState.sourcePolyID, land.landmarks!,1);
         print("source entry found is ${element.sId} ${element.name} [${element.coordinateX},${element.coordinateY}]");
 
-          List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
-          destinationEntrylat = dv[0];
-          destinationEntrylng = dv[1];
-          PathState.DestinationEntryPolyid = element.properties!.polyId;
-          if (element.floor == PathState.destinationFloor) {
-            await fetchroute(
-                element.coordinateX!,
-                element.coordinateY!,
-                PathState.destinationX,
-                PathState.destinationY,
-                PathState.destinationFloor,
-                false,true,
-                bid: PathState.destinationBid);
-          } else if (element.floor != PathState.destinationFloor) {
-            List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
-                landmarksMap[PathState.destinationPolyID]!.lifts!);
-            await fetchroute(
+        List<double> dv = tools.localtoglobal(element.coordinateX!, element.coordinateY!,patchData: building.patchData[element.buildingID]);
+        destinationEntrylat = dv[0];
+        destinationEntrylng = dv[1];
+        PathState.DestinationEntryPolyid = element.properties!.polyId;
+        if (element.floor == PathState.destinationFloor) {
+          await fetchroute(
+              element.coordinateX!,
+              element.coordinateY!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              false,true,
+              bid: PathState.destinationBid);
+        } else if (element.floor != PathState.destinationFloor) {
+          List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
+              landmarksMap[PathState.destinationPolyID]!.lifts!);
+          await fetchroute(
+              commonlifts[0].x2!,
+              commonlifts[0].y2!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              true,true,
+              bid: PathState.destinationBid);
+          await fetchroute(element.coordinateX!, element.coordinateY!,
+              commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
+              false,true,
+              bid: PathState.destinationBid);
+
+          PathState.connections[PathState.destinationBid] = {
+            element.floor!: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.destinationBid]![
+                element.floor!]![0]),
+            PathState.destinationFloor: calculateindex(
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
-                PathState.destinationX,
-                PathState.destinationY,
-                PathState.destinationFloor,
-                true,true,
-                bid: PathState.destinationBid);
-            await fetchroute(element.coordinateX!, element.coordinateY!,
-                commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                false,true,
-                bid: PathState.destinationBid);
 
-            PathState.connections[PathState.destinationBid] = {
-              element.floor!: calculateindex(
-                  commonlifts[0].x1!,
-                  commonlifts[0].y1!,
-                  building.floorDimenssion[PathState.destinationBid]![
-                  element.floor!]![0]),
-              PathState.destinationFloor: calculateindex(
-                  commonlifts[0].x2!,
-                  commonlifts[0].y2!,
+                building.floorDimenssion[PathState.destinationBid]![
+                PathState.destinationFloor]![0])
+          };
 
-                  building.floorDimenssion[PathState.destinationBid]![
-                  PathState.destinationFloor]![0])
-            };
-
-          }
+        }
 
 
         // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
@@ -3851,44 +3854,44 @@ _showLowAccuracyDialog();
 
 
         Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,2);
-          print("destination entry found is ${element2.sId} ${element2.name} [${element2.coordinateX},${element2.coordinateY}]");
+        print("destination entry found is ${element2.sId} ${element2.name} [${element2.coordinateX},${element2.coordinateY}]");
 
-          List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
-          sourceEntrylat = sv[0];
-          sourceEntrylng = sv[1];
-          PathState.SourceExitPolyid = element2.properties!.polyId;
-          if (PathState.sourceFloor == element2.floor) {
-            await fetchroute(PathState.sourceX, PathState.sourceY,
-                element2.coordinateX!, element2.coordinateY!, element2.floor!,
-                true,false,
-                bid: PathState.sourceBid);
-          } else if (PathState.sourceFloor != element2.floor) {
-            List<CommonLifts> commonlifts = findCommonLifts(
-                landmarksMap[PathState.sourcePolyID]!.lifts!, element2.lifts!);
+        List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
+        sourceEntrylat = sv[0];
+        sourceEntrylng = sv[1];
+        PathState.SourceExitPolyid = element2.properties!.polyId;
+        if (PathState.sourceFloor == element2.floor) {
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+              element2.coordinateX!, element2.coordinateY!, element2.floor!,
+              true,false,
+              bid: PathState.sourceBid);
+        } else if (PathState.sourceFloor != element2.floor) {
+          List<CommonLifts> commonlifts = findCommonLifts(
+              landmarksMap[PathState.sourcePolyID]!.lifts!, element2.lifts!);
 
-            await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
-                element2.coordinateX!, element2.coordinateY!, element2.floor!,
-                true,false,
-                bid: PathState.sourceBid);
-            await fetchroute(PathState.sourceX, PathState.sourceY,
-                commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                true,true,
-                bid: PathState.sourceBid);
+          await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+              element2.coordinateX!, element2.coordinateY!, element2.floor!,
+              true,false,
+              bid: PathState.sourceBid);
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+              commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+              true,true,
+              bid: PathState.sourceBid);
 
-            PathState.connections[PathState.sourceBid] = {
-              PathState.sourceFloor: calculateindex(
-                  commonlifts[0].x1!,
-                  commonlifts[0].y1!,
-                  building.floorDimenssion[PathState.sourceBid]![
-                  PathState.sourceFloor]![0]),
-              element2.floor!: calculateindex(
+          PathState.connections[PathState.sourceBid] = {
+            PathState.sourceFloor: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.sourceBid]![
+                PathState.sourceFloor]![0]),
+            element2.floor!: calculateindex(
 
-                  commonlifts[0].x2!,
-                  commonlifts[0].y2!,
-                  building.floorDimenssion[PathState.sourceBid]![
-                  element2.floor!]![0])
-            };
-          }
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                building.floorDimenssion[PathState.sourceBid]![
+                element2.floor!]![0])
+          };
+        }
 
 
         OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
@@ -3966,11 +3969,11 @@ _showLowAccuracyDialog();
       if (PathState.destinationName == "${LocaleData.yourcurrentloc.getString(context)}") {
         speak(
 
-              "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} ${LocaleData.iss.getString(widget.context)} $distance ${LocaleData.meteraway.getString(widget.context)}. ${LocaleData.clickstarttonavigate.getString(widget.context)}");
+            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click start to navigate",_currentLocale);
 
       } else {
         speak(
-            "${PathState.destinationName} ${LocaleData.iss.getString(widget.context)} $distance ${LocaleData.meteraway.getString(widget.context)}. ${LocaleData.clickstarttonavigate.getString(widget.context)}");
+            "${PathState.destinationName} is $distance meter away. Click start to navigate",_currentLocale);
       }
     }
   }
@@ -4075,7 +4078,7 @@ _showLowAccuracyDialog();
       tools
           .associateTurnWithLandmark(path, nearbyLandmarks, numCols)
           .then((value) {
-            value.addAll(PathState.associateTurnWithLandmark);
+        value.addAll(PathState.associateTurnWithLandmark);
         PathState.associateTurnWithLandmark = value;
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
@@ -4174,7 +4177,7 @@ _showLowAccuracyDialog();
       }
 
       final Uint8List tealtorch =
-          await getImagesFromMarker('assets/tealtorch.png', 35);
+      await getImagesFromMarker('assets/tealtorch.png', 35);
 
       Set<Marker> innerMarker = pathMarkers[floor]??Set();
       if(destinationMarker){
@@ -4210,7 +4213,7 @@ _showLowAccuracyDialog();
 
       if (bid != null) {
         List<double> value =
-            tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+        tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
         coordinates.add(LatLng(value[0], value[1]));
       } else {
@@ -4263,7 +4266,7 @@ _showLowAccuracyDialog();
   Widget floorColumn() {
     List<int> floorNumbers = List.generate(
         building.numberOfFloors[buildingAllApi.getStoredString()]!,
-        (index) => index);
+            (index) => index);
 
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
@@ -4272,7 +4275,7 @@ _showLowAccuracyDialog();
         width: 100,
         child: ListView.builder(
             itemCount:
-                building.numberOfFloors[buildingAllApi.getStoredString()]!,
+            building.numberOfFloors[buildingAllApi.getStoredString()]!,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.only(top: 10),
@@ -4292,7 +4295,7 @@ _showLowAccuracyDialog();
                                 index;
                             createRooms(
                               building.polylinedatamap[
-                                  buildingAllApi.getStoredString()]!,
+                              buildingAllApi.getStoredString()]!,
                               building.floor[buildingAllApi.getStoredString()]!,
                             );
                             if (pathMarkers[index] != null) {
@@ -4371,7 +4374,7 @@ _showLowAccuracyDialog();
             directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
                     ? '${LocaleData.gostraight.getString(context)}'
-                    : "'${LocaleData.turn.getString(context)}' ${PathState.directions[i].turnDirection!} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!}, ${LocaleData.and.getString(context)} '${LocaleData.gostraight.getString(context)}'",
+                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
                     .ceil()
                     .toString(),context: context));
@@ -4385,14 +4388,14 @@ _showLowAccuracyDialog();
 
             } else {
               directionWidgets.add(directionInstruction(
-                  direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
-                      ? '${LocaleData.gostraight.getString(context)}'
-                      : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
-                  distance:
+                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                    ? '${LocaleData.gostraight.getString(context)}'
+                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
+                distance:
 
-                  (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
-                      .ceil()
-                      .toString(),context: context,));
+                (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
+                    .ceil()
+                    .toString(),context: context,));
 
             }
           }
@@ -4488,7 +4491,7 @@ _showLowAccuracyDialog();
                           }
                           setState(() {
                             Marker? temp = selectedroomMarker[
-                                    buildingAllApi.getStoredString()]
+                            buildingAllApi.getStoredString()]
                                 ?.first;
 
                             selectedroomMarker.clear();
@@ -4519,7 +4522,7 @@ _showLowAccuracyDialog();
                               border: Border.all(color: Color(0xffE2E2E2)),
                             ),
                             padding:
-                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
                             child: Text(
                               PathState.sourceName,
                               style: const TextStyle(
@@ -4536,9 +4539,9 @@ _showLowAccuracyDialog();
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(
-                                          hintText: 'Source location',
-                                          voiceInputEnabled: false,
-                                        ))).then((value) {
+                                      hintText: 'Source location',
+                                      voiceInputEnabled: false,
+                                    ))).then((value) {
                               onSourceVenueClicked(value);
                             });
                           },
@@ -4552,7 +4555,7 @@ _showLowAccuracyDialog();
                               border: Border.all(color: Color(0xffE2E2E2)),
                             ),
                             padding:
-                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
                             child: Semantics(
                               onDidGainAccessibilityFocus: closeRoutePannel,
                               child: Text(
@@ -4572,9 +4575,9 @@ _showLowAccuracyDialog();
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(
-                                          hintText: 'Destination location',
-                                          voiceInputEnabled: false,
-                                        ))).then((value) {
+                                      hintText: 'Destination location',
+                                      voiceInputEnabled: false,
+                                    ))).then((value) {
                               _isBuildingPannelOpen = false;
                               onDestinationVenueClicked(value);
                             });
@@ -4665,15 +4668,15 @@ _showLowAccuracyDialog();
                                     autofocus: true,
                                     child: Semantics(
                                       label:
-                                          "Your destination is ${distance}m away ",
+                                      "Your destination is ${distance}m away ",
                                       child: Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                        MainAxisAlignment.start,
                                         children: [
                                           Semantics(
                                             excludeSemantics: true,
                                             child: Text(
-                                              "${time.toInt()} min ",
+                                              "${time.toInt()} ${LocaleData.min.getString(context)} ",
                                               style: const TextStyle(
                                                 color: Color(0xffDC6A01),
                                                 fontFamily: "Roboto",
@@ -4707,7 +4710,7 @@ _showLowAccuracyDialog();
                                                 pathMarkers.clear();
 
                                                 building.selectedLandmarkID =
-                                                    null;
+                                                null;
 
                                                 PathState =
                                                     pathState.withValues(
@@ -4722,11 +4725,11 @@ _showLowAccuracyDialog();
                                                 PathState.path.clear();
                                                 PathState.sourcePolyID = "";
                                                 PathState.destinationPolyID =
-                                                    "";
+                                                "";
                                                 PathState.sourceBid = "";
                                                 PathState.destinationBid = "";
                                                 singleroute.clear();
-                          realWorldPath.clear();
+                                                realWorldPath.clear();
                                                 PathState.directions = [];
                                                 interBuildingPath.clear();
                                                 //  if(user.isnavigating==false){
@@ -4780,7 +4783,7 @@ _showLowAccuracyDialog();
                                           decoration: BoxDecoration(
                                             color: Color(0xff24B9B0),
                                             borderRadius:
-                                                BorderRadius.circular(4.0),
+                                            BorderRadius.circular(4.0),
                                           ),
                                           child: TextButton(
                                             onPressed: () async {
@@ -4819,22 +4822,22 @@ _showLowAccuracyDialog();
                                                   .moveToStartofPath()
                                                   .then((value) async {
                                                 final Uint8List userloc =
-                                                    await getImagesFromMarker(
-                                                        'assets/userloc0.png',
-                                                        80);
+                                                await getImagesFromMarker(
+                                                    'assets/userloc0.png',
+                                                    80);
                                                 final Uint8List userlocdebug =
-                                                    await getImagesFromMarker(
-                                                        'assets/tealtorch.png',
-                                                        35);
+                                                await getImagesFromMarker(
+                                                    'assets/tealtorch.png',
+                                                    35);
 
                                                 setState(() {
                                                   markers.clear();
                                                   List<double> val =
-                                                      tools.localtoglobal(
-                                                          user.showcoordX
-                                                              .toInt(),
-                                                          user.showcoordY
-                                                              .toInt());
+                                                  tools.localtoglobal(
+                                                      user.showcoordX
+                                                          .toInt(),
+                                                      user.showcoordY
+                                                          .toInt());
 
                                                   markers.putIfAbsent(
                                                       user.Bid, () => []);
@@ -4842,7 +4845,7 @@ _showLowAccuracyDialog();
                                                     markerId: MarkerId(
                                                         "UserLocation"),
                                                     position:
-                                                        LatLng(val[0], val[1]),
+                                                    LatLng(val[0], val[1]),
                                                     icon: BitmapDescriptor
                                                         .fromBytes(userloc),
                                                     anchor: Offset(0.5, 0.829),
@@ -4855,10 +4858,10 @@ _showLowAccuracyDialog();
                                                   markers[user.Bid]?.add(Marker(
                                                     markerId: MarkerId("debug"),
                                                     position:
-                                                        LatLng(val[0], val[1]),
+                                                    LatLng(val[0], val[1]),
                                                     icon: BitmapDescriptor
                                                         .fromBytes(
-                                                            userlocdebug),
+                                                        userlocdebug),
                                                     anchor: Offset(0.5, 0.829),
                                                   ));
                                                   // circles.add(
@@ -4876,7 +4879,7 @@ _showLowAccuracyDialog();
                                               _isRoutePanelOpen = false;
 
                                               building.selectedLandmarkID =
-                                                  null;
+                                              null;
 
                                               _isnavigationPannelOpen = true;
 
@@ -4889,40 +4892,40 @@ _showLowAccuracyDialog();
                                               ], [
                                                 PathState
                                                     .singleCellListPath[
-                                                        user.pathobj.index + 1]
+                                                user.pathobj.index + 1]
                                                     .lat,
                                                 PathState
                                                     .singleCellListPath[
-                                                        user.pathobj.index + 1]
+                                                user.pathobj.index + 1]
                                                     .lng
                                               ]);
                                             },
                                             child: !startingNavigation
                                                 ? Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .assistant_navigation,
-                                                        color: Colors.black,
-                                                      ),
-                                                      SizedBox(width: 8),
-                                                      Text(
-                                             '${LocaleData.start.getString(context)}',
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
+                                              mainAxisSize:
+                                              MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .assistant_navigation,
+                                                  color: Colors.black,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  '${LocaleData.start.getString(context)}',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                                 : Container(
-                                                    width: 24,
-                                                    height: 24,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      color: Colors.white,
-                                                    )),
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                )),
                                           ),
                                         ),
                                       ),
@@ -4932,9 +4935,9 @@ _showLowAccuracyDialog();
                                         margin: EdgeInsets.only(left: 12),
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(4.0),
+                                          BorderRadius.circular(4.0),
                                           border:
-                                              Border.all(color: Colors.black),
+                                          Border.all(color: Colors.black),
                                         ),
                                         child: TextButton(
                                           onPressed: () {
@@ -4952,28 +4955,28 @@ _showLowAccuracyDialog();
                                             children: [
                                               Icon(
                                                 _routeDetailPannelController
-                                                        .isAttached
+                                                    .isAttached
                                                     ? _routeDetailPannelController
-                                                            .isPanelClosed
-                                                        ? Icons
-                                                            .short_text_outlined
-                                                        : Icons.map_sharp
+                                                    .isPanelClosed
+                                                    ? Icons
+                                                    .short_text_outlined
+                                                    : Icons.map_sharp
                                                     : Icons.short_text_outlined,
                                                 color: Colors.black,
                                               ),
                                               SizedBox(width: 8),
                                               Semantics(
                                                 sortKey:
-                                                    const OrdinalSortKey(2),
+                                                const OrdinalSortKey(2),
                                                 onDidGainAccessibilityFocus:
-                                                    openRoutePannel,
+                                                openRoutePannel,
                                                 child: Text(
                                                   _routeDetailPannelController
-                                                          .isAttached
+                                                      .isAttached
                                                       ? _routeDetailPannelController
-                                                              .isPanelClosed
-                                                          ? "${LocaleData.steps.getString(context)}"
-                                                          : "${LocaleData.maps.getString(context)}"
+                                                      .isPanelClosed
+                                                      ? "${LocaleData.steps.getString(context)}"
+                                                      : "${LocaleData.maps.getString(context)}"
                                                       : "${LocaleData.steps.getString(context)}",
                                                   style: TextStyle(
                                                     color: Colors.black,
@@ -4991,7 +4994,7 @@ _showLowAccuracyDialog();
                             ),
                             Container(
                               margin:
-                                  EdgeInsets.only(left: 17, top: 12, right: 17),
+                              EdgeInsets.only(left: 17, top: 12, right: 17),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -4999,7 +5002,7 @@ _showLowAccuracyDialog();
                                     child: Semantics(
                                       excludeSemantics: true,
                                       child: Text(
-                                        "Steps",
+                                        "${LocaleData.steps.getString(context)}",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 18,
@@ -5023,25 +5026,25 @@ _showLowAccuracyDialog();
                                             excludeSemantics: false,
                                             child: Row(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                               children: [
                                                 Container(
                                                   height: 25,
                                                   margin:
-                                                      EdgeInsets.only(right: 8),
+                                                  EdgeInsets.only(right: 8),
                                                   child: SvgPicture.asset(
                                                       "assets/StartpointVector.svg"),
                                                 ),
                                                 Semantics(
                                                   label:
-                                                      "Steps preview,    You are heading from",
+                                                  "Steps preview,    You are heading from",
                                                   child: Text(
                                                     "${PathState.sourceName}",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 16,
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xff0e0d0d),
                                                       height: 25 / 16,
                                                     ),
@@ -5067,12 +5070,12 @@ _showLowAccuracyDialog();
                                           ),
                                           Row(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                             children: [
                                               Container(
                                                 height: 25,
                                                 margin:
-                                                    EdgeInsets.only(right: 8),
+                                                EdgeInsets.only(right: 8),
                                                 child: Icon(
                                                   Icons.pin_drop_sharp,
                                                   size: 24,
@@ -5080,7 +5083,7 @@ _showLowAccuracyDialog();
                                               ),
                                               Semantics(
                                                 label:
-                                                    "Your are heading towards ",
+                                                "Your are heading towards ",
                                                 child: Text(
                                                   angle != null
 
@@ -5129,7 +5132,7 @@ _showLowAccuracyDialog();
   void alignMapToPath(List<double> A, List<double> B) async {
     mapState.tilt = 33.5;
     List<double> val =
-        tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+    tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -5217,7 +5220,7 @@ _showLowAccuracyDialog();
           List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
           int index =
-              user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+          user.path.indexOf((user.showcoordY * col) + user.showcoordX);
 
           int node = user.path[index + 1];
 
@@ -5298,7 +5301,7 @@ _showLowAccuracyDialog();
                               autofocus: true,
                               child: Semantics(
                                 onDidGainAccessibilityFocus:
-                                    noshouldStepOpenfunc,
+                                noshouldStepOpenfunc,
                                 child: Row(
                                   children: [
                                     SizedBox(
@@ -5306,7 +5309,7 @@ _showLowAccuracyDialog();
                                     ),
                                     Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Semantics(
                                           excludeSemantics: false,
@@ -5320,7 +5323,7 @@ _showLowAccuracyDialog();
                                                       fontFamily: "Roboto",
                                                       fontSize: 20,
                                                       fontWeight:
-                                                          FontWeight.w700,
+                                                      FontWeight.w700,
                                                       height: 26 / 20,
                                                       color: Color(0xffDC6A01)),
                                                   textAlign: TextAlign.left,
@@ -5385,7 +5388,7 @@ _showLowAccuracyDialog();
                                   PathState.sourcePolyID = "";
                                   PathState.destinationPolyID = "";
                                   singleroute.clear();
-                          realWorldPath.clear();
+                                  realWorldPath.clear();
                                   fitPolygonInScreen(patch.first);
                                   setState(() {
                                     if (markers.length > 0) {
@@ -5516,7 +5519,7 @@ _showLowAccuracyDialog();
                                     PathState.sourceFloor = user.floor;
                                     PathState.sourcePolyID = user.key;
                                     PathState.sourceName =
-                                        "${LocaleData.yourcurrentloc.getString(context)}";
+                                    "${LocaleData.yourcurrentloc.getString(context)}";
                                     building.landmarkdata!.then((value) async {
                                       await calculateroute(value.landmarksMap!)
                                           .then((value) {
@@ -5532,7 +5535,7 @@ _showLowAccuracyDialog();
                                           setState(() {
                                             if (markers.length > 0) {
                                               markers[user.Bid]?[
-                                                      0] =
+                                              0] =
                                                   customMarker.move(
                                                       LatLng(
                                                           tools.localtoglobal(
@@ -5569,44 +5572,44 @@ _showLowAccuracyDialog();
                                         user.Cellpath =
                                             PathState.singleCellListPath;
                                         int numCols = building.floorDimenssion[
-                                            PathState
-                                                .sourceBid]![PathState
+                                        PathState
+                                            .sourceBid]![PathState
                                             .sourceFloor]![0]; //floor length
                                         double angle =
-                                            tools.calculateAngleBWUserandPath(
-                                                user,
-                                                PathState.path[
-                                                    PathState.sourceFloor]![1],
-                                                numCols);
+                                        tools.calculateAngleBWUserandPath(
+                                            user,
+                                            PathState.path[
+                                            PathState.sourceFloor]![1],
+                                            numCols);
                                         if (angle != 0) {
                                           speak("${LocaleData.turn.getString(widget.context)}" +
-                                              tools.angleToClocks(angle,context));
+                                              tools.angleToClocks(angle,context),_currentLocale);
                                         } else {}
 
                                         mapState.tilt = 50;
 
                                         mapState.bearing =
                                             tools.calculateBearing([
-                                          user.lat,
-                                          user.lng
-                                        ], [
-                                          PathState
-                                              .singleCellListPath[
-                                                  user.pathobj.index + 1]
-                                              .lat,
-                                          PathState
-                                              .singleCellListPath[
-                                                  user.pathobj.index + 1]
-                                              .lng
-                                        ]);
+                                              user.lat,
+                                              user.lng
+                                            ], [
+                                              PathState
+                                                  .singleCellListPath[
+                                              user.pathobj.index + 1]
+                                                  .lat,
+                                              PathState
+                                                  .singleCellListPath[
+                                              user.pathobj.index + 1]
+                                                  .lng
+                                            ]);
                                         _googleMapController.animateCamera(
                                             CameraUpdate.newCameraPosition(
-                                          CameraPosition(
-                                              target: mapState.target,
-                                              zoom: mapState.zoom,
-                                              bearing: mapState.bearing!,
-                                              tilt: mapState.tilt),
-                                        ));
+                                              CameraPosition(
+                                                  target: mapState.target,
+                                                  zoom: mapState.zoom,
+                                                  bearing: mapState.bearing!,
+                                                  tilt: mapState.tilt),
+                                            ));
                                       });
                                     });
                                     rerouting = false;
@@ -5614,23 +5617,23 @@ _showLowAccuracyDialog();
                                 },
                                 child: !rerouting
                                     ? Text(
-                                        "Reroute",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff000000),
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      )
+                                  "Reroute",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff000000),
+                                    height: 20 / 14,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                )
                                     : Container(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -5721,13 +5724,13 @@ _showLowAccuracyDialog();
     } else if (optionsTags != null && floorOptionsTags == null) {
       setState(() {
         filteredItems = LandmarkItems.where((item) =>
-            optionsTags.contains(item.element?.type) &&
+        optionsTags.contains(item.element?.type) &&
             floorOptionsTags.contains('Floor ${item.floor}')).toList();
       });
     } else {
       setState(() {
         filteredItems = LandmarkItems.where(
-            (item) => optionsTags.contains(item.element?.type)).toList();
+                (item) => optionsTags.contains(item.element?.type)).toList();
       });
     }
   }
@@ -5772,7 +5775,7 @@ _showLowAccuracyDialog();
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -5797,1060 +5800,1060 @@ _showLowAccuracyDialog();
               ),
             ],
             minHeight:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 155
-                    : 140,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 155
+                : 140,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 190 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 190 / screenHeight
+                : 175 / screenHeight,
             maxHeight: screenHeight * 0.9,
             panel: Semantics(
               child: Container(
                   child: !_isFilterOpen
                       ? Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 16),
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, bottom: 4),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${element.buildingName}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 27 / 18,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  element.workingDays != null &&
+                                      element.workingDays!.length > 0
+                                      ? Row(
+                                    children: [
+                                      Text(
+                                        "Open ",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff4caf50),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        "  Closes ${element.workingDays![0].closingTime}",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff8d8c8c),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  )
+                                      : Container()
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Row(
                                 children: [
                                   Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8),
+                                    width: 142,
+                                    height: 42,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Color(0xff24B9B0),
+                                      borderRadius:
+                                      BorderRadius.circular(8.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                              "assets/ExploreInside.svg"),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Explore Inside",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Container(
+                                    width: 83,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                        color: Color(0xffffffff),
+                                        borderRadius:
+                                        BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                            color: Color(0xff000000))),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.call,
+                                            color: Color(0xff000000),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Call",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff000000),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Semantics(
+                                    label: "Share",
+                                    onDidGainAccessibilityFocus:
+                                    _slidePanelUp,
+                                    // onDidLoseAccessibilityFocus: _slidePanelDown,
+                                    child: Container(
+                                      width: 95,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffffffff),
+                                          borderRadius:
+                                          BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                              color: Color(0xff000000))),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.share,
+                                              color: Color(0xff000000),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Share",
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight:
+                                                FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 20 / 14,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16),
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, bottom: 4),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${element.buildingName}",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            height: 27 / 18,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        element.workingDays != null &&
-                                                element.workingDays!.length > 0
-                                            ? Row(
-                                                children: [
-                                                  Text(
-                                                    "Open ",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff4caf50),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  Text(
-                                                    "  Closes ${element.workingDays![0].closingTime}",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff8d8c8c),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              )
-                                            : Container()
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, top: 8, bottom: 8),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 142,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xff24B9B0),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SvgPicture.asset(
-                                                    "assets/ExploreInside.svg"),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Explore Inside",
+                            ),
+                            Semantics(
+                              label: "",
+                              child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Semantics(
+                                              header: true,
+                                              child: GestureDetector(
+                                                onTap: _slidePanelUp,
+                                                child: Text(
+                                                  "Services",
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xffffffff),
-                                                    height: 20 / 14,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    color: Color(0xff000000),
+                                                    height: 23 / 16,
                                                   ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Container(
-                                          width: 83,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffffffff),
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              border: Border.all(
-                                                  color: Color(0xff000000))),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.call,
-                                                  color: Color(0xff000000),
+                                                  textAlign: TextAlign.center,
                                                 ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Call",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xff000000),
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Semantics(
-                                          label: "Share",
-                                          onDidGainAccessibilityFocus:
-                                              _slidePanelUp,
-                                          // onDidLoseAccessibilityFocus: _slidePanelDown,
-                                          child: Container(
-                                            width: 95,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                                color: Color(0xffffffff),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                border: Border.all(
-                                                    color: Color(0xff000000))),
-                                            child: TextButton(
-                                              onPressed: () {},
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.share,
-                                                    color: Color(0xff000000),
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text(
-                                                    "Share",
+                                            Semantics(
+                                              label: 'Services',
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      print(
+                                                          "Himanshuchecker");
+                                                      //_isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                                      _isFilterOpen =
+                                                      !_isFilterOpen;
+                                                    });
+                                                  },
+                                                  child: Text(
+                                                    "See All",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
+                                                      FontWeight.w500,
+                                                      color:
+                                                      Color(0xff4a4545),
                                                       height: 20 / 14,
                                                     ),
-                                                    textAlign: TextAlign.left,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  )),
+                                            )
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Semantics(
-                                    label: "",
-                                    child: Container(
-                                        child: Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 16, right: 16),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Semantics(
-                                                header: true,
-                                                child: GestureDetector(
-                                                  onTap: _slidePanelUp,
-                                                  child: Text(
-                                                    "Services",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
-                                                      height: 23 / 16,
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 16),
+                                        child: Row(
+                                          children: [
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/washroomservice.svg"),
                                                     ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                              ),
-                                              Semantics(
-                                                label: 'Services',
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        print(
-                                                            "Himanshuchecker");
-                                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
-                                                        _isFilterOpen =
-                                                            !_isFilterOpen;
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      "See All",
+                                                    Text(
+                                                      "Washroom",
                                                       style: const TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 14,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xff4a4545),
+                                                        Color(0xff4a4545),
                                                         height: 20 / 14,
                                                       ),
                                                       textAlign:
-                                                          TextAlign.center,
-                                                    )),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(left: 16),
-                                          child: Row(
-                                            children: [
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/washroomservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Washroom",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/foodservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Food",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/accservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Accessibility",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/exitservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Exit",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Semantics(
-                                          onDidLoseAccessibilityFocus:
-                                              _slidePanelDown,
-                                          child: Container(
-                                            margin: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: _slidePanelDown,
-                                                  child: Container(
-                                                      margin: EdgeInsets.only(
-                                                          left: 17),
-                                                      child: Text(
-                                                        "Information",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Color(0xff000000),
-                                                          height: 23 / 16,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      )),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      left: 16, right: 16),
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0, 11, 0, 10),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                        bottom: BorderSide(
-                                                            width: 1.0,
-                                                            color: Color(
-                                                                0xffebebeb))),
-                                                  ),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SvgPicture.asset(
-                                                          "assets/Depth 3, Frame 0.svg"),
-                                                      SizedBox(
-                                                        width: 16,
-                                                      ),
-                                                      Container(
-                                                        width:
-                                                            screenWidth - 100,
-                                                        margin: EdgeInsets.only(
-                                                            top: 8),
-                                                        child: RichText(
-                                                          text: TextSpan(
-                                                            style:
-                                                                const TextStyle(
-                                                              fontFamily:
-                                                                  "Roboto",
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
                                                               color: Color(
-                                                                  0xff4a4545),
-                                                              height: 25 / 16,
-                                                            ),
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    "${element.address}",
-                                                              ),
-                                                            ],
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/foodservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Food",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/accservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Accessibility",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/exitservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Exit",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Semantics(
+                                        onDidLoseAccessibilityFocus:
+                                        _slidePanelDown,
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: _slidePanelDown,
+                                                child: Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 17),
+                                                    child: Text(
+                                                      "Information",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                        FontWeight.w500,
+                                                        color:
+                                                        Color(0xff000000),
+                                                        height: 23 / 16,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.left,
+                                                    )),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16, right: 16),
+                                                padding: EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 0.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                      screenWidth - 100,
+                                                      margin: EdgeInsets.only(
+                                                          top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height: 25 / 16,
                                                           ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.address}",
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                // Container(
-                                                //   margin:
-                                                //   EdgeInsets.only(left: 16, right: 16),
-                                                //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                                //   decoration: BoxDecoration(
-                                                //     border: Border(
-                                                //         bottom: BorderSide(
-                                                //             width: 1.0,
-                                                //             color: Color(0xffebebeb))),
-                                                //   ),
-                                                //   child: Row(
-                                                //     crossAxisAlignment:
-                                                //     CrossAxisAlignment.center,
-                                                //     children: [
-                                                //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                                //       SizedBox(width: 16,),
-                                                //       Container(
-                                                //         margin: EdgeInsets.only(top: 8),
-                                                //         child: RichText(
-                                                //           text: TextSpan(
-                                                //             style: const TextStyle(
-                                                //               fontFamily: "Roboto",
-                                                //               fontSize: 16,
-                                                //               fontWeight: FontWeight.w400,
-                                                //               color: Color(0xff4a4545),
-                                                //               height: 25 / 16,
-                                                //             ),
-                                                //             children: [
-                                                //               TextSpan(
-                                                //                 text:
-                                                //                 "6 Floors",
-                                                //               ),
-                                                //             ],
-                                                //           ),
-                                                //         ),
-                                                //       ),
-                                                //     ],
-                                                //   ),
-                                                // ),
-                                                element.phone != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                              ),
+                                              // Container(
+                                              //   margin:
+                                              //   EdgeInsets.only(left: 16, right: 16),
+                                              //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                              //   decoration: BoxDecoration(
+                                              //     border: Border(
+                                              //         bottom: BorderSide(
+                                              //             width: 1.0,
+                                              //             color: Color(0xffebebeb))),
+                                              //   ),
+                                              //   child: Row(
+                                              //     crossAxisAlignment:
+                                              //     CrossAxisAlignment.center,
+                                              //     children: [
+                                              //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                              //       SizedBox(width: 16,),
+                                              //       Container(
+                                              //         margin: EdgeInsets.only(top: 8),
+                                              //         child: RichText(
+                                              //           text: TextSpan(
+                                              //             style: const TextStyle(
+                                              //               fontFamily: "Roboto",
+                                              //               fontSize: 16,
+                                              //               fontWeight: FontWeight.w400,
+                                              //               color: Color(0xff4a4545),
+                                              //               height: 25 / 16,
+                                              //             ),
+                                              //             children: [
+                                              //               TextSpan(
+                                              //                 text:
+                                              //                 "6 Floors",
+                                              //               ),
+                                              //             ],
+                                              //           ),
+                                              //         ),
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
+                                              element.phone != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-1.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-1.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.phone}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.phone}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.website != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.website != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-2.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-2.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.website}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.website}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.workingDays != null &&
-                                                        element.workingDays!
-                                                                .length >
-                                                            1
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-3.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.workingDays != null &&
+                                                  element.workingDays!
+                                                      .length >
+                                                      1
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-3.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
                                                               children: [
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
                                                                 ),
                                                               ],
                                                             ),
-                                                          ],
+                                                          ),
                                                         ),
-                                                      )
-                                                    : Container()
-                                              ],
-                                            ),
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container()
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    )),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8, bottom: 8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        _isFilterOpen = !_isFilterOpen;
-                                      },
-                                      icon: SvgPicture.asset(
-                                        "assets/Navigation_closeIcon.svg",
-                                        height: 24,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: Text(
-                                      "Filters",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 26 / 20,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 14, top: 10),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        optionsTags.clear();
-                                        floorOptionsTags.clear();
-                                      },
-                                      child: Text(
-                                        "Clear All",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff24b9b0),
-                                          height: 20 / 14,
                                         ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                      )
+                                    ],
+                                  )),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                      : Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8, bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
-
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: IconButton(
+                                onPressed: () {
+                                  _isFilterOpen = !_isFilterOpen;
+                                },
+                                icon: SvgPicture.asset(
+                                  "assets/Navigation_closeIcon.svg",
+                                  height: 24,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: Text(
+                                "Filters",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 26 / 20,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              margin: EdgeInsets.only(right: 14, top: 10),
+                              child: TextButton(
+                                onPressed: () {
+                                  optionsTags.clear();
+                                  floorOptionsTags.clear();
+                                },
                                 child: Text(
-                                  "Services",
+                                  "Clear All",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
+                                    color: Color(0xff24b9b0),
+                                    height: 20 / 14,
                                   ),
-                                  textAlign: TextAlign.start,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
-                              //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
-                              // FutureBuilder<int>(
-                              //   future: getHiveBoxLength(),
-                              //   builder: (context, snapshot) {
-                              //     if (snapshot.connectionState != ConnectionState.waiting) {
-                              //       return Text('Error: ${snapshot.error}'); // or any loading indicator
-                              //     } else if (snapshot.hasError) {
-                              //       return Text('Error: ${snapshot.error}');
-                              //     } else {
-                              //       return Text('Length of Hive Box: ${snapshot.data}');
-                              //     }
-                              //   },
-                              // ),
-                              //---------------------------------------------------------------------------------------
+                            )
+                          ],
+                        ),
 
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length != 0) {
-                                      optionsTags = value.getAt(0);
-                                      print("tags");
-                                      print(optionsTags);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: optionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(0, val);
-                                        setState(() {
-                                          optionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: options,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                          selectedStyle: const C2ChipStyle(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(7),
-                                              ),
-                                              backgroundColor:
-                                                  Color(0XFFABF9F4)),
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(7),
-                                          ),
-                                          borderStyle: BorderStyle.solid),
-                                      wrapped: false,
-                                    );
-                                  },
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Services",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                        // FutureBuilder<int>(
+                        //   future: getHiveBoxLength(),
+                        //   builder: (context, snapshot) {
+                        //     if (snapshot.connectionState != ConnectionState.waiting) {
+                        //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else {
+                        //       return Text('Length of Hive Box: ${snapshot.data}');
+                        //     }
+                        //   },
+                        // ),
+                        //---------------------------------------------------------------------------------------
+
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length != 0) {
+                                optionsTags = value.getAt(0);
+                                print("tags");
+                                print(optionsTags);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: optionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(0, val);
+                                  setState(() {
+                                    optionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: options,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
                                 ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Choose Floor",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length == 2) {
-                                      floorOptionsTags = value.getAt(1);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: floorOptionsTags,
-                                      onChanged: (val) {
-                                        print(
-                                            "Filter change${val}${value.values}");
-                                        value.put(1, val);
-                                        setState(() {
-                                          floorOptionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: floorOptions,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceLeadingBuilder: (data, i) {
-                                        if (data.meta == null) return null;
-                                        return CircleAvatar(
-                                          maxRadius: 12,
-                                          backgroundImage: data.avatarImage,
-                                        );
-                                      },
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                        selectedStyle: const C2ChipStyle(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(7),
-                                            ),
-                                            backgroundColor: Color(0XFFABF9F4)),
-                                        color: Colors.white,
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                    selectedStyle: const C2ChipStyle(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(7),
                                         ),
-                                      ),
-                                      wrapped: false,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Filter results ${filteredItems.length}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 12),
-                                height: screenHeight - 410,
-                                child: ListView.builder(
-                                  itemCount: filteredItems.length,
-                                  itemBuilder: (context, index) {
-                                    final item = filteredItems[index];
-                                    return NavigatonFilterCard(
-                                      LandmarkName: item.venueName!,
-                                      LandmarkDistance: "90 m",
-                                      LandmarkFloor: "Floor ${item.floor}",
-                                      LandmarksubName: item.buildingName!,
-                                    );
-                                  },
-                                ),
-                              )
-                            ],
+                                        backgroundColor:
+                                        Color(0XFFABF9F4)),
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(7),
+                                    ),
+                                    borderStyle: BorderStyle.solid),
+                                wrapped: false,
+                              );
+                            },
                           ),
-                        )),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Choose Floor",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length == 2) {
+                                floorOptionsTags = value.getAt(1);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: floorOptionsTags,
+                                onChanged: (val) {
+                                  print(
+                                      "Filter change${val}${value.values}");
+                                  value.put(1, val);
+                                  setState(() {
+                                    floorOptionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: floorOptions,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
+                                ),
+                                choiceLeadingBuilder: (data, i) {
+                                  if (data.meta == null) return null;
+                                  return CircleAvatar(
+                                    maxRadius: 12,
+                                    backgroundImage: data.avatarImage,
+                                  );
+                                },
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                  selectedStyle: const C2ChipStyle(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(7),
+                                      ),
+                                      backgroundColor: Color(0XFFABF9F4)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                ),
+                                wrapped: false,
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Filter results ${filteredItems.length}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 12),
+                          height: screenHeight - 410,
+                          child: ListView.builder(
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              return NavigatonFilterCard(
+                                LandmarkName: item.venueName!,
+                                LandmarkDistance: "90 m",
+                                LandmarkFloor: "Floor ${item.floor}",
+                                LandmarksubName: item.buildingName!,
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
             )));
   }
 
@@ -6932,7 +6935,7 @@ _showLowAccuracyDialog();
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6961,9 +6964,9 @@ _showLowAccuracyDialog();
             ],
             minHeight: 90,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 220 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 220 / screenHeight
+                : 175 / screenHeight,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -7043,10 +7046,10 @@ _showLowAccuracyDialog();
         return (marker.union(Set<Marker>.of(markers[user.Bid] ?? []))).union(realWorldPath);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!
-                    .union(Set<Marker>.of(markers[user.Bid] ?? [])))
-                .union(Markers).union(realWorldPath)
+            .union(Set<Marker>.of(markers[user.Bid] ?? [])))
+            .union(Markers).union(realWorldPath)
             : (Set<Marker>.of(markers[user.Bid] ?? [])).union(Markers).union(realWorldPath);
       }
     } else {
@@ -7058,9 +7061,9 @@ _showLowAccuracyDialog();
         return marker.union(Markers);
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
-                null
+            null
             ? (pathMarkers[building.floor[buildingAllApi.getStoredString()]]!)
-                .union(Markers)
+            .union(Markers)
             : Markers;
       }
     }
@@ -7239,7 +7242,7 @@ _showLowAccuracyDialog();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
     singleroute.clear();
-                          realWorldPath.clear();
+    realWorldPath.clear();
     fitPolygonInScreen(patch.first);
     Future.delayed(Duration.zero, () async {
       setState(() {
@@ -7250,7 +7253,7 @@ _showLowAccuracyDialog();
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
-          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+      tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
@@ -7264,7 +7267,7 @@ _showLowAccuracyDialog();
         building.landmarkdata!.then((value) {
           _isBuildingPannelOpen = false;
           building.floor[value.landmarksMap![ID]!.buildingID!] =
-              value.landmarksMap![ID]!.floor!;
+          value.landmarksMap![ID]!.floor!;
           createRooms(
               building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
               building.floor[value.landmarksMap![ID]!.buildingID!]!);
@@ -7272,14 +7275,14 @@ _showLowAccuracyDialog();
               value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
           building.selectedLandmarkID = ID;
           singleroute.clear();
-                          realWorldPath.clear();
+          realWorldPath.clear();
           _isRoutePanelOpen = DirectlyStartNavigation;
           _isLandmarkPanelOpen = !DirectlyStartNavigation;
           List<double> pvalues = tools.localtoglobal(
               value.landmarksMap![ID]!.coordinateX!,
               value.landmarksMap![ID]!.coordinateY!,
               patchData:
-                  building.patchData[value.landmarksMap![ID]!.buildingID]);
+              building.patchData[value.landmarksMap![ID]!.buildingID]);
           LatLng point = LatLng(pvalues[0], pvalues[1]);
           _googleMapController.animateCamera(
             CameraUpdate.newLatLngZoom(
@@ -7302,7 +7305,7 @@ _showLowAccuracyDialog();
       print("Himanshuchecker ${land.landmarksMap}");
       print("Himanshuchecker ${value[0]}");
       building.selectedLandmarkID =
-          land.landmarksMap![value[0]]!.properties!.polyId!;
+      land.landmarksMap![value[0]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {
@@ -7399,7 +7402,7 @@ _showLowAccuracyDialog();
 
       //List<LatLng> coordinates = [];
       final Uint8List greytorch =
-          await getImagesFromMarker('assets/previewarrow.png', 75);
+      await getImagesFromMarker('assets/previewarrow.png', 75);
       // BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
       //   ImageConfiguration(size: Size(15, 15)),
       //   'assets/previewarrow.png',
@@ -7535,555 +7538,555 @@ _showLowAccuracyDialog();
     return SafeArea(
       child: isLoading && isBlueToothLoading
           ? Scaffold(
-              body: Center(
-                child: lott.Lottie.asset(
-                  'assets/loading_bluetooth.json', // Path to your Lottie animation
-                  width: 500,
-                  height: 500,
+        body: Center(
+          child: lott.Lottie.asset(
+            'assets/loading_bluetooth.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
+          ),
+        ),
+      )
+          : isLoading
+          ? Scaffold(
+        body: Center(
+            child: lott.Lottie.asset(
+              'assets/loding_animation.json', // Path to your Lottie animation
+              width: 500,
+              height: 500,
+            )),
+      )
+          : Scaffold(
+        body: Stack(
+          children: [
+            detected
+                ? Semantics(
+                excludeSemantics: true,
+                child: ExploreModePannel())
+                : Semantics(
+                excludeSemantics: true, child: Container()),
+            Semantics(
+              excludeSemantics: true,
+              child: Container(
+                child: GoogleMap(
+                  padding: EdgeInsets.only(
+                      left: 20), // <--- padding added here
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+
+                  polygons: patch
+                      .union(getCombinedPolygons())
+                      .union(otherpatch)
+                      .union(_polygon),
+                  polylines: singleroute[building.floor[
+                  buildingAllApi.getStoredString()]] !=
+                      null
+                      ? getCombinedPolylines().union(singleroute[
+                  building.floor[
+                  buildingAllApi.getStoredString()]]!)
+                      : getCombinedPolylines(),
+                  markers: getCombinedMarkers()
+                      .union(_markers)
+                      .union(focusturnArrow),
+                  onTap: (x) {
+                    mapState.interaction = true;
+                  },
+                  myLocationEnabled: false,
+                  mapType: MapType.normal,
+                  buildingsEnabled: false,
+                  compassEnabled: true,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller) {
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    print("tumhari galti hai sb saalo");
+
+                    if (patch.isNotEmpty) {
+                      fitPolygonInScreen(patch.first);
+                    }
+                    setState(() {
+                      _isMapLoading = false;
+                    });
+                    _initMarkers();
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
+                    // print("plpl ${cameraPosition.tilt}");
+                    focusBuildingChecker(cameraPosition);
+                    mapState.interaction = true;
+                    mapbearing = cameraPosition.bearing;
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    if (true) {
+                      _updateMarkers(cameraPosition.zoom);
+                      //_updateBuilding(cameraPosition.zoom);
+                    }
+                    // _updateMarkers(cameraPosition.zoom);
+                    if (cameraPosition.zoom < 17) {
+                      _markers.clear();
+                      markerSldShown = false;
+                    } else {
+                      if (user.isnavigating) {
+                        _markers.clear();
+                        markerSldShown = false;
+                      } else {
+                        markerSldShown = true;
+                      }
+                    }
+                    if (markerSldShown) {
+                      _updateMarkers11(cameraPosition.zoom);
+                    } else {
+                      print("Notshow");
+                    }
+
+                    // _updateEntryMarkers11(cameraPosition.zoom);
+                    //_markerLocations.clear();
+                    // print("Zoom level: ${cameraPosition.zoom}");
+                  },
+                  onCameraIdle: () {
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    mapState.interaction2 = false;
+                  },
+                  circles: circles,
                 ),
               ),
-            )
-          : isLoading
-              ? Scaffold(
-                  body: Center(
-                      child: lott.Lottie.asset(
-                    'assets/loding_animation.json', // Path to your Lottie animation
-                    width: 500,
-                    height: 500,
-                  )),
-                )
-              : Scaffold(
-                  body: Stack(
-                    children: [
-                      detected
-                          ? Semantics(
-                              excludeSemantics: true,
-                              child: ExploreModePannel())
-                          : Semantics(
-                              excludeSemantics: true, child: Container()),
-                      Semantics(
-                        excludeSemantics: true,
-                        child: Container(
-                          child: GoogleMap(
-                            padding: EdgeInsets.only(
-                                left: 20), // <--- padding added here
-                            initialCameraPosition: _initialCameraPosition,
-                            myLocationButtonEnabled: false,
-                            zoomControlsEnabled: false,
-                            zoomGesturesEnabled: true,
+            ),
+            //debug----
 
-                            polygons: patch
-                                .union(getCombinedPolygons())
-                                .union(otherpatch)
-                                .union(_polygon),
-                            polylines: singleroute[building.floor[
-                                        buildingAllApi.getStoredString()]] !=
-                                    null
-                                ? getCombinedPolylines().union(singleroute[
-                                    building.floor[
-                                        buildingAllApi.getStoredString()]]!)
-                                : getCombinedPolylines(),
-                            markers: getCombinedMarkers()
-                                .union(_markers)
-                                .union(focusturnArrow),
-                            onTap: (x) {
-                              mapState.interaction = true;
-                            },
-                            myLocationEnabled: false,
-                            mapType: MapType.normal,
-                            buildingsEnabled: false,
-                            compassEnabled: true,
-                            rotateGesturesEnabled: true,
-                            minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                            onMapCreated: (controller) {
-                              controller.setMapStyle(maptheme);
-                              _googleMapController = controller;
-                              print("tumhari galti hai sb saalo");
-
-                              if (patch.isNotEmpty) {
-                                fitPolygonInScreen(patch.first);
-                              }
-                              setState(() {
-                                _isMapLoading = false;
-                              });
-                              _initMarkers();
-                            },
-                            onCameraMove: (CameraPosition cameraPosition) {
-                              // print("plpl ${cameraPosition.tilt}");
-                              focusBuildingChecker(cameraPosition);
-                              mapState.interaction = true;
-                              mapbearing = cameraPosition.bearing;
-                              if (!mapState.interaction) {
-                                mapState.zoom = cameraPosition.zoom;
-                              }
-                              if (true) {
-                                _updateMarkers(cameraPosition.zoom);
-                                //_updateBuilding(cameraPosition.zoom);
-                              }
-                              // _updateMarkers(cameraPosition.zoom);
-                              if (cameraPosition.zoom < 17) {
-                                _markers.clear();
-                                markerSldShown = false;
-                              } else {
-                                if (user.isnavigating) {
-                                  _markers.clear();
-                                  markerSldShown = false;
-                                } else {
-                                  markerSldShown = true;
-                                }
-                              }
-                              if (markerSldShown) {
-                                _updateMarkers11(cameraPosition.zoom);
-                              } else {
-                                print("Notshow");
-                              }
-
-                              // _updateEntryMarkers11(cameraPosition.zoom);
-                              //_markerLocations.clear();
-                              // print("Zoom level: ${cameraPosition.zoom}");
-                            },
-                            onCameraIdle: () {
-                              if (!mapState.interaction) {
-                                mapState.interaction2 = true;
-                              }
-                            },
-                            onCameraMoveStarted: () {
-                              mapState.interaction2 = false;
-                            },
-                            circles: circles,
-                          ),
-                        ),
-                      ),
-                      //debug----
-
-                      DebugToggle.PDRIcon
-                          ? Positioned(
-                              top: 150,
-                              right: 50,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(),
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: (isPdr) ? Colors.green : Colors.red,
-                                ),
-                                height: 20,
-                                width: 20,
-                              ))
-                          : Container(),
-                      Positioned(
-                        bottom: 150.0, // Adjust the position as needed
-                        right: 16.0,
-
-                        child: Semantics(
-                          excludeSemantics: false,
-                          child: Column(
-                            children: [
-                              //
-                              // // Text(Building.thresh),
-                              Visibility(
-                                visible: DebugToggle.StepButton,
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(24))),
-                                    child: IconButton(
-                                        onPressed: () {
-                                          //StartPDR();
-                                          // Navigator.pushReplacement(
-                                          //   context,
-                                          //   PageRouteBuilder(
-                                          //     pageBuilder: (context, animation1, animation2) => Navigation(),
-                                          //     transitionDuration: Duration.zero,
-                                          //     reverseTransitionDuration: Duration.zero,
-                                          //   ),
-                                          // );
-
-                                          bool isvalid =
-                                              MotionModel.isValidStep(
-                                                  user,
-                                                  building.floorDimenssion[user
-                                                      .Bid]![user.floor]![0],
-                                                  building.floorDimenssion[user
-                                                      .Bid]![user.floor]![1],
-                                                  building.nonWalkable[
-                                                      user.Bid]![user.floor]!,
-                                                  reroute);
-                                          if (isvalid) {
-
-                                            user.move(context).then((value) {
-                                              if(!user.isInRealWorld){
-                                                renderHere();
-                                              }
-
-                                            });
-                                          } else {
-                                            if (user.isnavigating) {
-                                              // reroute();
-                                              // showToast("You are out of path");
-                                            }
-                                          }
-                                        },
-                                        icon: Icon(Icons.directions_walk))),
-                              ),
-
-                              SizedBox(height: 28.0),
-
-                              DebugToggle.Slider?Text("${user.theta}"):Container(),
-                              Text("coord [${user.coordX},${user.coordY}] \n"
-                                  "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                                  "userBid ${user.Bid} \n"
-                                  "index ${user.pathobj.index} \n"
-                                  "buildingnumber ${user.buildingNumber} \n"
-                                  "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
-                              DebugToggle.Slider?Slider(
-                                  value: user.theta,
-                                  min: -180,
-                                  max: 180,
-                                  onChanged: (newvalue) {
-                                    double? compassHeading = newvalue;
-                                    setState(() {
-                                      user.theta = compassHeading!;
-                                      if (mapState.interaction2) {
-                                        mapState.bearing = compassHeading!;
-                                        _googleMapController.moveCamera(
-                                          CameraUpdate.newCameraPosition(
-                                            CameraPosition(
-                                              target: mapState.target,
-                                              zoom: mapState.zoom,
-                                              bearing: mapState.bearing!,
-                                            ),
-                                          ),
-                                          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                        );
-                                      } else {
-                                        if (markers.length > 0)
-                                          markers[user.Bid]?[0] =
-                                              customMarker.rotate(
-                                                  compassHeading! - mapbearing,
-                                                  markers[user.Bid]![0]);
-                                      }
-                                    });
-                                  }):Container(),
-
-                              SizedBox(height: 28.0),
-                              !isSemanticEnabled
-                                  ? Semantics(
-                                      label: "Change floor",
-                                      child: SpeedDial(
-                                        child: Text(
-                                          building.floor == 0
-                                              ? 'G'
-                                              : '${building.floor[buildingAllApi.getStoredString()]}',
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff24b9b0),
-                                            height: 19 / 16,
-                                          ),
-                                        ),
-                                        activeIcon: Icons.close,
-                                        backgroundColor: Colors.white,
-                                        children: List.generate(
-                                          building.numberOfFloors[buildingAllApi
-                                              .getStoredString()]!,
-                                          (int i) {
-                                            return SpeedDialChild(
-                                              child: Semantics(
-                                                label: "i",
-                                                child: Text(
-                                                  i == 0 ? 'G' : '$i',
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    height: 19 / 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              backgroundColor:
-                                                  pathMarkers[i] == null
-                                                      ? Colors.white
-                                                      : Color(0xff24b9b0),
-                                              onTap: () {
-                                                _polygon.clear();
-                                                circles.clear();
-                                                // _markers.clear();
-                                                // _markerLocationsMap.clear();
-                                                // _markerLocationsMapLanName.clear();
-
-                                                building.floor[buildingAllApi
-                                                    .getStoredString()] = i;
-                                                createRooms(
-                                                  building.polylinedatamap[
-                                                      buildingAllApi
-                                                          .getStoredString()]!,
-                                                  building.floor[buildingAllApi
-                                                      .getStoredString()]!,
-                                                );
-                                                if (pathMarkers[i] != null) {
-                                                  //setCameraPosition(pathMarkers[i]!);
-                                                }
-                                                building.landmarkdata!
-                                                    .then((value) {
-                                                  createMarkers(
-                                                    value,
-                                                    building.floor[buildingAllApi
-                                                        .getStoredString()]!,
-                                                  );
-                                                });
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    )
-                                  : floorColumn(),
-                              SizedBox(
-                                  height: 28.0), // Adjust the height as needed
-
-                              // Container(
-                              //   width: 300,
-                              //   height: 100,
-                              //   child: SingleChildScrollView(
-                              //     scrollDirection: Axis.horizontal,
-                              //     child: Column(
-                              //       crossAxisAlignment: CrossAxisAlignment.start,
-                              //       children: [
-                              //         Text(testBIn.keys.toString()),
-                              //         Text(testBIn.values.toString()),
-                              //         Text("summap"),
-                              //         Text(sortedsumMapfordebug.toString()),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
-
-                              Semantics(
-                                child: FloatingActionButton(
-                                  onPressed: () async {
-
-                                    enableBT();
-                                    _timer = Timer.periodic(
-                                        Duration(milliseconds: 9000), (timer) {
-                                      localizeUser().then((value) => {
-                                            print(
-                                                "localize user is calling itself....."),
-                                            _timer.cancel()
-                                          });
-                                    });
-                                    // _timer.cancel();
-                                    //localizeUser();
-                                    //wsocket.sendmessg();
-                                    // //print(PathState.connections);
-                                    building.floor[buildingAllApi
-                                        .getStoredString()] = user.floor;
-                                    createRooms(
-                                        building.polylinedatamap[
-                                            buildingAllApi.getStoredString()]!,
-                                        building.floor[
-                                            buildingAllApi.getStoredString()]!);
-                                    if (pathMarkers[user.floor] != null) {
-                                      setCameraPosition(
-                                          pathMarkers[user.floor]!);
-                                    }
-                                    building.landmarkdata!.then((value) {
-                                      createMarkers(
-                                          value,
-                                          building.floor[buildingAllApi
-                                              .getStoredString()]!);
-                                    });
-                                    if (markers.length > 0)
-                                      markers[user.Bid]?[0] = customMarker
-                                          .rotate(0, markers[user.Bid]![0]);
-                                    if (user.initialallyLocalised) {
-                                      mapState.interaction =
-                                          !mapState.interaction;
-                                    }
-                                    mapState.zoom = 21;
-                                    fitPolygonInScreen(patch.first);
-
-                                  },
-                                  child: Semantics(
-                                    label: "Localize",
-                                    onDidGainAccessibilityFocus:
-                                        close_isnavigationPannelOpen,
-                                    child: Icon(
-                                      Icons.my_location_sharp,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-
-                                  backgroundColor: Colors
-                                      .white, // Set the background color of the FAB
-                                ),
-                              ),
-                              SizedBox(height: 28.0),
-
-                              !user.isnavigating?FloatingActionButton(
-                                onPressed: () async {
-                                  if (user.initialallyLocalised) {
-                                    setState(() {
-                                      if (isLiveLocalizing) {
-                                        isLiveLocalizing = false;
-                                        HelperClass.showToast(
-                                            "Explore mode is disabled");
-                                        _exploreModeTimer!.cancel();
-                                        _isExploreModePannelOpen = false;
-                                        _isBuildingPannelOpen = true;
-                                        lastBeaconValue = "";
-                                      } else {
-                                        speak("${LocaleData.exploremodenabled.getString(widget.context)}");
-                                        isLiveLocalizing = true;
-                                        HelperClass.showToast(
-                                            "Explore mode enabled");
-                                        _exploreModeTimer =
-                                            Timer.periodic(
-                                                Duration(
-                                                    milliseconds: 5000),
-                                                    (timer) async {
-                                                  btadapter
-                                                      .startScanning(resBeacons);
-                                                  Future.delayed(Duration(
-                                                      milliseconds: 2000))
-                                                      .then((value) => {
-                                                    realTimeReLocalizeUser(
-                                                        resBeacons)
-                                                    // listenToBin()
-                                                  });
-                                                });
-                                        _isBuildingPannelOpen = false;
-                                        _isExploreModePannelOpen = true;
-                                      }
-                                    });
-                                  }
-                                },
-                                      child: SvgPicture.asset(
-                                        "assets/Navigation_RTLIcon.svg",
-                                        // color:
-                                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                                      ),
-                                      backgroundColor: Color(
-                                          0xff24B9B0), // Set the background color of the FAB
-                                    )
-                                  : Container(), // Adjust the height as needed// Adjust the height as needed
-                            ],
-                          ),
-                        ),
-                      ),
-                      //-------
-                      Positioned(
-                          top: 16,
-                          left: 16,
-                          right: 16,
-                          child: _isLandmarkPanelOpen ||
-                                  _isRoutePanelOpen ||
-                                  _isnavigationPannelOpen
-                              ? Semantics(
-                                  excludeSemantics: true, child: Container())
-                              : FocusScope(
-                                  autofocus: true,
-                                  child: Focus(
-                                    child: Semantics(
-                                      sortKey: const OrdinalSortKey(
-                                          0), // header: true,
-                                      child: HomepageSearch(
-                                        onVenueClicked: onLandmarkVenueClicked,
-                                        fromSourceAndDestinationPage:
-                                            fromSourceAndDestinationPage,
-                                      ),
-                                    ),
-                                  ),
-                                )),
-                      FutureBuilder(
-                        future: building.landmarkdata,
-                        builder: (context, snapshot) {
-                          if (_isLandmarkPanelOpen) {
-                            return landmarkdetailpannel(context, snapshot);
-                          } else {
-                            return Semantics(
-                                excludeSemantics: true, child: Container());
-                          }
-                        },
-                      ),
-                      routeDeatilPannel(),
-                      navigationPannel(),
-                      reroutePannel(),
-                      ExploreModePannel(),
-                      detected
-                          ? Semantics(child: nearestLandmarkpannel())
-                          : Container(),
-                      SizedBox(height: 28.0), // Adjust the height as needed
-                      // FloatingActionButton(
-                      //     onPressed: (){
-                      //       print("checkingBuildingfloor");
-                      //       //building.floor == 0 ? 'G' : '${building.floor}',
-                      //       print(building.floor);
-                      //       int firstKey = building.floor.values.first;
-                      //       print(firstKey);
-                      //       print(singleroute[building.floor.values.first]);
-                      //
-                      //       print(singleroute.keys);
-                      //       print(singleroute.values);
-                      //       print(building.floor[buildingAllApi.getStoredString()]);
-                      //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                      //     },
-                      //     child: Icon(Icons.add)
-                      // ),
-
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
-                    ],
+            DebugToggle.PDRIcon
+                ? Positioned(
+                top: 150,
+                right: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                    color: (isPdr) ? Colors.green : Colors.red,
                   ),
+                  height: 20,
+                  width: 20,
+                ))
+                : Container(),
+            Positioned(
+              bottom: 150.0, // Adjust the position as needed
+              right: 16.0,
+
+              child: Semantics(
+                excludeSemantics: false,
+                child: Column(
+                  children: [
+                    //
+                    // // Text(Building.thresh),
+                    Visibility(
+                      visible: DebugToggle.StepButton,
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(24))),
+                          child: IconButton(
+                              onPressed: () {
+                                //StartPDR();
+                                // Navigator.pushReplacement(
+                                //   context,
+                                //   PageRouteBuilder(
+                                //     pageBuilder: (context, animation1, animation2) => Navigation(),
+                                //     transitionDuration: Duration.zero,
+                                //     reverseTransitionDuration: Duration.zero,
+                                //   ),
+                                // );
+
+                                bool isvalid =
+                                MotionModel.isValidStep(
+                                    user,
+                                    building.floorDimenssion[user
+                                        .Bid]![user.floor]![0],
+                                    building.floorDimenssion[user
+                                        .Bid]![user.floor]![1],
+                                    building.nonWalkable[
+                                    user.Bid]![user.floor]!,
+                                    reroute);
+                                if (isvalid) {
+
+                                  user.move(context).then((value) {
+                                    if(!user.isInRealWorld){
+                                      renderHere();
+                                    }
+
+                                  });
+                                } else {
+                                  if (user.isnavigating) {
+                                    // reroute();
+                                    // showToast("You are out of path");
+                                  }
+                                }
+                              },
+                              icon: Icon(Icons.directions_walk))),
+                    ),
+
+                    SizedBox(height: 28.0),
+
+                    DebugToggle.Slider?Text("${user.theta}"):Container(),
+                    Text("coord [${user.coordX},${user.coordY}] \n"
+                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                        "userBid ${user.Bid} \n"
+                        "index ${user.pathobj.index} \n"
+                        "buildingnumber ${user.buildingNumber} \n"
+                        "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
+                    DebugToggle.Slider?Slider(
+                        value: user.theta,
+                        min: -180,
+                        max: 180,
+                        onChanged: (newvalue) {
+                          double? compassHeading = newvalue;
+                          setState(() {
+                            user.theta = compassHeading!;
+                            if (mapState.interaction2) {
+                              mapState.bearing = compassHeading!;
+                              _googleMapController.moveCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                    target: mapState.target,
+                                    zoom: mapState.zoom,
+                                    bearing: mapState.bearing!,
+                                  ),
+                                ),
+                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              );
+                            } else {
+                              if (markers.length > 0)
+                                markers[user.Bid]?[0] =
+                                    customMarker.rotate(
+                                        compassHeading! - mapbearing,
+                                        markers[user.Bid]![0]);
+                            }
+                          });
+                        }):Container(),
+
+                    SizedBox(height: 28.0),
+                    !isSemanticEnabled
+                        ? Semantics(
+                      label: "Change floor",
+                      child: SpeedDial(
+                        child: Text(
+                          building.floor == 0
+                              ? 'G'
+                              : '${building.floor[buildingAllApi.getStoredString()]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff24b9b0),
+                            height: 19 / 16,
+                          ),
+                        ),
+                        activeIcon: Icons.close,
+                        backgroundColor: Colors.white,
+                        children: List.generate(
+                          building.numberOfFloors[buildingAllApi
+                              .getStoredString()]!,
+                              (int i) {
+                            return SpeedDialChild(
+                              child: Semantics(
+                                label: "i",
+                                child: Text(
+                                  i == 0 ? 'G' : '$i',
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 19 / 16,
+                                  ),
+                                ),
+                              ),
+                              backgroundColor:
+                              pathMarkers[i] == null
+                                  ? Colors.white
+                                  : Color(0xff24b9b0),
+                              onTap: () {
+                                _polygon.clear();
+                                circles.clear();
+                                // _markers.clear();
+                                // _markerLocationsMap.clear();
+                                // _markerLocationsMapLanName.clear();
+
+                                building.floor[buildingAllApi
+                                    .getStoredString()] = i;
+                                createRooms(
+                                  building.polylinedatamap[
+                                  buildingAllApi
+                                      .getStoredString()]!,
+                                  building.floor[buildingAllApi
+                                      .getStoredString()]!,
+                                );
+                                if (pathMarkers[i] != null) {
+                                  //setCameraPosition(pathMarkers[i]!);
+                                }
+                                building.landmarkdata!
+                                    .then((value) {
+                                  createMarkers(
+                                    value,
+                                    building.floor[buildingAllApi
+                                        .getStoredString()]!,
+                                  );
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                        : floorColumn(),
+                    SizedBox(
+                        height: 28.0), // Adjust the height as needed
+
+                    // Container(
+                    //   width: 300,
+                    //   height: 100,
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(testBIn.keys.toString()),
+                    //         Text(testBIn.values.toString()),
+                    //         Text("summap"),
+                    //         Text(sortedsumMapfordebug.toString()),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    Semantics(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+
+                          enableBT();
+                          _timer = Timer.periodic(
+                              Duration(milliseconds: 9000), (timer) {
+                            localizeUser().then((value) => {
+                              print(
+                                  "localize user is calling itself....."),
+                              _timer.cancel()
+                            });
+                          });
+                          // _timer.cancel();
+                          //localizeUser();
+                          //wsocket.sendmessg();
+                          // //print(PathState.connections);
+                          building.floor[buildingAllApi
+                              .getStoredString()] = user.floor;
+                          createRooms(
+                              building.polylinedatamap[
+                              buildingAllApi.getStoredString()]!,
+                              building.floor[
+                              buildingAllApi.getStoredString()]!);
+                          if (pathMarkers[user.floor] != null) {
+                            setCameraPosition(
+                                pathMarkers[user.floor]!);
+                          }
+                          building.landmarkdata!.then((value) {
+                            createMarkers(
+                                value,
+                                building.floor[buildingAllApi
+                                    .getStoredString()]!);
+                          });
+                          if (markers.length > 0)
+                            markers[user.Bid]?[0] = customMarker
+                                .rotate(0, markers[user.Bid]![0]);
+                          if (user.initialallyLocalised) {
+                            mapState.interaction =
+                            !mapState.interaction;
+                          }
+                          mapState.zoom = 21;
+                          fitPolygonInScreen(patch.first);
+
+                        },
+                        child: Semantics(
+                          label: "Localize",
+                          onDidGainAccessibilityFocus:
+                          close_isnavigationPannelOpen,
+                          child: Icon(
+                            Icons.my_location_sharp,
+                            color: Colors.black,
+                          ),
+                        ),
+
+                        backgroundColor: Colors
+                            .white, // Set the background color of the FAB
+                      ),
+                    ),
+                    SizedBox(height: 28.0),
+
+                    !user.isnavigating?FloatingActionButton(
+                      onPressed: () async {
+                        if (user.initialallyLocalised) {
+                          setState(() {
+                            if (isLiveLocalizing) {
+                              isLiveLocalizing = false;
+                              HelperClass.showToast(
+                                  "Explore mode is disabled");
+                              _exploreModeTimer!.cancel();
+                              _isExploreModePannelOpen = false;
+                              _isBuildingPannelOpen = true;
+                              lastBeaconValue = "";
+                            } else {
+                              speak("Explore Mode Enabled",_currentLocale);
+                              isLiveLocalizing = true;
+                              HelperClass.showToast(
+                                  "Explore mode enabled");
+                              _exploreModeTimer =
+                                  Timer.periodic(
+                                      Duration(
+                                          milliseconds: 5000),
+                                          (timer) async {
+                                        btadapter
+                                            .startScanning(resBeacons);
+                                        Future.delayed(Duration(
+                                            milliseconds: 2000))
+                                            .then((value) => {
+                                          realTimeReLocalizeUser(
+                                              resBeacons)
+                                          // listenToBin()
+                                        });
+                                      });
+                              _isBuildingPannelOpen = false;
+                              _isExploreModePannelOpen = true;
+                            }
+                          });
+                        }
+                      },
+                      child: SvgPicture.asset(
+                        "assets/Navigation_RTLIcon.svg",
+                        // color:
+                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                      ),
+                      backgroundColor: Color(
+                          0xff24B9B0), // Set the background color of the FAB
+                    )
+                        : Container(), // Adjust the height as needed// Adjust the height as needed
+                  ],
                 ),
+              ),
+            ),
+            //-------
+            Positioned(
+                top: 16,
+                left: 16,
+                right: 16,
+                child: _isLandmarkPanelOpen ||
+                    _isRoutePanelOpen ||
+                    _isnavigationPannelOpen
+                    ? Semantics(
+                    excludeSemantics: true, child: Container())
+                    : FocusScope(
+                  autofocus: true,
+                  child: Focus(
+                    child: Semantics(
+                      sortKey: const OrdinalSortKey(
+                          0), // header: true,
+                      child: HomepageSearch(
+                        onVenueClicked: onLandmarkVenueClicked,
+                        fromSourceAndDestinationPage:
+                        fromSourceAndDestinationPage,
+                      ),
+                    ),
+                  ),
+                )),
+            FutureBuilder(
+              future: building.landmarkdata,
+              builder: (context, snapshot) {
+                if (_isLandmarkPanelOpen) {
+                  return landmarkdetailpannel(context, snapshot);
+                } else {
+                  return Semantics(
+                      excludeSemantics: true, child: Container());
+                }
+              },
+            ),
+            routeDeatilPannel(),
+            navigationPannel(),
+            reroutePannel(),
+            ExploreModePannel(),
+            detected
+                ? Semantics(child: nearestLandmarkpannel())
+                : Container(),
+            SizedBox(height: 28.0), // Adjust the height as needed
+            // FloatingActionButton(
+            //     onPressed: (){
+            //       print("checkingBuildingfloor");
+            //       //building.floor == 0 ? 'G' : '${building.floor}',
+            //       print(building.floor);
+            //       int firstKey = building.floor.values.first;
+            //       print(firstKey);
+            //       print(singleroute[building.floor.values.first]);
+            //
+            //       print(singleroute.keys);
+            //       print(singleroute.values);
+            //       print(building.floor[buildingAllApi.getStoredString()]);
+            //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+            //     },
+            //     child: Icon(Icons.add)
+            // ),
+
+            // FloatingActionButton(
+            //   onPressed: () async {
+            //
+            //     //StopPDR();
+            //
+            //     if (user.initialallyLocalised) {
+            //       setState(() {
+            //         isLiveLocalizing = !isLiveLocalizing;
+            //       });
+            //       HelperClass.showToast("realTimeReLocalizeUser started");
+            //
+            //       Timer.periodic(
+            //           Duration(milliseconds: 5000),
+            //               (timer) async {
+            //             print(resBeacons);
+            //             btadapter.startScanning(resBeacons);
+            //
+            //
+            //             // setState(() {
+            //             //   sumMap=  btadapter.calculateAverage();
+            //             // });
+            //
+            //
+            //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+            //               realTimeReLocalizeUser(resBeacons)
+            //               // listenToBin()
+            //
+            //
+            //             });
+            //
+            //             setState(() {
+            //               debugPQ = btadapter.returnPQ();
+            //
+            //             });
+            //
+            //           });
+            //
+            //     }
+            //
+            //   },
+            //   child: Icon(
+            //     Icons.location_history_sharp,
+            //     color: (isLiveLocalizing)
+            //         ? Colors.cyan
+            //         : Colors.black,
+            //   ),
+            //   backgroundColor: Colors
+            //       .white, // Set the background color of the FAB
+            // ),
+          ],
+        ),
+      ),
     );
   }
   //
@@ -8199,7 +8202,7 @@ _showLowAccuracyDialog();
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }

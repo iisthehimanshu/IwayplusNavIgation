@@ -86,6 +86,7 @@ dependencies:
   bluetooth_enable_fork: ^0.1.6
   fluster: ^1.2.0
   flutter_cache_manager:
+  translator: ^1.0.0
 
 
 

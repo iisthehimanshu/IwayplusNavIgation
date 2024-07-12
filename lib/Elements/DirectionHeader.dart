@@ -21,6 +21,7 @@ import '../directionClass.dart';
 import '../Navigation.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import '../Elements/locales.dart';
+import 'package:translator/translator.dart';
 
 class DirectionHeader extends StatefulWidget {
   String direction;
@@ -79,10 +80,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
+  late FlutterLocalization _flutterLocalization;
+  late String _currentLocale = '';
 
   @override
   void initState() {
     super.initState();
+
+    _flutterLocalization = FlutterLocalization.instance;
+    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    print("_currentLocale");
+    print(_currentLocale);
 
     for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
@@ -162,11 +170,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if(widget.direction == LocaleData.straight.getString(widget.context)){
           widget.direction = LocaleData.gostraight.getString(widget.context);
 
-          speak("${LocaleData.gostraight.getString(widget.context)} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}");
+          speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps",_currentLocale);
         }else{
           widget.direction = "${LocaleData.turn.getString(widget.context)} ${widget.direction}, ${LocaleData.and.getString(widget.context)} ${LocaleData.gostraight.getString(widget.context)}";
 
-          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}");
+          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps",_currentLocale);
           widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}";
 
         }
@@ -291,7 +299,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             speak(
-                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} ${LocaleData.floor.getString(widget.context)}");
+                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} ${LocaleData.floor.getString(widget.context)}",_currentLocale);
             //need to render on beacon for aiims jammu
             widget.paint(nearestBeacon, render: false);
             return true;
@@ -360,7 +368,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}");
+                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} steps",_currentLocale);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 return true; //moved on path
@@ -395,10 +403,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg) async {
+  Future<void> speak(String msg,String lngcode) async {
+    var translation=await msg.translate(to:lngcode);
+    print("translation");
+    print(translation);
     await flutterTts.setSpeechRate(0.6);
     await flutterTts.setPitch(1.0);
-    await flutterTts.speak(msg);
+    await flutterTts.speak(translation.toString());
   }
 
   Cell findNextTurn(List<Cell> path) {
@@ -469,14 +480,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
 
-          speak("${LocaleData.turn.getString(widget.context)} ${widget.direction}");
+          speak("${LocaleData.turn.getString(widget.context)} ${widget.direction}",_currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == LocaleData.gostraight.getString(widget.context)) {
           Vibration.vibrate();
 
 
           speak(
-              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}");
+              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
         }
       }
 
@@ -489,14 +500,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("index mila $index");
 
             speak(
-                "Approaching ${direc} ${LocaleData.turn.getString(widget.context)} ${LocaleData.from.getString(widget.context)} ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}");
+                "Approaching ${direc} ${LocaleData.turnfrm.getString(widget.context)} ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",_currentLocale);
             //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
           } else {
             int index = path.indexWhere((element) => element == nextTurn);
             print("index mila $index");
             String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]),widget.context);
             print("direc mila $direc");
-            speak("Approaching ${direc} ${LocaleData.turn.getString(widget.context)}");
+            speak("Approaching ${direc} ${LocaleData.turn.getString(widget.context)}",_currentLocale);
             widget.user.move(context);
           }
         }
@@ -517,13 +528,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("${LocaleData.turn.getString(widget.context)}${widget.direction}");
+          speak("${LocaleData.turn.getString(widget.context)} ${widget.direction}",_currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == LocaleData.straight.getString(widget.context)) {
           Vibration.vibrate();
 
           speak(
-              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}");
+              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
         }
       }
     }
@@ -629,6 +640,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   // }
 
   static Icon getCustomIcon(String direction,context) {
+
     if (direction == LocaleData.straight.getString(context)) {
       return Icon(
         Icons.straight,
@@ -916,7 +928,7 @@ class scrollableDirection extends StatelessWidget {
           ? "${listOfDirections[DirectionIndex].turnDirection} ${ LocaleData.willbe.getString(context)}${tools.angleToClocks3(angle,context)}"
           : "${listOfDirections[DirectionIndex].turnDirection} ${ LocaleData.willbe.getString(context)} ${ LocaleData.onyourfront.getString(context)}";
     } else if (DirectionIndex == nextTurnIndex) {
-      return "${Direction ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context): "${ LocaleData.turn.getString(context)} ${Direction}, ${ LocaleData.and.getString(context)} ${ LocaleData.gostraight.getString(context)}"}";
+      return "${Direction ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context): "${LocaleData.turn.getString(context)} ${Direction}, ${ LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}";
     } else {
       if (DirectionIndex < listOfDirections.length) {
         return "${listOfDirections[DirectionIndex].turnDirection ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context) : "${LocaleData.turn.getString(context)} ${listOfDirections[DirectionIndex].turnDirection}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}";

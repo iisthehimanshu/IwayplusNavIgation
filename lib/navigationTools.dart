@@ -16,6 +16,8 @@ import 'directionClass.dart';
 import 'path.dart';
 import 'Elements/locales.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import '../Elements/locales.dart';
+import 'package:translator/translator.dart';
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -248,7 +250,7 @@ class tools {
     double hor = dist * cos(ang * pi / 180.0);
 
     Map<String, double> finalCoords =
-        obtainCoordinates(ref[leastLat], ver, hor);
+    obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
@@ -261,9 +263,9 @@ class tools {
     double difflon =
         ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-            cos((secondLocation["lat"]! * pi) / 180) *
-            sin(difflon / 2) *
-            sin(difflon / 2) +
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
@@ -289,7 +291,7 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle,context) {
+  static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -356,7 +358,7 @@ class tools {
           : "on 9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
       return (currentDir == 'Natural Direction')
-            ?  LocaleData.onyourslightleft.getString(context)
+          ?  LocaleData.onyourslightleft.getString(context)
           : "on 10-11 o'clock";
     } else {
       return "on your None";
@@ -430,6 +432,11 @@ class tools {
     }
 
     return angle;
+  }
+
+  static Future<String> convertTolng(String msg,String lngCode)async{
+    var translation =await msg.translate(to:lngCode);
+    return translation.toString();
   }
 
   static double calculateAngleBetweenVectors(double latA, double lonA, double latB, double lonB, double angle) {
@@ -576,7 +583,7 @@ class tools {
   }
 
 
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+  static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //print("AAAAAA $a");
     // //print("B $b");
     // //print("C $c");
@@ -920,32 +927,32 @@ class tools {
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
-          double d = 0.0;
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
 
-          if (value.doorX != null) {
-            d = calculateDistance(
-                pCoord, [value.doorX!, value.doorY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
-          }else{
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+        if (value.doorX != null) {
+          d = calculateDistance(
+              pCoord, [value.doorX!, value.doorY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
           }
+        }else{
+          d = calculateDistance(
+              pCoord, [value.coordinateX!, value.coordinateY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+          }
+        }
 
       }
     });
@@ -954,10 +961,10 @@ class tools {
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       //print("entry.key");
       while(priorityQueue.isNotEmpty)
-        {
-          MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-          nearestLandmark.add(entry.key);
-        }
+      {
+        MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+        nearestLandmark.add(entry.key);
+      }
     }else{
       //print("priorityQueue.isEmpty");
     }
@@ -1022,7 +1029,7 @@ class tools {
           if (d<distance) {
             coordinates.add(value.coordinateX!);
             coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
+            // finalCords.add(coordinates);
           }
         }
       }
@@ -1207,7 +1214,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-   // //print(AngleBetweenBuildingandGlobalNorth);
+    // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

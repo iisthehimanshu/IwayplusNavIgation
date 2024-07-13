@@ -27,7 +27,9 @@ class beaconapi {
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);
+
       if(BeaconBox.get(id) != null && !VersionInfo.landmarksDataVersionUpdate){
+
         List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         return beaconList;
@@ -64,6 +66,7 @@ class beaconapi {
 
 
       return beaconList;
+
     }else if (response.statusCode == 403) {
       print("BEACON API in error 403");
       String newAccessToken = await RefreshTokenAPI.refresh();
@@ -94,6 +97,7 @@ class beaconapi {
         print("BEACON API EMPTY DATA FROM API AFTER 403");
         List<beacon> beaconList = [];
         return beaconList;
+
       }
 
     } else {

@@ -89,11 +89,11 @@ class UserState{
   //
   // }
 
-  Future<void> move()async{
+  Future<void> move(context)async{
 
 
 
-    moveOneStep();
+    moveOneStep(context);
 
 
     if(!isInRealWorld){
@@ -132,8 +132,9 @@ class UserState{
 
 
 
+
         if(movementAllowed){
-          moveOneStep();
+          moveOneStep(context);
         }else if(!movementAllowed){
           return;
         }
@@ -141,17 +142,19 @@ class UserState{
     }
 
 
-    if(stepSize.toInt() != stepSize){
 
+    if(stepSize.toInt() != stepSize){
     }
   }
+
 
   void pri(){
     List<int> value = ListofPaths[buildingNumber][pathobj.index].move(theta);
     print("multidebug ${pathobj.index} $value ${ListofPaths[buildingNumber][pathobj.index].move} [$coordX,$coordY] + $theta -----> [${coordX+value[0]},${coordY+value[1]}]");
   }
 
-  Future<void> moveOneStep()async{
+  Future<void> moveOneStep(context)async{
+
 
     wsocket.message["userPosition"]["X"]=coordX;
     wsocket.message["userPosition"]["Y"]=coordY;
@@ -247,6 +250,7 @@ class UserState{
                 "Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
           }
 
+
           if (pathState.nearbyLandmarks.isNotEmpty) {
             pathState.nearbyLandmarks.forEach((element) {
               if (element.element!.subType == "room door" &&
@@ -282,11 +286,12 @@ class UserState{
                     element.coordinateY!
                   ]);
                   speak(
-                      "${element.name} is on your ${tools.angleToClocks(agl)}");
+                      "${element.name} is on your ${tools.angleToClocks(agl,context)}");
                   pathState.nearbyLandmarks.remove(element);
                 }
               }
             });
+
           }
         }
       }else{

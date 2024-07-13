@@ -14,6 +14,10 @@ import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
 import 'directionClass.dart';
 import 'path.dart';
+import 'Elements/locales.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import '../Elements/locales.dart';
+import 'package:translator/translator.dart';
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -246,7 +250,7 @@ class tools {
     double hor = dist * cos(ang * pi / 180.0);
 
     Map<String, double> finalCoords =
-        obtainCoordinates(ref[leastLat], ver, hor);
+    obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
@@ -259,9 +263,9 @@ class tools {
     double difflon =
         ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-            cos((secondLocation["lat"]! * pi) / 180) *
-            sin(difflon / 2) *
-            sin(difflon / 2) +
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
@@ -287,114 +291,114 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle) {
+  static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
-      return (currentDir == 'Natural Direction') ? "Straight" : "12 o'clock";
+      return (currentDir == 'Natural Direction') ?  LocaleData.straight.getString(context): "12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
-          ? "Slight Right"
+          ?  LocaleData.slightright.getString(context)
           : "1-2 o'clock";
     } else if (angle > 67.5 && angle <= 112.5) {
-      return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
+      return (currentDir == 'Natural Direction') ?  LocaleData.right.getString(context): "3 o'clock";
     } else if (angle > 112.5 && angle <= 157.5) {
       return (currentDir == 'Natural Direction')
-          ? "Sharp Right"
+          ?  LocaleData.sharpright.getString(context)
           : "4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
-      return (currentDir == 'Natural Direction') ? "U Turn" : "6 o'clock";
+      return (currentDir == 'Natural Direction') ?  LocaleData.uturn.getString(context): "6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
-      return (currentDir == 'Natural Direction') ? "Sharp Left" : "7-8 o'clock";
+      return (currentDir == 'Natural Direction') ?  LocaleData.sharpleft.getString(context) : "7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
-      return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
+      return (currentDir == 'Natural Direction') ?  LocaleData.left.getString(context) : "9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
       return (currentDir == 'Natural Direction')
-          ? "Slight Left"
+          ?  LocaleData.slightleft.getString(context)
           : "10-11 o'clock";
     } else {
       return "None";
     }
   }
 
-  static String angleToClocks2(double angle) {
+  static String angleToClocks2(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your front"
+          ?  LocaleData.onyourfront.getString(context)
           : "on 12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Slight Right"
+          ?  LocaleData.onyourslightright.getString(context)
           : "on 1-2 o'clock";
     } else if (angle > 67.5 && angle <= 112.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Right"
+          ?  LocaleData.onyourright.getString(context)
           : "on 3 o'clock";
     } else if (angle > 112.5 && angle <= 157.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Sharp Right"
+          ?  LocaleData.onyoursharpright.getString(context)
           : "on 4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your back"
+          ? LocaleData.onyourback.getString(context)
           : "on 6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Sharp Left"
+          ?  LocaleData.onyoursharpleft.getString(context)
           : "on 7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Left"
+          ?  LocaleData.onyourleft.getString(context)
           : "on 9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your Slight Left"
+          ?  LocaleData.onyourslightleft.getString(context)
           : "on 10-11 o'clock";
     } else {
       return "on your None";
     }
   }
 
-  static String angleToClocks3(double angle) {
+  static String angleToClocks3(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 315 || angle <= 45) {
       return (currentDir == 'Natural Direction')
-          ? "on your Front"
+          ? LocaleData.onyourfront.getString(context)
           : "on 12 o'clock";
     } else if (angle > 45 && angle <= 180) {
       return (currentDir == 'Natural Direction')
-          ? "on your Right"
+          ?  LocaleData.onyourright.getString(context)
           : "3 o'clock";
     } else if (angle > 180 && angle <= 315) {
-      return (currentDir == 'Natural Direction') ? "on your Left" : "9 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.onyourleft.getString(context) : "9 o'clock";
     } else {
-      return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.onyourback.getString(context): "6 o'clock";
     }
   }
 
-  static String angleToClocksForNearestLandmarkToBeacon(double angle) {
+  static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
 
     if ((angle >= 315 && angle <= 360) || (angle >= 0 && angle <= 45)) {
-      return (currentDir == 'Natural Direction') ? "Front" : "12 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.front.getString(context) : "12 o'clock";
     } else if (angle > 45 && angle <= 135) {
-      return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.right.getString(context) : "3 o'clock";
     } else if (angle > 135 && angle <= 225) {
-      return (currentDir == 'Natural Direction') ? "Back" : "6 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.back.getString(context) : "6 o'clock";
     } else if (angle > 225 && angle < 315) {
-      return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
+      return (currentDir == 'Natural Direction') ? LocaleData.left.getString(context) : "9 o'clock";
     } else {
       return "None";
     }
@@ -428,6 +432,11 @@ class tools {
     }
 
     return angle;
+  }
+
+  static Future<String> convertTolng(String msg,String lngCode)async{
+    var translation =await msg.translate(to:lngCode);
+    return translation.toString();
   }
 
   static double calculateAngleBetweenVectors(double latA, double lonA, double latB, double lonB, double angle) {
@@ -574,7 +583,7 @@ class tools {
   }
 
 
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+  static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //print("AAAAAA $a");
     // //print("B $b");
     // //print("C $c");
@@ -798,7 +807,7 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState,context) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);
@@ -809,7 +818,7 @@ class tools {
       double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
       double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
       double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
-      String direc = tools.angleToClocks(angle);
+      String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
     return Directions;
@@ -918,32 +927,32 @@ class tools {
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
-          double d = 0.0;
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
 
-          if (value.doorX != null) {
-            d = calculateDistance(
-                pCoord, [value.doorX!, value.doorY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
-          }else{
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+        if (value.doorX != null) {
+          d = calculateDistance(
+              pCoord, [value.doorX!, value.doorY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
           }
+        }else{
+          d = calculateDistance(
+              pCoord, [value.coordinateX!, value.coordinateY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+          }
+        }
 
       }
     });
@@ -952,10 +961,10 @@ class tools {
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       //print("entry.key");
       while(priorityQueue.isNotEmpty)
-        {
-          MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-          nearestLandmark.add(entry.key);
-        }
+      {
+        MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+        nearestLandmark.add(entry.key);
+      }
     }else{
       //print("priorityQueue.isEmpty");
     }
@@ -1020,7 +1029,7 @@ class tools {
           if (d<distance) {
             coordinates.add(value.coordinateX!);
             coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
+            // finalCords.add(coordinates);
           }
         }
       }
@@ -1040,6 +1049,7 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
+
   static void setBuildingAngle(String angle){
     AngleBetweenBuildingandGlobalNorth = double.parse(angle);
     AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
@@ -1047,6 +1057,7 @@ class tools {
       AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
     }
   }
+
 
   // static double angleBetweenBuildingAndNorth(String Bid) {
   //   // Assuming corners is a list of Point objects representing coordinates of the building corners
@@ -1203,7 +1214,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-   // //print(AngleBetweenBuildingandGlobalNorth);
+    // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

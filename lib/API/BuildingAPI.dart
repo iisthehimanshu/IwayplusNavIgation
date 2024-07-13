@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../APIMODELS/Building.dart';
-import '../Elements/HelperClass.dart';
+import '/Elements/HelperClass.dart';
 import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';

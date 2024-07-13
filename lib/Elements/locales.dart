@@ -40,6 +40,62 @@ mixin LocaleData {
   static const String between56Feet = '5 to 6 Feet';
   static const String more6Feet = '> 6 Feet';
 
+  static const String straight='Straight';
+  static const String right='Right';
+  static const String uturn='U Turn';
+  static const String sharpleft='Sharp Left';
+  static const String left='Left';
+  static const String slightright='Slight Right';
+  static const String slightleft='Slight Left';
+  static const String sharpright='Sharp Right';
+  static const String gostraight='Go Straight';
+  static const String then='Then';
+  static const String and='and';
+  static const String turn='Turn';
+  static const String steps='Steps';
+  static const String willbeonyourfront='will be on your front';
+  static const String onyourfront='on your Front';
+  static const String onyourright= 'on your Right';
+  static const String onyourleft= 'on your Left';
+  static const String onyourback= 'on your Back';
+  static const String willbe='will be';
+  static const String yourcurrentloc="Your current location";
+  static const String lift="Lift";
+  static const String floor='Floor';
+  static const String goto ='go to';
+  static const String from ='from';
+  static const String exit ='Exit';
+  static const String start='Start';
+  static const String min='min';
+  static const String take='Take';
+  static const String maps='Maps';
+  static const String slight='slight';
+  static const String onyourslightright='on your Slight Right';
+  static const String onyoursharpright= 'on your Sharp Right';
+  static const String onyoursharpleft= 'on your Sharp Left';
+  static const String onyourslightleft='on your Slight Left';
+  static const String front='Front';
+  static const String back='Back';
+  static const String loadingMaps='Loading maps';
+  static const String searchingyourlocation='Searching your location...';
+  static const String plswait='Please wait';
+  static const String youareon= 'You are on';
+  static const String isonyour='is on your';
+  static const String near='near';
+  static const String unabletofindyourlocation='Unable to find your location';
+  static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
+  static const String iss= 'is';
+  static const String meteraway='meter away';
+  static const String clickstarttonavigate= 'Click Start to Navigate';
+ static const String exploremodenabled= 'Explore Mode Enabled';
+ static const String direction='Direction';
+ static const String turnfrm='turn from';
+ static const String approaching='Approaching';
+
+
+
+
+
   static const Map<String, dynamic> EN = {
     'title': 'Settings',
     'generalSettings': 'General Settings',
@@ -68,6 +124,64 @@ mixin LocaleData {
     '< 5 Feet':'< 5 Feet',
     '5 to 6 Feet':'5 to 6 Feet',
     '> 6 Feet':'> 6 Feet',
+   'Straight':'Straight',
+   'Right':'Right',
+   'U Turn':'U Turn',
+   'Sharp Left':'Sharp Left',
+   'Left':'Left',
+   'Slight Right':'Slight Right',
+   'Slight Left':'Slight Left',
+   'Sharp Right':'Sharp Right',
+    'Go Straight':'Go Straight',
+    'Then': 'Then',
+    'and': 'and',
+    'Turn':'Turn',
+    'Steps':'Steps',
+    'will be on your front': 'will be on your front',
+    'on your Front': 'on your Front',
+    'on your Right': 'on your Right',
+    'on your Left': 'on your Left',
+    'on your Back': 'on your Back',
+    'will be': 'will be',
+    'Your current location':'Your current location',
+    'Lift':'Lift',
+    'Floor' :'Floor',
+    'go to': 'go to',
+    'from': 'from',
+    'Exit': 'exit',
+    'Start' :'Start',
+    'min': 'min',
+    'Take': 'Take',
+    'Maps' : 'Maps',
+  'slight': 'slight',
+    'on your Slight Right' :'on your Slight Right',
+    'on your Sharp Right': 'on your Sharp Right',
+    'on your Sharp Left': 'on your Sharp Left',
+    'on your Slight Left': 'on your Slight Left',
+    'Front' : 'Front',
+    'Back':'Back',
+    'Loading maps' :'Loading maps',
+    'Searching your location...' : 'Searching your location...',
+    'Please wait': 'Please wait',
+    'You are on': 'You are on',
+    'is on your':'is on your',
+    'near':'near',
+    'Unable to find your location': 'Unable to find your location',
+    'You are going away from the path. Click Reroute to Navigate from here.': 'You are going away from the path. Click Reroute to Navigate from here.',
+    'is': 'is',
+    'meter away': 'meter away',
+    'Click Start to Navigate' : 'Click Start to Navigate',
+    'Explore Mode Enabled' : 'Explore Mode Enabled',
+    'Direction':'Direction',
+    'turn from':'turn from',
+    'Approaching': 'Approaching'
+
+
+
+
+
+
+
   };
 
   static const Map<String, dynamic> HI = {
@@ -97,7 +211,58 @@ mixin LocaleData {
     'userHeight': 'उपयोगकर्ता की ऊंचाई',
     '< 5 Feet': '< 5 फीट',
     '5 to 6 Feet': '5 से 6 फीट',
-    '> 6 Feet': '> 6 फीट'
+    '> 6 Feet': '> 6 फीट',
+    'Straight': 'सीधे',
+    'Right': 'दाएं',
+    'U Turn': 'यू टर्न',
+    'Sharp Left': 'तेज़ बाएं',
+    'Left': 'बाएं',
+    'Slight Right': 'हल्का दायें',
+    'Slight Left': 'हल्का बाएं',
+    'Sharp Right': 'तेज़ दाएं',
+    'Then': 'फिर',
+    'Go Straight': 'सीधे जाएं',
+    'and': 'और',
+    'Turn': 'मूड़े',
+    'Steps': 'कदम',
+    'will be on your front': 'आपके सामने होगा',
+    'on your Front': 'आपके सामने',
+    'on your Right': 'आपके दाएँ',
+    'on your Left': 'आपके बाएँ',
+    'on your Back': 'आपके पीछे',
+    'will be': 'होगा',
+    'Your current location':'आपकी वर्तमान स्थिति',
+    'Lift':'लिफ्ट',
+    'Floor' :'मंजिल',
+    'go to': 'जाओ',
+    'from': 'से',
+    'Exit': 'निकास',
+    'Start' :'प्राम्भ करे',
+    'min': 'मिनट',
+    'Take': 'लें',
+  'Maps' : 'नक्शा',
+  'slight': 'हल्का',
+    'on your Slight Right' :'आपके हल्के दायें',
+    'on your Sharp Right': 'आपके तेज़ दायें',
+    'on your Sharp Left': 'आपके तेज़ बायें',
+    'on your Slight Left': 'आपके हल्के बायें',
+    'Front' : 'सामने',
+    'Back' :'पीछे',
+    'Loading maps' :'नक्शे लोड हो रहे हैं',
+    'Searching your location...' : 'आपकी स्थिति खोजी जा रही है...',
+  'Please wait': 'कृपया प्रतीक्षा करें',
+    'You are on': 'आप हैं',
+    'is on your':'आपके पर है',
+    'near':'पास',
+    'Unable to find your location': 'आपकी स्थिति का पता नहीं चल पाया',
+    'You are going away from the path. Click Reroute to Navigate from here.': 'आप मार्ग से भटक रहे हैं। यहाँ से मार्गदर्शन करने के लिए पुनर्निर्देशित पर क्लिक करें।',
+    'is': 'है',
+    'meter away': 'मीटर दूर',
+    'Click Start to Navigate' : 'नेविगेट करने के लिए स्टार्ट पर क्लिक करें',
+    'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
+  'Direction':'दिशा',
+  'turn from':'से मुड़ो',
+    'Approaching': 'पास आ रहे हैं'
   };
 
   static const Map<String, dynamic> TA = {

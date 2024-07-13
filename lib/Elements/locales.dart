@@ -90,6 +90,7 @@ mixin LocaleData {
  static const String exploremodenabled= 'Explore Mode Enabled';
  static const String direction='Direction';
  static const String turnfrm='turn from';
+ static const String approaching='Approaching';
 
 
 
@@ -173,6 +174,7 @@ mixin LocaleData {
     'Explore Mode Enabled' : 'Explore Mode Enabled',
     'Direction':'Direction',
     'turn from':'turn from',
+    'Approaching': 'Approaching'
 
 
 
@@ -260,6 +262,7 @@ mixin LocaleData {
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
   'Direction':'दिशा',
   'turn from':'से मुड़ो',
+    'Approaching': 'पास आ रहे हैं'
   };
 
   static const Map<String, dynamic> TA = {

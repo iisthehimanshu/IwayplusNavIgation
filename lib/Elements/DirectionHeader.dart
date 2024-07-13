@@ -500,14 +500,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("index mila $index");
 
             speak(
-                "Approaching ${direc} ${LocaleData.turnfrm.getString(widget.context)} ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",_currentLocale);
+                "${LocaleData.approaching.getString(widget.context)} ${direc} ${LocaleData.turnfrm.getString(widget.context)} ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",_currentLocale);
             //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
           } else {
             int index = path.indexWhere((element) => element == nextTurn);
             print("index mila $index");
             String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]),widget.context);
             print("direc mila $direc");
-            speak("Approaching ${direc} ${LocaleData.turn.getString(widget.context)}",_currentLocale);
+            speak("${LocaleData.approaching.getString(widget.context)} ${direc} ${LocaleData.turn.getString(widget.context)}",_currentLocale);
             widget.user.move(context);
           }
         }

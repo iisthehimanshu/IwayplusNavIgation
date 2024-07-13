@@ -3745,6 +3745,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         print(PathState.sourcePolyID!);
+        print(landmarksMap[PathState.sourcePolyID]!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
         List<CommonLifts> commonlifts = findCommonLifts(

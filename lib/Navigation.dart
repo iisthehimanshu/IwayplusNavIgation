@@ -3852,7 +3852,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // double destinationLng=double.parse(source.properties!.longitude!);
 
 
-        Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,2);
+        Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,1);
         print("destination entry found is ${element2.sId} ${element2.name} [${element2.coordinateX},${element2.coordinateY}]");
 
         List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);

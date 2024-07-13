@@ -864,9 +864,9 @@ class tools {
   }
 
 
-  static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
-    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
+    PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
@@ -897,8 +897,7 @@ class tools {
           }
           if (d<distance) {
 
-            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            Landmarks currentLandInfo = value;
             print(currentLandInfo.name);
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
@@ -910,9 +909,9 @@ class tools {
       }
     });
 
-    nearestLandInfo? nearestLandmark;
+    Landmarks? nearestLandmark;
     if(priorityQueue.isNotEmpty){
-      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
       nearestLandmark = entry.key;
     }else{
       //print("priorityQueue.isEmpty");
@@ -1935,6 +1934,7 @@ class Poi {
 class nearestLandInfo{
   Element? element;
   // Properties? properties;
+
   String? sId;
   String? buildingID;
   int? coordinateX;

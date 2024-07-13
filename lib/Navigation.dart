@@ -1020,6 +1020,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         await building.landmarkdata!.then((value) {
           nearestLandInfomation = tools.localizefindNearbyLandmark(
               apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+          if(nearestLandInfomation != null){
+
+            user.nearestLandmark = nearestLandInfomation!.properties!.polyId!;
+            print("not null${user.nearestLandmark}");
+          }
+
         });
       } catch (e) {
         print("inside catch");
@@ -1376,7 +1382,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       PathState.sourceFloor = user.floor;
-      PathState.sourcePolyID = user.key;
+      print("not null ${user.nearestLandmark} ${user.key}");
+      PathState.sourcePolyID = user.nearestLandmark??user.key;
       PathState.sourceName =
       "Your current location";
       building.landmarkdata!.then((value) async {
@@ -1868,7 +1875,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   String nearestLandmarkToBeacon = "";
   String nearestLandmarkToMacid = "";
 
-  nearestLandInfo? nearestLandInfomation;
+  Landmarks? nearestLandInfomation;
   String nearestBeacon = "";
 
   Future<void> localizeUser() async {
@@ -3373,7 +3380,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               PathState.sourceFloor = user.floor;
-                              PathState.sourcePolyID = user.key;
+                              PathState.sourcePolyID = user.nearestLandmark??user.key;
                               print("object ${PathState.sourcePolyID}");
                               PathState.sourceName = "${LocaleData.yourcurrentloc.getString(context)}";
                               PathState.destinationPolyID =
@@ -3744,7 +3751,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             landmarksMap[PathState.sourcePolyID]!.lifts!,
             landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-        print(commonlifts);
+        print("commonlifts $commonlifts");
 
         await fetchroute(
             commonlifts[0].x2!,

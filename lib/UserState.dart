@@ -23,6 +23,7 @@ class UserState{
   double lat;
   double lng;
   String key;
+  String? nearestLandmark;
   double theta;
   String? locationName;
   bool isnavigating;

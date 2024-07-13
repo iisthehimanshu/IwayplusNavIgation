@@ -1695,8 +1695,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //please wait
       //searching your location
 
-      speak("Please wait");
-      speak("Searching your location. .");
+      speak("Please wait",_currentLocale);
+      speak("Searching your location. .",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();

@@ -1888,7 +1888,7 @@ class tools {
     for (Landmarks point in points) {
       if(point.element!.subType != null &&
           point.element!.subType == "main entry" &&
-          point.name!.toLowerCase().contains("entry") &&
+          (point.name!.toLowerCase().contains("entry") || point.name!.toLowerCase().contains("exit")) &&
           point.name!.toLowerCase().contains("ramp") == ramp &&
           point.buildingID == s.buildingID){
         List<double> pointCartesian = latLongToCartesian(double.parse(point.properties!.latitude!), double.parse(point.properties!.longitude!));

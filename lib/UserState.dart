@@ -164,7 +164,7 @@ class UserState{
     if(isnavigating){
       checkForMerge();
       if(pathobj.index + 3 == ListofPaths[buildingNumber].length && !isInRealWorld){
-        if(ListofPaths[buildingNumber-1].isNotEmpty && ListofPaths[buildingNumber][0].bid != ListofPaths[buildingNumber-1][0].bid){
+        if(ListofPaths[buildingNumber-1].isNotEmpty && ListofPaths[buildingNumber][0].bid != ListofPaths[buildingNumber-1][0].bid && realWorldCoordinates.length>2){
           print("toogleed");
           p = realWorldCoordinates[1];
           isInRealWorld = !isInRealWorld;

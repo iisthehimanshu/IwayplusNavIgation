@@ -70,7 +70,10 @@ class buildingAllApi {
       print("BUILDINGALL API DATA FROM DATABASE");
       print(BuildingAllBox.length);
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       return buildingList;
     }
 
@@ -93,7 +96,10 @@ class buildingAllApi {
       print("BUILDING API DATA FROM API");
       BuildingAllBox.add(buildingData);
       buildingData.save();
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       return buildingList;
 
     } else {

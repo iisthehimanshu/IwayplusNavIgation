@@ -5765,8 +5765,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAll> buildingList =
-      responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -6925,8 +6927,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAll> buildingList =
-      responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {

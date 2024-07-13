@@ -1547,55 +1547,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   void apiCalls() async {
     print("working 1");
-
-    building.beacondata ??= [];
-    var buildingMap = await buildingAllApi.getStoredAllBuildingID();
-    for (var entry in buildingMap.entries) {
-      var key = entry.key;
-      await beaconapi().fetchBeaconData(key).then((value) {
-        print("apibeaconmap ${apibeaconmap.length}");
-        print("value of $key ${value.length}");
-        if (value.isNotEmpty) {
-          building.beacondata!.addAll(value);
-          for (int i = 0; i < value.length; i++) {
-            beacon beacons = value[i];
-            if (beacons.name != null) {
-              apibeaconmap[beacons.name!] = beacons;
-            }
-          }
-          Building.apibeaconmap = apibeaconmap;
-          setState(() {
-            resBeacons = apibeaconmap;
-          });
-        }
-        print("apibeaconmap2 ${apibeaconmap.length}");
-      });
-    }
-    if (Platform.isAndroid) {
-      print("starting scanning for android");
-      print("apibeaconmapinsideAndroid ${apibeaconmap.length}");
-      btadapter.startScanning(apibeaconmap);
-    } else {
-      print("starting scanning for IOS");
-      btadapter.startScanningIOS(apibeaconmap);
-      // btadapter.strtScanningIos(apibeaconmap);
-      // btadapter.getDevicesList();
-    }
-
-    late Timer _timer;
-    //please wait
-    //searching your location
-    await Future.delayed(Duration(seconds: 1));
-    speak("Please Wait",_currentLocale);
-    speak("Searching your location...",_currentLocale);
-
-    _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-      localizeUser();
-
-      print("localize user is calling itself.....");
-      _timer.cancel();
-    });
-
     //await DataVersionApi().fetchDataVersionApiData();
 
     await patchAPI()
@@ -1708,16 +1659,62 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
 
+
+    await beaconapi().fetchBeaconData(buildingAllApi.selectedBuildingID).then((value) {
+      print("beacondatacheck");
+
+      building.beacondata = value;
+      for (int i = 0; i < value.length; i++) {
+        print(value[i].name);
+        beacon beacons = value[i];
+        if (beacons.name != null) {
+          apibeaconmap[beacons.name!] = beacons;
+        }
+      }
+      Building.apibeaconmap = apibeaconmap;
+
+      print("scanningggg starteddddd");
+
+      if (Platform.isAndroid) {
+        print("starting scanning for android");
+        btadapter.startScanning(apibeaconmap);
+      } else {
+        print("starting scanning for IOS");
+        btadapter.startScanningIOS(apibeaconmap);
+        // btadapter.strtScanningIos(apibeaconmap);
+        // btadapter.getDevicesList();
+      }
+
+      //btadapter.startScanning(apibeaconmap);
+      setState(() {
+        resBeacons = apibeaconmap;
+      });
+      // print("printing bin");
+      // btadapter.printbin();
+      late Timer _timer;
+      //please wait
+      //searching your location
+
+      speak("Please wait");
+      speak("Searching your location. .");
+
+      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
+        localizeUser();
+
+        print("localize user is calling itself.....");
+        _timer.cancel();
+      });
+    });
+
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
 
     List<String> IDS = [];
-
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
-    try {
+    try{
       await outBuilding().outbuilding(IDS).then((out) async {
         if (out != null) {
           buildingAllApi.outdoorID = out!.data!.campusId!;
@@ -1725,9 +1722,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               geo.LatLng(0.0, 0.0);
         }
       });
-    } catch (e) {
+    }catch(e){
       print("Out Building API Error");
     }
+
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       IDS.add(key);
@@ -1735,25 +1733,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
           if (key == buildingAllApi.outdoorID) {
-            building.floorDimenssion[buildingAllApi.outdoorID] = {
-              1: [
-                int.parse(value.patchData!.length!),
-                int.parse(value.patchData!.breadth!)
-              ]
-            };
             createotherPatch(value);
-          } else if (buildingAllApi.outdoorID == "") {
-            createotherPatch(value);
-          }
+          } else {}
         });
 
-
-        try {
-          await waypointapi().fetchwaypoint(id: key).then((value) {
+        try{
+          await waypointapi().fetchwaypoint(id: key).then((value){
             Building.waypoint[key] = value;
           });
-        } catch (e) {
-          print("wayPoint API ERROR");
+        }catch(e){
+          print("wayPoint API ERROR ");
         }
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
@@ -1814,22 +1803,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
 
+        await beaconapi().fetchBeaconData(key).then((value) {
+          building.beacondata?.addAll(value);
 
-
-
-
-
-        buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
-        await Future.delayed(Duration(seconds: 3));
-        setState(() {
-          isLoading = false;
-          isBlueToothLoading = false;
-          print("isBlueToothLoading");
-          print(isBlueToothLoading);
         });
-        print("Circular progress stop");
       }
-    });}
+    });
+
+    buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
+    await Future.delayed(Duration(seconds: 3));
+    setState(() {
+      isLoading = false;
+      isBlueToothLoading = false;
+      print("isBlueToothLoading");
+      print(isBlueToothLoading);
+    });
+    print("Circular progress stop");
+  }
+
 
   void _updateCircle() {
     final Circle updatedCircle = Circle(

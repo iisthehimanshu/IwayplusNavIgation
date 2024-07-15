@@ -293,12 +293,9 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                       top: 20, left: 16, right: 16),
                                   height: 58,
                                   child: Container(
-                                      padding: EdgeInsets.only(left: 12),
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: outlineheaderColor,
-                                            width: 2),
+
                                         color: Color(0xfffffff),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -316,12 +313,34 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                   controller: mailEditingController,
                                                   obscureText: _obscureText, // Flag to show/hide password
                                                   decoration: InputDecoration(
-                                                    hintText: 'New Password',
+                                                    //hintText: 'New Password',
+                                                    labelText: "New Password",
+                                                    labelStyle: TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff49454f),
+                                                      height: 16/12,
+                                                    ),
                                                     hintStyle: TextStyle(
                                                       fontFamily: 'Roboto',
                                                       fontSize: 14,
                                                       fontWeight: FontWeight.w400,
                                                       color: Color(0xffbdbdbd),
+                                                    ),
+                                                    focusedBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(6),
+                                                        borderSide: BorderSide(
+                                                          color: Color(0xff24b9b0),
+                                                          width: 2,
+                                                        )
+                                                    ),
+                                                    enabledBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      borderSide: BorderSide(
+                                                        color: Colors.black,
+                                                        width: 2,
+                                                      ),
                                                     ),
                                                     border: InputBorder.none,
                                                     suffixIcon: IconButton(
@@ -353,13 +372,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                 margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                 height: 58,
                                 child: Container(
-                                  padding: EdgeInsets.only(left: 12),
                                   width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: outlineheaderColor, width: 2),
-                                    color: Color(0xfffffff),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
+
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -372,18 +386,43 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                               controller: confirmmailEditingController,
                                               obscureText: _obscureText2,
                                               decoration: InputDecoration(
-                                                hintText: 'Confirm Password',
+                                                //hintText: 'Confirm Password',
+                                                labelText: "Confirm Password",
+                                                labelStyle: TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xff49454f),
+                                                  height: 16/12,
+                                                ),
                                                 hintStyle: TextStyle(
                                                   fontFamily: 'Roboto',
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w400,
                                                   color: Color(0xffbdbdbd),
                                                 ),
+                                                focusedBorder: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    borderSide: BorderSide(
+                                                      color: Color(0xff24b9b0),
+                                                      width: 2,
+                                                    )
+                                                ),
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 2,
+                                                  ),
+                                                ),
                                                 border: InputBorder.none,
                                                 suffixIcon: IconButton(
-                                                  icon: Icon(
-                                                    _obscureText2 ? Icons.visibility_off:Icons.visibility ,
-                                                    color: Colors.grey,
+                                                  icon: Semantics(
+                                                    label: _obscureText2? "View Password" : "Hide Password",
+                                                    child: Icon(
+                                                      _obscureText2 ? Icons.visibility_off:Icons.visibility ,
+                                                      color: Colors.grey,
+                                                    ),
                                                   ),
                                                   onPressed: () {
                                                     setState(() {

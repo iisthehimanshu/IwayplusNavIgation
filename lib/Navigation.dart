@@ -4520,6 +4520,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 bottomLeft: Radius.circular(10.0),
                 bottomRight: Radius.circular(10.0),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes the position of the shadow
+                ),
+              ],
               color: Colors.white,
 
             ),
@@ -4708,9 +4716,51 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     ],
                   ),
                   PathState.sourceFloor != PathState.destinationFloor?Container(
-                    margin: EdgeInsets.only(top: 8,left: 42),
+                    margin: EdgeInsets.only(top: 8,left: 0),
                     child: Row(
-                      children: [
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Container(
+                        width: 112,
+                        margin: EdgeInsets.only(left: 8),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              PathState.accessiblePath = "Stairs";
+                              PathState.clearforaccessiblepath();
+                              building.landmarkdata!.then((value){
+                                try {
+                                  calculateroute(value.landmarksMap!,
+                                      accessibleby: "Stairs");
+                                }catch(e){
+
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="Stairs"?Color(0xff24B9B0):Colors.white,
+                                elevation: 0// Set the text color to black
+                            ),
+                            child: Center(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.stairs,color: PathState.accessiblePath == "Stairs"?Colors.white:Color(0xff24B9B0),),
+                                  Container(
+                                    margin: EdgeInsets.only(left: 3),
+                                    child: Text(
+                                      "Stairs",
+                                      style: TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.black,
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
                         Container(
                           width: 110,
                           margin: EdgeInsets.only(left: 8),
@@ -4728,13 +4778,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Lifts"?Colors.blueAccent:Colors.white,
+                                foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="Lifts"?Color(0xff24B9B0):Colors.white,
                                 elevation: 0// Set the text color to black
                               ),
                               child: Center(
                                 child: Row(
                                   children: [
-                                    Icon(Icons.elevator,color: PathState.accessiblePath == "Lifts"?Colors.white:Colors.blueAccent,),
+                                    Icon(Icons.elevator,color: PathState.accessiblePath == "Lifts"?Colors.white:Color(0xff24B9B0),),
                                     Container(
                                       margin: EdgeInsets.only(left: 3),
                                       child: Text(
@@ -4744,48 +4794,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                           fontSize: 14,
                                           fontWeight: FontWeight.w400,
                                           color: PathState.accessiblePath == "Lifts"?Colors.white:Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                        Container(
-                          width: 112,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "Stairs";
-                                PathState.clearforaccessiblepath();
-                                building.landmarkdata!.then((value){
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "Stairs");
-                                  }catch(e){
-
-                                  }
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Stairs"?Colors.blueAccent:Colors.white,
-                                  elevation: 0// Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.stairs,color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.blueAccent,),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Stairs",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.black,
                                           height: 20 / 14,
                                         ),
                                         textAlign: TextAlign.center,
@@ -4812,13 +4820,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="ramp"?Colors.blueAccent:Colors.white,
+                                  foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="ramp"?Color(0xff24B9B0):Colors.white,
                                   elevation: 0// Set the text color to black
                               ),
                               child: Center(
                                 child: Row(
                                   children: [
-                                    Icon(Icons.elevator,color: PathState.accessiblePath == "ramp"?Colors.white:Colors.blueAccent,),
+                                    Icon(Icons.stairs_rounded,color: PathState.accessiblePath == "ramp"?Colors.white:Color(0xff24B9B0),),
                                     Container(
                                       margin: EdgeInsets.only(left: 3),
                                       child: Text(
@@ -4856,7 +4864,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     color: Colors.grey,
                   ),
                 ],
-                minHeight: 163,
+                minHeight: 155,
                 maxHeight: screenHeight * 0.8,
                 panel: PathState.noPathFound?Container(
                   margin: EdgeInsets.only(top: 36),
@@ -4953,8 +4961,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                           IconButton(
                                               onPressed: () {
                                                 showMarkers();
-                                                _isBuildingPannelOpen = true;
-                                                _isRoutePanelOpen = false;
+                                                setState(() {
+                                                  _isBuildingPannelOpen = true;
+                                                  _isRoutePanelOpen = false;
+                                                });
                                                 selectedroomMarker.clear();
                                                 pathMarkers.clear();
 

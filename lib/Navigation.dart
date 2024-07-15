@@ -4442,172 +4442,202 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       child: Stack(
         children: [
           Container(
-            margin: EdgeInsets.only(left: 16, top: 16),
-            height: 119,
-            width: screenWidth - 32,
+            height: 219,
+            width: screenWidth,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes the position of the shadow
-                ),
-              ],
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0),
+              ),
+              color: Colors.blue,
+
             ),
             child: Semantics(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  Container(
-                    child: IconButton(
-                        onPressed: () {
-                          showMarkers();
-                          List<double> mvalues = tools.localtoglobal(
-                              PathState.destinationX, PathState.destinationY);
-                          _googleMapController.animateCamera(
-                            CameraUpdate.newLatLngZoom(
-                              LatLng(mvalues[0], mvalues[1]),
-                              20, // Specify your custom zoom level here
-                            ),
-                          );
-                          _isRoutePanelOpen = false;
-                          _isLandmarkPanelOpen = true;
-                          PathState = pathState.withValues(
-                              -1, -1, -1, -1, -1, -1, null, 0);
-                          PathState.path.clear();
-                          PathState.sourcePolyID = "";
-                          PathState.destinationPolyID = "";
-                          singleroute.clear();
-                          realWorldPath.clear();
-                          _isBuildingPannelOpen = true;
-                          if (user.isnavigating == false) {
-                            clearPathVariables();
-                          }
-                          setState(() {
-                            Marker? temp = selectedroomMarker[
-                            buildingAllApi.getStoredString()]
-                                ?.first;
-
-                            selectedroomMarker.clear();
-                            selectedroomMarker[buildingAllApi.getStoredString()]
-                                ?.add(temp!);
-                            pathMarkers.clear();
-                          });
-                        },
-                        icon: Semantics(
-                          label: "Back",
-                          onDidGainAccessibilityFocus: closeRoutePannel,
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 24,
-                          ),
-                        )),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        InkWell(
-                          child: Container(
-                            height: 40,
-                            width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                            padding:
-                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                            child: Text(
-                              PathState.sourceName,
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff24b9b0),
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(
-                                      hintText: 'Source location',
-                                      voiceInputEnabled: false,
-                                    ))).then((value) {
-                              onSourceVenueClicked(value);
-                            });
-                          },
-                        ),
-                        InkWell(
-                          child: Container(
-                            height: 40,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                            padding:
-                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                            child: Semantics(
-                              onDidGainAccessibilityFocus: closeRoutePannel,
-                              child: Text(
-                                PathState.destinationName,
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff282828),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        child: IconButton(
+                            onPressed: () {
+                              showMarkers();
+                              List<double> mvalues = tools.localtoglobal(
+                                  PathState.destinationX, PathState.destinationY);
+                              _googleMapController.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  LatLng(mvalues[0], mvalues[1]),
+                                  20, // Specify your custom zoom level here
                                 ),
-                                textAlign: TextAlign.left,
+                              );
+                              _isRoutePanelOpen = false;
+                              _isLandmarkPanelOpen = true;
+                              PathState = pathState.withValues(
+                                  -1, -1, -1, -1, -1, -1, null, 0);
+                              PathState.path.clear();
+                              PathState.sourcePolyID = "";
+                              PathState.destinationPolyID = "";
+                              singleroute.clear();
+                              realWorldPath.clear();
+                              _isBuildingPannelOpen = true;
+                              if (user.isnavigating == false) {
+                                clearPathVariables();
+                              }
+                              setState(() {
+                                Marker? temp = selectedroomMarker[
+                                buildingAllApi.getStoredString()]
+                                    ?.first;
+
+                                selectedroomMarker.clear();
+                                selectedroomMarker[buildingAllApi.getStoredString()]
+                                    ?.add(temp!);
+                                pathMarkers.clear();
+                              });
+                            },
+                            icon: Semantics(
+                              label: "Back",
+                              onDidGainAccessibilityFocus: closeRoutePannel,
+                              child: Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 24,
                               ),
+                            )),
+                      ),
+                      Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(top: 12, right: 5),
+                                width: 15.0,
+                                height: 15.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 12, right: 5),
+                                width: 5.0,
+                                height: 5.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 28,right: 5),
+                              child: Icon(Icons.location_on_rounded,color: Colors.red,size: 22,))
+                        ],
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            InkWell(
+                              child: Container(
+                                height: 40,
+                                width: double.infinity,
+                                margin: EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                padding:
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                child: Text(
+                                  PathState.sourceName,
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff24b9b0),
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DestinationSearchPage(
+                                          hintText: 'Source location',
+                                          voiceInputEnabled: false,
+                                        ))).then((value) {
+                                  onSourceVenueClicked(value);
+                                });
+                              },
                             ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(
-                                      hintText: 'Destination location',
-                                      voiceInputEnabled: false,
-                                    ))).then((value) {
-                              _isBuildingPannelOpen = false;
-                              onDestinationVenueClicked(value);
-                            });
-                          },
+                            InkWell(
+                              child: Container(
+                                height: 40,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                padding:
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                child: Semantics(
+                                  onDidGainAccessibilityFocus: closeRoutePannel,
+                                  child: Text(
+                                    PathState.destinationName,
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff282828),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DestinationSearchPage(
+                                          hintText: 'Destination location',
+                                          voiceInputEnabled: false,
+                                        ))).then((value) {
+                                  _isBuildingPannelOpen = false;
+                                  onDestinationVenueClicked(value);
+                                });
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Container(
+                        child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                PathState.swap();
+                                PathState.path.clear();
+                                pathMarkers.clear();
+                                PathState.directions.clear();
+                                if (user.isnavigating == false) {
+                                  clearPathVariables();
+                                }
+                                building.landmarkdata!.then((value) {
+                                  calculateroute(value.landmarksMap!);
+                                });
+                              });
+                            },
+                            icon: Semantics(
+                              label: "Swap location",
+                              child: Icon(
+                                Icons.swap_vert_circle_outlined,
+                                size: 24,
+                              ),
+                            )),
+                      ),
+                    ],
                   ),
-                  Container(
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            PathState.swap();
-                            PathState.path.clear();
-                            pathMarkers.clear();
-                            PathState.directions.clear();
-                            if (user.isnavigating == false) {
-                              clearPathVariables();
-                            }
-                            building.landmarkdata!.then((value) {
-                              calculateroute(value.landmarksMap!);
-                            });
-                          });
-                        },
-                        icon: Semantics(
-                          label: "Swap location",
-                          child: Icon(
-                            Icons.swap_vert_circle_outlined,
-                            size: 24,
-                          ),
-                        )),
-                  ),
+
                 ],
               ),
             ),

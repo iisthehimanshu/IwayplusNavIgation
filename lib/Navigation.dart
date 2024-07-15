@@ -21,6 +21,7 @@ import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/accessiblepathchip.dart';
+import 'package:iwaymaps/Exceptionthrow.dart';
 import 'package:iwaymaps/testfile.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -3671,28 +3672,68 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return (y * fl) + x;
   }
 
-  List<CommonLifts> findCommonLifts(
+  List<CommonConnection> findCommonLifts(
       Landmarks landmark1, Landmarks landmark2,String accessibleby) {
-    List<CommonLifts> commonLifts = [];
-
-    for (var lift1 in list1) {
-      for (var lift2 in list2) {
-        if (lift1.name == lift2.name) {
-          // Create a new Lifts object with x and y values from both input lists
-          print(
-              "name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
-          commonLifts.add(CommonLifts(
-              name: lift1.name,
-              distance: lift1.distance,
-              x1: lift1.x,
-              y1: lift1.y,
-              x2: lift2.x,
-              y2: lift2.y));
-          break;
+    List<CommonConnection> commonLifts = [];
+    print("accessibleby recieved $accessibleby");
+    if(accessibleby == "Lifts"){
+      print("inside lifts");
+      for (var lift1 in landmark1.lifts!) {
+        for (var lift2 in landmark2.lifts!) {
+          if (lift1.name == lift2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
+            commonLifts.add(CommonConnection(
+                name: lift1.name,
+                distance: lift1.distance,
+                x1: lift1.x,
+                y1: lift1.y,
+                x2: lift2.x,
+                y2: lift2.y));
+            break;
+          }
+        }
+      }
+    }else if (accessibleby == "Stairs"){
+      print("inside stairs");
+      for (var stair1 in landmark1.stairs!) {
+        for (var stair2 in landmark2.stairs!) {
+          if (stair1.name == stair2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${stair1.name} (${stair1.x},${stair1.y}) && (${stair2.x},${stair2.y})");
+            commonLifts.add(CommonConnection(
+                name: stair1.name,
+                distance: stair1.distance,
+                x1: stair1.x,
+                y1: stair1.y,
+                x2: stair2.x,
+                y2: stair2.y));
+            break;
+          }
+        }
+      }
+    }else if (accessibleby == "ramp"){
+      print("inside stairs");
+      for (var ramp1 in landmark1.others!) {
+        for (var ramp2 in landmark2.others!) {
+          if (ramp1.name == ramp2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${ramp1.name} (${ramp1.x},${ramp1.y}) && (${ramp2.x},${ramp2.y})");
+            commonLifts.add(CommonConnection(
+                name: ramp1.name,
+                distance: ramp1.distance,
+                x1: ramp1.x,
+                y1: ramp1.y,
+                x2: ramp2.x,
+                y2: ramp2.y));
+            break;
+          }
         }
       }
     }
-
     // Sort the commonLifts based on distance
     commonLifts.sort((a, b) => (a.distance ?? 0).compareTo(b.distance ?? 0));
     return commonLifts;
@@ -3701,6 +3742,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{String accessibleby = "Lifts"}) async {
+
     circles.clear();
     singleroute.clear();
     realWorldPath.clear();
@@ -3748,9 +3790,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print(PathState.sourcePolyID!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
-        List<CommonLifts> commonlifts = findCommonLifts(
+
+        List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
-            landmarksMap[PathState.destinationPolyID]!);
+            landmarksMap[PathState.destinationPolyID]!,accessibleby);
+
+        if(commonlifts.isEmpty){
+          setState(() {
+            PathState.noPathFound = true;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+          return;
+        }
 
         print("commonlifts $commonlifts");
 
@@ -3810,8 +3862,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               false,true,
               bid: PathState.destinationBid);
         } else if (element.floor != PathState.destinationFloor) {
-          List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
-              landmarksMap[PathState.destinationPolyID]!.lifts!);
+          List<dynamic> commonlifts = findCommonLifts(element,
+              landmarksMap[PathState.destinationPolyID]!,accessibleby);
+          if(commonlifts.isEmpty){
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
           await fetchroute(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
@@ -3865,8 +3925,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               true,false,
               bid: PathState.sourceBid);
         } else if (PathState.sourceFloor != element2.floor) {
-          List<CommonLifts> commonlifts = findCommonLifts(
-              landmarksMap[PathState.sourcePolyID]!.lifts!, element2.lifts!);
+          List<dynamic> commonlifts = findCommonLifts(
+              landmarksMap[PathState.sourcePolyID]!, element2,accessibleby);
+          if(commonlifts.isEmpty){
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
 
           await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
               element2.coordinateX!, element2.coordinateY!, element2.floor!,
@@ -3975,6 +4043,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             "${PathState.destinationName} is $distance meter away. Click start to navigate",_currentLocale);
       }
     }
+
   }
 
   List<int> beaconCord = [];
@@ -4443,7 +4512,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       child: Stack(
         children: [
           Container(
-            height: 170,
+            height: PathState.sourceFloor != PathState.destinationFloor?170:130,
             width: screenWidth,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -4638,7 +4707,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  Container(
+                  PathState.sourceFloor != PathState.destinationFloor?Container(
                     margin: EdgeInsets.only(top: 8,left: 42),
                     child: Row(
                       children: [
@@ -4649,6 +4718,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               onPressed: () {
                                 PathState.accessiblePath = "Lifts";
                                 PathState.clearforaccessiblepath();
+                                building.landmarkdata!.then((value){
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "Lifts");
+                                  }catch(e){
+
+                                  }
+                                });
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Lifts"?Colors.blueAccent:Colors.white,
@@ -4682,6 +4759,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           child: ElevatedButton(
                               onPressed: () {
                                 PathState.accessiblePath = "Stairs";
+                                PathState.clearforaccessiblepath();
+                                building.landmarkdata!.then((value){
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "Stairs");
+                                  }catch(e){
+
+                                  }
+                                });
                               },
                               style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Stairs"?Colors.blueAccent:Colors.white,
@@ -4708,10 +4794,52 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                   ],
                                 ),
                               )),
-                        )
+                        ),
+                        Container(
+                          width: 112,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "ramp";
+                                PathState.clearforaccessiblepath();
+                                building.landmarkdata!.then((value){
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "ramp");
+                                  }catch(e){
+
+                                  }
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="ramp"?Colors.blueAccent:Colors.white,
+                                  elevation: 0// Set the text color to black
+                              ),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.elevator,color: PathState.accessiblePath == "ramp"?Colors.white:Colors.blueAccent,),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Ramp",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: PathState.accessiblePath == "ramp"?Colors.white:Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
                       ],
                     ),
-                  ),
+                  ):Container(),
 
                 ],
               ),
@@ -4729,8 +4857,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
                 ],
                 minHeight: 163,
-                maxHeight: screenHeight * 0.9,
-                panel: Semantics(
+                maxHeight: screenHeight * 0.8,
+                panel: PathState.noPathFound?Container(
+                  margin: EdgeInsets.only(top: 36),
+                  child: Column(
+                    children: [
+                      Image.asset("assets/error.png"),
+                      Text(
+                        "Can't find a way there",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff3f3f46),
+                          height: 40/14,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    ],
+                  ),
+                ):Semantics(
                   sortKey: const OrdinalSortKey(0),
                   child: Column(
                     children: [

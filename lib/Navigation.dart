@@ -20,6 +20,7 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/accessiblepathchip.dart';
 import 'package:iwaymaps/testfile.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -3671,7 +3672,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   List<CommonLifts> findCommonLifts(
-      List<la.Lifts> list1, List<la.Lifts> list2) {
+      Landmarks landmark1, Landmarks landmark2,String accessibleby) {
     List<CommonLifts> commonLifts = [];
 
     for (var lift1 in list1) {
@@ -3699,7 +3700,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
-  Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{String accessibleby = "Lifts"}) async {
     circles.clear();
     singleroute.clear();
     realWorldPath.clear();
@@ -3748,8 +3749,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
         List<CommonLifts> commonlifts = findCommonLifts(
-            landmarksMap[PathState.sourcePolyID]!.lifts!,
-            landmarksMap[PathState.destinationPolyID]!.lifts!);
+            landmarksMap[PathState.sourcePolyID]!,
+            landmarksMap[PathState.destinationPolyID]!);
 
         print("commonlifts $commonlifts");
 
@@ -4442,7 +4443,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       child: Stack(
         children: [
           Container(
-            height: 219,
+            height: 170,
             width: screenWidth,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -4450,7 +4451,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 bottomLeft: Radius.circular(10.0),
                 bottomRight: Radius.circular(10.0),
               ),
-              color: Colors.blue,
+              color: Colors.white,
 
             ),
             child: Semantics(
@@ -4636,6 +4637,80 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             )),
                       ),
                     ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8,left: 42),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 110,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "Lifts";
+                                PathState.clearforaccessiblepath();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Lifts"?Colors.blueAccent:Colors.white,
+                                elevation: 0// Set the text color to black
+                              ),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.elevator,color: PathState.accessiblePath == "Lifts"?Colors.white:Colors.blueAccent,),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Lifts",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: PathState.accessiblePath == "Lifts"?Colors.white:Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Container(
+                          width: 112,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "Stairs";
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.lightBlueAccent, backgroundColor: PathState.accessiblePath=="Stairs"?Colors.blueAccent:Colors.white,
+                                  elevation: 0// Set the text color to black
+                              ),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.stairs,color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.blueAccent,),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Stairs",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        )
+                      ],
+                    ),
                   ),
 
                 ],

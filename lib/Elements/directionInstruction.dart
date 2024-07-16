@@ -33,6 +33,9 @@ class _directionInstructionState extends State<directionInstruction> {
 
   Widget getCustomIcon(String direction,context) {
 
+    print('directionnnn');
+    print(direction);
+
     if (direction ==  LocaleData.gostraight.getString(context)) {
       return Icon(
         Icons.straight,
@@ -51,7 +54,7 @@ class _directionInstructionState extends State<directionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains(LocaleData.right.getString(context))) {
+    } else if (direction.contains(LocaleData.tright.getString(context))) {
       return Icon(
         Icons.turn_right,
         color: Colors.black,
@@ -76,7 +79,7 @@ class _directionInstructionState extends State<directionInstruction> {
         size: 32,
       );
 
-    } else if (direction.contains(LocaleData.left.getString(context))) {
+    } else if (direction.contains(LocaleData.tleft.getString(context))) {
       return Icon(
         Icons.turn_left,
         color: Colors.black,

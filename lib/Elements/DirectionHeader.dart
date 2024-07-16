@@ -185,6 +185,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   void dispose() {
+    flutterTts.cancelHandler;
     _timer.cancel();
     super.dispose();
   }

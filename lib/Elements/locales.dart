@@ -117,6 +117,17 @@ mixin LocaleData {
     'Sharp Left': tssharpleft,
     'Left': tsleft,
     'Slight Left': tsslightleft,
+    'on your Slight Right':onyourslightright,
+    'on your Sharp Right':onyoursharpright,
+    'on your Sharp Left':onyoursharpleft,
+    'on your Slight Left':onyourslightleft,
+        'on your Front':onyourfront,
+        'on your Left':onyourleft,
+        'on your Back':onyourleft,
+        'on your Right':onyourright
+
+
+
   };
 
 
@@ -153,8 +164,6 @@ mixin LocaleData {
 
 
   static String getProperty4(String propertyName,context) {
-    print("propertyName");
-    print(propertyName);
     return properties4[propertyName]!.getString(context);
   }
 

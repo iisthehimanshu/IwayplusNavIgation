@@ -42,12 +42,29 @@ mixin LocaleData {
 
   static const String straight='Straight';
   static const String right='Right';
+  static const String tright='tRight';
+  static const String tslightright= 'tSlightRight';
+  static const String tslightleft= 'tSlightLeft';
+
+
+
   static const String uturn='U Turn';
   static const String sharpleft='Sharp Left';
   static const String left='Left';
+  static const String tleft='tLeft';
   static const String slightright='Slight Right';
   static const String slightleft='Slight Left';
   static const String sharpright='Sharp Right';
+
+  static const String tsright='tsRight';
+  static const String tsuturn='tsU Turn';
+  static const String tssharpleft='tsSharp Left';
+  static const String tsleft='tsLeft';
+  static const String tsslightright='tsSlight Right';
+  static const String tsslightleft='tsSlight Left';
+  static const String tssharpright='tsSharp Right';
+  static const String hright='hRight';
+  static const String hleft='hLeft';
   static const String gostraight='Go Straight';
   static const String then='Then';
   static const String and='and';
@@ -92,6 +109,55 @@ mixin LocaleData {
  static const String turnfrm='turn from';
  static const String approaching='Approaching';
 
+  static Map<String, String> get properties => {
+    'Slight Right': tsslightright,
+    'Right': tsright,
+    'Sharp Right': tssharpright,
+    'U Turn': tsuturn,
+    'Sharp Left': tssharpleft,
+    'Left': tsleft,
+    'Slight Left': tsslightleft,
+  };
+
+
+  static String getProperty(String propertyName,context) {
+    return properties[propertyName]!.getString(context);
+  }
+
+  static Map<String, String> get properties2 => {
+    'Right':hright,
+    'Left':hleft,
+  };
+
+
+  static String getProperty2(String propertyName,context) {
+    return properties2[propertyName]!.getString(context);
+  }
+
+  static Map<String, String> get properties3 => {
+    'Right':right,
+    'Left':left,
+  };
+
+
+  static String getProperty3(String propertyName,context) {
+    return properties3[propertyName]!.getString(context);
+  }
+  static Map<String, String> get properties4 => {
+    'Right':tright,
+    'Left':tleft,
+    'Slight Left':tslightleft,
+    'Slight Right':tslightright,
+    'Straight':straight
+  };
+
+
+  static String getProperty4(String propertyName,context) {
+    print("propertyName");
+    print(propertyName);
+    return properties4[propertyName]!.getString(context);
+  }
+
 
 
 
@@ -125,6 +191,7 @@ mixin LocaleData {
     '5 to 6 Feet':'5 to 6 Feet',
     '> 6 Feet':'> 6 Feet',
    'Straight':'Straight',
+
    'Right':'Right',
    'U Turn':'U Turn',
    'Sharp Left':'Sharp Left',
@@ -132,6 +199,20 @@ mixin LocaleData {
    'Slight Right':'Slight Right',
    'Slight Left':'Slight Left',
    'Sharp Right':'Sharp Right',
+
+    'tsRight':'turn right and go straight',
+    'tsU Turn':'turn around and go straight',
+    'tsSharp Left':'turn sharp left and go straight',
+    'tsLeft':'turn left and go straight',
+    'tsSlight Right':'turn slight right and go straight',
+    'tsSlight Left':'turn slight left and go straight',
+    'tsSharp Right':'turn sharp right and go straight',
+
+    'tRight':'Right',
+    'tLeft':'Left',
+    'tSlightRight':'Slight Right',
+      'tSlightLeft':'Slight Left',
+
     'Go Straight':'Go Straight',
     'Then': 'Then',
     'and': 'and',
@@ -174,7 +255,9 @@ mixin LocaleData {
     'Explore Mode Enabled' : 'Explore Mode Enabled',
     'Direction':'Direction',
     'turn from':'turn from',
-    'Approaching': 'Approaching'
+    'Approaching': 'Approaching',
+    'hRight':'',
+    'hLeft':'',
 
 
 
@@ -213,29 +296,48 @@ mixin LocaleData {
     '5 to 6 Feet': '5 से 6 फीट',
     '> 6 Feet': '> 6 फीट',
     'Straight': 'सीधे',
-    'Right': 'दाएं',
+    'Right': '',
     'U Turn': 'यू टर्न',
     'Sharp Left': 'तेज़ बाएं',
-    'Left': 'बाएं',
+    'Left': '',
     'Slight Right': 'हल्का दायें',
     'Slight Left': 'हल्का बाएं',
     'Sharp Right': 'तेज़ दाएं',
+
+    'hRight':'से दाईं ओर मुड़ें',
+    'hLeft':'से बायीं ओर मुड़ें',
+
+    'tRight':'दाईं ओर मुड़ें',
+    'tLeft':'बायीं ओर मुड़ें',
+
+
+    'tSlightRight':'हल्का दायें ओर मुड़ें',
+      'tSlightLeft':'हल्का बाएं ओर मुड़े',
+
+    'tsRight': 'दाएँ मुड़ें और सीधे जाएँ',
+    'tsU Turn': 'उल्टा घूमे और सीधा जाएँ',
+    'tsSharp Left': 'एकदम बाएँ मुड़ें और सीधे जाएँ',
+    'tsLeft': 'बाएँ मुड़ें और सीधे जाएँ',
+    'tsSlight Right': 'थोड़ा दाएं मुड़ें और सीधे जाएं',
+    'tsSlight Left': 'थोड़ा बाएँ मुड़ें और सीधे जाएँ',
+    'tsSharp Right': 'एकदम दाहिनी ओर मुड़ें और सीधे जाएं',
+
     'Then': 'फिर',
     'Go Straight': 'सीधे जाएं',
     'and': 'और',
-    'Turn': 'मूड़े',
+    'Turn': '',
     'Steps': 'कदम',
     'will be on your front': 'आपके सामने होगा',
-    'on your Front': 'आपके सामने',
-    'on your Right': 'आपके दाएँ',
-    'on your Left': 'आपके बाएँ',
-    'on your Back': 'आपके पीछे',
-    'will be': 'होगा',
+    'on your Front': 'आपके सामने है',
+    'on your Right': 'आपके दाएँ ओर है',
+    'on your Left': 'आपके बाएँ ओर है',
+    'on your Back': 'आपके पीछे है',
+    'will be': '',
     'Your current location':'आपकी वर्तमान स्थिति',
     'Lift':'लिफ्ट',
     'Floor' :'मंजिल',
     'go to': 'जाओ',
-    'from': 'से',
+    'from': '',
     'Exit': 'निकास',
     'Start' :'प्राम्भ करे',
     'min': 'मिनट',

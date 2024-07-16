@@ -22,7 +22,10 @@ class _directionInstructionState extends State<directionInstruction> {
   @override
   void initState() {
 
+
     super.initState();
+    print("widget.direction");
+    print(widget.direction);
     setState(() {
       icon = getCustomIcon(widget.direction,widget.context);
     });

@@ -297,26 +297,26 @@ class tools {
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
-      return (currentDir == 'Natural Direction') ?  LocaleData.straight.getString(context): "12 o'clock";
+      return (currentDir == 'Natural Direction') ? "Straight" : "12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
-          ?  LocaleData.slightright.getString(context)
+          ? "Slight Right"
           : "1-2 o'clock";
     } else if (angle > 67.5 && angle <= 112.5) {
-      return (currentDir == 'Natural Direction') ?  LocaleData.right.getString(context): "3 o'clock";
+      return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
     } else if (angle > 112.5 && angle <= 157.5) {
       return (currentDir == 'Natural Direction')
-          ?  LocaleData.sharpright.getString(context)
+          ? "Sharp Right"
           : "4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
-      return (currentDir == 'Natural Direction') ?  LocaleData.uturn.getString(context): "6 o'clock";
+      return (currentDir == 'Natural Direction') ? "U Turn" : "6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
-      return (currentDir == 'Natural Direction') ?  LocaleData.sharpleft.getString(context) : "7-8 o'clock";
+      return (currentDir == 'Natural Direction') ? "Sharp Left" : "7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
-      return (currentDir == 'Natural Direction') ?  LocaleData.left.getString(context) : "9 o'clock";
+      return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
     } else if (angle > 292.5 && angle <= 337.5) {
       return (currentDir == 'Natural Direction')
-          ?  LocaleData.slightleft.getString(context)
+          ? "Slight Left"
           : "10-11 o'clock";
     } else {
       return "None";

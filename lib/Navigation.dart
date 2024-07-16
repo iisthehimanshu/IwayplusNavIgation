@@ -1705,7 +1705,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //searching your location
 
       speak("Please wait",_currentLocale);
-      speak("Searching your location. .",_currentLocale);
+      speak("Your current location is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -3794,6 +3794,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         print(PathState.sourcePolyID!);
+        print(landmarksMap[PathState.sourcePolyID]!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
 
@@ -4159,7 +4160,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(direction(-1, "Take ${liftName}", null, null,
+          directions.add(direction(-1, "${LocaleData.take.getString(context)} ${liftName}", null, null,
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
@@ -4451,7 +4452,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
                     ? '${LocaleData.gostraight.getString(context)}'
-                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
+                    : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(PathState.directions[i].turnDirection!,context)} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!} ${LocaleData.getProperty2(PathState.directions[i].turnDirection!,context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
                     .ceil()
                     .toString(),context: context));
@@ -4467,7 +4468,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
                     ? '${LocaleData.gostraight.getString(context)}'
-                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
+                    : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty4(PathState.directions[i].turnDirection!,context)}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance:
 
                 (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
@@ -7272,7 +7273,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              "${user.locationName}, Floor ${user.floor}",
+                              "${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 18,

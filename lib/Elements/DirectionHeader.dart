@@ -884,7 +884,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(ShowsumMap.toString()),
+                  // Text(ShowsumMap.toString()),
                 ],
               ),
             ),

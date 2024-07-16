@@ -3200,41 +3200,47 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: Container(
-                        child: Text(
-                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
+                        child: Semantics(
+                          excludeSemantics: true,
+                          child: Text(
+                            snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                .name ??
+                                snapshot
+                                    .data!
+                                    .landmarksMap![building.selectedLandmarkID]!
+                                    .element!
+                                    .subType!,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
                           ),
                         )),
                   ),
                   Container(
                     height: 48,
                     width: 47,
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          _polygon.clear();
-                          circles.clear();
-                          showMarkers();
-                          toggleLandmarkPanel();
-                          _isBuildingPannelOpen = true;
-                        },
-                        icon: Semantics(
-                          label: "Close",
-                          child: Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.black,
-                            size: 24,
+                    child: Semantics(
+                      excludeSemantics: true,
+                      child: Center(
+                        child: IconButton(
+                          onPressed: () {
+                            _polygon.clear();
+                            circles.clear();
+                            showMarkers();
+                            toggleLandmarkPanel();
+                            _isBuildingPannelOpen = true;
+                          },
+                          icon: Semantics(
+                            label: "Close",
+                            child: Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),
@@ -4337,10 +4343,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             (index) => index);
 
     return Semantics(
-      excludeSemantics: excludeFloorSemanticWork,
+      excludeSemantics:_isnavigationPannelOpen || _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
       child: Container(
         height: 300,
-        width: 100,
+        width: 60,
         child: ListView.builder(
             itemCount:
             building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -4405,6 +4411,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
+    exploreModeSemanticEnable = true;
+    excludeFloorSemanticWork = true;
+    // excludeFloorSemanticWorkchange();
     setState(() {
       semanticShouldBeExcluded = true;
     });
@@ -4997,7 +5006,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 fitPolygonInScreen(patch.first);
                                               },
                                               icon: Semantics(
-                                                label: "Close",
+                                                label: "Close Navigation",
                                                 child: Icon(
                                                   Icons.cancel_outlined,
                                                   size: 25,
@@ -7787,6 +7796,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
+  bool exploreModeSemanticEnable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -7996,12 +8006,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     SizedBox(height: 28.0),
 
                     DebugToggle.Slider?Text("${user.theta}"):Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "buildingnumber ${user.buildingNumber} \n"
-                        "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "buildingnumber ${user.buildingNumber} \n"
+                    //     "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
                     DebugToggle.Slider?Slider(
                         value: user.theta,
                         min: -180,
@@ -8127,6 +8137,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     // ),
 
                     Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
                       child: FloatingActionButton(
                         onPressed: () async {
 
@@ -8187,51 +8198,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 28.0),
 
-                    !user.isnavigating?FloatingActionButton(
-                      onPressed: () async {
-                        if (user.initialallyLocalised) {
-                          setState(() {
-                            if (isLiveLocalizing) {
-                              isLiveLocalizing = false;
-                              HelperClass.showToast(
-                                  "Explore mode is disabled");
-                              _exploreModeTimer!.cancel();
-                              _isExploreModePannelOpen = false;
-                              _isBuildingPannelOpen = true;
-                              lastBeaconValue = "";
-                            } else {
-                              speak("Explore Mode Enabled",_currentLocale);
-                              isLiveLocalizing = true;
-                              HelperClass.showToast(
-                                  "Explore mode enabled");
-                              _exploreModeTimer =
-                                  Timer.periodic(
-                                      Duration(
-                                          milliseconds: 5000),
-                                          (timer) async {
-                                        btadapter
-                                            .startScanning(resBeacons);
-                                        Future.delayed(Duration(
-                                            milliseconds: 2000))
-                                            .then((value) => {
-                                          realTimeReLocalizeUser(
-                                              resBeacons)
-                                          // listenToBin()
+                    !user.isnavigating?Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              if (isLiveLocalizing) {
+                                isLiveLocalizing = false;
+                                HelperClass.showToast(
+                                    "Explore mode is disabled");
+                                _exploreModeTimer!.cancel();
+                                _isExploreModePannelOpen = false;
+                                _isBuildingPannelOpen = true;
+                                lastBeaconValue = "";
+                              } else {
+                                speak("Explore Mode Enabled",_currentLocale);
+                                isLiveLocalizing = true;
+                                HelperClass.showToast(
+                                    "Explore mode enabled");
+                                _exploreModeTimer =
+                                    Timer.periodic(
+                                        Duration(
+                                            milliseconds: 5000),
+                                            (timer) async {
+                                          btadapter
+                                              .startScanning(resBeacons);
+                                          Future.delayed(Duration(
+                                              milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(
+                                                resBeacons)
+                                            // listenToBin()
+                                          });
                                         });
-                                      });
-                              _isBuildingPannelOpen = false;
-                              _isExploreModePannelOpen = true;
-                            }
-                          });
-                        }
-                      },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                _isBuildingPannelOpen = false;
+                                _isExploreModePannelOpen = true;
+                              }
+                            });
+                          }
+                        },
+                        child: Semantics(
+                          label: "Explore Mode",
+                          child: SvgPicture.asset(
+                            "assets/Navigation_RTLIcon.svg",
+                            // color:
+                            // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                          ),
+                        ),
+                        backgroundColor: Color(
+                            0xff24B9B0), // Set the background color of the FAB
                       ),
-                      backgroundColor: Color(
-                          0xff24B9B0), // Set the background color of the FAB
                     )
                         : Container(), // Adjust the height as needed// Adjust the height as needed
                   ],

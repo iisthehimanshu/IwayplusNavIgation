@@ -89,6 +89,10 @@ dependencies:
   translator: ^1.0.0
 
 
+  test: ^1.16.0
+  mockito: ^5.1.0
+
+
 
 
 dev_dependencies:

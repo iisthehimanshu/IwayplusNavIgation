@@ -12,6 +12,7 @@ import 'package:lottie/lottie.dart' as lot;
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import 'CreateNewPassword.dart';
+import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignUpAPI.dart';
 
 class VerifyYourAccount extends StatefulWidget {
@@ -232,7 +233,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
                                   child: Text(
-                                    "Please enter the verification code we’ve sent you on ${finalSendingEmailORPhone}",
+                                    "Please enter the verification code we’ve sent on ${isNumeric(finalSendingEmailORPhone) ? "your phone number" : finalSendingEmailORPhone }",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 16,
@@ -269,35 +270,56 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                 Container(
                                     margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                     height: 58,
-                                    padding: EdgeInsets.only(left: 12),
                                     width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: outlineheaderColor, width: 2),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+
                                     child: Semantics(
                                       label: "Enter 4 digit OTP",
                                       child: ExcludeSemantics(
                                         child: TextFormField(
+
+
                                           focusNode: _focusNode1,
                                           keyboardType: TextInputType.number,
                                           inputFormatters: <TextInputFormatter>[
-                                            FilteringTextInputFormatter.digitsOnly
+                                            FilteringTextInputFormatter.digitsOnly,
+
                                           ],
                                           controller: OTPEditingController,
                                           decoration: InputDecoration(
-                                              hintText: 'OTP',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
+                                              labelText: 'OTP',
+                                              labelStyle: TextStyle(
+                                                fontFamily: "Roboto",
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                                color: Color(0xff49454f),
+                                                height: 16/12,
+                                              ),
+                                              hintStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff49454f),
+                                                height: 24/16,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderSide: BorderSide(
+                                                    color: Color(0xff24b9b0),
+                                                    width: 2,
+                                                  )
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                                borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 2,
+                                                ),
                                               ),
                                               border: InputBorder.none
                                           ),
                                           onChanged: (value) {
                                             OTPFieldListner();
+
                                             outlineheaderColorForPass = new Color(0xff49454f);
                                             outlineheaderColorForName = new Color(0xff49454f);
                                           },
@@ -321,25 +343,35 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                     ),
                                   ),
                                 ),
-                                Container(
-                                    alignment: Alignment.topLeft,
-                                    margin: EdgeInsets.only(top: 4,right: 26),
-                                    child: Row(
-                                      children: [
-                                        Spacer(),
-                                        Text(
-                                          timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff000000),
-                                            height: 23/16,
+                                InkWell(
+                                  onTap: (){
+                                    timeLeft==0? SignInAPI.sendOtpForgetPassword(widget.userEmailOrPhone): ();
+
+                                    setState(() {
+                                      timeLeft = 59;
+                                      startCountDown();
+                                    });
+                                  },
+                                  child: Container(
+                                      alignment: Alignment.topLeft,
+                                      margin: EdgeInsets.only(top: 4,right: 26),
+                                      child: Row(
+                                        children: [
+                                          Spacer(),
+                                          Text(
+                                            timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff000000),
+                                              height: 23/16,
+                                            ),
+                                            textAlign: TextAlign.left,
                                           ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      ],
-                                    )
+                                        ],
+                                      )
+                                  ),
                                 ),
                                 Container(
                                     margin: EdgeInsets.only(top: 20,right: 16,left: 16),

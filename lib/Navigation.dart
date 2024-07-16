@@ -20,6 +20,8 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/accessiblepathchip.dart';
+import 'package:iwaymaps/Exceptionthrow.dart';
 import 'package:iwaymaps/testfile.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -1020,6 +1022,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         await building.landmarkdata!.then((value) {
           nearestLandInfomation = tools.localizefindNearbyLandmark(
               apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+          if(nearestLandInfomation != null){
+
+            user.nearestLandmark = nearestLandInfomation!.properties!.polyId!;
+            print("not null${user.nearestLandmark}");
+          }
+
         });
       } catch (e) {
         print("inside catch");
@@ -1376,7 +1384,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       PathState.sourceFloor = user.floor;
-      PathState.sourcePolyID = user.key;
+      print("not null ${user.nearestLandmark} ${user.key}");
+      PathState.sourcePolyID = user.nearestLandmark??user.key;
       PathState.sourceName =
       "Your current location";
       building.landmarkdata!.then((value) async {
@@ -1868,7 +1877,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   String nearestLandmarkToBeacon = "";
   String nearestLandmarkToMacid = "";
 
-  nearestLandInfo? nearestLandInfomation;
+  Landmarks? nearestLandInfomation;
   String nearestBeacon = "";
 
   Future<void> localizeUser() async {
@@ -3191,41 +3200,47 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: Container(
-                        child: Text(
-                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
+                        child: Semantics(
+                          excludeSemantics: true,
+                          child: Text(
+                            snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                .name ??
+                                snapshot
+                                    .data!
+                                    .landmarksMap![building.selectedLandmarkID]!
+                                    .element!
+                                    .subType!,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
                           ),
                         )),
                   ),
                   Container(
                     height: 48,
                     width: 47,
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          _polygon.clear();
-                          circles.clear();
-                          showMarkers();
-                          toggleLandmarkPanel();
-                          _isBuildingPannelOpen = true;
-                        },
-                        icon: Semantics(
-                          label: "Close",
-                          child: Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.black,
-                            size: 24,
+                    child: Semantics(
+                      excludeSemantics: true,
+                      child: Center(
+                        child: IconButton(
+                          onPressed: () {
+                            _polygon.clear();
+                            circles.clear();
+                            showMarkers();
+                            toggleLandmarkPanel();
+                            _isBuildingPannelOpen = true;
+                          },
+                          icon: Semantics(
+                            label: "Close",
+                            child: Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),
@@ -3373,7 +3388,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               PathState.sourceX = user.coordX;
                               PathState.sourceY = user.coordY;
                               PathState.sourceFloor = user.floor;
-                              PathState.sourcePolyID = user.key;
+                              PathState.sourcePolyID = user.nearestLandmark??user.key;
                               print("object ${PathState.sourcePolyID}");
                               PathState.sourceName = "${LocaleData.yourcurrentloc.getString(context)}";
                               PathState.destinationPolyID =
@@ -3663,28 +3678,68 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return (y * fl) + x;
   }
 
-  List<CommonLifts> findCommonLifts(
-      List<la.Lifts> list1, List<la.Lifts> list2) {
-    List<CommonLifts> commonLifts = [];
-
-    for (var lift1 in list1) {
-      for (var lift2 in list2) {
-        if (lift1.name == lift2.name) {
-          // Create a new Lifts object with x and y values from both input lists
-          print(
-              "name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
-          commonLifts.add(CommonLifts(
-              name: lift1.name,
-              distance: lift1.distance,
-              x1: lift1.x,
-              y1: lift1.y,
-              x2: lift2.x,
-              y2: lift2.y));
-          break;
+  List<CommonConnection> findCommonLifts(
+      Landmarks landmark1, Landmarks landmark2,String accessibleby) {
+    List<CommonConnection> commonLifts = [];
+    print("accessibleby recieved $accessibleby");
+    if(accessibleby == "Lifts"){
+      print("inside lifts");
+      for (var lift1 in landmark1.lifts!) {
+        for (var lift2 in landmark2.lifts!) {
+          if (lift1.name == lift2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
+            commonLifts.add(CommonConnection(
+                name: lift1.name,
+                distance: lift1.distance,
+                x1: lift1.x,
+                y1: lift1.y,
+                x2: lift2.x,
+                y2: lift2.y));
+            break;
+          }
+        }
+      }
+    }else if (accessibleby == "Stairs"){
+      print("inside stairs");
+      for (var stair1 in landmark1.stairs!) {
+        for (var stair2 in landmark2.stairs!) {
+          if (stair1.name == stair2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${stair1.name} (${stair1.x},${stair1.y}) && (${stair2.x},${stair2.y})");
+            commonLifts.add(CommonConnection(
+                name: stair1.name,
+                distance: stair1.distance,
+                x1: stair1.x,
+                y1: stair1.y,
+                x2: stair2.x,
+                y2: stair2.y));
+            break;
+          }
+        }
+      }
+    }else if (accessibleby == "ramp"){
+      print("inside stairs");
+      for (var ramp1 in landmark1.others!) {
+        for (var ramp2 in landmark2.others!) {
+          if (ramp1.name == ramp2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+            print(
+                "name ${ramp1.name} (${ramp1.x},${ramp1.y}) && (${ramp2.x},${ramp2.y})");
+            commonLifts.add(CommonConnection(
+                name: ramp1.name,
+                distance: ramp1.distance,
+                x1: ramp1.x,
+                y1: ramp1.y,
+                x2: ramp2.x,
+                y2: ramp2.y));
+            break;
+          }
         }
       }
     }
-
     // Sort the commonLifts based on distance
     commonLifts.sort((a, b) => (a.distance ?? 0).compareTo(b.distance ?? 0));
     return commonLifts;
@@ -3692,7 +3747,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
-  Future<void> calculateroute(Map<String, Landmarks> landmarksMap) async {
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{String accessibleby = "Lifts"}) async {
+
     circles.clear();
     singleroute.clear();
     realWorldPath.clear();
@@ -3741,11 +3797,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print(landmarksMap[PathState.sourcePolyID]!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
-        List<CommonLifts> commonlifts = findCommonLifts(
-            landmarksMap[PathState.sourcePolyID]!.lifts!,
-            landmarksMap[PathState.destinationPolyID]!.lifts!);
 
-        print(commonlifts);
+        List<CommonConnection> commonlifts = findCommonLifts(
+            landmarksMap[PathState.sourcePolyID]!,
+            landmarksMap[PathState.destinationPolyID]!,accessibleby);
+
+        if(commonlifts.isEmpty){
+          setState(() {
+            PathState.noPathFound = true;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+          return;
+        }
+
+        print("commonlifts $commonlifts");
 
         await fetchroute(
             commonlifts[0].x2!,
@@ -3803,8 +3869,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               false,true,
               bid: PathState.destinationBid);
         } else if (element.floor != PathState.destinationFloor) {
-          List<CommonLifts> commonlifts = findCommonLifts(element.lifts!,
-              landmarksMap[PathState.destinationPolyID]!.lifts!);
+          List<dynamic> commonlifts = findCommonLifts(element,
+              landmarksMap[PathState.destinationPolyID]!,accessibleby);
+          if(commonlifts.isEmpty){
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
           await fetchroute(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
@@ -3845,7 +3919,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // double destinationLng=double.parse(source.properties!.longitude!);
 
 
-        Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,2);
+        Landmarks element2  = tools.findMinAnglePoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!,1);
         print("destination entry found is ${element2.sId} ${element2.name} [${element2.coordinateX},${element2.coordinateY}]");
 
         List<double> sv = tools.localtoglobal(element2.coordinateX!, element2.coordinateY!,patchData: building.patchData[element2.buildingID]);
@@ -3858,8 +3932,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               true,false,
               bid: PathState.sourceBid);
         } else if (PathState.sourceFloor != element2.floor) {
-          List<CommonLifts> commonlifts = findCommonLifts(
-              landmarksMap[PathState.sourcePolyID]!.lifts!, element2.lifts!);
+          List<dynamic> commonlifts = findCommonLifts(
+              landmarksMap[PathState.sourcePolyID]!, element2,accessibleby);
+          if(commonlifts.isEmpty){
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
 
           await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
               element2.coordinateX!, element2.coordinateY!, element2.floor!,
@@ -3968,6 +4050,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             "${PathState.destinationName} is $distance meter away. Click start to navigate",_currentLocale);
       }
     }
+
   }
 
   List<int> beaconCord = [];
@@ -4261,10 +4344,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             (index) => index);
 
     return Semantics(
-      excludeSemantics: excludeFloorSemanticWork,
+      excludeSemantics:_isnavigationPannelOpen || _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
       child: Container(
         height: 300,
-        width: 100,
+        width: 60,
         child: ListView.builder(
             itemCount:
             building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -4329,6 +4412,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
+    exploreModeSemanticEnable = true;
+    excludeFloorSemanticWork = true;
+    // excludeFloorSemanticWorkchange();
     setState(() {
       semanticShouldBeExcluded = true;
     });
@@ -4436,172 +4522,343 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       child: Stack(
         children: [
           Container(
-            margin: EdgeInsets.only(left: 16, top: 16),
-            height: 119,
-            width: screenWidth - 32,
+            height: PathState.sourceFloor != PathState.destinationFloor?170:130,
+            width: screenWidth,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
+                  spreadRadius: 1,
                   blurRadius: 5,
                   offset: Offset(0, 3), // changes the position of the shadow
                 ),
               ],
+              color: Colors.white,
+
             ),
             child: Semantics(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  Container(
-                    child: IconButton(
-                        onPressed: () {
-                          showMarkers();
-                          List<double> mvalues = tools.localtoglobal(
-                              PathState.destinationX, PathState.destinationY);
-                          _googleMapController.animateCamera(
-                            CameraUpdate.newLatLngZoom(
-                              LatLng(mvalues[0], mvalues[1]),
-                              20, // Specify your custom zoom level here
-                            ),
-                          );
-                          _isRoutePanelOpen = false;
-                          _isLandmarkPanelOpen = true;
-                          PathState = pathState.withValues(
-                              -1, -1, -1, -1, -1, -1, null, 0);
-                          PathState.path.clear();
-                          PathState.sourcePolyID = "";
-                          PathState.destinationPolyID = "";
-                          singleroute.clear();
-                          realWorldPath.clear();
-                          _isBuildingPannelOpen = true;
-                          if (user.isnavigating == false) {
-                            clearPathVariables();
-                          }
-                          setState(() {
-                            Marker? temp = selectedroomMarker[
-                            buildingAllApi.getStoredString()]
-                                ?.first;
-
-                            selectedroomMarker.clear();
-                            selectedroomMarker[buildingAllApi.getStoredString()]
-                                ?.add(temp!);
-                            pathMarkers.clear();
-                          });
-                        },
-                        icon: Semantics(
-                          label: "Back",
-                          onDidGainAccessibilityFocus: closeRoutePannel,
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 24,
-                          ),
-                        )),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        InkWell(
-                          child: Container(
-                            height: 40,
-                            width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                            padding:
-                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                            child: Text(
-                              PathState.sourceName,
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff24b9b0),
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(
-                                      hintText: 'Source location',
-                                      voiceInputEnabled: false,
-                                    ))).then((value) {
-                              onSourceVenueClicked(value);
-                            });
-                          },
-                        ),
-                        InkWell(
-                          child: Container(
-                            height: 40,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                            padding:
-                            EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                            child: Semantics(
-                              onDidGainAccessibilityFocus: closeRoutePannel,
-                              child: Text(
-                                PathState.destinationName,
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff282828),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        child: IconButton(
+                            onPressed: () {
+                              showMarkers();
+                              List<double> mvalues = tools.localtoglobal(
+                                  PathState.destinationX, PathState.destinationY);
+                              _googleMapController.animateCamera(
+                                CameraUpdate.newLatLngZoom(
+                                  LatLng(mvalues[0], mvalues[1]),
+                                  20, // Specify your custom zoom level here
                                 ),
-                                textAlign: TextAlign.left,
+                              );
+                              _isRoutePanelOpen = false;
+                              _isLandmarkPanelOpen = true;
+                              PathState = pathState.withValues(
+                                  -1, -1, -1, -1, -1, -1, null, 0);
+                              PathState.path.clear();
+                              PathState.sourcePolyID = "";
+                              PathState.destinationPolyID = "";
+                              singleroute.clear();
+                              realWorldPath.clear();
+                              _isBuildingPannelOpen = true;
+                              if (user.isnavigating == false) {
+                                clearPathVariables();
+                              }
+                              setState(() {
+                                Marker? temp = selectedroomMarker[
+                                buildingAllApi.getStoredString()]
+                                    ?.first;
+
+                                selectedroomMarker.clear();
+                                selectedroomMarker[buildingAllApi.getStoredString()]
+                                    ?.add(temp!);
+                                pathMarkers.clear();
+                              });
+                            },
+                            icon: Semantics(
+                              label: "Back",
+                              onDidGainAccessibilityFocus: closeRoutePannel,
+                              child: Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 24,
                               ),
-                            ),
+                            )),
+                      ),
+                      Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(top: 12, right: 5),
+                                width: 15.0,
+                                height: 15.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: 12, right: 5),
+                                width: 5.0,
+                                height: 5.0,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
                           ),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(
-                                      hintText: 'Destination location',
-                                      voiceInputEnabled: false,
-                                    ))).then((value) {
-                              _isBuildingPannelOpen = false;
-                              onDestinationVenueClicked(value);
-                            });
-                          },
+                          Container(
+                            margin: EdgeInsets.only(top: 28,right: 5),
+                              child: Icon(Icons.location_on_rounded,color: Colors.red,size: 22,))
+                        ],
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            InkWell(
+                              child: Container(
+                                height: 40,
+                                width: double.infinity,
+                                margin: EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                padding:
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                child: Text(
+                                  PathState.sourceName,
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff24b9b0),
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DestinationSearchPage(
+                                          hintText: 'Source location',
+                                          voiceInputEnabled: false,
+                                        ))).then((value) {
+                                  onSourceVenueClicked(value);
+                                });
+                              },
+                            ),
+                            InkWell(
+                              child: Container(
+                                height: 40,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                padding:
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                child: Semantics(
+                                  onDidGainAccessibilityFocus: closeRoutePannel,
+                                  child: Text(
+                                    PathState.destinationName,
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff282828),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DestinationSearchPage(
+                                          hintText: 'Destination location',
+                                          voiceInputEnabled: false,
+                                        ))).then((value) {
+                                  _isBuildingPannelOpen = false;
+                                  onDestinationVenueClicked(value);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                PathState.swap();
+                                PathState.path.clear();
+                                pathMarkers.clear();
+                                PathState.directions.clear();
+                                if (user.isnavigating == false) {
+                                  clearPathVariables();
+                                }
+                                building.landmarkdata!.then((value) {
+                                  calculateroute(value.landmarksMap!);
+                                });
+                              });
+                            },
+                            icon: Semantics(
+                              label: "Swap location",
+                              child: Icon(
+                                Icons.swap_vert_circle_outlined,
+                                size: 24,
+                              ),
+                            )),
+                      ),
+                    ],
+                  ),
+                  PathState.sourceFloor != PathState.destinationFloor?Container(
+                    margin: EdgeInsets.only(top: 8,left: 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Container(
+                        width: 112,
+                        margin: EdgeInsets.only(left: 8),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              PathState.accessiblePath = "Stairs";
+                              PathState.clearforaccessiblepath();
+                              building.landmarkdata!.then((value){
+                                try {
+                                  calculateroute(value.landmarksMap!,
+                                      accessibleby: "Stairs");
+                                }catch(e){
+
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="Stairs"?Color(0xff24B9B0):Colors.white,
+                                elevation: 0// Set the text color to black
+                            ),
+                            child: Center(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.stairs,color: PathState.accessiblePath == "Stairs"?Colors.white:Color(0xff24B9B0),),
+                                  Container(
+                                    margin: EdgeInsets.only(left: 3),
+                                    child: Text(
+                                      "Stairs",
+                                      style: TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: PathState.accessiblePath == "Stairs"?Colors.white:Colors.black,
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
+                        Container(
+                          width: 110,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "Lifts";
+                                PathState.clearforaccessiblepath();
+                                building.landmarkdata!.then((value){
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "Lifts");
+                                  }catch(e){
+
+                                  }
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="Lifts"?Color(0xff24B9B0):Colors.white,
+                                elevation: 0// Set the text color to black
+                              ),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.elevator,color: PathState.accessiblePath == "Lifts"?Colors.white:Color(0xff24B9B0),),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Lifts",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: PathState.accessiblePath == "Lifts"?Colors.white:Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Container(
+                          width: 112,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "ramp";
+                                PathState.clearforaccessiblepath();
+                                building.landmarkdata!.then((value){
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "ramp");
+                                  }catch(e){
+
+                                  }
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.greenAccent, backgroundColor: PathState.accessiblePath=="ramp"?Color(0xff24B9B0):Colors.white,
+                                  elevation: 0// Set the text color to black
+                              ),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.stairs_rounded,color: PathState.accessiblePath == "ramp"?Colors.white:Color(0xff24B9B0),),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Ramp",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: PathState.accessiblePath == "ramp"?Colors.white:Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
                         ),
                       ],
                     ),
-                  ),
-                  Container(
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            PathState.swap();
-                            PathState.path.clear();
-                            pathMarkers.clear();
-                            PathState.directions.clear();
-                            if (user.isnavigating == false) {
-                              clearPathVariables();
-                            }
-                            building.landmarkdata!.then((value) {
-                              calculateroute(value.landmarksMap!);
-                            });
-                          });
-                        },
-                        icon: Semantics(
-                          label: "Swap location",
-                          child: Icon(
-                            Icons.swap_vert_circle_outlined,
-                            size: 24,
-                          ),
-                        )),
-                  ),
+                  ):Container(),
+
                 ],
               ),
             ),
@@ -4617,9 +4874,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     color: Colors.grey,
                   ),
                 ],
-                minHeight: 163,
-                maxHeight: screenHeight * 0.9,
-                panel: Semantics(
+                minHeight: 155,
+                maxHeight: screenHeight * 0.8,
+                panel: PathState.noPathFound?Container(
+                  margin: EdgeInsets.only(top: 36),
+                  child: Column(
+                    children: [
+                      Image.asset("assets/error.png"),
+                      Text(
+                        "Can't find a way there",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff3f3f46),
+                          height: 40/14,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                    ],
+                  ),
+                ):Semantics(
                   sortKey: const OrdinalSortKey(0),
                   child: Column(
                     children: [
@@ -4696,8 +4971,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                           IconButton(
                                               onPressed: () {
                                                 showMarkers();
-                                                _isBuildingPannelOpen = true;
-                                                _isRoutePanelOpen = false;
+                                                setState(() {
+                                                  _isBuildingPannelOpen = true;
+                                                  _isRoutePanelOpen = false;
+                                                });
                                                 selectedroomMarker.clear();
                                                 pathMarkers.clear();
 
@@ -4730,7 +5007,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 fitPolygonInScreen(patch.first);
                                               },
                                               icon: Semantics(
-                                                label: "Close",
+                                                label: "Close Navigation",
                                                 child: Icon(
                                                   Icons.cancel_outlined,
                                                   size: 25,
@@ -7520,6 +7797,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
+  bool exploreModeSemanticEnable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -7860,6 +8138,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     // ),
 
                     Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
                       child: FloatingActionButton(
                         onPressed: () async {
 
@@ -7920,51 +8199,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 28.0),
 
-                    !user.isnavigating?FloatingActionButton(
-                      onPressed: () async {
-                        if (user.initialallyLocalised) {
-                          setState(() {
-                            if (isLiveLocalizing) {
-                              isLiveLocalizing = false;
-                              HelperClass.showToast(
-                                  "Explore mode is disabled");
-                              _exploreModeTimer!.cancel();
-                              _isExploreModePannelOpen = false;
-                              _isBuildingPannelOpen = true;
-                              lastBeaconValue = "";
-                            } else {
-                              speak("Explore Mode Enabled",_currentLocale);
-                              isLiveLocalizing = true;
-                              HelperClass.showToast(
-                                  "Explore mode enabled");
-                              _exploreModeTimer =
-                                  Timer.periodic(
-                                      Duration(
-                                          milliseconds: 5000),
-                                          (timer) async {
-                                        btadapter
-                                            .startScanning(resBeacons);
-                                        Future.delayed(Duration(
-                                            milliseconds: 2000))
-                                            .then((value) => {
-                                          realTimeReLocalizeUser(
-                                              resBeacons)
-                                          // listenToBin()
+                    !user.isnavigating?Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              if (isLiveLocalizing) {
+                                isLiveLocalizing = false;
+                                HelperClass.showToast(
+                                    "Explore mode is disabled");
+                                _exploreModeTimer!.cancel();
+                                _isExploreModePannelOpen = false;
+                                _isBuildingPannelOpen = true;
+                                lastBeaconValue = "";
+                              } else {
+                                speak("Explore Mode Enabled",_currentLocale);
+                                isLiveLocalizing = true;
+                                HelperClass.showToast(
+                                    "Explore mode enabled");
+                                _exploreModeTimer =
+                                    Timer.periodic(
+                                        Duration(
+                                            milliseconds: 5000),
+                                            (timer) async {
+                                          btadapter
+                                              .startScanning(resBeacons);
+                                          Future.delayed(Duration(
+                                              milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(
+                                                resBeacons)
+                                            // listenToBin()
+                                          });
                                         });
-                                      });
-                              _isBuildingPannelOpen = false;
-                              _isExploreModePannelOpen = true;
-                            }
-                          });
-                        }
-                      },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                _isBuildingPannelOpen = false;
+                                _isExploreModePannelOpen = true;
+                              }
+                            });
+                          }
+                        },
+                        child: Semantics(
+                          label: "Explore Mode",
+                          child: SvgPicture.asset(
+                            "assets/Navigation_RTLIcon.svg",
+                            // color:
+                            // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                          ),
+                        ),
+                        backgroundColor: Color(
+                            0xff24B9B0), // Set the background color of the FAB
                       ),
-                      backgroundColor: Color(
-                          0xff24B9B0), // Set the background color of the FAB
                     )
                         : Container(), // Adjust the height as needed// Adjust the height as needed
                   ],

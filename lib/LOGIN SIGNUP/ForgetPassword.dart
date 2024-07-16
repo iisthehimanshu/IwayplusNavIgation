@@ -19,6 +19,9 @@ class ForgetPassword extends StatefulWidget {
 }
 
 class _ForgetPasswordState extends State<ForgetPassword> {
+  String prefixMailText = "";
+
+
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
   FocusNode _focusNode2_1 = FocusNode();
@@ -283,49 +286,21 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                   textAlign: TextAlign.left,
                                 ),
                               ),
-                              // Container(
-                              //   margin: EdgeInsets.only(
-                              //       left: 16, top: 8, right: 16),
-                              //   width: screenWidth,
-                              //   child: const Column(
-                              //     crossAxisAlignment: CrossAxisAlignment.start,
-                              //     children: [
-                              //       Flexible(
-                              //         child: Text(
-                              //           "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
-                              //           style: TextStyle(
-                              //             fontFamily: "Roboto",
-                              //             fontSize: 16,
-                              //             fontWeight: FontWeight.w400,
-                              //             color: Color(0xff242323),
-                              //           ),
-                              //           textAlign: TextAlign.left,
-                              //         ),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
+
                               Container(
                                 //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(
                                       top: 20, left: 16, right: 16),
                                   height: 58,
                                   child: Container(
-                                      padding: EdgeInsets.only(left: 12),
                                       width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: outlineheaderColor,
-                                            width: 2),
-                                        color: Color(0xfffffff),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
+
                                       child: Row(
                                         children: [
-                                          containsOnlyNumeric(
-                                              mailEditingController.text)
-                                              ? CountryCodeSelector()
-                                              : Text(""),
+                                          // containsOnlyNumeric(
+                                          //     mailEditingController.text)
+                                          //     ? CountryCodeSelector()
+                                          //     : Text(""),
                                           Expanded(
                                             child: Semantics(
                                               label: "Enter Email or mobile number",
@@ -333,16 +308,46 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                 child: TextFormField(
                                                   focusNode: _focusNode1,
                                                   controller: mailEditingController,
-                                                  decoration: const InputDecoration(
-                                                      hintText:
-                                                      'Email or mobile number',
-                                                      hintStyle: TextStyle(
-                                                        fontFamily: 'Roboto',
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.w400,
-                                                        color: Color(0xffbdbdbd),
+                                                  decoration:  InputDecoration(
+                                                    labelText:
+                                                    'Email or mobile number',
+                                                    labelStyle: TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff49454f),
+                                                      height: 16/12,
+                                                    ),
+                                                    floatingLabelStyle: TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff24B9B0),
+                                                      height: 16/12,
+                                                    ),
+                                                    hintStyle: TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xff49454f),
+                                                      height: 24/16,
+                                                    ),
+                                                    focusedBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(6),
+                                                        borderSide: BorderSide(
+                                                          color: Color(0xff24B9B0),
+                                                          width: 2,
+                                                        )
+                                                    ),
+                                                    enabledBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      borderSide: BorderSide(
+                                                        color: Colors.black,
+                                                        width: 2,
                                                       ),
-                                                      border: InputBorder.none
+                                                    ),
+                                                    border: InputBorder.none,
+                                                    prefix: Text(prefixMailText),
                                                     //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                   ),
                                                   onChanged: (value) {
@@ -351,6 +356,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                     new Color(0xff49454f);
                                                     outlineheaderColorForName =
                                                     new Color(0xff49454f);
+                                                    if(containsOnlyNumeric(value)){
+                                                      setState(() {
+                                                        prefixMailText = "+91  ";
+                                                      });
+                                                    }else{
+                                                      setState(() {
+                                                        prefixMailText = "";
+                                                      });
+                                                    }
                                                   },
                                                 ),
                                               ),

@@ -20,8 +20,10 @@ class pathState {
   double destinationLng = 0.0;
   int sourceFloor = 0;
   int destinationFloor = 0;
+  String accessiblePath = "Lifts";
   List<List<double>> realWorldCoordinates = [];
   Map<int, List<int>> path = {};
+  bool noPathFound = false;
   Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];
   List<Cell> singleCellListPath = [];
@@ -58,6 +60,7 @@ class pathState {
     associateTurnWithLandmark.clear();
     index = 0;
     beaconCords.clear();
+    noPathFound = false;
   }
 
   void swap() {
@@ -89,5 +92,18 @@ class pathState {
     path.forEach((key, value) {
       path[key] = value.reversed.toList();
     });
+  }
+
+  void clearforaccessiblepath(){
+    realWorldCoordinates.clear();
+    path.clear();
+    Cellpath.clear();
+    singleListPath.clear();
+    singleCellListPath.clear();
+    CellTurnPoints.clear();
+    listofPaths.clear();
+    directions.clear();
+    connections.clear();
+    noPathFound = false;
   }
 }

@@ -23,6 +23,7 @@ class UserState{
   double lat;
   double lng;
   String key;
+  String? nearestLandmark;
   double theta;
   String? locationName;
   bool isnavigating;
@@ -163,7 +164,9 @@ class UserState{
     if(isnavigating){
       checkForMerge();
       if(pathobj.index + 3 == ListofPaths[buildingNumber].length && !isInRealWorld){
+
         if(buildingNumber-1>0 && ListofPaths[buildingNumber-1].isNotEmpty && ListofPaths[buildingNumber][0].bid != ListofPaths[buildingNumber-1][0].bid){
+
           print("toogleed");
           p = realWorldCoordinates[1];
           isInRealWorld = !isInRealWorld;

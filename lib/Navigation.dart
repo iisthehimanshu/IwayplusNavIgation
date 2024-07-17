@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
 class Navigation extends StatefulWidget {
   String directLandID = "";
   static bool bluetoothGranted = false;
-  BuildContext context;
+   BuildContext context;
 
   Navigation({this.directLandID = '',required this.context});
 
@@ -396,7 +396,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
+      speak("Loading Maps",_currentLocale);
 
     });
     print("Circular progress bar");
@@ -692,9 +692,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+var translationn=GoogleTranslator();
   Future<void> speak(String msg,String lngcode) async {
-    var translation=await msg.translate(to:lngcode);
+    var translation=await translationn.translate(msg,from:'en',to:lngcode);
+    print('transalation');
+    print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(translation.toString());
@@ -1276,7 +1278,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 "You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}",_currentLocale);
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       } else {
@@ -1287,7 +1289,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       }
@@ -1707,7 +1709,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //searching your location
 
       speak("Please wait",_currentLocale);
-      speak("Your current location is being discovered",_currentLocale);
+      speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -1725,6 +1727,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
+    print("IDS ${IDS}");
     try{
       await outBuilding().outbuilding(IDS).then((out) async {
         if (out != null) {
@@ -4451,10 +4454,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       for (int i = 1; i < PathState.directions.length; i++) {
         if (!PathState.directions[i].isDestination) {
           if (PathState.directions[i].nearbyLandmark != null) {
-            // print("PathState.directions[i].turnDirection");
-            // print(PathState.directions[i].turnDirection);
+            print("PathState.directions[i].turnDirection");
+            print(PathState.directions[i].turnDirection);
             directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                direction: PathState.directions[i].turnDirection == 'Straight'
                     ? '${LocaleData.gostraight.getString(context)}'
                     : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(PathState.directions[i].turnDirection!,context)} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!} ${LocaleData.getProperty2(PathState.directions[i].turnDirection!,context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)

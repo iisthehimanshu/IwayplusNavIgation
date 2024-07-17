@@ -85,7 +85,7 @@ class _directionInstructionState extends State<directionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains(LocaleData.lift.getString(context))) {
+    } else if (direction.contains("Lift")) {
       return Padding(
         padding: const EdgeInsets.all(3.5),
         child: SvgPicture.asset("assets/elevator.svg"),

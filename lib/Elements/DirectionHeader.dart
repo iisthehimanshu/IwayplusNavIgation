@@ -170,11 +170,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if(widget.direction == "Straight"){
         widget.direction = "Go Straight";
 
-        speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} step",_currentLocale);
+        speak("${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
       }else{
 
 
-        speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} step",_currentLocale);
+        speak("Turn ${LocaleData.getProperty5(widget.direction,widget.context)}, and ${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
         widget.getSemanticValue="Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps";
 
       }
@@ -369,7 +369,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} step",_currentLocale);
+                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 return true; //moved on path
@@ -404,13 +404,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
+  var translationn=GoogleTranslator();
   Future<void> speak(String msg,String lngcode) async {
-    var translation=await msg.translate(to:lngcode);
+    var translation=await translationn.translate(msg,from:'en',to:lngcode);
     print("transalation");
     print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
-    await flutterTts.speak(translation.toString());
+    await flutterTts.speak(msg);
   }
 
   Cell findNextTurn(List<Cell> path) {
@@ -488,7 +489,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
           speak(
-              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} step",_currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
         }
       }
 
@@ -529,13 +530,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("Turn ${widget.direction}",_currentLocale);
+          speak("Turn ${LocaleData.getProperty5(widget.direction,context)}",_currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == "Straight") {
           Vibration.vibrate();
 
           speak(
-              "Go Straight ${(widget.distance / UserState.stepSize).ceil()} step",_currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
         }
       }
     }

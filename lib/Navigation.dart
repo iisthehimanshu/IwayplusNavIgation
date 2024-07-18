@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
 class Navigation extends StatefulWidget {
   String directLandID = "";
   static bool bluetoothGranted = false;
-  BuildContext context;
+   BuildContext context;
 
   Navigation({this.directLandID = '',required this.context});
 
@@ -396,7 +396,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
+      speak("Loading Maps",_currentLocale);
 
     });
     print("Circular progress bar");
@@ -651,7 +651,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else if (accuracy <= 10) {
       return 'Medium';
     } else {
-      _showLowAccuracyDialog();
+     // _showLowAccuracyDialog();
       return 'Low';
     }
   }
@@ -692,9 +692,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+var translationn=GoogleTranslator();
   Future<void> speak(String msg,String lngcode) async {
-    var translation=await msg.translate(to:lngcode);
+    var translation=await translationn.translate(msg,from:'en',to:lngcode);
+    print('transalation');
+    print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(translation.toString());
@@ -1137,6 +1139,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
       UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+      UserState.lngCode=_currentLocale;
       UserState.moveMarkerToBuilding = moveMarkerToBuilding;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
@@ -1145,6 +1148,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
       UserState.customRender = customRender;
+
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -1274,7 +1278,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 "You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}",_currentLocale);
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       } else {
@@ -1285,7 +1289,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       }
@@ -1350,7 +1354,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
-    _isreroutePannelOpen = true;
+    _isreroutePannelOpen = false;
     user.isnavigating = false;
     print("reroute----- coord ${user.coordX},${user.coordY}");
     print("reroute----- show ${user.showcoordX},${user.showcoordY}");
@@ -1705,7 +1709,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //searching your location
 
       speak("Please wait",_currentLocale);
-      speak("Searching your location. .",_currentLocale);
+      speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -1723,6 +1727,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
+    print("IDS ${IDS}");
     try{
       await outBuilding().outbuilding(IDS).then((out) async {
         if (out != null) {
@@ -3200,41 +3205,47 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: Container(
-                        child: Text(
-                          snapshot.data!.landmarksMap![building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8e8d8d),
-                            height: 25 / 16,
+                        child: Semantics(
+                          excludeSemantics: true,
+                          child: Text(
+                            snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                                .name ??
+                                snapshot
+                                    .data!
+                                    .landmarksMap![building.selectedLandmarkID]!
+                                    .element!
+                                    .subType!,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8e8d8d),
+                              height: 25 / 16,
+                            ),
                           ),
                         )),
                   ),
                   Container(
                     height: 48,
                     width: 47,
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          _polygon.clear();
-                          circles.clear();
-                          showMarkers();
-                          toggleLandmarkPanel();
-                          _isBuildingPannelOpen = true;
-                        },
-                        icon: Semantics(
-                          label: "Close",
-                          child: Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.black,
-                            size: 24,
+                    child: Semantics(
+                      excludeSemantics: true,
+                      child: Center(
+                        child: IconButton(
+                          onPressed: () {
+                            _polygon.clear();
+                            circles.clear();
+                            showMarkers();
+                            toggleLandmarkPanel();
+                            _isBuildingPannelOpen = true;
+                          },
+                          icon: Semantics(
+                            label: "Close",
+                            child: Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ),
@@ -3788,6 +3799,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
         print(PathState.sourcePolyID!);
+        print(landmarksMap[PathState.sourcePolyID]!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
 
@@ -4153,7 +4165,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(direction(-1, "Take ${liftName}", null, null,
+          directions.add(direction(-1, "${LocaleData.take.getString(context)} ${liftName}", null, null,
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
@@ -4337,10 +4349,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             (index) => index);
 
     return Semantics(
-      excludeSemantics: excludeFloorSemanticWork,
+      excludeSemantics:_isnavigationPannelOpen || _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
       child: Container(
         height: 300,
-        width: 100,
+        width: 60,
         child: ListView.builder(
             itemCount:
             building.numberOfFloors[buildingAllApi.getStoredString()]!,
@@ -4405,6 +4417,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   Widget routeDeatilPannel() {
+    exploreModeSemanticEnable = true;
+    excludeFloorSemanticWork = true;
+    // excludeFloorSemanticWorkchange();
     setState(() {
       semanticShouldBeExcluded = true;
     });
@@ -4439,10 +4454,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       for (int i = 1; i < PathState.directions.length; i++) {
         if (!PathState.directions[i].isDestination) {
           if (PathState.directions[i].nearbyLandmark != null) {
+            print("PathState.directions[i].turnDirection");
+            print(PathState.directions[i].turnDirection);
             directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                direction: PathState.directions[i].turnDirection == 'Straight'
                     ? '${LocaleData.gostraight.getString(context)}'
-                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
+                    : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(PathState.directions[i].turnDirection!,context)} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!} ${LocaleData.getProperty2(PathState.directions[i].turnDirection!,context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
                     .ceil()
                     .toString(),context: context));
@@ -4452,13 +4469,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   direction: "${PathState.directions[i].turnDirection!}",
                   distance:
 
-                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
+                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
 
             } else {
               directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                direction: PathState.directions[i].turnDirection == 'Straight'
                     ? '${LocaleData.gostraight.getString(context)}'
-                    : "${LocaleData.turn.getString(context)} ${PathState.directions[i].turnDirection!}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
+                    : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty4(PathState.directions[i].turnDirection!,context)}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance:
 
                 (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
@@ -4997,7 +5014,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 fitPolygonInScreen(patch.first);
                                               },
                                               icon: Semantics(
-                                                label: "Close",
+                                                label: "Close Navigation",
                                                 child: Icon(
                                                   Icons.cancel_outlined,
                                                   size: 25,
@@ -5346,7 +5363,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 child: Text(
                                                   angle != null
 
-                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)} ${tools.angleToClocks3(angle,context)}"
+                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)}  ${LocaleData.getProperty(tools.angleToClocks3(angle,context),context)}"
                                                       : PathState.destinationName,
 
                                                   style: const TextStyle(
@@ -7263,7 +7280,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              "${user.locationName}, Floor ${user.floor}",
+                              "${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 18,
@@ -7787,6 +7804,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
+  bool exploreModeSemanticEnable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -7996,12 +8014,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     SizedBox(height: 28.0),
 
                     DebugToggle.Slider?Text("${user.theta}"):Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "buildingnumber ${user.buildingNumber} \n"
-                        "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "buildingnumber ${user.buildingNumber} \n"
+                    //     "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
                     DebugToggle.Slider?Slider(
                         value: user.theta,
                         min: -180,
@@ -8127,6 +8145,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     // ),
 
                     Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
                       child: FloatingActionButton(
                         onPressed: () async {
 
@@ -8187,51 +8206,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     ),
                     SizedBox(height: 28.0),
 
-                    !user.isnavigating?FloatingActionButton(
-                      onPressed: () async {
-                        if (user.initialallyLocalised) {
-                          setState(() {
-                            if (isLiveLocalizing) {
-                              isLiveLocalizing = false;
-                              HelperClass.showToast(
-                                  "Explore mode is disabled");
-                              _exploreModeTimer!.cancel();
-                              _isExploreModePannelOpen = false;
-                              _isBuildingPannelOpen = true;
-                              lastBeaconValue = "";
-                            } else {
-                              speak("Explore Mode Enabled",_currentLocale);
-                              isLiveLocalizing = true;
-                              HelperClass.showToast(
-                                  "Explore mode enabled");
-                              _exploreModeTimer =
-                                  Timer.periodic(
-                                      Duration(
-                                          milliseconds: 5000),
-                                          (timer) async {
-                                        btadapter
-                                            .startScanning(resBeacons);
-                                        Future.delayed(Duration(
-                                            milliseconds: 2000))
-                                            .then((value) => {
-                                          realTimeReLocalizeUser(
-                                              resBeacons)
-                                          // listenToBin()
+                    !user.isnavigating?Semantics(
+                      excludeSemantics: _isRoutePanelOpen || _isLandmarkPanelOpen? true : false,
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          if (user.initialallyLocalised) {
+                            setState(() {
+                              if (isLiveLocalizing) {
+                                isLiveLocalizing = false;
+                                HelperClass.showToast(
+                                    "Explore mode is disabled");
+                                _exploreModeTimer!.cancel();
+                                _isExploreModePannelOpen = false;
+                                _isBuildingPannelOpen = true;
+                                lastBeaconValue = "";
+                              } else {
+                                speak("Explore Mode Enabled",_currentLocale);
+                                isLiveLocalizing = true;
+                                HelperClass.showToast(
+                                    "Explore mode enabled");
+                                _exploreModeTimer =
+                                    Timer.periodic(
+                                        Duration(
+                                            milliseconds: 5000),
+                                            (timer) async {
+                                          btadapter
+                                              .startScanning(resBeacons);
+                                          Future.delayed(Duration(
+                                              milliseconds: 2000))
+                                              .then((value) => {
+                                            realTimeReLocalizeUser(
+                                                resBeacons)
+                                            // listenToBin()
+                                          });
                                         });
-                                      });
-                              _isBuildingPannelOpen = false;
-                              _isExploreModePannelOpen = true;
-                            }
-                          });
-                        }
-                      },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                                _isBuildingPannelOpen = false;
+                                _isExploreModePannelOpen = true;
+                              }
+                            });
+                          }
+                        },
+                        child: Semantics(
+                          label: "Explore Mode",
+                          child: SvgPicture.asset(
+                            "assets/Navigation_RTLIcon.svg",
+                            // color:
+                            // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                          ),
+                        ),
+                        backgroundColor: Color(
+                            0xff24B9B0), // Set the background color of the FAB
                       ),
-                      backgroundColor: Color(
-                          0xff24B9B0), // Set the background color of the FAB
                     )
                         : Container(), // Adjust the height as needed// Adjust the height as needed
                   ],

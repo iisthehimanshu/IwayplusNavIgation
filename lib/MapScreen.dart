@@ -23,6 +23,8 @@ import 'package:iwaymaps/navigationTools.dart';
 import 'MODELS/GMapIconNameModel.dart';
 import 'package:iwaymaps/buildingState.dart' as bs;
 
+import 'Navigation.dart';
+
 
 
 void main() {
@@ -65,7 +67,7 @@ class _MapScreenState extends State<MapScreen> {
   ply.Polyline? polyLine = null;
   Set<gmap.Polyline> _myPolyLine = {};
   List<LatLng> poly = <LatLng>[];
-  HashMap<String,LatLng> idLatLngHashMap = new HashMap();
+  HashMap<String,geo.LatLng> idLatLngHashMap = new HashMap();
   HashMap<String,bool> chekIfRendered = new HashMap();
   geo.Geodesy geodesy = geo.Geodesy();
   bool _isLandmarkPanelOpen = false;
@@ -122,13 +124,13 @@ class _MapScreenState extends State<MapScreen> {
   }
   void apiPlycall() async{
     await patchAPI().fetchPatchData().then((value) {
-      createPatch(value);
+     // createPatch(value);
     });
 
     await PolyLineApi().fetchPolyData().then((value) {
       polyLineData = value;
       setState(() {
-        createRooms(value, 0);
+        //createRooms(value, 0);
       });
     });
 
@@ -565,15 +567,16 @@ class _MapScreenState extends State<MapScreen> {
   void createVenueListForGMIconList(){
     for (buildingAll venue in getting_buildingAllApi_List) {
       print("Adding in idLatLngHashMap");
+      print(venue.buildingName);
       print(venue.coordinates![0]);
       print(venue.coordinates![1]);
-      LatLng kk = LatLng(venue.coordinates![0], venue.coordinates![1]);
+      geo.LatLng kk = geo.LatLng(venue.coordinates![0], venue.coordinates![1]);
       idLatLngHashMap[venue.sId!] = kk;
 
-      if (!uniqueVenueNames.contains(venue.venueName)) {
+      //if (!uniqueVenueNames.contains(venue.venueName)) {
         uniqueVenuesList.add(venue);
         uniqueVenueNames.add(venue.venueName!);
-      }
+      //}s
     }
     // Display the filtered list
     // uniqueVenues.forEach((venue) {
@@ -586,20 +589,24 @@ class _MapScreenState extends State<MapScreen> {
   }
   void createGMAPIconList(){
     for(buildingAll venue in uniqueVenuesList){
+       print("venue");
+      print(venue.buildingName);
       if(venue.venueCategory=='Academic'){
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Academic.png'));
+        // print("venue");
+        // print(venue.buildingName);
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.buildingName!, IconAddress: 'assets/Academic.png', id: venue.sId!, buildingId:idLatLngHashMap ));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Hospital') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Hospital.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.buildingName!, IconAddress: 'assets/Hospital.png', id: venue.sId!, buildingId:idLatLngHashMap));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Tech Park') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/IT park.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.buildingName!, IconAddress: 'assets/IT park.png', id: venue.sId!, buildingId:idLatLngHashMap));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else if(venue.venueCategory=='Event') {
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Events.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.buildingName!, IconAddress: 'assets/Events.png', id: venue.sId!, buildingId:idLatLngHashMap));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }else{
-        GMapIconList.add(GMapIconNameModel(buildingName: venue.venueName!, IconAddress: 'assets/Landmark.png'));
+        GMapIconList.add(GMapIconNameModel(buildingName: venue.buildingName!, IconAddress: 'assets/Landmark.png', id: venue.sId!, buildingId:idLatLngHashMap));
         GMapLatLngForIcons.add(LatLng(venue.coordinates![0], venue.coordinates![1]));
       }
     }
@@ -671,6 +678,7 @@ class _MapScreenState extends State<MapScreen> {
           icon: BitmapDescriptor.fromBytes(iconMarker),
             onTap: (){
               print("Info Window ");
+              getNav(GMapIconList[a].id,GMapIconList[a].buildingId);
             },
           infoWindow: InfoWindow(
             title:'${GMapIconList[a].buildingName}',
@@ -689,7 +697,17 @@ class _MapScreenState extends State<MapScreen> {
   // ];
   //
 
-
+void getNav(String id,HashMap<String,geo.LatLng> allBuildingid){
+  buildingAllApi.setStoredString(id);
+  buildingAllApi.setSelectedBuildingID(id);
+  buildingAllApi.setStoredAllBuildingID(allBuildingid);
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) =>   Navigation(context: context,),
+    ),
+  );
+}
 
 
   @override
@@ -714,7 +732,7 @@ class _MapScreenState extends State<MapScreen> {
                 LatLng currentLatLng = position.target;
                 double distanceThreshold = 100.0;
                 String closestBuildingId = "";
-                idLatLngHashMap.forEach((String buildingId, LatLng storedLatLng) {
+                idLatLngHashMap.forEach((String buildingId, geo.LatLng storedLatLng) {
                   num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
                     geo.LatLng(storedLatLng.latitude, storedLatLng.longitude),
                     geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),

@@ -22,13 +22,19 @@ class _directionInstructionState extends State<directionInstruction> {
   @override
   void initState() {
 
+
     super.initState();
+    print("widget.direction");
+    print(widget.direction);
     setState(() {
       icon = getCustomIcon(widget.direction,widget.context);
     });
   }
 
   Widget getCustomIcon(String direction,context) {
+
+    print('directionnnn');
+    print(direction);
 
     if (direction ==  LocaleData.gostraight.getString(context)) {
       return Icon(
@@ -48,7 +54,7 @@ class _directionInstructionState extends State<directionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains(LocaleData.right.getString(context))) {
+    } else if (direction.contains(LocaleData.tright.getString(context))) {
       return Icon(
         Icons.turn_right,
         color: Colors.black,
@@ -73,13 +79,13 @@ class _directionInstructionState extends State<directionInstruction> {
         size: 32,
       );
 
-    } else if (direction.contains(LocaleData.left.getString(context))) {
+    } else if (direction.contains(LocaleData.tleft.getString(context))) {
       return Icon(
         Icons.turn_left,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains(LocaleData.lift.getString(context))) {
+    } else if (direction.contains("Lift")) {
       return Padding(
         padding: const EdgeInsets.all(3.5),
         child: SvgPicture.asset("assets/elevator.svg"),

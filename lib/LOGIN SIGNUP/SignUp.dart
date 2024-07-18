@@ -1,3 +1,6 @@
+
+
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
@@ -24,6 +27,14 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  FocusNode emailFocus = FocusNode();
+  FocusNode nameFocus = FocusNode();
+  FocusNode passwordFocus = FocusNode();
+  FocusNode cnfPasswordFocus = FocusNode();
+
+
+
+
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
   FocusNode _focusNode2_1 = FocusNode();
@@ -60,147 +71,9 @@ class _SignUpState extends State<SignUp> {
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
-  // getConnectivity() =>
-  //     subscription = Connectivity().onConnectivityChanged.listen(
-  //           (ConnectivityResult result) async {
-  //         isDeviceConnected = await InternetConnectionChecker().hasConnection;
-  //         if (!isDeviceConnected && isAlertSet == false) {
-  //           showDialogBox();
-  //           setState(() => isAlertSet = true);
-  //         }
-  //       },
-  //     );
-  //
-  // showDialogBox() => showCupertinoDialog<String>(
-  //   context: context,
-  //   builder: (BuildContext context) => CupertinoAlertDialog(
-  //     title: const Text('No Connection'),
-  //     content: const Text('Please check your internet connectivity'),
-  //     actions: <Widget>[
-  //       TextButton(
-  //         onPressed: () async {
-  //           Navigator.pop(context, 'Cancel');
-  //           setState(() => isAlertSet = false);
-  //           isDeviceConnected =
-  //           await InternetConnectionChecker().hasConnection;
-  //           if (!isDeviceConnected && isAlertSet == false) {
-  //             showDialogBox();
-  //             setState(() => isAlertSet = true);
-  //           }
-  //         },
-  //         child: const Text('OK'),
-  //       ),
-  //     ],
-  //   ),
-  // );
+  String prefixMailText = "";
 
-  // void subotp()async{
-  //   setState(() {
-  //     loginapifetching2 = true;
-  //   });
-  //
-  //   try{
-  //
-  //     if (OTPEditingController.text.length == 4) {
-  //
-  //       await verifyotpapi().verifyotp(phoneEditingController.text, OTPEditingController.text, number2.dialCode.toString()).then((value){
-  //         if(value == 200){
-  //           final fetchedlogindata = loginapi().fetchedData;
-  //           setState(() {
-  //             loginapifetching2 = false;
-  //           });
-  //           if (!fetchedlogindata!.data!.deleted!) {
-  //             if (fetchedlogindata.data!.validateData()) {
-  //               uobj.savedata("UID", {100000 + random.nextInt(900000)}.toString());
-  //               Navigator.pushAndRemoveUntil(
-  //                 context,
-  //                 MaterialPageRoute(builder: (context) => mainscreen(initialIndex: 0,)),
-  //                     (route) => false, // Remove all routes until the new route
-  //               );
-  //             } else {
-  //               Navigator.pushReplacement(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                     builder: (context) => UserProfile(title: "Registration Form")),
-  //               );
-  //             }
-  //           } else {
-  //             setState(() {
-  //               otpincorrect = true;
-  //             });
-  //             print("Wrong credentials");
-  //             showToast("Wrong credentials");
-  //           }
-  //         }else if(value == 201){
-  //           setState(() {
-  //             loginapifetching2 = false;
-  //             otpincorrect = true;
-  //           });
-  //         }
-  //       });
-  //
-  //     }
-  //   }catch(e){
-  //     setState(() {
-  //       loginapifetching2 = false;
-  //       otpincorrect = true;
-  //     });
-  //     print("Error occurred: $e");
-  //     showToast("Failed to load data");
-  //   }
-  // }
 
-  // void login() async {
-  //   setState(() {
-  //     loginapifetching = true;
-  //   });
-  //
-  //   String email = mailEditingController.text;
-  //   String password = passEditingController.text;
-  //   print("$email   $password");
-  //
-  //   try {
-  //     await loginapi().login(email, password);
-  //     final fetchedlogindata = loginapi().fetchedData;
-  //
-  //     setState(() {
-  //       loginapifetching = false;
-  //     });
-  //
-  //     if (!fetchedlogindata!.data!.deleted!) {
-  //       if (fetchedlogindata.data!.validateData()) {
-  //         uobj.savedata("UID", {100000 + random.nextInt(900000)}.toString());
-  //         // Navigator.of(context).push(_createRoute());
-  //
-  //         Navigator.pushAndRemoveUntil(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => mainscreen(initialIndex: 0,)),
-  //               (route) => false, // Remove all routes until the new route
-  //         );
-  //       } else {
-  //
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //               builder: (context) => UserProfile(title: "Registration Form")),
-  //         );
-  //       }
-  //     } else {
-  //       setState(() {
-  //         passincorrect = true;
-  //       });
-  //       print("Wrong credentials");
-  //       showToast("Wrong credentials");
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       loginapifetching = false;
-  //       passincorrect = true;
-  //     });
-  //     print("Error occurred: $e");
-  //     showToast("Failed to load data");
-  //   }
-  // }
 
   TextEditingController passEditingController = TextEditingController();
   TextEditingController mailEditingController = TextEditingController();
@@ -238,14 +111,14 @@ class _SignUpState extends State<SignUp> {
       if (mailEditingController.text.length > 0 &&
           passEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
         });
       }
       setState(() {
         outlineheaderColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -261,15 +134,15 @@ class _SignUpState extends State<SignUp> {
       if (passEditingController.text.length > 0 &&
           nameEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -285,15 +158,15 @@ class _SignUpState extends State<SignUp> {
       if (mailEditingController.text.length > 0 &&
           nameEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -316,10 +189,17 @@ class _SignUpState extends State<SignUp> {
   @override
   void initstate() {
     super.initState();
-    _focusNode1.addListener(_onFocusChange);
-    _focusNode2.addListener(_onFocusChange);
-    _focusNode1_1.addListener(_onFocusChange);
-    _focusNode2_1.addListener(_onFocusChange);
+
+
+    // _focusNode1.addListener(_onFocusChange);
+    // emailFocus.addListener(() {
+    //   setState(() {
+    //
+    //   });
+    // });
+    // _focusNode2.addListener(_onFocusChange);
+    // _focusNode1_1.addListener(_onFocusChange);
+    // _focusNode2_1.addListener(_onFocusChange);
   }
 
   void _onFocusChange() {
@@ -416,61 +296,99 @@ class _SignUpState extends State<SignUp> {
                                     textAlign: TextAlign.left,
                                   ),
                                 ),
-                                Container(
-                                  margin: EdgeInsets.only(top: 20, left: 16, right: 16),
-                                  height: 58,
-                                  child: Container(
-                                    padding: EdgeInsets.only(left: 12),
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: outlineheaderColor, width: 2),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        containsOnlyNumeric(mailEditingController.text)
-                                            ? CountryCodeSelector()
-                                            : Text(""),
-                                        Expanded(
-                                          child: Semantics(
-                                            label: "Enter Email or mobile number",
-                                            child: ExcludeSemantics(
-                                              child: TextFormField(
-                                                focusNode: _focusNode1,
-                                                controller: mailEditingController,
-                                                decoration: InputDecoration(
-                                                  hintText: 'Email or mobile number',
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
+                                Stack(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(top: 20, left: 16, right: 16),
+                                        height: 58,
+                                        child: Container(
+                                          // padding: EdgeInsets.only(left: 12),
+                                          width: double.infinity,
+                                          // decoration: BoxDecoration(
+                                          //   border: Border.all(color: outlineheaderColor, width: 2),
+                                          //   color: Color(0xfffffff),
+                                          //   borderRadius: BorderRadius.circular(4),
+                                          // ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Semantics(
+                                                  label: "Enter Email or mobile number",
+                                                  child: ExcludeSemantics(
+                                                    child: TextFormField(
+                                                      focusNode: emailFocus,
+                                                      controller: mailEditingController,
+
+                                                      decoration: InputDecoration(
+                                                        labelText: "Email or mobile number",
+                                                        labelStyle: TextStyle(
+                                                          fontFamily: "Roboto",
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w400,
+                                                          color: Color(0xff49454f),
+                                                          height: 16/12,
+                                                        ),
+                                                        floatingLabelStyle: TextStyle(
+                                                          fontFamily: "Roboto",
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w400,
+                                                          color: Color(0xff24B9B0),
+                                                          height: 16/12,
+                                                        ),
+                                                        hintStyle: TextStyle(
+                                                          fontFamily: "Roboto",
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.w400,
+                                                          color: Color(0xff49454f),
+                                                          height: 24/16,
+                                                        ),
+                                                        focusedBorder: OutlineInputBorder(
+                                                            borderRadius: BorderRadius.circular(6),
+                                                            borderSide: BorderSide(
+                                                              color: Color(0xff24B9B0),
+                                                              width: 2,
+                                                            )
+                                                        ),
+                                                        enabledBorder: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(6),
+                                                          borderSide: BorderSide(
+                                                            color: Colors.black,
+                                                            width: 2,
+                                                          ),
+                                                        ),
+                                                        prefix: Text(prefixMailText),
+                                                        // prefixIcon: containsOnlyNumeric(emailMobileText.text) ? CountryCodeSelector() : Container()
+                                                      ),
+                                                      onChanged: (text){
+                                                        emailFieldListner();
+                                                        if(containsOnlyNumeric(text)){
+                                                          setState(() {
+                                                            prefixMailText = "+91  ";
+                                                          });
+                                                        }else{
+                                                          setState(() {
+                                                            prefixMailText = "";
+                                                          });
+                                                        }
+                                                      },
+                                                    ),
                                                   ),
-                                                  border: InputBorder.none,
                                                 ),
-                                                onChanged: (value) {
-                                                  emailFieldListner();
-                                                },
                                               ),
-                                            ),
+                                            ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+
+                                    ]
+
+
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                   height: 58,
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 12),
                                     width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: outlineheaderColor, width: 2),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
                                     child: Row(
                                       children: [
                                         Expanded(
@@ -478,17 +396,47 @@ class _SignUpState extends State<SignUp> {
                                             label: "Enter your name",
                                             child: ExcludeSemantics(
                                               child: TextFormField(
-                                                focusNode: nameFocusNode,
+                                                focusNode: nameFocus,
                                                 controller: nameEditingController,
                                                 decoration: InputDecoration(
-                                                  hintText: 'Name',
+                                                  labelText: "Name",
+                                                  labelStyle: TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff49454f),
+                                                    height: 16/12,
+                                                  ),
                                                   hintStyle: TextStyle(
-                                                    fontFamily: 'Roboto',
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff49454f),
+                                                    height: 24/16,
+                                                  ),
+                                                  floatingLabelStyle: TextStyle(
+                                                    fontFamily: "Roboto",
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w400,
-                                                    color: Color(0xffbdbdbd),
+                                                    color: Color(0xff24B9B0),
+                                                    height: 16/12,
                                                   ),
-                                                  border: InputBorder.none,
+                                                  focusedBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      borderSide: BorderSide(
+                                                        color: Color(0xff24B9B0),
+                                                        width: 2,
+                                                      )
+                                                  ),
+                                                  enabledBorder: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+
+                                                  // prefixIcon: containsOnlyNumeric(emailMobileText.text) ? CountryCodeSelector() : Container()
                                                 ),
                                                 onChanged: (value) {
                                                   nameFiledListner();
@@ -509,32 +457,53 @@ class _SignUpState extends State<SignUp> {
                                   margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                   height: 58,
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 12),
                                     width: double.infinity,
                                     height: 48,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: passincorrect ? Colors.redAccent : outlineheaderColorForPass,
-                                        width: 2,
-                                      ),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+
                                     child: Container(
                                       child: Semantics(
                                         label: "Enter your password",
                                         child: ExcludeSemantics(
                                           child: TextField(
-                                            focusNode: _focusNode1_1,
+                                            focusNode: passwordFocus,
                                             controller: passEditingController,
                                             obscureText: _obscureText,
                                             decoration: InputDecoration(
-                                              hintText: 'Password',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
+                                              labelText: "Password",
+                                              labelStyle: TextStyle(
+                                                fontFamily: "Roboto",
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                                color: Color(0xff49454f),
+                                                height: 16/12,
+                                              ),
+                                              floatingLabelStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff24B9B0),
+                                                height: 16/12,
+                                              ),
+                                              hintStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff49454f),
+                                                height: 24/16,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderSide: BorderSide(
+                                                    color: Color(0xff24B9B0),
+                                                    width: 2,
+                                                  )
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                                borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 2,
+                                                ),
                                               ),
                                               border: InputBorder.none,
                                               suffixIcon: IconButton(
@@ -566,7 +535,7 @@ class _SignUpState extends State<SignUp> {
                                 passEditingController.text.length < 8
                                     ? ExcludeSemantics(
                                   child: Container(
-                                    margin: EdgeInsets.only(left: 32, top: 4),
+                                    margin: EdgeInsets.only(left: 30, top: 4),
                                     child: Text(
                                       "8 characters password required.",
                                       style: const TextStyle(
@@ -580,52 +549,58 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                   ),
                                 )
-                                    : ExcludeSemantics(
-                                  child: Container(
-                                    margin: EdgeInsets.only(left: 32, top: 4),
-                                    child: Text(
-                                      "8 characters password required.",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.green,
-                                        height: 16 / 12,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                ),
+                                    : Container(),
                                 Container(
                                   margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                   height: 58,
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 12),
                                     width: double.infinity,
                                     height: 48,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: passincorrect ? Colors.redAccent : outlineheaderColorForPass,
-                                        width: 2,
-                                      ),
-                                      color: Color(0xfffffff),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+
                                     child: Container(
                                       child: Semantics(
                                         label: "Confirm your password",
                                         child: ExcludeSemantics(
                                           child: TextField(
-                                            focusNode: _focusNode1_2,
+                                            focusNode: cnfPasswordFocus,
                                             controller: confirmPassEditingController,
                                             obscureText: _obscureTextConfirm,
                                             decoration: InputDecoration(
-                                              hintText: 'Confirm Password',
-                                              hintStyle: TextStyle(
-                                                fontFamily: 'Roboto',
+                                              labelText: "Confirm Password",
+                                              labelStyle: TextStyle(
+                                                fontFamily: "Roboto",
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w400,
-                                                color: Color(0xffbdbdbd),
+                                                color: Color(0xff49454f),
+                                                height: 16/12,
+                                              ),
+                                              floatingLabelStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff24B9B0),
+                                                height: 16/12,
+                                              ),
+                                              hintStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff49454f),
+                                                height: 24/16,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderSide: BorderSide(
+                                                    color: Color(0xff24B9B0),
+                                                    width: 2,
+                                                  )
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                                borderSide: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 2,
+                                                ),
                                               ),
                                               border: InputBorder.none,
                                               suffixIcon: IconButton(
@@ -685,138 +660,7 @@ class _SignUpState extends State<SignUp> {
                                         ),
                                         elevation: 0,
                                       ),
-                                      // onPressed: () async {
-                                      //   if (mailEditingController.text.isNotEmpty &&
-                                      //       nameEditingController.text.isNotEmpty &&
-                                      //       passEditingController.text.isNotEmpty &&
-                                      //       confirmPassEditingController.text.isNotEmpty) {
-                                      //     if (passEditingController.text.length >= 8) {
-                                      //       if (passEditingController.text == confirmPassEditingController.text) {
-                                      //         showDialog(
-                                      //           context: context,
-                                      //           barrierDismissible: false,
-                                      //           builder: (BuildContext context) {
-                                      //             return Center(child: CircularProgressIndicator());
-                                      //           },
-                                      //         );
-                                      //
-                                      //         String finalMailEditingController = '';
-                                      //         if (containsOnlyNumeric(mailEditingController.text)) {
-                                      //           finalMailEditingController = "+91${mailEditingController.text}";
-                                      //         } else {
-                                      //           finalMailEditingController = mailEditingController.text;
-                                      //         }
-                                      //
-                                      //         try {
-                                      //          bool otpSent= await SendOTPAPI().sendOTP(finalMailEditingController);
-                                      //           if(!otpSent){
-                                      //             HelperClass.showToast("Invalid email");
-                                      //           }
-                                      //
-                                      //           bool userExists = await checkUserExists(finalMailEditingController);
-                                      //
-                                      //           Navigator.of(context).pop();
-                                      //           if(containsOnlyNumeric(mailEditingController.text)){
-                                      //             if(mailEditingController.text.length!=10){
-                                      //               QuickAlert.show(
-                                      //                 context: context, type: QuickAlertType.error,
-                                      //                 title: 'Error',
-                                      //                 text: 'Incorrect phone number entered',
-                                      //                 confirmBtnText: 'OK',
-                                      //               );
-                                      //
-                                      //             }
-                                      //             else if (userExists) {
-                                      //               QuickAlert.show(
-                                      //                 context: context,
-                                      //                 type: QuickAlertType.error,
-                                      //                 title: 'Error',
-                                      //                 text: 'User already exists. Please use a different phone number.',
-                                      //                 confirmBtnText: 'OK',
-                                      //                 onConfirmBtnTap: () {
-                                      //                   Navigator.pop(context);
-                                      //                   Navigator.pushReplacement(
-                                      //                     context,
-                                      //                     MaterialPageRoute(
-                                      //                       builder: (context) => SignIn(
-                                      //                         emailOrPhoneNumber: mailEditingController.text,
-                                      //                       ),
-                                      //                     ),
-                                      //                   );
-                                      //                 },
-                                      //               );
-                                      //             }
-                                      //           }
-                                      //           else if (userExists) {
-                                      //             QuickAlert.show(
-                                      //               context: context,
-                                      //               type: QuickAlertType.error,
-                                      //               title: 'Error',
-                                      //               text: 'User already exists. Please use a different phone number.',
-                                      //               confirmBtnText: 'OK',
-                                      //               onConfirmBtnTap: () {
-                                      //                 Navigator.pop(context);
-                                      //                 Navigator.pushReplacement(
-                                      //                   context,
-                                      //                   MaterialPageRoute(
-                                      //                     builder: (context) => SignIn(
-                                      //                       emailOrPhoneNumber: mailEditingController.text,
-                                      //                     ),
-                                      //                   ),
-                                      //                 );
-                                      //               },
-                                      //             );
-                                      //           }
-                                      //           else {
-                                      //
-                                      //             SendOTPAPI().sendOTP(finalMailEditingController);
-                                      //
-                                      //             // Navigate to the next screen if user does not exist
-                                      //             Navigator.push(
-                                      //               context,
-                                      //               MaterialPageRoute(
-                                      //                 builder: (context) => VerifyYourAccount(
-                                      //                   previousScreen: 'SignUp',
-                                      //                   userEmailOrPhone: mailEditingController.text,
-                                      //                   userName: nameEditingController.text,
-                                      //                   userPasword: passEditingController.text,
-                                      //                 ),
-                                      //               ),
-                                      //             );
-                                      //           }
-                                      //         } catch (error) {
-                                      //           Navigator.of(context).pop();
-                                      //           print(error);
-                                      //           showDialog(
-                                      //             context: context,
-                                      //             builder: (BuildContext context) {
-                                      //               return AlertDialog(
-                                      //                 title: Text(error.toString()),
-                                      //                 content: Text('An error occurred while checking user existence. Please try again.'),
-                                      //                 actions: <Widget>[
-                                      //                   TextButton(
-                                      //                     child: Text('OK'),
-                                      //                     onPressed: () {
-                                      //                       Navigator.of(context).pop();
-                                      //                     },
-                                      //                   ),
-                                      //                 ],
-                                      //               );
-                                      //             },
-                                      //           );
-                                      //         }
-                                      //
-                                      //
-                                      //       } else {
-                                      //         HelperClass.showToast("Passwords do not match.");
-                                      //       }
-                                      //     } else {
-                                      //       HelperClass.showToast("Password should be of 8 characters");
-                                      //     }
-                                      //   } else {
-                                      //     HelperClass.showToast("Please provide all required fields");
-                                      //   }
-                                      // },
+
                                       onPressed: () async {
                                         if (mailEditingController.text.isNotEmpty &&
                                             nameEditingController.text.isNotEmpty &&
@@ -840,14 +684,19 @@ class _SignUpState extends State<SignUp> {
                                               }
 
                                               try {
-                                                bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
-                                                if (!otpSent) {
-                                                  HelperClass.showToast("Invalid email");
-                                                  Navigator.of(context).pop(); // Dismiss the loading dialog
-                                                  return; // Exit the function
-                                                }
+                                                print("checking phone number");
+                                                print(finalMailEditingController);
+
 
                                                 bool userExists = await checkUserExists(finalMailEditingController);
+                                                if(!userExists){
+                                                  bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
+                                                  if (!otpSent) {
+                                                    HelperClass.showToast("Invalid email");
+                                                    Navigator.of(context).pop(); // Dismiss the loading dialog
+                                                    return; // Exit the function
+                                                  }
+                                                }
 
                                                 Navigator.of(context).pop(); // Dismiss the loading dialog
 
@@ -982,392 +831,6 @@ class _SignUpState extends State<SignUp> {
               ),
             )
 
-          // SingleChildScrollView(
-          //   physics: ScrollPhysics(),
-          //   child: Container(
-          //     height: (orientation == Orientation.portrait)
-          //         ? screenHeight - 37
-          //         : screenWidth,
-          //     decoration: BoxDecoration(
-          //       color: Color(0xffffffff),
-          //     ),
-          //     child: Column(
-          //       children: [
-          //         Container(
-          //           child: Column(
-          //             crossAxisAlignment: CrossAxisAlignment.center,
-          //             children: [
-          //               Container(
-          //                 child: Column(
-          //                   crossAxisAlignment: CrossAxisAlignment.start,
-          //                   children: [
-          //                     Container(
-          //                         margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
-          //                         width: double.infinity,
-          //                         child: Text(
-          //                           "Sign Up",
-          //                           style: const TextStyle(
-          //                             fontFamily: "Roboto",
-          //                             fontSize: 24,
-          //                             fontWeight: FontWeight.w700,
-          //                             color: Color(0xff000000),
-          //                             height: 30 / 24,
-          //                           ),
-          //                           textAlign: TextAlign.left,
-          //                         )),
-          //                     Container(
-          //                         //color: Colors.amberAccent,
-          //                         margin: EdgeInsets.only(
-          //                             top: 20, left: 16, right: 16),
-          //                         height: 58,
-          //                         child: Container(
-          //                             padding: EdgeInsets.only(left: 12),
-          //                             width: double.infinity,
-          //                             decoration: BoxDecoration(
-          //                               border: Border.all(
-          //                                   color: outlineheaderColor,
-          //                                   width: 2),
-          //                               color: Color(0xfffffff),
-          //                               borderRadius: BorderRadius.circular(4),
-          //                             ),
-          //                             child: Row(
-          //                               children: [
-          //                                 containsOnlyNumeric(
-          //                                         mailEditingController.text)
-          //                                     ? CountryCodeSelector()
-          //                                     : Text(""),
-          //                                 Expanded(
-          //                                   child: Semantics(
-          //                                     label:
-          //                                         "Enter Email or mobile number",
-          //                                     child: ExcludeSemantics(
-          //                                       child: TextFormField(
-          //                                         focusNode: _focusNode1,
-          //                                         controller:
-          //                                             mailEditingController,
-          //                                         decoration: InputDecoration(
-          //                                             hintText:
-          //                                                 'Email or mobile number',
-          //                                             hintStyle: TextStyle(
-          //                                               fontFamily: 'Roboto',
-          //                                               fontSize: 14,
-          //                                               fontWeight:
-          //                                                   FontWeight.w400,
-          //                                               color:
-          //                                                   Color(0xffbdbdbd),
-          //                                             ),
-          //                                             border: InputBorder.none
-          //                                             //contentPadding: EdgeInsets.symmetric(vertical: 8)
-          //                                             ),
-          //                                         onChanged: (value) {
-          //                                           emailFieldListner();
-          //                                         },
-          //                                       ),
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ],
-          //                             ))),
-          //                     Container(
-          //                         //color: Colors.amberAccent,
-          //                         margin: EdgeInsets.only(
-          //                             top: 20, left: 16, right: 16),
-          //                         height: 58,
-          //                         child: Container(
-          //                             padding: EdgeInsets.only(left: 12),
-          //                             width: double.infinity,
-          //                             decoration: BoxDecoration(
-          //                               border: Border.all(
-          //                                   color: outlineheaderColor,
-          //                                   width: 2),
-          //                               color: Color(0xfffffff),
-          //                               borderRadius: BorderRadius.circular(4),
-          //                             ),
-          //                             child: Row(
-          //                               children: [
-          //                                 // containsOnlyNumeric(mailEditingController.text)? CountryCodeSelector(): Text(""),
-          //                                 Expanded(
-          //                                   child: Semantics(
-          //                                     label: "Enter your name",
-          //                                     child: ExcludeSemantics(
-          //                                       child: TextFormField(
-          //                                         focusNode: nameFocusNode,
-          //                                         controller:
-          //                                             nameEditingController,
-          //                                         decoration: InputDecoration(
-          //                                             hintText: 'Name',
-          //                                             hintStyle: TextStyle(
-          //                                               fontFamily: 'Roboto',
-          //                                               fontSize: 14,
-          //                                               fontWeight:
-          //                                                   FontWeight.w400,
-          //                                               color:
-          //                                                   Color(0xffbdbdbd),
-          //                                             ),
-          //                                             border: InputBorder.none
-          //                                             //contentPadding: EdgeInsets.symmetric(vertical: 8)
-          //                                             ),
-          //                                         onChanged: (value) {
-          //                                           nameFiledListner();
-          //                                           setState(() {
-          //                                             outlineheaderColorForPass =
-          //                                                 new Color(0xff49454f);
-          //                                             outlineheaderColor =
-          //                                                 new Color(0xff49454f);
-          //                                           });
-          //                                         },
-          //                                       ),
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ],
-          //                             ))),
-          //                     Container(
-          //                       //color: Colors.amberAccent,
-          //                       margin: EdgeInsets.only(
-          //                           top: 20, left: 16, right: 16),
-          //                       height: 58,
-          //                       child: Container(
-          //                         padding: EdgeInsets.only(left: 12),
-          //                         width: double.infinity,
-          //                         height: 48,
-          //                         decoration: BoxDecoration(
-          //                           border: Border.all(
-          //                               color: passincorrect
-          //                                   ? Colors.redAccent
-          //                                   : outlineheaderColorForPass,
-          //                               width: 2),
-          //                           color: Color(0xfffffff),
-          //                           borderRadius: BorderRadius.circular(4),
-          //                         ),
-          //                         child: Container(
-          //                           child: Semantics(
-          //                             label: "Enter your password",
-          //                             child: ExcludeSemantics(
-          //                               child: TextField(
-          //                                 focusNode: _focusNode1_1,
-          //                                 controller: passEditingController,
-          //                                 obscureText: _obscureText,
-          //                                 decoration: InputDecoration(
-          //                                   hintText: 'Password',
-          //                                   hintStyle: TextStyle(
-          //                                     fontFamily: 'Roboto',
-          //                                     fontSize: 14,
-          //                                     fontWeight: FontWeight.w400,
-          //                                     color: Color(0xffbdbdbd),
-          //                                   ),
-          //                                   border: InputBorder.none,
-          //                                   suffixIcon: IconButton(
-          //                                     icon: Icon(
-          //                                       _obscureText
-          //                                           ? Icons.visibility_off
-          //                                           : Icons.visibility,
-          //                                       color: Colors.grey,
-          //                                     ),
-          //                                     onPressed: () {
-          //                                       setState(() {
-          //                                         _obscureText =
-          //                                             !_obscureText; // Toggle show/hide password
-          //                                       });
-          //                                     },
-          //                                   ),
-          //                                   //contentPadding: EdgeInsets.symmetric(vertical: 8)
-          //                                 ),
-          //                                 onChanged: (value) {
-          //                                   passwordFieldListner();
-          //                                   setState(() {
-          //                                     outlineheaderColorForName =
-          //                                         new Color(0xff49454f);
-          //                                     outlineheaderColor =
-          //                                         new Color(0xff49454f);
-          //                                     passincorrect = false;
-          //                                   });
-          //                                 },
-          //                               ),
-          //                             ),
-          //                           ),
-          //                         ),
-          //                       ),
-          //                     ),
-          //                     passEditingController.text.length < 8
-          //                         ? ExcludeSemantics(
-          //                             child: Container(
-          //                               margin:
-          //                                   EdgeInsets.only(left: 32, top: 4),
-          //                               child: Text(
-          //                                 "8 characters password required.",
-          //                                 style: const TextStyle(
-          //                                   fontFamily: "Roboto",
-          //                                   fontSize: 12,
-          //                                   fontWeight: FontWeight.w400,
-          //                                   color: Color(0xffB3261E),
-          //                                   height: 16 / 12,
-          //                                 ),
-          //                                 textAlign: TextAlign.left,
-          //                               ),
-          //                             ),
-          //                           )
-          //                         : ExcludeSemantics(
-          //                             child: Container(
-          //                               margin:
-          //                                   EdgeInsets.only(left: 32, top: 4),
-          //                               child: Text(
-          //                                 "8 characters password required.",
-          //                                 style: const TextStyle(
-          //                                   fontFamily: "Roboto",
-          //                                   fontSize: 12,
-          //                                   fontWeight: FontWeight.w400,
-          //                                   color: Colors.green,
-          //                                   height: 16 / 12,
-          //                                 ),
-          //                                 textAlign: TextAlign.left,
-          //                               ),
-          //                             ),
-          //                           ),
-          //
-          //                     Container(
-          //                       margin: EdgeInsets.only(
-          //                           top: 20, right: 16, left: 16),
-          //                       child: SizedBox(
-          //                         height: 48,
-          //                         child: ElevatedButton(
-          //                           style: ElevatedButton.styleFrom(
-          //                             foregroundColor: Color(0xff777777),
-          //                             backgroundColor: buttonBGColor,
-          //                             shape: RoundedRectangleBorder(
-          //                               borderRadius:
-          //                                   BorderRadius.circular(4.0),
-          //                             ),
-          //                             elevation: 0,
-          //                           ),
-          //                           onPressed: () async {
-          //                             if (mailEditingController.text.isNotEmpty &&
-          //                                 nameEditingController
-          //                                     .text.isNotEmpty &&
-          //                                 passEditingController
-          //                                     .text.isNotEmpty) {
-          //                               if (passEditingController.text.length >=
-          //                                   8) {
-          //                                 showDialog(
-          //                                   context: context,
-          //                                   barrierDismissible: false,
-          //                                   builder: (BuildContext context) {
-          //                                     return Center(
-          //                                         child:
-          //                                             CircularProgressIndicator());
-          //                                   },
-          //                                 );
-          //
-          //                                 String finalMailEditingController =
-          //                                     '';
-          //                                 if (containsOnlyNumeric(
-          //                                     mailEditingController.text)) {
-          //                                   finalMailEditingController =
-          //                                       "+91${mailEditingController.text}";
-          //                                 } else {
-          //                                   finalMailEditingController =
-          //                                       mailEditingController.text;
-          //                                 }
-          //
-          //                                 try {
-          //                                   bool userExists =
-          //                                       await checkUserExists(
-          //                                           finalMailEditingController);
-          //
-          //                                   Navigator.of(context).pop();
-          //
-          //                                   if (userExists) {
-          //                                     QuickAlert.show(
-          //                                       context: context,
-          //                                       type: QuickAlertType.error,
-          //                                       title: 'Error',
-          //                                       text:
-          //                                           'User already exists. Please use a different phone number.',
-          //                                       confirmBtnText: 'OK',
-          //                                       onConfirmBtnTap:(){
-          //                                         Navigator.pop(context);
-          //                                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignIn(emailOrPhoneNumber: mailEditingController.text,)));
-          //                                       }
-          //
-          //                                     );
-          //
-          //                                   } else {
-          //                                     // Navigate to the next screen if user does not exist
-          //                                     Navigator.push(
-          //                                       context,
-          //                                       MaterialPageRoute(
-          //                                         builder: (context) =>
-          //                                             VerifyYourAccount(
-          //                                           previousScreen: 'SignUp',
-          //                                           userEmailOrPhone:
-          //                                               mailEditingController
-          //                                                   .text,
-          //                                           userName:
-          //                                               nameEditingController
-          //                                                   .text,
-          //                                           userPasword:
-          //                                               passEditingController
-          //                                                   .text,
-          //                                         ),
-          //                                       ),
-          //                                     );
-          //                                   }
-          //                                 } catch (error) {
-          //                                   Navigator.of(context).pop();
-          //                                   print(error);
-          //                                   showDialog(
-          //                                     context: context,
-          //                                     builder: (BuildContext context) {
-          //                                       return AlertDialog(
-          //                                         title: Text(error.toString()),
-          //                                         content: Text(
-          //                                             'An error occurred while checking user existence. Please try again.'),
-          //                                         actions: <Widget>[
-          //                                           TextButton(
-          //                                             child: Text('OK'),
-          //                                             onPressed: () {
-          //                                               Navigator.of(context)
-          //                                                   .pop();
-          //                                             },
-          //                                           ),
-          //                                         ],
-          //                                       );
-          //                                     },
-          //                                   );
-          //                                 }
-          //                               } else {
-          //                                 HelperClass.showToast(
-          //                                     "Password should be of 8 characters");
-          //                               }
-          //                             } else {
-          //                               HelperClass.showToast(
-          //                                   "Please provide all required fields");
-          //                             }
-          //                           },
-          //                           child: Center(
-          //                             child: Text(
-          //                               'Sign Up',
-          //                               style: TextStyle(
-          //                                 fontFamily: 'Roboto',
-          //                                 fontSize: 16,
-          //                                 fontWeight: FontWeight.w500,
-          //                                 color: Color(0xffffffff),
-          //                               ),
-          //                             ),
-          //                           ),
-          //                         ),
-          //                       ),
-          //                     ),
-          //                   ],
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
         )
       ]),
     );
@@ -1390,3 +853,4 @@ String extractPhoneNumber(String countryCode, String fullPhoneNumber) {
     return fullPhoneNumber;
   }
 }
+

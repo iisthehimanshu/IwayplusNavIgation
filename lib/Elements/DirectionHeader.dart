@@ -4,11 +4,14 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/locales.dart';
 
 import 'package:iwaymaps/navigationTools.dart';
+import 'package:translator/translator.dart';
 import 'package:vibration/vibration.dart';
 
 import '../Cell.dart';
@@ -19,9 +22,6 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
-import 'package:flutter_localization/flutter_localization.dart';
-import '../Elements/locales.dart';
-import 'package:translator/translator.dart';
 
 class DirectionHeader extends StatefulWidget {
   String direction;
@@ -50,18 +50,19 @@ class DirectionHeader extends StatefulWidget {
       required this.isRelocalize,
       this.getSemanticValue = '',
       required this.focusOnTurn,
-      required this.clearFocusTurnArrow,required this.context}) {
+      required this.clearFocusTurnArrow,
+      required this.context}) {
     try {
       double angle = tools.calculateAngleBWUserandCellPath(
           user.Cellpath[0],
           user.Cellpath[1],
           user.pathobj.numCols![user.Bid]![user.floor]!,
           user.theta);
-      direction = tools.angleToClocks(angle,context);
-      if (direction == LocaleData.straight.getString(context)) {
-        direction = LocaleData.gostraight.getString(context);
+      direction = tools.angleToClocks(angle, context);
+      if (direction == "Straight") {
+        direction = "Go Straight";
       } else {
-        direction = "${LocaleData.turn.getString(context)} ${direction}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}";
+        direction = "Turn ${direction}, and Go Straight";
       }
     } catch (e) {}
   }
@@ -89,8 +90,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    print("_currentLocale");
-    print(_currentLocale);
 
     for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
@@ -139,7 +138,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     listenToBin();
     //
     //   });
-    if(!widget.user.isInRealWorld){
+    if (!widget.user.isInRealWorld) {
       List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
       List<int> v = tools.eightcelltransition(widget.user.theta);
@@ -155,7 +154,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
             path[widget.user.pathobj.index + 1]);
       }
-      widget.direction = tools.angleToClocks(a,widget.context);
+      widget.direction = tools.angleToClocks(a, widget.context);
       List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
       if (remainingPath.isEmpty) {
         remainingPath.add(path.last);
@@ -163,28 +162,37 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       Cell nextTurn = findNextTurn(remainingPath);
       widget.distance = tools.distancebetweennodes(
           nextTurn, path[widget.user.pathobj.index], path);
+    }
+
+    //print("angleeeeee $angle")  ;
+    setState(() {
+      if (widget.direction == "Straight") {
+        widget.direction = "Go Straight";
+
+        speak(
+            "${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+            _currentLocale);
+      } else {
+        speak(
+            convertTolng(
+                "Turn ${LocaleData.getProperty5(widget.direction, widget.context)}, and ${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                _currentLocale,
+                "",
+                Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
+                    0.0, ""),
+                ""),
+            _currentLocale);
+        widget.getSemanticValue =
+            "Turn ${widget.direction}, and Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps";
       }
-
-      //print("angleeeeee $angle")  ;
-      setState(() {
-        if(widget.direction == LocaleData.straight.getString(widget.context)){
-          widget.direction = LocaleData.gostraight.getString(widget.context);
-
-          speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps",_currentLocale);
-        }else{
-          widget.direction = "${LocaleData.turn.getString(widget.context)} ${widget.direction}, ${LocaleData.and.getString(widget.context)} ${LocaleData.gostraight.getString(widget.context)}";
-
-          speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps",_currentLocale);
-          widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}";
-
-        }
-      });
+    });
     //
     // }
   }
 
   @override
   void dispose() {
+    flutterTts.cancelHandler;
     _timer.cancel();
     super.dispose();
   }
@@ -299,7 +307,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             speak(
-                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} ${LocaleData.floor.getString(widget.context)}",_currentLocale);
+                convertTolng(
+                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                    _currentLocale,
+                    "",
+                    Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null,
+                        0.0, 0.0, ""),
+                    nearestBeacon),
+                _currentLocale);
             //need to render on beacon for aiims jammu
             widget.paint(nearestBeacon, render: false);
             return true;
@@ -313,10 +328,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           else if (widget.user.floor ==
-
-              Building.apibeaconmap[nearestBeacon]!.floor &&
+                  Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight >= 1.3) {
-
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -326,10 +339,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             var dataBox = BuildingAPIModelBox.getData();
             dataBox.keys;
             dataBox.values;
-            for(var keys in dataBox.keys){
-
-            }
-
+            for (var keys in dataBox.keys) {}
 
             List<int> usercoord = [
               widget.user.showcoordX,
@@ -346,14 +356,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               int? indexOnPath = null;
               int numCols = widget
                   .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
-              widget.user.ListofPaths[widget.user.buildingNumber].forEach((node) {
+              widget.user.ListofPaths[widget.user.buildingNumber]
+                  .forEach((node) {
                 List<int> pathcoord = [node.x, node.y];
                 double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                 if (d1 < distanceFromPath) {
                   distanceFromPath = d1.toInt();
                   //print("node on path $node");
                   //print("distanceFromPath $distanceFromPath");
-                  indexOnPath = widget.user.ListofPaths[widget.user.buildingNumber].indexOf(node);
+                  indexOnPath = widget
+                      .user.ListofPaths[widget.user.buildingNumber]
+                      .indexOf(node);
                   //print(indexOnPath);
                 }
               });
@@ -368,7 +381,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} steps",_currentLocale);
+                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                    _currentLocale);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 return true; //moved on path
@@ -403,13 +417,54 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg,String lngcode) async {
-    var translation=await msg.translate(to:lngcode);
-    print("translation");
+  var translationn = GoogleTranslator();
+  Future<void> speak(String msg, String lngcode) async {
+    var translation =
+        await translationn.translate(msg, from: 'en', to: lngcode);
+    print("transalation");
     print(translation);
-    await flutterTts.setSpeechRate(0.6);
+    await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
-    await flutterTts.speak(translation.toString());
+    await flutterTts.speak(msg);
+  }
+
+  String convertTolng(String msg, String lngcode, String direc, Cell nextTurn,
+      String nearestBeacon) {
+    if (msg == "Turn ${widget.direction}") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "${widget.direction} मुड़ें";
+      }
+    } else if (widget.user.pathobj.associateTurnWithLandmark[nextTurn]!=null && msg ==
+        "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "आप ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!} से ${direc} मोड़ के करीब पहुंच रहे हैं।";
+      }
+    } else if (msg == "You are approaching ${direc} turn") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "आप ${direc} मोड़ के करीब पहुंच रहे हैं";
+      }
+    } else if (msg ==
+        "Turn ${LocaleData.getProperty5(widget.direction, widget.context)}, and ${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "${LocaleData.getProperty5(widget.direction, widget.context)} और सीधे ${(widget.distance / UserState.stepSize).ceil()} कदम चलें";
+      }
+    } else if (msg ==
+        "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "आप ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} मंजिल पर पहुंच गए हैं";
+      }
+    }
+    return "";
   }
 
   Cell findNextTurn(List<Cell> path) {
@@ -444,7 +499,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(!widget.user.isInRealWorld){
+    if (!widget.user.isInRealWorld) {
       List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
       List<int> v = tools.eightcelltransition(widget.user.theta);
@@ -460,7 +515,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             [widget.user.showcoordX + v[0], widget.user.showcoordY + v[1]],
             path[widget.user.pathobj.index + 1]);
       }
-      widget.direction = tools.angleToClocks(a,widget.context);
+      widget.direction = tools.angleToClocks(a, widget.context);
       List<Cell> remainingPath = path.sublist(widget.user.pathobj.index);
       if (remainingPath.isEmpty) {
         remainingPath.add(path.last);
@@ -470,7 +525,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           nextTurn, path[widget.user.pathobj.index], path);
       print("distance ${widget.distance}");
       if (oldWidget.direction != widget.direction) {
-        if (oldWidget.direction == LocaleData.straight.getString(widget.context)) {
+        if (oldWidget.direction == "Straight") {
           Vibration.vibrate();
 
           // if(nextTurn == turnPoints.last){
@@ -479,47 +534,75 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-
-          speak("${LocaleData.turn.getString(widget.context)} ${widget.direction}",_currentLocale);
+          speak(
+              convertTolng("Turn ${widget.direction}", _currentLocale, "", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
+                      0.0, ""),""),
+              _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+
         } else if (widget.direction == LocaleData.straight.getString(widget.context)) {
+
           Vibration.vibrate();
 
-
           speak(
-              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              _currentLocale);
         }
       }
 
-      try{
-        if((widget.distance/UserState.stepSize).ceil() == 7){
+      try {
+        if ((widget.distance / UserState.stepSize).ceil() == 7) {
           if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
             int index = path.indexWhere((element) => element == nextTurn);
-            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index-1].x , path[index-1].y], path[index+1]),widget.context);
+            String direc = tools.angleToClocks(
+                tools.calculateAnglefifthForMultiBuilding(path[index],
+                    [path[index - 1].x, path[index - 1].y], path[index + 1]),
+                widget.context);
             print("direc mila $direc");
             print("index mila $index");
 
             speak(
-                "${LocaleData.approaching.getString(widget.context)} ${direc} ${LocaleData.turnfrm.getString(widget.context)} ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",_currentLocale);
+                convertTolng(
+                    "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
+                    _currentLocale,
+                    direc,
+                    nextTurn,""),
+                _currentLocale);
             //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
           } else {
             int index = path.indexWhere((element) => element == nextTurn);
             print("index mila $index");
-            String direc = tools.angleToClocks(tools.calculateAnglefifthForMultiBuilding(path[index], [path[index+1].x , path[index+1].y], path[index-1]),widget.context);
+            String direc = tools.angleToClocks(
+                tools.calculateAnglefifthForMultiBuilding(path[index],
+                    [path[index + 1].x, path[index + 1].y], path[index - 1]),
+                widget.context);
             print("direc mila $direc");
-            speak("${LocaleData.approaching.getString(widget.context)} ${direc} ${LocaleData.turn.getString(widget.context)}",_currentLocale);
-            widget.user.move(context);
+            speak(
+                convertTolng("You are approaching ${direc} turn",
+                    _currentLocale, direc, nextTurn,""),
+                _currentLocale);
+            widget.user.move(widget.context);
           }
         }
-      }catch(e){
+      } catch (e) {
         print("approaching turn issue");
       }
-    }else{
-      widget.distance = tools.calculateDistanceBetweenLatLng(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1],inFeet: true).ceil()-UserState.stepSize.toInt();
-      double a = tools.calculateAngleBetweenVectors(widget.user.lat, widget.user.lng, widget.user.p[0], widget.user.p[1], widget.user.theta);
-      widget.direction = tools.angleToClocks(a,widget.context);
+    } else {
+      widget.distance = tools
+              .calculateDistanceBetweenLatLng(widget.user.lat, widget.user.lng,
+                  widget.user.p[0], widget.user.p[1],
+                  inFeet: true)
+              .ceil() -
+          UserState.stepSize.toInt();
+      double a = tools.calculateAngleBetweenVectors(
+          widget.user.lat,
+          widget.user.lng,
+          widget.user.p[0],
+          widget.user.p[1],
+          widget.user.theta);
+      widget.direction = tools.angleToClocks(a, widget.context);
       if (oldWidget.direction != widget.direction) {
-        if (oldWidget.direction == LocaleData.straight.getString(widget.context)) {
+        if (oldWidget.direction == "Straight") {
           Vibration.vibrate();
 
           // if(nextTurn == turnPoints.last){
@@ -528,19 +611,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("${LocaleData.turn.getString(widget.context)} ${widget.direction}",_currentLocale);
+          speak("Turn ${LocaleData.getProperty5(widget.direction, context)}",
+              _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-        } else if (widget.direction == LocaleData.straight.getString(widget.context)) {
+        } else if (widget.direction == "Straight") {
           Vibration.vibrate();
 
           speak(
-              "${LocaleData.gostraight.getString(widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",_currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              _currentLocale);
         }
       }
     }
-
-
-
   }
 
   // @override
@@ -580,7 +662,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   //       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
   //
   //       double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-  //       widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
+  //       widget.direction = tools.angleToClocks(angle,context) == "None"?oldWidget.direction:tools.angleToClocks(angle,context);
   //       int index = widget.user.path.indexOf(nextTurn);
   //       //print("index $index");
   //       double a =0;
@@ -639,51 +721,50 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   //   }
   // }
 
-  static Icon getCustomIcon(String direction,context) {
-
-    if (direction == LocaleData.straight.getString(context)) {
+  static Icon getCustomIcon(String direction) {
+    if (direction == "Straight") {
       return Icon(
         Icons.straight,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.slightright.getString(context)) {
+    } else if (direction == "Slight Right") {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.right.getString(context)) {
+    } else if (direction == "Right") {
       return Icon(
         Icons.turn_right,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.sharpright.getString(context)) {
+    } else if (direction == "Sharp Right") {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.uturn.getString(context)) {
+    } else if (direction == "U Turn") {
       return Icon(
         Icons.u_turn_right,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.sharpleft.getString(context)) {
+    } else if (direction == "Sharp Left") {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.left.getString(context)) {
+    } else if (direction == "Left") {
       return Icon(
         Icons.turn_left,
         color: Colors.white,
         size: 40,
       );
-    } else if (direction == LocaleData.slightleft.getString(context)) {
+    } else if (direction == "Slight Left") {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.white,
@@ -698,50 +779,50 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-  Icon getNextCustomIcon(String direction,context) {
-    if (direction == LocaleData.straight.getString(context)) {
+  Icon getNextCustomIcon(String direction) {
+    if (direction == "Straight") {
       return Icon(
         Icons.straight,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.slightright.getString(context)) {
+    } else if (direction == "Slight Right") {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.right.getString(context)) {
+    } else if (direction == "Right") {
       return Icon(
         Icons.turn_right,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.sharpright.getString(context)) {
+    } else if (direction == "Sharp Right") {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.uturn.getString(context)) {
+    } else if (direction == "U Turn") {
       return Icon(
         Icons.u_turn_right,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.sharpleft.getString(context)) {
+    } else if (direction == "Sharp Left") {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.left.getString(context)) {
+    } else if (direction == "Left") {
       return Icon(
         Icons.turn_left,
         color: Colors.white,
         size: 23,
       );
-    } else if (direction ==  LocaleData.slightleft.getString(context)) {
+    } else if (direction == "Slight Left") {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.white,
@@ -804,11 +885,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 scrollableDirection(
                     "${widget.direction}",
                     '${(widget.distance / UserState.stepSize).ceil()}',
-                    getCustomIcon(widget.direction,widget.context),
+                    getCustomIcon(widget.direction),
                     DirectionIndex,
                     nextTurnIndex,
                     widget.user.pathobj.directions,
-                    widget.user),
+                    widget.user,
+                    widget.context),
                 const SizedBox(
                   width: 8,
                 ),
@@ -852,11 +934,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     color: Color(0xff013633),
                   ),
-
                   child: Row(
                     children: [
                       Text(
-                        LocaleData.then.getString(context),
+                        "Then",
                         style: const TextStyle(
                           fontFamily: "Roboto",
                           fontSize: 16,
@@ -871,7 +952,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       ),
                       // Text(DirectionIndex.toString()),
                       // Text(nextTurnIndex.toString())
-                      getNextCustomIcon(turnDirection,widget.context)
+                      getNextCustomIcon(turnDirection)
                     ],
                   ),
                 )
@@ -884,12 +965,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(ShowsumMap.toString()),
+                  // Text(ShowsumMap.toString()),
                 ],
               ),
             ),
           ),
-
         ],
       ),
     );
@@ -904,9 +984,10 @@ class scrollableDirection extends StatelessWidget {
   int nextTurnIndex;
   List<direction> listOfDirections;
   UserState user;
+  BuildContext context;
 
   scrollableDirection(this.Direction, this.steps, this.i, this.DirectionIndex,
-      this.nextTurnIndex, this.listOfDirections, this.user);
+      this.nextTurnIndex, this.listOfDirections, this.user, this.context);
 
   String chooseDirection(context) {
     if (listOfDirections[DirectionIndex].isDestination) {
@@ -925,30 +1006,30 @@ class scrollableDirection extends StatelessWidget {
         ]);
       }
       return angle != null
-          ? "${listOfDirections[DirectionIndex].turnDirection} ${ LocaleData.willbe.getString(context)}${tools.angleToClocks3(angle,context)}"
-          : "${listOfDirections[DirectionIndex].turnDirection} ${ LocaleData.willbe.getString(context)} ${ LocaleData.onyourfront.getString(context)}";
+          ? "${listOfDirections[DirectionIndex].turnDirection} will be ${tools.angleToClocks3(angle, context)}"
+          : "${listOfDirections[DirectionIndex].turnDirection} will be on your front";
     } else if (DirectionIndex == nextTurnIndex) {
-      return "${Direction ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context): "${LocaleData.turn.getString(context)} ${Direction}, ${ LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}";
+      return "${Direction == "Straight" ? "Go Straight" : "Turn ${Direction}, and Go Straight"}";
     } else {
       if (DirectionIndex < listOfDirections.length) {
-        return "${listOfDirections[DirectionIndex].turnDirection ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context) : "${LocaleData.turn.getString(context)} ${listOfDirections[DirectionIndex].turnDirection}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}";
+        return "${listOfDirections[DirectionIndex].turnDirection == "Straight" ? "Go Straight" : "Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
       } else {
-        return "${listOfDirections[DirectionIndex - 1].turnDirection ==  LocaleData.straight.getString(context) ?  LocaleData.gostraight.getString(context) : "${LocaleData.turn.getString(context)} ${listOfDirections[DirectionIndex - 1].turnDirection}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}";
+        return "${listOfDirections[DirectionIndex - 1].turnDirection == "Straight" ? "Go Straight" : "Turn ${listOfDirections[DirectionIndex - 1].turnDirection}, and Go Straight"}";
       }
     }
   }
 
-  String chooseSteps(context) {
+  String chooseSteps() {
     if (listOfDirections[DirectionIndex].isDestination) {
       return "";
     } else if (DirectionIndex == nextTurnIndex) {
-      return '$steps ${LocaleData.steps.getString(context)}';
+      return '$steps Steps';
     } else {
-      return '${((listOfDirections[DirectionIndex].distanceToNextTurn ?? 1) / UserState.stepSize).ceil()} ${LocaleData.steps.getString(context)}';
+      return '${((listOfDirections[DirectionIndex].distanceToNextTurn ?? 1) / UserState.stepSize).ceil()} Steps';
     }
   }
 
-  Icon chooseIcon(context) {
+  Icon chooseIcon() {
     if (listOfDirections[DirectionIndex].isDestination) {
       return Icon(
         Icons.place_rounded,
@@ -959,7 +1040,7 @@ class scrollableDirection extends StatelessWidget {
       return i;
     } else {
       return _DirectionHeaderState.getCustomIcon(
-          listOfDirections[DirectionIndex].turnDirection!,context);
+          listOfDirections[DirectionIndex].turnDirection!);
     }
   }
 
@@ -973,7 +1054,7 @@ class scrollableDirection extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                "${Direction == LocaleData.straight.getString(context) ? LocaleData.gostraight.getString(context) : "${LocaleData.turn.getString(context)} ${Direction}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"}",
+                "${Direction == "Straight" ? "${LocaleData.gostraight.getString(context)}" : LocaleData.getProperty(Direction, context)}",
                 style: const TextStyle(
                   fontFamily: "Roboto",
                   fontSize: 24,
@@ -1009,7 +1090,7 @@ class scrollableDirection extends StatelessWidget {
                 Container(
                   height: 40,
                   width: 40,
-                  child: chooseIcon(context),
+                  child: chooseIcon(),
                 ),
               ],
             ),

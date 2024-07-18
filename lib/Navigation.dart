@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
 class Navigation extends StatefulWidget {
   String directLandID = "";
   static bool bluetoothGranted = false;
-  BuildContext context;
+   BuildContext context;
 
   Navigation({this.directLandID = '',required this.context});
 
@@ -396,7 +396,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
+      speak("Loading Maps",_currentLocale);
 
     });
     print("Circular progress bar");
@@ -651,7 +651,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else if (accuracy <= 10) {
       return 'Medium';
     } else {
-      _showLowAccuracyDialog();
+     // _showLowAccuracyDialog();
       return 'Low';
     }
   }
@@ -692,9 +692,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+var translationn=GoogleTranslator();
   Future<void> speak(String msg,String lngcode) async {
-    var translation=await msg.translate(to:lngcode);
+    var translation=await translationn.translate(msg,from:'en',to:lngcode);
+    print('transalation');
+    print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(translation.toString());
@@ -1137,6 +1139,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
       UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+      UserState.lngCode=_currentLocale;
       UserState.moveMarkerToBuilding = moveMarkerToBuilding;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
@@ -1145,6 +1148,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
       UserState.customRender = customRender;
+
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -1274,7 +1278,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 "You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}",_currentLocale);
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       } else {
@@ -1285,7 +1289,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}",_currentLocale);
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
           }
         }
       }
@@ -1350,7 +1354,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
-    _isreroutePannelOpen = true;
+    _isreroutePannelOpen = false;
     user.isnavigating = false;
     print("reroute----- coord ${user.coordX},${user.coordY}");
     print("reroute----- show ${user.showcoordX},${user.showcoordY}");
@@ -1705,7 +1709,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //searching your location
 
       speak("Please wait",_currentLocale);
-      speak("Your current location is being discovered",_currentLocale);
+      speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -1723,6 +1727,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
+    print("IDS ${IDS}");
     try{
       await outBuilding().outbuilding(IDS).then((out) async {
         if (out != null) {
@@ -4449,8 +4454,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       for (int i = 1; i < PathState.directions.length; i++) {
         if (!PathState.directions[i].isDestination) {
           if (PathState.directions[i].nearbyLandmark != null) {
+            print("PathState.directions[i].turnDirection");
+            print(PathState.directions[i].turnDirection);
             directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                direction: PathState.directions[i].turnDirection == 'Straight'
                     ? '${LocaleData.gostraight.getString(context)}'
                     : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(PathState.directions[i].turnDirection!,context)} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!} ${LocaleData.getProperty2(PathState.directions[i].turnDirection!,context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
@@ -4462,11 +4469,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   direction: "${PathState.directions[i].turnDirection!}",
                   distance:
 
-                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
+                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
 
             } else {
               directionWidgets.add(directionInstruction(
-                direction: PathState.directions[i].turnDirection == '${LocaleData.straight.getString(context)}'
+                direction: PathState.directions[i].turnDirection == 'Straight'
                     ? '${LocaleData.gostraight.getString(context)}'
                     : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty4(PathState.directions[i].turnDirection!,context)}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance:
@@ -5356,7 +5363,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 child: Text(
                                                   angle != null
 
-                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)} ${tools.angleToClocks3(angle,context)}"
+                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)}  ${LocaleData.getProperty(tools.angleToClocks3(angle,context),context)}"
                                                       : PathState.destinationName,
 
                                                   style: const TextStyle(

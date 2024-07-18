@@ -45,6 +45,19 @@ mixin LocaleData {
   static const String tright='tRight';
   static const String tslightright= 'tSlightRight';
   static const String tslightleft= 'tSlightLeft';
+  static const String tsharpright= 'tSharpRight';
+  static const String tsharpleft= 'tSharpLeft';
+
+
+  static const String ttsright='ttsRight';
+  static const String ttsleft='ttsLeft';
+  static const String ttsback='ttsBack';
+  static const String ttsfront='ttsFront';
+  static const String ttsslightright='ttsSlightRight';
+  static const String ttsslightleft='ttsSlightLeft';
+  static const String ttssharpright='ttsSharpRight';
+  static const String ttssharpleft='ttsSharpLeft';
+  static const String ttsuturn='ttsUTurn';
 
 
 
@@ -60,9 +73,11 @@ mixin LocaleData {
   static const String tsuturn='tsU Turn';
   static const String tssharpleft='tsSharp Left';
   static const String tsleft='tsLeft';
+
   static const String tsslightright='tsSlight Right';
   static const String tsslightleft='tsSlight Left';
   static const String tssharpright='tsSharp Right';
+
   static const String hright='hRight';
   static const String hleft='hLeft';
   static const String gostraight='Go Straight';
@@ -108,6 +123,10 @@ mixin LocaleData {
  static const String direction='Direction';
  static const String turnfrm='turn from';
  static const String approaching='Approaching';
+ static const String location='Location';
+  static const String none='None';
+  static const String ttsgostraight='ttsGoStraight';
+
 
   static Map<String, String> get properties => {
     'Slight Right': tsslightright,
@@ -117,6 +136,17 @@ mixin LocaleData {
     'Sharp Left': tssharpleft,
     'Left': tsleft,
     'Slight Left': tsslightleft,
+    'on your Slight Right':onyourslightright,
+    'on your Sharp Right':onyoursharpright,
+    'on your Sharp Left':onyoursharpleft,
+    'on your Slight Left':onyourslightleft,
+        'on your Front':onyourfront,
+        'on your Left':onyourleft,
+        'on your Back':onyourleft,
+        'on your Right':onyourright
+
+
+
   };
 
 
@@ -148,16 +178,44 @@ mixin LocaleData {
     'Left':tleft,
     'Slight Left':tslightleft,
     'Slight Right':tslightright,
-    'Straight':straight
+    'Straight':straight,
+    'Sharp Left':tsharpleft,
+    'Sharp Right':tsharpright
   };
 
 
   static String getProperty4(String propertyName,context) {
-    print("propertyName");
-    print(propertyName);
     return properties4[propertyName]!.getString(context);
   }
 
+  static Map<String, String> get properties5 => {
+    'Right':ttsright,
+    'Left':ttsleft,
+    'Front':ttsfront,
+    'Back':ttsback,
+    'None':none,
+    'Slight Right':ttsslightright,
+    'Slight Left':ttsslightleft,
+  'Sharp Left':ttssharpleft,
+  'Sharp Right':ttssharpleft,
+  'U Turn':ttsuturn,
+
+  };
+
+
+  static String getProperty5(String propertyName,context) {
+    return properties5[propertyName]!.getString(context);
+  }
+
+  static Map<String, String> get properties6 => {
+   'Go Straight':ttsgostraight
+
+  };
+
+
+  static String getProperty6(String propertyName,context) {
+    return properties6[propertyName]!.getString(context);
+  }
 
 
 
@@ -212,6 +270,8 @@ mixin LocaleData {
     'tLeft':'Left',
     'tSlightRight':'Slight Right',
       'tSlightLeft':'Slight Left',
+      'tSharpRight':'Sharp Right',
+    'tSharpLeft':'Sharp Left',
 
     'Go Straight':'Go Straight',
     'Then': 'Then',
@@ -258,7 +318,18 @@ mixin LocaleData {
     'Approaching': 'Approaching',
     'hRight':'',
     'hLeft':'',
-
+    'Location':'location',
+  'ttsRight':'Right',
+  'ttsLeft':'Left',
+  'ttsBack':'Back',
+  'ttsFront':'Front',
+    'None':'None',
+  'ttsSlightRight':'Slight Right',
+  'ttsSlightLeft':'Slight Left',
+  'ttsSharpRight':'Sharp Right',
+  'ttsSharpLeft':'Sharp Left',
+  'ttsUTurn':'U Turn',
+    'ttsGoStraight':'Go Straight'
 
 
 
@@ -313,6 +384,8 @@ mixin LocaleData {
 
     'tSlightRight':'हल्का दायें ओर मुड़ें',
       'tSlightLeft':'हल्का बाएं ओर मुड़े',
+    'tSharpRight':'तीव्र दायें ओर मुड़ें',
+    'tSharpLeft':'तीव्र बाएं ओर मुड़े',
 
     'tsRight': 'दाएँ मुड़ें और सीधे जाएँ',
     'tsU Turn': 'उल्टा घूमे और सीधा जाएँ',
@@ -364,7 +437,20 @@ mixin LocaleData {
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
   'Direction':'दिशा',
   'turn from':'से मुड़ो',
-    'Approaching': 'पास आ रहे हैं'
+    'Approaching': 'पास आ रहे हैं',
+    'Location':'लोकेशन',
+
+    'ttsRight':'राइट',
+    'ttsLeft':'लेफ्ट',
+    'ttsBack':'बैक',
+    'ttsFront':'फ्रंट',
+    'None':'शून्य',
+  'ttsSlightRight':'थोड़ा दाएँ',
+  'ttsSlightLeft':'थोड़ा बाएँ',
+  'ttsSharpRight':'तीव्र दाएँ',
+  'ttsSharpLeft':'तीव्र बाएँ',
+  'ttsUTurn':'यू टर्न',
+    'ttsGoStraight':'सीधे चले लगभग'
   };
 
   static const Map<String, dynamic> TA = {

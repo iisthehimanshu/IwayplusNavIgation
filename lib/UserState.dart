@@ -29,6 +29,7 @@ class UserState{
   bool isnavigating;
   int showcoordX;
   int showcoordY;
+
   pathState pathobj = pathState();
   List<int> path = [];
   List<Cell> Cellpath = [];
@@ -42,6 +43,7 @@ class UserState{
   List<double> p = [];
   List<List<double>> realWorldCoordinates = [];
   bool isInRealWorld = false;
+  static String lngCode='en';
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
@@ -52,14 +54,14 @@ class UserState{
   static Map<String,Map<int, List<int>>> nonWalkable = Map();
   static Function reroute = (){};
   static Function closeNavigation = (){};
-  static Function speak = (){};
+  static Function speak = (String lngcode){};
   static Function AlignMapToPath = (){};
   static Function startOnPath = (){};
   static Function paintMarker = (geo.LatLng Location){};
   static Function customRender = (List<double> pos){};
   static Function moveMarkerToBuilding = (String destBid, String sourceBid){};
 
-  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false, this.coordXf = 0.0, this.coordYf = 0.0});
+  UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false, this.coordXf = 0.0, this.coordYf = 0.0,});
 
   // Future<void> move()async {
   //   print("prev----- coord $coordX,$coordY");
@@ -228,7 +230,7 @@ class UserState{
           // destination check
           if (buildingNumber == 0 &&
               ListofPaths[buildingNumber].length - pathobj.index < 6) {
-            speak("You have reached ${pathobj.destinationName}");
+            speak("You have reached ${pathobj.destinationName}",lngCode);
             closeNavigation();
           }
 
@@ -250,7 +252,7 @@ class UserState{
               pathobj.connections[Bid]?[floor] ==
                   (showcoordY * cols + showcoordX)) {
             speak(
-                "Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
+                "Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor",lngCode);
           }
 
 
@@ -266,7 +268,7 @@ class UserState{
                       element.doorY ?? element.coordinateY!
                     ]) <=
                     3) {
-                  speak("Passing by ${element.name}");
+                  speak("Passing by ${element.name}",lngCode);
                   pathState.nearbyLandmarks.remove(element);
                 }
               } else {
@@ -289,7 +291,7 @@ class UserState{
                     element.coordinateY!
                   ]);
                   speak(
-                      "${element.name} is on your ${tools.angleToClocks(agl,context)}");
+                      "${element.name} is on your ${tools.angleToClocks(agl,context)}",lngCode);
                   pathState.nearbyLandmarks.remove(element);
                 }
               }

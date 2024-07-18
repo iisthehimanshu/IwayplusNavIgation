@@ -204,6 +204,8 @@ mixin LocaleData {
 
 
   static String getProperty5(String propertyName,context) {
+    print("property5");
+    print(propertyName);
     return properties5[propertyName]!.getString(context);
   }
 
@@ -412,7 +414,7 @@ mixin LocaleData {
     'go to': 'जाओ',
     'from': '',
     'Exit': 'निकास',
-    'Start' :'प्राम्भ करे',
+    'Start' :'स्टार्ट करे',
     'min': 'मिनट',
     'Take': 'लें',
   'Maps' : 'नक्शा',
@@ -423,16 +425,16 @@ mixin LocaleData {
     'on your Slight Left': 'आपके हल्के बायें',
     'Front' : 'सामने',
     'Back' :'पीछे',
-    'Loading maps' :'नक्शे लोड हो रहे हैं',
-    'Searching your location...' : 'आपकी स्थिति खोजी जा रही है...',
+    'Loading maps' :'लोडिंग मैप्स',
+    'Searching your location...' : 'आपकी वर्तमान जगह को ढूँढ़ा जा रहा है',
   'Please wait': 'कृपया प्रतीक्षा करें',
     'You are on': 'आप हैं',
     'is on your':'आपके पर है',
     'near':'पास',
     'Unable to find your location': 'आपकी स्थिति का पता नहीं चल पाया',
     'You are going away from the path. Click Reroute to Navigate from here.': 'आप मार्ग से भटक रहे हैं। यहाँ से मार्गदर्शन करने के लिए पुनर्निर्देशित पर क्लिक करें।',
-    'is': 'है',
-    'meter away': 'मीटर दूर',
+    'is': '',
+    'meter away': 'मीटर दूर है',
     'Click Start to Navigate' : 'नेविगेट करने के लिए स्टार्ट पर क्लिक करें',
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
   'Direction':'दिशा',

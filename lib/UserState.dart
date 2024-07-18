@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/MotionModel.dart';
@@ -9,6 +10,7 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'Elements/locales.dart';
 import 'navigationTools.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 
@@ -92,18 +94,41 @@ class UserState{
   //
   // }
 
+  String convertTolng(String msg,String? name,double agl,BuildContext context){
+    if(msg=="You have reached ${pathobj.destinationName}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "आप ${pathobj.destinationName} पर पहुंच गए हैं";
+      }
+    }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
+      }
+    }else if(name!=null && msg=="Passing by ${name}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "${name} से गुज़रते हुए";
+      }
+    }else if(name!=null && msg=="${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}")
+      {
+        if(lngCode=='en'){
+          return msg;
+        }else{
+          return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)} पर है";
+        }
+      }
+    return "";
+  }
+
   Future<void> move(context)async{
-
-
-
     moveOneStep(context);
-
-
     if(!isInRealWorld){
       for(int i=1;i<stepSize.toInt() ; i++){
         bool movementAllowed = true;
-
-
         if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[Bid]![floor]!, reroute)){
           movementAllowed = false;
         }
@@ -230,7 +255,7 @@ class UserState{
           // destination check
           if (buildingNumber == 0 &&
               ListofPaths[buildingNumber].length - pathobj.index < 6) {
-            speak("You have reached ${pathobj.destinationName}",lngCode);
+            speak(convertTolng("You have reached ${pathobj.destinationName}","",0.0,context) ,lngCode);
             closeNavigation();
           }
 
@@ -251,8 +276,8 @@ class UserState{
           if (floor != pathobj.destinationFloor &&
               pathobj.connections[Bid]?[floor] ==
                   (showcoordY * cols + showcoordX)) {
-            speak(
-                "Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor",lngCode);
+            speak(convertTolng("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor","",0.0,context)
+               ,lngCode);
           }
 
 
@@ -268,7 +293,7 @@ class UserState{
                       element.doorY ?? element.coordinateY!
                     ]) <=
                     3) {
-                  speak("Passing by ${element.name}",lngCode);
+                  speak(convertTolng("Passing by ${element.name}",element.name!,0.0,context) ,lngCode);
                   pathState.nearbyLandmarks.remove(element);
                 }
               } else {
@@ -290,8 +315,8 @@ class UserState{
                     element.coordinateX!,
                     element.coordinateY!
                   ]);
-                  speak(
-                      "${element.name} is on your ${tools.angleToClocks(agl,context)}",lngCode);
+                  speak(convertTolng("${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}", element.name!,0.0,context)
+                     ,lngCode);
                   pathState.nearbyLandmarks.remove(element);
                 }
               }

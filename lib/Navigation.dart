@@ -8015,12 +8015,12 @@ var translationn=GoogleTranslator();
                     SizedBox(height: 28.0),
 
                     DebugToggle.Slider?Text("${user.theta}"):Container(),
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    //     "userBid ${user.Bid} \n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "buildingnumber ${user.buildingNumber} \n"
-                    //     "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
+                    Text("coord [${user.coordX},${user.coordY}] \n"
+                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                        "userBid ${user.Bid} \n"
+                        "index ${user.pathobj.index} \n"
+                        "buildingnumber ${user.buildingNumber} \n"
+                        "path ${user.ListofPaths.isEmpty?[]:user.ListofPaths[user.buildingNumber][user.pathobj.index].node} \n"),
                     DebugToggle.Slider?Slider(
                         value: user.theta,
                         min: -180,

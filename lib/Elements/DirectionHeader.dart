@@ -500,7 +500,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!widget.user.isInRealWorld) {
-      double di = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], [widget.user.pathobj.connections[widget.user.Bid]![widget.user.floor]! % UserState.cols, widget.user.pathobj.connections[widget.user.Bid]![widget.user.floor]! ~/ UserState.cols]);
+      double di = 1000000;
+      try {
+         di = tools.calculateDistance(
+            [widget.user.showcoordX, widget.user.showcoordY], [
+          widget.user.pathobj.connections[widget.user.Bid]![widget.user
+              .floor]! % UserState.cols,
+          widget.user.pathobj.connections[widget.user.Bid]![widget.user
+              .floor]! ~/ UserState.cols
+        ]);
+      }catch(e){
+
+      }
       List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
       List<int> v = tools.eightcelltransition(widget.user.theta);

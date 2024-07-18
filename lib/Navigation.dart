@@ -1142,6 +1142,7 @@ var translationn=GoogleTranslator();
       UserState.lngCode=_currentLocale;
       UserState.moveMarkerToBuilding = moveMarkerToBuilding;
       UserState.reroute = reroute;
+      user.building = building;
       UserState.closeNavigation = closeNavigation;
       UserState.AlignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
@@ -2416,7 +2417,7 @@ var translationn=GoogleTranslator();
     floorData.forEach((Element) {
       if (Element.floor == floor) {
         Element.polyArray!.forEach((element) {
-          if (element.name!.toLowerCase().contains("lift")) {
+          if (element.cubicleName!.toLowerCase().contains("lift")) {
             lifts.add(element);
           }
         });
@@ -2427,15 +2428,14 @@ var translationn=GoogleTranslator();
 
   List<int> findCommonLift(List<PolyArray> list1, List<PolyArray> list2) {
     List<int> diff = [0, 0];
-
+    print("lifts 1 $list1");
+    print("lifts 2 $list2");
     for (int i = 0; i < list1.length; i++) {
       for (int y = 0; y < list2.length; y++) {
         PolyArray l1 = list1[i];
         PolyArray l2 = list2[y];
 
-        if (l1.name!.toLowerCase() == "lift-1" &&
-            l2.name!.toLowerCase() == "lift-1" &&
-            l1.name == l2.name) {
+        if (l1.name != null && l1.name == l2.name && l1.name!.length>4) {
           print("i ${l1.cubicleName}");
           print("y ${l2.cubicleName}");
           int x1 = 0;
@@ -2464,10 +2464,11 @@ var translationn=GoogleTranslator();
 
           print("11 ${[x1, y1]}");
           print("22 ${[x2, y2]}");
+          return diff;
         }
       }
     }
-    return diff;
+    return [0,0];
   }
 
   void createRooms(polylinedata value, int floor) {
@@ -4195,7 +4196,7 @@ var translationn=GoogleTranslator();
     });
 
     List<Cell> Cellpath = findCorridorSegments(
-        path, building.nonWalkable[bid]![floor]!, numCols, bid);
+        path, building.nonWalkable[bid]![floor]!, numCols, bid,floor);
     print("cellapth $Cellpath");
     PathState.listofPaths.add(Cellpath);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
@@ -5070,7 +5071,7 @@ var translationn=GoogleTranslator();
 
 
                                               //detected=false;
-
+                                              user.building = building;
                                               wsocket.message["path"]["source"]=PathState.sourceName;
                                               wsocket.message["path"]["source"]=PathState.destinationName;
                                               user.ListofPaths = PathState.listofPaths;

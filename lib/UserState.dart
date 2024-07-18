@@ -11,6 +11,7 @@ import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'buildingState.dart' as b;
 
 
 
@@ -43,6 +44,7 @@ class UserState{
   List<double> p = [];
   List<List<double>> realWorldCoordinates = [];
   bool isInRealWorld = false;
+  b.Building? building;
   static String lngCode='en';
   static int xdiff = 0;
   static int ydiff = 0;
@@ -185,41 +187,57 @@ class UserState{
         }
       }
       if(!isInRealWorld){
-        print(
-            "2mude ${ListofPaths[buildingNumber][pathobj.index]}  ${ListofPaths[buildingNumber][pathobj.index + 1]}");
-        pathobj.index = pathobj.index + 1;
         List<int> transitionvalue =
-            ListofPaths[buildingNumber][pathobj.index].move(theta);
-        coordX = coordX + transitionvalue[0];
-        coordY = coordY + transitionvalue[1];
-        List<double> values =
-            tools.localtoglobal(coordX, coordY, patchData: patchData[Bid]);
-        lat = values[0];
-        lng = values[1];
-
-        // if(coordXf == 0.0){
-        //   coordXf = transitionvalue[0]*(stepSize-stepSize.toInt());
-        // }else{
-        //   coordX = coordX + transitionvalue[0];
-        //   coordXf = 0.0;
-        // }
-        //
-        //
-        // if(coordYf == 0.0){
-        //   coordYf = transitionvalue[1]*(stepSize-stepSize.toInt());
-        // }else{
-        //   coordY = coordY + transitionvalue[1];
-        //   coordYf = 0.0;
-        // }
-
-        if (this.isnavigating && ListofPaths[buildingNumber].isNotEmpty) {
-          showcoordX = ListofPaths[buildingNumber][pathobj.index].x;
-          showcoordY = ListofPaths[buildingNumber][pathobj.index].y;
-        } else {
+        ListofPaths[buildingNumber][pathobj.index].move(theta);
+        if(floor != ListofPaths[buildingNumber][pathobj.index].floor){
+          floor = ListofPaths[buildingNumber][pathobj.index].floor;
+          coordX = ListofPaths[buildingNumber][pathobj.index].x;
+          coordY = ListofPaths[buildingNumber][pathobj.index].y;
           showcoordX = coordX;
           showcoordY = coordY;
-        }
+          List<double> values =
+          tools.localtoglobal(coordX, coordY, patchData: patchData[Bid]);
+          lat = values[0];
+          lng = values[1];
+          if(building != null){
+            rows = building!.floorDimenssion[ListofPaths[buildingNumber][pathobj.index].bid]![floor]![1];
+            cols = building!.floorDimenssion[ListofPaths[buildingNumber][pathobj.index].bid]![floor]![0];
+          }
+        }else{
+          print(
+              "2mude ${ListofPaths[buildingNumber][pathobj.index]}  ${ListofPaths[buildingNumber][pathobj.index + 1]}");
+          pathobj.index = pathobj.index + 1;
 
+          coordX = coordX + transitionvalue[0];
+          coordY = coordY + transitionvalue[1];
+          List<double> values =
+          tools.localtoglobal(coordX, coordY, patchData: patchData[Bid]);
+          lat = values[0];
+          lng = values[1];
+
+          // if(coordXf == 0.0){
+          //   coordXf = transitionvalue[0]*(stepSize-stepSize.toInt());
+          // }else{
+          //   coordX = coordX + transitionvalue[0];
+          //   coordXf = 0.0;
+          // }
+          //
+          //
+          // if(coordYf == 0.0){
+          //   coordYf = transitionvalue[1]*(stepSize-stepSize.toInt());
+          // }else{
+          //   coordY = coordY + transitionvalue[1];
+          //   coordYf = 0.0;
+          // }
+
+          if (this.isnavigating && ListofPaths[buildingNumber].isNotEmpty) {
+            showcoordX = ListofPaths[buildingNumber][pathobj.index].x;
+            showcoordY = ListofPaths[buildingNumber][pathobj.index].y;
+          } else {
+            showcoordX = coordX;
+            showcoordY = coordY;
+          }
+        }
         if (pathobj.index != ListofPaths[buildingNumber].length - 1) {
           int prevX = ListofPaths[buildingNumber][pathobj.index - 1].x;
           int prevY = ListofPaths[buildingNumber][pathobj.index - 1].y;
@@ -230,7 +248,8 @@ class UserState{
           // destination check
           if (buildingNumber == 0 &&
               ListofPaths[buildingNumber].length - pathobj.index < 6) {
-            speak("You have reached ${pathobj.destinationName}",lngCode);
+            double a = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [pathobj.destinationX,pathobj.destinationY]);
+            speak("You have reached ${pathobj.destinationName}. It is ${tools.angleToClocks3(a, context)}",lngCode);
             closeNavigation();
           }
 
@@ -245,12 +264,12 @@ class UserState{
           }
 
           //lift check
-          print("iwiwiwi ${pathobj.connections[Bid]?[floor]}");
-          print("iwwwwi ${showcoordY * cols + showcoordX}");
-
+          print("iwiwiwi ${[pathobj.connections[Bid]![floor]! % cols, pathobj.connections[Bid]![floor]! ~/ cols]}");
+          print("iwwwwi ${[showcoordX,showcoordY]}");
+          double di = tools.calculateDistance([showcoordX,showcoordY], [pathobj.connections[Bid]![floor]! % cols, pathobj.connections[Bid]![floor]! ~/ cols]);
+          print("iwwi $di");
           if (floor != pathobj.destinationFloor &&
-              pathobj.connections[Bid]?[floor] ==
-                  (showcoordY * cols + showcoordX)) {
+                  di < 3 ) {
             speak(
                 "Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor",lngCode);
           }

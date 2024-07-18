@@ -248,7 +248,7 @@ class Node {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Node && runtimeType == other.runtimeType && index == other.index;
+          other is Node && runtimeType == other.runtimeType && index == other.index;
 
   @override
   int get hashCode => index.hashCode;
@@ -332,12 +332,12 @@ Future<List<int>> findBestPathAmongstBoth(
 }
 
 Future<List<int>> findPath(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
-)async{
+    int numRows,
+    int numCols,
+    List<int> nonWalkableCells,
+    int sourceIndex,
+    int destinationIndex,
+    )async{
   sourceIndex -= 1;
   destinationIndex -= 1;
 
@@ -375,7 +375,7 @@ Future<List<int>> findPath(
     }
 
     for (int neighborIndex
-        in getNeighbors(currentIdx, numRows, numCols, nonWalkableSet)) {
+    in getNeighbors(currentIdx, numRows, numCols, nonWalkableSet)) {
       if (closedSet.contains(neighborIndex)) continue;
 
       Node neighbor = nodes[neighborIndex];
@@ -406,20 +406,20 @@ Future<List<int>> findPath(
 }
 
 
- Future<List<List<List<int>>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells)async{
+Future<List<List<List<int>>>> optimizeDiagonalEntry(Building building,List<int> path,int numCols,int floor,String Bid,List<int> nonWalkableCells)async{
   List<List<List<int>>> res = [];
   List<Landmarks> nearbyLandmarks = [];
   await building.landmarkdata!.then((value){
-   nearbyLandmarks = tools.findNearbyLandmark(
+    nearbyLandmarks = tools.findNearbyLandmark(
 
         path, value.landmarksMap!, 5, numCols, floor, Bid!);
 
   });
 
 
-    res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
+  res = findDoorAndPathTurnCoords(nearbyLandmarks, path, numCols);
 
-    //print(res);
+  //print(res);
 // for(int i=0;i<res.length;i++)
 //   {
 //     if(res.isNotEmpty){
@@ -432,22 +432,22 @@ Future<List<int>> findPath(
 //
 //   }
 
-List<List<List<int>>> result=[];
-    for (int i = 0; i < res.length; i++) {
-      List<List<int>> p1 = findIntersection(
-          res[i][1],
-          res[i][2],
-          res[i][0],
-          res[i][3],
-          res[i][4], nonWalkableCells,numCols
+  List<List<List<int>>> result=[];
+  for (int i = 0; i < res.length; i++) {
+    List<List<int>> p1 = findIntersection(
+        res[i][1],
+        res[i][2],
+        res[i][0],
+        res[i][3],
+        res[i][4], nonWalkableCells,numCols
 
-      );
-      //print("p1-----p2");
-      //print(p1);
-      result.add(p1);
+    );
+    //print("p1-----p2");
+    //print(p1);
+    result.add(p1);
 
-    }
-    return result;
+  }
+  return result;
 }
 
 // List<int> findPath(
@@ -759,8 +759,8 @@ double pointLineDistance(Node point, Node start, Node end) {
     return distance(point, start);
   } else {
     double n = ((end.x - start.x) * (start.y - point.y) -
-                (start.x - point.x) * (end.y - start.y))
-            .abs() +
+        (start.x - point.x) * (end.y - start.y))
+        .abs() +
         0.0;
     double d = sqrt(pow(end.x - start.x, 2) + pow(end.y - start.y, 2));
     return n / d;
@@ -790,9 +790,9 @@ List<Node> rdp(List<Node> points, double epsilon, Set<int> nonWalkableIndices) {
   List<Node> result = [];
   if (dmax > epsilon) {
     List<Node> recursiveResults1 =
-        rdp(points.sublist(0, index + 1), epsilon, nonWalkableIndices);
+    rdp(points.sublist(0, index + 1), epsilon, nonWalkableIndices);
     List<Node> recursiveResults2 =
-        rdp(points.sublist(index, end + 1), epsilon, nonWalkableIndices);
+    rdp(points.sublist(index, end + 1), epsilon, nonWalkableIndices);
     result = [
       ...recursiveResults1.sublist(0, recursiveResults1.length - 1),
       ...recursiveResults2
@@ -1284,45 +1284,45 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 // }
 
 List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3,List<int> p11,List<int> p22,List<int> nonWalkableCells,int numCols) {
- double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
- double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
+  double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
+  double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
 //print("m1----m2");
-if(m1.isInfinite || m1.isNaN){
-  m1=p1[0]+0.0;
-}
- if(m2.isInfinite || m2.isNaN){
-   m2=p2[0]+0.0;
- }
+  if(m1.isInfinite || m1.isNaN){
+    m1=p1[0]+0.0;
+  }
+  if(m2.isInfinite || m2.isNaN){
+    m2=p2[0]+0.0;
+  }
 //print(m1);
 //print(m2);
- //eq of parallel lines
- double node1=(m1);
- double node2=(m2);
+  //eq of parallel lines
+  double node1=(m1);
+  double node2=(m2);
 
- //checking vertical and horizontal condition
+  //checking vertical and horizontal condition
 
 
- List<List<int>> intersections =[
-   [node1.toInt(), p3[1]],
-   [node2.toInt(), p3[1]]];
+  List<List<int>> intersections =[
+    [node1.toInt(), p3[1]],
+    [node2.toInt(), p3[1]]];
 
- int index1=intersections[0][0]+intersections[0][1]*numCols;
- int index2=intersections[1][0]+intersections[1][1]*numCols;
- //print(index1);
- //print(index2);
- if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
-   node1=p1[1]+0.0;
-   node2=p2[1]+0.0;
-   intersections=[[p3[0], node1.toInt()],
-     [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
- }else{
-   intersections=[
-     [node1.toInt(), p3[1]],
-     [node2.toInt(), p3[1]],
-     [p1[0],p1[1]],[p2[0],p2[1]]
-   ];
- }
- //noww new points areeee
+  int index1=intersections[0][0]+intersections[0][1]*numCols;
+  int index2=intersections[1][0]+intersections[1][1]*numCols;
+  //print(index1);
+  //print(index2);
+  if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
+    node1=p1[1]+0.0;
+    node2=p2[1]+0.0;
+    intersections=[[p3[0], node1.toInt()],
+      [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
+  }else{
+    intersections=[
+      [node1.toInt(), p3[1]],
+      [node2.toInt(), p3[1]],
+      [p1[0],p1[1]],[p2[0],p2[1]]
+    ];
+  }
+  //noww new points areeee
 
   return intersections;
 }
@@ -1406,7 +1406,7 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<int> path, List<int> nonWalkable, int numCols,String? bid) {
+    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor) {
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
@@ -1426,13 +1426,13 @@ List<Cell> findCorridorSegments(
     }
 
     bool northCollision =
-        checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
     bool southCollision =
-        checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
     bool eastCollision =
-        checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
     bool westCollision =
-        checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
 
     int collisionCount = (northCollision ? 1 : 0) +
         (southCollision ? 1 : 0) +
@@ -1442,49 +1442,49 @@ List<Cell> findCorridorSegments(
     // Check if any two opposite directions collide with non-walkable cells
     if (i == 0) {
       //print("$pos with first cell");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid,floor));
     } else if (nextrow != row && nextcol != col) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
       if(nextcol>col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }else if(nextcol<col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }else{
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }
 
     } else if ((eastCollision && westCollision)) {
       print("$pos with twohorizontal");
       if(nextrow>row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }else if(nextrow<row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }else{
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }
 
     } else if (collisionCount == 1) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid,floor));
     } else if ((!northCollision && !southCollision) &&
         (!eastCollision && !westCollision)) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid,floor));
     } else {
       //print("$pos with second eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid,floor));
     }
   }
 

@@ -177,7 +177,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             convertTolng(
                 "Turn ${LocaleData.getProperty5(widget.direction, widget.context)}, and ${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
                 _currentLocale,
-                "",
+                widget.direction,"",
                 Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
                     0.0, "",0),
                 ""),
@@ -311,6 +311,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
                     _currentLocale,
                     "",
+                    "",
                     Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null,
                         0.0, 0.0, "",0),
                     nearestBeacon),
@@ -381,7 +382,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 print("workingg 4");
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                    " ${LocaleData.getProperty5(widget.direction,widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
                     _currentLocale);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
@@ -417,26 +418,27 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
-  var translationn = GoogleTranslator();
+ // var translationn = GoogleTranslator();
   Future<void> speak(String msg, String lngcode) async {
-    var translation =
-        await translationn.translate(msg, from: 'en', to: lngcode);
-    print("transalation");
-    print(translation);
+    // var translation =
+    //     await translationn.translate(msg, from: 'en', to: lngcode);
+    // print("transalation");
+    // print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
 
-  String convertTolng(String msg, String lngcode, String direc, Cell nextTurn,
+  String convertTolng(String msg, String lngcode,String direction,String direc, Cell nextTurn,
       String nearestBeacon) {
-    if (msg == "Turn ${widget.direction}") {
+    if (msg == "Turn ${direction}") {
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "${widget.direction} मुड़ें";
+
+        return "${LocaleData.getProperty5(direction, widget.context)} मुड़ें";
       }
-    } else if (widget.user.pathobj.associateTurnWithLandmark[nextTurn]!=null && msg ==
+    } else if ((widget.user.pathobj.associateTurnWithLandmark[nextTurn]!=null && widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!=null) && msg ==
         "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}") {
       if (lngcode == 'en') {
         return msg;
@@ -454,14 +456,27 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "${LocaleData.getProperty5(widget.direction, widget.context)} और सीधे ${(widget.distance / UserState.stepSize).ceil()} कदम चलें";
+        return "${LocaleData.getProperty5(widget.direction, widget.context)} मुड़ें और सीधे ${(widget.distance / UserState.stepSize).ceil()} कदम चलें";
       }
-    } else if (msg ==
+    } else if (Building.apibeaconmap[nearestBeacon]!=null && msg ==
         "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor") {
       if (lngcode == 'en') {
         return msg;
       } else {
         return "आप ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} मंजिल पर पहुंच गए हैं";
+      }
+    }else if (msg == "Turn ${LocaleData.getProperty5(widget.direction, widget.context)}") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "${LocaleData.getProperty5(widget.direction, widget.context)} मुड़ें";
+      }
+    }
+    else if(msg=="Turn ${direction}"){
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "${LocaleData.getProperty5(direction, widget.context)} मुड़ें";
       }
     }
     return "";
@@ -537,6 +552,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if (oldWidget.direction == "Straight") {
           Vibration.vibrate();
 
+          print("getting into itttttt");
+
           // if(nextTurn == turnPoints.last){
           //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
           // }else{
@@ -544,12 +561,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           speak(
-              convertTolng("Turn ${widget.direction}", _currentLocale, "", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
+
+              convertTolng("Turn ${widget.direction}",_currentLocale,widget.direction ,"", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
                       0.0, "",0),""),
               _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-
-        } else if (widget.direction == LocaleData.straight.getString(widget.context)) {
+        } else if(widget.direction == "Straight"){
 
           Vibration.vibrate();
 
@@ -574,6 +591,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 convertTolng(
                     "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
                     _currentLocale,
+                    '',
                     direc,
                     nextTurn,""),
                 _currentLocale);
@@ -588,13 +606,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             print("direc mila $direc");
             speak(
                 convertTolng("You are approaching ${direc} turn",
-                    _currentLocale, direc, nextTurn,""),
+                    _currentLocale, '',direc, nextTurn,""),
                 _currentLocale);
             widget.user.move(widget.context);
           }
         }
       } catch (e) {
-        print("approaching turn issue");
+       print("approaching turn issue $e");
       }
     } else {
       widget.distance = tools
@@ -620,7 +638,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
 
-          speak("Turn ${LocaleData.getProperty5(widget.direction, context)}",
+          speak(convertTolng("Turn ${LocaleData.getProperty5(widget.direction, context)}", _currentLocale, widget.direction,"", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
+              0.0, ""), ""),
               _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == "Straight") {

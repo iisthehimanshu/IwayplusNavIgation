@@ -396,7 +396,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("Loading Maps",_currentLocale);
+      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
 
     });
     print("Circular progress bar");
@@ -692,14 +692,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-var translationn=GoogleTranslator();
+// var translationn=GoogleTranslator();
   Future<void> speak(String msg,String lngcode) async {
-    var translation=await translationn.translate(msg,from:'en',to:lngcode);
-    print('transalation');
-    print(translation);
+    // var translation=await translationn.translate(msg,from:'en',to:lngcode);
+    // print('transalation');
+    // print(translation);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
-    await flutterTts.speak(translation.toString());
+    await flutterTts.speak(msg);
   }
 
   void checkPermissions() async {
@@ -1275,22 +1275,22 @@ var translationn=GoogleTranslator();
 
         if (speakTTS) {
           if (finalvalue == null) {
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}",_currentLocale);
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,'')
+                ,_currentLocale);
           } else {
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue)
+                ,_currentLocale);
           }
         }
       } else {
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}",_currentLocale);
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,''),_currentLocale);
 
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",_currentLocale);
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue),_currentLocale);
           }
         }
       }
@@ -1308,12 +1308,31 @@ var translationn=GoogleTranslator();
         _fetchInitialCompassData();
       }
     } else {
-      if (speakTTS) speak("Unable to find your location",_currentLocale);
+      if (speakTTS) speak(LocaleData.unabletofindyourlocation.getString(widget.context),_currentLocale);
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
       onLandmarkVenueClicked(widget.directLandID);
     }
+  }
+
+  String convertTolng(String msg,String lngcode,String finalvalue){
+    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}")
+      {
+        if(lngcode=='en'){
+          return msg;
+        }else{
+          return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, मंज़िल ${user.locationName} पर हैं";
+        }
+      }else if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}"){
+      if(lngcode=='en'){
+        return msg;
+      }else{
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} पर है";
+      }
+
+    }
+    return "";
   }
 
   void moveUser() async {
@@ -1456,7 +1475,7 @@ var translationn=GoogleTranslator();
               numCols);
           if (angle != 0) {
             speak("${LocaleData.turn.getString(context)} " +
-                tools.angleToClocks(angle,context),_currentLocale);
+               LocaleData.getProperty5(tools.angleToClocks(angle,context), context) ,_currentLocale);
           } else {}
 
           mapState.tilt = 50;
@@ -1709,8 +1728,9 @@ var translationn=GoogleTranslator();
       //please wait
       //searching your location
 
-      speak("Please wait",_currentLocale);
-      speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
+      speak("${LocaleData.plswait.getString(context)}",_currentLocale);
+      speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
+     // speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -4049,11 +4069,11 @@ var translationn=GoogleTranslator();
       if (PathState.destinationName == "${LocaleData.yourcurrentloc.getString(context)}") {
         speak(
 
-            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click start to navigate",_currentLocale);
+            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",_currentLocale);
 
       } else {
         speak(
-            "${PathState.destinationName} is $distance meter away. Click start to navigate",_currentLocale);
+            "${PathState.destinationName} is $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",_currentLocale);
       }
     }
 
@@ -8222,7 +8242,7 @@ var translationn=GoogleTranslator();
                                 _isBuildingPannelOpen = true;
                                 lastBeaconValue = "";
                               } else {
-                                speak("Explore Mode Enabled",_currentLocale);
+                                speak("${LocaleData.exploremodenabled.getString(context)}",_currentLocale);
                                 isLiveLocalizing = true;
                                 HelperClass.showToast(
                                     "Explore mode enabled");

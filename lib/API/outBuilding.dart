@@ -17,13 +17,13 @@ class outBuilding {
 
     final OutBuildingBox = OutDoorModeBOX.getData();
 
-    for(var id in ids){
-      if(OutBuildingBox.containsKey(id)){
-        print("OUTBUILDING DATA FORM DATABASE");
-        Map<String, dynamic> responseBody = OutBuildingBox.get(id)!.responseBody;
-        return outdoormodel.fromJson(responseBody);
-      }
-    }
+    // for(var id in ids){
+    //   if(OutBuildingBox.containsKey(id)){
+    //     print("OUTBUILDING DATA FORM DATABASE");
+    //     Map<String, dynamic> responseBody = OutBuildingBox.get(id)!.responseBody;
+    //     return outdoormodel.fromJson(responseBody);
+    //   }
+    // }
 
     final Map<String, dynamic> data = {
       "buildingIds": ids

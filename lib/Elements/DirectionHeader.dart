@@ -539,7 +539,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       0.0, ""),""),
               _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-        } else if (widget.direction == "Straight") {
+
+        } else if (widget.direction == LocaleData.straight.getString(widget.context)) {
+
           Vibration.vibrate();
 
           speak(

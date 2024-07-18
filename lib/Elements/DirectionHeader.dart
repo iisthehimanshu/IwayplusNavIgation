@@ -179,7 +179,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 _currentLocale,
                 widget.direction,"",
                 Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
-                    0.0, ""),
+                    0.0, "",0),
                 ""),
             _currentLocale);
         widget.getSemanticValue =
@@ -313,7 +313,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     "",
                     "",
                     Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null,
-                        0.0, 0.0, ""),
+                        0.0, 0.0, "",0),
                     nearestBeacon),
                 _currentLocale);
             //need to render on beacon for aiims jammu
@@ -515,6 +515,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!widget.user.isInRealWorld) {
+      double di = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], [widget.user.pathobj.connections[widget.user.Bid]![widget.user.floor]! % UserState.cols, widget.user.pathobj.connections[widget.user.Bid]![widget.user.floor]! ~/ UserState.cols]);
       List<Cell> path = widget.user.ListofPaths[widget.user.buildingNumber];
 
       List<int> v = tools.eightcelltransition(widget.user.theta);
@@ -539,6 +540,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       widget.distance = tools.distancebetweennodes(
           nextTurn, path[widget.user.pathobj.index], path);
       print("distance ${widget.distance}");
+
+      // isko uncomment kr lena agar direction header mein instruction dikhaani hai yeh vaali
+      // if (widget.user.floor != widget.user.pathobj.destinationFloor &&
+      //     di < 3 ) {
+      //   widget.direction = "Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor";
+      // }
+
+
       if (oldWidget.direction != widget.direction) {
         if (oldWidget.direction == "Straight") {
           Vibration.vibrate();
@@ -552,11 +561,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           speak(
+
               convertTolng("Turn ${widget.direction}",_currentLocale,widget.direction ,"", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
-                      0.0, ""),""),
+                      0.0, "",0),""),
               _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if(widget.direction == "Straight"){
+
           Vibration.vibrate();
 
           speak(
@@ -739,7 +750,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   // }
 
   static Icon getCustomIcon(String direction) {
-    if (direction == "Straight") {
+    if (direction.toLowerCase().contains("lift")) {
+      return Icon(
+        Icons.elevator,
+        color: Colors.white,
+        size: 40,
+      );
+    }else if (direction == "Straight") {
       return Icon(
         Icons.straight,
         color: Colors.white,
@@ -1091,7 +1108,7 @@ class scrollableDirection extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                Direction.toLowerCase().contains("lift")?Container():Text(
                   steps,
                   style: const TextStyle(
                     fontFamily: "Roboto",

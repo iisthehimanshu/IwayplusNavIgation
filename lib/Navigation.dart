@@ -1258,11 +1258,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       building.patchData[value.patchData!.buildingID!] = value;
       createPatch(value);
       tools.globalData = value;
+      tools.setBuildingAngle(value.patchData!.buildingAngle!);
       for (int i = 0; i < 4; i++) {
         tools.corners.add(math.Point(
             double.parse(value.patchData!.coordinates![i].globalRef!.lat!),
             double.parse(value.patchData!.coordinates![i].globalRef!.lng!)));
       }
+      tools.setBuildingAngle(value.patchData!.buildingAngle!);
     });
     print("working 2");
     await PolyLineApi()
@@ -1298,7 +1300,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (value.landmarks![i].element!.type == "Floor") {
           List<int> allIntegers = [];
           String jointnonwalkable =
-              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+          value.landmarks![i].properties!.nonWalkableGrids!.join(',');
           RegExp regExp = RegExp(r'\d+');
           Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
           for (Match match in matches) {
@@ -1311,7 +1313,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
           building.nonWalkable[value.landmarks![i].buildingID!] =
               currrentnonWalkable;
-          UserState.nonWalkable = currrentnonWalkable;
+          UserState.nonWalkable = building.nonWalkable;
           localizedData.nonWalkable = currrentnonWalkable;
 
           Map<int, List<int>> currentfloorDimenssion =
@@ -1323,7 +1325,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           ];
 
           building.floorDimenssion[buildingAllApi.selectedBuildingID] =
-              currentfloorDimenssion!;
+          currentfloorDimenssion!;
           localizedData.currentfloorDimenssion = currentfloorDimenssion;
 
           print("fetch route--  ${building.floorDimenssion}");
@@ -1347,17 +1349,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       print(isBlueToothLoading);
     });
 
-    try{
-      await waypointapi().fetchwaypoint().then((value){
-        Building.waypoint = value;
+
+
+    try {
+      await waypointapi().fetchwaypoint().then((value) {
+        Building.waypoint[buildingAllApi.getStoredString()] = value;
       });
-    }catch(e){
-      print("wayPoint API ERROR");
+    } catch (e) {
+      print("wayPoint API ERROR ");
     }
 
 
 
-    await beaconapi().fetchBeaconData().then((value) {
+
+    await beaconapi().fetchBeaconData(buildingAllApi.selectedBuildingID).then((value) {
       print("beacondatacheck");
 
       building.beacondata = value;
@@ -1382,7 +1387,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         // btadapter.getDevicesList();
       }
 
-       //btadapter.startScanning(apibeaconmap);
+      //btadapter.startScanning(apibeaconmap);
       setState(() {
         resBeacons = apibeaconmap;
       });
@@ -1402,6 +1407,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         _timer.cancel();
       });
     });
+
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
@@ -1410,6 +1416,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       IDS.add(key);
     });
+    print("IDS ${IDS}");
     try{
       await outBuilding().outbuilding(IDS).then((out) async {
         if (out != null) {
@@ -1432,6 +1439,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             createotherPatch(value);
           } else {}
         });
+
+        try{
+          await waypointapi().fetchwaypoint(id: key).then((value){
+            Building.waypoint[key] = value;
+          });
+        }catch(e){
+          print("wayPoint API ERROR ");
+        }
 
         await PolyLineApi().fetchPolyData(id: key).then((value) {
           if (key == buildingAllApi.outdoorID) {
@@ -1461,7 +1476,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             if (value.landmarks![i].element!.type == "Floor") {
               List<int> allIntegers = [];
               String jointnonwalkable =
-                  value.landmarks![i].properties!.nonWalkableGrids!.join(',');
+              value.landmarks![i].properties!.nonWalkableGrids!.join(',');
               RegExp regExp = RegExp(r'\d+');
               Iterable<Match> matches = regExp.allMatches(jointnonwalkable);
               for (Match match in matches) {
@@ -1480,7 +1495,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                 value.landmarks![i].properties!.floorBreadth!
               ];
               building.floorDimenssion[key] = currentfloorDimenssion!;
-             // print("fetch route--  ${building.floorDimenssion}");
+              // print("fetch route--  ${building.floorDimenssion}");
 
               // building.floorDimenssion[value.landmarks![i].floor!] = [
               //   value.landmarks![i].properties!.floorLength!,
@@ -1490,7 +1505,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           }
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
-        await beaconapi().fetchBeaconData(id: key).then((value) {
+
+        await beaconapi().fetchBeaconData(key).then((value) {
+          building.beacondata?.addAll(value);
 
         });
       }
@@ -3393,7 +3410,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
   Map<List<String>, Set<gmap.Polyline>> interBuildingPath = new Map();
 
-  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{String accessibleby = "Lifts"}) async {    circles.clear();
+  Future<void> calculateroute(Map<String, Landmarks> landmarksMap,{String accessibleby = "Lifts"}) async {
+    circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3425,8 +3443,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             PathState.destinationFloor,
             bid: PathState.destinationBid);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!,
-            building.floor[buildingAllApi.getStoredString()]!);
+
 
         building.landmarkdata!.then((value) {
           createMarkers(
@@ -3585,23 +3602,52 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             destinationEntrylat,
             destinationEntrylng);
         print("build data: $buildData");
+        PathState.realWorldCoordinates.clear();
+        List<LatLng> coords = [LatLng(sourceEntrylat, sourceEntrylng)];
+        final Uint8List realWorldPathMarker =
+        await getImagesFromMarker('assets/rw.png', 30);
+        PathState.realWorldCoordinates.add([sourceEntrylat,sourceEntrylng]);
+        // realWorldPath.add(Marker(
+        //   markerId: MarkerId('rw [$sourceEntrylat,$sourceEntrylng]'),
+        //   position: LatLng(sourceEntrylat,
+        //       sourceEntrylng),
+        //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
+        // ),);
 
-        List<LatLng> coords = [];
         if (buildData != null) {
-          int len = buildData!.data!.path!.length;
-          for (int i = 0; i < len; i++) {
-            coords.add(LatLng(buildData!.data!.path![i].lat!,
-                buildData!.data!.path![i].lng!));
-          }
 
+          int len = buildData.path.length;
+          for (int i = 0; i < len; i++) {
+            // realWorldPath.add(Marker(
+            //   markerId: MarkerId('rw [${buildData.path[i][1]},${buildData.path[i][0]}]'),
+            //   position: LatLng(buildData.path[i][1],
+            //       buildData.path[i][0]),
+            //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
+            // ),);
+            coords.add(LatLng(buildData.path[i][1],
+                buildData.path[i][0]));
+            PathState.realWorldCoordinates.add([buildData.path[i][1],buildData.path[i][0]]);
+          }
+          coords.add(LatLng(destinationEntrylat, destinationEntrylng));
+          PathState.realWorldCoordinates.add([destinationEntrylat,destinationEntrylng]);
+          print(coords);
           List<String> key = [PathState.sourceBid, PathState.destinationBid];
-          interBuildingPath[key] = Set();
-          interBuildingPath[key]!.add(gmap.Polyline(
-            polylineId: PolylineId("InterBuilding"),
-            points: coords,
-            color: Colors.red,
-            width: 1,
-          ));
+          setState(() {
+            singleroute.putIfAbsent(0, () => Set());
+            singleroute[0]?.add(gmap.Polyline(
+              polylineId: PolylineId(buildData.pathId),
+              points: coords,
+              color: Colors.red,
+              width: 5,
+            ));
+          });
+          // List<Cell> interBuildingPath = [];
+          // for(LatLng c in coords){
+          //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
+          //   int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
+          //   interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
+          // }
+          // PathState.listofPaths.insert(1, interBuildingPath);
         }
       });
       print("different building detected");
@@ -3703,7 +3749,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     print("$sourceX, $sourceY, $destinationX, $destinationY");
 
     try{
-      PathModel model = Building.waypoint.firstWhere((element) => element.floor == floor);
+      PathModel model = Building.waypoint[bid]!.firstWhere((element) => element.floor == floor);
       Map<String, List<dynamic>> adjList = model.pathNetwork;
       var graph = Graph(adjList);
       List<int> path2 = await graph.bfs(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);

@@ -4,6 +4,8 @@ import 'package:iwaymaps/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
+import '../Elements/HelperClass.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'buildingAllApi.dart';
 import 'guestloginapi.dart';
@@ -12,16 +14,17 @@ import 'package:hive/hive.dart';
 
 class landmarkApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
-  var signInBox = Hive.box('SignInDatabase');
-  String token = "";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
 
 
 
   Future<land> fetchLandmarkData({String? id = null}) async {
     print("landmark");
-    token = signInBox.get("accessToken");
+    accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.landmarksDataVersionUpdate){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
@@ -39,7 +42,7 @@ class landmarkApi {
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token
+        'x-access-token': accessToken
       },
     );
 
@@ -83,13 +86,38 @@ class landmarkApi {
       //     return land.fromJson(responseBody);
       //   }
       // }
-    } else {
-      if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
-        return landmarkApi().fetchLandmarkData();
+    } else if (response.statusCode == 403) {
+      print('LANDMARK DATA API in error 403');
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        body: json.encode(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        String APITime = responseBody['landmarks'][0]['updatedAt']!;
+        final landmarkData = LandMarkApiModel(responseBody: responseBody);
+
+        print('LANDMARK DATA FROM API AFTER 403');
+        print(responseBody.containsValue("polylineExist"));
+        LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
+        landmarkData.save();
+        return land.fromJson(responseBody);
+      }else{
+        print('LANDMARK DATA EMPTY FROM API AFTER 403');
+        land landData = land();
+        return landData;
       }
-      print(response.statusCode);
-      print(response.body);
+    } else {
+      HelperClass.showToast("MishorError in LANDMARK API API");
       throw Exception('Failed to load data');
     }
   }

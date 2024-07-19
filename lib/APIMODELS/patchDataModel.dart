@@ -32,6 +32,7 @@ class PatchData {
   List<PickupCoords>? pickupCoords;
   String? createdAt;
   String? updatedAt;
+  String? buildingAngle;
   int? iV;
 
   PatchData(
@@ -45,6 +46,7 @@ class PatchData {
         this.pickupCoords,
         this.createdAt,
         this.updatedAt,
+        this.buildingAngle,
         this.iV});
 
   PatchData.fromJson(Map<dynamic, dynamic> json) {
@@ -73,6 +75,7 @@ class PatchData {
     }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+    buildingAngle = json['buildingAngle'];
     iV = json['__v'];
   }
 
@@ -95,6 +98,7 @@ class PatchData {
     }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
+    data['buildingAngle'] = this.buildingAngle;
     data['__v'] = this.iV;
     return data;
   }

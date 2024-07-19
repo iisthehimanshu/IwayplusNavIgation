@@ -9,7 +9,10 @@ class Building {
     if (json['data'] != null) {
       data = <BuildingAPIInsideModel>[];
       json['data'].forEach((v) {
-        data!.add(new BuildingAPIInsideModel.fromJson(v));
+        print("v $v");
+        if(v['initialBuildingName'] != null) {
+          data!.add(new BuildingAPIInsideModel.fromJson(v));
+        }
       });
     }
   }

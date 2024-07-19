@@ -3425,8 +3425,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             PathState.destinationFloor,
             bid: PathState.destinationBid);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!,
-            building.floor[buildingAllApi.getStoredString()]!);
+        // createRooms(building.polyLineData!,
+        //     building.floor[buildingAllApi.getStoredString()]!);
 
         building.landmarkdata!.then((value) {
           createMarkers(
@@ -3927,6 +3927,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
     building.floor[bid!] = floor;
     createRooms(building.polyLineData!, floor);
+    // createMarkers(await building.landmarkdata!.then((value) {return value;}), floor);
     return path;
   }
 

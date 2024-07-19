@@ -42,7 +42,7 @@ class UserState{
 
   static int cols = 0;
   static int rows = 0;
-  static Map<int, List<int>> nonWalkable = Map();
+  static Map<String,Map<int, List<int>>> nonWalkable = Map();
   static Function reroute = (){};
   static Function closeNavigation = (){};
   static Function speak = (){};
@@ -93,7 +93,7 @@ class UserState{
       bool movementAllowed = true;
 
 
-      if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[floor]!, reroute)){
+      if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[Bid]![floor]!, reroute)){
         movementAllowed = false;
       }
 

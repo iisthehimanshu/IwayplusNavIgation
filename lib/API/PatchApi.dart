@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
@@ -17,65 +18,21 @@ class patchAPI {
 
   String token = "";
   final String baseUrl = "https://dev.iwayplus.in/secured/patch/get";
-  var signInBox = Hive.box('SignInDatabase');
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
 
-  void checkForUpdate({String? id=null}) async{
-    final PatchBox = PatchAPIModelBox.getData();
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
-
-    final Map<String, dynamic> data = {
-      "id": id??buildingAllApi.getStoredString()
-    };
-
-    final response = await http.post(
-      Uri.parse(baseUrl), body: json.encode(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': token
-      },
-    );
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> responseBody = json.decode(response.body);
-      String APITime = responseBody['patchData']['updatedAt']!;
-      final patchData = PatchAPIModel(responseBody: responseBody);
-      if(!PatchBox.containsKey(buildingAllApi.getStoredString())) {
-        PatchBox.put(buildingAllApi.getStoredString(),patchData);
-        patchData.save();
-        print("PATCHDATA UPDATE BOX EMPTY AND SAVED IN THE DATABASE");
-      }else{
-        Map<String, dynamic> databaseresponseBody = PatchBox.get(buildingAllApi.getStoredString())!.responseBody;
-        String LastUpdatedTime = databaseresponseBody['patchData']['updatedAt'];
-        print("APITime");
-        if(APITime!=LastUpdatedTime){
-          print("PATCHDATA UPDATE API DATA FROM DATABASE AND UPDATED");
-          print("Current Time: ${APITime} Lastupdated Time: ${LastUpdatedTime}");
-          PatchBox.put(buildingAllApi.getStoredString(),patchData);
-          patchData.save();
-        }
-      }
-    } else {
-      print(Exception);
-      throw Exception('Failed to load data');
-    }
-  }
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+    print("checking data");
+    print(accessToken);
+    print(refreshToken);
 
-    // final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
-    //
-    // bleScan();
-    //
-    // print("checkingPer${permissionStatus}");
 
-    token = signInBox.get("accessToken");
-    print("patch");
+    accessToken = signInBox.get("accessToken");
+
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.patchDataVersionUpdate){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
@@ -92,26 +49,54 @@ class patchAPI {
       Uri.parse(baseUrl), body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token
+        'x-access-token': accessToken
       },
     );
 
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
+
       final patchData = PatchAPIModel(responseBody: responseBody);
       PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();
       print("PATCH API DATA FROM API");
       return patchDataModel.fromJson(responseBody);
 
-    } else {
-      if (response.statusCode == 403) {
-        RefreshTokenAPI.fetchPatchData();
-        return patchAPI().fetchPatchData();
+    }else if (response.statusCode == 403)  {
+      print("PATCH API in error 403");
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+
+      final response = await http.post(
+        Uri.parse(baseUrl), body: json.encode(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+
+        final patchData = PatchAPIModel(responseBody: responseBody);
+        PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
+        patchData.save();
+        print("PATCH API DATA FROM API AFTER 403");
+        return patchDataModel.fromJson(responseBody);
+
+      }else{
+        print("PATCH API EMPTY DATA FROM API AFTER 403");
+        patchDataModel patchData = patchDataModel();
+        return patchData;
       }
+    } else {
+      print("PATCH API in else error");
       print(Exception);
       throw Exception('Failed to load data');
     }
   }
 
-  }
+
+
+}

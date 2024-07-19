@@ -504,6 +504,14 @@ class tools {
     return angleInDegrees;
   }
 
+  static void setBuildingAngle(String angle){
+    AngleBetweenBuildingandGlobalNorth = double.parse(angle);
+    AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
+    if(AngleBetweenBuildingandGlobalNorth>360){
+      AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
+    }
+  }
+
 
   static double calculateAngleBWUserandPath(UserState user, int node , int cols) {
     List<int> a = [user.showcoordX, user.showcoordY];

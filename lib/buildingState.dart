@@ -17,7 +17,7 @@ class Building{
   //Map<int,List<poly.Nodes>> wayPoints = {};
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
-    Future<land>? landmarkdata = null;
+  Future<land>? landmarkdata = null;
   List<beacon>? beacondata = null;
   String? selectedLandmarkID = null;
   Map<String,patchDataModel> patchData = Map();
@@ -25,7 +25,7 @@ class Building{
   List<String> ignoredMarker = [];
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
-  static List<PathModel> waypoint = [];
+  static Map<String,List<PathModel>> waypoint = {};
   Building({required this.floor,required this.numberOfFloors});
 
 }

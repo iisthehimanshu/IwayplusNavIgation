@@ -1,42 +1,87 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:geodesy/geodesy.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
 import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
-import 'RefreshTokenAPI.dart';
+import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'guestloginapi.dart';
 
 class buildingAllApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
-  var signInBox = Hive.box('SignInDatabase');
   String token = "";
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";
-  static HashMap<String,LatLng> allBuildingID = new HashMap();
+  static Map<String,LatLng> allBuildingID = {
+  };
   static String outdoorID = "";
 
 
+  void checkForUpdate() async {
+    final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+
+    await guestApi().guestlogin().then((value){
+      if(value.accessToken != null){
+        token = value.accessToken!;
+      }
+    });
+
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': token
+      },
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> responseBody = json.decode(response.body);
+      final buildingData = BuildingAllAPIModel(responseBody: responseBody);
+      String APITime = responseBody[0]['updatedAt']!;
+
+      if(BuildingAllBox.length==0){
+        print("BUILDINGALL UPDATE BOX EMPTY AND SAVED IN THE DATABASE");
+        BuildingAllBox.add(buildingData);
+        buildingData.save();
+      }else{
+        List<dynamic> databaseresponseBody = BuildingAllBox.getAt(0)!.responseBody;
+        String LastUpdatedTime = databaseresponseBody[0]['updatedAt']!;
+        if(APITime != LastUpdatedTime){
+          print("BUILDINGALL UPDATE API DATA FROM DATABASE AND UPDATED");
+          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
+          BuildingAllBox.add(buildingData);
+          buildingData.save();
+        }
+      }
+    } else {
+      print(response.statusCode);
+      print(response.body);
+      throw Exception('Failed to load data');
+    }
+  }
+
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-    token = signInBox.get("accessToken");
-    print("checking wilson");
-    print(token);
 
     if(BuildingAllBox.length!=0){
       print("BUILDINGALL API DATA FROM DATABASE");
       print(BuildingAllBox.length);
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       return buildingList;
     }
+
+    await guestApi().guestlogin().then((value){
+      if(value.accessToken != null){
+        token = value.accessToken!;
+      }
+    });
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -51,23 +96,15 @@ class buildingAllApi {
       print("BUILDING API DATA FROM API");
       BuildingAllBox.add(buildingData);
       buildingData.save();
-      List<buildingAll> buildingList = responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      List<buildingAll> buildingList = responseBody
+          .where((data) => data['initialBuildingName'] != null)
+          .map((data) => buildingAll.fromJson(data))
+          .toList();
       return buildingList;
 
     } else {
-      print("InbuildingAllApi");
-      print(response.statusCode);
-      if (response.statusCode == 403) {
-        print("In response.statusCode == 403");
-        print(token);
-        RefreshTokenAPI.fetchPatchData();
-        print("newToken");
-        token = signInBox.get("accessToken");
-        return buildingAllApi().fetchBuildingAllData();
-      }
       print(response.statusCode);
       print(response.body);
-      HelperClass.showToast("MishorError in BuildingAll API");
       throw Exception('Failed to load data');
     }
   }
@@ -86,7 +123,7 @@ class buildingAllApi {
     allBuildingID = value;
   }
 
-  static HashMap<String,LatLng> getStoredAllBuildingID(){
+  static Map<String,LatLng> getStoredAllBuildingID(){
     return allBuildingID;
   }
 

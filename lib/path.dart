@@ -1406,7 +1406,7 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<int> path, List<int> nonWalkable, int numCols) {
+    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor) {
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
@@ -1426,13 +1426,13 @@ List<Cell> findCorridorSegments(
     }
 
     bool northCollision =
-        checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
     bool southCollision =
-        checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
     bool eastCollision =
-        checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
     bool westCollision =
-        checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
 
     int collisionCount = (northCollision ? 1 : 0) +
         (southCollision ? 1 : 0) +
@@ -1442,54 +1442,55 @@ List<Cell> findCorridorSegments(
     // Check if any two opposite directions collide with non-walkable cells
     if (i == 0) {
       //print("$pos with first cell");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid,floor));
     } else if (nextrow != row && nextcol != col) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,ttsEnabled: false));
     } else if (turnPoints.contains(pos)) {
       //print("$pos with first eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,ttsEnabled: false));
+      single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {
       print("$pos with twoverticle");
       if(nextcol>col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }else if(nextcol<col){
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }else{
         single
-            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng));
+            .add(Cell(pos, row, col, tools.twocelltransitionvertical, lat, lng,bid,floor));
       }
 
     } else if ((eastCollision && westCollision)) {
       print("$pos with twohorizontal");
       if(nextrow>row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }else if(nextrow<row){
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }else{
         single.add(
-            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng));
+            Cell(pos, row, col, tools.twocelltransitionhorizontal, lat, lng,bid,floor));
       }
 
     } else if (collisionCount == 1) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid,floor));
     } else if ((!northCollision && !southCollision) &&
         (!eastCollision && !westCollision)) {
       //print("$pos with four");
-      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.fourcelltransition, lat, lng,bid,floor));
     } else {
       //print("$pos with second eight");
-      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng));
+      single.add(Cell(pos, row, col, tools.eightcelltransition, lat, lng,bid,floor));
     }
   }
 
   return single;
 }
+
 
 bool checkDirection(List<int> nonWalkable, int row, int col, int width,
     int rowInc, int colInc, int depth) {

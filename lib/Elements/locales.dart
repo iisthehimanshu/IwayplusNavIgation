@@ -143,7 +143,8 @@ mixin LocaleData {
         'on your Front':onyourfront,
         'on your Left':onyourleft,
         'on your Back':onyourleft,
-        'on your Right':onyourright
+        'on your Right':onyourright,
+    'None':none
 
 
 
@@ -151,6 +152,8 @@ mixin LocaleData {
 
 
   static String getProperty(String propertyName,context) {
+    print("real nav direction");
+    print(propertyName);
     return properties[propertyName]!.getString(context);
   }
 

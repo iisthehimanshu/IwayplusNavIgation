@@ -176,7 +176,7 @@ class UserState{
           isInRealWorld = !isInRealWorld;
 
         }else{
-          pathobj.index = 2;
+          pathobj.index = 3;
           buildingNumber --;
           moveMarkerToBuilding(ListofPaths[buildingNumber][2].bid!,Bid);
           Bid = ListofPaths[buildingNumber][2].bid!;
@@ -203,6 +203,7 @@ class UserState{
             rows = building!.floorDimenssion[ListofPaths[buildingNumber][pathobj.index].bid]![floor]![1];
             cols = building!.floorDimenssion[ListofPaths[buildingNumber][pathobj.index].bid]![floor]![0];
           }
+          customRender([lat,lng]);
         }else{
           print(
               "2mude ${ListofPaths[buildingNumber][pathobj.index]}  ${ListofPaths[buildingNumber][pathobj.index + 1]}");

@@ -72,7 +72,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Navigation(context: context,),
+                  builder: (context) => Navigation(),
                 ),
               );
             },
@@ -109,7 +109,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Navigation(context: context,),
+                  builder: (context) => Navigation(),
                 ),
               );
             },
@@ -139,7 +139,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Navigation(context: context,),
+                      builder: (context) => Navigation(),
                     ),
                   );
                 },

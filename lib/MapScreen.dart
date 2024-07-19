@@ -704,7 +704,7 @@ void getNav(String id,HashMap<String,geo.LatLng> allBuildingid){
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) =>   Navigation(context: context,),
+      builder: (context) =>   Navigation(),
     ),
   );
 }

@@ -412,7 +412,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>   Navigation(context: context,),
+                                        builder: (context) =>   Navigation(),
                                       ),
                                     );
                                 // }else{
@@ -796,7 +796,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>   Navigation(directLandID: "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",context: context,),
+                      builder: (context) =>   Navigation(directLandID: "0a8bdc2-b0b2-662a-ae5-bff7bff350c0"),
                     ),
                   );
                 }, icon: Icon(Icons.accessibility_outlined),)

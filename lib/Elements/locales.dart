@@ -143,7 +143,8 @@ mixin LocaleData {
         'on your Front':onyourfront,
         'on your Left':onyourleft,
         'on your Back':onyourleft,
-        'on your Right':onyourright
+        'on your Right':onyourright,
+    'None':none
 
 
 
@@ -431,7 +432,7 @@ mixin LocaleData {
     'You are on': 'आप हैं',
     'is on your':'आपके पर है',
     'near':'पास',
-    'Unable to find your location': 'आपकी स्थिति का पता नहीं चल पाया',
+    'Unable to find your location': 'आपकी वर्तमान जगह हम ढूँढ़ नहीं पा रहे है',
     'You are going away from the path. Click Reroute to Navigate from here.': 'आप मार्ग से भटक रहे हैं। यहाँ से मार्गदर्शन करने के लिए पुनर्निर्देशित पर क्लिक करें।',
     'is': '',
     'meter away': 'मीटर दूर है',

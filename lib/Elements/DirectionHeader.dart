@@ -30,8 +30,8 @@ class DirectionHeader extends StatefulWidget {
   UserState user;
   String getSemanticValue;
   BuildContext context;
-  final Function(String nearestBeacon, {bool render}) paint;
-  final Function(String nearestBeacon) repaint;
+  final Function(String nearestBeacon,BuildContext context, {bool render}) paint;
+  final Function(String nearestBeacon,BuildContext context) repaint;
   final Function() reroute;
   final Function() moveUser;
   final Function() closeNavigation;
@@ -317,7 +317,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     nearestBeacon),
                 _currentLocale);
             //need to render on beacon for aiims jammu
-            widget.paint(nearestBeacon, render: false);
+            widget.paint(nearestBeacon,widget.context, render: false);
             return true;
           }
 
@@ -375,7 +375,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               if (distanceFromPath > 10) {
                 print("workingg 3");
                 _timer.cancel();
-                widget.repaint(nearestBeacon);
+                widget.repaint(nearestBeacon,widget.context);
                 widget.reroute;
                 return false; //away from path
               } else {
@@ -406,7 +406,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         //print(nearestBeacon);
         _timer.cancel();
-        widget.repaint(nearestBeacon);
+        widget.repaint(nearestBeacon,widget.context);
         widget.reroute;
         return false;
       }
@@ -443,13 +443,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!} से ${direc} मोड़ के करीब पहुंच रहे हैं।";
+        return "आप ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!} से ${LocaleData.getProperty5(direc, widget.context)} मोड़ के करीब पहुंच रहे हैं।";
       }
     } else if (msg == "You are approaching ${direc} turn") {
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${direc} मोड़ के करीब पहुंच रहे हैं";
+        return "आप ${LocaleData.getProperty5(direc, widget.context)} मोड़ के करीब पहुंच रहे हैं";
       }
     } else if (msg ==
         "Turn ${LocaleData.getProperty5(widget.direction, widget.context)}, and ${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}") {
@@ -650,7 +650,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }
 
           speak(convertTolng("Turn ${LocaleData.getProperty5(widget.direction, context)}", _currentLocale, widget.direction,"", Cell(0, 0, 0, (angle, {currPointer, totalCells}) => null, 0.0,
-              0.0, ""), ""),
+              0.0, "",0), ""),
               _currentLocale);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == "Straight") {

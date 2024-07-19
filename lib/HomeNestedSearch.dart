@@ -76,7 +76,7 @@ class HomeNestedSearch extends SearchDelegate{
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Navigation(context: context,),
+                builder: (context) => Navigation(),
               ),
             );
           },

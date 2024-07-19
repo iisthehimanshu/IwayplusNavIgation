@@ -113,7 +113,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Navigation(context: context,),
+      home: Navigation(),
     );
   }
 }
@@ -121,9 +121,9 @@ class MyApp extends StatelessWidget {
 class Navigation extends StatefulWidget {
   String directLandID = "";
   static bool bluetoothGranted = false;
-   BuildContext context;
 
-  Navigation({this.directLandID = '',required this.context});
+
+  Navigation({this.directLandID = ''});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -396,14 +396,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isLoading = true;
 
-      speak("${LocaleData.loadingMaps.getString(widget.context)}",_currentLocale);
+
 
     });
     print("Circular progress bar");
     //  calibrate();
 
     //btadapter.strtScanningIos(apibeaconmap);
-    apiCalls();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      speak("${LocaleData.loadingMaps.getString(context)}",_currentLocale);
+
+
+      apiCalls(context);
+    });
     !DebugToggle.Slider ? handleCompassEvents() : () {};
 
     DefaultAssetBundle.of(context)
@@ -994,15 +1000,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return finalDirections;
   }
 
-  void repaintUser(String nearestBeacon) {
+  void repaintUser(String nearestBeacon,context) {
     reroute();
-    paintUser(nearestBeacon, speakTTS: false);
+    paintUser(nearestBeacon,context, speakTTS: false);
   }
 
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  void paintUser(String nearestBeacon,
+  void paintUser(String nearestBeacon,BuildContext context,
       {bool speakTTS = true, bool render = true}) async {
     wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
     print("nearestBeacon : $nearestBeacon");
@@ -1308,7 +1314,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         _fetchInitialCompassData();
       }
     } else {
-      if (speakTTS) speak(LocaleData.unabletofindyourlocation.getString(widget.context),_currentLocale);
+      if (speakTTS) speak(LocaleData.unabletofindyourlocation.getString(context),_currentLocale);
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
@@ -1571,14 +1577,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation1, animation2) => Navigation(context: context,),
+        pageBuilder: (context, animation1, animation2) => Navigation(),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
     );
   }
 
-  void apiCalls() async {
+  void apiCalls(context) async {
     print("working 1");
     //await DataVersionApi().fetchDataVersionApiData();
 
@@ -1733,7 +1739,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
      // speak("Your current ${LocaleData.location.getString(context)} is being discovered",_currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
+        localizeUser(context);
 
         print("localize user is calling itself.....");
         _timer.cancel();
@@ -1906,7 +1912,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Landmarks? nearestLandInfomation;
   String nearestBeacon = "";
 
-  Future<void> localizeUser() async {
+  Future<void> localizeUser(context) async {
     print("Beacon searching started");
     double highestweight = 0;
 
@@ -1942,7 +1948,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     btadapter.stopScanning();
 
     // sumMap = btadapter.calculateAverage();
-    paintUser(nearestBeacon);
+    paintUser(nearestBeacon,context);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
@@ -1969,7 +1975,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   String lastBeaconValue = "";
 
   Future<void> realTimeReLocalizeUser(
-      HashMap<String, beacon> apibeaconmap) async {
+      HashMap<String, beacon> apibeaconmap,context) async {
     sumMap.clear();
     setState(() {
       sumMap = btadapter.calculateAverage();
@@ -1998,7 +2004,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           apibeaconmap[firstValue]!.coordinateX! + tv[0],
           apibeaconmap[firstValue]!.coordinateY! + tv[1]
         ], getallnearestInfo);
-        paintUser(firstValue);
+        paintUser(firstValue,context);
         ExploreModePannelController.open();
         setState(() {
           lastBeaconValue = firstValue;
@@ -5741,7 +5747,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   bool rerouting = false;
-  Widget reroutePannel() {
+  Widget reroutePannel(context) {
     return Visibility(
         visible: _isreroutePannelOpen,
         child: SlidingUpPanel(
@@ -5879,7 +5885,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                             PathState.sourceFloor]![1],
                                             numCols);
                                         if (angle != 0) {
-                                          speak("${LocaleData.turn.getString(widget.context)}" +
+                                          speak("${LocaleData.turn.getString(context)}" +
                                               tools.angleToClocks(angle,context),_currentLocale);
                                         } else {}
 
@@ -8173,7 +8179,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           enableBT();
                           _timer = Timer.periodic(
                               Duration(milliseconds: 9000), (timer) {
-                            localizeUser().then((value) => {
+                            localizeUser(context).then((value) => {
                               print(
                                   "localize user is calling itself....."),
                               _timer.cancel()
@@ -8257,7 +8263,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                               milliseconds: 2000))
                                               .then((value) => {
                                             realTimeReLocalizeUser(
-                                                resBeacons)
+                                                resBeacons,context)
                                             // listenToBin()
                                           });
                                         });
@@ -8321,7 +8327,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
             routeDeatilPannel(),
             navigationPannel(),
-            reroutePannel(),
+            reroutePannel(context),
             ExploreModePannel(),
             detected
                 ? Semantics(child: nearestLandmarkpannel())

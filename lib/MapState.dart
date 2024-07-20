@@ -1,7 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapState{
-  double zoom = 0.0;
+  double zoom = 22.0;
   double bearing = 0.0;
   double tilt = 0.0;
   bool interaction = true;

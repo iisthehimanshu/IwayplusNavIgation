@@ -634,6 +634,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   Future<void> speak(String msg,String lngcode) async {
+    print(await flutterTts.getDefaultVoice);
+    if(lngcode == "hi"){
+      await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+    }else{
+      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+    }
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -914,8 +920,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     if (apibeaconmap[nearestBeacon] != null) {
 
       //buildingAngle compute
-      tools.angleBetweenBuildingAndNorth(
-          apibeaconmap[nearestBeacon]!.buildingID!);
+
+
+      tools.setBuildingAngle(building.patchData[apibeaconmap[nearestBeacon]!.buildingID]!.patchData!.buildingAngle!);
 
       //nearestLandmark compute
 
@@ -7525,7 +7532,8 @@ setState(() {
                             padding: EdgeInsets.only(
                                 left: 20), // <--- padding added here
                             initialCameraPosition: _initialCameraPosition,
-                            myLocationButtonEnabled: false,
+                            myLocationButtonEnabled: true,
+                            myLocationEnabled: true,
                             zoomControlsEnabled: false,
                             zoomGesturesEnabled: true,
 

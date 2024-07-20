@@ -392,6 +392,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     await translationn.translate(msg, from: 'en', to: lngcode);
     // print("transalation");
     // print(translation);
+    if(lngcode == "hi"){
+      await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+    }else{
+      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+    }
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -521,7 +526,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle,widget.context)}",_currentLocale);
         }else if(nextTurn != turnPoints.last && (widget.distance/UserState.stepSize).ceil() == 7){
-          if(!direc.contains("slight")){
+          if(!direc.contains("slight") && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
               speak(

@@ -5333,7 +5333,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                           ),
                           Container(
                             height: 40,
-                            width: 56,
+                            width: 65,
                             decoration: BoxDecoration(
                               color: Color(0xffDF3535),
                               borderRadius: BorderRadius.circular(20.0),

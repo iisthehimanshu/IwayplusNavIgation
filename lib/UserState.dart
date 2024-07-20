@@ -187,8 +187,11 @@ class UserState{
 
 
       //destination check
-      if(Cellpath.length - pathobj.index <6 ){
-        speak("You have reached ${pathobj.destinationName}");
+      if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
+        List<int> tv = tools.eightcelltransition(theta);
+        double angle = tools.calculateAngleSecond([showcoordX,showcoordY], [showcoordX+tv[0], showcoordY+tv[1]], [pathobj.destinationX,pathobj.destinationY]);
+        String direction = tools.angleToClocks3(angle);
+        speak("You have reached ${pathobj.destinationName}. It is $direction");
         closeNavigation();
       }
 
@@ -299,8 +302,8 @@ class UserState{
       pathobj.index = Cellpath.indexOf(turnPoints[0]);
     }
     floor = pathobj.sourceFloor;
-    showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
-    showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+    showcoordX = Cellpath[pathobj.index].x;
+    showcoordY = Cellpath[pathobj.index].y;
     coordX = showcoordX;
     coordY = showcoordY;
     List<double> values = tools.localtoglobal(coordX, coordY);

@@ -399,12 +399,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
-
-      if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
-
-        speak("You have reached ${widget.user.pathobj.destinationName}");
-        widget.closeNavigation();
-      }else{
         widget.user.pathobj.connections.forEach((key, value) {
           value.forEach((inkey, invalue) {
             if(widget.user.path[widget.user.pathobj.index] == invalue){
@@ -484,7 +478,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
           }
         }
-      }
+
     }
   }
 

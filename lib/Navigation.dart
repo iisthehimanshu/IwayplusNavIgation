@@ -1291,8 +1291,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                 PathState.sourceFloor]![1],
                 numCols);
             if (angle != 0) {
-              speak("Turn " +
-                  tools.angleToClocks(angle));
+              speak("${LocaleData.turn.getString(context)} " +
+                  LocaleData.getProperty5(tools.angleToClocks(angle,context), context) ,_currentLocale);
             } else {}
 
             mapState.tilt = 50;
@@ -1346,7 +1346,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
     FlutterBeep.beep();
     speak(
-        "You are going away from the path. Rerouting you to the destination");
+        "You are going away from the path. Rerouting you to the destination",_currentLocale);
 
     autoreroute();
   }

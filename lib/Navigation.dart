@@ -13,6 +13,7 @@ import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
@@ -27,6 +28,7 @@ import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
+import 'Elements/locales.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 
@@ -187,6 +189,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   bool excludeFloorSemanticWork = false;
   bool markerSldShown = true;
   Set<Marker> _markers = Set();
+  late FlutterLocalization _flutterLocalization;
+  late String _currentLocale = '';
 
   //-----------------------------------------------------------------------------------------
   /// Set of displayed markers and cluster markers on the map
@@ -359,6 +363,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
+    _flutterLocalization = FlutterLocalization.instance;
+    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
     _messageTimer=Timer.periodic(Duration(seconds: 5), (timer){
       wsocket.sendmessg();
     });
@@ -381,13 +387,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
-      speak("Loading maps");
+
     });
     print("Circular progress bar");
     //  calibrate();
 
     //btadapter.strtScanningIos(apibeaconmap);
-    apiCalls();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      speak("${LocaleData.loadingMaps.getString(context)}",_currentLocale);
+
+
+      apiCalls(context);
+    });
+
     !DebugToggle.Slider?handleCompassEvents():(){};
 
     DefaultAssetBundle.of(context)
@@ -618,7 +631,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     );
   }
 
-  Future<void> speak(String msg) async {
+  Future<void> speak(String msg,String lngcode) async {
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -718,7 +731,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
-            user.move().then((value) {
+            user.move(context).then((value) {
               renderHere();
             });
           } else {
@@ -816,7 +829,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
               building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
-            user.move().then((value) {
+            user.move(context).then((value) {
               setState(() {
                 if (markers.length > 0) {
                   markers[user.Bid]![0] = customMarker.move(
@@ -849,7 +862,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       // print("value----");
       // print(value);
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value,context);
       // print(finalvalue);
       finalDirections.add(finalvalue);
     }
@@ -860,6 +873,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, speakTTS: false);
+  }
+
+  String convertTolng(String msg,String lngcode,String finalvalue){
+    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}")
+    {
+      if(lngcode=='en'){
+        return msg;
+      }else{
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, मंज़िल ${user.locationName} पर हैं";
+      }
+    }else if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}"){
+      if(lngcode=='en'){
+        return msg;
+      }else{
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} पर है";
+      }
+
+    }
+    return "";
   }
 
   late AnimationController _controller;
@@ -995,6 +1027,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
       UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!
           .buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+      UserState.lngCode=_currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
       UserState.AlignMapToPath = alignMapToPath;
@@ -1076,7 +1109,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       mapState.zoom = 22;
       print("value----");
       print(value);
-      String? finalvalue = value == 0? null:tools.angleToClocksForNearestLandmarkToBeacon(value);
+      String? finalvalue = value == 0? null:tools.angleToClocksForNearestLandmarkToBeacon(value,context);
 
       // double value =
       //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
@@ -1086,7 +1119,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       // print("final value");
       // print(finalvalue);
       if (user.isnavigating == false) {
-        detected = true;
+        detected = !detected;
         if(!_isExploreModePannelOpen){
           _isBuildingPannelOpen = true;
         }
@@ -1114,21 +1147,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         if (speakTTS) {
           if (finalvalue == null) {
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}");
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,'')
+                ,_currentLocale);
           } else {
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}");
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue)
+                ,_currentLocale);
           }
         }
       } else {
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}");
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,''),_currentLocale);
+
           } else {
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${finalvalue}");
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue),_currentLocale);
           }
         }
       }
@@ -1143,7 +1177,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         );
       }
     } else {
-      if (speakTTS) speak("Unable to find your location");
+      if (speakTTS) speak(LocaleData.unabletofindyourlocation.getString(context),_currentLocale);
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
@@ -1204,8 +1238,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
     });
-    speak(
-        "You are going away from the path. Click Reroute to Navigate from here. ");
+    // speak(
+    //     "You are going away from the path. Click Reroute to Navigate from here. ",);
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -1247,7 +1281,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   bool isBlueToothLoading = false;
   // Initially set to true to show loader
 
-  void apiCalls() async {
+  void apiCalls(context) async {
     print("working 1");
     //await DataVersionApi().fetchDataVersionApiData();
 
@@ -1397,8 +1431,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       //please wait
       //searching your location
 
-      speak("Please wait");
-      speak("Searching your location. .");
+      speak("${LocaleData.plswait.getString(context)}",_currentLocale);
+      speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
 
       _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
         localizeUser();
@@ -3000,7 +3034,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           left: 17,
                         ),
                         child: Text(
-                          "Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
+                          "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 16,
@@ -3125,7 +3159,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                             }
                           },
                           child: (!calculatingPath)
-                              ? const Row(
+                              ? Row(
                                   //  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -3134,7 +3168,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                                     ),
                                     SizedBox(width: 8),
                                     Text(
-                                      "Direction",
+                                      "${LocaleData.direction.getString(context)}",
                                       style: TextStyle(
                                         color: Colors.black,
                                       ),
@@ -3668,12 +3702,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
       distance = distance * 0.3048;
       distance = double.parse(distance.toStringAsFixed(1));
-      if (PathState.destinationName == "Your current location") {
+      if (PathState.destinationName == "${LocaleData.yourcurrentloc.getString(context)}") {
         speak(
-            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance meter away. Click Start to Navigate.");
+
+            "${nearestLandInfomation!=null?apibeaconmap[nearbeacon]!.name:nearestLandInfomation!.name} is $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",_currentLocale);
+
       } else {
         speak(
-            "${PathState.destinationName} is $distance meter away. Click Start to Navigate.");
+            "${PathState.destinationName} is $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",_currentLocale);
       }
     }
   }
@@ -3837,7 +3873,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
-            path, numCols, value, floor, bid ?? "", PathState));
+            path, numCols, value, floor, bid ?? "", PathState,context));
         // directions.forEach((element) {
         //   print("directioons ${value[element.node]} +++  ${element.node}  +++++  ${element.turnDirection}  +++++++  ${element.nearbyLandmark}");
         // });
@@ -4089,10 +4125,10 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     if (PathState.directions.isNotEmpty) {
       if(PathState.directions[0].distanceToNextTurn!=null){
         directionWidgets.add(directionInstruction(
-            direction: "Go Straight",
+            direction: '${LocaleData.gostraight.getString(context)}',
             distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
                 .ceil()
-                .toString()));
+                .toString(),context: context,));
       }
 
       for (int i = 1; i < PathState.directions.length; i++) {
@@ -4100,26 +4136,26 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == "Straight"
-                    ? "Go Straight"
-                    : "Turn ${PathState.directions[i].turnDirection!} from ${PathState.directions[i].nearbyLandmark!.name!}, and Go Straight",
+                    ? '${LocaleData.gostraight.getString(context)}'
+                   : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(PathState.directions[i].turnDirection!,context)} ${LocaleData.from.getString(context)} ${PathState.directions[i].nearbyLandmark!.name!} ${LocaleData.getProperty2(PathState.directions[i].turnDirection!,context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance: (PathState.directions[i].distanceToNextTurn! * 0.3048)
                     .ceil()
-                    .toString()));
+                    .toString(),context: context,));
           } else {
             if (PathState.directions[i].node == -1) {
               directionWidgets.add(directionInstruction(
                   direction: "${PathState.directions[i].turnDirection!}",
                   distance:
-                  "and go to ${PathState.directions[i].distanceToPrevTurn ?? 0.toInt()} floor"));
+                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",context: context));
             } else {
               directionWidgets.add(directionInstruction(
                   direction: PathState.directions[i].turnDirection == "Straight"
-                      ? "Go Straight"
-                      : "Turn ${PathState.directions[i].turnDirection!}, and Go Straight",
+                      ? '${LocaleData.gostraight.getString(context)}'
+                      : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty4(PathState.directions[i].turnDirection!,context)}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                   distance:
                   (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
                       .ceil()
-                      .toString()));
+                      .toString(), context: context,));
             }
           }
         }
@@ -4827,7 +4863,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                 ),
                                                 SizedBox(width: 8),
                                                 Text(
-                                                  "Start",
+                                                  '${LocaleData.start.getString(context)}',
                                                   style: TextStyle(
                                                     color: Colors.black,
                                                   ),
@@ -4890,9 +4926,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       .isAttached
                                                       ? _routeDetailPannelController
                                                       .isPanelClosed
-                                                      ? "Steps"
-                                                      : "Map"
-                                                      : "Steps",
+                                                      ? "${LocaleData.steps.getString(context)}"
+                                                      : "${LocaleData.maps.getString(context)}"
+                                                      : "${LocaleData.steps.getString(context)}",
                                                   style: TextStyle(
                                                     color: Colors.black,
                                                   ),
@@ -5001,7 +5037,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                 "Your are heading towards ",
                                                 child: Text(
                                                   angle != null
-                                                      ? "${PathState.destinationName} will be ${tools.angleToClocks3(angle)}"
+                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)}  ${LocaleData.getProperty(tools.angleToClocks3(angle,context),context)}"
                                                       : PathState.destinationName,
 
                                                   style: const TextStyle(
@@ -5330,7 +5366,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                   });
                                 },
                                 child: Text(
-                                  "Exit",
+                                  "${LocaleData.exit.getString(context)}",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
                                     fontSize: 14,
@@ -5361,14 +5397,16 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
               moveUser: moveUser,
               closeNavigation: closeNavigation,
               isRelocalize: false,
+
               focusOnTurn: focusOnTurn, clearFocusTurnArrow: clearFocusTurnArrow,
+              context: context,
             )
           ],
         ));
   }
 
   bool rerouting = false;
-  Widget reroutePannel() {
+  Widget reroutePannel(context) {
     return Visibility(
         visible: _isreroutePannelOpen,
         child: SlidingUpPanel(
@@ -5491,8 +5529,8 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                     PathState.sourceFloor]![1],
                                                 numCols);
                                         if (angle != 0) {
-                                          speak("Turn " +
-                                              tools.angleToClocks(angle));
+                                          speak("${LocaleData.turn.getString(context)} " +
+                                              LocaleData.getProperty5(tools.angleToClocks(angle,context), context) ,_currentLocale);
                                         } else {}
 
                                         mapState.tilt = 50;
@@ -6909,7 +6947,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              "${user.locationName}, Floor ${user.floor}",
+                              "${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 18,
@@ -7595,7 +7633,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                                       user.Bid]![user.floor]!,
                                                   reroute);
                                           if (isvalid) {
-                                            user.move().then((value) {
+                                            user.move(context).then((value) {
                                               renderHere();
                                             });
                                           } else {
@@ -7807,7 +7845,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                         _isBuildingPannelOpen = true;
                                         lastBeaconValue = "";
                                       }else{
-                                        speak("Explore Mode Enabled");
+                                        speak("${LocaleData.exploremodenabled.getString(context)}",_currentLocale);
                                         isLiveLocalizing = true;
                                         HelperClass.showToast(
                                             "Explore mode enabled");
@@ -7878,7 +7916,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                       ),
                       routeDeatilPannel(),
                       navigationPannel(),
-                      reroutePannel(),
+                      reroutePannel(context),
                       ExploreModePannel(),
                       detected
                           ? Semantics(child: nearestLandmarkpannel())

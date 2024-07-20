@@ -2,12 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'locales.dart';
 
 class directionInstruction extends StatefulWidget {
   String direction;
   String distance;
-  directionInstruction({required this.direction, required this.distance});
+  BuildContext context;
+  directionInstruction({required this.direction, required this.distance,required this.context});
 
   @override
   State<directionInstruction> createState() => _directionInstructionState();
@@ -20,56 +24,62 @@ class _directionInstructionState extends State<directionInstruction> {
   void initState() {
 
     super.initState();
+    print("widget.direction");
+    print(widget.direction);
     setState(() {
-      icon = getCustomIcon(widget.direction);
+      icon = getCustomIcon(widget.direction,widget.context);
     });
   }
 
-  Widget getCustomIcon(String direction) {
-    if (direction == "Go Straight") {
+  Widget getCustomIcon(String direction,context) {
+
+    print('directionnnn');
+    print(direction);
+
+    if (direction ==  LocaleData.gostraight.getString(context)) {
       return Icon(
         Icons.straight,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains("Slight Right")) {
+    } else if (direction.contains(LocaleData.slightright.getString(context))) {
       return Icon(
         Icons.turn_slight_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains("Sharp Right")) {
+    } else if (direction.contains(LocaleData.sharpright.getString(context))) {
       return Icon(
         Icons.turn_sharp_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains("Right")) {
+    } else if (direction.contains(LocaleData.tright.getString(context))) {
       return Icon(
         Icons.turn_right,
         color: Colors.black,
         size: 32,
       );
-    }  else if (direction.contains("U Turn")) {
+    }  else if (direction.contains(LocaleData.uturn.getString(context))) {
       return Icon(
         Icons.u_turn_right,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains("Sharp Left")) {
+    } else if (direction.contains(LocaleData.sharpleft.getString(context))) {
       return Icon(
         Icons.turn_sharp_left,
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains("Slight Left")) {
+    } else if (direction.contains(LocaleData.slightleft.getString(context))) {
       return Icon(
         Icons.turn_slight_left,
         color: Colors.black,
         size: 32,
       );
 
-    } else if (direction.contains("Left")) {
+    } else if (direction.contains(LocaleData.tleft.getString(context))) {
       return Icon(
         Icons.turn_left,
         color: Colors.black,

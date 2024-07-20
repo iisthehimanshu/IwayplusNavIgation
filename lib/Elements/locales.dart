@@ -40,6 +40,207 @@ mixin LocaleData {
   static const String between56Feet = '5 to 6 Feet';
   static const String more6Feet = '> 6 Feet';
 
+  static const String straight='Straight';
+  static const String right='Right';
+  static const String tright='tRight';
+  static const String tslightright= 'tSlightRight';
+  static const String tslightleft= 'tSlightLeft';
+  static const String tsharpright= 'tSharpRight';
+  static const String tsharpleft= 'tSharpLeft';
+
+
+  static const String ttsright='ttsRight';
+  static const String ttsleft='ttsLeft';
+  static const String ttsback='ttsBack';
+  static const String ttsfront='ttsFront';
+  static const String ttsslightright='ttsSlightRight';
+  static const String ttsslightleft='ttsSlightLeft';
+  static const String ttssharpright='ttsSharpRight';
+  static const String ttssharpleft='ttsSharpLeft';
+  static const String ttsuturn='ttsUTurn';
+
+
+
+  static const String uturn='U Turn';
+  static const String sharpleft='Sharp Left';
+  static const String left='Left';
+  static const String tleft='tLeft';
+  static const String slightright='Slight Right';
+  static const String slightleft='Slight Left';
+  static const String sharpright='Sharp Right';
+
+  static const String tsright='tsRight';
+  static const String tsuturn='tsU Turn';
+  static const String tssharpleft='tsSharp Left';
+  static const String tsleft='tsLeft';
+
+  static const String tsslightright='tsSlight Right';
+  static const String tsslightleft='tsSlight Left';
+  static const String tssharpright='tsSharp Right';
+
+  static const String hright='hRight';
+  static const String hleft='hLeft';
+  static const String gostraight='Go Straight';
+  static const String then='Then';
+  static const String and='and';
+  static const String turn='Turn';
+  static const String steps='Steps';
+  static const String willbeonyourfront='will be on your front';
+  static const String onyourfront='on your Front';
+  static const String onyourright= 'on your Right';
+  static const String onyourleft= 'on your Left';
+  static const String onyourback= 'on your Back';
+  static const String willbe='will be';
+  static const String yourcurrentloc="Your current location";
+  static const String lift="Lift";
+  static const String floor='Floor';
+  static const String goto ='go to';
+  static const String from ='from';
+  static const String exit ='Exit';
+  static const String start='Start';
+  static const String min='min';
+  static const String take='Take';
+  static const String maps='Maps';
+  static const String slight='slight';
+  static const String onyourslightright='on your Slight Right';
+  static const String onyoursharpright= 'on your Sharp Right';
+  static const String onyoursharpleft= 'on your Sharp Left';
+  static const String onyourslightleft='on your Slight Left';
+  static const String front='Front';
+  static const String back='Back';
+  static const String loadingMaps='Loading maps';
+  static const String searchingyourlocation='Searching your location...';
+  static const String plswait='Please wait';
+  static const String youareon= 'You are on';
+  static const String isonyour='is on your';
+  static const String near='near';
+  static const String unabletofindyourlocation='Unable to find your location';
+  static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
+  static const String iss= 'is';
+  static const String meteraway='meter away';
+  static const String clickstarttonavigate= 'Click Start to Navigate';
+  static const String exploremodenabled= 'Explore Mode Enabled';
+  static const String direction='Direction';
+  static const String turnfrm='turn from';
+  static const String approaching='Approaching';
+  static const String location='Location';
+  static const String none='None';
+  static const String ttsgostraight='ttsGoStraight';
+
+
+  static Map<String, String> get properties => {
+    'Slight Right': tsslightright,
+    'Right': tsright,
+    'Sharp Right': tssharpright,
+    'U Turn': tsuturn,
+    'Sharp Left': tssharpleft,
+    'Left': tsleft,
+    'Slight Left': tsslightleft,
+    'on your Slight Right':onyourslightright,
+    'on your Sharp Right':onyoursharpright,
+    'on your Sharp Left':onyoursharpleft,
+    'on your Slight Left':onyourslightleft,
+    'on your Front':onyourfront,
+    'on your Left':onyourleft,
+    'on your Back':onyourleft,
+    'on your Right':onyourright,
+    'None':none
+
+
+
+  };
+
+
+  static String getProperty(String propertyName,context) {
+
+    if(properties[propertyName]!=null){
+      return properties[propertyName]!.getString(context);
+    }
+    return propertyName;
+
+  }
+
+  static Map<String, String> get properties2 => {
+    'Right':hright,
+    'Left':hleft,
+  };
+
+
+  static String getProperty2(String propertyName,context) {
+    if(properties2[propertyName]!=null){
+      return properties2[propertyName]!.getString(context);
+    }
+    return propertyName;
+  }
+
+  static Map<String, String> get properties3 => {
+    'Right':right,
+    'Left':left,
+  };
+
+
+  static String getProperty3(String propertyName,context) {
+    if(properties3[propertyName]!=null){
+      return properties3[propertyName]!.getString(context);
+    }
+    return propertyName;
+  }
+  static Map<String, String> get properties4 => {
+    'Right':tright,
+    'Left':tleft,
+    'Slight Left':tslightleft,
+    'Slight Right':tslightright,
+    'Straight':straight,
+    'Sharp Left':tsharpleft,
+    'Sharp Right':tsharpright
+  };
+
+
+  static String getProperty4(String propertyName,context) {
+    if(properties4[propertyName]!=null){
+      return properties4[propertyName]!.getString(context);
+    }
+    return propertyName;
+  }
+
+  static Map<String, String> get properties5 => {
+    'Right':ttsright,
+    'Left':ttsleft,
+    'Front':ttsfront,
+    'Back':ttsback,
+    'None':none,
+    'Slight Right':ttsslightright,
+    'Slight Left':ttsslightleft,
+    'Sharp Left':ttssharpleft,
+    'Sharp Right':ttssharpleft,
+    'U Turn':ttsuturn,
+
+  };
+
+
+  static String getProperty5(String propertyName,context) {
+    if(properties5[propertyName]!=null){
+      return properties5[propertyName]!.getString(context);
+    }
+    return propertyName;
+  }
+
+  static Map<String, String> get properties6 => {
+    'Go Straight':ttsgostraight
+
+  };
+
+
+  static String getProperty6(String propertyName,context) {
+    if(properties6[propertyName]!=null){
+      return properties6[propertyName]!.getString(context);
+    }
+    return propertyName;
+  }
+
+
+
+
   static const Map<String, dynamic> EN = {
     'title': 'Settings',
     'generalSettings': 'General Settings',
@@ -68,6 +269,94 @@ mixin LocaleData {
     '< 5 Feet':'< 5 Feet',
     '5 to 6 Feet':'5 to 6 Feet',
     '> 6 Feet':'> 6 Feet',
+    'Straight':'Straight',
+
+    'Right':'Right',
+    'U Turn':'U Turn',
+    'Sharp Left':'Sharp Left',
+    'Left':'Left',
+    'Slight Right':'Slight Right',
+    'Slight Left':'Slight Left',
+    'Sharp Right':'Sharp Right',
+
+    'tsRight':'turn right and go straight',
+    'tsU Turn':'turn around and go straight',
+    'tsSharp Left':'turn sharp left and go straight',
+    'tsLeft':'turn left and go straight',
+    'tsSlight Right':'turn slight right and go straight',
+    'tsSlight Left':'turn slight left and go straight',
+    'tsSharp Right':'turn sharp right and go straight',
+
+    'tRight':'Right',
+    'tLeft':'Left',
+    'tSlightRight':'Slight Right',
+    'tSlightLeft':'Slight Left',
+    'tSharpRight':'Sharp Right',
+    'tSharpLeft':'Sharp Left',
+
+    'Go Straight':'Go Straight',
+    'Then': 'Then',
+    'and': 'and',
+    'Turn':'Turn',
+    'Steps':'Steps',
+    'will be on your front': 'will be on your front',
+    'on your Front': 'on your Front',
+    'on your Right': 'on your Right',
+    'on your Left': 'on your Left',
+    'on your Back': 'on your Back',
+    'will be': 'will be',
+    'Your current location':'Your current location',
+    'Lift':'Lift',
+    'Floor' :'Floor',
+    'go to': 'go to',
+    'from': 'from',
+    'Exit': 'exit',
+    'Start' :'Start',
+    'min': 'min',
+    'Take': 'Take',
+    'Maps' : 'Maps',
+    'slight': 'slight',
+    'on your Slight Right' :'on your Slight Right',
+    'on your Sharp Right': 'on your Sharp Right',
+    'on your Sharp Left': 'on your Sharp Left',
+    'on your Slight Left': 'on your Slight Left',
+    'Front' : 'Front',
+    'Back':'Back',
+    'Loading maps' :'Loading maps',
+    'Searching your location...' : 'Searching your location...',
+    'Please wait': 'Please wait',
+    'You are on': 'You are on',
+    'is on your':'is on your',
+    'near':'near',
+    'Unable to find your location': 'Unable to find your location',
+    'You are going away from the path. Click Reroute to Navigate from here.': 'You are going away from the path. Click Reroute to Navigate from here.',
+    'is': 'is',
+    'meter away': 'meter away',
+    'Click Start to Navigate' : 'Click Start to Navigate',
+    'Explore Mode Enabled' : 'Explore Mode Enabled',
+    'Direction':'Direction',
+    'turn from':'turn from',
+    'Approaching': 'Approaching',
+    'hRight':'',
+    'hLeft':'',
+    'Location':'location',
+    'ttsRight':'Right',
+    'ttsLeft':'Left',
+    'ttsBack':'Back',
+    'ttsFront':'Front',
+    'None':'None',
+    'ttsSlightRight':'Slight Right',
+    'ttsSlightLeft':'Slight Left',
+    'ttsSharpRight':'Sharp Right',
+    'ttsSharpLeft':'Sharp Left',
+    'ttsUTurn':'U Turn',
+    'ttsGoStraight':'Go Straight'
+
+
+
+
+
+
   };
 
   static const Map<String, dynamic> HI = {
@@ -97,7 +386,92 @@ mixin LocaleData {
     'userHeight': 'उपयोगकर्ता की ऊंचाई',
     '< 5 Feet': '< 5 फीट',
     '5 to 6 Feet': '5 से 6 फीट',
-    '> 6 Feet': '> 6 फीट'
+    '> 6 Feet': '> 6 फीट',
+    'Straight': 'सीधे',
+    'Right': '',
+    'U Turn': 'यू टर्न',
+    'Sharp Left': 'तेज़ बाएं',
+    'Left': '',
+    'Slight Right': 'हल्का दायें',
+    'Slight Left': 'हल्का बाएं',
+    'Sharp Right': 'तेज़ दाएं',
+
+    'hRight':'से दाईं ओर मुड़ें',
+    'hLeft':'से बायीं ओर मुड़ें',
+
+    'tRight':'दाईं ओर मुड़ें',
+    'tLeft':'बायीं ओर मुड़ें',
+
+
+    'tSlightRight':'हल्का दायें ओर मुड़ें',
+    'tSlightLeft':'हल्का बाएं ओर मुड़े',
+    'tSharpRight':'तीव्र दायें ओर मुड़ें',
+    'tSharpLeft':'तीव्र बाएं ओर मुड़े',
+
+    'tsRight': 'दाएँ मुड़ें और सीधे जाएँ',
+    'tsU Turn': 'उल्टा घूमे और सीधा जाएँ',
+    'tsSharp Left': 'एकदम बाएँ मुड़ें और सीधे जाएँ',
+    'tsLeft': 'बाएँ मुड़ें और सीधे जाएँ',
+    'tsSlight Right': 'थोड़ा दाएं मुड़ें और सीधे जाएं',
+    'tsSlight Left': 'थोड़ा बाएँ मुड़ें और सीधे जाएँ',
+    'tsSharp Right': 'एकदम दाहिनी ओर मुड़ें और सीधे जाएं',
+
+    'Then': 'फिर',
+    'Go Straight': 'सीधे जाएं',
+    'and': 'और',
+    'Turn': '',
+    'Steps': 'कदम',
+    'will be on your front': 'आपके सामने होगा',
+    'on your Front': 'आपके सामने है',
+    'on your Right': 'आपके दाएँ ओर है',
+    'on your Left': 'आपके बाएँ ओर है',
+    'on your Back': 'आपके पीछे है',
+    'will be': '',
+    'Your current location':'आपकी वर्तमान स्थिति',
+    'Lift':'लिफ्ट',
+    'Floor' :'मंजिल',
+    'go to': 'जाओ',
+    'from': '',
+    'Exit': 'निकास',
+    'Start' :'स्टार्ट करे',
+    'min': 'मिनट',
+    'Take': 'लें',
+    'Maps' : 'नक्शा',
+    'slight': 'हल्का',
+    'on your Slight Right' :'आपके हल्के दायें',
+    'on your Sharp Right': 'आपके तेज़ दायें',
+    'on your Sharp Left': 'आपके तेज़ बायें',
+    'on your Slight Left': 'आपके हल्के बायें',
+    'Front' : 'सामने',
+    'Back' :'पीछे',
+    'Loading maps' :'लोडिंग मैप्स',
+    'Searching your location...' : 'आपकी वर्तमान जगह को ढूँढ़ा जा रहा है',
+    'Please wait': 'कृपया प्रतीक्षा करें',
+    'You are on': 'आप हैं',
+    'is on your':'आपके पर है',
+    'near':'पास',
+    'Unable to find your location': 'आपकी वर्तमान जगह हम ढूँढ़ नहीं पा रहे है',
+    'You are going away from the path. Click Reroute to Navigate from here.': 'आप मार्ग से भटक रहे हैं। यहाँ से मार्गदर्शन करने के लिए पुनर्निर्देशित पर क्लिक करें।',
+    'is': '',
+    'meter away': 'मीटर दूर है',
+    'Click Start to Navigate' : 'नेविगेट करने के लिए इस्टार्ट पर क्लिक करें',
+    'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
+    'Direction':'दिशा',
+    'turn from':'से मुड़ो',
+    'Approaching': 'पास आ रहे हैं',
+    'Location':'लोकेशन',
+
+    'ttsRight':'राइट',
+    'ttsLeft':'लेफ्ट',
+    'ttsBack':'बैक',
+    'ttsFront':'फ्रंट',
+    'None':'शून्य',
+    'ttsSlightRight':'थोड़ा राइट',
+    'ttsSlightLeft':'थोड़ा लेफ्ट',
+    'ttsSharpRight':'तीव्र राइट',
+    'ttsSharpLeft':'तीव्र लेफ्ट',
+    'ttsUTurn':'यू टर्न',
+    'ttsGoStraight':'सीधे चले लगभग'
   };
 
   static const Map<String, dynamic> TA = {

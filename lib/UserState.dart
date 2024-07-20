@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
@@ -8,6 +9,7 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 
 import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
+import 'Elements/locales.dart';
 import 'navigationTools.dart';
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -38,8 +40,7 @@ class UserState{
   static bool isRelocalizeAroundLift=false;
   static int UserHeight  = 195;
   static double stepSize = 2;
-
-
+  static String lngCode='en';
   static int cols = 0;
   static int rows = 0;
   static Map<String,Map<int, List<int>>> nonWalkable = Map();
@@ -81,11 +82,11 @@ class UserState{
   //
   // }
 
-  Future<void> move()async{
+  Future<void> move(context)async{
 
 
 
-    moveOneStep();
+    moveOneStep(context);
 
 
 
@@ -125,7 +126,7 @@ class UserState{
 
 
       if(movementAllowed){
-        moveOneStep();
+        moveOneStep(context);
       }else if(!movementAllowed){
         return;
       }
@@ -136,7 +137,7 @@ class UserState{
     }
   }
 
-  Future<void> moveOneStep()async{
+  Future<void> moveOneStep(context)async{
 
     wsocket.message["userPosition"]["X"]=coordX;
     wsocket.message["userPosition"]["Y"]=coordY;
@@ -216,7 +217,7 @@ class UserState{
           }else{
             if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
               double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
-              speak("${element.name} is on your ${tools.angleToClocks(agl)}");
+              speak(convertTolng("${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}", element.name!,0.0,context,0.0));
               pathState.nearbyLandmarks.remove(element);
             }
           }
@@ -248,6 +249,35 @@ class UserState{
   }
 
 
+  String convertTolng(String msg,String? name,double agl,BuildContext context,double a){
+    if(msg=="You have reached ${pathobj.destinationName}. It is ${tools.angleToClocks3(a, context)}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "आप ${pathobj.destinationName} पर पहुँच गए हैं। यह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
+      }
+    }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
+      }
+    }else if(name!=null && msg=="Passing by ${name}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "${name} से गुज़रते हुए";
+      }
+    }else if(name!=null && msg=="${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}")
+    {
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)} पर है";
+      }
+    }
+    return "";
+  }
 
 
   Future<void> checkForMerge()async{

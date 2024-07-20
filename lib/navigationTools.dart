@@ -281,7 +281,7 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle) {
+  static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -313,14 +313,14 @@ class tools {
     }
   }
 
-  static String angleToClocks2(double angle) {
+  static String angleToClocks2(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your front"
+          ? "on your Front"
           : "on 12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
@@ -336,7 +336,7 @@ class tools {
           : "on 4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your back"
+          ? "on your Back"
           : "on 6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
       return (currentDir == 'Natural Direction')
@@ -355,7 +355,7 @@ class tools {
     }
   }
 
-  static String angleToClocks3(double angle) {
+  static String angleToClocks3(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -375,7 +375,7 @@ class tools {
     }
   }
 
-  static String angleToClocksForNearestLandmarkToBeacon(double angle) {
+  static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -714,7 +714,7 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState,context) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);
@@ -725,7 +725,7 @@ class tools {
       double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
       double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
       double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
-      String direc = tools.angleToClocks(angle);
+      String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
     return Directions;

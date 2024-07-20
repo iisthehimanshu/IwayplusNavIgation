@@ -481,12 +481,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
     }else{
-
-      if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
-
-        speak(convertTolng( "You have reached ${widget.user.pathobj.destinationName}", _currentLocale, "", "", 0, ''),_currentLocale);
-        widget.closeNavigation();
-      }else{
         widget.user.pathobj.connections.forEach((key, value) {
           value.forEach((inkey, invalue) {
             if(widget.user.path[widget.user.pathobj.index] == invalue){
@@ -579,7 +573,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 _currentLocale);
           }
         }
-      }
+
     }
   }
 

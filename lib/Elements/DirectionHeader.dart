@@ -149,10 +149,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               "${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
                 _currentLocale);
         }else{
-          widget.direction = "Turn ${widget.direction}, and Go Straight";
+          widget.direction = convertTolng("Turn ${LocaleData.getProperty5(widget.direction, widget.context)}", _currentLocale, widget.direction,"",0, "");
 
           speak(
-              "Turn ${widget.direction}, and Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps",
+              "${widget.direction}",
               _currentLocale);
         widget.getSemanticValue =
         "Turn ${widget.direction}, and Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps";

@@ -12,6 +12,7 @@ import 'package:collection/collection.dart' as pac;
 import 'package:fluster/fluster.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animator/flutter_animator.dart';
+import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
@@ -191,6 +192,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   Set<Marker> _markers = Set();
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  final GlobalKey rerouteButton = GlobalKey();
 
   //-----------------------------------------------------------------------------------------
   /// Set of displayed markers and cluster markers on the map
@@ -1220,6 +1222,110 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
   }
 
+  void autoreroute() {
+    Future.delayed(Duration(milliseconds: 100)).then((value){
+      fitPolygonInScreen(patch.first);
+    });
+    Future.delayed(Duration(seconds: 3)).then((value){
+      if (!rerouting) {
+        setState(() {
+          rerouting = true;
+        });
+        //  if(user.isnavigating==false){
+        clearPathVariables();
+        // }
+
+        PathState.clear();
+        PathState.sourceX = user.coordX;
+        PathState.sourceY = user.coordY;
+        user.showcoordX = user.coordX;
+        user.showcoordY = user.coordY;
+        PathState.sourceFloor = user.floor;
+        PathState.sourcePolyID = user.key;
+        PathState.sourceName =
+        "Your current location";
+        building.landmarkdata!.then((value) async {
+          await calculateroute(value.landmarksMap!)
+              .then((value) {
+            user.pathobj = PathState;
+            user.path = PathState.path.values
+                .expand((list) => list)
+                .toList();
+            user.Cellpath =
+                PathState.singleCellListPath;
+            user.pathobj.index = 0;
+            user.isnavigating = true;
+            user.moveToStartofPath().then((value) {
+              setState(() {
+                if (markers.length > 0) {
+                  markers[user.Bid]?[
+                  0] =
+                      customMarker.move(
+                          LatLng(
+                              tools.localtoglobal(
+                                  user.showcoordX
+                                      .toInt(),
+                                  user.showcoordY
+                                      .toInt())[0],
+                              tools.localtoglobal(
+                                  user.showcoordX
+                                      .toInt(),
+                                  user.showcoordY
+                                      .toInt())[1]),
+                          markers[user.Bid]![0]);
+                }
+              });
+            });
+            _isRoutePanelOpen = false;
+            building.selectedLandmarkID = null;
+            _isnavigationPannelOpen = true;
+            _isreroutePannelOpen = false;
+            int numCols = building.floorDimenssion[
+            PathState
+                .sourceBid]![PathState
+                .sourceFloor]![0]; //floor length
+            double angle =
+            tools.calculateAngleBWUserandPath(
+                user,
+                PathState.path[
+                PathState.sourceFloor]![1],
+                numCols);
+            if (angle != 0) {
+              speak("${LocaleData.turn.getString(context)} " +
+                  LocaleData.getProperty5(tools.angleToClocks(angle,context), context) ,_currentLocale);
+            } else {}
+
+            mapState.tilt = 50;
+
+            mapState.bearing =
+                tools.calculateBearing([
+                  user.lat,
+                  user.lng
+                ], [
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj.index + 1]
+                      .lat,
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj.index + 1]
+                      .lng
+                ]);
+            _googleMapController.animateCamera(
+                CameraUpdate.newCameraPosition(
+                  CameraPosition(
+                      target: mapState.target,
+                      zoom: mapState.zoom,
+                      bearing: mapState.bearing!,
+                      tilt: mapState.tilt),
+                ));
+          });
+        });
+        rerouting = false;
+      }
+    });
+  }
+
   void reroute() {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
@@ -1238,8 +1344,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
     });
-    // speak(
-    //     "You are going away from the path. Click Reroute to Navigate from here. ",);
+    FlutterBeep.beep();
+    speak(
+        "You are going away from the path. Rerouting you to the destination",_currentLocale);
+
+    autoreroute();
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -1972,7 +2081,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     }
   }
 
-  void fitPolygonInScreen(Polygon polygon) {
+  void fitPolygonInScreen(Polygon polygon){
     List<LatLng> polygonPoints = getPolygonPoints(polygon);
     double minLat = polygonPoints[0].latitude;
     double maxLat = polygonPoints[0].latitude;
@@ -1997,7 +2106,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
       southwest: LatLng(minLat, minLng),
       northeast: LatLng(maxLat, maxLng),
     );
-    _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 0));
+    _googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 0)).then((value){
+      return;
+    });
   }
 
   LatLng calculateBoundsCenter(LatLngBounds bounds) {
@@ -3479,10 +3590,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         building.floor[buildingAllApi.getStoredString()] = user.floor;
 
 
-        building.landmarkdata!.then((value) {
-          createMarkers(
-              value, building.floor[buildingAllApi.getStoredString()]!);
-        });
+
         if (markers.length > 0)
           markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
         if (user.initialallyLocalised) {
@@ -3712,6 +3820,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             "${PathState.destinationName} is $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",_currentLocale);
       }
     }
+    setState(() {
+      building.floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
+    });
   }
 
   List<int> beaconCord = [];
@@ -3864,6 +3975,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
           .associateTurnWithLandmark(path, nearbyLandmarks, numCols)
           .then((value) {
         PathState.associateTurnWithLandmark = value;
+        PathState.associateTurnWithLandmark.removeWhere((key, value) => value.properties!.polyId == PathState.destinationPolyID);
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
         // });
@@ -4006,8 +4118,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
     //   ));
     //   singleroute[floor] = innerset;
     // });
-
-    building.floor[bid!] = floor;
+setState(() {
+  building.floor[bid] = floor;
+});
     createRooms(building.polyLineData!, floor);
     return path;
   }
@@ -5464,103 +5577,9 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
                               child: TextButton(
+                                key: rerouteButton,
                                 onPressed: () async {
-                                  if (!rerouting) {
-                                    setState(() {
-                                      rerouting = true;
-                                    });
-                                  //  if(user.isnavigating==false){
-                                      clearPathVariables();
-                                   // }
-
-                                    PathState.clear();
-                                    PathState.sourceX = user.coordX;
-                                    PathState.sourceY = user.coordY;
-                                    user.showcoordX = user.coordX;
-                                    user.showcoordY = user.coordY;
-                                    PathState.sourceFloor = user.floor;
-                                    PathState.sourcePolyID = user.key;
-                                    PathState.sourceName =
-                                        "Your current location";
-                                    building.landmarkdata!.then((value) async {
-                                      await calculateroute(value.landmarksMap!)
-                                          .then((value) {
-                                        user.pathobj = PathState;
-                                        user.path = PathState.path.values
-                                            .expand((list) => list)
-                                            .toList();
-                                        user.Cellpath =
-                                            PathState.singleCellListPath;
-                                        user.pathobj.index = 0;
-                                        user.isnavigating = true;
-                                        user.moveToStartofPath().then((value) {
-                                          setState(() {
-                                            if (markers.length > 0) {
-                                              markers[user.Bid]?[
-                                                      0] =
-                                                  customMarker.move(
-                                                      LatLng(
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[0],
-                                                          tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt())[1]),
-                                                      markers[user.Bid]![0]);
-                                            }
-                                          });
-                                        });
-                                        _isRoutePanelOpen = false;
-                                        building.selectedLandmarkID = null;
-                                        _isnavigationPannelOpen = true;
-                                        _isreroutePannelOpen = false;
-                                        int numCols = building.floorDimenssion[
-                                            PathState
-                                                .sourceBid]![PathState
-                                            .sourceFloor]![0]; //floor length
-                                        double angle =
-                                            tools.calculateAngleBWUserandPath(
-                                                user,
-                                                PathState.path[
-                                                    PathState.sourceFloor]![1],
-                                                numCols);
-                                        if (angle != 0) {
-                                          speak("${LocaleData.turn.getString(context)} " +
-                                              LocaleData.getProperty5(tools.angleToClocks(angle,context), context) ,_currentLocale);
-                                        } else {}
-
-                                        mapState.tilt = 50;
-
-                                        mapState.bearing =
-                                            tools.calculateBearing([
-                                          user.lat,
-                                          user.lng
-                                        ], [
-                                          PathState
-                                              .singleCellListPath[
-                                                  user.pathobj.index + 1]
-                                              .lat,
-                                          PathState
-                                              .singleCellListPath[
-                                                  user.pathobj.index + 1]
-                                              .lng
-                                        ]);
-                                        _googleMapController.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                          CameraPosition(
-                                              target: mapState.target,
-                                              zoom: mapState.zoom,
-                                              bearing: mapState.bearing!,
-                                              tilt: mapState.tilt),
-                                        ));
-                                      });
-                                    });
-                                    rerouting = false;
-                                  }
+                                  autoreroute();
                                 },
                                 child: !rerouting
                                     ? Text(
@@ -7648,6 +7667,11 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
                               SizedBox(height: 28.0),
                               DebugToggle.Slider?Text("${user.theta}"):Container(),
+                              Text("coord [${user.coordX},${user.coordY}] \n"
+                                  "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                                  "floor ${user.floor}\n"
+                                  "userBid ${user.Bid} \n"
+                                  "index ${user.pathobj.index} \n"),
                               DebugToggle.Slider?Slider(
                                   value: user.theta,
                                   min: -180,
@@ -7774,6 +7798,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
+                                    if(!user.isnavigating){
                                     enableBT();
                                     _timer = Timer.periodic(
                                         Duration(milliseconds: 9000), (timer) {
@@ -7786,6 +7811,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
 
 
                                     });
+                                    }
                                    // _timer.cancel();
                                     //localizeUser();
                                     //wsocket.sendmessg();

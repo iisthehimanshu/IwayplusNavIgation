@@ -428,6 +428,50 @@ class tools {
     return degree * pi / 180.0;
   }
 
+
+  // static double calculateBearing(List<double> pointA, List<double> pointB) {
+  //   double lat1 = toRadians(pointA[0]);
+  //   double lon1 = toRadians(pointA[1]);
+  //   double lat2 = toRadians(pointB[0]);
+  //   double lon2 = toRadians(pointB[1]);
+  //
+  //   double dLon = lon2 - lon1;
+  //
+  //   // Debugging prints
+  //   print("Original dLon: $dLon");
+  //
+  //   // Adjust dLon for wrap-around at the International Date Line
+  //   if (dLon > pi) {
+  //     dLon -= 2 * pi;
+  //   } else if (dLon < -pi) {
+  //     dLon += 2 * pi;
+  //   }
+  //
+  //   // Debugging prints
+  //   print("Adjusted dLon: $dLon");
+  //
+  //   double x = sin(dLon) * cos(lat2);
+  //   double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  //
+  //   double bearingRadians = atan2(x, y);
+  //   double bearingDegrees = bearingRadians * 180.0 / pi;
+  //
+  //   // Normalize the bearing to be within the range 0° to 360°
+  //   bearingDegrees = (bearingDegrees + 360) % 360;
+  //
+  //   // Debugging prints
+  //   print("Point A: (${pointA[0]}, ${pointA[1]})");
+  //   print("Point B: (${pointB[0]}, ${pointB[1]})");
+  //   print("x: $x, y: $y");
+  //   print("Bearing (Radians): $bearingRadians");
+  //   print("Bearing (Degrees): $bearingDegrees");
+  //
+  //   return bearingDegrees;
+  // }
+
+
+
+
   static double calculateBearing(List<double> pointA, List<double> pointB) {
     double lat1 = toRadians(pointA[0]);
     double lon1 = toRadians(pointA[1]);

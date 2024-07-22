@@ -284,6 +284,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            UserState.createCircle(widget.user.lat,widget.user.lng);
             speak(
                 "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
                 _currentLocale
@@ -349,6 +350,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
                     _currentLocale
                 );
+                UserState.createCircle(widget.user.lat,widget.user.lng);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 return true; //moved on path

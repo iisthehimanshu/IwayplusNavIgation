@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DebugToggle extends StatefulWidget {
-  static bool Slider = false;
-  static bool StepButton = false;
+  static bool Slider = true;
+  static bool StepButton = true;
   static bool PDRIcon = false;
   const DebugToggle({super.key});
 
@@ -11,8 +11,8 @@ class DebugToggle extends StatefulWidget {
 }
 
 class _DebugToggleState extends State<DebugToggle> {
-  bool Slider = false;
-  bool StepButton = false;
+  bool Slider = true;
+  bool StepButton = true;
   bool PDRIcon = false;
 
 

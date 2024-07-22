@@ -2694,10 +2694,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   void createMarkers(land _landData, int floor) async {
-    Markers.clear();
+
+    print("Markercleared");
+    print(Markers.length);
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
+    Markers.clear();
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
@@ -2947,6 +2950,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     });
     print("_markerLocationsMap");
     print("$_markerLocationsMap");
+
     _initMarkers();
   }
 
@@ -3206,6 +3210,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
                           onPressed: () async {
                             _polygon.clear();
                             circles.clear();
+                            Markers.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -3572,6 +3577,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
     singleroute.clear();
     pathMarkers.clear();
+    Markers.clear();
+
     PathState.destinationX =
         landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
@@ -7794,6 +7801,7 @@ setState(() {
                                                 if (pathMarkers[i] != null) {
                                                   //setCameraPosition(pathMarkers[i]!);
                                                 }
+                                                // Markers.clear();
                                                 building.landmarkdata!
                                                     .then((value) {
                                                   createMarkers(

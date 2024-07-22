@@ -21,6 +21,7 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -30,6 +31,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'Elements/locales.dart';
+import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 
@@ -5517,6 +5519,10 @@ setState(() {
                                           markers[user.Bid]![0]);
                                     }
                                   });
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+
+
+
                                 },
                                 child: Text(
                                   "${LocaleData.exit.getString(context)}",
@@ -7253,6 +7259,8 @@ setState(() {
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+
   }
 
   void onLandmarkVenueClicked(String ID,

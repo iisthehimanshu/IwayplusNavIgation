@@ -188,6 +188,7 @@ class UserState{
 
 
       //destination check
+      print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
       if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
         List<int> tv = tools.eightcelltransition(theta);
         double angle = tools.calculateAngleSecond([showcoordX,showcoordY], [showcoordX+tv[0], showcoordY+tv[1]], [pathobj.destinationX,pathobj.destinationY]);

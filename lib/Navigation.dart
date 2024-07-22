@@ -884,7 +884,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   String convertTolng(String msg,String lngcode,String finalvalue){
-    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}")
+    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}")
     {
       if(lngcode=='en'){
         return msg;
@@ -1156,7 +1156,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         if (speakTTS) {
           if (finalvalue == null) {
-            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,'')
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}", _currentLocale,'')
                 ,_currentLocale);
           } else {
             speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue)
@@ -1167,7 +1167,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,''),_currentLocale);
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}", _currentLocale,''),_currentLocale);
 
           } else {
             speak(
@@ -3612,6 +3612,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,accessibleby);
 
+        if(commonlifts.isEmpty){
+          setState(() {
+            PathState.noPathFound = true;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+          return;
+        }
+
         print(commonlifts);
 
         await fetchroute(
@@ -3668,6 +3677,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             } else if (element.floor != PathState.destinationFloor) {
               List<dynamic> commonlifts = findCommonLifts(element,
                   landmarksMap[PathState.destinationPolyID]!,accessibleby);
+              if(commonlifts.isEmpty){
+                setState(() {
+                  PathState.noPathFound = true;
+                  _isLandmarkPanelOpen = false;
+                  _isRoutePanelOpen = true;
+                });
+                return;
+              }
               await fetchroute(
                   commonlifts[0].x2!,
                   commonlifts[0].y2!,
@@ -3720,6 +3737,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             } else if (PathState.sourceFloor != element.floor) {
               List<dynamic> commonlifts = findCommonLifts(
                   landmarksMap[PathState.sourcePolyID]!, element,accessibleby);
+              if(commonlifts.isEmpty){
+                setState(() {
+                  PathState.noPathFound = true;
+                  _isLandmarkPanelOpen = false;
+                  _isRoutePanelOpen = true;
+                });
+                return;
+              }
 
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
                   element.coordinateX!, element.coordinateY!, element.floor!,
@@ -4873,7 +4898,8 @@ setState(() {
                                               // user.buildingNumber = PathState.listofPaths.length-1;
                                               buildingAllApi.selectedID = PathState.sourceBid;
                                               buildingAllApi.selectedBuildingID = PathState.sourceBid;
-
+                                              UserState.cols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                                              UserState.rows = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![1];
                                               user.Bid = PathState.sourceBid;
                                               //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                               user.floor =
@@ -7532,8 +7558,8 @@ setState(() {
                             padding: EdgeInsets.only(
                                 left: 20), // <--- padding added here
                             initialCameraPosition: _initialCameraPosition,
-                            myLocationButtonEnabled: true,
-                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            myLocationEnabled: false,
                             zoomControlsEnabled: false,
                             zoomGesturesEnabled: true,
 
@@ -7675,11 +7701,11 @@ setState(() {
 
                               SizedBox(height: 28.0),
                               DebugToggle.Slider?Text("${user.theta}"):Container(),
-                              Text("coord [${user.coordX},${user.coordY}] \n"
-                                  "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                                  "floor ${user.floor}\n"
-                                  "userBid ${user.Bid} \n"
-                                  "index ${user.pathobj.index} \n"),
+                              // Text("coord [${user.coordX},${user.coordY}] \n"
+                              //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                              //     "floor ${user.floor}\n"
+                              //     "userBid ${user.Bid} \n"
+                              //     "index ${user.pathobj.index} \n"),
                               DebugToggle.Slider?Slider(
                                   value: user.theta,
                                   min: -180,

@@ -1288,8 +1288,6 @@ class tools {
       if(land != null){
         ls[turn] = land!;
       }
-
-
     });
 
     // landmarks.forEach((element) {

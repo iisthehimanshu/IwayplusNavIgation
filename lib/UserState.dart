@@ -46,7 +46,7 @@ class UserState{
   static Map<String,Map<int, List<int>>> nonWalkable = Map();
   static Function reroute = (){};
   static Function closeNavigation = (){};
-  static Function speak = (){};
+  static Function speak = (String lngcode){};
   static Function AlignMapToPath = (){};
   static Function startOnPath = (){};
   static Function paintMarker = (geo.LatLng Location){};
@@ -188,11 +188,12 @@ class UserState{
 
 
       //destination check
+      print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
       if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
         List<int> tv = tools.eightcelltransition(theta);
         double angle = tools.calculateAngleSecond([showcoordX,showcoordY], [showcoordX+tv[0], showcoordY+tv[1]], [pathobj.destinationX,pathobj.destinationY]);
         String direction = tools.angleToClocks3(angle,context);
-        speak("You have reached ${pathobj.destinationName}. It is $direction");
+        speak(convertTolng("You have reached ${pathobj.destinationName}. It is ${direction}", "", 0.0, context, 0.0) ,lngCode);
         closeNavigation();
       }
 
@@ -207,24 +208,29 @@ class UserState{
       print("iwwwwi ${showcoordY*cols + showcoordX}");
 
       if(floor!=pathobj.destinationFloor &&  pathobj.connections[Bid]?[floor] == (showcoordY*cols + showcoordX)){
-        speak("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
+        speak(convertTolng(
+            "Use this lift and go to ${tools.numericalToAlphabetical(
+                pathobj.destinationFloor)} floor", "", 0.0, context, 0.0)
+            , lngCode);
       }
 
       if(pathState.nearbyLandmarks.isNotEmpty){
-        pathState.nearbyLandmarks.forEach((element) {
-          if(element.element!.subType == "room door" && element.properties!.polygonExist != true){
-            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=3){
-              speak("Passing by ${element.name}");
-              pathState.nearbyLandmarks.remove(element);
+        pathState.nearbyLandmarks.retainWhere((element) {
+          if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
+            if (tools.calculateDistance([showcoordX, showcoordY], [element.doorX ?? element.coordinateX!, element.doorY ?? element.coordinateY!]) <= 3) {
+              speak(convertTolng("Passing by ${element.name}", element.name, 0.0, context, 0.0), lngCode);
+              return false; // Remove this element
             }
-          }else{
-            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
-              double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
-              speak(convertTolng("${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}", element.name!,0.0,context,0.0));
-              pathState.nearbyLandmarks.remove(element);
+          } else {
+            if (tools.calculateDistance([showcoordX, showcoordY], [element.doorX ?? element.coordinateX!, element.doorY ?? element.coordinateY!]) <= 6) {
+              double agl = tools.calculateAngle2([showcoordX, showcoordY], [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]], [element.coordinateX!, element.coordinateY!]);
+              speak(convertTolng("${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}", element.name!, 0.0, context, 0.0), lngCode);
+              return false; // Remove this element
             }
           }
+          return true; // Keep this element
         });
+
       }
 
     }else{
@@ -253,11 +259,13 @@ class UserState{
 
 
   String convertTolng(String msg,String? name,double agl,BuildContext context,double a){
+    print("msgggg");
+    print("${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}");
     if(msg=="You have reached ${pathobj.destinationName}. It is ${tools.angleToClocks3(a, context)}"){
       if(lngCode=='en'){
         return msg;
       }else{
-        return "आप ${pathobj.destinationName} पर पहुँच गए हैं। यह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
+        return "आप ${pathobj.destinationName} पर पहुँच गए हैं। वह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
       }
     }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
       if(lngCode=='en'){

@@ -634,6 +634,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   Future<void> speak(String msg,String lngcode) async {
+    print(await flutterTts.getDefaultVoice);
+    if(lngcode == "hi"){
+      await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+    }else{
+      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+    }
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -878,7 +884,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
   }
 
   String convertTolng(String msg,String lngcode,String finalvalue){
-    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}")
+    if(msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}")
     {
       if(lngcode=='en'){
         return msg;
@@ -914,8 +920,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
     if (apibeaconmap[nearestBeacon] != null) {
 
       //buildingAngle compute
-      tools.angleBetweenBuildingAndNorth(
-          apibeaconmap[nearestBeacon]!.buildingID!);
+
+
+      tools.setBuildingAngle(building.patchData[apibeaconmap[nearestBeacon]!.buildingID]!.patchData!.buildingAngle!);
 
       //nearestLandmark compute
 
@@ -1149,7 +1156,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
 
         if (speakTTS) {
           if (finalvalue == null) {
-            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,'')
+            speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}", _currentLocale,'')
                 ,_currentLocale);
           } else {
             speak(convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}", _currentLocale, finalvalue)
@@ -1160,7 +1167,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
         if (speakTTS) {
           if (finalvalue == null) {
             speak(
-                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,floor ${user.locationName}", _currentLocale,''),_currentLocale);
+                convertTolng("You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}", _currentLocale,''),_currentLocale);
 
           } else {
             speak(
@@ -3605,6 +3612,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,accessibleby);
 
+        if(commonlifts.isEmpty){
+          setState(() {
+            PathState.noPathFound = true;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+          return;
+        }
+
         print(commonlifts);
 
         await fetchroute(
@@ -3661,6 +3677,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             } else if (element.floor != PathState.destinationFloor) {
               List<dynamic> commonlifts = findCommonLifts(element,
                   landmarksMap[PathState.destinationPolyID]!,accessibleby);
+              if(commonlifts.isEmpty){
+                setState(() {
+                  PathState.noPathFound = true;
+                  _isLandmarkPanelOpen = false;
+                  _isRoutePanelOpen = true;
+                });
+                return;
+              }
               await fetchroute(
                   commonlifts[0].x2!,
                   commonlifts[0].y2!,
@@ -3713,6 +3737,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin{
             } else if (PathState.sourceFloor != element.floor) {
               List<dynamic> commonlifts = findCommonLifts(
                   landmarksMap[PathState.sourcePolyID]!, element,accessibleby);
+              if(commonlifts.isEmpty){
+                setState(() {
+                  PathState.noPathFound = true;
+                  _isLandmarkPanelOpen = false;
+                  _isRoutePanelOpen = true;
+                });
+                return;
+              }
 
               await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
                   element.coordinateX!, element.coordinateY!, element.floor!,
@@ -4866,7 +4898,8 @@ setState(() {
                                               // user.buildingNumber = PathState.listofPaths.length-1;
                                               buildingAllApi.selectedID = PathState.sourceBid;
                                               buildingAllApi.selectedBuildingID = PathState.sourceBid;
-
+                                              UserState.cols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                                              UserState.rows = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![1];
                                               user.Bid = PathState.sourceBid;
                                               //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                               user.floor =
@@ -5446,7 +5479,7 @@ setState(() {
                           ),
                           Container(
                             height: 40,
-                            width: 56,
+                            width: 65,
                             decoration: BoxDecoration(
                               color: Color(0xffDF3535),
                               borderRadius: BorderRadius.circular(20.0),
@@ -7526,6 +7559,7 @@ setState(() {
                                 left: 20), // <--- padding added here
                             initialCameraPosition: _initialCameraPosition,
                             myLocationButtonEnabled: false,
+                            myLocationEnabled: false,
                             zoomControlsEnabled: false,
                             zoomGesturesEnabled: true,
 
@@ -7667,11 +7701,11 @@ setState(() {
 
                               SizedBox(height: 28.0),
                               DebugToggle.Slider?Text("${user.theta}"):Container(),
-                              Text("coord [${user.coordX},${user.coordY}] \n"
-                                  "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                                  "floor ${user.floor}\n"
-                                  "userBid ${user.Bid} \n"
-                                  "index ${user.pathobj.index} \n"),
+                              // Text("coord [${user.coordX},${user.coordY}] \n"
+                              //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                              //     "floor ${user.floor}\n"
+                              //     "userBid ${user.Bid} \n"
+                              //     "index ${user.pathobj.index} \n"),
                               DebugToggle.Slider?Slider(
                                   value: user.theta,
                                   min: -180,

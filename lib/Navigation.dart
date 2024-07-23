@@ -670,11 +670,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 // Function to stop the timer
   bool isPdrStop = false;
+
   void StopPDR() async {
     if (PDRTimer != null && PDRTimer!.isActive) {
       setState(() {
         isPdrStop = true;
         isPdr = false;
+
       });
 
       PDRTimer!.cancel();
@@ -5411,12 +5413,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void alignMapToPath(List<double> A, List<double> B) async {
+    print("a------ $A");
+    print("b------- $B");
     mapState.tilt = 33.5;
     List<double> val =
         tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
     mapState.target = LatLng(val[0], val[1]);
-    print("bearing value");
-    print(tools.calculateBearing(A, B));
     mapState.bearing = tools.calculateBearing(A, B);
    await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
@@ -5539,9 +5541,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               // print("points unmatchedddd");
 
               Future.delayed(Duration(milliseconds: 1500))
-                  .then((value) => {StartPDR()});
+                  .then((value) => {
+                    StartPDR(),
+
+
+                  });
+
+
 
               setState(() {
+
                 isPdrStop = false;
               });
 
@@ -7450,7 +7459,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
 
   }
 

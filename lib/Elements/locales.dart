@@ -11,7 +11,7 @@ const List<MapLocale> LOCALES=[
 ];
 
 mixin LocaleData {
-
+  static const String iss = "iss";
   static const String title = 'title';
   static const String generalSettings = 'generalSettings';
   static const String language = 'language';
@@ -116,7 +116,7 @@ mixin LocaleData {
   static const String near='near';
   static const String unabletofindyourlocation='Unable to find your location';
   static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
-  static const String iss= 'is';
+  static const String issss= 'is';
   static const String meteraway='meter away';
   static const String clickstarttonavigate= 'Click Start to Navigate';
   static const String exploremodenabled= 'Explore Mode Enabled';
@@ -242,6 +242,7 @@ mixin LocaleData {
 
 
   static const Map<String, dynamic> EN = {
+    'iss': 'is',
     'title': 'Settings',
     'generalSettings': 'General Settings',
     'language': 'Language',
@@ -360,6 +361,7 @@ mixin LocaleData {
   };
 
   static const Map<String, dynamic> HI = {
+    'iss':'',
     'title': 'सेटिंग्स',
     'generalSettings': 'सामान्य सेटिंग्स',
     'language': 'भाषा',

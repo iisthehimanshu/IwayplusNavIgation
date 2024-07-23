@@ -429,10 +429,10 @@ class tools {
   }
 
   static double calculateBearing(List<double> pointA, List<double> pointB) {
-    double lat1 = toRadians(pointA[0]);
-    double lon1 = toRadians(pointA[1]);
-    double lat2 = toRadians(pointB[0]);
-    double lon2 = toRadians(pointB[1]);
+    double lat1 = toRadians(pointA[0]); //user
+    double lon1 = toRadians(pointA[1]); //user
+    double lat2 = toRadians(pointB[0]); //path next point
+    double lon2 = toRadians(pointB[1]); //path next point
 
     double dLon = lon2 - lon1;
 
@@ -566,6 +566,33 @@ class tools {
     int currentY = currentCoordinate[1];
     int nextX = next[0];
     int nextY = next[1];
+
+    // Calculate the vectors from prev to current and from current to next
+    int vector1X = currentX - prevX;
+    int vector1Y = currentY - prevY;
+    int vector2X = nextX - currentX;
+    int vector2Y = nextY - currentY;
+
+    // Calculate the cross product of vector1 and vector2
+    int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+    // A cross product of zero means the points are collinear (no turn).
+    // Cross product != 0 means there is a turn.
+    return crossProduct != 0;
+  }
+
+  static bool isCellTurn(Cell prev, Cell currentCoordinate, Cell next) {
+    if (prev == null || next == null) {
+      return false;  // Not enough data to determine if it's a turn.
+    }
+
+    // Extracting coordinates
+    int prevX = prev.x;
+    int prevY = prev.y;
+    int currentX = currentCoordinate.x;
+    int currentY = currentCoordinate.y;
+    int nextX = next.x;
+    int nextY = next.y;
 
     // Calculate the vectors from prev to current and from current to next
     int vector1X = currentX - prevX;
@@ -1517,11 +1544,15 @@ class tools {
   }
 
   static int distancebetweennodes(int node1, int node2, int numCols){
+    print("nextturn $node1 $node2");
     int x1 = node1 % numCols;
     int y1 = node1 ~/ numCols;
 
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
+
+    print("nextturn [$x1,$y1] [$x2,$y2]");
+
 
     // //print("@@@@@ $x1,$y1");
     // //print("&&&&& $x2,$y2");

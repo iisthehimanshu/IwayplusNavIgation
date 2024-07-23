@@ -19,9 +19,9 @@ class MotionModel{
       return false;
     }
 
-    if(nonWalkable.contains((newY*cols)+newX)){
-      return false;
-    }
+    // if(nonWalkable.contains((newY*cols)+newX)){
+    //   return false;
+    // }
 
     try{
       if(user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionvertical){

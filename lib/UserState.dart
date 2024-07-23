@@ -190,10 +190,6 @@ class UserState{
       //destination check
       print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
       if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
-        List<int> tv = tools.eightcelltransition(theta);
-        double angle = tools.calculateAngleSecond([showcoordX,showcoordY], [showcoordX+tv[0], showcoordY+tv[1]], [pathobj.destinationX,pathobj.destinationY]);
-        String direction = tools.angleToClocks3(angle,context);
-        speak(convertTolng("You have reached ${pathobj.destinationName}. It is ${direction}", "", 0.0, context, 0.0) ,lngCode);
         closeNavigation();
       }
 
@@ -211,10 +207,10 @@ class UserState{
         speak(convertTolng(
             "Use this lift and go to ${tools.numericalToAlphabetical(
                 pathobj.destinationFloor)} floor", "", 0.0, context, 0.0)
-            , lngCode);
+            , lngCode, prevpause:true);
       }
 
-      if(pathState.nearbyLandmarks.isNotEmpty){
+      if(0<pathobj.index && pathobj.index<Cellpath.length-1 && pathState.nearbyLandmarks.isNotEmpty && !tools.isCellTurn(Cellpath[pathobj.index-1], Cellpath[pathobj.index], Cellpath[pathobj.index+1])){
         pathState.nearbyLandmarks.retainWhere((element) {
           if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
             if (tools.calculateDistance([showcoordX, showcoordY], [element.doorX ?? element.coordinateX!, element.doorY ?? element.coordinateY!]) <= 3) {
@@ -258,14 +254,14 @@ class UserState{
   }
 
 
-  String convertTolng(String msg,String? name,double agl,BuildContext context,double a){
+  String convertTolng(String msg,String? name,double agl,BuildContext context,double a,{String destname = ""}){
     print("msgggg");
     print("${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}");
-    if(msg=="You have reached ${pathobj.destinationName}. It is ${tools.angleToClocks3(a, context)}"){
+    if(msg=="You have reached ${destname}. It is ${tools.angleToClocks3(a, context)}"){
       if(lngCode=='en'){
         return msg;
       }else{
-        return "आप ${pathobj.destinationName} पर पहुँच गए हैं। वह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
+        return "आप ${destname} पर पहुँच गए हैं। वह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
       }
     }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
       if(lngCode=='en'){

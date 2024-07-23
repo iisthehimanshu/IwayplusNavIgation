@@ -97,22 +97,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     }
 
-    // btadapter.startScanning(Building.apibeaconmap);
-    // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-    //   //print("Pathposition");
-    //   //print(widget.user.path);
-    //
-    //
-    //   // //print("listen to bin :${listenToBin()}");
-    //
-    //   // HelperClass.showToast("Bin cleared");
-    //   if(widget.user.pathobj.index>1) {
-    //     listenToBin();
-    //   }
-    //
-    //
-    //
-    // });
+    btadapter.startScanning(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+      //print("Pathposition");
+      //print(widget.user.path);
+
+
+      // //print("listen to bin :${listenToBin()}");
+
+      // HelperClass.showToast("Bin cleared");
+      if(widget.user.pathobj.index>1) {
+        listenToBin();
+      }
+
+
+
+    });
 
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
@@ -318,7 +318,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.5) {
+              highestweight >= 6.0) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -392,8 +392,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         //print(nearestBeacon);
         _timer.cancel();
-        widget.repaint(nearestBeacon);
-        widget.reroute;
+
+        if(highestweight > 0.5){
+          widget.repaint(nearestBeacon);
+          widget.reroute;
+        }
         return false;
       }
     }

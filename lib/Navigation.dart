@@ -21,6 +21,7 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -30,6 +31,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'Elements/locales.dart';
+import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 
@@ -2727,10 +2729,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void createMarkers(land _landData, int floor) async {
-    Markers.clear();
+
+    print("Markercleared");
+    print(Markers.length);
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
+    Markers.clear();
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
@@ -2983,6 +2988,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     print("_markerLocationsMap");
     print("$_markerLocationsMap");
+
     _initMarkers();
   }
 
@@ -3250,6 +3256,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           onPressed: () async {
                             _polygon.clear();
                             circles.clear();
+                            Markers.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
                               PathState.sourceX = user.coordX;
@@ -3625,6 +3632,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     singleroute.clear();
     pathMarkers.clear();
+    Markers.clear();
+
     PathState.destinationX =
         landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
@@ -5683,6 +5692,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                           markers[user.Bid]![0]);
                                     }
                                   });
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+
+
+
                                 },
                                 child: Text(
                                   "${LocaleData.exit.getString(context)}",
@@ -7438,6 +7451,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+
   }
 
   void onLandmarkVenueClicked(String ID,
@@ -7994,6 +8009,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 if (pathMarkers[i] != null) {
                                                   //setCameraPosition(pathMarkers[i]!);
                                                 }
+                                                // Markers.clear();
                                                 building.landmarkdata!
                                                     .then((value) {
                                                   createMarkers(

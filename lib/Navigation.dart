@@ -378,7 +378,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
-        _updateCircle(user.lat,user.lng);
+        _updateCircle(user.lat, user.lng);
       });
 
     building.floor.putIfAbsent("", () => 0);
@@ -624,7 +624,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     );
   }
 
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+  Future<void> speak(String msg, String lngcode,
+      {bool prevpause = false}) async {
     if (prevpause) {
       await flutterTts.pause();
     }
@@ -1039,7 +1040,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
-      UserState.createCircle=updateCircle;
+      UserState.createCircle = updateCircle;
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -1672,28 +1673,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("Circular progress stop");
   }
 
-  void _updateCircle(double lat,double lng) {
+  void _updateCircle(double lat, double lng) {
     // Create a new Tween with the provided begin and end values
-        // Optionally update UI or logic with animation value
-        final Circle updatedCircle = Circle(
-          circleId: CircleId("circle"),
-          center: LatLng(lat, lng),
-          radius: _animation.value,
-          strokeWidth: 1,
-          strokeColor: Colors.blue,
-          fillColor: Colors.lightBlue.withOpacity(0.2),
-        );
+    // Optionally update UI or logic with animation value
+    final Circle updatedCircle = Circle(
+      circleId: CircleId("circle"),
+      center: LatLng(lat, lng),
+      radius: _animation.value,
+      strokeWidth: 1,
+      strokeColor: Colors.blue,
+      fillColor: Colors.lightBlue.withOpacity(0.2),
+    );
 
-        setState(() {
-          circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
-          circles.add(updatedCircle);
-        });
-
-
-
+    setState(() {
+      circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+      circles.add(updatedCircle);
+    });
   }
 
-  void updateCircle(double lat,double lng,{double begin = 5, double end = 0}) {
+  void updateCircle(double lat, double lng,
+      {double begin = 5, double end = 0}) {
     // Create a new Tween with the provided begin and end values
     _animation = Tween<double>(begin: begin, end: end).animate(_controller)
       ..addListener(() {
@@ -1708,15 +1707,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
 
         setState(() {
-          circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+          circles
+              .removeWhere((circle) => circle.circleId == CircleId("circle"));
           circles.add(updatedCircle);
         });
-
       });
     // Start the animation
     _controller.forward(from: 0.0);
-
-
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -2729,7 +2726,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void createMarkers(land _landData, int floor) async {
-
     print("Markercleared");
     print(Markers.length);
     _markers.clear();
@@ -4070,8 +4066,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(direction(-1, "Take ${liftName} and go to ${PathState.destinationFloor} floor", null, null,
-              floor.toDouble(), null, null, floor, bid ?? ""));
+          directions.add(direction(
+              -1,
+              "Take ${liftName} and go to ${PathState.destinationFloor} floor",
+              null,
+              null,
+              floor.toDouble(),
+              null,
+              null,
+              floor,
+              bid ?? ""));
         }
         directions.addAll(tools.getDirections(
             path, numCols, value, floor, bid ?? "", PathState, context));
@@ -5410,6 +5414,157 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     );
   }
 
+  int _rating = 0;
+  String _feedback = '';
+  PanelController _feedbackController = PanelController();
+  TextEditingController _feedbackTextController = TextEditingController();
+
+
+  bool showFeedback = false;
+
+
+
+  Widget feedbackPanel(BuildContext context) {
+
+    return Visibility(
+      visible: showFeedback,
+      child: Semantics(
+        excludeSemantics: true,
+        child: SlidingUpPanel(
+            controller: _feedbackController,
+            minHeight: MediaQuery.of(context).size.height/2,
+            maxHeight: MediaQuery.of(context).size.height,
+            snapPoint: 0.9,
+            borderRadius: BorderRadius.all(Radius.circular(24.0)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            panel: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40),
+                  Text(
+                    'How was your experience?',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Your feedback helps us improve our service.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        return GestureDetector(
+                          onTap: () => setState(() => _rating = index + 1),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Icon(
+                              index < _rating ? Icons.star : Icons.star_border,
+                              color: Colors.amber,
+                              size: 48,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  if (_rating > 0 && _rating < 4) ...[
+                    Text(
+                      'What can we improve?',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      controller: _feedbackTextController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Please share your thoughts...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: false,
+                        fillColor: Colors.white,
+                      ),
+                      onChanged: (value) => setState(() => _feedback = value),
+                    ),
+                  ],
+                  SizedBox(height: 40),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
+                        // TODO: Submit feedback
+                        print('Rating: $_rating');
+                        if (_feedback.isNotEmpty) {
+                          print('Feedback: $_feedback');
+                        }
+                        showFeedback= false;
+                        _feedbackController.hide();
+                      }
+                          : null,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          'Submit Feedback',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ),
+      ),
+    );
+  }
+
+  void _submitFeedback() {
+    String feedbackMessage = 'Rating: $_rating\n';
+    if (_feedback.isNotEmpty) {
+      feedbackMessage += 'Feedback: $_feedback';
+    }
+
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(feedbackMessage),
+    //     duration: Duration(seconds: 3),
+    //   ),
+    // );
+    _feedbackController.close();
+    _feedbackTextController.clear();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   void alignMapToPath(List<double> A, List<double> B) async {
     mapState.tilt = 33.5;
     List<double> val =
@@ -5418,7 +5573,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("bearing value");
     print(tools.calculateBearing(A, B));
     mapState.bearing = tools.calculateBearing(A, B);
-   await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+    await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
           target: mapState.target,
           zoom: mapState.zoom,
@@ -5476,7 +5631,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-
 
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -5692,8 +5846,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                           markers[user.Bid]![0]);
                                     }
                                   });
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
 
+                                  setState(() {
+                                    showFeedback = true;
+                                    Future.delayed(Duration(seconds: 5));
+
+                                    _feedbackController.open();
+
+                                    _feedbackTextController.clear();
+                                    print(_feedbackTextController.value.text);
+
+                                  });
+                                  print("feedbackTextController.value.text");
+                                  print(_feedbackTextController.value.text);
 
 
                                 },
@@ -7412,18 +7577,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks3(angle, context);
-    flutterTts.pause().then((value){
+    flutterTts.pause().then((value) {
       print("closing navigation");
       speak(
-          user.convertTolng(
-              "You have reached ${destname}. It is ${direction}",
-              "",
-              0.0,
-              context,
-              angle,destname: destname),
+          user.convertTolng("You have reached ${destname}. It is ${direction}",
+              "", 0.0, context, angle,
+              destname: destname),
           _currentLocale);
     });
-
 
     clearPathVariables();
     StopPDR();
@@ -7451,7 +7612,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+    //avigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
+    showFeedback = true;
+    Future.delayed(Duration(seconds: 5));
+    _feedbackController.open();
 
   }
 
@@ -8048,7 +8212,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               Semantics(
                                 child: FloatingActionButton(
                                   onPressed: () async {
-                                    print("destinationName ${PathState.destinationName}");
+                                    print(
+                                        "destinationName ${PathState.destinationName}");
                                     // if (!user.isnavigating) {
                                     //   enableBT();
                                     //   _timer = Timer.periodic(
@@ -8196,6 +8361,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         },
                       ),
                       routeDeatilPannel(),
+                      feedbackPanel(context),
                       navigationPannel(),
                       reroutePannel(context),
                       ExploreModePannel(),

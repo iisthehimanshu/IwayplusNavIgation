@@ -671,11 +671,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 // Function to stop the timer
   bool isPdrStop = false;
+
   void StopPDR() async {
     if (PDRTimer != null && PDRTimer!.isActive) {
       setState(() {
         isPdrStop = true;
         isPdr = false;
+
       });
 
       PDRTimer!.cancel();
@@ -1107,7 +1109,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       double value = 0;
       if (nearestLandInfomation != null) {
-        value = tools.calculateAngle2(userCords, newUserCord, [
+        value = tools.calculateAngle2([apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!],newUserCord, [
           nearestLandInfomation!.coordinateX!,
           nearestLandInfomation!.coordinateY!
         ]);
@@ -4066,16 +4068,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // });
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(direction(
-              -1,
-              "Take ${liftName} and go to ${PathState.destinationFloor} floor",
-              null,
-              null,
-              floor.toDouble(),
-              null,
-              null,
-              floor,
-              bid ?? ""));
+          directions.add(direction(-1, "Take ${liftName} and Go to ${PathState.destinationFloor} Floor", null, null,
+              floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
             path, numCols, value, floor, bid ?? "", PathState, context));
@@ -5566,12 +5560,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void alignMapToPath(List<double> A, List<double> B) async {
+    print("a------ $A");
+    print("b------- $B");
     mapState.tilt = 33.5;
     List<double> val =
         tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
     mapState.target = LatLng(val[0], val[1]);
-    print("bearing value");
-    print(tools.calculateBearing(A, B));
     mapState.bearing = tools.calculateBearing(A, B);
     await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
@@ -5693,9 +5687,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               // print("points unmatchedddd");
 
               Future.delayed(Duration(milliseconds: 1500))
-                  .then((value) => {StartPDR()});
+                  .then((value) => {
+                    StartPDR(),
+
+
+                  });
+
+
 
               setState(() {
+
                 isPdrStop = false;
               });
 
@@ -7572,13 +7573,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("close navigation");
     String destname = PathState.destinationName;
     List<int> tv = tools.eightcelltransition(user.theta);
-    double angle = tools.calculateAngleSecond(
-        [user.showcoordX, user.showcoordY],
-        [user.showcoordX + tv[0], user.showcoordY + tv[1]],
+    double angle = tools.calculateAngle2(
+        [user.showcoordX, user.showcoordY],[user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks3(angle, context);
-    flutterTts.pause().then((value) {
-      print("closing navigation");
+    print("closing navigation $angle ${[user.showcoordX, user.showcoordY]}     ${[user.showcoordX + tv[0], user.showcoordY + tv[1]]}     ${[PathState.destinationX, PathState.destinationY]}");
+    flutterTts.pause().then((value){
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
               "", 0.0, context, angle,
@@ -7616,6 +7616,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     showFeedback = true;
     Future.delayed(Duration(seconds: 5));
     _feedbackController.open();
+
 
   }
 

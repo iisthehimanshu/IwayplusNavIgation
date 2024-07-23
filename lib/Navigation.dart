@@ -369,14 +369,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setPdrThreshold();
 
     _controller = AnimationController(
-      duration: const Duration(seconds: 3),
       vsync: this,
+      duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
-        _updateCircle();
+        _updateCircle(user.lat,user.lng);
       });
 
     building.floor.putIfAbsent("", () => 0);
@@ -1037,6 +1037,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
+      UserState.createCircle=updateCircle;
       List<int> userCords = [];
       userCords.add(user.coordX);
       userCords.add(user.coordY);
@@ -1669,20 +1670,51 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("Circular progress stop");
   }
 
-  void _updateCircle() {
-    final Circle updatedCircle = Circle(
-      circleId: CircleId("circle"),
-      center: LatLng(user.lat, user.lng),
-      radius: _animation.value,
-      strokeWidth: 1,
-      strokeColor: Colors.blue,
-      fillColor: Colors.lightBlue.withOpacity(0.2),
-    );
+  void _updateCircle(double lat,double lng) {
+    // Create a new Tween with the provided begin and end values
+        // Optionally update UI or logic with animation value
+        final Circle updatedCircle = Circle(
+          circleId: CircleId("circle"),
+          center: LatLng(lat, lng),
+          radius: _animation.value,
+          strokeWidth: 1,
+          strokeColor: Colors.blue,
+          fillColor: Colors.lightBlue.withOpacity(0.2),
+        );
 
-    setState(() {
-      circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
-      circles.add(updatedCircle);
-    });
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+          circles.add(updatedCircle);
+        });
+
+
+
+  }
+
+  void updateCircle(double lat,double lng,{double begin = 5, double end = 0}) {
+    // Create a new Tween with the provided begin and end values
+    _animation = Tween<double>(begin: begin, end: end).animate(_controller)
+      ..addListener(() {
+        // Optionally update UI or logic with animation value
+        final Circle updatedCircle = Circle(
+          circleId: CircleId("circle"),
+          center: LatLng(lat, lng),
+          radius: _animation.value,
+          strokeWidth: 1,
+          strokeColor: Colors.blue,
+          fillColor: Colors.lightBlue.withOpacity(0.2),
+        );
+
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+          circles.add(updatedCircle);
+        });
+
+      });
+    // Start the animation
+    _controller.forward(from: 0.0);
+
+
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -5374,8 +5406,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     List<double> val =
         tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
     mapState.target = LatLng(val[0], val[1]);
+    print("bearing value");
+    print(tools.calculateBearing(A, B));
     mapState.bearing = tools.calculateBearing(A, B);
-    _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+   await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
           target: mapState.target,
           zoom: mapState.zoom,
@@ -5430,6 +5464,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       );
     });
   }
+  // void _addCircle(double l1,double l2){
+  //   _updateCircle();
+  // }
+
 
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -5450,6 +5488,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     try {
       //implement the turn functionality.
+      // if(UserState.reachedLift){
+      //    updateCircle(user.lat,user.lng);
+      //     UserState.reachedLift=false;
+      //
+      // }
+
       if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
         int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 

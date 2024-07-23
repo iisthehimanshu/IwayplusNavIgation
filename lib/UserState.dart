@@ -38,6 +38,7 @@ class UserState{
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
+  static bool reachedLift=false;
   static int UserHeight  = 195;
   static double stepSize = 2;
   static String lngCode='en';
@@ -50,6 +51,7 @@ class UserState{
   static Function AlignMapToPath = (){};
   static Function startOnPath = (){};
   static Function paintMarker = (geo.LatLng Location){};
+  static Function createCircle=(double lat,double lng){};
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false, this.coordXf = 0.0, this.coordYf = 0.0});
 
@@ -204,6 +206,8 @@ class UserState{
       print("iwwwwi ${showcoordY*cols + showcoordX}");
 
       if(floor!=pathobj.destinationFloor &&  pathobj.connections[Bid]?[floor] == (showcoordY*cols + showcoordX)){
+       // UserState.reachedLift=true;
+        createCircle(lat,lng);
         speak(convertTolng(
             "Use this lift and go to ${tools.numericalToAlphabetical(
                 pathobj.destinationFloor)} floor", "", 0.0, context, 0.0)

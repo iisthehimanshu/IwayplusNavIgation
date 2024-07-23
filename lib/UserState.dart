@@ -192,6 +192,7 @@ class UserState{
       //destination check
       print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
       if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
+        createCircle(lat,lng);
         closeNavigation();
       }
 
@@ -209,7 +210,7 @@ class UserState{
        // UserState.reachedLift=true;
         createCircle(lat,lng);
         speak(convertTolng(
-            "Use this lift and go to ${tools.numericalToAlphabetical(
+            "Use this ${pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(
                 pathobj.destinationFloor)} floor", "", 0.0, context, 0.0)
             , lngCode, prevpause:true);
       }
@@ -267,11 +268,17 @@ class UserState{
       }else{
         return "आप ${destname} पर पहुँच गए हैं। वह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
       }
-    }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+    }else if(msg=="Use this Lifts and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
       if(lngCode=='en'){
-        return msg;
+        return "Use this Lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor";
       }else{
         return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
+      }
+    }else if(msg=="Use this Stairs and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+      if(lngCode=='en'){
+        return "Use this Stair and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor";
+      }else{
+        return "इन सीढ़ियों का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
       }
     }else if(name!=null && msg=="Passing by ${name}"){
       if(lngCode=='en'){

@@ -212,7 +212,7 @@ mixin LocaleData {
     'Slight Right':ttsslightright,
     'Slight Left':ttsslightleft,
     'Sharp Left':ttssharpleft,
-    'Sharp Right':ttssharpleft,
+    'Sharp Right':ttssharpright,
     'U Turn':ttsuturn,
 
   };

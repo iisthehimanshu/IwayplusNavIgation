@@ -656,17 +656,20 @@ class tools {
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
-
     if(user.move == tools.twocelltransitionhorizontal || user.move == tools.twocelltransitionvertical){
       tval = tools.fourcelltransition(theta);
+    }else if(user.move == tools.eightcelltransitionforTurns){
+      tval = tools.eightcelltransition(theta);
     }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    // //print("AA $a");
-    // //print("BB $b");
-    // //print("CC $c");
-    // //print("DD ${node.move.toString()}");
+
+    // print("AA $a");
+    // print("BB $b");
+    // print("CC $c");
+    // print("theta $theta");
+    // print("DD ${user.move.toString()}");
     // //print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];

@@ -173,7 +173,11 @@ class Graph {
 
     }
 
-    return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+    if(l1.isNotEmpty || l3.isNotEmpty){
+      return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+    }else{
+      return mergeLists(l1, l2, l3);
+    }
 
   }
 

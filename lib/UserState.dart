@@ -286,7 +286,7 @@ class UserState{
       }else{
         return "${name} से गुज़रते हुए";
       }
-    }else if(name!=null && msg=="${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}")
+    }else if(name!=null && msg=="${name} is on your ${(tools.angleToClocks(agl,context),context)}")
     {
       if(lngCode=='en'){
         return msg;

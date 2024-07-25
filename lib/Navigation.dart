@@ -628,9 +628,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+bool disposed=false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
+    if(disposed)return;
     if (prevpause) {
       await flutterTts.pause();
     }
@@ -641,6 +642,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
     }
+    await flutterTts.stop();
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -5061,6 +5063,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                             .sourceFloor]![1];
                                                     user.Bid =
                                                         PathState.sourceBid;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                                     user.floor =
                                                         PathState.sourceFloor;
@@ -7867,6 +7876,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();

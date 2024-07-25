@@ -72,10 +72,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
-  
+  bool isSpeaking=false;
+
+  void initTts() {
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+  }
+
+
+
+
+
+
   @override
   void initState() {
     super.initState();
+
+   // initTts();
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
@@ -403,9 +419,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
 
-  FlutterTts flutterTts = FlutterTts() ;
+  FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg,String lngcode,{bool prevpause = false}) async {
 
+
+    // if (isSpeaking) {
+    //   await flutterTts.stop();
+    // }
+    // setState(() {
+    //   isSpeaking = true;
+    // });
     if(prevpause){
       await flutterTts.pause();
     }
@@ -417,10 +440,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
         }
       }
+    if(isSpeaking){
+      await flutterTts.stop();
+    }
 
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
+
+    setState(() {
+      isSpeaking =!isSpeaking;
+    });
   }
 
   int findNextTurn(List<int> turns, List<int> path) {
@@ -601,6 +631,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       direc,
                       nextTurn,""),
                   _currentLocale);
+              return;
               //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
             }else{
               speak(
@@ -608,7 +639,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       _currentLocale, '',direc, nextTurn,""),
                   _currentLocale);
               widget.user.move(widget.context);
+              return;
             }
+
+
           }
         }
 

@@ -52,12 +52,10 @@ class RatingsaveAPI{
       if (response.statusCode == 200) {
         print('RatingsaveAPI STATUS 200!! SUCCESS');
         Map<String,dynamic> responseBody = json.decode(response.body);
-        HelperClass.showToast(responseBody["message"]);
+        HelperClass.showToast("Response saved successfully");
       }else{
         print('RatingsaveAPI Response 403');
-
-
-
+        HelperClass.showToast('Failed to load data');
       }
 
 

@@ -21,6 +21,7 @@ import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -1673,6 +1674,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+    print("shift to feedbackpannel after debug");
+    print(UserCredentials().UserId);
+
   }
 
   void _updateCircle(double lat, double lng) {
@@ -5419,6 +5423,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
   Widget feedbackPanel(BuildContext context) {
+
 
     return Visibility(
       visible: showFeedback,

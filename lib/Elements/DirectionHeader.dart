@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 
 import 'package:flutter/cupertino.dart';
@@ -71,10 +72,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
-  
+  bool isSpeaking=false;
+
+  void initTts() {
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+  }
+
+
+
+
+
+
   @override
   void initState() {
     super.initState();
+
+   // initTts();
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
@@ -402,20 +419,38 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
 
-  FlutterTts flutterTts = FlutterTts() ;
+  FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg,String lngcode,{bool prevpause = false}) async {
+
+
+    // if (isSpeaking) {
+    //   await flutterTts.stop();
+    // }
+    // setState(() {
+    //   isSpeaking = true;
+    // });
     if(prevpause){
       await flutterTts.pause();
     }
-    print(await flutterTts.getDefaultVoice);
-    if(lngcode == "hi"){
-      await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-    }else{
-      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+    if(Platform.isAndroid)
+      {
+        if(lngcode == "hi"){
+          await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+        }else{
+          await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+        }
+      }
+    if(isSpeaking){
+      await flutterTts.stop();
     }
+
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
+
+    setState(() {
+      isSpeaking =!isSpeaking;
+    });
   }
 
   int findNextTurn(List<int> turns, List<int> path) {
@@ -442,7 +477,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if (lngcode == 'en') {
         return msg;
       } else {
-
         return "${LocaleData.getProperty5(direction, widget.context)} मुड़ें";
       }
     }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor"){
@@ -597,6 +631,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       direc,
                       nextTurn,""),
                   _currentLocale);
+              return;
               //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
             }else{
               speak(
@@ -604,7 +639,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       _currentLocale, '',direc, nextTurn,""),
                   _currentLocale);
               widget.user.move(widget.context);
+              return;
             }
+
+
           }
         }
 

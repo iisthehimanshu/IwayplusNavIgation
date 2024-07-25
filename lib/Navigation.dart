@@ -16,11 +16,13 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import 'package:iwaymaps/API/RatingsaveAPI.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -1680,6 +1682,9 @@ bool disposed=false;
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+    print("shift to feedbackpannel after debug");
+    print(UserCredentials().getUserId());
+
   }
 
   void _updateCircle(double lat, double lng) {
@@ -5435,6 +5440,7 @@ bool disposed=false;
 
 
   Widget feedbackPanel(BuildContext context) {
+    
 
     return Visibility(
       visible: showFeedback,
@@ -5525,11 +5531,36 @@ bool disposed=false;
                       onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
+                        var signInBox = Hive.box('UserInformation');
+                        print(signInBox.keys);
+                        var infoBox=Hive.box('SignInDatabase');
+                        String accessToken = infoBox.get('accessToken');
+                        //print('loadInfoToFile');
+                        print(infoBox.get('userId'));
+                        //String userId = signInBox.get("sId");
+                        //String username = signInBox.get("username");
+
+
+
+
+
+                        RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+                        
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
                         showFeedback= false;
                         _feedbackController.hide();
+                        print("_feedbackTextController.clear()");
+                        print(_feedbackTextController.text);
+                        _feedbackTextController.clear();
+                        print(_feedbackTextController.text);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+                              (Route<dynamic> route) => false,
+                        );
+
                       }
                           : null,
                       child: Padding(
@@ -5876,6 +5907,8 @@ bool disposed=false;
                                   });
                                   print("feedbackTextController.value.text");
                                   print(_feedbackTextController.value.text);
+
+
 
 
                                 },

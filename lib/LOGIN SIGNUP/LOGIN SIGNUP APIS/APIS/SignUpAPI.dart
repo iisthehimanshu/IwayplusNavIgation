@@ -12,7 +12,8 @@ class SignUpAPI{
       "username": username,
       "name": name,
       "password": password,
-      "otp": OTP
+      "otp": OTP,
+      "appId":"com.iwayplus.navigation"
     };
 
     final response = await http.post(

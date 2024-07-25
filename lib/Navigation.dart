@@ -573,7 +573,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print("manufacture $manufacturer $step_threshold");
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
-      } else {
+      } else if (manufacturer.toLowerCase().contains("apple")) {
+        print("manufacture $manufacturer $step_threshold");
+        peakThreshold = 10.111111;
+        valleyThreshold = -10.111111;
+      }else {
+        print("manufacture $manufacturer $step_threshold");
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }
@@ -1131,7 +1136,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       // print("final value");
       // print(finalvalue);
       if (user.isnavigating == false) {
-        detected = !detected;
+        detected = true;
         if (!_isExploreModePannelOpen) {
           _isBuildingPannelOpen = true;
         }
@@ -1844,6 +1849,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           apibeaconmap[firstValue]!.coordinateX! + tv[0],
           apibeaconmap[firstValue]!.coordinateY! + tv[1]
         ], getallnearestInfo);
+
         paintUser(firstValue);
         ExploreModePannelController.open();
         setState(() {
@@ -3632,6 +3638,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print(landmarksMap[PathState.destinationPolyID]!.buildingID);
     print(landmarksMap[PathState.sourcePolyID]!.buildingID);
 
+    PathState.noPathFound=false;
     singleroute.clear();
     pathMarkers.clear();
     Markers.clear();
@@ -7887,6 +7894,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
+  bool isLocalized=false;
 
   @override
   Widget build(BuildContext context) {
@@ -8217,62 +8225,48 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
                               Semantics(
                                 child: FloatingActionButton(
-                                  onPressed: () async {
-                                    print(
-                                        "destinationName ${PathState.destinationName}");
-                                    // if (!user.isnavigating) {
-                                    //   enableBT();
-                                    //   _timer = Timer.periodic(
-                                    //       Duration(milliseconds: 9000),
-                                    //       (timer) {
-                                    //     localizeUser().then((value) => {
-                                    //           print(
-                                    //               "localize user is calling itself....."),
-                                    //           _timer.cancel()
-                                    //         });
-                                    //   });
-                                    // }
-                                    // // _timer.cancel();
-                                    // //localizeUser();
-                                    // //wsocket.sendmessg();
-                                    // // //print(PathState.connections);
-                                    // building.floor[buildingAllApi
-                                    //     .getStoredString()] = user.floor;
-                                    // createRooms(
-                                    //     building.polyLineData!,
-                                    //     building.floor[
-                                    //         buildingAllApi.getStoredString()]!);
-                                    // if (pathMarkers[user.floor] != null) {
-                                    //   setCameraPosition(
-                                    //       pathMarkers[user.floor]!);
-                                    // }
-                                    // building.landmarkdata!.then((value) {
-                                    //   createMarkers(
-                                    //       value,
-                                    //       building.floor[buildingAllApi
-                                    //           .getStoredString()]!);
-                                    // });
-                                    // if (markers.length > 0)
-                                    //   markers[user.Bid]?[0] = customMarker
-                                    //       .rotate(0, markers[user.Bid]![0]);
-                                    // if (user.initialallyLocalised) {
-                                    //   mapState.interaction =
-                                    //       !mapState.interaction;
-                                    // }
-                                    // mapState.zoom = 21;
-                                    // fitPolygonInScreen(patch.first);
+                                  onPressed:() async {
+
+
+                                    if(!user.isnavigating){
+                                      if (Platform.isAndroid) {
+                                        print("starting scanning for android");
+                                        btadapter.startScanning(apibeaconmap);
+                                      } else {
+                                        print("starting scanning for IOS");
+                                        btadapter.startScanningIOS(apibeaconmap);
+                                      }
+                                      setState(() {
+                                        isLocalized=true;
+                                        resBeacons = apibeaconmap;
+                                      });
+                                      late Timer _timer;
+                                      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                                        localizeUser().then((value)=>{
+                                          setState((){
+                                            isLocalized=false;
+                                          })
+                                        });
+                                        print("localize user is calling itself.....");
+                                        _timer.cancel();
+                                      });
+                                    }
+
                                   },
                                   child: Semantics(
                                     label: "Localize",
                                     onDidGainAccessibilityFocus:
                                         close_isnavigationPannelOpen,
-                                    child: Icon(
+                                    child:(isLocalized)?lott.Lottie.asset(
+                                      'assets/localized.json', // Path to your Lottie animation
+                                      width: 70,
+                                      height: 70,
+                                    ): Icon(
                                       Icons.my_location_sharp,
                                       color: Colors.black,
                                     ),
                                   ),
-
-                                  backgroundColor: Colors
+                                  backgroundColor:  Colors
                                       .white, // Set the background color of the FAB
                                 ),
                               ),

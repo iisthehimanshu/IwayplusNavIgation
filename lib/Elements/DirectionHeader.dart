@@ -101,10 +101,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
-
-
       // //print("listen to bin :${listenToBin()}");
-
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
         listenToBin();
@@ -318,7 +315,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 6.0) {
+              highestweight >= 1.5) {
 
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -392,11 +389,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         //print(nearestBeacon);
         _timer.cancel();
-
-        if(highestweight > 0.5){
-          widget.repaint(nearestBeacon);
-          widget.reroute;
-        }
+        widget.repaint(nearestBeacon);
+        widget.reroute;
         return false;
       }
     }

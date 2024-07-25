@@ -11,7 +11,7 @@ import '../../../Elements/UserCredential.dart';
 
 class SignInAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/signin";
+  final String baseUrl = "https://dev.iwayplus.in/auth/signin2";
 
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
@@ -20,6 +20,7 @@ class SignInAPI{
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
+      "appId":"com.iwayplus.navigation"
     };
 
     final response = await http.post(

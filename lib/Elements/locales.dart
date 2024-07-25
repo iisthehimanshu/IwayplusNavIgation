@@ -219,7 +219,11 @@ mixin LocaleData {
 
 
   static String getProperty5(String propertyName,context) {
+
+
+
     if(properties5[propertyName]!=null){
+      print("property5 ${properties5[propertyName]!.getString(context)}");
       return properties5[propertyName]!.getString(context);
     }
     return propertyName;

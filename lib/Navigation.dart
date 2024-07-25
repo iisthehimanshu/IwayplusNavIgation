@@ -33,6 +33,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'Elements/locales.dart';
+import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
@@ -5440,15 +5441,13 @@ bool disposed=false;
 
 
   Widget feedbackPanel(BuildContext context) {
-    
-
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
         child: SlidingUpPanel(
             controller: _feedbackController,
-            minHeight: MediaQuery.of(context).size.height/2,
+            minHeight: MediaQuery.of(context).size.height/2.5,
             maxHeight: MediaQuery.of(context).size.height,
             snapPoint: 0.9,
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
@@ -5557,7 +5556,7 @@ bool disposed=false;
                         print(_feedbackTextController.text);
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+                          MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
                               (Route<dynamic> route) => false,
                         );
 
@@ -7665,6 +7664,11 @@ bool disposed=false;
     showFeedback = true;
     Future.delayed(Duration(seconds: 5));
     _feedbackController.open();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+          (Route<dynamic> route) => false,
+    );
 
 
   }

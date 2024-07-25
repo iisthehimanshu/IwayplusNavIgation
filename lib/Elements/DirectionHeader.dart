@@ -67,6 +67,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   List<Widget> DirectionWidgetList = [];
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  bool disposed=false;
 
 
   Map<String, double> ShowsumMap = Map();
@@ -196,6 +197,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
     _timer.cancel();
     super.dispose();
   }
@@ -421,7 +424,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg,String lngcode,{bool prevpause = false}) async {
-
+if(disposed)return;
 
     // if (isSpeaking) {
     //   await flutterTts.stop();
@@ -894,19 +897,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ):Container(),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

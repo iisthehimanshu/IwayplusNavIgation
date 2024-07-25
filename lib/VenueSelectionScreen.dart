@@ -18,7 +18,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/BuildingAPI.dart';
 import 'package:iwaymaps/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/API/UsergetAPI.dart';
 import 'package:iwaymaps/DATABASE/BOXES/WayPointModelBOX.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -65,7 +67,20 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
 
+
+
   }
+
+  void loadInfoToFile(){
+    var infoBox=Hive.box('SignInDatabase');
+    String accessToken = infoBox.get('accessToken');
+    print('loadInfoToFile');
+    print(infoBox.get('userId'));
+
+    UsergetAPI().getUserDetailsApi(infoBox.get('userId'));
+
+  }
+
 
   void getLocs()async{
     setState(() {
@@ -129,6 +144,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     {
       buildingsPos.add(venueList[i]);
     }
+
+    loadInfoToFile();
 
   }
   int getDistanceFromLatLonInKm(double lat1, double lon1, double lat2, double lon2) {

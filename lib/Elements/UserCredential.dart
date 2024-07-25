@@ -12,6 +12,13 @@ import 'package:hive/hive.dart';
    String UserNavigationModeSetting = "";
    String UserOrentationSetting = "";
    String UserPathDetails = '';
+   String userName = '';
+
+
+   String getuserName(){
+     userName = userInformationBox.get('username');
+     return userName;
+   }
 
 
   void setUserHeight(String userheight){

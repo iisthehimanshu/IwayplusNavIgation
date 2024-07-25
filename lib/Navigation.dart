@@ -16,6 +16,7 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import 'package:iwaymaps/API/RatingsaveAPI.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
@@ -1680,7 +1681,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     print("Circular progress stop");
     print("shift to feedbackpannel after debug");
-    print(UserCredentials().UserId);
+    print(UserCredentials().getUserId());
 
   }
 
@@ -5430,7 +5431,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
   Widget feedbackPanel(BuildContext context) {
-
+    
 
     return Visibility(
       visible: showFeedback,
@@ -5521,11 +5522,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
+                        var signInBox = Hive.box('UserInformation');
+                        print(signInBox.keys);
+                        var infoBox=Hive.box('SignInDatabase');
+                        String accessToken = infoBox.get('accessToken');
+                        //print('loadInfoToFile');
+                        print(infoBox.get('userId'));
+                        //String userId = signInBox.get("sId");
+                        //String username = signInBox.get("username");
+
+
+
+
+
+                        RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+                        
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
                         showFeedback= false;
                         _feedbackController.hide();
+                        print("_feedbackTextController.clear()");
+                        print(_feedbackTextController.text);
+                        _feedbackTextController.clear();
+                        print(_feedbackTextController.text);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+                              (Route<dynamic> route) => false,
+                        );
+
                       }
                           : null,
                       child: Padding(
@@ -5872,6 +5898,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                   });
                                   print("feedbackTextController.value.text");
                                   print(_feedbackTextController.value.text);
+
+
 
 
                                 },

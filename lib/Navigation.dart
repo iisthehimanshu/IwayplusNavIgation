@@ -1279,7 +1279,7 @@ bool disposed=false;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
-        PathState.sourcePolyID = user.key;
+      //  PathState.sourcePolyID = user.key;
         PathState.sourceName = "Your current location";
         building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!).then((value) {
@@ -4112,8 +4112,7 @@ bool disposed=false;
       }
     });
 
-    List<Cell> Cellpath = findCorridorSegments(
-        path, building.nonWalkable[bid]![floor]!, numCols, bid, floor);
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols, bid, floor);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -5869,6 +5868,7 @@ bool disposed=false;
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  StopPDR();
                                   markerSldShown = true;
                                   focusturnArrow.clear();
                                   clearPathVariables();

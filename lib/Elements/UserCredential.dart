@@ -1,24 +1,24 @@
 
 import 'package:hive/hive.dart';
 
- class UserCredentials{
-   var userInformationBox = Hive.box('UserInformation');
-   String RefreshToken = "";
-   String AccessToken = "";
-   List<dynamic> Roles = [];
-   String UserId = "";
-   String UserHeight = "";
-   String UserPersonWithDisability = "";
-   String UserNavigationModeSetting = "";
-   String UserOrentationSetting = "";
-   String UserPathDetails = '';
-   String userName = '';
+class UserCredentials{
+  var userInformationBox = Hive.box('UserInformation');
+  String RefreshToken = "";
+  String AccessToken = "";
+  List<dynamic> Roles = [];
+  String UserId = "";
+  String UserHeight = "";
+  String UserPersonWithDisability = "";
+  String UserNavigationModeSetting = "";
+  String UserOrentationSetting = "";
+  String UserPathDetails = '';
+  String userName = '';
 
 
-   String getuserName(){
-     userName = userInformationBox.get('username');
-     return userName;
-   }
+  String getuserName(){
+    userName = userInformationBox.get('username');
+    return userName;
+  }
 
 
   void setUserHeight(String userheight){
@@ -50,17 +50,17 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
   String getUserOrentationSetting(){
-    UserOrentationSetting = userInformationBox.get('UserOrentationSetting');
+    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')?? "Focus Mode";
     return UserOrentationSetting;
   }
 
   void setUserPathDetails(String userUserPathDetails){
     userInformationBox.put('UserPathDetails', userUserPathDetails);
   }
-   String getUserPathDetails(){
-     UserPathDetails = userInformationBox.get('UserPathDetails');
-     return UserPathDetails;
-   }
+  String getUserPathDetails(){
+    UserPathDetails = userInformationBox.get('UserPathDetails')??"Distance in meters";
+    return UserPathDetails;
+  }
 
 
 

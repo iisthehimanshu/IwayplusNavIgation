@@ -5454,97 +5454,175 @@ bool disposed=false;
 
 
   bool showFeedback = false;
+  double minHight = 0.0;
+  void __feedbackControllerUp(double d) {
+    _feedbackController.animatePanelToPosition(d);
+  }
+  void __feedbackControllerDown() {
+    _feedbackController.close();
+  }
+
+
 
 
 
   Widget feedbackPanel(BuildContext context) {
+    minHight = MediaQuery.of(context).size.height/2.5;
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
         child: SlidingUpPanel(
-            controller: _feedbackController,
-            minHeight: MediaQuery.of(context).size.height/2.5,
-            maxHeight: MediaQuery.of(context).size.height,
-            snapPoint: 0.9,
-            borderRadius: BorderRadius.all(Radius.circular(24.0)),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 20.0,
-                color: Colors.grey,
-              ),
-            ],
-            panel: Padding(
+          controller: _feedbackController,
+          minHeight: minHight,
+          maxHeight: MediaQuery.of(context).size.height-20,
+          snapPoint: 0.9,
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20.0,
+              color: Colors.grey,
+            ),
+          ],
+          panel: SingleChildScrollView(
+            child: Padding(
               padding: EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 40),
+                  SizedBox(height: 16),
                   Text(
-                    'How was your experience?',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    "How was your navigation experience ?",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
                     ),
+                    textAlign: TextAlign.left,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Your feedback helps us improve our service.',
-                    style: TextStyle(
+                    "Your Feedback Helps Us Do Better",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
                       fontSize: 16,
-                      color: Colors.black54,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffa1a1aa),
                     ),
+                    textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 36),
+                  Text(
+                    "Rate Your Experience",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  SizedBox(height: 32),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
                         return GestureDetector(
-                          onTap: () => setState(() => _rating = index + 1),
+                          onTap: () {
+                            _rating = index + 1;
+                            if (_rating >=4) {
+                              __feedbackControllerUp(0.3);
+                              // _feedbackTextController.clear();
+                            } else if (_rating <= 3) {
+                              __feedbackControllerUp(0.9);
+
+                            }else if(_rating == 3 || _rating==4){
+                              _feedbackTextController.clear();
+                            }
+                            print("minHight");
+                            print(minHight);
+
+                            setState(() {
+
+                            });
+                          },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Icon(
-                              index < _rating ? Icons.star : Icons.star_border,
-                              color: Colors.amber,
-                              size: 48,
-                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: index < _rating ? SvgPicture.asset('assets/ratingStarFilled.svg', width: 48.0, height: 48.0,) : SvgPicture.asset('assets/ratingStarBorder.svg', width: 48.0, height: 48.0,),
                           ),
                         );
                       }),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   if (_rating > 0 && _rating < 4) ...[
+                    SizedBox(height: 16),
                     Text(
-                      'What can we improve?',
-                      style: TextStyle(
+                      "Select the Issues ",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
                       ),
+                      textAlign: TextAlign.left,
                     ),
                     SizedBox(height: 16),
-                    TextFormField(
-                      controller: _feedbackTextController,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Please share your thoughts...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: false,
-                        fillColor: Colors.white,
+                    ChipFilterWidget(
+
+                      options: ['Bad map route', 'Wrong turns', 'UI Issue', 'App speed','Search Function','Map Accuracy'],
+                      onSelected: (selectedOption) {
+                        print('Selected: $selectedOption');
+                        // Handle the selection here
+                        _feedbackTextController.text = selectedOption;
+                        _feedback = _feedbackTextController.text;
+                        print(_feedback);
+                        setState(() {
+
+                        });
+                      },
+
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Add a Detailed Review",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
+                        height: 24/18,
                       ),
-                      onChanged: (value) => setState(() => _feedback = value),
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                        controller: _feedbackTextController,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          hintText: 'Please share your thoughts...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: false,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value)  {
+                          _feedback = value;
+                          print("onchange--");
+                          setState(() {
+
+                          });
+                        }
                     ),
                   ],
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
+                      onPressed: (_rating > 0 && (_rating >= 4 || _feedback.length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
                         var signInBox = Hive.box('UserInformation');
@@ -5561,7 +5639,7 @@ bool disposed=false;
 
 
                         RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
-                        
+
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
@@ -5582,20 +5660,29 @@ bool disposed=false;
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          'Submit Feedback',
-                          style: TextStyle(fontSize: 18),
+                          'Submit',
+                          style: TextStyle(fontSize: 18,color: Colors.white),
+
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 0))
+                            ? Color(0xff24B9B0)
+                            : Colors.grey,
+                        disabledBackgroundColor: Colors.grey,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(5),
                         ),
+
                       ),
                     ),
                   ),
+                  SizedBox(height: 36),
+
                 ],
               ),
             ),
+          ),
         ),
       ),
     );
@@ -5886,6 +5973,7 @@ bool disposed=false;
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  StopPDR();
                                   markerSldShown = true;
                                   focusturnArrow.clear();
                                   clearPathVariables();

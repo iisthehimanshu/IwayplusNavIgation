@@ -1,6 +1,7 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
@@ -8,6 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/HomepageFilter.dart';
+import 'package:iwaymaps/Elements/locales.dart';
 import 'package:iwaymaps/SourceAndDestinationPage.dart';
 
 import '../APIMODELS/landmark.dart';
@@ -98,7 +100,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                     child: Focus(
                       child: Semantics(
                         sortKey: const OrdinalSortKey(0),
-                        label: "Search Bar",
+                        label: "${LocaleData.waytogo.getString(context)}",
                         child: InkWell(
                           onTap: (){
                             Navigator.push(
@@ -112,7 +114,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                           child: Container(
                               margin: EdgeInsets.only(left: 16),
                               child: Text(
-                                widget.searchText,
+                                "${LocaleData.waytogo.getString(context)}",
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,

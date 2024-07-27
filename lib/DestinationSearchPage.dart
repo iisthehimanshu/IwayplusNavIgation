@@ -616,3 +616,58 @@ class SetInfo {
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
 }
+class ChipFilterWidget extends StatefulWidget {
+  final List<String> options;
+  final Function(String) onSelected;
+
+  ChipFilterWidget({required this.options, required this.onSelected});
+
+  @override
+  _ChipFilterWidgetState createState() => _ChipFilterWidgetState();
+}
+
+class _ChipFilterWidgetState extends State<ChipFilterWidget> {
+  String? _selectedOption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 4.0,
+      runSpacing: 8.0,
+      children: widget.options.map((option) {
+        return ChoiceChip(
+          label: Text(
+            option,
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 20/14,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          selected: _selectedOption == option,
+          onSelected: (selected) {
+            setState(() {
+              _selectedOption = selected ? option : null;
+            });
+            widget.onSelected(option);
+          },
+          showCheckmark: false,
+          selectedColor: Colors.green,
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: _selectedOption == option ? Colors.white : Colors.black,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22.0), // Adjust the radius as needed
+            side: BorderSide(
+              color: _selectedOption == option ? Colors.green : Colors.black,
+              width: 1.0, // Adjust the border width as needed
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}

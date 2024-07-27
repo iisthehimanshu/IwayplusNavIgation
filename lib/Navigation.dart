@@ -366,6 +366,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   GlobalKey floorButtonKey = GlobalKey();
   GlobalKey reLocalizeButtonKey = GlobalKey();
   GlobalKey exploreModeButtonKey = GlobalKey();
+  GlobalKey searchBarButtonKey = GlobalKey();
+  GlobalKey searchBarButtonKey2 = GlobalKey();
 
 
   void showTutorial() {
@@ -374,33 +376,81 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   void createTutorial() {
     print("createTutorial");
-    tutorialCoachMark = TutorialCoachMark(
-      targets: _createTargets(),
-      colorShadow: Colors.red,
-      textSkip: "SKIP",
-      paddingFocus: 10,
-      opacityShadow: 0.5,
-      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      onFinish: () {
-        print("finish");
-      },
-      onClickTarget: (target) {
-        print('onClickTarget: $target');
-      },
-      onClickTargetWithTapPosition: (target, tapDetails) {
-        print("target: $target");
-        print(
-            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
-      },
-      onClickOverlay: (target) {
-        print('onClickOverlay: $target');
-      },
-      onSkip: () {
-        print("skip");
-        return true;
-      },
-    );
+    if (searchBarButtonKey.currentContext != null) {
+      final RenderBox renderBox = searchBarButtonKey.currentContext!.findRenderObject() as RenderBox;
+      final size = renderBox.size;
+      final position = renderBox.localToGlobal(Offset.zero);
+
+      print('Size: $size');
+      print('Position: $position');
+
+      // You can also perform other actions with the context
+      // For example, scroll to the widget:
+      Scrollable.ensureVisible(searchBarButtonKey.currentContext!);
+
+      tutorialCoachMark = TutorialCoachMark(
+        targets: _createTargets(),
+        colorShadow: Colors.red,
+        textSkip: "SKIP",
+        paddingFocus: 10,
+        opacityShadow: 0.5,
+        imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        onFinish: () {
+          print("finish");
+        },
+        onClickTarget: (target) {
+          print('onClickTarget: $target');
+        },
+        onClickTargetWithTapPosition: (target, tapDetails) {
+          print("target: $target");
+          print(
+              "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+        },
+        onClickOverlay: (target) {
+          print('onClickOverlay: $target');
+        },
+        onSkip: () {
+          print("skip");
+          return true;
+        },
+      );
+
+      // Start the tutorial
+      tutorialCoachMark!.show(context: context);
+    } else {
+      print('Target key context is null');
+      tutorialCoachMark = TutorialCoachMark(
+        targets: _createTargets(),
+        colorShadow: Colors.red,
+        textSkip: "SKIP",
+        paddingFocus: 10,
+        opacityShadow: 0.5,
+        imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        onFinish: () {
+          print("finish");
+        },
+        onClickTarget: (target) {
+          print('onClickTarget: $target');
+        },
+        onClickTargetWithTapPosition: (target, tapDetails) {
+          print("target: $target");
+          print(
+              "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+        },
+        onClickOverlay: (target) {
+          print('onClickOverlay: $target');
+        },
+        onSkip: () {
+          print("skip");
+          return true;
+        },
+      );
+
+      // Start the tutorial
+      tutorialCoachMark!.show(context: context);
+    }
   }
+
 
   List<TargetFocus> _createTargets() {
     List<TargetFocus> targets = [];
@@ -408,7 +458,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       TargetFocus(
         identify: "floorButtonKey",
         keyTarget: floorButtonKey,
-        alignSkip: Alignment.topRight,
+        alignSkip: Alignment.bottomRight,
         enableOverlayTab: true,
         color: Colors.tealAccent,
         contents: [
@@ -493,16 +543,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               children: <Widget>[
                 Text(
                   "Explore Mode",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 20.0),
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xff000000),
+                    height: 80/28,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 10.0),
                   child: Text(
                     "This feature enables you to explore your surrounding Places.",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                 )
               ],
@@ -513,6 +567,51 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         shape: ShapeLightFocus.RRect,
       ),
     );
+    targets.add(
+      TargetFocus(
+        identify: "searchBarButtonKey",
+        keyTarget: searchBarButtonKey,
+        alignSkip: Alignment.bottomRight,
+
+        enableOverlayTab: true,
+        color: Colors.white,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    "Landmark Search",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
+                      height: 80/28,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.previous();
+                    },
+                    child: const Icon(Icons.chevron_left),
+                  ),
+                ],
+              );
+            },
+          ),
+
+        ],
+        shape: ShapeLightFocus.RRect,
+      ),
+    );
+
+
 
 
     return targets;
@@ -8552,7 +8651,7 @@ bool disposed=false;
                                       child: HomepageSearch(
                                         onVenueClicked: onLandmarkVenueClicked,
                                         fromSourceAndDestinationPage:
-                                            fromSourceAndDestinationPage,
+                                            fromSourceAndDestinationPage, targetKey: searchBarButtonKey,
                                       ),
                                     ),
                                   ),

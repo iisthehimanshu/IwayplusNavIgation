@@ -32,12 +32,12 @@ class patchAPI {
     accessToken = signInBox.get("accessToken");
 
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.patchDataVersionUpdate){
-      print("PATCH API DATA FROM DATABASE");
-      print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
-      Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
-      return patchDataModel.fromJson(responseBody);
-    }
+    // if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.patchDataVersionUpdate){
+    //   print("PATCH API DATA FROM DATABASE");
+    //   print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
+    //   Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
+    //   return patchDataModel.fromJson(responseBody);
+    // }
 
 
 

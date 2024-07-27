@@ -91,6 +91,8 @@ dependencies:
   test: ^1.16.0
   mockito: ^5.1.0
   flutter_beep: ^1.0.0
+  tutorial_coach_mark: ^1.2.11
+
 
 
 

@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -27,6 +28,7 @@ import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
@@ -359,8 +361,169 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
   //--------------------------------------------------------------------------------------
 
+  late TutorialCoachMark tutorialCoachMark;
+
+  GlobalKey floorButtonKey = GlobalKey();
+  GlobalKey reLocalizeButtonKey = GlobalKey();
+  GlobalKey exploreModeButtonKey = GlobalKey();
+
+
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
+  }
+
+  void createTutorial() {
+    print("createTutorial");
+    tutorialCoachMark = TutorialCoachMark(
+      targets: _createTargets(),
+      colorShadow: Colors.red,
+      textSkip: "SKIP",
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      onFinish: () {
+        print("finish");
+      },
+      onClickTarget: (target) {
+        print('onClickTarget: $target');
+      },
+      onClickTargetWithTapPosition: (target, tapDetails) {
+        print("target: $target");
+        print(
+            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+      },
+      onClickOverlay: (target) {
+        print('onClickOverlay: $target');
+      },
+      onSkip: () {
+        print("skip");
+        return true;
+      },
+    );
+  }
+
+  List<TargetFocus> _createTargets() {
+    List<TargetFocus> targets = [];
+    targets.add(
+      TargetFocus(
+        identify: "floorButtonKey",
+        keyTarget: floorButtonKey,
+        alignSkip: Alignment.topRight,
+        enableOverlayTab: true,
+        color: Colors.tealAccent,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Floor change button",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
+
+
+    targets.add(
+      TargetFocus(
+        identify: "reLocalizeButtonKey",
+        keyTarget: reLocalizeButtonKey,
+        color: Colors.white,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text(
+                    "Relocalize Button",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      "Helps you to Relocate and find your Current Location",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.previous();
+                    },
+                    child: const Icon(Icons.chevron_left),
+                  ),
+                ],
+              );
+            },
+          )
+        ],
+        shape: ShapeLightFocus.RRect,
+        radius: 5,
+      ),
+    );
+    targets.add(
+      TargetFocus(
+        identify: "exploreModeButtonKey",
+        keyTarget: exploreModeButtonKey,
+        color:Colors.tealAccent,
+        contents: [
+          TargetContent(
+            align: ContentAlign.left,
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Explore Mode",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20.0),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Text(
+                    "This feature enables you to explore your surrounding Places.",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )
+              ],
+            ),
+          ),
+
+        ],
+        shape: ShapeLightFocus.RRect,
+      ),
+    );
+
+
+    return targets;
+  }
+
+
+
   @override
   void initState() {
+    createTutorial();
+
     super.initState();
 
     //add a timer of duration 5sec
@@ -438,6 +601,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           true;
         }),
       );
+
+
     } catch (E) {
       print("E----");
       print(E);
@@ -1685,6 +1850,7 @@ bool disposed=false;
     print("Circular progress stop");
     print("shift to feedbackpannel after debug");
     print(UserCredentials().getUserId());
+    Future.delayed(Duration.zero, showTutorial);
 
   }
 
@@ -1887,11 +2053,7 @@ bool disposed=false;
       );
 
       for (int i = 0; i < 4; i++) {
-        polygonPoints.add(LatLng(
-            latcenterofmap +
-                1.1 *
-                    (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+        polygonPoints.add(LatLng(latcenterofmap + 1.1 * (double.parse(value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
@@ -8176,6 +8338,7 @@ bool disposed=false;
                                   ? Semantics(
                                       label: "Change floor",
                                       child: SpeedDial(
+                                        key: floorButtonKey,
                                         child: Text(
                                           building.floor == 0
                                               ? 'G'
@@ -8268,6 +8431,7 @@ bool disposed=false;
 
                               Semantics(
                                 child: FloatingActionButton(
+                                  key:reLocalizeButtonKey,
                                   onPressed:() async {
 
 
@@ -8316,6 +8480,7 @@ bool disposed=false;
                               SizedBox(height: 28.0),
                               !user.isnavigating
                                   ? FloatingActionButton(
+                                      key:exploreModeButtonKey,
                                       onPressed: () async {
                                         if (user.initialallyLocalised) {
                                           setState(() {

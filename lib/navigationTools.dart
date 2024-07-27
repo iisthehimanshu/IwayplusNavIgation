@@ -902,6 +902,63 @@ class tools {
 
     return nearestLandmark;
   }
+
+  static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap) {
+
+    PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
+    int distance=10;
+    List<int> pCoord = [];
+    pCoord.add(user.coordX!);
+    pCoord.add(user.coordY!);
+    landmarksMap.forEach((key, value) {
+
+      if(user.Bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+        if (user.floor == value.floor) {
+
+          double d = 0.0;
+
+          if (value.doorX != null) {
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+
+          }else{
+
+
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+            // if (d<distance) {
+            //   nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+            //     doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            //   priorityQueue.add(MapEntry(currentLandInfo, d));
+            // }
+
+
+          }
+          if (d<distance) {
+
+            Landmarks currentLandInfo =value;
+            print(currentLandInfo.name);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+
+            //print(value.name);
+          }
+
+        }
+
+      }
+    });
+
+    Landmarks? nearestLandmark;
+    if(priorityQueue.isNotEmpty){
+      MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
+      nearestLandmark = entry.key;
+    }else{
+      //print("priorityQueue.isEmpty");
+    }
+
+
+    return nearestLandmark;
+  }
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));

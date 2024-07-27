@@ -1279,7 +1279,6 @@ bool disposed=false;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
-        PathState.sourcePolyID = user.key;
         PathState.sourceName = "Your current location";
         building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!).then((value) {
@@ -1419,7 +1418,7 @@ bool disposed=false;
     await patchAPI()
         .fetchPatchData(id: buildingAllApi.selectedBuildingID)
         .then((value) {
-      print("${value.patchData.toString()}");
+      print("${value.patchData!.toJson()}");
       building.patchData[value.patchData!.buildingID!] = value;
       createPatch(value);
       tools.globalData = value;
@@ -3635,6 +3634,12 @@ bool disposed=false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
+    try{
+    if(PathState.sourcePolyID == ""){
+      PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
+    }}catch(e){
+      print("error in finding nearest landmark second");
+    }
     circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
@@ -5037,6 +5042,18 @@ bool disposed=false;
                                                       _markers.clear();
                                                       markerSldShown = false;
                                                     });
+
+
+                                                    UserState.cols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                                                    UserState.rows = building.floorDimenssion[PathState.destinationBid]![PathState.destinationFloor]![1];
+                                                    UserState.lngCode = _currentLocale;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
 
                                                     //detected=false;
                                                     //user.building = building;
@@ -8600,4 +8617,5 @@ bool disposed=false;
 
     return Map.fromEntries(sortedEntries);
   }
+
 }

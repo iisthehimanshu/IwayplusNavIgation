@@ -913,6 +913,8 @@ bool disposed=false;
 
   late AnimationController _controller;
   late Animation<double> _animation;
+  late AnimationController controller;
+  late Animation<double> animation;
 
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
@@ -1730,6 +1732,94 @@ bool disposed=false;
     // Start the animation
     _controller.forward(from: 0.0);
   }
+
+  List<CircleAnimation> _circleAnimations = [];
+  //Set<Circle> circles2 = {};
+  Timer? _timer2;
+  int _circleIdCounter = 0;
+  // bool _isAnimating=false;
+
+
+  void _startCircleWaves(double lat,double lng) {
+    _timer2 = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+      print("repeatedddd");
+      updateCircleAtDesti(lat,lng);
+    });
+  }
+
+  void updateCircleAtDesti(double lat, double lng,
+      {double begin = 3, double end = 2}) {
+
+    // if (_isAnimating) return; // Prevent overlapping animations
+
+
+    controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..addListener(() {
+    setState(() {
+    final double radius = controller.value * 3;
+    final double opacity = 1.0 - controller.value;
+
+    circles.add(
+    Circle(
+    circleId: CircleId("circle_${_circleIdCounter}"),
+    center: LatLng(lat, lng),
+    radius: radius,
+    strokeWidth: 2,
+    strokeColor: Colors.red.withOpacity(opacity),
+    fillColor: Colors.red.withOpacity(0.1 * opacity),
+    ),
+    );
+
+    // Remove the previous circle
+    if (circles.length > 1) {
+    circles.removeWhere((circle) => circle.circleId.value == "circle_${_circleIdCounter - 1}");
+    }
+    });
+    });
+
+
+    // final Animation<double> animation = Tween<double>(begin: 1, end: 3).animate(controller);
+    // final double radius = controller.value * 100;
+    //
+    // animation.addListener(() {
+    //   setState(() {
+    //     circles.add(
+    //       Circle(
+    //         circleId: CircleId("circle"),
+    //         center: LatLng(lat, lng),
+    //         radius: radius,
+    //         strokeWidth: 2,
+    //         strokeColor: Colors.red.withOpacity(1 - (animation.value / 100)),
+    //         fillColor: Colors.red.withOpacity(0.2 * (1 - (animation.value / 100))),
+    //       ),
+    //     );
+    //   });
+    //
+    //   if(circles.length>1){
+    //     setState(() {
+    //       circles.removeWhere((circle) => circle.circleId.value == "circle");
+    //     });
+    //   }
+    // });
+      // animation.addStatusListener((status) {
+      //   if (status == AnimationStatus.completed) {
+      //
+      //     controller.dispose();
+      //    _isAnimating=false;
+      //     // Start the next animation after a delay
+      //
+      //   }
+      // });
+
+    //_circleAnimations.add(CircleAnimation(controller, animation));
+    _circleIdCounter++;
+    controller.forward();
+    controller.repeat();
+  }
+
+
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371; // Radius of the earth in kilometers
@@ -4196,12 +4286,11 @@ bool disposed=false;
           await getImagesFromMarker('assets/tealtorch.png', 35);
 
       Set<Marker> innerMarker = Set();
-      final Uint8List destianim=await getJsonAsUint8List('assets/destianimation.json');
 
       innerMarker.add(Marker(
           markerId: MarkerId("destination${bid}"),
           position: LatLng(dvalue[0], dvalue[1]),
-          icon: BitmapDescriptor.fromBytes(destianim)));
+          icon: BitmapDescriptor.defaultMarker));
       innerMarker.add(
         Marker(
           markerId: MarkerId('source${bid}'),
@@ -4210,6 +4299,11 @@ bool disposed=false;
           anchor: Offset(0.5, 0.5),
         ),
       );
+     // updateCircleAtDesti(dvalue[0],dvalue[1]);
+      if(_timer2==null){
+        _startCircleWaves(dvalue[0],dvalue[1]);
+      }
+
       setCameraPosition(innerMarker);
       pathMarkers[floor] = innerMarker;
     } else {
@@ -5887,6 +5981,7 @@ bool disposed=false;
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  _stopRippleAnimation();
                                   StopPDR();
                                   markerSldShown = true;
                                   focusturnArrow.clear();
@@ -7635,7 +7730,18 @@ bool disposed=false;
       focusturnArrow.clear();
     });
   }
+  void _stopRippleAnimation() {
+    _timer2?.cancel();
+    // if (!_isAnimating) return;
 
+    setState(() {
+      // _isAnimating = false;
+
+      controller.stop();
+      controller.reset();
+      circles.clear(); // Clear all circles when stopping the animation
+    });
+  }
   void closeNavigation() {
     print("close navigation");
     String destname = PathState.destinationName;
@@ -7652,7 +7758,7 @@ bool disposed=false;
               destname: destname),
           _currentLocale);
     });
-
+    _stopRippleAnimation();
     clearPathVariables();
     StopPDR();
     _isnavigationPannelOpen = false;
@@ -7934,6 +8040,8 @@ bool disposed=false;
   void dispose() {
     disposed=true;
     flutterTts.stop();
+    _timer2?.cancel();
+    controller.dispose();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -8619,4 +8727,11 @@ bool disposed=false;
 
     return Map.fromEntries(sortedEntries);
   }
+}
+
+class CircleAnimation {
+  final AnimationController controller;
+  final Animation<double> animation;
+
+  CircleAnimation(this.controller, this.animation);
 }

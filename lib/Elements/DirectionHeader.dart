@@ -1,6 +1,7 @@
 import 'dart:async';
 
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
@@ -292,7 +293,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           //widget.user.pathobj.destinationFloor
           if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor!=widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
-
+            widget.user.onConnection = false;
             print("workingg 5");
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             UserState.createCircle(widget.user.lat,widget.user.lng);
@@ -316,7 +317,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight >= 1.5) {
-
+            widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -354,6 +355,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
                 widget.reroute;
+                DirectionIndex = 1;
                 return false; //away from path
               } else {
                 print("workingg 4");
@@ -526,6 +528,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         int nextTurn = findNextTurn(turnPoints, remainingPath);
         print("nextTurn $nextTurn");
         print(remainingPath);
+        for (var element in widget.user.pathobj.directions) {
+          print("checkkkkk here   ${element.node} [${element.x},${element.y}]");
+        }
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
         print("nextTurn index $nextTurnIndex");
 
@@ -888,6 +893,7 @@ class scrollableDirection extends StatelessWidget {
   scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user,this.context);
 
   String chooseDirection(){
+    print("Direction $DirectionIndex $nextTurnIndex");
     try {
       if (listOfDirections.isNotEmpty &&
           listOfDirections.length > DirectionIndex) {

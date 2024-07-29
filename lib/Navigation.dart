@@ -1279,7 +1279,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           await calculateroute(value.landmarksMap!).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
-              user.path = PathState.path.values.expand((list) => list).toList();
+              user.path = PathState.path[PathState.sourceFloor]!;
+              user.path.addAll(PathState.path[PathState.destinationFloor]!);
               user.Cellpath = PathState.singleCellListPath;
               user.pathobj.index = 0;
               user.isnavigating = true;
@@ -8102,12 +8103,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               DebugToggle.Slider
                                   ? Text("${user.theta}")
                                   : Container(),
-                              // Text("coord [${user.coordX},${user.coordY}] \n"
-                              //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                              //     "floor ${user.floor}\n"
-                              //     "userBid ${user.Bid} \n"
-                              //     "index ${user.pathobj.index} \n"
-                              //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                              Text("coord [${user.coordX},${user.coordY}] \n"
+                                  "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                                  "floor ${user.floor}\n"
+                                  "userBid ${user.Bid} \n"
+                                  "index ${user.pathobj.index} \n"
+                                  "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                               DebugToggle.Slider
                                   ? Slider(
                                       value: user.theta,

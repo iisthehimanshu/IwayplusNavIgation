@@ -121,6 +121,7 @@ class UserState{
         //lift check
 
         if(pathobj.connections[Bid]?[floor] == showcoordY*cols + showcoordX){
+          print("entered herere");
           movementAllowed = false;
         }
       }

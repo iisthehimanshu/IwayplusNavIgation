@@ -2740,6 +2740,29 @@ bool disposed=false;
         .buffer
         .asUint8List();
   }
+  Future<Uint8List> getJsonAsUint8List(String path) async {
+    // Load JSON file as a string
+    String jsonString = await rootBundle.loadString(path);
+
+    // Convert JSON string to Uint8List
+    Uint8List bytes = Uint8List.fromList(utf8.encode(jsonString));
+    return bytes;
+  }
+
+
+
+
+  Uint8List jsonToUint8List(Map<String, dynamic> jsonObject) {
+    // Convert JSON object to string
+    String jsonString = json.encode(jsonObject);
+
+    // Convert string to list of UTF-8 encoded bytes
+    List<int> utf8Bytes = utf8.encode(jsonString);
+
+    // Convert list of bytes to Uint8List
+    return Uint8List.fromList(utf8Bytes);
+  }
+
 
   void createMarkers(land _landData, int floor) async {
     print("Markercleared");
@@ -4173,11 +4196,12 @@ bool disposed=false;
           await getImagesFromMarker('assets/tealtorch.png', 35);
 
       Set<Marker> innerMarker = Set();
+      final Uint8List destianim=await getJsonAsUint8List('assets/destianimation.json');
 
       innerMarker.add(Marker(
           markerId: MarkerId("destination${bid}"),
           position: LatLng(dvalue[0], dvalue[1]),
-          icon: BitmapDescriptor.defaultMarker));
+          icon: BitmapDescriptor.fromBytes(destianim)));
       innerMarker.add(
         Marker(
           markerId: MarkerId('source${bid}'),
@@ -5597,11 +5621,11 @@ bool disposed=false;
     // );
     _feedbackController.close();
     _feedbackTextController.clear();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
-      (Route<dynamic> route) => false,
-    );
+    // Navigator.pushAndRemoveUntil(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+    //   (Route<dynamic> route) => false,
+    // );
   }
 
   void alignMapToPath(List<double> A, List<double> B) async {
@@ -5719,11 +5743,12 @@ bool disposed=false;
 
           // print("pointss matchedddd ${getPoints}");
           for (int i = 0; i < getPoints.length; i++) {
-            // print("---length  = ${getPoints.length}");
-            // print("--- point  = ${getPoints[i]}");
-            // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-            // print("--- val  = $val");
-            // print("--- isPDRStop  = $isPdrStop");
+            print("---length  = ${getPoints.length}");
+            print("--- point  = ${getPoints}");
+            print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+            print("---- columns  = ${user.pathobj.numCols![user.Bid]![user.floor]}");
+            print("--- val  = $val");
+            print("--- isPDRStop  = $isPdrStop");
 
             //print("turn corrds");
 
@@ -5733,13 +5758,7 @@ bool disposed=false;
 
               Future.delayed(Duration(milliseconds: 1500))
                   .then((value) => {
-                    StartPDR(),
-
-
-                  });
-
-
-
+                    StartPDR(),});
               setState(() {
 
                 isPdrStop = false;
@@ -5749,7 +5768,7 @@ bool disposed=false;
             }
             if (getPoints[i][0] == user.showcoordX &&
                 getPoints[i][1] == user.showcoordY) {
-              // print("points matchedddddddd");
+               print("points matchedddddddd");
 
               StopPDR();
               getPoints.removeAt(i);

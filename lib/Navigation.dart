@@ -594,26 +594,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
       double? compassHeading = event.heading!;
-      setState(() {
-        user.theta = compassHeading!;
-        if (mapState.interaction2) {
-          mapState.bearing = compassHeading!;
-          _googleMapController.moveCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: mapState.target,
-                zoom: mapState.zoom,
-                bearing: mapState.bearing!,
+      if(mounted){
+        setState(() {
+          user.theta = compassHeading!;
+          if (mapState.interaction2) {
+            mapState.bearing = compassHeading!;
+            _googleMapController.moveCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: mapState.target,
+                  zoom: mapState.zoom,
+                  bearing: mapState.bearing!,
+                ),
               ),
-            ),
-            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-          );
-        } else {
-          if (markers.length > 0)
-            markers[user.Bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing, markers[user.Bid]![0]);
-        }
-      });
+              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+            );
+          } else {
+            if (markers.length > 0)
+              markers[user.Bid]![0] = customMarker.rotate(
+                  compassHeading! - mapbearing, markers[user.Bid]![0]);
+          }
+        });
+      }
+
     }, onError: (error) {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
@@ -1737,86 +1740,55 @@ bool disposed=false;
   //Set<Circle> circles2 = {};
   Timer? _timer2;
   int _circleIdCounter = 0;
+  int _rippleDelay = 200;
   // bool _isAnimating=false;
 
 
-  void _startCircleWaves(double lat,double lng) {
-    _timer2 = Timer.periodic(Duration(milliseconds: 2000), (timer) {
-      print("repeatedddd");
-      updateCircleAtDesti(lat,lng);
+  void _startCircleWaves(double lat, double lng) {
+    _timer2 = Timer.periodic(Duration(milliseconds: 1500), (timer) {
+      // Delay the ripple start by increasing the delay based on the number of ripples
+      final delay = _rippleDelay * (_circleIdCounter % 5);
+      Future.delayed(Duration(milliseconds: delay), () {
+        updateCircleAtDesti(lat, lng);
+      });
     });
   }
 
   void updateCircleAtDesti(double lat, double lng,
       {double begin = 3, double end = 2}) {
-
     // if (_isAnimating) return; // Prevent overlapping animations
-
-
-    controller = AnimationController(
+    final int circleId = _circleIdCounter++;
+    final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
-    )..addListener(() {
-    setState(() {
-    final double radius = controller.value * 3;
-    final double opacity = 1.0 - controller.value;
-
-    circles.add(
-    Circle(
-    circleId: CircleId("circle_${_circleIdCounter}"),
-    center: LatLng(lat, lng),
-    radius: radius,
-    strokeWidth: 2,
-    strokeColor: Colors.red.withOpacity(opacity),
-    fillColor: Colors.red.withOpacity(0.1 * opacity),
-    ),
     );
+    _animation = Tween<double>(begin: 0, end: 3).animate(controller)
+      ..addListener(() {
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId.value == "circle_$circleId");
+          circles.add(
+            Circle(
+              circleId: CircleId("circle_$circleId"),
+              center: LatLng(lat, lng),
+              radius: _animation.value,
+              strokeWidth: 2,
+              strokeColor: Colors.red.withOpacity(1 - controller.value),
+              fillColor: Colors.red.withOpacity(0.3 * (1 - controller.value)),
+            ),
+          );
+        });
+      });
 
-    // Remove the previous circle
-    if (circles.length > 1) {
-    circles.removeWhere((circle) => circle.circleId.value == "circle_${_circleIdCounter - 1}");
-    }
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId.value == "circle_$circleId");
+        });
+        controller.dispose();
+      }
     });
-    });
 
-
-    // final Animation<double> animation = Tween<double>(begin: 1, end: 3).animate(controller);
-    // final double radius = controller.value * 100;
-    //
-    // animation.addListener(() {
-    //   setState(() {
-    //     circles.add(
-    //       Circle(
-    //         circleId: CircleId("circle"),
-    //         center: LatLng(lat, lng),
-    //         radius: radius,
-    //         strokeWidth: 2,
-    //         strokeColor: Colors.red.withOpacity(1 - (animation.value / 100)),
-    //         fillColor: Colors.red.withOpacity(0.2 * (1 - (animation.value / 100))),
-    //       ),
-    //     );
-    //   });
-    //
-    //   if(circles.length>1){
-    //     setState(() {
-    //       circles.removeWhere((circle) => circle.circleId.value == "circle");
-    //     });
-    //   }
-    // });
-      // animation.addStatusListener((status) {
-      //   if (status == AnimationStatus.completed) {
-      //
-      //     controller.dispose();
-      //    _isAnimating=false;
-      //     // Start the next animation after a delay
-      //
-      //   }
-      // });
-
-    //_circleAnimations.add(CircleAnimation(controller, animation));
-    _circleIdCounter++;
     controller.forward();
-    controller.repeat();
   }
 
 
@@ -2146,7 +2118,7 @@ bool disposed=false;
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
-    circles.clear();
+
     print("WilsonInSelected");
     print(polygonPoints);
     _polygon.add(Polygon(
@@ -3186,7 +3158,7 @@ bool disposed=false;
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
-                          circles.clear();
+                         // circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -3227,8 +3199,9 @@ bool disposed=false;
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _stopRippleAnimation();
                           _polygon.clear();
-                          circles.clear();
+                        //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -3379,8 +3352,8 @@ bool disposed=false;
                         ),
                         child: TextButton(
                           onPressed: () async {
-                            _polygon.clear();
-                            circles.clear();
+                            //_polygon.clear();
+
                             Markers.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
@@ -3748,7 +3721,7 @@ bool disposed=false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
-    circles.clear();
+   // circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3791,6 +3764,10 @@ bool disposed=false;
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+       List<double> value = tools.localtoglobal(PathState.destinationX, PathState.destinationY,
+            patchData: building.patchData[PathState.destinationBid]);
+       PathState.destinationLat=value[0];
+       PathState.destinationLng=value[1];
         print(PathState.sourcePolyID!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
@@ -4300,9 +4277,12 @@ bool disposed=false;
         ),
       );
      // updateCircleAtDesti(dvalue[0],dvalue[1]);
-      if(_timer2==null){
-        _startCircleWaves(dvalue[0],dvalue[1]);
+      if(PathState.destinationFloor==PathState.sourceFloor){
+        if(_timer2==null){
+          _startCircleWaves(dvalue[0],dvalue[1]);
+        }
       }
+
 
       setCameraPosition(innerMarker);
       pathMarkers[floor] = innerMarker;
@@ -4579,6 +4559,8 @@ bool disposed=false;
                       Container(
                         child: IconButton(
                             onPressed: () {
+
+                              _stopRippleAnimation();
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
@@ -5057,6 +5039,7 @@ bool disposed=false;
                                                 Spacer(),
                                                 IconButton(
                                                     onPressed: () {
+                                                      _stopRippleAnimation();
                                                       showMarkers();
                                                       setState(() {
                                                         _isBuildingPannelOpen =
@@ -5152,6 +5135,7 @@ bool disposed=false;
                                                   onPressed: () async {
                                                     setState(() {
                                                       _markers.clear();
+                                                     circles.clear();
                                                       markerSldShown = false;
                                                     });
 
@@ -5194,6 +5178,7 @@ bool disposed=false;
                                                     UserState.paintMarker = paintMarker;
                                                     UserState.createCircle = updateCircle;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
+
                                                     user.floor =
                                                         PathState.sourceFloor;
                                                     user.pathobj = PathState;
@@ -5981,6 +5966,7 @@ bool disposed=false;
                             ),
                             child: TextButton(
                                 onPressed: () {
+                                  _polygon.clear();
                                   _stopRippleAnimation();
                                   StopPDR();
                                   markerSldShown = true;
@@ -7732,17 +7718,16 @@ bool disposed=false;
   }
   void _stopRippleAnimation() {
     _timer2?.cancel();
+    _timer2=null;
     // if (!_isAnimating) return;
-
     setState(() {
-      // _isAnimating = false;
-
-      controller.stop();
-      controller.reset();
-      circles.clear(); // Clear all circles when stopping the animation
+      // _isAnimating = falsee
+      //circles.clear(); // Clear all circles when stopping the animation
     });
   }
   void closeNavigation() {
+
+    _polygon.clear();
     print("close navigation");
     String destname = PathState.destinationName;
     List<int> tv = tools.eightcelltransition(user.theta);
@@ -8339,8 +8324,24 @@ bool disposed=false;
                                                       ? Colors.white
                                                       : Color(0xff24b9b0),
                                               onTap: () {
+                                                if(PathState.destinationFloor!=PathState.sourceFloor && PathState.destinationFloor==i){
+                                                  if(_timer2==null){
+                                                    _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
+                                                  }
+
+                                                }else{
+                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                                    print("nearestLandInfomation!.floor");
+                                                    circles.clear();
+                                                  }else if(nearestLandInfomation!=null && nearestLandInfomation!.floor==i){
+                                                    _updateCircle(user.lat,user.lng);
+                                                  }
+                                                  if(_timer2!=null){
+                                                    _stopRippleAnimation();
+                                                  }
+                                                }
                                                 _polygon.clear();
-                                                circles.clear();
+                                              //  circles.clear();
                                                 // _markers.clear();
                                                 // _markerLocationsMap.clear();
                                                 // _markerLocationsMapLanName.clear();
@@ -8355,6 +8356,7 @@ bool disposed=false;
                                                       .getStoredString()]!,
                                                 );
                                                 if (pathMarkers[i] != null) {
+                                                  print(pathMarkers[i]);
                                                   //setCameraPosition(pathMarkers[i]!);
                                                 }
                                                 // Markers.clear();

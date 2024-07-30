@@ -1,6 +1,6 @@
 import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/Cell.dart';
-
+import 'package:google_maps_flutter_platform_interface/src/types/marker.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'directionClass.dart';
@@ -41,6 +41,9 @@ class pathState {
   Map<int,Landmarks> associateTurnWithLandmark = Map();
   String? SourceExitPolyid;
   String? DestinationEntryPolyid;
+  Map<int, Set<Marker>> innerMarker = {};
+  bool didPathStart = false;
+
   // Default constructor without arguments
   pathState();
 
@@ -61,6 +64,7 @@ class pathState {
     index = 0;
     beaconCords.clear();
     noPathFound = false;
+    didPathStart = false;
   }
 
   void swap() {
@@ -95,6 +99,7 @@ class pathState {
   }
 
   void clearforaccessiblepath(){
+    didPathStart = true;
     realWorldCoordinates.clear();
     path.clear();
     Cellpath.clear();

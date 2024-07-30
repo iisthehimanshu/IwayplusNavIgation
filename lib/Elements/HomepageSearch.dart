@@ -22,7 +22,7 @@ import 'HomepageFilter.dart';
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
-  final Function(String ID) onVenueClicked;
+  final Function(String ID,{bool DirectlyStartNavigation}) onVenueClicked;
   final Function(List<String>) fromSourceAndDestinationPage;
   const HomepageSearch({this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage});
 
@@ -108,7 +108,8 @@ class _HomepageSearchState extends State<HomepageSearch> {
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                             ).then((value){
-                              widget.onVenueClicked(value);
+                              print("POP22");
+                              widget.onVenueClicked(value,DirectlyStartNavigation: true);
                             });
                           },
                           child: Container(
@@ -140,6 +141,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                             MaterialPageRoute(
                                 builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                         ).then((value){
+                          print("POPPP");
                           widget.onVenueClicked(value);
                         });
                       },

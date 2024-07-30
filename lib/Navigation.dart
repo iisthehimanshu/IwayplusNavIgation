@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -444,6 +445,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     // fetchlist();
     // filterItems();
+    print("widget.directLandID");
+    print(widget.directLandID);
   }
 
   void excludeFloorSemanticWorkchange() {
@@ -1218,10 +1221,11 @@ bool disposed=false;
       if (speakTTS)
         speak(LocaleData.unabletofindyourlocation.getString(context),
             _currentLocale);
+
     }
     if (widget.directLandID.isNotEmpty) {
       print("checkdirectLandID");
-      onLandmarkVenueClicked(widget.directLandID);
+      onLandmarkVenueClicked(widget.directLandID,DirectlyStartNavigation: true);
     }
   }
 
@@ -1436,6 +1440,13 @@ bool disposed=false;
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
+      print("value.polyline!.floors!");
+      List<int> currentBuildingFloor = [];
+      value.polyline!.floors!.forEach((element) {
+        currentBuildingFloor.add(tools.alphabeticalToNumerical(element.floor!));
+        print(element.floor);
+      });
+      Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = currentBuildingFloor;
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
@@ -1616,6 +1627,8 @@ bool disposed=false;
             createRooms(value, 0);
           }
           building.polylinedatamap[key] = value;
+          print("value.polyline!.floors!");
+          print(value.polyline!.floors!);
           building.numberOfFloors[key] = value.polyline!.floors!.length;
           //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
         });
@@ -1798,8 +1811,8 @@ bool disposed=false;
     // sumMap = btadapter.calculateAverage();
     paintUser(nearestBeacon);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-          _controller.stop(),
-        });
+      _controller.stop(),
+    });
 
     //emptying the bin manually
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -2739,6 +2752,59 @@ bool disposed=false;
         .buffer
         .asUint8List();
   }
+  Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(String text, String imagePath, {Size imageSize = const Size(50, 50)}) async {
+    // Load the base marker image
+    final ByteData baseImageBytes = await rootBundle.load(imagePath);
+    final ui.Codec markerImageCodec = await ui.instantiateImageCodec(baseImageBytes.buffer.asUint8List(), targetWidth: imageSize.width.toInt(), targetHeight: imageSize.height.toInt());
+    final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+    final ui.Image markerImage = markerImageFrame.image;
+
+    // Set the text style and layout
+    final TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontSize: 30.0, // Increased font size
+        color: Colors.black,
+      ),
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: double.infinity,
+    );
+
+    // Calculate the overall canvas size
+    final double textWidth = textPainter.width;
+    final double textHeight = textPainter.height;
+    final double canvasWidth = textWidth > imageSize.width ? textWidth : imageSize.width;
+    final double canvasHeight = textHeight + imageSize.height + 20.0; // Increased padding
+
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Draw the text centered above the marker image
+    final double textX = (canvasWidth - textWidth) / 2;
+    final double textY = 0.0;
+    textPainter.paint(canvas, Offset(textX, textY));
+
+    // Draw the base marker image below the text
+    final double imageX = (canvasWidth - imageSize.width) / 2;
+    final double imageY = textHeight + 10.0; // Padding between text and image
+    canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
+
+    // Generate the final image
+    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
+
+    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List? pngBytes = byteData?.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(pngBytes!);
+  }
 
   void createMarkers(land _landData, int floor) async {
     print("Markercleared");
@@ -2766,11 +2832,20 @@ bool disposed=false;
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
               patchData: building.patchData[buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
+          BitmapDescriptor textMarker;
+          String markerText;
+          if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
+          }else{
+            textMarker = await bitmapDescriptorFromTextAndImage(landmarks[i].name!,'assets/pin.png');
+          }
 
           Markers.add(Marker(
               markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
               position: LatLng(value[0], value[1]),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
+              icon: textMarker,
               anchor: Offset(0.5, 0.5),
               visible: false,
               onTap: () {
@@ -3016,6 +3091,7 @@ bool disposed=false;
   bool calculatingPath = false;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
+
     pathMarkers.clear();
     // if(user.isnavigating==false){
     //   clearPathVariables();
@@ -3036,6 +3112,8 @@ bool disposed=false;
       building.selectedLandmarkID = null;
       return Container();
     }
+
+
 
     return Stack(
       children: [
@@ -3943,6 +4021,17 @@ bool disposed=false;
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
 
+  List<LatLng> _polylineCoordinates = [];
+  Marker? _movingMarker;
+  Timer? _polytimer;
+  int _currentIndex = 0;
+  AnimationController? _animationController;
+  Animation<double>? _polyanimation;
+  late LatLng sourcePosition;
+  late LatLng destinationPosition;
+  late BitmapDescriptor sourceIcon;
+  late BitmapDescriptor destinationIcon;
+
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null, String? liftName}) async {
@@ -4082,7 +4171,7 @@ bool disposed=false;
           .then((value) {
         PathState.associateTurnWithLandmark = value;
         PathState.associateTurnWithLandmark.removeWhere((key, value) =>
-            value.properties!.polyId == PathState.destinationPolyID);
+        value.properties!.polyId == PathState.destinationPolyID);
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
         // });
@@ -4176,7 +4265,7 @@ bool disposed=false;
       }
 
       final Uint8List tealtorch =
-          await getImagesFromMarker('assets/tealtorch.png', 35);
+      await getImagesFromMarker('assets/tealtorch.png', 35);
 
       Set<Marker> innerMarker = Set();
 
@@ -4205,7 +4294,7 @@ bool disposed=false;
       print("path4 $node : [$row,$col]");
       if (bid != null) {
         List<double> value =
-            tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+        tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
         coordinates.add(LatLng(value[0], value[1]));
       } else {
@@ -4239,6 +4328,82 @@ bool disposed=false;
     });
     createRooms(building.polyLineData!, floor);
     return path;
+  }
+  void animateMarker() {
+    Set<Marker> innerMarker = Set();
+    double step = 0.0001;
+    Timer.periodic(Duration(milliseconds: 50), (timer) {
+      setState(() {
+        sourcePosition = LatLng(sourcePosition.latitude + step, sourcePosition.longitude + step);
+        innerMarker.add(
+            Marker(
+            markerId: MarkerId("destination${destinationPosition}"),
+            position: destinationPosition,
+            icon: sourceIcon));
+        innerMarker.add(
+          Marker(
+            markerId: MarkerId("destination"),
+            position: destinationPosition,
+            icon: destinationIcon,
+          ),
+        );
+
+        //setCameraPosition(innerMarker);
+        pathMarkers[3] = innerMarker;
+
+      });
+      if ((sourcePosition.latitude - destinationPosition.latitude).abs() < step &&
+          (sourcePosition.longitude - destinationPosition.longitude).abs() < step) {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _initializePolylineAndMarker() {
+    setState(() {
+      _movingMarker = Marker(
+        markerId: MarkerId('moving_marker'),
+        position: _polylineCoordinates[0],
+      );
+    });
+  }
+  List<LatLng> _visibleWhitePolyline = [];
+
+
+  void _startAnimation() {
+    int currentIndex = 0;
+    _polytimer = Timer.periodic(Duration(milliseconds: 50), (Timer timer) {
+      setState(() {
+        currentIndex++;
+        if (currentIndex >= _polylineCoordinates.length) {
+          currentIndex = 0;
+          _visibleWhitePolyline.clear();
+        } else {
+          _visibleWhitePolyline.add(_polylineCoordinates[currentIndex]);
+        }
+      });
+    });
+  }
+
+  LatLng _getLatLngAlongPath(double fraction) {
+    int startIndex = (_polylineCoordinates.length - 1) * fraction ~/ 1;
+    int endIndex = startIndex + 1;
+
+    if (endIndex >= _polylineCoordinates.length) {
+      endIndex = _polylineCoordinates.length - 1;
+    }
+
+    final startPoint = _polylineCoordinates[startIndex];
+    final endPoint = _polylineCoordinates[endIndex];
+
+    final lat = _lerp(startPoint.latitude, endPoint.latitude, fraction);
+    final lng = _lerp(startPoint.longitude, endPoint.longitude, fraction);
+
+    return LatLng(lat, lng);
+  }
+
+  double _lerp(double start, double end, double fraction) {
+    return start + (end - start) * fraction;
   }
 
   void closeRoutePannel() {
@@ -4578,8 +4743,8 @@ bool disposed=false;
                                             DestinationSearchPage(
                                               hintText: 'Source location',
                                               voiceInputEnabled: false,
-                                            ))).then((value) {
-                                  onSourceVenueClicked(value);
+                                            ))).then((value) async {
+                                  onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
                                 });
                               },
                             ),
@@ -4617,6 +4782,7 @@ bool disposed=false;
                                               voiceInputEnabled: false,
                                             ))).then((value) {
                                   _isBuildingPannelOpen = false;
+                                  print("onDestinationVenueClicked");
                                   onDestinationVenueClicked(value);
                                 });
                               },
@@ -7434,6 +7600,7 @@ bool disposed=false;
   }
 
   Widget nearestLandmarkpannel() {
+    print("nearestLandmarkpannel");
     buildingAll element = new buildingAll.buildngAllAPIModel();
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     if (BuildingAllBox.length > 0) {
@@ -7455,7 +7622,7 @@ bool disposed=false;
     //filterItems();
 
     return Visibility(
-        visible: _isBuildingPannelOpen && !user.isnavigating,
+        visible: _isBuildingPannelOpen && !user.isnavigating ,
         child: Semantics(
           excludeSemantics: true,
           child: SlidingUpPanel(
@@ -7548,7 +7715,7 @@ bool disposed=false;
         });
 
         // print(Set<Marker>.of(markers[user.Bid]!));
-        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
+        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? []))) ;
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
@@ -7584,6 +7751,12 @@ bool disposed=false;
 
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
+    // poly.add(gmap.Polyline(
+    //   polylineId: PolylineId('animated_route'),
+    //   points: _visibleWhitePolyline,
+    //   color: Colors.red,
+    //   width: 8,
+    // ));
     polylines.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
     });
@@ -7775,39 +7948,112 @@ bool disposed=false;
           (Route<dynamic> route) => false,
     );
 
-
   }
 
   void onLandmarkVenueClicked(String ID,
-      {bool DirectlyStartNavigation = false}) {
+      {bool DirectlyStartNavigation = false}) async {
+    print('DirectlyStartNavigation');
+    final snapshot = await building.landmarkdata;
+    building.selectedLandmarkID = ID;
+    
+    _isBuildingPannelOpen = false;
+
+
     setState(() {
-      if (building.selectedLandmarkID != ID) {
-        building.landmarkdata!.then((value) {
-          _isBuildingPannelOpen = false;
-          building.floor[value.landmarksMap![ID]!.buildingID!] =
-              value.landmarksMap![ID]!.floor!;
-          createRooms(
-              building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-              building.floor[value.landmarksMap![ID]!.buildingID!]!);
-          createMarkers(
-              value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
-          building.selectedLandmarkID = ID;
-          singleroute.clear();
-          _isRoutePanelOpen = DirectlyStartNavigation;
-          _isLandmarkPanelOpen = !DirectlyStartNavigation;
-          List<double> pvalues = tools.localtoglobal(
-              value.landmarksMap![ID]!.coordinateX!,
-              value.landmarksMap![ID]!.coordinateY!,
-              patchData:
-                  building.patchData[value.landmarksMap![ID]!.buildingID]);
-          LatLng point = LatLng(pvalues[0], pvalues[1]);
-          _googleMapController.animateCamera(
-            CameraUpdate.newLatLngZoom(
-              point,
-              22,
-            ),
-          );
-          addselectedMarker(point);
+      // if (building.selectedLandmarkID != ID) {
+      //   building.landmarkdata!.then((value) {
+      //     _isBuildingPannelOpen = false;
+      //     building.floor[value.landmarksMap![ID]!.buildingID!] =
+      //         value.landmarksMap![ID]!.floor!;
+      //     createRooms(
+      //         building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
+      //         building.floor[value.landmarksMap![ID]!.buildingID!]!);
+      //     createMarkers(
+      //         value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
+      //     building.selectedLandmarkID = ID;
+      //     singleroute.clear();
+      //     _isRoutePanelOpen = DirectlyStartNavigation;
+      //     _isLandmarkPanelOpen = !DirectlyStartNavigation;
+      //     List<double> pvalues = tools.localtoglobal(
+      //         value.landmarksMap![ID]!.coordinateX!,
+      //         value.landmarksMap![ID]!.coordinateY!,
+      //         patchData:
+      //             building.patchData[value.landmarksMap![ID]!.buildingID]);
+      //     LatLng point = LatLng(pvalues[0], pvalues[1]);
+      //     _googleMapController.animateCamera(
+      //       CameraUpdate.newLatLngZoom(
+      //         point,
+      //         22,
+      //       ),
+      //     );
+      //     addselectedMarker(point);
+      //   });
+      // }
+
+      if (user.coordY != 0 && user.coordX != 0) {
+        PathState.sourceX = user.coordX;
+        PathState.sourceY = user.coordY;
+        PathState.sourceFloor = user.floor;
+        PathState.sourcePolyID = user.key;
+        print("object ${PathState.sourcePolyID}");
+        PathState.sourceName = "Your current location";
+        PathState.destinationPolyID =
+        building.selectedLandmarkID!;
+        PathState.destinationName = snapshot!
+            .landmarksMap![
+        building.selectedLandmarkID]!
+            .name ??
+            snapshot!
+                .landmarksMap![
+            building.selectedLandmarkID]!
+                .element!
+                .subType!;
+        PathState.destinationFloor = snapshot!
+            .landmarksMap![building.selectedLandmarkID]!
+            .floor!;
+        PathState.sourceBid = user.Bid;
+
+        PathState.destinationBid = snapshot!
+            .landmarksMap![building.selectedLandmarkID]!
+            .buildingID!;
+
+        setState(() {
+          print("valuechanged");
+          calculatingPath = true;
+        });
+        Future.delayed(Duration(seconds: 1), () {
+          calculateroute(snapshot!.landmarksMap!)
+              .then((value) {
+            calculatingPath = false;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+        });
+      } else {
+        PathState.sourceName = "Choose Starting Point";
+        PathState.destinationPolyID =
+        building.selectedLandmarkID!;
+        PathState.destinationName = snapshot!.landmarksMap![
+        building.selectedLandmarkID]!
+            .name ??
+            snapshot!.landmarksMap![
+            building.selectedLandmarkID]!
+                .element!
+                .subType!;
+        PathState.destinationFloor = snapshot!.landmarksMap![building.selectedLandmarkID]!
+            .floor!;
+        building.selectedLandmarkID = "";
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    SourceAndDestinationPage(
+                      DestinationID:
+                      PathState.destinationPolyID,
+                    ))).then((value) {
+          if (value != null) {
+            fromSourceAndDestinationPage(value);
+          }
         });
       }
     });
@@ -8099,16 +8345,10 @@ bool disposed=false;
                                 .union(getCombinedPolygons())
                                 .union(otherpatch)
                                 .union(_polygon),
-                            polylines: singleroute[building.floor[
-                                        buildingAllApi.getStoredString()]] !=
-                                    null
-                                ? getCombinedPolylines().union(singleroute[
-                                    building.floor[
-                                        buildingAllApi.getStoredString()]]!)
-                                : getCombinedPolylines(),
+                            polylines: singleroute[building.floor[buildingAllApi.getStoredString()]] != null ? getCombinedPolylines().union(singleroute[building.floor[buildingAllApi.getStoredString()]]!) : getCombinedPolylines(),
                             markers: getCombinedMarkers()
                                 .union(_markers)
-                                .union(focusturnArrow),
+                                .union(focusturnArrow).union(_movingMarker != null ? {_movingMarker!} : {},),
                             onTap: (x) {
                               mapState.interaction = true;
                             },
@@ -8296,14 +8536,24 @@ bool disposed=false;
                                         activeIcon: Icons.close,
                                         backgroundColor: Colors.white,
                                         children: List.generate(
-                                          building.numberOfFloors[buildingAllApi
-                                              .getStoredString()]!,
-                                          (int i) {
+                                          Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!.length, (int i) {
+                                            print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
+                                            List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!;
+                                            List<int> revfloorList = floorList;
+                                            revfloorList.sort();
+
+                                            print("floorList[i]");
+                                            print(revfloorList);
+                                            print(pathMarkers[i]);
+                                            // building.numberOfFloors[buildingAllApi
+                                            //     .getStoredString()];
+                                            //
+                                            // print(building.numberOfFloors!);
                                             return SpeedDialChild(
                                               child: Semantics(
-                                                label: "i",
+                                                label: "${revfloorList[i]}",
                                                 child: Text(
-                                                  i == 0 ? 'G' : '$i',
+                                                  revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
                                                     fontSize: 16,
@@ -8312,10 +8562,7 @@ bool disposed=false;
                                                   ),
                                                 ),
                                               ),
-                                              backgroundColor:
-                                                  pathMarkers[i] == null
-                                                      ? Colors.white
-                                                      : Color(0xff24b9b0),
+                                              backgroundColor: pathMarkers[i] == null? Colors.white : Color(0xff24b9b0),
                                               onTap: () {
                                                 _polygon.clear();
                                                 circles.clear();
@@ -8324,7 +8571,7 @@ bool disposed=false;
                                                 // _markerLocationsMapLanName.clear();
 
                                                 building.floor[buildingAllApi
-                                                    .getStoredString()] = i;
+                                                    .getStoredString()] = revfloorList[i];
                                                 createRooms(
                                                   building.polylinedatamap[
                                                       buildingAllApi
@@ -8501,6 +8748,7 @@ bool disposed=false;
                         future: building.landmarkdata,
                         builder: (context, snapshot) {
                           if (_isLandmarkPanelOpen) {
+
                             return landmarkdetailpannel(context, snapshot);
                           } else {
                             return Semantics(

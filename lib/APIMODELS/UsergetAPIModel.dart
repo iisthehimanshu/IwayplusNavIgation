@@ -2,7 +2,7 @@ class UsergetAPIModel {
   String? sId;
   String? name;
   String? email;
-  Null? mobile;
+  String? mobile;
   String? username;
   bool? emailVerification;
   bool? mobileVerification;

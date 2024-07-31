@@ -590,6 +590,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void handleCompassEvents() {
+    if(!mounted) return;
     compassSubscription = FlutterCompass.events!.listen((event) {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
@@ -4008,10 +4009,13 @@ bool disposed=false;
       distance = double.parse(distance.toStringAsFixed(1));
       if (PathState.destinationName ==
           "${LocaleData.yourcurrentloc.getString(context)}") {
+        print("entered herere2");
+
         speak(
-            "${nearestLandInfomation != null ? apibeaconmap[nearbeacon]!.name : nearestLandInfomation!.name} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+            "${nearestLandInfomation!.name} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
             _currentLocale);
       } else {
+        print("entered herere");
         speak(
             "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
             _currentLocale);
@@ -4561,6 +4565,7 @@ bool disposed=false;
                             onPressed: () {
 
                               _stopRippleAnimation();
+                              _polygon.clear();
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
@@ -4721,6 +4726,7 @@ bool disposed=false;
                       Container(
                         child: IconButton(
                             onPressed: () {
+                              _stopRippleAnimation();
                               setState(() {
                                 PathState.swap();
                                 PathState.path.clear();
@@ -5039,6 +5045,7 @@ bool disposed=false;
                                                 Spacer(),
                                                 IconButton(
                                                     onPressed: () {
+                                                      _polygon.clear();
                                                       _stopRippleAnimation();
                                                       showMarkers();
                                                       setState(() {
@@ -8031,6 +8038,7 @@ bool disposed=false;
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
+    compas
     compassSubscription.cancel();
     flutterTts.cancelHandler;
     _timer?.cancel();
@@ -8328,8 +8336,14 @@ bool disposed=false;
                                                   if(_timer2==null){
                                                     _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
                                                   }
+                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                                    print("nearestLandInfomation!.floor");
+                                                    circles.clear();
+                                                  }
 
                                                 }else{
+                                                  print(nearestLandInfomation!.floor);
+                                                  print(circles.isNotEmpty);
                                                   if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
                                                     print("nearestLandInfomation!.floor");
                                                     circles.clear();

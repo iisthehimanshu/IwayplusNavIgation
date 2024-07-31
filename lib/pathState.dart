@@ -41,6 +41,7 @@ class pathState {
   Map<int,Landmarks> associateTurnWithLandmark = Map();
   String? SourceExitPolyid;
   String? DestinationEntryPolyid;
+  static String? scanPolyID;
   // Default constructor without arguments
   pathState();
 

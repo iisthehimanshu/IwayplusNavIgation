@@ -149,6 +149,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String polyID = "";
   String buildingID = "";
   String finalName = "";
+  bool promptLoader = false;
+
 
   void _onSearchChanged() {
     List<String> promptArray = ["navigate to","take me to"];
@@ -164,7 +166,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     });
     if(containsPrompt){
       if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
+      print("Entered");
+
       _searchDebounce = Timer(Duration(seconds: 3), () {
+        setState(() {
+          promptLoader = true;
+        });
+        print("Entered2");
+
         // Perform search
         //_performSearch(_controller.text);
 
@@ -224,6 +233,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             if(polyID.isNotEmpty){
               print("polyidis${polyID}");
               HelperClass.showToast("Navigating to ${finalName}");
+              setState(() {
+                promptLoader = false;
+              });
+              //Future.delayed(Duration(seconds: 2));
               Navigator.pop(context, polyID);
             }else{
               print("elsepolyID");
@@ -240,6 +253,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
       });
+
+
     }else{
       print("Prompt not used");
     }
@@ -551,9 +566,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         ),
         body: Container(
           color: Colors.white,
-          child: Column(
+          child: !promptLoader? Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+
               Container(
                   width: screenWidth - 32,
                   height: 48,
@@ -726,6 +742,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         children: category ? searcCategoryhResults : searchResults,
                       ))),
             ],
+          ) : Center(
+            child: CircularProgressIndicator(
+              color: Colors.red,
+            ),
           ),
         ),
       ),

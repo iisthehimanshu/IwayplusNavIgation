@@ -91,6 +91,7 @@ dependencies:
   test: ^1.16.0
   mockito: ^5.1.0
   flutter_beep: ^1.0.0
+  qr_code_scanner: ^1.0.1
 
 
 

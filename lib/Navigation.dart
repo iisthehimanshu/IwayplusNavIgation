@@ -974,17 +974,7 @@ bool disposed=false;
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
             building.polyLineData!.polyline!.floors!);
-        print("print cubicle data");
-        for (int i = 0; i < prevFloorLifts.length; i++) {
-          print(prevFloorLifts[i].name);
-        }
-        print("data2");
-        for (int i = 0; i < currFloorLifts.length; i++) {
-          print(currFloorLifts[i].name);
-        }
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-        print("dvalue");
-        print(dvalue);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -1285,13 +1275,17 @@ bool disposed=false;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
+
       //  PathState.sourcePolyID = user.key;
         PathState.sourceName = "Your current location";
         building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
-              user.path = PathState.path.values.expand((list) => list).toList();
+              user.path = [
+                ...PathState.path[PathState.sourceFloor]!,
+                ...PathState.path[PathState.destinationFloor]!,
+              ];
               user.Cellpath = PathState.singleCellListPath;
               user.pathobj.index = 0;
               user.isnavigating = true;
@@ -1425,7 +1419,7 @@ bool disposed=false;
     await patchAPI()
         .fetchPatchData(id: buildingAllApi.selectedBuildingID)
         .then((value) {
-      print("${value.patchData.toString()}");
+      print("${value.patchData!.toJson()}");
       building.patchData[value.patchData!.buildingID!] = value;
       createPatch(value);
       tools.globalData = value;
@@ -2318,7 +2312,7 @@ bool disposed=false;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          100.0, // padding to adjust the bounding box on the screen
+          200.0, // padding to adjust the bounding box on the screen
         ),
       );
     } else {
@@ -2349,7 +2343,70 @@ bool disposed=false;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          100.0, // padding to adjust the bounding box on the screen
+          200.0, // padding to adjust the bounding box on the screen
+        ),
+      );
+    }
+  }
+
+  void setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
+      {List<LatLng>? selectedroomMarker2 = null}) {
+    double minLat = double.infinity;
+    double minLng = double.infinity;
+    double maxLat = double.negativeInfinity;
+    double maxLng = double.negativeInfinity;
+
+    if (selectedroomMarker2 == null) {
+      for (LatLng marker in selectedroomMarker1) {
+        double lat = marker.latitude;
+        double lng = marker.longitude;
+
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(minLat, minLng),
+        northeast: LatLng(maxLat, maxLng),
+      );
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          bounds,
+          200.0, // padding to adjust the bounding box on the screen
+        ),
+      );
+    } else {
+      for (LatLng marker in selectedroomMarker1) {
+        double lat = marker.latitude;
+        double lng = marker.longitude;
+
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+      for (LatLng marker in selectedroomMarker2) {
+        double lat = marker.latitude;
+        double lng = marker.longitude;
+
+        minLat = math.min(minLat, lat);
+        minLng = math.min(minLng, lng);
+        maxLat = math.max(maxLat, lat);
+        maxLng = math.max(maxLng, lng);
+      }
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(minLat, minLng),
+        northeast: LatLng(maxLat, maxLng),
+      );
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          bounds,
+          200.0, // padding to adjust the bounding box on the screen
         ),
       );
     }
@@ -2414,7 +2471,7 @@ bool disposed=false;
     return diff;
   }
 
-  void createRooms(polylinedata value, int floor) {
+  Future<void> createRooms(polylinedata value, int floor)async{
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
     }
@@ -2792,6 +2849,7 @@ bool disposed=false;
         }
       }
     });
+    return;
   }
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
@@ -3722,6 +3780,15 @@ bool disposed=false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
+    try{
+    if(PathState.sourcePolyID == ""){
+      PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
+    }else if(landmarksMap[PathState.sourcePolyID]!.lifts == null || landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty ){
+      landmarksMap[PathState.sourcePolyID]!.lifts = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true)!.lifts;
+    }
+    }catch(e){
+      print("$e error in finding nearest landmark second");
+    }
    // circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
@@ -4231,22 +4298,27 @@ bool disposed=false;
     }
 
     if (path.isNotEmpty) {
-      if (floor != 0) {
+      if(building.floor[bid] != PathState.sourceFloor){
+        setState(() {
+          building.floor[bid] = PathState.sourceFloor;
+        });
+        await createRooms(building.polyLineData!, PathState.sourceFloor);
+      }
+      if(floor != 0){
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
             building.polyLineData!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(floor),
             building.polyLineData!.polyline!.floors!);
-        print('WilsonCheckingCurrentFloor');
-        print(currFloorLifts);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
-      } else {
+      }else{
         UserState.xdiff = 0;
         UserState.ydiff = 0;
       }
+
       List<double> svalue = [];
       List<double> dvalue = [];
       if (bid != null) {
@@ -4261,6 +4333,45 @@ bool disposed=false;
         print("Himanshucheckerpath in else block ");
         svalue = tools.localtoglobal(sourceX, sourceY);
         dvalue = tools.localtoglobal(destinationX, destinationY);
+      }
+
+      setCameraPositionusingCoords([LatLng(svalue[0], svalue[1]),LatLng(dvalue[0], dvalue[1])]);
+      List<LatLng> coordinates = [];
+      for (var node in path) {
+        int row = (node % numCols); //divide by floor length
+        int col = (node ~/ numCols); //divide by floor length
+        List<double> value =
+        tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+        coordinates.add(LatLng(value[0], value[1]));
+        if(singleroute[floor] != null){
+          gmap.Polyline oldPolyline = singleroute[floor]!.firstWhere(
+                (polyline) => polyline.polylineId.value == bid,
+          );
+          gmap.Polyline updatedPolyline = gmap.Polyline(
+            polylineId: oldPolyline.polylineId,
+            points: coordinates,
+            color: oldPolyline.color,
+            width: oldPolyline.width,
+          );
+          setState(() {
+            // Remove the old polyline and add the updated polyline
+            singleroute[floor]!.remove(oldPolyline);
+            singleroute[floor]!.add(updatedPolyline);
+          });
+        }else{
+          setState(() {
+            singleroute.putIfAbsent(floor, () => Set());
+            singleroute[floor]?.add(gmap.Polyline(
+              polylineId: PolylineId("$bid"),
+              points: coordinates,
+              color: Colors.red,
+              width: 5,
+            ));
+          });
+        }
+        if(building.floor[bid] == PathState.sourceFloor){
+          await Future.delayed(Duration(microseconds: 1500));
+        }
       }
 
       final Uint8List tealtorch =
@@ -4294,31 +4405,7 @@ bool disposed=false;
       print("No path found.");
     }
 
-    List<LatLng> coordinates = [];
-    for (var node in path) {
-      int row = (node % numCols); //divide by floor length
-      int col = (node ~/ numCols); //divide by floor length
-      print("path4 $node : [$row,$col]");
-      if (bid != null) {
-        List<double> value =
-            tools.localtoglobal(row, col, patchData: building.patchData[bid]);
 
-        coordinates.add(LatLng(value[0], value[1]));
-      } else {
-        List<double> value = tools.localtoglobal(row, col);
-        coordinates.add(LatLng(value[0], value[1]));
-      }
-    }
-
-    setState(() {
-      singleroute.putIfAbsent(floor, () => Set());
-      singleroute[floor]?.add(gmap.Polyline(
-        polylineId: PolylineId("$bid"),
-        points: coordinates,
-        color: Colors.red,
-        width: 5,
-      ));
-    });
 
     // setState(() {
     //   Set<gmap.Polyline> innerset = Set();
@@ -4330,10 +4417,6 @@ bool disposed=false;
     //   ));
     //   singleroute[floor] = innerset;
     // });
-    setState(() {
-      building.floor[bid] = floor;
-    });
-    createRooms(building.polyLineData!, floor);
     return path;
   }
 
@@ -5088,6 +5171,7 @@ bool disposed=false;
                                                       //}
                                                       fitPolygonInScreen(
                                                           patch.first);
+                                                      exitNavigation();
                                                     },
                                                     icon: Semantics(
                                                       label: "Close Navigation",
@@ -5145,6 +5229,19 @@ bool disposed=false;
                                                      circles.clear();
                                                       markerSldShown = false;
                                                     });
+                                                    user.onConnection = false;
+                                                    PathState.didPathStart = true;
+
+                                                    UserState.cols = building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                                                    UserState.rows = building.floorDimenssion[PathState.destinationBid]![PathState.destinationFloor]![1];
+                                                    UserState.lngCode = _currentLocale;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
 
                                                     //detected=false;
                                                     //user.building = building;
@@ -5972,6 +6069,7 @@ bool disposed=false;
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: TextButton(
+
                                 onPressed: () {
                                   _polygon.clear();
                                   _stopRippleAnimation();
@@ -6002,15 +6100,13 @@ bool disposed=false;
                                   });
 
                                   setState(() {
-                                    showFeedback = true;
-                                    Future.delayed(Duration(seconds: 5));
-
-                                    _feedbackController.open();
-
-                                    _feedbackTextController.clear();
-                                    print(_feedbackTextController.value.text);
-
+                                    user.isnavigating = false;
+                                    _isRoutePanelOpen = true;
+                                    _isnavigationPannelOpen = false;
+                                    print("building floor ${building.floor}");
+                                    setCameraPosition(pathMarkers[building.floor[user.Bid]]!);
                                   });
+
                                   print("feedbackTextController.value.text");
                                   print(_feedbackTextController.value.text);
 
@@ -6056,6 +6152,41 @@ bool disposed=false;
             )
           ],
         ));
+  }
+
+  void exitNavigation(){
+    setState(() {
+      if(PathState.didPathStart){
+        showFeedback = true;
+        Future.delayed(Duration(seconds: 5));
+        _feedbackController.open();
+        _feedbackTextController.clear();
+      }
+    });
+    markerSldShown = true;
+    focusturnArrow.clear();
+    clearPathVariables();
+    _isnavigationPannelOpen = false;
+    user.reset();
+    PathState = pathState.withValues(
+        -1, -1, -1, -1, -1, -1, null, 0);
+    selectedroomMarker.clear();
+    pathMarkers.clear();
+    PathState.path.clear();
+    PathState.sourcePolyID = "";
+    PathState.destinationPolyID = "";
+    singleroute.clear();
+    fitPolygonInScreen(patch.first);
+    setState(() {
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(
+            user.showcoordX.toInt(),
+            user.showcoordY.toInt());
+        markers[user.Bid]?[0] = customMarker.move(
+            LatLng(lvalue[0], lvalue[1]),
+            markers[user.Bid]![0]);
+      }
+    });
   }
 
   bool rerouting = false;
@@ -7753,6 +7884,7 @@ bool disposed=false;
     _stopRippleAnimation();
     clearPathVariables();
     StopPDR();
+    PathState.didPathStart = true;
     _isnavigationPannelOpen = false;
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
@@ -8070,123 +8202,226 @@ bool disposed=false;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     return SafeArea(
-      child: isLoading && isBlueToothLoading
-          ? Scaffold(
-              body: Center(
-                child: lott.Lottie.asset(
-                  'assets/loading_bluetooth.json', // Path to your Lottie animation
-                  width: 500,
-                  height: 500,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            detected
+                ? Semantics(
+                excludeSemantics: true,
+                child: ExploreModePannel())
+                : Semantics(
+                excludeSemantics: true, child: Container()),
+            Semantics(
+              excludeSemantics: true,
+              child: Container(
+                child: GoogleMap(
+                  padding: EdgeInsets.only(
+                      left: 20), // <--- padding added here
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationButtonEnabled: false,
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+
+                  polygons: patch
+                      .union(getCombinedPolygons())
+                      .union(otherpatch)
+                      .union(_polygon),
+                  polylines: singleroute[building.floor[
+                  buildingAllApi.getStoredString()]] !=
+                      null
+                      ? getCombinedPolylines().union(singleroute[
+                  building.floor[
+                  buildingAllApi.getStoredString()]]!)
+                      : getCombinedPolylines(),
+                  markers: getCombinedMarkers()
+                      .union(_markers)
+                      .union(focusturnArrow),
+                  onTap: (x) {
+                    mapState.interaction = true;
+                  },
+                  mapType: MapType.normal,
+                  buildingsEnabled: false,
+                  compassEnabled: true,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller) {
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    print("tumhari galti hai sb saalo");
+
+                    if (patch.isNotEmpty) {
+                      fitPolygonInScreen(patch.first);
+                    }
+                    _initMarkers();
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
+                    // print("plpl ${cameraPosition.tilt}");
+                    focusBuildingChecker(cameraPosition);
+                    mapState.interaction = true;
+                    mapbearing = cameraPosition.bearing;
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    if (true) {
+                      _updateMarkers(cameraPosition.zoom);
+                      //_updateBuilding(cameraPosition.zoom);
+                    }
+                    // _updateMarkers(cameraPosition.zoom);
+                    if (cameraPosition.zoom < 17) {
+                      _markers.clear();
+                      markerSldShown = false;
+                    } else {
+                      if (user.isnavigating) {
+                        _markers.clear();
+                        markerSldShown = false;
+                      } else {
+                        markerSldShown = true;
+                      }
+                    }
+                    if (markerSldShown) {
+                      _updateMarkers11(cameraPosition.zoom);
+                    } else {
+                      print("Notshow");
+                    }
+
+                    // _updateEntryMarkers11(cameraPosition.zoom);
+                    //_markerLocations.clear();
+                    // print("Zoom level: ${cameraPosition.zoom}");
+                  },
+                  onCameraIdle: () {
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    mapState.interaction2 = false;
+                  },
+                  circles: circles,
                 ),
               ),
-            )
-          : isLoading
-              ? Scaffold(
-                  body: Center(
-                      child: lott.Lottie.asset(
-                    'assets/loding_animation.json', // Path to your Lottie animation
-                    width: 500,
-                    height: 500,
-                  )),
-                )
-              : Scaffold(
-                  body: Stack(
-                    children: [
-                      detected
-                          ? Semantics(
-                              excludeSemantics: true,
-                              child: ExploreModePannel())
-                          : Semantics(
-                              excludeSemantics: true, child: Container()),
-                      Semantics(
-                        excludeSemantics: true,
-                        child: Container(
-                          child: GoogleMap(
-                            padding: EdgeInsets.only(
-                                left: 20), // <--- padding added here
-                            initialCameraPosition: _initialCameraPosition,
-                            myLocationButtonEnabled: false,
-                            myLocationEnabled: false,
-                            zoomControlsEnabled: false,
-                            zoomGesturesEnabled: true,
+            ),
+            //debug----
 
-                            polygons: patch
-                                .union(getCombinedPolygons())
-                                .union(otherpatch)
-                                .union(_polygon),
-                            polylines: singleroute[building.floor[
-                                        buildingAllApi.getStoredString()]] !=
-                                    null
-                                ? getCombinedPolylines().union(singleroute[
-                                    building.floor[
-                                        buildingAllApi.getStoredString()]]!)
-                                : getCombinedPolylines(),
-                            markers: getCombinedMarkers()
-                                .union(_markers)
-                                .union(focusturnArrow),
-                            onTap: (x) {
-                              mapState.interaction = true;
-                            },
-                            mapType: MapType.normal,
-                            buildingsEnabled: false,
-                            compassEnabled: true,
-                            rotateGesturesEnabled: true,
-                            minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                            onMapCreated: (controller) {
-                              controller.setMapStyle(maptheme);
-                              _googleMapController = controller;
-                              print("tumhari galti hai sb saalo");
+            DebugToggle.PDRIcon
+                ? Positioned(
+                top: 150,
+                right: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                    color: (isPdr) ? Colors.green : Colors.red,
+                  ),
+                  height: 20,
+                  width: 20,
+                ))
+                : Container(),
+            Positioned(
+              bottom: 150.0, // Adjust the position as needed
+              right: 16.0,
 
-                              if (patch.isNotEmpty) {
-                                fitPolygonInScreen(patch.first);
-                              }
-                              _initMarkers();
-                            },
-                            onCameraMove: (CameraPosition cameraPosition) {
-                              // print("plpl ${cameraPosition.tilt}");
-                              focusBuildingChecker(cameraPosition);
-                              mapState.interaction = true;
-                              mapbearing = cameraPosition.bearing;
-                              if (!mapState.interaction) {
-                                mapState.zoom = cameraPosition.zoom;
-                              }
-                              if (true) {
-                                _updateMarkers(cameraPosition.zoom);
-                                //_updateBuilding(cameraPosition.zoom);
-                              }
-                              // _updateMarkers(cameraPosition.zoom);
-                              if (cameraPosition.zoom < 17) {
-                                _markers.clear();
-                                markerSldShown = false;
-                              } else {
-                                if (user.isnavigating) {
-                                  _markers.clear();
-                                  markerSldShown = false;
+              child: Semantics(
+                excludeSemantics: false,
+                child: Column(
+                  children: [
+                    //
+                    // // Text(Building.thresh),
+                    Visibility(
+                      visible: DebugToggle.StepButton,
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(24))),
+                          child: IconButton(
+                              onPressed: () {
+                                //StartPDR();
+
+                                bool isvalid =
+                                MotionModel.isValidStep(
+                                    user,
+                                    building.floorDimenssion[user
+                                        .Bid]![user.floor]![0],
+                                    building.floorDimenssion[user
+                                        .Bid]![user.floor]![1],
+                                    building.nonWalkable[
+                                    user.Bid]![user.floor]!,
+                                    reroute);
+                                if (isvalid) {
+                                  user.move(context).then((value) {
+                                    renderHere();
+                                  });
                                 } else {
-                                  markerSldShown = true;
+                                  if (user.isnavigating) {
+                                    // reroute();
+                                    // showToast("You are out of path");
+                                  }
                                 }
-                              }
-                              if (markerSldShown) {
-                                _updateMarkers11(cameraPosition.zoom);
-                              } else {
-                                print("Notshow");
-                              }
+                              },
+                              icon: Icon(Icons.directions_walk))),
+                    ),
 
-                              // _updateEntryMarkers11(cameraPosition.zoom);
-                              //_markerLocations.clear();
-                              // print("Zoom level: ${cameraPosition.zoom}");
-                            },
-                            onCameraIdle: () {
-                              if (!mapState.interaction) {
-                                mapState.interaction2 = true;
-                              }
-                            },
-                            onCameraMoveStarted: () {
-                              mapState.interaction2 = false;
-                            },
-                            circles: circles,
+                    SizedBox(height: 28.0),
+                    DebugToggle.Slider
+                        ? Text("${user.theta}")
+                        : Container(),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    DebugToggle.Slider
+                        ? Slider(
+                        value: user.theta,
+                        min: -180,
+                        max: 180,
+                        onChanged: (newvalue) {
+                          double? compassHeading = newvalue;
+                          setState(() {
+                            user.theta = compassHeading!;
+                            if (mapState.interaction2) {
+                              mapState.bearing = compassHeading!;
+                              _googleMapController.moveCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                    target: mapState.target,
+                                    zoom: mapState.zoom,
+                                    bearing: mapState.bearing!,
+                                  ),
+                                ),
+                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              );
+                            } else {
+                              if (markers.length > 0)
+                                markers[user.Bid]?[0] =
+                                    customMarker.rotate(
+                                        compassHeading! -
+                                            mapbearing,
+                                        markers[user.Bid]![0]);
+                            }
+                          });
+                        })
+                        : Container(),
+                    SizedBox(height: 28.0),
+                    !isSemanticEnabled
+                        ? Semantics(
+                      label: "Change floor",
+                      child: SpeedDial(
+                        child: Text(
+                          building.floor == 0
+                              ? 'G'
+                              : '${building.floor[buildingAllApi.getStoredString()]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff24b9b0),
+                            height: 19 / 16,
                           ),
                         ),
+
                       ),
                       //debug----
 
@@ -8308,7 +8543,10 @@ bool disposed=false;
                                             height: 19 / 16,
                                           ),
                                         ),
-                                        activeIcon: Icons.close,
+                
+                                        
+                                        
+                                        
                                         backgroundColor: Colors.white,
                                         children: List.generate(
                                           building.numberOfFloors[buildingAllApi
@@ -8452,178 +8690,282 @@ bool disposed=false;
                                       color: Colors.black,
                                     ),
                                   ),
-                                  backgroundColor:  Colors
-                                      .white, // Set the background color of the FAB
                                 ),
                               ),
-                              SizedBox(height: 28.0),
-                              !user.isnavigating
-                                  ? FloatingActionButton(
-                                      onPressed: () async {
-                                        if (user.initialallyLocalised) {
-                                          setState(() {
-                                            if (isLiveLocalizing) {
-                                              isLiveLocalizing = false;
-                                              HelperClass.showToast(
-                                                  "Explore mode is disabled");
-                                              _exploreModeTimer!.cancel();
-                                              _isExploreModePannelOpen = false;
-                                              _isBuildingPannelOpen = true;
-                                              lastBeaconValue = "";
-                                            } else {
-                                              speak(
-                                                  "${LocaleData.exploremodenabled.getString(context)}",
-                                                  _currentLocale);
-                                              isLiveLocalizing = true;
-                                              HelperClass.showToast(
-                                                  "Explore mode enabled");
-                                              _exploreModeTimer =
-                                                  Timer.periodic(
-                                                      Duration(
-                                                          milliseconds: 5000),
-                                                      (timer) async {
-                                                btadapter
-                                                    .startScanning(resBeacons);
-                                                Future.delayed(Duration(
-                                                        milliseconds: 2000))
-                                                    .then((value) => {
-                                                          realTimeReLocalizeUser(
-                                                              resBeacons)
-                                                          // listenToBin()
-                                                        });
-                                              });
-                                              _isBuildingPannelOpen = false;
-                                              _isExploreModePannelOpen = true;
-                                            }
-                                          });
-                                        }
-                                      },
-                                      child: SvgPicture.asset(
-                                        "assets/Navigation_RTLIcon.svg",
-                                        // color:
-                                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                                      ),
-                                      backgroundColor: Color(
-                                          0xff24B9B0), // Set the background color of the FAB
-                                    )
-                                  : Container(), // Adjust the height as needed// Adjust the height as needed
-                            ],
-                          ),
+                              backgroundColor:
+                              pathMarkers[i] == null
+                                  ? Colors.white
+                                  : Color(0xff24b9b0),
+                              onTap: () {
+                                _polygon.clear();
+                                circles.clear();
+                                // _markers.clear();
+                                // _markerLocationsMap.clear();
+                                // _markerLocationsMapLanName.clear();
+
+                                building.floor[buildingAllApi
+                                    .getStoredString()] = i;
+                                createRooms(
+                                  building.polylinedatamap[
+                                  buildingAllApi
+                                      .getStoredString()]!,
+                                  building.floor[buildingAllApi
+                                      .getStoredString()]!,
+                                );
+                                if (pathMarkers[i] != null) {
+                                  //setCameraPosition(pathMarkers[i]!);
+                                }
+                                // Markers.clear();
+                                building.landmarkdata!
+                                    .then((value) {
+                                  createMarkers(
+                                    value,
+                                    building.floor[buildingAllApi
+                                        .getStoredString()]!,
+                                  );
+                                });
+                              },
+                            );
+                          },
                         ),
                       ),
-                      //-------
-                      Positioned(
-                          top: 16,
-                          left: 16,
-                          right: 16,
-                          child: _isLandmarkPanelOpen ||
-                                  _isRoutePanelOpen ||
-                                  _isnavigationPannelOpen
-                              ? Semantics(
-                                  excludeSemantics: true, child: Container())
-                              : FocusScope(
-                                  autofocus: true,
-                                  child: Focus(
-                                    child: Semantics(
-                                      sortKey: const OrdinalSortKey(
-                                          0), // header: true,
-                                      child: HomepageSearch(
-                                        onVenueClicked: onLandmarkVenueClicked,
-                                        fromSourceAndDestinationPage:
-                                            fromSourceAndDestinationPage,
-                                      ),
-                                    ),
-                                  ),
-                                )),
-                      FutureBuilder(
-                        future: building.landmarkdata,
-                        builder: (context, snapshot) {
-                          if (_isLandmarkPanelOpen) {
-                            return landmarkdetailpannel(context, snapshot);
-                          } else {
-                            return Semantics(
-                                excludeSemantics: true, child: Container());
-                          }
-                        },
-                      ),
-                      routeDeatilPannel(),
-                      feedbackPanel(context),
-                      navigationPannel(),
-                      reroutePannel(context),
-                      ExploreModePannel(),
-                      detected
-                          ? Semantics(child: nearestLandmarkpannel())
-                          : Container(),
-                      SizedBox(height: 28.0), // Adjust the height as needed
-                      // FloatingActionButton(
-                      //     onPressed: (){
-                      //       print("checkingBuildingfloor");
-                      //       //building.floor == 0 ? 'G' : '${building.floor}',
-                      //       print(building.floor);
-                      //       int firstKey = building.floor.values.first;
-                      //       print(firstKey);
-                      //       print(singleroute[building.floor.values.first]);
-                      //
-                      //       print(singleroute.keys);
-                      //       print(singleroute.values);
-                      //       print(building.floor[buildingAllApi.getStoredString()]);
-                      //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-                      //     },
-                      //     child: Icon(Icons.add)
-                      // ),
+                    )
+                        : floorColumn(),
+                    SizedBox(
+                        height: 28.0), // Adjust the height as needed
 
-                      // FloatingActionButton(
-                      //   onPressed: () async {
-                      //
-                      //     //StopPDR();
-                      //
-                      //     if (user.initialallyLocalised) {
-                      //       setState(() {
-                      //         isLiveLocalizing = !isLiveLocalizing;
-                      //       });
-                      //       HelperClass.showToast("realTimeReLocalizeUser started");
-                      //
-                      //       Timer.periodic(
-                      //           Duration(milliseconds: 5000),
-                      //               (timer) async {
-                      //             print(resBeacons);
-                      //             btadapter.startScanning(resBeacons);
-                      //
-                      //
-                      //             // setState(() {
-                      //             //   sumMap=  btadapter.calculateAverage();
-                      //             // });
-                      //
-                      //
-                      //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-                      //               realTimeReLocalizeUser(resBeacons)
-                      //               // listenToBin()
-                      //
-                      //
-                      //             });
-                      //
-                      //             setState(() {
-                      //               debugPQ = btadapter.returnPQ();
-                      //
-                      //             });
-                      //
-                      //           });
-                      //
-                      //     }
-                      //
-                      //   },
-                      //   child: Icon(
-                      //     Icons.location_history_sharp,
-                      //     color: (isLiveLocalizing)
-                      //         ? Colors.cyan
-                      //         : Colors.black,
-                      //   ),
-                      //   backgroundColor: Colors
-                      //       .white, // Set the background color of the FAB
-                      // ),
-                    ],
-                  ),
+                    // Container(
+                    //   width: 300,
+                    //   height: 100,
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(testBIn.keys.toString()),
+                    //         Text(testBIn.values.toString()),
+                    //         Text("summap"),
+                    //         Text(sortedsumMapfordebug.toString()),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    Semantics(
+                      child: FloatingActionButton(
+                        onPressed:() async {
+
+
+                          if(!user.isnavigating){
+                            if (Platform.isAndroid) {
+                              print("starting scanning for android");
+                              btadapter.startScanning(apibeaconmap);
+                            } else {
+                              print("starting scanning for IOS");
+                              btadapter.startScanningIOS(apibeaconmap);
+                            }
+                            setState(() {
+                              isLocalized=true;
+                              resBeacons = apibeaconmap;
+                            });
+                            late Timer _timer;
+                            _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                              localizeUser().then((value)=>{
+                                setState((){
+                                  isLocalized=false;
+                                })
+                              });
+                              print("localize user is calling itself.....");
+                              _timer.cancel();
+                            });
+                          }
+
+                        },
+                        child: Semantics(
+                          label: "Localize",
+                          onDidGainAccessibilityFocus:
+                          close_isnavigationPannelOpen,
+                          child:(isLocalized)?lott.Lottie.asset(
+                            'assets/localized.json', // Path to your Lottie animation
+                            width: 70,
+                            height: 70,
+                          ): Icon(
+                            Icons.my_location_sharp,
+                            color: Colors.black,
+                          ),
+                        ),
+                        backgroundColor:  Colors
+                            .white, // Set the background color of the FAB
+                      ),
+                    ),
+                    SizedBox(height: 28.0),
+                    !user.isnavigating
+                        ? FloatingActionButton(
+                      onPressed: () async {
+                        if (user.initialallyLocalised) {
+                          setState(() {
+                            if (isLiveLocalizing) {
+                              isLiveLocalizing = false;
+                              HelperClass.showToast(
+                                  "Explore mode is disabled");
+                              _exploreModeTimer!.cancel();
+                              _isExploreModePannelOpen = false;
+                              _isBuildingPannelOpen = true;
+                              lastBeaconValue = "";
+                            } else {
+                              speak(
+                                  "${LocaleData.exploremodenabled.getString(context)}",
+                                  _currentLocale);
+                              isLiveLocalizing = true;
+                              HelperClass.showToast(
+                                  "Explore mode enabled");
+                              _exploreModeTimer =
+                                  Timer.periodic(
+                                      Duration(
+                                          milliseconds: 5000),
+                                          (timer) async {
+                                        btadapter
+                                            .startScanning(resBeacons);
+                                        Future.delayed(Duration(
+                                            milliseconds: 2000))
+                                            .then((value) => {
+                                          realTimeReLocalizeUser(
+                                              resBeacons)
+                                          // listenToBin()
+                                        });
+                                      });
+                              _isBuildingPannelOpen = false;
+                              _isExploreModePannelOpen = true;
+                            }
+                          });
+                        }
+                      },
+                      child: SvgPicture.asset(
+                        "assets/Navigation_RTLIcon.svg",
+                        // color:
+                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                      ),
+                      backgroundColor: Color(
+                          0xff24B9B0), // Set the background color of the FAB
+                    )
+                        : Container(), // Adjust the height as needed// Adjust the height as needed
+                  ],
                 ),
+              ),
+            ),
+            //-------
+            Positioned(
+                top: 16,
+                left: 16,
+                right: 16,
+                child: _isLandmarkPanelOpen ||
+                    _isRoutePanelOpen ||
+                    _isnavigationPannelOpen
+                    ? Semantics(
+                    excludeSemantics: true, child: Container())
+                    : FocusScope(
+                  autofocus: true,
+                  child: Focus(
+                    child: Semantics(
+                      sortKey: const OrdinalSortKey(
+                          0), // header: true,
+                      child: HomepageSearch(
+                        onVenueClicked: onLandmarkVenueClicked,
+                        fromSourceAndDestinationPage:
+                        fromSourceAndDestinationPage,
+                      ),
+                    ),
+                  ),
+                )),
+            FutureBuilder(
+              future: building.landmarkdata,
+              builder: (context, snapshot) {
+                if (_isLandmarkPanelOpen) {
+                  return landmarkdetailpannel(context, snapshot);
+                } else {
+                  return Semantics(
+                      excludeSemantics: true, child: Container());
+                }
+              },
+            ),
+            routeDeatilPannel(),
+            feedbackPanel(context),
+            navigationPannel(),
+            reroutePannel(context),
+            ExploreModePannel(),
+            detected
+                ? Semantics(child: nearestLandmarkpannel())
+                : Container(),
+            SizedBox(height: 28.0), // Adjust the height as needed
+            // FloatingActionButton(
+            //     onPressed: (){
+            //       print("checkingBuildingfloor");
+            //       //building.floor == 0 ? 'G' : '${building.floor}',
+            //       print(building.floor);
+            //       int firstKey = building.floor.values.first;
+            //       print(firstKey);
+            //       print(singleroute[building.floor.values.first]);
+            //
+            //       print(singleroute.keys);
+            //       print(singleroute.values);
+            //       print(building.floor[buildingAllApi.getStoredString()]);
+            //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+            //     },
+            //     child: Icon(Icons.add)
+            // ),
+
+            // FloatingActionButton(
+            //   onPressed: () async {
+            //
+            //     //StopPDR();
+            //
+            //     if (user.initialallyLocalised) {
+            //       setState(() {
+            //         isLiveLocalizing = !isLiveLocalizing;
+            //       });
+            //       HelperClass.showToast("realTimeReLocalizeUser started");
+            //
+            //       Timer.periodic(
+            //           Duration(milliseconds: 5000),
+            //               (timer) async {
+            //             print(resBeacons);
+            //             btadapter.startScanning(resBeacons);
+            //
+            //
+            //             // setState(() {
+            //             //   sumMap=  btadapter.calculateAverage();
+            //             // });
+            //
+            //
+            //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+            //               realTimeReLocalizeUser(resBeacons)
+            //               // listenToBin()
+            //
+            //
+            //             });
+            //
+            //             setState(() {
+            //               debugPQ = btadapter.returnPQ();
+            //
+            //             });
+            //
+            //           });
+            //
+            //     }
+            //
+            //   },
+            //   child: Icon(
+            //     Icons.location_history_sharp,
+            //     color: (isLiveLocalizing)
+            //         ? Colors.cyan
+            //         : Colors.black,
+            //   ),
+            //   backgroundColor: Colors
+            //       .white, // Set the background color of the FAB
+            // ),
+          ],
+        ),
+      ),
     );
   }
   //
@@ -8743,6 +9085,7 @@ bool disposed=false;
 
     return Map.fromEntries(sortedEntries);
   }
+
 }
 
 class CircleAnimation {

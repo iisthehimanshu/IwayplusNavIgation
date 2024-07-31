@@ -35,6 +35,7 @@ class UserState{
   bool initialallyLocalised = false;
   String Bid ;
   List<int> offPathDistance = [];
+  bool onConnection = false;
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
@@ -209,6 +210,7 @@ class UserState{
 
       if(floor!=pathobj.destinationFloor &&  pathobj.connections[Bid]?[floor] == (showcoordY*cols + showcoordX)){
        // UserState.reachedLift=true;
+        onConnection = true;
         createCircle(lat,lng);
         speak(convertTolng(
             "Use this ${pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(

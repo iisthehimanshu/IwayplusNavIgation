@@ -1269,8 +1269,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           await calculateroute(value.landmarksMap!).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
-              user.path = PathState.path[PathState.sourceFloor]!;
-              user.path.addAll(PathState.path[PathState.destinationFloor]!);
+              user.path = [
+                ...PathState.path[PathState.sourceFloor]!,
+                ...PathState.path[PathState.destinationFloor]!,
+              ];
               user.Cellpath = PathState.singleCellListPath;
               user.pathobj.index = 0;
               user.isnavigating = true;
@@ -2396,7 +2398,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return diff;
   }
 
-  void createRooms(polylinedata value, int floor) {
+  Future<void> createRooms(polylinedata value, int floor)async{
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
     }
@@ -2774,6 +2776,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
       }
     });
+    return;
   }
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
@@ -4192,6 +4195,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
 
     if (path.isNotEmpty) {
+      if(building.floor[bid] != PathState.sourceFloor){
+        setState(() {
+          building.floor[bid] = PathState.sourceFloor;
+        });
+        await createRooms(building.polyLineData!, PathState.sourceFloor);
+      }
       if(floor != 0){
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
@@ -4257,7 +4266,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ));
           });
         }
-        await Future.delayed(Duration(microseconds: 1500));
+        if(building.floor[bid] == PathState.sourceFloor){
+          await Future.delayed(Duration(microseconds: 1500));
+        }
       }
 
       final Uint8List tealtorch =
@@ -4299,10 +4310,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //   ));
     //   singleroute[floor] = innerset;
     // });
-    setState(() {
-      building.floor[bid] = floor;
-    });
-    createRooms(building.polyLineData!, floor);
     return path;
   }
 

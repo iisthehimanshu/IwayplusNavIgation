@@ -8170,7 +8170,7 @@ bool disposed=false;
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
-    compas
+
     compassSubscription.cancel();
     flutterTts.cancelHandler;
     _timer?.cancel();
@@ -8202,7 +8202,26 @@ bool disposed=false;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     return SafeArea(
-      child: Scaffold(
+      child: isLoading && isBlueToothLoading
+          ? Scaffold(
+        body: Center(
+          child: lott.Lottie.asset(
+            'assets/loading_bluetooth.json', // Path to your Lottie animation
+            width: 500,
+            height: 500,
+          ),
+        ),
+      )
+          : isLoading
+          ? Scaffold(
+        body: Center(
+            child: lott.Lottie.asset(
+              'assets/loding_animation.json', // Path to your Lottie animation
+              width: 500,
+              height: 500,
+            )),
+      )
+          : Scaffold(
         body: Stack(
           children: [
             detected
@@ -8422,273 +8441,24 @@ bool disposed=false;
                           ),
                         ),
 
-                      ),
-                      //debug----
-
-                      DebugToggle.PDRIcon
-                          ? Positioned(
-                              top: 150,
-                              right: 50,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(),
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: (isPdr) ? Colors.green : Colors.red,
-                                ),
-                                height: 20,
-                                width: 20,
-                              ))
-                          : Container(),
-                      Positioned(
-                        bottom: 150.0, // Adjust the position as needed
-                        right: 16.0,
-
-                        child: Semantics(
-                          excludeSemantics: false,
-                          child: Column(
-                            children: [
-                              //
-                              // // Text(Building.thresh),
-                              Visibility(
-                                visible: DebugToggle.StepButton,
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(24))),
-                                    child: IconButton(
-                                        onPressed: () {
-                                          //StartPDR();
-
-                                          bool isvalid =
-                                              MotionModel.isValidStep(
-                                                  user,
-                                                  building.floorDimenssion[user
-                                                      .Bid]![user.floor]![0],
-                                                  building.floorDimenssion[user
-                                                      .Bid]![user.floor]![1],
-                                                  building.nonWalkable[
-                                                      user.Bid]![user.floor]!,
-                                                  reroute);
-                                          if (isvalid) {
-                                            user.move(context).then((value) {
-                                              renderHere();
-                                            });
-                                          } else {
-                                            if (user.isnavigating) {
-                                              // reroute();
-                                              // showToast("You are out of path");
-                                            }
-                                          }
-                                        },
-                                        icon: Icon(Icons.directions_walk))),
-                              ),
-
-                              SizedBox(height: 28.0),
-                              DebugToggle.Slider
-                                  ? Text("${user.theta}")
-                                  : Container(),
-                              // Text("coord [${user.coordX},${user.coordY}] \n"
-                              //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                              //     "floor ${user.floor}\n"
-                              //     "userBid ${user.Bid} \n"
-                              //     "index ${user.pathobj.index} \n"
-                              //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
-                              DebugToggle.Slider
-                                  ? Slider(
-                                      value: user.theta,
-                                      min: -180,
-                                      max: 180,
-                                      onChanged: (newvalue) {
-                                        double? compassHeading = newvalue;
-                                        setState(() {
-                                          user.theta = compassHeading!;
-                                          if (mapState.interaction2) {
-                                            mapState.bearing = compassHeading!;
-                                            _googleMapController.moveCamera(
-                                              CameraUpdate.newCameraPosition(
-                                                CameraPosition(
-                                                  target: mapState.target,
-                                                  zoom: mapState.zoom,
-                                                  bearing: mapState.bearing!,
-                                                ),
-                                              ),
-                                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                            );
-                                          } else {
-                                            if (markers.length > 0)
-                                              markers[user.Bid]?[0] =
-                                                  customMarker.rotate(
-                                                      compassHeading! -
-                                                          mapbearing,
-                                                      markers[user.Bid]![0]);
-                                          }
-                                        });
-                                      })
-                                  : Container(),
-                              SizedBox(height: 28.0),
-                              !isSemanticEnabled
-                                  ? Semantics(
-                                      label: "Change floor",
-                                      child: SpeedDial(
-                                        child: Text(
-                                          building.floor == 0
-                                              ? 'G'
-                                              : '${building.floor[buildingAllApi.getStoredString()]}',
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff24b9b0),
-                                            height: 19 / 16,
-                                          ),
-                                        ),
-                
-                                        
-                                        
-                                        
-                                        backgroundColor: Colors.white,
-                                        children: List.generate(
-                                          building.numberOfFloors[buildingAllApi
-                                              .getStoredString()]!,
-                                          (int i) {
-                                            return SpeedDialChild(
-                                              child: Semantics(
-                                                label: "i",
-                                                child: Text(
-                                                  i == 0 ? 'G' : '$i',
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    height: 19 / 16,
-                                                  ),
-                                                ),
-                                              ),
-                                              backgroundColor:
-                                                  pathMarkers[i] == null
-                                                      ? Colors.white
-                                                      : Color(0xff24b9b0),
-                                              onTap: () {
-                                                if(PathState.destinationFloor!=PathState.sourceFloor && PathState.destinationFloor==i){
-                                                  if(_timer2==null){
-                                                    _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
-                                                  }
-                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
-                                                    print("nearestLandInfomation!.floor");
-                                                    circles.clear();
-                                                  }
-
-                                                }else{
-                                                  print(nearestLandInfomation!.floor);
-                                                  print(circles.isNotEmpty);
-                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
-                                                    print("nearestLandInfomation!.floor");
-                                                    circles.clear();
-                                                  }else if(nearestLandInfomation!=null && nearestLandInfomation!.floor==i){
-                                                    _updateCircle(user.lat,user.lng);
-                                                  }
-                                                  if(_timer2!=null){
-                                                    _stopRippleAnimation();
-                                                  }
-                                                }
-                                                _polygon.clear();
-                                              //  circles.clear();
-                                                // _markers.clear();
-                                                // _markerLocationsMap.clear();
-                                                // _markerLocationsMapLanName.clear();
-
-                                                building.floor[buildingAllApi
-                                                    .getStoredString()] = i;
-                                                createRooms(
-                                                  building.polylinedatamap[
-                                                      buildingAllApi
-                                                          .getStoredString()]!,
-                                                  building.floor[buildingAllApi
-                                                      .getStoredString()]!,
-                                                );
-                                                if (pathMarkers[i] != null) {
-                                                  print(pathMarkers[i]);
-                                                  //setCameraPosition(pathMarkers[i]!);
-                                                }
-                                                // Markers.clear();
-                                                building.landmarkdata!
-                                                    .then((value) {
-                                                  createMarkers(
-                                                    value,
-                                                    building.floor[buildingAllApi
-                                                        .getStoredString()]!,
-                                                  );
-                                                });
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    )
-                                  : floorColumn(),
-                              SizedBox(
-                                  height: 28.0), // Adjust the height as needed
-
-                              // Container(
-                              //   width: 300,
-                              //   height: 100,
-                              //   child: SingleChildScrollView(
-                              //     scrollDirection: Axis.horizontal,
-                              //     child: Column(
-                              //       crossAxisAlignment: CrossAxisAlignment.start,
-                              //       children: [
-                              //         Text(testBIn.keys.toString()),
-                              //         Text(testBIn.values.toString()),
-                              //         Text("summap"),
-                              //         Text(sortedsumMapfordebug.toString()),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
-
-                              Semantics(
-                                child: FloatingActionButton(
-                                  onPressed:() async {
 
 
-                                    if(!user.isnavigating){
-                                      if (Platform.isAndroid) {
-                                        print("starting scanning for android");
-                                        btadapter.startScanning(apibeaconmap);
-                                      } else {
-                                        print("starting scanning for IOS");
-                                        btadapter.startScanningIOS(apibeaconmap);
-                                      }
-                                      setState(() {
-                                        isLocalized=true;
-                                        resBeacons = apibeaconmap;
-                                      });
-                                      late Timer _timer;
-                                      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-                                        localizeUser().then((value)=>{
-                                          setState((){
-                                            isLocalized=false;
-                                          })
-                                        });
-                                        print("localize user is calling itself.....");
-                                        _timer.cancel();
-                                      });
-                                    }
 
-                                  },
-                                  child: Semantics(
-                                    label: "Localize",
-                                    onDidGainAccessibilityFocus:
-                                        close_isnavigationPannelOpen,
-                                    child:(isLocalized)?lott.Lottie.asset(
-                                      'assets/localized.json', // Path to your Lottie animation
-                                      width: 70,
-                                      height: 70,
-                                    ): Icon(
-                                      Icons.my_location_sharp,
-                                      color: Colors.black,
-                                    ),
+                        backgroundColor: Colors.white,
+                        children: List.generate(
+                          building.numberOfFloors[buildingAllApi
+                              .getStoredString()]!,
+                              (int i) {
+                            return SpeedDialChild(
+                              child: Semantics(
+                                label: "i",
+                                child: Text(
+                                  i == 0 ? 'G' : '$i',
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 19 / 16,
                                   ),
                                 ),
                               ),
@@ -8697,8 +8467,30 @@ bool disposed=false;
                                   ? Colors.white
                                   : Color(0xff24b9b0),
                               onTap: () {
+                                if(PathState.destinationFloor!=PathState.sourceFloor && PathState.destinationFloor==i){
+                                  if(_timer2==null){
+                                    _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
+                                  }
+                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                    print("nearestLandInfomation!.floor");
+                                    circles.clear();
+                                  }
+
+                                }else{
+                                  print(nearestLandInfomation!.floor);
+                                  print(circles.isNotEmpty);
+                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                    print("nearestLandInfomation!.floor");
+                                    circles.clear();
+                                  }else if(nearestLandInfomation!=null && nearestLandInfomation!.floor==i){
+                                    _updateCircle(user.lat,user.lng);
+                                  }
+                                  if(_timer2!=null){
+                                    _stopRippleAnimation();
+                                  }
+                                }
                                 _polygon.clear();
-                                circles.clear();
+//  circles.clear();
                                 // _markers.clear();
                                 // _markerLocationsMap.clear();
                                 // _markerLocationsMapLanName.clear();
@@ -8713,6 +8505,7 @@ bool disposed=false;
                                       .getStoredString()]!,
                                 );
                                 if (pathMarkers[i] != null) {
+                                  print(pathMarkers[i]);
                                   //setCameraPosition(pathMarkers[i]!);
                                 }
                                 // Markers.clear();
@@ -8725,6 +8518,7 @@ bool disposed=false;
                                   );
                                 });
                               },
+
                             );
                           },
                         ),
@@ -8881,6 +8675,7 @@ bool disposed=false;
               future: building.landmarkdata,
               builder: (context, snapshot) {
                 if (_isLandmarkPanelOpen) {
+
                   return landmarkdetailpannel(context, snapshot);
                 } else {
                   return Semantics(
@@ -9081,7 +8876,7 @@ bool disposed=false;
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }

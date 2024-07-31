@@ -28,9 +28,9 @@
 	<true/>
 
 	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>bluetooth</string>
+    <string>using bluetooth in order to localize the user</string>
     <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>bluetooth</string>
+    <string>using bluetooth in order to localize the user</string>
 
     <key>NSCalendarsUsageDescription</key>
     <string>To add or access events to your calendar</string>
@@ -46,13 +46,13 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open and in the background.</string>
+	<string>This app needs to access the location in order to enhance navigation in the background.</string>
 	<key>NSLocationUsageDescription</key>
-    <string>This app needs access to location when in the foreground.</string>
+    <string>This app needs to access the location in order to enhance navigation in the foreground.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app needs access to location when in the background.</string>
+	<string>This app needs to access the location in order to enhance navigation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location in the background.</string>
+	<string>This app needs to access the location in order to enhance navigation.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need access to your microphone to enable speech recognition.</string>
 	<key>NSMotionUsageDescription</key>

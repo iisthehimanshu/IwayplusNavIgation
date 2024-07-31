@@ -105,15 +105,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> responseBody = json.decode(response.body);
+        print("response.statusCode");
+        print('vyomapi');
+
+        print(responseBody);
         setState(() {
           name = responseBody["name"];
           emailAddress = responseBody["email"];
           username = responseBody["username"];
         });
       } else if (response.statusCode == 403) {
+        print('responseeeeee--');
         await refreshTokenAndRetryForGetUserDetails(baseUrl);
 
       } else {
+        print('vyomapi else');
+        print(response.statusCode);
       }
     } catch (e) {
       // Handle errors

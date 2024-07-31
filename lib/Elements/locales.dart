@@ -415,7 +415,7 @@ mixin LocaleData {
     'tSharpLeft':'तीव्र बाएं ओर मुड़े',
 
     'tsRight': 'दाएँ मुड़ें और सीधे जाएँ',
-    'tsU Turn': 'उल्टा घूमे और सीधा जाएँ',
+    'tsU Turn': 'पीछे मुड़ें और सीधे जाएँ',
     'tsSharp Left': 'एकदम बाएँ मुड़ें और सीधे जाएँ',
     'tsLeft': 'बाएँ मुड़ें और सीधे जाएँ',
     'tsSlight Right': 'थोड़ा दाएं मुड़ें और सीधे जाएं',
@@ -467,15 +467,15 @@ mixin LocaleData {
     'Approaching': 'पास आ रहे हैं',
     'Location':'लोकेशन',
 
-    'ttsRight':'राइट',
-    'ttsLeft':'लेफ्ट',
-    'ttsBack':'बैक',
-    'ttsFront':'फ्रंट',
+    'ttsRight':'दाएं',
+    'ttsLeft':'बाएं',
+    'ttsBack':'पीछे',
+    'ttsFront':'सामने',
     'None':'शून्य',
-    'ttsSlightRight':'थोड़ा राइट',
-    'ttsSlightLeft':'थोड़ा लेफ्ट',
-    'ttsSharpRight':'तीव्र राइट',
-    'ttsSharpLeft':'तीव्र लेफ्ट',
+    'ttsSlightRight':'थोड़ा दाएं',
+    'ttsSlightLeft':'थोड़ा बाएं',
+    'ttsSharpRight':'तीव्र दाएं',
+    'ttsSharpLeft':'तीव्र बाएं',
     'ttsUTurn':'यू टर्न',
     'ttsGoStraight':'सीधे चले लगभग'
   };

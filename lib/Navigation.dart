@@ -16,11 +16,13 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import 'package:iwaymaps/API/RatingsaveAPI.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -31,6 +33,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'Elements/locales.dart';
+import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
@@ -587,30 +590,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void handleCompassEvents() {
+    if(!mounted) return;
     compassSubscription = FlutterCompass.events!.listen((event) {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
       double? compassHeading = event.heading!;
-      setState(() {
-        user.theta = compassHeading!;
-        if (mapState.interaction2) {
-          mapState.bearing = compassHeading!;
-          _googleMapController.moveCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: mapState.target,
-                zoom: mapState.zoom,
-                bearing: mapState.bearing!,
+      if(mounted){
+        setState(() {
+          user.theta = compassHeading!;
+          if (mapState.interaction2) {
+            mapState.bearing = compassHeading!;
+            _googleMapController.moveCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: mapState.target,
+                  zoom: mapState.zoom,
+                  bearing: mapState.bearing!,
+                ),
               ),
-            ),
-            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-          );
-        } else {
-          if (markers.length > 0)
-            markers[user.Bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing, markers[user.Bid]![0]);
-        }
-      });
+              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+            );
+          } else {
+            if (markers.length > 0)
+              markers[user.Bid]![0] = customMarker.rotate(
+                  compassHeading! - mapbearing, markers[user.Bid]![0]);
+          }
+        });
+      }
+
     }, onError: (error) {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
@@ -628,9 +635,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+bool disposed=false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
+    if(disposed)return;
     if (prevpause) {
       await flutterTts.pause();
     }
@@ -641,6 +649,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
     }
+    await flutterTts.stop();
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -908,6 +917,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   late AnimationController _controller;
   late Animation<double> _animation;
+  late AnimationController controller;
+  late Animation<double> animation;
 
   void paintUser(String nearestBeacon,
       {bool speakTTS = true, bool render = true}) async {
@@ -1264,6 +1275,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
+
+      //  PathState.sourcePolyID = user.key;
         PathState.sourceName = "Your current location";
         building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!).then((value) {
@@ -1670,6 +1683,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+    print("shift to feedbackpannel after debug");
+    print(UserCredentials().getUserId());
+
   }
 
   void _updateCircle(double lat, double lng) {
@@ -1714,6 +1730,63 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // Start the animation
     _controller.forward(from: 0.0);
   }
+
+  List<CircleAnimation> _circleAnimations = [];
+  //Set<Circle> circles2 = {};
+  Timer? _timer2;
+  int _circleIdCounter = 0;
+  int _rippleDelay = 200;
+  // bool _isAnimating=false;
+
+
+  void _startCircleWaves(double lat, double lng) {
+    _timer2 = Timer.periodic(Duration(milliseconds: 1500), (timer) {
+      // Delay the ripple start by increasing the delay based on the number of ripples
+      final delay = _rippleDelay * (_circleIdCounter % 5);
+      Future.delayed(Duration(milliseconds: delay), () {
+        updateCircleAtDesti(lat, lng);
+      });
+    });
+  }
+
+  void updateCircleAtDesti(double lat, double lng,
+      {double begin = 3, double end = 2}) {
+    // if (_isAnimating) return; // Prevent overlapping animations
+    final int circleId = _circleIdCounter++;
+    final AnimationController controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0, end: 3).animate(controller)
+      ..addListener(() {
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId.value == "circle_$circleId");
+          circles.add(
+            Circle(
+              circleId: CircleId("circle_$circleId"),
+              center: LatLng(lat, lng),
+              radius: _animation.value,
+              strokeWidth: 2,
+              strokeColor: Colors.red.withOpacity(1 - controller.value),
+              fillColor: Colors.red.withOpacity(0.3 * (1 - controller.value)),
+            ),
+          );
+        });
+      });
+
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          circles.removeWhere((circle) => circle.circleId.value == "circle_$circleId");
+        });
+        controller.dispose();
+      }
+    });
+
+    controller.forward();
+  }
+
+
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371; // Radius of the earth in kilometers
@@ -2040,7 +2113,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
-    circles.clear();
+
     print("WilsonInSelected");
     print(polygonPoints);
     _polygon.add(Polygon(
@@ -2788,6 +2861,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         .buffer
         .asUint8List();
   }
+  Future<Uint8List> getJsonAsUint8List(String path) async {
+    // Load JSON file as a string
+    String jsonString = await rootBundle.loadString(path);
+
+    // Convert JSON string to Uint8List
+    Uint8List bytes = Uint8List.fromList(utf8.encode(jsonString));
+    return bytes;
+  }
+
+
+
+
+  Uint8List jsonToUint8List(Map<String, dynamic> jsonObject) {
+    // Convert JSON object to string
+    String jsonString = json.encode(jsonObject);
+
+    // Convert string to list of UTF-8 encoded bytes
+    List<int> utf8Bytes = utf8.encode(jsonString);
+
+    // Convert list of bytes to Uint8List
+    return Uint8List.fromList(utf8Bytes);
+  }
+
 
   void createMarkers(land _landData, int floor) async {
     print("Markercleared");
@@ -3121,7 +3217,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
-                          circles.clear();
+                         // circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -3162,8 +3258,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     child: Center(
                       child: IconButton(
                         onPressed: () {
+                          _stopRippleAnimation();
                           _polygon.clear();
-                          circles.clear();
+                        //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -3314,8 +3411,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         ),
                         child: TextButton(
                           onPressed: () async {
-                            _polygon.clear();
-                            circles.clear();
+                            //_polygon.clear();
+
                             Markers.clear();
 
                             if (user.coordY != 0 && user.coordX != 0) {
@@ -3692,7 +3789,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }catch(e){
       print("$e error in finding nearest landmark second");
     }
-    circles.clear();
+   // circles.clear();
     print("landmarksMap");
     print(landmarksMap.keys);
     print(landmarksMap.values);
@@ -3735,6 +3832,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+       List<double> value = tools.localtoglobal(PathState.destinationX, PathState.destinationY,
+            patchData: building.patchData[PathState.destinationBid]);
+       PathState.destinationLat=value[0];
+       PathState.destinationLng=value[1];
         print(PathState.sourcePolyID!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
@@ -3975,10 +4076,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       distance = double.parse(distance.toStringAsFixed(1));
       if (PathState.destinationName ==
           "${LocaleData.yourcurrentloc.getString(context)}") {
+        print("entered herere2");
+
         speak(
-            "${nearestLandInfomation != null ? apibeaconmap[nearbeacon]!.name : nearestLandInfomation!.name} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+            "${nearestLandInfomation!.name} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
             _currentLocale);
       } else {
+        print("entered herere");
         speak(
             "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
             _currentLocale);
@@ -4169,8 +4273,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     });
 
-    List<Cell> Cellpath = findCorridorSegments(
-        path, building.nonWalkable[bid]![floor]!, numCols, bid, floor);
+    List<Cell> Cellpath = findCorridorSegments(path, building.nonWalkable[bid]![floor]!, numCols, bid, floor);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -4273,27 +4376,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       final Uint8List tealtorch =
           await getImagesFromMarker('assets/tealtorch.png', 35);
-
+//just to push it
       Set<Marker> innerMarker = Set();
 
-      setState(() {
-        innerMarker.add(Marker(
-            markerId: MarkerId("destination${bid}"),
-            position: LatLng(dvalue[0], dvalue[1]),
-            icon: BitmapDescriptor.defaultMarker));
-        innerMarker.add(
-          Marker(
-            markerId: MarkerId('source${bid}'),
-            position: LatLng(svalue[0], svalue[1]),
-            icon: BitmapDescriptor.fromBytes(tealtorch),
-            anchor: Offset(0.5, 0.5),
-          ),
-        );
+      innerMarker.add(Marker(
+          markerId: MarkerId("destination${bid}"),
+          position: LatLng(dvalue[0], dvalue[1]),
+          icon: BitmapDescriptor.defaultMarker));
+      innerMarker.add(
+        Marker(
+          markerId: MarkerId('source${bid}'),
+          position: LatLng(svalue[0], svalue[1]),
+          icon: BitmapDescriptor.fromBytes(tealtorch),
+          anchor: Offset(0.5, 0.5),
+        ),
+      );
+     // updateCircleAtDesti(dvalue[0],dvalue[1]);
+      if(PathState.destinationFloor==PathState.sourceFloor){
+        if(_timer2==null){
+          _startCircleWaves(dvalue[0],dvalue[1]);
+        }
+      }
 
-        PathState.innerMarker[floor] = innerMarker;
-        pathMarkers[floor] = innerMarker;
-      });
 
+      setCameraPosition(innerMarker);
+      pathMarkers[floor] = innerMarker;
     } else {
       print("No path found.");
     }
@@ -4539,6 +4646,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       Container(
                         child: IconButton(
                             onPressed: () {
+
+                              _stopRippleAnimation();
+                              _polygon.clear();
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
@@ -4699,6 +4809,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       Container(
                         child: IconButton(
                             onPressed: () {
+                              _stopRippleAnimation();
                               setState(() {
                                 PathState.swap();
                                 PathState.path.clear();
@@ -5017,6 +5128,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 Spacer(),
                                                 IconButton(
                                                     onPressed: () {
+                                                      _polygon.clear();
+                                                      _stopRippleAnimation();
                                                       showMarkers();
                                                       setState(() {
                                                         _isBuildingPannelOpen =
@@ -5113,6 +5226,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                   onPressed: () async {
                                                     setState(() {
                                                       _markers.clear();
+                                                     circles.clear();
                                                       markerSldShown = false;
                                                     });
                                                     user.onConnection = false;
@@ -5160,7 +5274,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                             .sourceFloor]![1];
                                                     user.Bid =
                                                         PathState.sourceBid;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
+
                                                     user.floor =
                                                         PathState.sourceFloor;
                                                     user.pathobj = PathState;
@@ -5525,14 +5647,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
   Widget feedbackPanel(BuildContext context) {
-
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
         child: SlidingUpPanel(
             controller: _feedbackController,
-            minHeight: MediaQuery.of(context).size.height/2,
+            minHeight: MediaQuery.of(context).size.height/2.5,
             maxHeight: MediaQuery.of(context).size.height,
             snapPoint: 0.9,
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
@@ -5615,11 +5736,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
+                        var signInBox = Hive.box('UserInformation');
+                        print(signInBox.keys);
+                        var infoBox=Hive.box('SignInDatabase');
+                        String accessToken = infoBox.get('accessToken');
+                        //print('loadInfoToFile');
+                        print(infoBox.get('userId'));
+                        //String userId = signInBox.get("sId");
+                        //String username = signInBox.get("username");
+
+
+
+
+
+                        RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+                        
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
                         showFeedback= false;
                         _feedbackController.hide();
+                        print("_feedbackTextController.clear()");
+                        print(_feedbackTextController.text);
+                        _feedbackTextController.clear();
+                        print(_feedbackTextController.text);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+                              (Route<dynamic> route) => false,
+                        );
+
                       }
                           : null,
                       child: Padding(
@@ -5658,11 +5804,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // );
     _feedbackController.close();
     _feedbackTextController.clear();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
-      (Route<dynamic> route) => false,
-    );
+    // Navigator.pushAndRemoveUntil(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
+    //   (Route<dynamic> route) => false,
+    // );
   }
 
   void alignMapToPath(List<double> A, List<double> B) async {
@@ -5780,11 +5926,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           // print("pointss matchedddd ${getPoints}");
           for (int i = 0; i < getPoints.length; i++) {
-            // print("---length  = ${getPoints.length}");
-            // print("--- point  = ${getPoints[i]}");
-            // print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
-            // print("--- val  = $val");
-            // print("--- isPDRStop  = $isPdrStop");
+            print("---length  = ${getPoints.length}");
+            print("--- point  = ${getPoints}");
+            print("---- usercoord  = ${user.showcoordX} , ${user.showcoordY}");
+            print("---- columns  = ${user.pathobj.numCols![user.Bid]![user.floor]}");
+            print("--- val  = $val");
+            print("--- isPDRStop  = $isPdrStop");
 
             //print("turn corrds");
 
@@ -5794,13 +5941,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
               Future.delayed(Duration(milliseconds: 1500))
                   .then((value) => {
-                    StartPDR(),
-
-
-                  });
-
-
-
+                    StartPDR(),});
               setState(() {
 
                 isPdrStop = false;
@@ -5810,7 +5951,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             }
             if (getPoints[i][0] == user.showcoordX &&
                 getPoints[i][1] == user.showcoordY) {
-              // print("points matchedddddddd");
+               print("points matchedddddddd");
 
               StopPDR();
               getPoints.removeAt(i);
@@ -5928,7 +6069,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: TextButton(
-                                onPressed: (){
+
+                                onPressed: () {
+                                  _polygon.clear();
+                                  _stopRippleAnimation();
+                                  StopPDR();
+                                  markerSldShown = true;
+                                  focusturnArrow.clear();
+                                  clearPathVariables();
+                                  _isnavigationPannelOpen = false;
+                                  user.reset();
+                                  PathState = pathState.withValues(
+                                      -1, -1, -1, -1, -1, -1, null, 0);
+                                  selectedroomMarker.clear();
+                                  pathMarkers.clear();
+                                  PathState.path.clear();
+                                  PathState.sourcePolyID = "";
+                                  PathState.destinationPolyID = "";
+                                  singleroute.clear();
+                                  fitPolygonInScreen(patch.first);
+                                  setState(() {
+                                    if (markers.length > 0) {
+                                      List<double> lvalue = tools.localtoglobal(
+                                          user.showcoordX.toInt(),
+                                          user.showcoordY.toInt());
+                                      markers[user.Bid]?[0] = customMarker.move(
+                                          LatLng(lvalue[0], lvalue[1]),
+                                          markers[user.Bid]![0]);
+                                    }
+                                  });
+
                                   setState(() {
                                     user.isnavigating = false;
                                     _isRoutePanelOpen = true;
@@ -5936,6 +6106,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                     print("building floor ${building.floor}");
                                     setCameraPosition(pathMarkers[building.floor[user.Bid]]!);
                                   });
+
+                                  print("feedbackTextController.value.text");
+                                  print(_feedbackTextController.value.text);
+
+
+
+
                                 },
                                 child: Text(
                                   "${LocaleData.exit.getString(context)}",
@@ -7677,8 +7854,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       focusturnArrow.clear();
     });
   }
-
+  void _stopRippleAnimation() {
+    _timer2?.cancel();
+    _timer2=null;
+    // if (!_isAnimating) return;
+    setState(() {
+      // _isAnimating = falsee
+      //circles.clear(); // Clear all circles when stopping the animation
+    });
+  }
   void closeNavigation() {
+
+    _polygon.clear();
     print("close navigation");
     String destname = PathState.destinationName;
     List<int> tv = tools.eightcelltransition(user.theta);
@@ -7694,7 +7881,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               destname: destname),
           _currentLocale);
     });
-
+    _stopRippleAnimation();
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -7726,6 +7913,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     showFeedback = true;
     Future.delayed(Duration(seconds: 5));
     _feedbackController.open();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+          (Route<dynamic> route) => false,
+    );
 
 
   }
@@ -7970,10 +8162,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
+    _timer2?.cancel();
+    controller.dispose();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
+    compas
     compassSubscription.cancel();
     flutterTts.cancelHandler;
     _timer?.cancel();
@@ -8224,22 +8421,274 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             height: 19 / 16,
                           ),
                         ),
-                        activeIcon: Icons.close,
-                        backgroundColor: Colors.white,
-                        children: List.generate(
-                          building.numberOfFloors[buildingAllApi
-                              .getStoredString()]!,
-                              (int i) {
-                            return SpeedDialChild(
-                              child: Semantics(
-                                label: "i",
-                                child: Text(
-                                  i == 0 ? 'G' : '$i',
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 19 / 16,
+
+                      ),
+                      //debug----
+
+                      DebugToggle.PDRIcon
+                          ? Positioned(
+                              top: 150,
+                              right: 50,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(),
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: (isPdr) ? Colors.green : Colors.red,
+                                ),
+                                height: 20,
+                                width: 20,
+                              ))
+                          : Container(),
+                      Positioned(
+                        bottom: 150.0, // Adjust the position as needed
+                        right: 16.0,
+
+                        child: Semantics(
+                          excludeSemantics: false,
+                          child: Column(
+                            children: [
+                              //
+                              // // Text(Building.thresh),
+                              Visibility(
+                                visible: DebugToggle.StepButton,
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(24))),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          //StartPDR();
+
+                                          bool isvalid =
+                                              MotionModel.isValidStep(
+                                                  user,
+                                                  building.floorDimenssion[user
+                                                      .Bid]![user.floor]![0],
+                                                  building.floorDimenssion[user
+                                                      .Bid]![user.floor]![1],
+                                                  building.nonWalkable[
+                                                      user.Bid]![user.floor]!,
+                                                  reroute);
+                                          if (isvalid) {
+                                            user.move(context).then((value) {
+                                              renderHere();
+                                            });
+                                          } else {
+                                            if (user.isnavigating) {
+                                              // reroute();
+                                              // showToast("You are out of path");
+                                            }
+                                          }
+                                        },
+                                        icon: Icon(Icons.directions_walk))),
+                              ),
+
+                              SizedBox(height: 28.0),
+                              DebugToggle.Slider
+                                  ? Text("${user.theta}")
+                                  : Container(),
+                              // Text("coord [${user.coordX},${user.coordY}] \n"
+                              //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                              //     "floor ${user.floor}\n"
+                              //     "userBid ${user.Bid} \n"
+                              //     "index ${user.pathobj.index} \n"
+                              //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                              DebugToggle.Slider
+                                  ? Slider(
+                                      value: user.theta,
+                                      min: -180,
+                                      max: 180,
+                                      onChanged: (newvalue) {
+                                        double? compassHeading = newvalue;
+                                        setState(() {
+                                          user.theta = compassHeading!;
+                                          if (mapState.interaction2) {
+                                            mapState.bearing = compassHeading!;
+                                            _googleMapController.moveCamera(
+                                              CameraUpdate.newCameraPosition(
+                                                CameraPosition(
+                                                  target: mapState.target,
+                                                  zoom: mapState.zoom,
+                                                  bearing: mapState.bearing!,
+                                                ),
+                                              ),
+                                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                            );
+                                          } else {
+                                            if (markers.length > 0)
+                                              markers[user.Bid]?[0] =
+                                                  customMarker.rotate(
+                                                      compassHeading! -
+                                                          mapbearing,
+                                                      markers[user.Bid]![0]);
+                                          }
+                                        });
+                                      })
+                                  : Container(),
+                              SizedBox(height: 28.0),
+                              !isSemanticEnabled
+                                  ? Semantics(
+                                      label: "Change floor",
+                                      child: SpeedDial(
+                                        child: Text(
+                                          building.floor == 0
+                                              ? 'G'
+                                              : '${building.floor[buildingAllApi.getStoredString()]}',
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xff24b9b0),
+                                            height: 19 / 16,
+                                          ),
+                                        ),
+                
+                                        
+                                        
+                                        
+                                        backgroundColor: Colors.white,
+                                        children: List.generate(
+                                          building.numberOfFloors[buildingAllApi
+                                              .getStoredString()]!,
+                                          (int i) {
+                                            return SpeedDialChild(
+                                              child: Semantics(
+                                                label: "i",
+                                                child: Text(
+                                                  i == 0 ? 'G' : '$i',
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    height: 19 / 16,
+                                                  ),
+                                                ),
+                                              ),
+                                              backgroundColor:
+                                                  pathMarkers[i] == null
+                                                      ? Colors.white
+                                                      : Color(0xff24b9b0),
+                                              onTap: () {
+                                                if(PathState.destinationFloor!=PathState.sourceFloor && PathState.destinationFloor==i){
+                                                  if(_timer2==null){
+                                                    _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
+                                                  }
+                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                                    print("nearestLandInfomation!.floor");
+                                                    circles.clear();
+                                                  }
+
+                                                }else{
+                                                  print(nearestLandInfomation!.floor);
+                                                  print(circles.isNotEmpty);
+                                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
+                                                    print("nearestLandInfomation!.floor");
+                                                    circles.clear();
+                                                  }else if(nearestLandInfomation!=null && nearestLandInfomation!.floor==i){
+                                                    _updateCircle(user.lat,user.lng);
+                                                  }
+                                                  if(_timer2!=null){
+                                                    _stopRippleAnimation();
+                                                  }
+                                                }
+                                                _polygon.clear();
+                                              //  circles.clear();
+                                                // _markers.clear();
+                                                // _markerLocationsMap.clear();
+                                                // _markerLocationsMapLanName.clear();
+
+                                                building.floor[buildingAllApi
+                                                    .getStoredString()] = i;
+                                                createRooms(
+                                                  building.polylinedatamap[
+                                                      buildingAllApi
+                                                          .getStoredString()]!,
+                                                  building.floor[buildingAllApi
+                                                      .getStoredString()]!,
+                                                );
+                                                if (pathMarkers[i] != null) {
+                                                  print(pathMarkers[i]);
+                                                  //setCameraPosition(pathMarkers[i]!);
+                                                }
+                                                // Markers.clear();
+                                                building.landmarkdata!
+                                                    .then((value) {
+                                                  createMarkers(
+                                                    value,
+                                                    building.floor[buildingAllApi
+                                                        .getStoredString()]!,
+                                                  );
+                                                });
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    )
+                                  : floorColumn(),
+                              SizedBox(
+                                  height: 28.0), // Adjust the height as needed
+
+                              // Container(
+                              //   width: 300,
+                              //   height: 100,
+                              //   child: SingleChildScrollView(
+                              //     scrollDirection: Axis.horizontal,
+                              //     child: Column(
+                              //       crossAxisAlignment: CrossAxisAlignment.start,
+                              //       children: [
+                              //         Text(testBIn.keys.toString()),
+                              //         Text(testBIn.values.toString()),
+                              //         Text("summap"),
+                              //         Text(sortedsumMapfordebug.toString()),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
+
+                              Semantics(
+                                child: FloatingActionButton(
+                                  onPressed:() async {
+
+
+                                    if(!user.isnavigating){
+                                      if (Platform.isAndroid) {
+                                        print("starting scanning for android");
+                                        btadapter.startScanning(apibeaconmap);
+                                      } else {
+                                        print("starting scanning for IOS");
+                                        btadapter.startScanningIOS(apibeaconmap);
+                                      }
+                                      setState(() {
+                                        isLocalized=true;
+                                        resBeacons = apibeaconmap;
+                                      });
+                                      late Timer _timer;
+                                      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                                        localizeUser().then((value)=>{
+                                          setState((){
+                                            isLocalized=false;
+                                          })
+                                        });
+                                        print("localize user is calling itself.....");
+                                        _timer.cancel();
+                                      });
+                                    }
+
+                                  },
+                                  child: Semantics(
+                                    label: "Localize",
+                                    onDidGainAccessibilityFocus:
+                                        close_isnavigationPannelOpen,
+                                    child:(isLocalized)?lott.Lottie.asset(
+                                      'assets/localized.json', // Path to your Lottie animation
+                                      width: 70,
+                                      height: 70,
+                                    ): Icon(
+                                      Icons.my_location_sharp,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -8637,4 +9086,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return Map.fromEntries(sortedEntries);
   }
 
+}
+
+class CircleAnimation {
+  final AnimationController controller;
+  final Animation<double> animation;
+
+  CircleAnimation(this.controller, this.animation);
 }

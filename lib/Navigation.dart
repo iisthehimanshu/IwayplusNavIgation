@@ -1684,7 +1684,7 @@ bool disposed=false;
                       setState(() {
                         _isExpanded = !_isExpanded;
                       });
-                      //Navigator.of(context).pop();
+                      Navigator.of(context).pop();
                       await Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => QRViewExample()),
@@ -1958,6 +1958,9 @@ bool disposed=false;
         print(element.floor);
       });
       Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = currentBuildingFloor;
+      if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761") {
+        Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = [5];
+      }
       print("Building.numberOfFloorsDelhi");
       print(Building.numberOfFloorsDelhi);
 
@@ -1965,9 +1968,17 @@ bool disposed=false;
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
-      createRooms(value, 0);
+      if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
+        createRooms(value, 5);
+      }else {
+        createRooms(value, 0);
+      }
     });
-    building.floor[buildingAllApi.selectedBuildingID] = 0;
+    if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761") {
+      building.floor[buildingAllApi.selectedBuildingID] = 5;
+    }else{
+      building.floor[buildingAllApi.selectedBuildingID] = 0;
+    }
     print("working 3");
     building.landmarkdata = landmarkApi()
         .fetchLandmarkData(id: buildingAllApi.selectedBuildingID)
@@ -2300,6 +2311,9 @@ bool disposed=false;
     for (int i = 0; i < btadapter.BIN.length; i++) {
       if (btadapter.BIN[i]!.isNotEmpty) {
         btadapter.BIN[i]!.forEach((key, value) {
+          if(value<0){
+            value = value * -1;
+          }
           if (value > highestweight) {
             highestweight = value;
             nearestBeacon = key;
@@ -3641,6 +3655,41 @@ bool disposed=false;
             //       }
             //     }));
           });
+        }else if (landmarks[i].element!.type == "Services" &&
+            landmarks[i].element!.subType == "kiosk" &&
+            landmarks[i].name == "kiosk" &&
+            landmarks[i].coordinateX != null) {
+          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+          //   ImageConfiguration(size: Size(44, 44)),
+          //   getImagesFromMarker('assets/location_on.png',50),
+          // );
+          final Uint8List iconMarker =
+          await getImagesFromMarker('assets/pin.png', 50);
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+              patchData: building.patchData[buildingAllApi.getStoredString()]);
+          //_markerLocations.add(LatLng(value[0],value[1]));
+          BitmapDescriptor textMarker;
+          String markerText;
+          markerText = "Kiosk";
+          textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
+
+          Markers.add(Marker(
+              markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
+              position: LatLng(value[0], value[1]),
+              icon: textMarker,
+              anchor: Offset(0.5, 0.5),
+              visible: false,
+              onTap: () {
+                print("Info Window");
+              },
+              infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  // snippet: '${landmarks[i].properties!.polyId}',
+                  // Replace with additional information
+                  onTap: () {
+                    print("Info Window ");
+                  })));
         } else {}
       }
     }
@@ -5120,19 +5169,24 @@ bool disposed=false;
       semanticShouldBeExcluded = true;
     });
     double? angle;
-    if (PathState.singleCellListPath.isNotEmpty) {
-      int l = PathState.singleCellListPath.length;
-      angle = tools.calculateAngle([
-        PathState.singleCellListPath[l - 2].x,
-        PathState.singleCellListPath[l - 2].y
-      ], [
-        PathState.singleCellListPath[l - 1].x,
-        PathState.singleCellListPath[l - 1].y
-      ], [
-        PathState.destinationX,
-        PathState.destinationY
-      ]);
+    try{
+      if (PathState.singleCellListPath.isNotEmpty) {
+        int l = PathState.singleCellListPath.length;
+        angle = tools.calculateAngle([
+          PathState.singleCellListPath[l - 2].x,
+          PathState.singleCellListPath[l - 2].y
+        ], [
+          PathState.singleCellListPath[l - 1].x,
+          PathState.singleCellListPath[l - 1].y
+        ], [
+          PathState.destinationX,
+          PathState.destinationY
+        ]);
+      }
+    }catch(e){
+
     }
+
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -6765,6 +6819,7 @@ bool disposed=false;
                             child: TextButton(
                                 onPressed: (){
                                   setState(() {
+                                    StopPDR();
                                     user.isnavigating = false;
                                     _isRoutePanelOpen = true;
                                     _isnavigationPannelOpen = false;
@@ -8225,7 +8280,6 @@ bool disposed=false;
   }
 
   Widget nearestLandmarkpannel() {
-    print("nearestLandmarkpannel");
     buildingAll element = new buildingAll.buildngAllAPIModel();
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     if (BuildingAllBox.length > 0) {
@@ -8584,37 +8638,41 @@ bool disposed=false;
     building.selectedLandmarkID = ID;
     
     _isBuildingPannelOpen = false;
-    setState(() {
-    //   if (building.selectedLandmarkID != ID) {
-    //     building.landmarkdata!.then((value) {
-    //       _isBuildingPannelOpen = false;
-    //       building.floor[value.landmarksMap![ID]!.buildingID!] =
-    //           value.landmarksMap![ID]!.floor!;
-    //       createRooms(
-    //           building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-    //           building.floor[value.landmarksMap![ID]!.buildingID!]!);
-    //       createMarkers(
-    //           value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
-    //       building.selectedLandmarkID = ID;
-    //       singleroute.clear();
-    //       _isRoutePanelOpen = DirectlyStartNavigation;
-    //       _isLandmarkPanelOpen = !DirectlyStartNavigation;
-    //       List<double> pvalues = tools.localtoglobal(
-    //           value.landmarksMap![ID]!.coordinateX!,
-    //           value.landmarksMap![ID]!.coordinateY!,
-    //           patchData:
-    //               building.patchData[value.landmarksMap![ID]!.buildingID]);
-    //       LatLng point = LatLng(pvalues[0], pvalues[1]);
-    //       _googleMapController.animateCamera(
-    //         CameraUpdate.newLatLngZoom(
-    //           point,
-    //           22,
-    //         ),
-    //       );
-    //       addselectedMarker(point);
-    //     });
-    //   }
 
+    if(!DirectlyStartNavigation) {
+      setState(() {
+        if (building.selectedLandmarkID != ID) {
+          building.landmarkdata!.then((value) {
+            _isBuildingPannelOpen = false;
+            building.floor[value.landmarksMap![ID]!.buildingID!] =
+            value.landmarksMap![ID]!.floor!;
+            createRooms(
+                building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
+                building.floor[value.landmarksMap![ID]!.buildingID!]!);
+            createMarkers(
+                value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
+            building.selectedLandmarkID = ID;
+            singleroute.clear();
+            _isRoutePanelOpen = DirectlyStartNavigation;
+            _isLandmarkPanelOpen = !DirectlyStartNavigation;
+            List<double> pvalues = tools.localtoglobal(
+                value.landmarksMap![ID]!.coordinateX!,
+                value.landmarksMap![ID]!.coordinateY!,
+                patchData:
+                building.patchData[value.landmarksMap![ID]!.buildingID]);
+            LatLng point = LatLng(pvalues[0], pvalues[1]);
+            _googleMapController.animateCamera(
+              CameraUpdate.newLatLngZoom(
+                point,
+                22,
+              ),
+            );
+            addselectedMarker(point);
+          });
+        }
+      });
+    }else{
+    setState(() {
       if (user.coordY != 0 && user.coordX != 0) {
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
@@ -8682,8 +8740,7 @@ bool disposed=false;
         });
       }
     });
-
-    if (DirectlyStartNavigation) {}
+    }
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
@@ -8916,7 +8973,6 @@ bool disposed=false;
   bool isLocalized=false;
 
   @override
-  @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -8936,95 +8992,105 @@ bool disposed=false;
                 child: ExploreModePannel())
                 : Semantics(
                 excludeSemantics: true, child: Container()),
-            Semantics(
-              excludeSemantics: true,
-              child: Container(
-                child: GoogleMap(
-                  padding: EdgeInsets.only(
-                      left: 20), // <--- padding added here
-                  initialCameraPosition: _initialCameraPosition,
-                  myLocationButtonEnabled: false,
-                  myLocationEnabled: false,
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: true,
+            Stack(
+              children: [Semantics(
+                excludeSemantics: true,
+                child: Container(
+                  child: GoogleMap(
+                    padding: EdgeInsets.only(
+                        left: 20), // <--- padding added here
+                    initialCameraPosition: _initialCameraPosition,
+                    myLocationButtonEnabled: false,
+                    myLocationEnabled: false,
+                    zoomControlsEnabled: false,
+                    zoomGesturesEnabled: true,
+mapToolbarEnabled: false,
+                    polygons: patch
+                        .union(getCombinedPolygons())
+                        .union(otherpatch)
+                        .union(_polygon),
+                    polylines: singleroute[building.floor[
+                    buildingAllApi.getStoredString()]] !=
+                        null
+                        ? getCombinedPolylines().union(singleroute[
+                    building.floor[
+                    buildingAllApi.getStoredString()]]!)
+                        : getCombinedPolylines(),
+                    markers: getCombinedMarkers()
+                        .union(_markers)
+                        .union(focusturnArrow),
+                    onTap: (x) {
+                      mapState.interaction = true;
+                    },
+                    mapType: MapType.normal,
+                    buildingsEnabled: false,
+                    compassEnabled: true,
+                    rotateGesturesEnabled: true,
+                    minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                    onMapCreated: (controller) {
+                      controller.setMapStyle(maptheme);
+                      _googleMapController = controller;
+                      print("tumhari galti hai sb saalo");
 
-                  polygons: patch
-                      .union(getCombinedPolygons())
-                      .union(otherpatch)
-                      .union(_polygon),
-                  polylines: singleroute[building.floor[
-                  buildingAllApi.getStoredString()]] !=
-                      null
-                      ? getCombinedPolylines().union(singleroute[
-                  building.floor[
-                  buildingAllApi.getStoredString()]]!)
-                      : getCombinedPolylines(),
-                  markers: getCombinedMarkers()
-                      .union(_markers)
-                      .union(focusturnArrow),
-                  onTap: (x) {
-                    mapState.interaction = true;
-                  },
-                  mapType: MapType.normal,
-                  buildingsEnabled: false,
-                  compassEnabled: true,
-                  rotateGesturesEnabled: true,
-                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                  onMapCreated: (controller) {
-                    controller.setMapStyle(maptheme);
-                    _googleMapController = controller;
-                    print("tumhari galti hai sb saalo");
-
-                    if (patch.isNotEmpty) {
-                      fitPolygonInScreen(patch.first);
-                    }
-                    _initMarkers();
-                  },
-                  onCameraMove: (CameraPosition cameraPosition) {
-                    // print("plpl ${cameraPosition.tilt}");
-                    focusBuildingChecker(cameraPosition);
-                    mapState.interaction = true;
-                    mapbearing = cameraPosition.bearing;
-                    if (!mapState.interaction) {
-                      mapState.zoom = cameraPosition.zoom;
-                    }
-                    if (true) {
-                      _updateMarkers(cameraPosition.zoom);
-                      //_updateBuilding(cameraPosition.zoom);
-                    }
-                    // _updateMarkers(cameraPosition.zoom);
-                    if (cameraPosition.zoom < 17) {
-                      _markers.clear();
-                      markerSldShown = false;
-                    } else {
-                      if (user.isnavigating) {
+                      if (patch.isNotEmpty) {
+                        fitPolygonInScreen(patch.first);
+                      }
+                      _initMarkers();
+                    },
+                    onCameraMove: (CameraPosition cameraPosition) {
+                      // print("plpl ${cameraPosition.tilt}");
+                      focusBuildingChecker(cameraPosition);
+                      mapState.interaction = true;
+                      mapbearing = cameraPosition.bearing;
+                      if (!mapState.interaction) {
+                        mapState.zoom = cameraPosition.zoom;
+                      }
+                      if (true) {
+                        _updateMarkers(cameraPosition.zoom);
+                        //_updateBuilding(cameraPosition.zoom);
+                      }
+                      // _updateMarkers(cameraPosition.zoom);
+                      if (cameraPosition.zoom < 17) {
                         _markers.clear();
                         markerSldShown = false;
                       } else {
-                        markerSldShown = true;
+                        if (user.isnavigating) {
+                          _markers.clear();
+                          markerSldShown = false;
+                        } else {
+                          markerSldShown = true;
+                        }
                       }
-                    }
-                    if (markerSldShown) {
-                      _updateMarkers11(cameraPosition.zoom);
-                    } else {
-                      print("Notshow");
-                    }
+                      if (markerSldShown) {
+                        _updateMarkers11(cameraPosition.zoom);
+                      } else {
+                        print("Notshow");
+                      }
 
-                    // _updateEntryMarkers11(cameraPosition.zoom);
-                    //_markerLocations.clear();
-                    // print("Zoom level: ${cameraPosition.zoom}");
-                  },
-                  onCameraIdle: () {
-                    if (!mapState.interaction) {
-                      mapState.interaction2 = true;
-                    }
-                  },
-                  onCameraMoveStarted: () {
-                    mapState.interaction2 = false;
-                  },
-                  circles: circles,
+                      // _updateEntryMarkers11(cameraPosition.zoom);
+                      //_markerLocations.clear();
+                      // print("Zoom level: ${cameraPosition.zoom}");
+                    },
+                    onCameraIdle: () {
+                      if (!mapState.interaction) {
+                        mapState.interaction2 = true;
+                      }
+                    },
+                    onCameraMoveStarted: () {
+                      mapState.interaction2 = false;
+                    },
+                    circles: circles,
+                  ),
                 ),
               ),
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  width: screenWidth,
+                  height: 30,
+                  color: Colors.white,
+                ),
+              )]
             ),
             //debug----
 
@@ -9151,7 +9217,7 @@ bool disposed=false;
                         children: List.generate(
                           (Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0]).length, (int i) {
                           //print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
-                          List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!;
+                          List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0];
                           List<int> revfloorList = floorList;
                           revfloorList.sort();
                           // building.numberOfFloors[buildingAllApi

@@ -848,7 +848,7 @@ class tools {
   static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=10;
+    int distance=20;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
     pCoord.add(Beacon.coordinateY!);

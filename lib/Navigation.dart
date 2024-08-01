@@ -9062,87 +9062,67 @@ bool disposed=false;
                             height: 19 / 16,
                           ),
                         ),
-
-
-
-
+                        activeIcon: Icons.close,
                         backgroundColor: Colors.white,
                         children: List.generate(
-                          building.numberOfFloors[buildingAllApi
-                              .getStoredString()]!,
-                              (int i) {
-                            return SpeedDialChild(
-                              child: Semantics(
-                                label: "i",
-                                child: Text(
-                                  i == 0 ? 'G' : '$i',
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 19 / 16,
-                                  ),
+                          Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!.length, (int i) {
+                          print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
+                          List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!;
+                          List<int> revfloorList = floorList;
+                          revfloorList.sort();
+
+                          print("floorList[i]");
+                          print(revfloorList);
+                          print(pathMarkers[i]);
+                          // building.numberOfFloors[buildingAllApi
+                          //     .getStoredString()];
+                          //
+                          // print(building.numberOfFloors!);
+                          return SpeedDialChild(
+                            child: Semantics(
+                              label: "${revfloorList[i]}",
+                              child: Text(
+                                revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 19 / 16,
                                 ),
                               ),
-                              backgroundColor:
-                              pathMarkers[i] == null
-                                  ? Colors.white
-                                  : Color(0xff24b9b0),
-                              onTap: () {
-                                if(PathState.destinationFloor!=PathState.sourceFloor && PathState.destinationFloor==i){
-                                  if(_timer2==null){
-                                    _startCircleWaves(PathState.destinationLat, PathState.destinationLng);
-                                  }
-                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
-                                    print("nearestLandInfomation!.floor");
-                                    circles.clear();
-                                  }
+                            ),
+                            backgroundColor: pathMarkers[i] == null? Colors.white : Color(0xff24b9b0),
+                            onTap: () {
+                              _polygon.clear();
+                              circles.clear();
+                              // _markers.clear();
+                              // _markerLocationsMap.clear();
+                              // _markerLocationsMapLanName.clear();
 
-                                }else{
-                                  print(nearestLandInfomation!.floor);
-                                  print(circles.isNotEmpty);
-                                  if(circles.isNotEmpty && nearestLandInfomation!=null && nearestLandInfomation!.floor!=i){
-                                    print("nearestLandInfomation!.floor");
-                                    circles.clear();
-                                  }else if(nearestLandInfomation!=null && nearestLandInfomation!.floor==i){
-                                    _updateCircle(user.lat,user.lng);
-                                  }
-                                  if(_timer2!=null){
-                                    _stopRippleAnimation();
-                                  }
-                                }
-                                _polygon.clear();
-//  circles.clear();
-                                // _markers.clear();
-                                // _markerLocationsMap.clear();
-                                // _markerLocationsMapLanName.clear();
-
+                              building.floor[buildingAllApi
+                                  .getStoredString()] = revfloorList[i];
+                              createRooms(
+                                building.polylinedatamap[
+                                buildingAllApi
+                                    .getStoredString()]!,
                                 building.floor[buildingAllApi
-                                    .getStoredString()] = i;
-                                createRooms(
-                                  building.polylinedatamap[
-                                  buildingAllApi
-                                      .getStoredString()]!,
+                                    .getStoredString()]!,
+                              );
+                              if (pathMarkers[i] != null) {
+                                //setCameraPosition(pathMarkers[i]!);
+                              }
+                              // Markers.clear();
+                              building.landmarkdata!
+                                  .then((value) {
+                                createMarkers(
+                                  value,
                                   building.floor[buildingAllApi
                                       .getStoredString()]!,
                                 );
-                                if (pathMarkers[i] != null) {
-                                  print(pathMarkers[i]);
-                                  //setCameraPosition(pathMarkers[i]!);
-                                }
-                                // Markers.clear();
-                                building.landmarkdata!
-                                    .then((value) {
-                                  createMarkers(
-                                    value,
-                                    building.floor[buildingAllApi
-                                        .getStoredString()]!,
-                                  );
-                                });
-                              },
-
-                            );
-                          },
+                              });
+                            },
+                          );
+                        },
                         ),
                       ),
                     )

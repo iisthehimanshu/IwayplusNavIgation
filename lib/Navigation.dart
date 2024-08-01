@@ -1424,6 +1424,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         .then((value) {
       print("object ${value.polyline!.floors!.length}");
       building.polyLineData = value;
+      print("value.polyline!.floors!");
+      List<int> currentBuildingFloor = [];
+      value.polyline!.floors!.forEach((element) {
+        currentBuildingFloor.add(tools.alphabeticalToNumerical(element.floor!));
+        print(element.floor);
+      });
+      Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = currentBuildingFloor;
+      print("Building.numberOfFloorsDelhi");
+      print(Building.numberOfFloorsDelhi);
+
+
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
@@ -5009,7 +5020,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                 Semantics(
                                                   excludeSemantics: true,
                                                   child: Text(
-                                                    "${time.toInt()} min ",
+                                                    "${time.toInt()} min Walk ",
                                                     style: const TextStyle(
                                                       color: Color(0xffDC6A01),
                                                       fontFamily: "Roboto",
@@ -8249,57 +8260,61 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         activeIcon: Icons.close,
                         backgroundColor: Colors.white,
                         children: List.generate(
-                          building.numberOfFloors[buildingAllApi
-                              .getStoredString()]!,
-                              (int i) {
-                            return SpeedDialChild(
-                              child: Semantics(
-                                label: "i",
-                                child: Text(
-                                  i == 0 ? 'G' : '$i',
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 19 / 16,
-                                  ),
+                          (Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0]).length, (int i) {
+                          //print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
+                          List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!;
+                          List<int> revfloorList = floorList;
+                          revfloorList.sort();
+
+                          // building.numberOfFloors[buildingAllApi
+                          //     .getStoredString()];
+                          //
+                          // print(building.numberOfFloors!);
+                          return SpeedDialChild(
+                            child: Semantics(
+                              label: "${revfloorList[i]}",
+                              child: Text(
+                                revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 19 / 16,
                                 ),
                               ),
-                              backgroundColor:
-                              pathMarkers[i] == null
-                                  ? Colors.white
-                                  : Color(0xff24b9b0),
-                              onTap: () {
-                                _polygon.clear();
-                                circles.clear();
-                                // _markers.clear();
-                                // _markerLocationsMap.clear();
-                                // _markerLocationsMapLanName.clear();
+                            ),
+                            backgroundColor: pathMarkers[i] == null? Colors.white : Color(0xff24b9b0),
+                            onTap: () {
+                              _polygon.clear();
+                              circles.clear();
+                              // _markers.clear();
+                              // _markerLocationsMap.clear();
+                              // _markerLocationsMapLanName.clear();
 
+                              building.floor[buildingAllApi
+                                  .getStoredString()] = revfloorList[i];
+                              createRooms(
+                                building.polylinedatamap[
+                                buildingAllApi
+                                    .getStoredString()]!,
                                 building.floor[buildingAllApi
-                                    .getStoredString()] = i;
-                                createRooms(
-                                  building.polylinedatamap[
-                                  buildingAllApi
-                                      .getStoredString()]!,
+                                    .getStoredString()]!,
+                              );
+                              if (pathMarkers[i] != null) {
+                                //setCameraPosition(pathMarkers[i]!);
+                              }
+                              // Markers.clear();
+                              building.landmarkdata!
+                                  .then((value) {
+                                createMarkers(
+                                  value,
                                   building.floor[buildingAllApi
                                       .getStoredString()]!,
                                 );
-                                if (pathMarkers[i] != null) {
-                                  //setCameraPosition(pathMarkers[i]!);
-                                }
-                                // Markers.clear();
-                                building.landmarkdata!
-                                    .then((value) {
-                                  createMarkers(
-                                    value,
-                                    building.floor[buildingAllApi
-                                        .getStoredString()]!,
-                                  );
-                                });
-                              },
-                            );
-                          },
+                              });
+                            },
+                          );
+                        },
                         ),
                       ),
                     )

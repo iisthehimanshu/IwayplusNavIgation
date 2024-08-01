@@ -316,7 +316,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 1.5) {
+              highestweight >= 3.8) {
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [

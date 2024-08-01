@@ -7482,7 +7482,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              "${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
+                              "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 18,
@@ -7491,6 +7491,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 height: 25 / 18,
                               ),
                               textAlign: TextAlign.left,
+                              softWrap: true,
+                              overflow: TextOverflow.visible,
                             )
                           ],
                         ),
@@ -7715,7 +7717,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               destname: destname),
           _currentLocale);
     });
-
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;

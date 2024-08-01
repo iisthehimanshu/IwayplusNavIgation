@@ -569,16 +569,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }else{
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
-          print("gonna speak");
+          print("aiims debug 1 ${widget.direction}");
           speak(convertTolng("Turn ${LocaleData.getProperty5(widget.direction, context)}", _currentLocale, widget.direction,"",0, ""),
               _currentLocale,prevpause: true);
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
 
 
         }else if(widget.direction == "Straight"){
-
-
-
+          print("aiims debug 2 ${widget.direction}");
           Vibration.vibrate();
 
           speak(
@@ -590,6 +588,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if(nextTurn == turnPoints.last && widget.distance == 7){
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle,widget.context)}",_currentLocale);
+          widget.user.move(context);
         }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
           if(!direc.contains("slight") && widget.user.pathobj.index > 4){
 

@@ -4048,45 +4048,66 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     List<int> path = [];
 
     print("$sourceX, $sourceY, $destinationX, $destinationY");
-
-    try {
-      PathModel model = Building.waypoint[bid]!
-          .firstWhere((element) => element.floor == floor);
-      Map<String, List<dynamic>> adjList = model.pathNetwork;
-      var graph = Graph(adjList);
-      List<int> path2 = await graph.bfs(
-          sourceX,
-          sourceY,
-          destinationX,
-          destinationY,
-          adjList,
-          numRows,
-          numCols,
-          building.nonWalkable[bid]![floor]!);
-      // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
-      //   path = path2;
-      //   print("path from waypoint $path");
-      // }else{
-      //   print("Faulty wayPoint path $path2");
-      //   throw Exception("wrong path");
-      // }
-      path = path2;
-      print("path from waypoint $path");
-    } catch (e) {
-      print("inside exception $e");
-
-      List<int> path2 = await findPath(
+    PathModel model = Building.waypoint[bid]!
+        .firstWhere((element) => element.floor == floor);
+    Map<String, List<dynamic>> adjList = model.pathNetwork;
+    var graph = Graph(adjList);
+    List<int> path2 = await graph.bfs(
+        sourceX,
+        sourceY,
+        destinationX,
+        destinationY,
+        adjList,
         numRows,
         numCols,
-        building.nonWalkable[bid]![floor]!,
-        sourceIndex,
-        destinationIndex,
-      );
-      path2 = getFinalOptimizedPath(path2, building.nonWalkable[bid]![floor]!,
-          numCols, sourceX, sourceY, destinationX, destinationY);
-      path = path2;
-      print("path from A* $path");
-    }
+        building.nonWalkable[bid]![floor]!);
+    // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
+    //   path = path2;
+    //   print("path from waypoint $path");
+    // }else{
+    //   print("Faulty wayPoint path $path2");
+    //   throw Exception("wrong path");
+    // }
+    path = path2;
+    print("path from waypoint $path");
+    // try {
+    //   PathModel model = Building.waypoint[bid]!
+    //       .firstWhere((element) => element.floor == floor);
+    //   Map<String, List<dynamic>> adjList = model.pathNetwork;
+    //   var graph = Graph(adjList);
+    //   List<int> path2 = await graph.bfs(
+    //       sourceX,
+    //       sourceY,
+    //       destinationX,
+    //       destinationY,
+    //       adjList,
+    //       numRows,
+    //       numCols,
+    //       building.nonWalkable[bid]![floor]!);
+    //   // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
+    //   //   path = path2;
+    //   //   print("path from waypoint $path");
+    //   // }else{
+    //   //   print("Faulty wayPoint path $path2");
+    //   //   throw Exception("wrong path");
+    //   // }
+    //   path = path2;
+    //   print("path from waypoint $path");
+    // } catch (e) {
+    //   print("inside exception $e");
+    //
+    //   List<int> path2 = await findPath(
+    //     numRows,
+    //     numCols,
+    //     building.nonWalkable[bid]![floor]!,
+    //     sourceIndex,
+    //     destinationIndex,
+    //   );
+    //   path2 = getFinalOptimizedPath(path2, building.nonWalkable[bid]![floor]!,
+    //       numCols, sourceX, sourceY, destinationX, destinationY);
+    //   path = path2;
+    //   print("path from A* $path");
+    // }
 
     // // List<List<int>> path3 = await graph.bfs2(sourceX, sourceY, destinationX, destinationY, adjList, numRows, numCols, building.nonWalkable[bid]![floor]!);
     // print("path $path");

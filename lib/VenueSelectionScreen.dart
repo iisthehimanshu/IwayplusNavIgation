@@ -25,8 +25,10 @@ import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'API/DataVersionApi.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/Building.dart';
+import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'BuildingInfoScreen.dart';
@@ -36,6 +38,7 @@ import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'HomeNestedSearch.dart';
+import 'VersioInfo.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -61,6 +64,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     super.initState();
     getLocs();
     apiCall();
+    versionApiCall();
 
     print("venueHashMap");
     print(venueHashMap);
@@ -69,6 +73,91 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
 
+  }
+
+  var versionBox = Hive.box('VersionData');
+  void versionApiCall() async{
+    print("VersionAPI");
+    try {
+      DataVersion dataVersion = await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+      if (versionBox.containsKey("buildingID") && versionBox.get("buildingID") == dataVersion.versionData!.buildingID) {
+        print("Already present");
+        if (dataVersion.versionData!.landmarksDataVersion ==
+            versionBox.get("landmarksDataVersion")) {
+          VersionInfo.landmarksDataVersionUpdate = false;
+          print("LandmarkVersion change: False");
+        } else {
+          versionBox.put("landmarksDataVersion",
+              dataVersion.versionData!.landmarksDataVersion);
+
+          VersionInfo.landmarksDataVersionUpdate = true;
+          print("LandmarkVersion change: True");
+        }
+
+        if (dataVersion.versionData!.polylineDataVersion ==
+            versionBox.get("polylineDataVersion")) {
+          VersionInfo.polylineDataVersionUpdate = false;
+
+          print("PolylineVersion change: False");
+          print(
+              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                  "polylineDataVersion")}");
+        } else {
+          VersionInfo.polylineDataVersionUpdate = true;
+          print("PolylineVersion change: True");
+          versionBox.put("polylineDataVersion",
+              dataVersion.versionData!.polylineDataVersion);
+          print(
+              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                  "polylineDataVersion")}");
+        }
+
+        if (dataVersion.versionData!.buildingDataVersion ==
+            versionBox.get("buildingDataVersion")) {
+          VersionInfo.buildingDataVersionUpdate = false;
+          print("BuildingDataVersion change: False");
+        } else {
+          VersionInfo.buildingDataVersionUpdate = true;
+          versionBox.put("buildingDataVersion",
+              dataVersion.versionData!.buildingDataVersion);
+          print("BuildingDataVersion change: True");
+        }
+
+        if (dataVersion.versionData!.patchDataVersion ==
+            versionBox.get("patchDataVersion")) {
+          VersionInfo.patchDataVersionUpdate = false;
+          print("PatchDataVersion change: False");
+        } else {
+          VersionInfo.patchDataVersionUpdate = true;
+          versionBox.put(
+              "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+
+          print("PatchDataVersion change: True");
+        }
+        versionBox.put("WalkThrough", false);
+        print(versionBox.keys);
+        print(versionBox.values);
+      } else {
+        print("Not present");
+        versionBox.put("landmarksDataVersion",
+            dataVersion.versionData!.landmarksDataVersion);
+        versionBox.put("polylineDataVersion",
+            dataVersion.versionData!.polylineDataVersion);
+        versionBox.put("buildingDataVersion",
+            dataVersion.versionData!.buildingDataVersion);
+        versionBox.put(
+            "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+        versionBox.put("sId", dataVersion.versionData!.sId);
+        versionBox.put("iV", dataVersion.versionData!.iV);
+        versionBox.put("createdAt", dataVersion.versionData!.createdAt);
+        versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
+        versionBox.put("buildingID", dataVersion.versionData!.buildingID);
+        versionBox.put("WalkThrough", true);
+      }
+      loadInfoToFile();
+    }catch(e){
+      print("Exception $e");
+    }
   }
 
   void loadInfoToFile(){
@@ -90,7 +179,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     if(mounted){
       setState(() {
         isLocating=false;
-
       });
     }
 
@@ -100,13 +188,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   Future<Position?> getUsersCurrentLatLng()async{
 
     if ((locBox.get('location')==null)?false:locBox.get('location')) {
-
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-
-
       return position;
-
-
     }else{
       Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
@@ -145,7 +228,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       buildingsPos.add(venueList[i]);
     }
 
-    loadInfoToFile();
+    //loadInfoToFile();
 
   }
   int getDistanceFromLatLonInKm(double lat1, double lon1, double lat2, double lon2) {

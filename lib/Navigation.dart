@@ -391,6 +391,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       tutorialCoachMark = TutorialCoachMark(
         targets: _createTargets(),
         colorShadow: Colors.red,
+
         textSkip: "SKIP",
         paddingFocus: 10,
         opacityShadow: 0.5,
@@ -423,6 +424,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         targets: _createTargets(),
         colorShadow: Colors.red,
         textSkip: "SKIP",
+        // skipWidget: ElevatedButton(
+        //   onPressed: () {
+        //     //controller.previous();
+        //   },
+        //   child: Text("SKIP"),
+        // ),
+
         paddingFocus: 10,
         opacityShadow: 0.5,
         imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -460,20 +468,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         keyTarget: floorButtonKey,
         alignSkip: Alignment.bottomRight,
         enableOverlayTab: true,
-        color: Colors.tealAccent,
+        color: Colors.black,
         contents: [
           TargetContent(
             align: ContentAlign.top,
             builder: (context, controller) {
-              return const Column(
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    "Floor change button",
+                    "Floor Change Button",
                     style: TextStyle(
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      fontSize: 20.0,
                     ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 5.0),
+                    child: Text(
+                      "Helps to change Building Floor",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.previous();
+                    },
+                    child: const Icon(Icons.chevron_left),
                   ),
                 ],
               );
@@ -490,7 +514,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       TargetFocus(
         identify: "reLocalizeButtonKey",
         keyTarget: reLocalizeButtonKey,
-        color: Colors.white,
+        color: Colors.black,
         contents: [
           TargetContent(
             align: ContentAlign.bottom,
@@ -503,17 +527,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     "Relocalize Button",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 20.0,
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.only(top: 10.0),
+                    padding: EdgeInsets.only(top: 5.0),
                     child: Text(
                       "Helps you to Relocate and find your Current Location",
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
+                  SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       controller.previous();
@@ -533,34 +558,42 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       TargetFocus(
         identify: "exploreModeButtonKey",
         keyTarget: exploreModeButtonKey,
-        color:Colors.tealAccent,
+        color:Colors.black,
         contents: [
           TargetContent(
             align: ContentAlign.left,
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "Explore Mode",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xff000000),
-                    height: 80/28,
+            builder: (context, controller) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Explore Mode",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: Text(
-                    "This feature enables you to explore your surrounding Places.",
-                    style: TextStyle(color: Colors.black),
+                  Padding(
+                    padding: EdgeInsets.only(top: 5.0),
+                    child: Text(
+                      "This feature enables you to explore your surrounding Places.",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                )
-              ],
-            ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.previous();
+                    },
+                    child: const Icon(Icons.chevron_left),
+                  ),
+                ],
+              );
+            }
           ),
 
         ],
@@ -574,7 +607,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         alignSkip: Alignment.bottomRight,
 
         enableOverlayTab: true,
-        color: Colors.white,
+        color: Colors.black,
         contents: [
           TargetContent(
             align: ContentAlign.bottom,
@@ -589,12 +622,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       fontFamily: "Roboto",
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xff000000),
+                      color: Colors.white,
                       height: 80/28,
                     ),
                     textAlign: TextAlign.left,
                   ),
-
+                  Padding(
+                    padding: EdgeInsets.only(top: 5.0),
+                    child: Text(
+                      "",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       controller.previous();
@@ -616,12 +656,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     return targets;
   }
+  var versionBox = Hive.box('VersionData');
+
 
 
 
   @override
   void initState() {
-    createTutorial();
+    versionBox.get("WalkThrough")? createTutorial():( print("No Walkthrough"));
+
 
     super.initState();
 
@@ -1949,7 +1992,7 @@ bool disposed=false;
     print("Circular progress stop");
     print("shift to feedbackpannel after debug");
     print(UserCredentials().getUserId());
-    Future.delayed(Duration.zero, showTutorial);
+    versionBox.get("WalkThrough")? Future.delayed(Duration.zero, showTutorial): ("No WalkThrough Show off");
 
   }
 

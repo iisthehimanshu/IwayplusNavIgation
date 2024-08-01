@@ -126,6 +126,7 @@ mixin LocaleData {
   static const String location='Location';
   static const String none='None';
   static const String ttsgostraight='ttsGoStraight';
+  static const String waytogo="Where you want to go?";
 
 
   static Map<String, String> get properties => {
@@ -355,7 +356,8 @@ mixin LocaleData {
     'ttsSharpRight':'Sharp Right',
     'ttsSharpLeft':'Sharp Left',
     'ttsUTurn':'U Turn',
-    'ttsGoStraight':'Go Straight'
+    'ttsGoStraight':'Go Straight',
+    'Where you want to go?':'Where you want to go?'
 
 
 
@@ -477,7 +479,8 @@ mixin LocaleData {
     'ttsSharpRight':'तीव्र राइट',
     'ttsSharpLeft':'तीव्र लेफ्ट',
     'ttsUTurn':'यू टर्न',
-    'ttsGoStraight':'सीधे चले लगभग'
+    'ttsGoStraight':'सीधे चले लगभग',
+    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
   };
 
   static const Map<String, dynamic> TA = {

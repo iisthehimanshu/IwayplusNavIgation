@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -16,11 +17,13 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import 'package:iwaymaps/API/RatingsaveAPI.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -30,7 +33,9 @@ import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
+import 'Elements/QRLandmarkScreen.dart';
 import 'Elements/locales.dart';
+import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
@@ -441,6 +446,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     // fetchlist();
     // filterItems();
+    print("widget.directLandID");
+    print(widget.directLandID);
   }
 
   void excludeFloorSemanticWorkchange() {
@@ -628,9 +635,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+bool disposed=false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
+    if(disposed)return;
     if (prevpause) {
       await flutterTts.pause();
     }
@@ -641,6 +649,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
     }
+    await flutterTts.stop();
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -908,91 +917,93 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   late AnimationController _controller;
   late Animation<double> _animation;
+  // land userSetLandmarkMap = land().landmarksMap;
 
-  void paintUser(String nearestBeacon,
-      {bool speakTTS = true, bool render = true}) async {
-    wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
-    print("nearestBeacon : $nearestBeacon");
 
-    final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
-    final Uint8List userlocdebug =
-        await getImagesFromMarker('assets/tealtorch.png', 35);
-
-    if (apibeaconmap[nearestBeacon] != null) {
-      //buildingAngle compute
+  void paintUser(String? nearestBeacon, {bool speakTTS = true, bool render = true,String? polyID}) async {
+    if(nearestBeacon==null && polyID!=null){
+      print("Inside");
+      Landmarks userSetLocation = Landmarks();
+      await building.landmarkdata!.then((value) {
+        print("value.landmarksMap");
+        value.landmarksMap?.forEach((key, valuee) {
+          if(key==polyID){
+            userSetLocation = valuee;
+          }
+        });
+        print("userLandmark: ${userSetLocation.name}");
+      });
+      final Uint8List userloc =
+      await getImagesFromMarker('assets/userloc0.png', 80);
+      final Uint8List userlocdebug =
+      await getImagesFromMarker('assets/tealtorch.png', 35);
 
       tools.setBuildingAngle(building
-          .patchData[apibeaconmap[nearestBeacon]!.buildingID]!
+          .patchData[userSetLocation.buildingID]!
           .patchData!
           .buildingAngle!);
 
       //nearestLandmark compute
-
-      try {
-        await building.landmarkdata!.then((value) {
-          nearestLandInfomation = tools.localizefindNearbyLandmark(
-              apibeaconmap[nearestBeacon]!, value.landmarksMap!);
-        });
-      } catch (e) {
-        print("inside catch");
-        print(Exception(e));
-      }
+      nearestLandInfo currentnearest = nearestLandInfo(sId: userSetLocation.sId, buildingID: userSetLocation.buildingID, coordinateX: userSetLocation.coordinateX, coordinateY: userSetLocation.coordinateY, doorX: userSetLocation.doorX, doorY: userSetLocation.doorY, type: userSetLocation.type, floor: userSetLocation.floor, name: userSetLocation.name, updatedAt: userSetLocation.updatedAt, buildingName: userSetLocation.buildingName, venueName: userSetLocation.venueName);
+      nearestLandInfomation = currentnearest;
 
       setState(() {
-        buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
-        buildingAllApi.selectedBuildingID =
-            apibeaconmap[nearestBeacon]!.buildingID!;
+        buildingAllApi.selectedID = userSetLocation!.buildingID!;
+        buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
       });
 
       List<int> localBeconCord = [];
-      localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
-      localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateY!);
+      localBeconCord.add(userSetLocation.coordinateX!);
+      localBeconCord.add(userSetLocation.coordinateY!);
       print(
-          "check beacon ${apibeaconmap[nearestBeacon]!.coordinateX} ${apibeaconmap[nearestBeacon]!.coordinateY}");
+          "check beacon || landmark ${userSetLocation
+              .coordinateX} ${userSetLocation.coordinateY}");
 
       pathState().beaconCords = localBeconCord;
 
       List<double> values = [];
 
       //floor alignment
-      if (apibeaconmap[nearestBeacon]!.floor != 0) {
+      if (userSetLocation.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
             building.polyLineData!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(apibeaconmap[nearestBeacon]!.floor!),
+            tools.numericalToAlphabetical(
+                userSetLocation.floor!),
             building.polyLineData!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
+        values =
+            tools.localtoglobal(userSetLocation.coordinateX!,
+                userSetLocation.coordinateY!);
         print(values);
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
-        values = tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!);
+        values =
+            tools.localtoglobal(userSetLocation.coordinateX!,
+                userSetLocation.coordinateY!);
       }
       print("values");
       print(values);
 
       mapState.target = LatLng(values[0], values[1]);
 
-      user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
-      user.locationName = apibeaconmap[nearestBeacon]!.name;
+      user.Bid = userSetLocation.buildingID!;
+      user.locationName = userSetLocation.name;
 
       //double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
 
       //double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
 
       //did this change over here UDIT...
-      user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
-      user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+      user.coordX = userSetLocation.coordinateX!;
+      user.coordY = userSetLocation.coordinateY!;
       List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
           patchData:
-              building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+          building.patchData[userSetLocation.buildingID]);
       user.lat = ls[0];
       user.lng = ls[1];
 
@@ -1026,10 +1037,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
-      UserState.cols = building.floorDimenssion[apibeaconmap[nearestBeacon]!
-          .buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
-      UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!
-          .buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+      UserState.cols = building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![0];
+      UserState.rows = building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![1];
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
@@ -1046,8 +1055,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         user.coordX + transitionValue[0],
         user.coordY + transitionValue[1]
       ];
-      user.floor = apibeaconmap[nearestBeacon]!.floor!;
-      user.key = apibeaconmap[nearestBeacon]!.sId!;
+      user.floor = userSetLocation.floor!;
+      user.key = userSetLocation.sId!;
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
@@ -1077,7 +1086,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         } else {
-          user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
+          user.moveToFloor(userSetLocation.floor!);
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
@@ -1093,18 +1102,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           ));
         }
 
-        building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
-            apibeaconmap[nearestBeacon]!.floor!;
+        building.floor[userSetLocation.buildingID!] =
+        userSetLocation.floor!;
         createRooms(
-            building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+            building.polyLineData!, userSetLocation.floor!);
         building.landmarkdata!.then((value) {
-          createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
+          createMarkers(value, userSetLocation!.floor!);
         });
       });
 
       double value = 0;
       if (nearestLandInfomation != null) {
-        value = tools.calculateAngle2([apibeaconmap[nearestBeacon]!.coordinateX!,apibeaconmap[nearestBeacon]!.coordinateY!],newUserCord, [
+        value = tools.calculateAngle2([
+          userSetLocation.coordinateX!,
+          userSetLocation.coordinateY!
+        ], newUserCord, [
           nearestLandInfomation!.coordinateX!,
           nearestLandInfomation!.coordinateY!
         ]);
@@ -1132,7 +1144,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
       }
       String name = nearestLandInfomation == null
-          ? apibeaconmap[nearestBeacon]!.name!
+          ? userSetLocation.name!
           : nearestLandInfomation!.name!;
       if (nearestLandInfomation == null) {
         //updating user pointer
@@ -1147,7 +1159,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               value, building.floor[buildingAllApi.getStoredString()]!);
         });
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.Bid]?[0] =
+              customMarker.rotate(0, markers[user.Bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -1157,14 +1170,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           if (finalvalue == null) {
             speak(
                 convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                    "You are on ${tools.numericalToAlphabetical(
+                        user.floor)} floor,${user.locationName}",
                     _currentLocale,
                     ''),
                 _currentLocale);
           } else {
             speak(
                 convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                    "You are on ${tools.numericalToAlphabetical(
+                        user.floor)} floor,${user
+                        .locationName} is on your ${LocaleData
+                        .properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
                     finalvalue),
                 _currentLocale);
@@ -1175,14 +1192,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           if (finalvalue == null) {
             speak(
                 convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                    "You are on ${tools.numericalToAlphabetical(
+                        user.floor)} floor,${user.locationName}",
                     _currentLocale,
                     ''),
                 _currentLocale);
           } else {
             speak(
                 convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                    "You are on ${tools.numericalToAlphabetical(
+                        user.floor)} floor,${user
+                        .locationName} is on your ${LocaleData
+                        .properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
                     finalvalue),
                 _currentLocale);
@@ -1199,15 +1220,521 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           ),
         );
       }
-    } else {
-      if (speakTTS)
-        speak(LocaleData.unabletofindyourlocation.getString(context),
-            _currentLocale);
+
+
+    }else {
+      wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
+      print("nearestBeacon : $nearestBeacon");
+
+      final Uint8List userloc =
+      await getImagesFromMarker('assets/userloc0.png', 80);
+      final Uint8List userlocdebug =
+      await getImagesFromMarker('assets/tealtorch.png', 35);
+
+      if (apibeaconmap[nearestBeacon] != null) {
+        //buildingAngle compute
+
+        tools.setBuildingAngle(building
+            .patchData[apibeaconmap[nearestBeacon]!.buildingID]!
+            .patchData!
+            .buildingAngle!);
+
+        //nearestLandmark compute
+
+        try {
+          await building.landmarkdata!.then((value) {
+            nearestLandInfomation = tools.localizefindNearbyLandmark(
+                apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+          });
+        } catch (e) {
+          print("inside catch");
+          print(Exception(e));
+        }
+
+        setState(() {
+          buildingAllApi.selectedID = apibeaconmap[nearestBeacon]!.buildingID!;
+          buildingAllApi.selectedBuildingID =
+          apibeaconmap[nearestBeacon]!.buildingID!;
+        });
+
+        List<int> localBeconCord = [];
+        localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateX!);
+        localBeconCord.add(apibeaconmap[nearestBeacon]!.coordinateY!);
+        print(
+            "check beacon ${apibeaconmap[nearestBeacon]!
+                .coordinateX} ${apibeaconmap[nearestBeacon]!.coordinateY}");
+
+        pathState().beaconCords = localBeconCord;
+
+        List<double> values = [];
+
+        //floor alignment
+        if (apibeaconmap[nearestBeacon]!.floor != 0) {
+          List<PolyArray> prevFloorLifts = findLift(
+              tools.numericalToAlphabetical(0),
+              building.polyLineData!.polyline!.floors!);
+          List<PolyArray> currFloorLifts = findLift(
+              tools.numericalToAlphabetical(
+                  apibeaconmap[nearestBeacon]!.floor!),
+              building.polyLineData!.polyline!.floors!);
+          print("print cubicle data");
+          for (int i = 0; i < prevFloorLifts.length; i++) {
+            print(prevFloorLifts[i].name);
+          }
+          print("data2");
+          for (int i = 0; i < currFloorLifts.length; i++) {
+            print(currFloorLifts[i].name);
+          }
+          List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+          print("dvalue");
+          print(dvalue);
+          UserState.xdiff = dvalue[0];
+          UserState.ydiff = dvalue[1];
+          values =
+              tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+                  apibeaconmap[nearestBeacon]!.coordinateY!);
+          print(values);
+        } else {
+          UserState.xdiff = 0;
+          UserState.ydiff = 0;
+          values =
+              tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+                  apibeaconmap[nearestBeacon]!.coordinateY!);
+        }
+        print("values");
+        print(values);
+
+        mapState.target = LatLng(values[0], values[1]);
+
+        user.Bid = apibeaconmap[nearestBeacon]!.buildingID!;
+        user.locationName = apibeaconmap[nearestBeacon]!.name;
+
+        //double.parse(apibeaconmap[nearestBeacon]!.properties!.latitude!);
+
+        //double.parse(apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+        //did this change over here UDIT...
+        user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
+        user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
+        List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
+            patchData:
+            building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+        user.lat = ls[0];
+        user.lng = ls[1];
+
+        if (nearestLandInfomation != null &&
+            nearestLandInfomation!.doorX != null) {
+          user.coordX = nearestLandInfomation!.doorX!;
+          user.coordY = nearestLandInfomation!.doorY!;
+          List<double> latlng = tools.localtoglobal(
+              nearestLandInfomation!.doorX!, nearestLandInfomation!.doorY!,
+              patchData: building.patchData[nearestLandInfomation!.buildingID]);
+          print("latlnghhjhj");
+          print(latlng);
+          user.lat = latlng[0];
+          user.lng = latlng[1];
+          user.locationName = nearestLandInfomation!.name ??
+              nearestLandInfomation!.element!.subType;
+        } else if (nearestLandInfomation != null &&
+            nearestLandInfomation!.doorX == null) {
+          user.coordX = nearestLandInfomation!.coordinateX!;
+          user.coordY = nearestLandInfomation!.coordinateY!;
+          List<double> latlng = tools.localtoglobal(
+              nearestLandInfomation!.coordinateX!,
+              nearestLandInfomation!.coordinateY!,
+              patchData: building.patchData[nearestLandInfomation!.buildingID]);
+          print("latlnghhjhj");
+          print(latlng);
+          user.lat = latlng[0];
+          user.lng = latlng[1];
+          user.locationName = nearestLandInfomation!.name ??
+              nearestLandInfomation!.element!.subType;
+        }
+        user.showcoordX = user.coordX;
+        user.showcoordY = user.coordY;
+        UserState.cols = building.floorDimenssion[apibeaconmap[nearestBeacon]!
+            .buildingID]![apibeaconmap[nearestBeacon]!.floor]![0];
+        UserState.rows = building.floorDimenssion[apibeaconmap[nearestBeacon]!
+            .buildingID]![apibeaconmap[nearestBeacon]!.floor]![1];
+        UserState.lngCode = _currentLocale;
+        UserState.reroute = reroute;
+        UserState.closeNavigation = closeNavigation;
+        UserState.AlignMapToPath = alignMapToPath;
+        UserState.startOnPath = startOnPath;
+        UserState.speak = speak;
+        UserState.paintMarker = paintMarker;
+        UserState.createCircle = updateCircle;
+        List<int> userCords = [];
+        userCords.add(user.coordX);
+        userCords.add(user.coordY);
+        List<int> transitionValue = tools.eightcelltransition(user.theta);
+        List<int> newUserCord = [
+          user.coordX + transitionValue[0],
+          user.coordY + transitionValue[1]
+        ];
+        user.floor = apibeaconmap[nearestBeacon]!.floor!;
+        user.key = apibeaconmap[nearestBeacon]!.sId!;
+        user.initialallyLocalised = true;
+        setState(() {
+          markers.clear();
+          //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
+          if (render) {
+            markers.putIfAbsent(user.Bid, () => []);
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("UserLocation"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userloc),
+              anchor: Offset(0.5, 0.829),
+            ));
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+            circles.add(
+              Circle(
+                circleId: CircleId("circle"),
+                center: LatLng(user.lat, user.lng),
+                radius: _animation.value,
+                strokeWidth: 1,
+                strokeColor: Colors.blue,
+                fillColor: Colors.lightBlue.withOpacity(0.2),
+              ),
+            );
+          } else {
+            user.moveToFloor(apibeaconmap[nearestBeacon]!.floor!);
+            markers.putIfAbsent(user.Bid, () => []);
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("UserLocation"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userloc),
+              anchor: Offset(0.5, 0.829),
+            ));
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
+
+          building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
+          apibeaconmap[nearestBeacon]!.floor!;
+          createRooms(
+              building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+          building.landmarkdata!.then((value) {
+            createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
+          });
+        });
+
+        double value = 0;
+        if (nearestLandInfomation != null) {
+          value = tools.calculateAngle2([
+            apibeaconmap[nearestBeacon]!.coordinateX!,
+            apibeaconmap[nearestBeacon]!.coordinateY!
+          ], newUserCord, [
+            nearestLandInfomation!.coordinateX!,
+            nearestLandInfomation!.coordinateY!
+          ]);
+        }
+
+        mapState.zoom = 22;
+        print("value----");
+        print(value);
+        String? finalvalue = value == 0
+            ? null
+            : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+
+        // double value =
+        //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
+        // print(value);
+        // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+        // print("final value");
+        // print(finalvalue);
+        if (user.isnavigating == false) {
+          detected = true;
+          if (!_isExploreModePannelOpen) {
+            _isBuildingPannelOpen = true;
+          }
+          nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+        }
+        String name = nearestLandInfomation == null
+            ? apibeaconmap[nearestBeacon]!.name!
+            : nearestLandInfomation!.name!;
+        if (nearestLandInfomation == null) {
+          //updating user pointer
+          building.floor[buildingAllApi.getStoredString()] = user.floor;
+          createRooms(building.polyLineData!,
+              building.floor[buildingAllApi.getStoredString()]!);
+          if (pathMarkers[user.floor] != null) {
+            setCameraPosition(pathMarkers[user.floor]!);
+          }
+          building.landmarkdata!.then((value) {
+            createMarkers(
+                value, building.floor[buildingAllApi.getStoredString()]!);
+          });
+          if (markers.length > 0)
+            markers[user.Bid]?[0] =
+                customMarker.rotate(0, markers[user.Bid]![0]);
+          if (user.initialallyLocalised) {
+            mapState.interaction = !mapState.interaction;
+          }
+          fitPolygonInScreen(patch.first);
+
+          if (speakTTS) {
+            if (finalvalue == null) {
+              speak(
+                  convertTolng(
+                      "You are on ${tools.numericalToAlphabetical(
+                          user.floor)} floor,${user.locationName}",
+                      _currentLocale,
+                      ''),
+                  _currentLocale);
+            } else {
+              speak(
+                  convertTolng(
+                      "You are on ${tools.numericalToAlphabetical(
+                          user.floor)} floor,${user
+                          .locationName} is on your ${LocaleData
+                          .properties5[finalvalue]?.getString(context)}",
+                      _currentLocale,
+                      finalvalue),
+                  _currentLocale);
+            }
+          }
+        } else {
+          if (speakTTS) {
+            if (finalvalue == null) {
+              speak(
+                  convertTolng(
+                      "You are on ${tools.numericalToAlphabetical(
+                          user.floor)} floor,${user.locationName}",
+                      _currentLocale,
+                      ''),
+                  _currentLocale);
+            } else {
+              speak(
+                  convertTolng(
+                      "You are on ${tools.numericalToAlphabetical(
+                          user.floor)} floor,${user
+                          .locationName} is on your ${LocaleData
+                          .properties5[finalvalue]?.getString(context)}",
+                      _currentLocale,
+                      finalvalue),
+                  _currentLocale);
+            }
+          }
+        }
+
+        if (speakTTS) {
+          mapState.zoom = 22.0;
+          _googleMapController.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              LatLng(user.lat, user.lng),
+              22, // Specify your custom zoom level here
+            ),
+          );
+        }
+      } else {
+        if (speakTTS) {
+          speak(LocaleData.unabletofindyourlocation.getString(context),
+              _currentLocale);
+          showLocationDialog(context);
+        }
+      }
+      if (widget.directLandID.isNotEmpty) {
+        print("checkdirectLandID");
+        onLandmarkVenueClicked(
+            widget.directLandID, DirectlyStartNavigation: true);
+      }
     }
-    if (widget.directLandID.isNotEmpty) {
-      print("checkdirectLandID");
-      onLandmarkVenueClicked(widget.directLandID);
-    }
+  }
+  bool _isExpanded = false;
+  String? qrText;
+
+
+
+
+  void showLocationDialog(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Container(
+            padding: EdgeInsets.only(top:20,left:15,right: 15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Choose Your Location",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xff000000),
+                    height: 24/18,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 2),
+                Text(
+                  "We couldn't detect your location",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffa1a1aa),
+                    height: 20/14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Container(
+                  width: screenWidth,
+                  child: TextField(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
+                      ).then((value){
+                        setState(() {
+                          //widget.SourceID = value;
+                          print("dataPOpped:$value");
+
+                          if(value!=null){
+                            Navigator.of(context).pop();
+                            paintUser(null,polyID: value);
+                          }else{
+                            print("selectionvalnotempty");
+                          }
+
+                          // SourceName = landmarkData.landmarksMap![value]!.name!;
+                          // if(widget.SourceID != "" && widget.DestinationID != ""){
+                          //   print("h3");
+                          //   Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                          // }
+                        });
+                      });
+                    },
+
+                    decoration: InputDecoration(
+                      hintText: 'Search your current location',
+                      hintStyle: TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xffa1a1aa),
+                        height: 20/14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.teal,width: 1),
+                      ),
+
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.teal, width: 1),
+                      ),
+
+                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 0), // Adjust vertical padding to center text
+
+                    ),
+                    textAlign: TextAlign.center, // Center the text and hint
+
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Or",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xffa0a0a0),
+                    height: 20/14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  "Scan the Nearby QR Code",
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xff18181b),
+                    height: 25/16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Center(
+                  child: GestureDetector(
+                    onTap: () async {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                      //Navigator.of(context).pop();
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => QRViewExample()),
+                      ).then((value){
+                        // if(value==""){
+                        //   showLocationDialog(context);
+                        // }
+                        // print("Value--${value}");
+                        // String polyValue = value.replaceAll("http://", "");
+                        // print("polyValue$polyValue");
+                        paintUser(null,polyID: value);
+                      });
+                      // if (result != null) {
+                      //   setState(() {
+                      //     qrText = result;
+                      //   });
+                      //   print('QR Code: $qrText');
+                      //   // Handle the scanned QR code text
+                      // }else{
+                      //   print("resultNull");
+                      // }
+                    },
+                    child: AnimatedContainer(
+                      duration: Duration(seconds: 3),
+                      width: _isExpanded ? 120 : 80,
+                      height: _isExpanded ? 120 : 80,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.teal),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 18),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    child: Text('Skip', style: TextStyle(color: Color(0xffa1a1aa))),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void moveUser() async {
@@ -1615,6 +2142,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             createRooms(value, 0);
           }
           building.polylinedatamap[key] = value;
+          print("value.polyline!.floors!");
+          print(value.polyline!.floors!);
           building.numberOfFloors[key] = value.polyline!.floors!.length;
           //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
         });
@@ -1681,6 +2210,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+    print("shift to feedbackpannel after debug");
+    print(UserCredentials().getUserId());
+
   }
 
   void _updateCircle(double lat, double lng) {
@@ -1780,8 +2312,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //lastBeaconValue = nearestBeacon;
     });
 
-    nearestLandmarkToBeacon = nearestBeacon;
-    nearestLandmarkToMacid = highestweight.toString();
+    // nearestLandmarkToBeacon = nearestBeacon;
+    // nearestLandmarkToMacid = highestweight.toString();
 
     setState(() {
       testBIn = btadapter.BIN;
@@ -1794,8 +2326,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // sumMap = btadapter.calculateAverage();
     paintUser(nearestBeacon);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-          _controller.stop(),
-        });
+      _controller.stop(),
+    });
 
     //emptying the bin manually
     for (int i = 0; i < btadapter.BIN.length; i++) {
@@ -2799,6 +3331,59 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         .buffer
         .asUint8List();
   }
+  Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(String text, String imagePath, {Size imageSize = const Size(50, 50)}) async {
+    // Load the base marker image
+    final ByteData baseImageBytes = await rootBundle.load(imagePath);
+    final ui.Codec markerImageCodec = await ui.instantiateImageCodec(baseImageBytes.buffer.asUint8List(), targetWidth: imageSize.width.toInt(), targetHeight: imageSize.height.toInt());
+    final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+    final ui.Image markerImage = markerImageFrame.image;
+
+    // Set the text style and layout
+    final TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontSize: 30.0, // Increased font size
+        color: Colors.black,
+      ),
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: double.infinity,
+    );
+
+    // Calculate the overall canvas size
+    final double textWidth = textPainter.width;
+    final double textHeight = textPainter.height;
+    final double canvasWidth = textWidth > imageSize.width ? textWidth : imageSize.width;
+    final double canvasHeight = textHeight + imageSize.height + 20.0; // Increased padding
+
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Draw the text centered above the marker image
+    final double textX = (canvasWidth - textWidth) / 2;
+    final double textY = 0.0;
+    textPainter.paint(canvas, Offset(textX, textY));
+
+    // Draw the base marker image below the text
+    final double imageX = (canvasWidth - imageSize.width) / 2;
+    final double imageY = textHeight + 10.0; // Padding between text and image
+    canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
+
+    // Generate the final image
+    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
+
+    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List? pngBytes = byteData?.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(pngBytes!);
+  }
 
   void createMarkers(land _landData, int floor) async {
     print("Markercleared");
@@ -2826,11 +3411,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
               patchData: building.patchData[buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
+          BitmapDescriptor textMarker;
+          String markerText;
+          if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
+          }else{
+            textMarker = await bitmapDescriptorFromTextAndImage(landmarks[i].name!,'assets/pin.png');
+          }
 
           Markers.add(Marker(
               markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
               position: LatLng(value[0], value[1]),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
+              icon: textMarker,
               anchor: Offset(0.5, 0.5),
               visible: false,
               onTap: () {
@@ -2844,6 +3438,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     print("Info Window ");
                   })));
         }
+
         if (landmarks[i].element!.subType != null &&
             landmarks[i].element!.subType == "room door" &&
             landmarks[i].doorX != null) {
@@ -3076,6 +3671,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool calculatingPath = false;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
+
     pathMarkers.clear();
     // if(user.isnavigating==false){
     //   clearPathVariables();
@@ -3096,6 +3692,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       building.selectedLandmarkID = null;
       return Container();
     }
+
+
 
     return Stack(
       children: [
@@ -3705,10 +4303,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     circles.clear();
     print("landmarksMap");
-    print(landmarksMap.keys);
-    print(landmarksMap.values);
-    print(landmarksMap[PathState.destinationPolyID]!.buildingID);
-    print(landmarksMap[PathState.sourcePolyID]!.buildingID);
+    // print(landmarksMap.keys);
+    // print(landmarksMap.values);
+    // print(landmarksMap[PathState.destinationPolyID]!.buildingID);
+    // print(landmarksMap[PathState.sourcePolyID]!.buildingID);
 
     PathState.noPathFound=false;
     singleroute.clear();
@@ -3987,7 +4585,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       if (PathState.destinationName ==
           "${LocaleData.yourcurrentloc.getString(context)}") {
         speak(
-            "${nearestLandInfomation != null ? apibeaconmap[nearbeacon]!.name : nearestLandInfomation!.name} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+            " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
             _currentLocale);
       } else {
         speak(
@@ -4005,6 +4603,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   double cordLt = 0;
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
+
+  List<LatLng> _polylineCoordinates = [];
+  Marker? _movingMarker;
+  Timer? _polytimer;
+  int _currentIndex = 0;
+  AnimationController? _animationController;
+  Animation<double>? _polyanimation;
+  late LatLng sourcePosition;
+  late LatLng destinationPosition;
+  late BitmapDescriptor sourceIcon;
+  late BitmapDescriptor destinationIcon;
 
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
@@ -4166,7 +4775,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           .then((value) {
         PathState.associateTurnWithLandmark = value;
         PathState.associateTurnWithLandmark.removeWhere((key, value) =>
-            value.properties!.polyId == PathState.destinationPolyID);
+        value.properties!.polyId == PathState.destinationPolyID);
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
         // });
@@ -4304,7 +4913,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
 
       final Uint8List tealtorch =
-          await getImagesFromMarker('assets/tealtorch.png', 35);
+      await getImagesFromMarker('assets/tealtorch.png', 35);
 
       Set<Marker> innerMarker = Set();
 
@@ -4330,8 +4939,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print("No path found.");
     }
 
-
-
     // setState(() {
     //   Set<gmap.Polyline> innerset = Set();
     //   innerset.add(gmap.Polyline(
@@ -4343,6 +4950,82 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //   singleroute[floor] = innerset;
     // });
     return path;
+  }
+  void animateMarker() {
+    Set<Marker> innerMarker = Set();
+    double step = 0.0001;
+    Timer.periodic(Duration(milliseconds: 50), (timer) {
+      setState(() {
+        sourcePosition = LatLng(sourcePosition.latitude + step, sourcePosition.longitude + step);
+        innerMarker.add(
+            Marker(
+            markerId: MarkerId("destination${destinationPosition}"),
+            position: destinationPosition,
+            icon: sourceIcon));
+        innerMarker.add(
+          Marker(
+            markerId: MarkerId("destination"),
+            position: destinationPosition,
+            icon: destinationIcon,
+          ),
+        );
+
+        //setCameraPosition(innerMarker);
+        pathMarkers[3] = innerMarker;
+
+      });
+      if ((sourcePosition.latitude - destinationPosition.latitude).abs() < step &&
+          (sourcePosition.longitude - destinationPosition.longitude).abs() < step) {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _initializePolylineAndMarker() {
+    setState(() {
+      _movingMarker = Marker(
+        markerId: MarkerId('moving_marker'),
+        position: _polylineCoordinates[0],
+      );
+    });
+  }
+  List<LatLng> _visibleWhitePolyline = [];
+
+
+  void _startAnimation() {
+    int currentIndex = 0;
+    _polytimer = Timer.periodic(Duration(milliseconds: 50), (Timer timer) {
+      setState(() {
+        currentIndex++;
+        if (currentIndex >= _polylineCoordinates.length) {
+          currentIndex = 0;
+          _visibleWhitePolyline.clear();
+        } else {
+          _visibleWhitePolyline.add(_polylineCoordinates[currentIndex]);
+        }
+      });
+    });
+  }
+
+  LatLng _getLatLngAlongPath(double fraction) {
+    int startIndex = (_polylineCoordinates.length - 1) * fraction ~/ 1;
+    int endIndex = startIndex + 1;
+
+    if (endIndex >= _polylineCoordinates.length) {
+      endIndex = _polylineCoordinates.length - 1;
+    }
+
+    final startPoint = _polylineCoordinates[startIndex];
+    final endPoint = _polylineCoordinates[endIndex];
+
+    final lat = _lerp(startPoint.latitude, endPoint.latitude, fraction);
+    final lng = _lerp(startPoint.longitude, endPoint.longitude, fraction);
+
+    return LatLng(lat, lng);
+  }
+
+  double _lerp(double start, double end, double fraction) {
+    return start + (end - start) * fraction;
   }
 
   void closeRoutePannel() {
@@ -4682,7 +5365,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                             DestinationSearchPage(
                                               hintText: 'Source location',
                                               voiceInputEnabled: false,
-                                            ))).then((value) {
+                                            ))).then((value) async {
+                                  // onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
                                   onSourceVenueClicked(value);
                                 });
                               },
@@ -4721,6 +5405,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                               voiceInputEnabled: false,
                                             ))).then((value) {
                                   _isBuildingPannelOpen = false;
+                                  print("onDestinationVenueClicked");
                                   onDestinationVenueClicked(value);
                                 });
                               },
@@ -5192,6 +5877,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                             .sourceFloor]![1];
                                                     user.Bid =
                                                         PathState.sourceBid;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                                     user.floor =
                                                         PathState.sourceFloor;
@@ -5553,124 +6245,235 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
   bool showFeedback = false;
+  double minHight = 0.0;
+  void __feedbackControllerUp(double d) {
+    _feedbackController.animatePanelToPosition(d);
+  }
+  void __feedbackControllerDown() {
+    _feedbackController.close();
+  }
+
+
 
 
 
   Widget feedbackPanel(BuildContext context) {
-
+    minHight = MediaQuery.of(context).size.height/2.5;
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
         child: SlidingUpPanel(
-            controller: _feedbackController,
-            minHeight: MediaQuery.of(context).size.height/2,
-            maxHeight: MediaQuery.of(context).size.height,
-            snapPoint: 0.9,
-            borderRadius: BorderRadius.all(Radius.circular(24.0)),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 20.0,
-                color: Colors.grey,
-              ),
-            ],
-            panel: Padding(
+          controller: _feedbackController,
+          minHeight: minHight,
+          maxHeight: MediaQuery.of(context).size.height-20,
+          snapPoint: 0.9,
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20.0,
+              color: Colors.grey,
+            ),
+          ],
+          panel: SingleChildScrollView(
+            child: Padding(
               padding: EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 40),
+                  SizedBox(height: 16),
                   Text(
-                    'How was your experience?',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    "How was your navigation experience ?",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
                     ),
+                    textAlign: TextAlign.left,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Your feedback helps us improve our service.',
-                    style: TextStyle(
+                    "Your Feedback Helps Us Do Better",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
                       fontSize: 16,
-                      color: Colors.black54,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffa1a1aa),
                     ),
+                    textAlign: TextAlign.left,
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 36),
+                  Text(
+                    "Rate Your Experience",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                  SizedBox(height: 32),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
                         return GestureDetector(
-                          onTap: () => setState(() => _rating = index + 1),
+                          onTap: () {
+                            _rating = index + 1;
+                            if (_rating >=4) {
+                              __feedbackControllerUp(0.3);
+                              // _feedbackTextController.clear();
+                            } else if (_rating <= 3) {
+                              __feedbackControllerUp(0.9);
+
+                            }else if(_rating == 3 || _rating==4){
+                              _feedbackTextController.clear();
+                            }
+                            print("minHight");
+                            print(minHight);
+
+                            setState(() {
+
+                            });
+                          },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Icon(
-                              index < _rating ? Icons.star : Icons.star_border,
-                              color: Colors.amber,
-                              size: 48,
-                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: index < _rating ? SvgPicture.asset('assets/ratingStarFilled.svg', width: 48.0, height: 48.0,) : SvgPicture.asset('assets/ratingStarBorder.svg', width: 48.0, height: 48.0,),
                           ),
                         );
                       }),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   if (_rating > 0 && _rating < 4) ...[
+                    SizedBox(height: 16),
                     Text(
-                      'What can we improve?',
-                      style: TextStyle(
+                      "Select the Issues ",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
                       ),
+                      textAlign: TextAlign.left,
                     ),
                     SizedBox(height: 16),
-                    TextFormField(
-                      controller: _feedbackTextController,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Please share your thoughts...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        filled: false,
-                        fillColor: Colors.white,
+                    ChipFilterWidget(
+
+                      options: ['Bad map route', 'Wrong turns', 'UI Issue', 'App speed','Search Function','Map Accuracy'],
+                      onSelected: (selectedOption) {
+                        print('Selected: $selectedOption');
+                        // Handle the selection here
+                        _feedbackTextController.text = selectedOption;
+                        _feedback = _feedbackTextController.text;
+                        print(_feedback);
+                        setState(() {
+
+                        });
+                      },
+
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Add a Detailed Review",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
+                        height: 24/18,
                       ),
-                      onChanged: (value) => setState(() => _feedback = value),
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                        controller: _feedbackTextController,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          hintText: 'Please share your thoughts...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: false,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value)  {
+                          _feedback = value;
+                          print("onchange--");
+                          setState(() {
+
+                          });
+                        }
                     ),
                   ],
-                  SizedBox(height: 40),
+                  SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
+                      onPressed: (_rating > 0 && (_rating >= 4 || _feedback.length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
+                        var signInBox = Hive.box('UserInformation');
+                        print(signInBox.keys);
+                        var infoBox=Hive.box('SignInDatabase');
+                        String accessToken = infoBox.get('accessToken');
+                        //print('loadInfoToFile');
+                        print(infoBox.get('userId'));
+                        //String userId = signInBox.get("sId");
+                        //String username = signInBox.get("username");
+
+
+
+
+
+                        RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
                         showFeedback= false;
                         _feedbackController.hide();
+                        print("_feedbackTextController.clear()");
+                        print(_feedbackTextController.text);
+                        _feedbackTextController.clear();
+                        print(_feedbackTextController.text);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+                              (Route<dynamic> route) => false,
+                        );
+
                       }
                           : null,
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          'Submit Feedback',
-                          style: TextStyle(fontSize: 18),
+                          'Submit',
+                          style: TextStyle(fontSize: 18,color: Colors.white),
+
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 0))
+                            ? Color(0xff24B9B0)
+                            : Colors.grey,
+                        disabledBackgroundColor: Colors.grey,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(5),
                         ),
+
                       ),
                     ),
                   ),
+                  SizedBox(height: 36),
+
                 ],
               ),
             ),
+          ),
         ),
       ),
     );
@@ -7422,6 +8225,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Widget nearestLandmarkpannel() {
+    print("nearestLandmarkpannel");
     buildingAll element = new buildingAll.buildngAllAPIModel();
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
     if (BuildingAllBox.length > 0) {
@@ -7443,7 +8247,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //filterItems();
 
     return Visibility(
-        visible: _isBuildingPannelOpen && !user.isnavigating,
+        visible: _isBuildingPannelOpen && !user.isnavigating ,
         child: Semantics(
           excludeSemantics: true,
           child: SlidingUpPanel(
@@ -7538,7 +8342,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         });
 
         // print(Set<Marker>.of(markers[user.Bid]!));
-        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? [])));
+        return (marker.union(Set<Marker>.of(markers[user.Bid] ?? []))) ;
       } else {
         return pathMarkers[building.floor[buildingAllApi.getStoredString()]] !=
                 null
@@ -7574,6 +8378,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
+    // poly.add(gmap.Polyline(
+    //   polylineId: PolylineId('animated_route'),
+    //   points: _visibleWhitePolyline,
+    //   color: Colors.red,
+    //   width: 8,
+    // ));
     polylines.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
     });
@@ -7756,43 +8566,119 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     // });
     //avigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
-    showFeedback = true;
-    Future.delayed(Duration(seconds: 5));
-    _feedbackController.open();
-
+    // showFeedback = true;
+    // Future.delayed(Duration(seconds: 5));
+    // _feedbackController.open();
+    // Navigator.pushAndRemoveUntil(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+    //       (Route<dynamic> route) => false,
+    // );
 
   }
 
   void onLandmarkVenueClicked(String ID,
-      {bool DirectlyStartNavigation = false}) {
+      {bool DirectlyStartNavigation = false}) async {
+    print('DirectlyStartNavigation');
+    final snapshot = await building.landmarkdata;
+    building.selectedLandmarkID = ID;
+    
+    _isBuildingPannelOpen = false;
     setState(() {
-      if (building.selectedLandmarkID != ID) {
-        building.landmarkdata!.then((value) {
-          _isBuildingPannelOpen = false;
-          building.floor[value.landmarksMap![ID]!.buildingID!] =
-              value.landmarksMap![ID]!.floor!;
-          createRooms(
-              building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-              building.floor[value.landmarksMap![ID]!.buildingID!]!);
-          createMarkers(
-              value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
-          building.selectedLandmarkID = ID;
-          singleroute.clear();
-          _isRoutePanelOpen = DirectlyStartNavigation;
-          _isLandmarkPanelOpen = !DirectlyStartNavigation;
-          List<double> pvalues = tools.localtoglobal(
-              value.landmarksMap![ID]!.coordinateX!,
-              value.landmarksMap![ID]!.coordinateY!,
-              patchData:
-                  building.patchData[value.landmarksMap![ID]!.buildingID]);
-          LatLng point = LatLng(pvalues[0], pvalues[1]);
-          _googleMapController.animateCamera(
-            CameraUpdate.newLatLngZoom(
-              point,
-              22,
-            ),
-          );
-          addselectedMarker(point);
+    //   if (building.selectedLandmarkID != ID) {
+    //     building.landmarkdata!.then((value) {
+    //       _isBuildingPannelOpen = false;
+    //       building.floor[value.landmarksMap![ID]!.buildingID!] =
+    //           value.landmarksMap![ID]!.floor!;
+    //       createRooms(
+    //           building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
+    //           building.floor[value.landmarksMap![ID]!.buildingID!]!);
+    //       createMarkers(
+    //           value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
+    //       building.selectedLandmarkID = ID;
+    //       singleroute.clear();
+    //       _isRoutePanelOpen = DirectlyStartNavigation;
+    //       _isLandmarkPanelOpen = !DirectlyStartNavigation;
+    //       List<double> pvalues = tools.localtoglobal(
+    //           value.landmarksMap![ID]!.coordinateX!,
+    //           value.landmarksMap![ID]!.coordinateY!,
+    //           patchData:
+    //               building.patchData[value.landmarksMap![ID]!.buildingID]);
+    //       LatLng point = LatLng(pvalues[0], pvalues[1]);
+    //       _googleMapController.animateCamera(
+    //         CameraUpdate.newLatLngZoom(
+    //           point,
+    //           22,
+    //         ),
+    //       );
+    //       addselectedMarker(point);
+    //     });
+    //   }
+
+      if (user.coordY != 0 && user.coordX != 0) {
+        PathState.sourceX = user.coordX;
+        PathState.sourceY = user.coordY;
+        PathState.sourceFloor = user.floor;
+        PathState.sourcePolyID = user.key;
+        print("object ${PathState.sourcePolyID}");
+        PathState.sourceName = "Your current location";
+        PathState.destinationPolyID =
+        building.selectedLandmarkID!;
+        PathState.destinationName = snapshot!
+            .landmarksMap![
+        building.selectedLandmarkID]!
+            .name ??
+            snapshot!
+                .landmarksMap![
+            building.selectedLandmarkID]!
+                .element!
+                .subType!;
+        PathState.destinationFloor = snapshot!
+            .landmarksMap![building.selectedLandmarkID]!
+            .floor!;
+        PathState.sourceBid = user.Bid;
+
+        PathState.destinationBid = snapshot!
+            .landmarksMap![building.selectedLandmarkID]!
+            .buildingID!;
+
+        setState(() {
+          print("valuechanged");
+          calculatingPath = true;
+        });
+        Future.delayed(Duration(seconds: 1), () {
+          calculateroute(snapshot!.landmarksMap!)
+              .then((value) {
+            calculatingPath = false;
+            _isLandmarkPanelOpen = false;
+            _isRoutePanelOpen = true;
+          });
+        });
+      } else {
+        PathState.sourceName = "Choose Starting Point";
+        PathState.destinationPolyID =
+        building.selectedLandmarkID!;
+        PathState.destinationName = snapshot!.landmarksMap![
+        building.selectedLandmarkID]!
+            .name ??
+            snapshot!.landmarksMap![
+            building.selectedLandmarkID]!
+                .element!
+                .subType!;
+        PathState.destinationFloor = snapshot!.landmarksMap![building.selectedLandmarkID]!
+            .floor!;
+        building.selectedLandmarkID = "";
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    SourceAndDestinationPage(
+                      DestinationID:
+                      PathState.destinationPolyID,
+                    ))).then((value) {
+          if (value != null) {
+            fromSourceAndDestinationPage(value);
+          }
         });
       }
     });
@@ -8003,6 +8889,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -8027,6 +8915,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   bool isSemanticEnabled = false;
   bool isLocalized=false;
 
+  @override
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -8265,7 +9154,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]!;
                           List<int> revfloorList = floorList;
                           revfloorList.sort();
-
                           // building.numberOfFloors[buildingAllApi
                           //     .getStoredString()];
                           //
@@ -8669,9 +9557,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }
 
+}
+
+class CircleAnimation {
+  final AnimationController controller;
+  final Animation<double> animation;
+
+  CircleAnimation(this.controller, this.animation);
 }

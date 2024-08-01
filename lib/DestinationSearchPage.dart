@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -21,6 +22,7 @@ import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:test/scaffolding.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
@@ -45,6 +47,7 @@ class DestinationSearchPage extends StatefulWidget {
 
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
   land landmarkData = land();
+  List<String> landmarkFuzzyNameList = [];
 
   List<Widget> searchResults = [];
 
@@ -53,6 +56,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   List<dynamic> recent = [];
 
   TextEditingController _controller = TextEditingController();
+  Timer? _searchDebounce;
 
   final SpeechToText speetchText = SpeechToText();
   bool speechEnabled = false;
@@ -66,6 +70,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   void initState() {
     super.initState();
     print("In search page");
+    fetchandBuild();
+    _controller.addListener(_onSearchChanged);
+
 
     for (int i = 0; i < optionListForUI.length; i++) {
       if (optionListForUI[i].toLowerCase() ==
@@ -93,7 +100,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     setState(() {
       searchHintString = widget.hintText;
     });
-    fetchandBuild();
+
     fetchRecents();
     recentResults.add(Container(
       margin: EdgeInsets.only(left: 16, right: 16, top: 8),
@@ -137,6 +144,124 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       ),
     ));
   }
+  String name = "";
+  String floor = "";
+  String polyID = "";
+  String buildingID = "";
+  String finalName = "";
+  bool promptLoader = false;
+
+
+  void _onSearchChanged() {
+    List<String> promptArray = ["navigate to","take me to"];
+    String userInput = _controller.text.toLowerCase();
+    String stringToRemove = "";
+    bool containsPrompt = promptArray.any((element) {
+      if(userInput.contains(element)){
+        stringToRemove = element;
+        return true;
+      }else{
+        return false;
+      }
+    });
+    if(containsPrompt){
+      if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
+      print("Entered");
+
+      _searchDebounce = Timer(Duration(seconds: 3), () {
+        setState(() {
+          promptLoader = true;
+        });
+        print("Entered2");
+
+        // Perform search
+        //_performSearch(_controller.text);
+
+        String modifiedString = _controller.text.replaceAll(stringToRemove, "");
+        print("modifiedString$modifiedString");
+        if(modifiedString.trim().length>0){
+          print("modifiedStringisnOtEmpty");
+          final fuse = Fuzzy(
+            landmarkData.landmarkNames,
+            options: FuzzyOptions(
+              findAllMatches: true,
+              tokenize: true,
+              threshold: 0.7,
+            ),
+          );
+          final outputresult = fuse.search(modifiedString.toLowerCase());
+          // Assuming `result` is a List<FuseResult<dynamic>>
+          print("outputresult");
+          outputresult.forEach((fuseResult) {
+            // Access the item property of the result to get the matched value
+            String matchedName = fuseResult.item;
+            fuseResult.matches.length;
+
+            // Access the score of the match
+            double score = fuseResult.score;
+
+            // Do something with the matchedName or score
+            // score == 0.0
+            //     ? print('Matched Name: $matchedName, Score: $score')
+            //     : print("");
+            if (score <= 0.3) { //0.5 for normal
+              finalName = fuseResult.item;
+              print(fuseResult);
+            }
+          });
+          print("finalName is $finalName");
+
+
+
+
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (value.name != null && value.element!.subType != "beacons") {
+              if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
+                print("yess");
+                name = value.name!;
+                floor = value.name!;
+                polyID = value.properties!.polyId!;
+                buildingID = value.buildingID!;
+              }else{
+                print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
+              }
+            }
+          });
+
+          if(landmarkData.landmarkNames!.contains(finalName)){
+            //onVenueClicked(name, floor, polyID, buildingID);
+            if(polyID.isNotEmpty){
+              print("polyidis${polyID}");
+              HelperClass.showToast("Navigating to ${finalName}");
+              setState(() {
+                promptLoader = false;
+              });
+              //Future.delayed(Duration(seconds: 2));
+              Navigator.pop(context, polyID);
+            }else{
+              print("elsepolyID");
+              print(polyID);
+            }
+          }
+          
+        }else{
+          HelperClass.showToast("Provide a Landmark name !!");
+          print("modifiedStringempty");
+        }
+
+
+
+
+      });
+
+
+    }else{
+      print("Prompt not used");
+    }
+
+  }
+
+
 
   void initSpeech() async {
     speechEnabled = await speetchText.initialize();
@@ -172,14 +297,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         _controller.text = result.recognizedWords;
         search(result.recognizedWords);
-        print(_controller.text);
+        // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
-      if (result.recognizedWords == null) {
-        setState(() {
-          searchHintString = widget.hintText;
-        });
-      }
+
+      // if (result.recognizedWords == null) {
+      //   print("result.recognizedWords");
+      //
+      //
+      //   setState(() {
+      //     searchHintString = widget.hintText;
+      //   });
+      // }
     });
     print("In onSpeechResult");
   }
@@ -214,7 +343,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
       });
+      print("landmarkData.landmarks!.length");
+      try {
+        print(landmarkData.landmarks);
+      }catch(e){
+        print("landmarkData.landmarks!.length$e");
+      }
     });
+
+
   }
 
   void addtoRecents(String name, String location, String ID, String bid) async {
@@ -261,101 +398,108 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   void search(String searchText) {
-    setState(() {
-      if (searchText.isNotEmpty) {
-        if (optionList.contains(searchText.toLowerCase())) {
-          category = true;
-          for(int i=0 ; i<optionList.length ; i++){
-            if(optionList[i] == searchText.toLowerCase()){
-              vall = i;
+    print("insearch");
+      setState(() {
+        if (searchText.isNotEmpty) {
+          if (optionList.contains(searchText.toLowerCase())) {
+            category = true;
+            for(int i=0 ; i<optionList.length ; i++){
+              if(optionList[i] == searchText.toLowerCase()){
+                vall = i;
+              }
             }
+            searcCategoryhResults.clear();
+            landmarkData.landmarksMap!.forEach((key, value) {
+              if (searcCategoryhResults.length < 10) {
+                if (value.name != null && value.element!.subType != "beacons") {
+                  if (value.name!.toLowerCase() == searchText.toLowerCase()) {
+                    optionListItemBuildingName.add(value.buildingName!);
+                    searcCategoryhResults.clear();
+                    optionListItemBuildingName.forEach((element) {
+                      searcCategoryhResults.add(SearchpageCategoryResults(
+                        name: searchText,
+                        buildingName: element,
+                        onClicked: onVenueClicked,
+                      ));
+                    });
+                  }
+                  if (value.name!
+                      .toLowerCase()
+                      .contains(searchText.toLowerCase())) {
+                    optionListItemBuildingName.add(value.buildingName!);
+                    searcCategoryhResults.clear();
+                    optionListItemBuildingName.forEach((element) {
+                      searcCategoryhResults.add(SearchpageCategoryResults(
+                        name: searchText,
+                        buildingName: element,
+                        onClicked: onVenueClicked,
+                      ));
+                    });
+                  }
+                }
+              } else {
+                return;
+              }
+            });
+          } else {
+            category = false;
+            vall = -1;
+            searchResults.clear();
+            landmarkData.landmarksMap!.forEach((key, value) {
+              if (searchResults.length < 10) {
+                if (value.name != null && value.element!.subType != "beacon" && value.buildingID == buildingAllApi.selectedBuildingID) {
+                  if (value.name!
+                      .toLowerCase()
+                      .contains(searchText.toLowerCase())) {
+                    final nameList = [value.name!.toLowerCase()];
+                    final fuse = Fuzzy(
+                      nameList,
+                      options: FuzzyOptions(
+                        findAllMatches: true,
+                        tokenize: true,
+                        threshold: 0.5,
+                      ),
+                    );
+
+                    final result = fuse.search(searchText.toLowerCase());
+                    // Assuming `result` is a List<FuseResult<dynamic>>
+                    result.forEach((fuseResult) {
+                      // Access the item property of the result to get the matched value
+                      String matchedName = fuseResult.item;
+
+                      // Access the score of the match
+                      double score = fuseResult.score;
+
+                      // Do something with the matchedName or score
+                      score == 0.0
+                          ? print('Matched Name: $matchedName, Score: $score')
+                          : print('Matched Name: $matchedName, Score: $score');
+                      if(score<0.2){
+                        searchResults.add(SearchpageResults(
+                          name: "${value.name}",
+                          location:
+                          "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                          onClicked: onVenueClicked,
+                          ID: value.properties!.polyId!,
+                          bid: value.buildingID!,
+                          floor: value.floor!,
+                          coordX: value.coordinateX!,
+                          coordY: value.coordinateY!,
+                        ));
+                      }
+
+                    });
+
+                  }
+                }
+              } else {
+                return;
+              }
+            });
           }
-          searcCategoryhResults.clear();
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (searcCategoryhResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons") {
-                if (value.name!.toLowerCase() == searchText.toLowerCase()) {
-                  optionListItemBuildingName.add(value.buildingName!);
-                  searcCategoryhResults.clear();
-                  optionListItemBuildingName.forEach((element) {
-                    searcCategoryhResults.add(SearchpageCategoryResults(
-                      name: searchText,
-                      buildingName: element,
-                      onClicked: onVenueClicked,
-                    ));
-                  });
-                }
-                if (value.name!
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase())) {
-                  optionListItemBuildingName.add(value.buildingName!);
-                  searcCategoryhResults.clear();
-                  optionListItemBuildingName.forEach((element) {
-                    searcCategoryhResults.add(SearchpageCategoryResults(
-                      name: searchText,
-                      buildingName: element,
-                      onClicked: onVenueClicked,
-                    ));
-                  });
-                }
-              }
-            } else {
-              return;
-            }
-          });
-        } else {
-          category = false;
-          vall = -1;
-          searchResults.clear();
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacon" && value.buildingID == buildingAllApi.selectedBuildingID) {
-                if (value.name!
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase())) {
-                  final nameList = [value.name!.toLowerCase()];
-                  final fuse = Fuzzy(
-                    nameList,
-                    options: FuzzyOptions(
-                      findAllMatches: true,
-                      tokenize: true,
-                      threshold: 0.5,
-                    ),
-                  );
-                  final result = fuse.search(searchText.toLowerCase());
-                  // Assuming `result` is a List<FuseResult<dynamic>>
-                  result.forEach((fuseResult) {
-                    // Access the item property of the result to get the matched value
-                    String matchedName = fuseResult.item;
-
-                    // Access the score of the match
-                    double score = fuseResult.score;
-
-                    // Do something with the matchedName or score
-                    score == 0.0
-                        ? print('Matched Name: $matchedName, Score: $score')
-                        : print("");
-                  });
-                  searchResults.add(SearchpageResults(
-                    name: "${value.name}",
-                    location:
-                    "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                    onClicked: onVenueClicked,
-                    ID: value.properties!.polyId!,
-                    bid: value.buildingID!,
-                    floor: value.floor!,
-                    coordX: value.coordinateX!,
-                    coordY: value.coordinateY!,
-                  ));
-                }
-              }
-            } else {
-              return;
-            }
-          });
         }
-      }
-    });
+      });
+
   }
 
   void onVenueClicked(String name, String location, String ID, String bid) {
@@ -422,9 +566,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         ),
         body: Container(
           color: Colors.white,
-          child: Column(
+          child: !promptLoader? Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+
               Container(
                   width: screenWidth - 32,
                   height: 48,
@@ -597,15 +742,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         children: category ? searcCategoryhResults : searchResults,
                       ))),
             ],
+          ) : Center(
+            child: CircularProgressIndicator(
+              color: Colors.red,
+            ),
           ),
         ),
       ),
     );
   }
 
+
+
   @override
   void dispose() {
+    _controller.removeListener(_onSearchChanged);
     _controller.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 }
@@ -615,4 +768,59 @@ class SetInfo {
   String SetInfoBuildingName;
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
+}
+class ChipFilterWidget extends StatefulWidget {
+  final List<String> options;
+  final Function(String) onSelected;
+
+  ChipFilterWidget({required this.options, required this.onSelected});
+
+  @override
+  _ChipFilterWidgetState createState() => _ChipFilterWidgetState();
+}
+
+class _ChipFilterWidgetState extends State<ChipFilterWidget> {
+  String? _selectedOption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 4.0,
+      runSpacing: 8.0,
+      children: widget.options.map((option) {
+        return ChoiceChip(
+          label: Text(
+            option,
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 20/14,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          selected: _selectedOption == option,
+          onSelected: (selected) {
+            setState(() {
+              _selectedOption = selected ? option : null;
+            });
+            widget.onSelected(option);
+          },
+          showCheckmark: false,
+          selectedColor: Colors.green,
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: _selectedOption == option ? Colors.white : Colors.black,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22.0), // Adjust the radius as needed
+            side: BorderSide(
+              color: _selectedOption == option ? Colors.green : Colors.black,
+              width: 1.0, // Adjust the border width as needed
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 }

@@ -11,6 +11,7 @@ import 'APIMODELS/polylinedata.dart' as poly;
 class Building{
   Map<String,int> floor;
   Map<String,int> numberOfFloors;
+  static Map<String,List<int>> numberOfFloorsDelhi = Map();
   Map<String,Map<int, List<int>>> nonWalkable = Map();
   static Map<String,List<int>> numberOfFloorsDelhi = Map();
   Map<String,Map<int,List<int>>> floorDimenssion = Map();

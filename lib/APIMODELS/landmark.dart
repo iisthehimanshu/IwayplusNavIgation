@@ -50,7 +50,6 @@ class land {
       for (var landmark in landmarksList) {
         if (landmark.properties!.polyId != null) {
           landmarksMap![landmark.properties!.polyId!] = landmark;
-
         }
         if (landmark.name != null) {
           landmarkNames ??= [];

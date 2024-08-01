@@ -1268,7 +1268,7 @@ bool disposed=false;
         //  if(user.isnavigating==false){
         clearPathVariables();
         // }
-
+        _stopRippleAnimation();
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
@@ -3411,7 +3411,7 @@ bool disposed=false;
                         ),
                         child: TextButton(
                           onPressed: () async {
-                            //_polygon.clear();
+                            _polygon.clear();
 
                             Markers.clear();
 

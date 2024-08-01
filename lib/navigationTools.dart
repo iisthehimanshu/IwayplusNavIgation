@@ -848,7 +848,7 @@ class tools {
   static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=10;
+    int distance=20;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
     pCoord.add(Beacon.coordinateY!);
@@ -903,10 +903,13 @@ class tools {
     return nearestLandmark;
   }
 
-  static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap) {
+  static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap,{bool increaserange = false}) {
 
     PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
+    if(increaserange){
+      distance = 100;
+    }
     List<int> pCoord = [];
     pCoord.add(user.coordX!);
     pCoord.add(user.coordY!);

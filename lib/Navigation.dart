@@ -902,7 +902,7 @@ bool disposed=false;
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, मंज़िल ${user.locationName} पर हैं";
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, ${user.locationName} पर हैं";
       }
     } else if (msg ==
         "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}") {
@@ -1688,7 +1688,7 @@ bool disposed=false;
                         setState(() {
                           _isExpanded = !_isExpanded;
                         });
-                        Navigator.of(context).pop();
+                        // Navigator.of(context).pop();
                         await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => QRViewExample()),
@@ -1701,6 +1701,7 @@ bool disposed=false;
                           // print("polyValue$polyValue");
                           paintUser(null,polyID: value);
                         });
+                        //Navigator.of(context).pop();
                         // if (result != null) {
                         //   setState(() {
                         //     qrText = result;

@@ -1114,8 +1114,8 @@ bool disposed=false;
       double value = 0;
       if (nearestLandInfomation != null) {
         value = tools.calculateAngle2([
-          userSetLocation.coordinateX!,
-          userSetLocation.coordinateY!
+          userSetLocation.doorX??userSetLocation.coordinateX!,
+          userSetLocation.doorY??userSetLocation.coordinateY!
         ], newUserCord, [
           nearestLandInfomation!.coordinateX!,
           nearestLandInfomation!.coordinateY!
@@ -1123,7 +1123,7 @@ bool disposed=false;
       }
 
       mapState.zoom = 22;
-      print("value----");
+      print("value----l0p[]");
       print(value);
       String? finalvalue = value == 0
           ? null
@@ -1431,8 +1431,7 @@ bool disposed=false;
         double value = 0;
         if (nearestLandInfomation != null) {
           value = tools.calculateAngle2([
-            apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!
+            user.coordX,user.coordY
           ], newUserCord, [
             nearestLandInfomation!.coordinateX!,
             nearestLandInfomation!.coordinateY!
@@ -1441,7 +1440,11 @@ bool disposed=false;
 
         mapState.zoom = 22;
         print("value----");
+
         print(value);
+        if(value<45){
+          value = value + 45;
+        }
         String? finalvalue = value == 0
             ? null
             : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
@@ -2245,7 +2248,7 @@ bool disposed=false;
   }
 
   void updateCircle(double lat, double lng,
-      {double begin = 5, double end = 0}) {
+      {double begin = 7, double end = 0}) {
     // Create a new Tween with the provided begin and end values
     _animation = Tween<double>(begin: begin, end: end).animate(_controller)
       ..addListener(() {
@@ -9001,7 +9004,7 @@ bool disposed=false;
                         left: 20), // <--- padding added here
                     initialCameraPosition: _initialCameraPosition,
                     myLocationButtonEnabled: false,
-                    myLocationEnabled: false,
+                    myLocationEnabled: true,
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
 mapToolbarEnabled: false,

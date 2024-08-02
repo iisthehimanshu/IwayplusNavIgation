@@ -341,6 +341,7 @@ class UserState{
     List<double> values = tools.localtoglobal(coordX, coordY);
     lat = values[0];
     lng = values[1];
+    createCircle(values[0],values[1]);
   }
 
   Future<void> moveToStartofPath()async{

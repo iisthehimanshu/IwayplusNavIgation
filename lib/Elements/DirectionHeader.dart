@@ -336,7 +336,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 4.4) {
+              highestweight >= 4.2) {
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -384,7 +384,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
                     _currentLocale
                 );
-                UserState.createCircle(widget.user.lat,widget.user.lng);
                 widget.user.moveToPointOnPath(indexOnPath!);
                 widget.moveUser();
                 DirectionIndex = nextTurnIndex;

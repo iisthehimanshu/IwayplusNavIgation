@@ -3657,7 +3657,6 @@ bool disposed=false;
           });
         }else if (landmarks[i].element!.type == "Services" &&
             landmarks[i].element!.subType == "kiosk" &&
-            landmarks[i].name == "kiosk" &&
             landmarks[i].coordinateX != null) {
           // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
           //   ImageConfiguration(size: Size(44, 44)),
@@ -3671,8 +3670,13 @@ bool disposed=false;
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
-          markerText = "Kiosk";
-          textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
+          if(landmarks[i].name != "kiosk") {
+            List<String> parts = landmarks[i].name!.split(' ');
+            markerText = parts.isNotEmpty ? parts[1].trim() : '';
+          }else{
+            markerText = "Kiosk";
+          }
+          textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/check-in.png');
 
           Markers.add(Marker(
               markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),

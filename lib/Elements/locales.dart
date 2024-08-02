@@ -127,6 +127,7 @@ mixin LocaleData {
   static const String none='None';
   static const String ttsgostraight='ttsGoStraight';
   static const String waytogo="Where you want to go?";
+  static const String scanQr="Scan nearby QR to know your location";
 
 
   static Map<String, String> get properties => {
@@ -357,7 +358,8 @@ mixin LocaleData {
     'ttsSharpLeft':'Sharp Left',
     'ttsUTurn':'U Turn',
     'ttsGoStraight':'Go Straight',
-    'Where you want to go?':'Where you want to go?'
+    'Where you want to go?':'Where you want to go?',
+    'Scan nearby QR to know your location':'Scan nearby QR to know your location',
 
 
 
@@ -480,7 +482,8 @@ mixin LocaleData {
     'ttsSharpLeft':'तीव्र लेफ्ट',
     'ttsUTurn':'यू टर्न',
     'ttsGoStraight':'सीधे चले लगभग',
-    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
+    'Where you want to go?':'आप कहाँ जाना चाहते हैं?',
+    'Scan nearby QR to know your location':'अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें'
   };
 
   static const Map<String, dynamic> TA = {

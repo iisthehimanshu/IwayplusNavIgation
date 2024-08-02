@@ -115,8 +115,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-    btadapter.startthescan(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
+    btadapter.startthescan(Building.apibeaconmap,diff: 5);
+    _timer = Timer.periodic(Duration(milliseconds: 1800), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -333,7 +333,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 4.2) {
+              highestweight >= 2.6) {
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -345,48 +345,83 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               widget.user.showcoordY
             ];
             double d = tools.calculateDistance(beaconcoord, usercoord);
-            if (d < 5) {
-              print("workingg 1");
-              //near to user so nothing to do
-              return true;
-            } else {
-              //print("workingg 2");
-              int distanceFromPath = 100000000;
-              int? indexOnPath = null;
-              int numCols = widget.user.pathobj.numCols![widget.user
-                  .Bid]![widget.user.floor]!;
-              widget.user.path.forEach((node) {
-                List<int> pathcoord = [node % numCols, node ~/ numCols];
-                double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-                if (d1 < distanceFromPath) {
-                  distanceFromPath = d1.toInt();
-                  //print("node on path $node");
-                  //print("distanceFromPath $distanceFromPath");
-                  indexOnPath = widget.user.path.indexOf(node);
-                  //print(indexOnPath);
-                }
-              });
-
-              if (distanceFromPath > 10) {
-                print("workingg 3");
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                return false; //away from path
-              } else {
-                print("workingg 4");
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
-                    _currentLocale
-                );
-                widget.user.moveToPointOnPath(indexOnPath!);
-                widget.moveUser();
-                DirectionIndex = nextTurnIndex;
-                return true; //moved on path
+            int distanceFromPath = 100000000;
+            int? indexOnPath = null;
+            int numCols = widget.user.pathobj.numCols![widget.user
+                .Bid]![widget.user.floor]!;
+            widget.user.path.forEach((node) {
+              List<int> pathcoord = [node % numCols, node ~/ numCols];
+              double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+              if (d1 < distanceFromPath) {
+                distanceFromPath = d1.toInt();
+                //print("node on path $node");
+                //print("distanceFromPath $distanceFromPath");
+                indexOnPath = widget.user.path.indexOf(node);
+                //print(indexOnPath);
               }
+            });
+
+            if (distanceFromPath > 10) {
+              print("workingg 3");
+              _timer.cancel();
+              widget.repaint(nearestBeacon);
+              widget.reroute;
+              DirectionIndex = 1;
+              return false; //away from path
+            } else {
+              print("workingg 4");
+              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+              speak(
+                  "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                  _currentLocale
+              );
+              widget.user.moveToPointOnPath(indexOnPath!);
+              widget.moveUser();
+              DirectionIndex = nextTurnIndex;
+              return true; //moved on path
             }
+            // if (d < 5) {
+            //   print("workingg 1");
+            //   //near to user so nothing to do
+            //   return true;
+            // } else {
+            //   //print("workingg 2");
+            //   int distanceFromPath = 100000000;
+            //   int? indexOnPath = null;
+            //   int numCols = widget.user.pathobj.numCols![widget.user
+            //       .Bid]![widget.user.floor]!;
+            //   widget.user.path.forEach((node) {
+            //     List<int> pathcoord = [node % numCols, node ~/ numCols];
+            //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+            //     if (d1 < distanceFromPath) {
+            //       distanceFromPath = d1.toInt();
+            //       //print("node on path $node");
+            //       //print("distanceFromPath $distanceFromPath");
+            //       indexOnPath = widget.user.path.indexOf(node);
+            //       //print(indexOnPath);
+            //     }
+            //   });
+            //
+            //   if (distanceFromPath > 10) {
+            //     print("workingg 3");
+            //     _timer.cancel();
+            //     widget.repaint(nearestBeacon);
+            //     widget.reroute;
+            //     DirectionIndex = 1;
+            //     return false; //away from path
+            //   } else {
+            //     print("workingg 4");
+            //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            //     speak(
+            //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+            //         _currentLocale
+            //     );
+            //     widget.user.moveToPointOnPath(indexOnPath!);
+            //     widget.moveUser();
+            //     DirectionIndex = nextTurnIndex;
+            //     return true; //moved on path
+            //   }
+            // }
 
 
             //print("d $d");

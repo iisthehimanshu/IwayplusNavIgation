@@ -21,6 +21,7 @@ class BLueToothClass {
   List<BluetoothDevice> _systemDevices = [];
   List<ScanResult> _scanResults = [];
   bool _isScanning = false;
+  DateTime currenttime = DateTime.timestamp().add(Duration(hours: 5, minutes: 30));
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
 
@@ -58,15 +59,15 @@ class BLueToothClass {
     weight[1] = 6.0;
     weight[2] = 4.0;
     weight[3] = 2; //0.5
-    weight[4] = -2; //0.25
-    weight[5] = -1;
+    weight[4] = 1; //0.25
+    weight[5] = 0.5;
     weight[6] = 0;
   }
 
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
-  void startthescan(HashMap<String, beacon> apibeaconmap){
+  void startthescan(HashMap<String, beacon> apibeaconmap, {int diff = 10}){
     FlutterBluePlus.startScan(withNames: apibeaconmap.keys.toList());
     if (Platform.isAndroid) {
       print("starting scanning for android");
@@ -77,26 +78,19 @@ class BLueToothClass {
       // btadapter.strtScanningIos(apibeaconmap);
       // btadapter.getDevicesList();
     }
-  }
-
-  void startScanning(HashMap<String, beacon> apibeaconmap) {
-
-   // print("himanshu 1");
-
     startbin();
-   // print("himanshu 2");
-  //  print("himanshu 3");
+    // print("himanshu 2");
+    //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-     ScanResult lastresult = results.last;
-     print("lastresult $lastresult");
+
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           //print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          print("searching $MacId with timestamp ${result.timeStamp}");
+          print("searching $MacId with timestamp ${result.timeStamp} difference is ${(currenttime.second - result.timeStamp.second).abs()}");
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
-          if (apibeaconmap.containsKey(MacId) && lastresult.timeStamp.difference(result.timeStamp).inSeconds<2) {
+          if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
             print("added $MacId");
             beacondetail[MacId] = Rssi * -1;
@@ -106,7 +100,13 @@ class BLueToothClass {
         }
       }
     });
+  }
 
+  void startScanning(HashMap<String, beacon> apibeaconmap) {
+    currenttime = DateTime.timestamp().add(Duration(hours: 5, minutes: 30));
+    print("lastresult ${FlutterBluePlus.lastScanResults}");
+    FlutterBluePlus.scanResults.drain();
+   // print("himanshu 1");
   }
 
 
@@ -301,7 +301,11 @@ class BLueToothClass {
 
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
-      sumMap[key] = sum / count;
+      if(count==1){
+        sumMap[key] = 0;
+      }else{
+        sumMap[key] = sum / count;
+      }
     });
 
     BIN = HashMap();

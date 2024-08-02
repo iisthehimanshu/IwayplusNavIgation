@@ -1114,8 +1114,8 @@ bool disposed=false;
       double value = 0;
       if (nearestLandInfomation != null) {
         value = tools.calculateAngle2([
-          userSetLocation.coordinateX!,
-          userSetLocation.coordinateY!
+          userSetLocation.doorX??userSetLocation.coordinateX!,
+          userSetLocation.doorY??userSetLocation.coordinateY!
         ], newUserCord, [
           nearestLandInfomation!.coordinateX!,
           nearestLandInfomation!.coordinateY!
@@ -1123,7 +1123,7 @@ bool disposed=false;
       }
 
       mapState.zoom = 22;
-      print("value----");
+      print("value----l0p[]");
       print(value);
       String? finalvalue = value == 0
           ? null
@@ -1138,7 +1138,7 @@ bool disposed=false;
       // print(finalvalue);
       if (user.isnavigating == false) {
         detected = true;
-        if (!_isExploreModePannelOpen) {
+        if (!_isExploreModePannelOpen && speakTTS) {
           _isBuildingPannelOpen = true;
         }
         nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
@@ -1433,8 +1433,7 @@ bool disposed=false;
         double value = 0;
         if (nearestLandInfomation != null) {
           value = tools.calculateAngle2([
-            apibeaconmap[nearestBeacon]!.coordinateX!,
-            apibeaconmap[nearestBeacon]!.coordinateY!
+            user.coordX,user.coordY
           ], newUserCord, [
             nearestLandInfomation!.coordinateX!,
             nearestLandInfomation!.coordinateY!
@@ -1443,7 +1442,11 @@ bool disposed=false;
 
         mapState.zoom = 22;
         print("value----");
+
         print(value);
+        if(value<45){
+          value = value + 45;
+        }
         String? finalvalue = value == 0
             ? null
             : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
@@ -1457,7 +1460,7 @@ bool disposed=false;
         // print(finalvalue);
         if (user.isnavigating == false) {
           detected = true;
-          if (!_isExploreModePannelOpen) {
+          if (!_isExploreModePannelOpen && speakTTS) {
             _isBuildingPannelOpen = true;
           }
           nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
@@ -2083,15 +2086,7 @@ bool disposed=false;
 
       print("scanningggg starteddddd");
 
-      if (Platform.isAndroid) {
-        print("starting scanning for android");
-        btadapter.startScanning(apibeaconmap);
-      } else {
-        print("starting scanning for IOS");
-        btadapter.startScanningIOS(apibeaconmap);
-        // btadapter.strtScanningIos(apibeaconmap);
-        // btadapter.getDevicesList();
-      }
+      btadapter.startthescan(apibeaconmap);
 
       //btadapter.startScanning(apibeaconmap);
       setState(() {
@@ -2253,7 +2248,7 @@ bool disposed=false;
   }
 
   void updateCircle(double lat, double lng,
-      {double begin = 5, double end = 0}) {
+      {double begin = 7, double end = 0}) {
     // Create a new Tween with the provided begin and end values
     _animation = Tween<double>(begin: begin, end: end).animate(_controller)
       ..addListener(() {
@@ -9311,13 +9306,7 @@ mapToolbarEnabled: false,
 
 
                           if(!user.isnavigating){
-                            if (Platform.isAndroid) {
-                              print("starting scanning for android");
-                              btadapter.startScanning(apibeaconmap);
-                            } else {
-                              print("starting scanning for IOS");
-                              btadapter.startScanningIOS(apibeaconmap);
-                            }
+                            btadapter.startthescan(apibeaconmap);
                             setState(() {
                               isLocalized=true;
                               resBeacons = apibeaconmap;
@@ -9378,8 +9367,7 @@ mapToolbarEnabled: false,
                                       Duration(
                                           milliseconds: 5000),
                                           (timer) async {
-                                        btadapter
-                                            .startScanning(resBeacons);
+                                        btadapter.startthescan(resBeacons);
                                         Future.delayed(Duration(
                                             milliseconds: 2000))
                                             .then((value) => {

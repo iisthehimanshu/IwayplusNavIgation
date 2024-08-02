@@ -115,9 +115,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-
-    btadapter.startScanning(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+    btadapter.startthescan(Building.apibeaconmap,diff: 5);
+    _timer = Timer.periodic(Duration(milliseconds: 1800), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -151,13 +150,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("turnpoints $turnPoints");
 
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-       btadapter.startScanning(Building.apibeaconmap);
-      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        print("WilsonCalled");
 
-        ();
-
-      });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -222,6 +215,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
+    //print("calledsumMap $sumMap");
     sortedsumMap.clear();
     //print("sortedsumMapcleared $sortedsumMap");
 
@@ -235,11 +229,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
     setState(() {
+      sumMap;
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
     });
 
-    btadapter.stopScanning();
-    btadapter.startScanning(Building.apibeaconmap);
+    btadapter.emptyBin();
+    btadapter.priorityQueue.clear();
+    // btadapter.stopScanning();
+     btadapter.startScanning(Building.apibeaconmap);
 
     // sortedsumMap.entries.forEach((element) {
     //   if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
@@ -336,7 +333,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= 4.2) {
+
+              highestweight >= 2.6) {
+
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
             List<int> beaconcoord = [
@@ -348,49 +347,83 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               widget.user.showcoordY
             ];
             double d = tools.calculateDistance(beaconcoord, usercoord);
-            if (d < 5) {
-              print("workingg 1");
-              //near to user so nothing to do
-              return true;
-            } else {
-              //print("workingg 2");
-              int distanceFromPath = 100000000;
-              int? indexOnPath = null;
-              int numCols = widget.user.pathobj.numCols![widget.user
-                  .Bid]![widget.user.floor]!;
-              widget.user.path.forEach((node) {
-                List<int> pathcoord = [node % numCols, node ~/ numCols];
-                double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-                if (d1 < distanceFromPath) {
-                  distanceFromPath = d1.toInt();
-                  //print("node on path $node");
-                  //print("distanceFromPath $distanceFromPath");
-                  indexOnPath = widget.user.path.indexOf(node);
-                  //print(indexOnPath);
-                }
-              });
-
-              if (distanceFromPath > 10) {
-                print("workingg 3");
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                return false; //away from path
-              } else {
-                print("workingg 4");
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                speak(
-                    "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
-                    _currentLocale
-                );
-                UserState.createCircle(widget.user.lat,widget.user.lng);
-                widget.user.moveToPointOnPath(indexOnPath!);
-                widget.moveUser();
-                DirectionIndex = nextTurnIndex;
-                return true; //moved on path
+            int distanceFromPath = 100000000;
+            int? indexOnPath = null;
+            int numCols = widget.user.pathobj.numCols![widget.user
+                .Bid]![widget.user.floor]!;
+            widget.user.path.forEach((node) {
+              List<int> pathcoord = [node % numCols, node ~/ numCols];
+              double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+              if (d1 < distanceFromPath) {
+                distanceFromPath = d1.toInt();
+                //print("node on path $node");
+                //print("distanceFromPath $distanceFromPath");
+                indexOnPath = widget.user.path.indexOf(node);
+                //print(indexOnPath);
               }
+            });
+
+            if (distanceFromPath > 10) {
+              print("workingg 3");
+              _timer.cancel();
+              widget.repaint(nearestBeacon);
+              widget.reroute;
+              DirectionIndex = 1;
+              return false; //away from path
+            } else {
+              print("workingg 4");
+              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+              speak(
+                  "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                  _currentLocale
+              );
+              widget.user.moveToPointOnPath(indexOnPath!);
+              widget.moveUser();
+              DirectionIndex = nextTurnIndex;
+              return true; //moved on path
             }
+            // if (d < 5) {
+            //   print("workingg 1");
+            //   //near to user so nothing to do
+            //   return true;
+            // } else {
+            //   //print("workingg 2");
+            //   int distanceFromPath = 100000000;
+            //   int? indexOnPath = null;
+            //   int numCols = widget.user.pathobj.numCols![widget.user
+            //       .Bid]![widget.user.floor]!;
+            //   widget.user.path.forEach((node) {
+            //     List<int> pathcoord = [node % numCols, node ~/ numCols];
+            //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+            //     if (d1 < distanceFromPath) {
+            //       distanceFromPath = d1.toInt();
+            //       //print("node on path $node");
+            //       //print("distanceFromPath $distanceFromPath");
+            //       indexOnPath = widget.user.path.indexOf(node);
+            //       //print(indexOnPath);
+            //     }
+            //   });
+            //
+            //   if (distanceFromPath > 10) {
+            //     print("workingg 3");
+            //     _timer.cancel();
+            //     widget.repaint(nearestBeacon);
+            //     widget.reroute;
+            //     DirectionIndex = 1;
+            //     return false; //away from path
+            //   } else {
+            //     print("workingg 4");
+            //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            //     speak(
+            //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+            //         _currentLocale
+            //     );
+            //     widget.user.moveToPointOnPath(indexOnPath!);
+            //     widget.moveUser();
+            //     DirectionIndex = nextTurnIndex;
+            //     return true; //moved on path
+            //   }
+            // }
 
 
             //print("d $d");
@@ -560,16 +593,14 @@ if(disposed)return;
 
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-        print("nextTurn remainingPath $remainingPath");
-        print("nextturn turnpoint $turnPoints");
+        // print("nextTurn remainingPath $remainingPath");
+        // print("nextturn turnpoint $turnPoints");
         int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print("nextTurn $nextTurn");
-        print(remainingPath);
-        for (var element in widget.user.pathobj.directions) {
-          print("checkkkkk here   ${element.node} [${element.x},${element.y}]");
-        }
+        // print("nextTurn $nextTurn");
+        // print(remainingPath);
+
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
-        print("nextTurn index $nextTurnIndex");
+        // print("nextTurn index $nextTurnIndex");
 
         if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
           if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
@@ -909,7 +940,9 @@ if(disposed)return;
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(ShowsumMap.toString()),
+
+                  Text(sumMap.toString()),
+
                 ],
               ),
             ),

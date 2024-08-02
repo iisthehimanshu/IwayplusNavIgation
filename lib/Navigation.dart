@@ -1226,6 +1226,8 @@ bool disposed=false;
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
       print("nearestBeacon : $nearestBeacon");
 
+
+
       final Uint8List userloc =
       await getImagesFromMarker('assets/userloc0.png', 80);
       final Uint8List userlocdebug =
@@ -1539,7 +1541,7 @@ bool disposed=false;
         }
       } else {
         if (speakTTS) {
-          speak(LocaleData.unabletofindyourlocation.getString(context),
+          await speak(LocaleData.unabletofindyourlocation.getString(context),
               _currentLocale);
           showLocationDialog(context);
         }
@@ -1558,183 +1560,188 @@ bool disposed=false;
 
 
   void showLocationDialog(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    Future.delayed(Duration(milliseconds: 1500)).then((value){
+      speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
+      double screenWidth = MediaQuery.of(context).size.width;
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
 
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: Container(
-            padding: EdgeInsets.only(top:20,left:15,right: 15),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Choose Your Location",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xff000000),
-                    height: 24/18,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  "We couldn't detect your location",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xffa1a1aa),
-                    height: 20/14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                Container(
-                  width: screenWidth,
-                  child: TextField(
-                    onTap: (){
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
-                      ).then((value){
-                        setState(() {
-                          //widget.SourceID = value;
-                          print("dataPOpped:$value");
-
-                          if(value!=null){
-                            Navigator.of(context).pop();
-                            paintUser(null,polyID: value);
-                          }else{
-                            print("selectionvalnotempty");
-                          }
-
-                          // SourceName = landmarkData.landmarksMap![value]!.name!;
-                          // if(widget.SourceID != "" && widget.DestinationID != ""){
-                          //   print("h3");
-                          //   Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                          // }
-                        });
-                      });
-                    },
-
-                    decoration: InputDecoration(
-                      hintText: 'Search your current location',
-                      hintStyle: TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffa1a1aa),
-                        height: 20/14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.teal,width: 1),
-                      ),
-
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.teal, width: 1),
-                      ),
-
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 0), // Adjust vertical padding to center text
-
-                    ),
-                    textAlign: TextAlign.center, // Center the text and hint
-
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Or",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xffa0a0a0),
-                    height: 20/14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "Scan the Nearby QR Code",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff18181b),
-                    height: 25/16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 10),
-                Center(
-                  child: GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
-                      Navigator.of(context).pop();
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => QRViewExample()),
-                      ).then((value){
-                        // if(value==""){
-                        //   showLocationDialog(context);
-                        // }
-                        // print("Value--${value}");
-                        // String polyValue = value.replaceAll("http://", "");
-                        // print("polyValue$polyValue");
-                        paintUser(null,polyID: value);
-                      });
-                      // if (result != null) {
-                      //   setState(() {
-                      //     qrText = result;
-                      //   });
-                      //   print('QR Code: $qrText');
-                      //   // Handle the scanned QR code text
-                      // }else{
-                      //   print("resultNull");
-                      // }
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(seconds: 3),
-                      width: _isExpanded ? 120 : 80,
-                      height: _isExpanded ? 120 : 80,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.teal),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 18),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    child: Text('Skip', style: TextStyle(color: Color(0xffa1a1aa))),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
             ),
-          ),
-        );
-      },
-    );
+            child: Container(
+              padding: EdgeInsets.only(top:20,left:15,right: 15),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Choose Your Location",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
+                      height: 24/18,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    "We couldn't detect your location",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffa1a1aa),
+                      height: 20/14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    width: screenWidth,
+                    child: TextField(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
+                        ).then((value){
+                          setState(() {
+                            //widget.SourceID = value;
+                            print("dataPOpped:$value");
+
+                            if(value!=null){
+                              Navigator.of(context).pop();
+                              paintUser(null,polyID: value);
+                            }else{
+                              print("selectionvalnotempty");
+                            }
+
+                            // SourceName = landmarkData.landmarksMap![value]!.name!;
+                            // if(widget.SourceID != "" && widget.DestinationID != ""){
+                            //   print("h3");
+                            //   Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                            // }
+                          });
+                        });
+                      },
+
+                      decoration: InputDecoration(
+                        hintText: 'Search your current location',
+                        hintStyle: TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xffa1a1aa),
+                          height: 20/14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.teal,width: 1),
+                        ),
+
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.teal, width: 1),
+                        ),
+
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 0), // Adjust vertical padding to center text
+
+                      ),
+                      textAlign: TextAlign.center, // Center the text and hint
+
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Or",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffa0a0a0),
+                      height: 20/14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Scan the Nearby QR Code",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff18181b),
+                      height: 25/16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                        Navigator.of(context).pop();
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => QRViewExample()),
+                        ).then((value){
+                          // if(value==""){
+                          //   showLocationDialog(context);
+                          // }
+                          // print("Value--${value}");
+                          // String polyValue = value.replaceAll("http://", "");
+                          // print("polyValue$polyValue");
+                          paintUser(null,polyID: value);
+                        });
+                        // if (result != null) {
+                        //   setState(() {
+                        //     qrText = result;
+                        //   });
+                        //   print('QR Code: $qrText');
+                        //   // Handle the scanned QR code text
+                        // }else{
+                        //   print("resultNull");
+                        // }
+                      },
+                      child: AnimatedContainer(
+                        duration: Duration(seconds: 3),
+                        width: _isExpanded ? 120 : 80,
+                        height: _isExpanded ? 120 : 80,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.teal),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 18),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      child: Text('Skip', style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+
   }
 
   void moveUser() async {

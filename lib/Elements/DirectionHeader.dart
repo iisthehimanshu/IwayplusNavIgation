@@ -115,9 +115,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-
-    btadapter.startScanning(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+    btadapter.startthescan(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -151,13 +150,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       print("turnpoints $turnPoints");
 
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
-       btadapter.startScanning(Building.apibeaconmap);
-      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-        print("WilsonCalled");
 
-        ();
-
-      });
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -240,9 +233,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
     });
 
-
-    btadapter.stopScanning();
-    btadapter.startScanning(Building.apibeaconmap);
+    btadapter.emptyBin();
+    btadapter.priorityQueue.clear();
+    // btadapter.stopScanning();
+     btadapter.startScanning(Building.apibeaconmap);
 
     // sortedsumMap.entries.forEach((element) {
     //   if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
@@ -562,16 +556,14 @@ if(disposed)return;
 
 
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-        print("nextTurn remainingPath $remainingPath");
-        print("nextturn turnpoint $turnPoints");
+        // print("nextTurn remainingPath $remainingPath");
+        // print("nextturn turnpoint $turnPoints");
         int nextTurn = findNextTurn(turnPoints, remainingPath);
-        print("nextTurn $nextTurn");
-        print(remainingPath);
-        for (var element in widget.user.pathobj.directions) {
-          print("checkkkkk here   ${element.node} [${element.x},${element.y}]");
-        }
+        // print("nextTurn $nextTurn");
+        // print(remainingPath);
+
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
-        print("nextTurn index $nextTurnIndex");
+        // print("nextTurn index $nextTurnIndex");
 
         if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
           if(DirectionIndex + 1 < widget.user.pathobj.directions.length)

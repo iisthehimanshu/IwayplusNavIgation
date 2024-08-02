@@ -2078,15 +2078,7 @@ bool disposed=false;
 
       print("scanningggg starteddddd");
 
-      if (Platform.isAndroid) {
-        print("starting scanning for android");
-        btadapter.startScanning(apibeaconmap);
-      } else {
-        print("starting scanning for IOS");
-        btadapter.startScanningIOS(apibeaconmap);
-        // btadapter.strtScanningIos(apibeaconmap);
-        // btadapter.getDevicesList();
-      }
+      btadapter.startthescan(apibeaconmap);
 
       //btadapter.startScanning(apibeaconmap);
       setState(() {
@@ -9302,13 +9294,7 @@ mapToolbarEnabled: false,
 
 
                           if(!user.isnavigating){
-                            if (Platform.isAndroid) {
-                              print("starting scanning for android");
-                              btadapter.startScanning(apibeaconmap);
-                            } else {
-                              print("starting scanning for IOS");
-                              btadapter.startScanningIOS(apibeaconmap);
-                            }
+                            btadapter.startthescan(apibeaconmap);
                             setState(() {
                               isLocalized=true;
                               resBeacons = apibeaconmap;
@@ -9369,8 +9355,7 @@ mapToolbarEnabled: false,
                                       Duration(
                                           milliseconds: 5000),
                                           (timer) async {
-                                        btadapter
-                                            .startScanning(resBeacons);
+                                        btadapter.startthescan(resBeacons);
                                         Future.delayed(Duration(
                                             milliseconds: 2000))
                                             .then((value) => {

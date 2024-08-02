@@ -1426,13 +1426,13 @@ List<Cell> findCorridorSegments(
     }
 
     bool northCollision =
-    checkDirection(nonWalkable, row, col, numCols, -1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, -1, 0, 10);
     bool southCollision =
-    checkDirection(nonWalkable, row, col, numCols, 1, 0, 8);
+    checkDirection(nonWalkable, row, col, numCols, 1, 0, 10);
     bool eastCollision =
-    checkDirection(nonWalkable, row, col, numCols, 0, 1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, 1, 10);
     bool westCollision =
-    checkDirection(nonWalkable, row, col, numCols, 0, -1, 8);
+    checkDirection(nonWalkable, row, col, numCols, 0, -1, 10);
 
     int collisionCount = (northCollision ? 1 : 0) +
         (southCollision ? 1 : 0) +

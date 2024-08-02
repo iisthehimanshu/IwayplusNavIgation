@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
@@ -65,26 +66,39 @@ class BLueToothClass {
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
+  void startthescan(HashMap<String, beacon> apibeaconmap){
+    FlutterBluePlus.startScan(withNames: apibeaconmap.keys.toList());
+    if (Platform.isAndroid) {
+      print("starting scanning for android");
+      startScanning(apibeaconmap);
+    } else {
+      print("starting scanning for IOS");
+      startScanningIOS(apibeaconmap);
+      // btadapter.strtScanningIos(apibeaconmap);
+      // btadapter.getDevicesList();
+    }
+  }
+
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
    // print("himanshu 1");
 
     startbin();
    // print("himanshu 2");
-    FlutterBluePlus.startScan();
-    FlutterBluePlus.
   //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-      print("calledresults $results");
+     ScanResult lastresult = results.last;
+     print("lastresult $lastresult");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           //print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          //print("mac $MacId    rssi $Rssi");
+          print("searching $MacId with timestamp ${result.timeStamp}");
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
-          if (apibeaconmap.containsKey(MacId)) {
+          if (apibeaconmap.containsKey(MacId) && lastresult.timeStamp.difference(result.timeStamp).inSeconds<2) {
             //print(MacId);
+            print("added $MacId");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes
@@ -92,6 +106,7 @@ class BLueToothClass {
         }
       }
     });
+
   }
 
 

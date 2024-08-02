@@ -72,9 +72,10 @@ class BLueToothClass {
     startbin();
    // print("himanshu 2");
     FlutterBluePlus.startScan();
+    FlutterBluePlus.
   //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-     // print("himanshu 4");
+      print("calledresults $results");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           //print("himanshu 5 ${result}");
@@ -91,8 +92,6 @@ class BLueToothClass {
         }
       }
     });
-
-    calculateAverage();
   }
 
 
@@ -275,7 +274,7 @@ class BLueToothClass {
     Map<String, double> sumMap = {};
 
     // Iterate over each inner map and accumulate the values for each string key
-
+    print("calledsumMap ${BIN}");
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;

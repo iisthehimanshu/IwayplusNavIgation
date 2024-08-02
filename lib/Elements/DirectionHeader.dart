@@ -117,7 +117,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
 
     btadapter.startScanning(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -222,6 +222,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
+    //print("calledsumMap $sumMap");
     sortedsumMap.clear();
     //print("sortedsumMapcleared $sortedsumMap");
 
@@ -235,8 +236,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
     setState(() {
+      sumMap;
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
     });
+
 
     btadapter.stopScanning();
     btadapter.startScanning(Building.apibeaconmap);
@@ -900,19 +903,19 @@ if(disposed)return;
             ),
           ):Container(),
 
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(ShowsumMap.toString()),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(sumMap.toString()),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

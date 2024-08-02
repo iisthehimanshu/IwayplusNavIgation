@@ -1138,7 +1138,7 @@ bool disposed=false;
       // print(finalvalue);
       if (user.isnavigating == false) {
         detected = true;
-        if (!_isExploreModePannelOpen) {
+        if (!_isExploreModePannelOpen && speakTTS) {
           _isBuildingPannelOpen = true;
         }
         nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
@@ -1458,7 +1458,7 @@ bool disposed=false;
         // print(finalvalue);
         if (user.isnavigating == false) {
           detected = true;
-          if (!_isExploreModePannelOpen) {
+          if (!_isExploreModePannelOpen && speakTTS) {
             _isBuildingPannelOpen = true;
           }
           nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
@@ -9004,7 +9004,7 @@ bool disposed=false;
                         left: 20), // <--- padding added here
                     initialCameraPosition: _initialCameraPosition,
                     myLocationButtonEnabled: false,
-                    myLocationEnabled: true,
+                    myLocationEnabled: false,
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
 mapToolbarEnabled: false,

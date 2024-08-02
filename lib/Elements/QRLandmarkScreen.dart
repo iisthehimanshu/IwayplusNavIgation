@@ -154,7 +154,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       print("result");
       print(result!.code);
       if(result != null){
-        String polyValue = result!.code!.replaceAll("http://", "");
+        String polyValue = result!.code!.replaceAll("https://dev.iwayplus.in/iwaymaps/", "");
         if(polyValue != ""){
           Navigator.pop(context,polyValue);
         }else{

@@ -1893,7 +1893,7 @@ bool disposed=false;
       }
     });
     FlutterBeep.beep();
-    speak("You are going away from the path. Rerouting you to the destination",
+    speak("${LocaleData.reroute.getString(context)}",
         _currentLocale);
 
     autoreroute();

@@ -847,11 +847,26 @@ if(disposed)return;
       return Color(0xff01544f);
     }
   }
+  final Map<int, Map<String, double>> bin = {
+    1: {'key1': 1.1, 'key2': 2.2},
+    2: {'keyA': 3.3, 'keyB': 4.4},
+  };
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    String binString = btadapter.BIN.entries.map((entry) {
+      int key = entry.key;
+      Map<String, double> valueMap = entry.value;
+      String valueString = valueMap.entries.map((e) {
+        return '${e.key}: ${e.value}';
+      }).join(', ');
+      return 'BIN[$key]: {$valueString}';
+    }).join('\n');
+    setState(() {
+
+    });
     return Semantics(
       excludeSemantics: true,
       child: Column(
@@ -941,12 +956,15 @@ if(disposed)return;
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
+
                   Text(sumMap.toString()),
+                  Text(binString),
 
                 ],
               ),
             ),
           ),
+
         ],
       ),
     );

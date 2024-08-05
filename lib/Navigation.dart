@@ -28,6 +28,7 @@ import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
@@ -3422,17 +3423,17 @@ bool disposed=false;
           //   ImageConfiguration(size: Size(44, 44)),
           //   getImagesFromMarker('assets/location_on.png',50),
           // );
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/pin.png', 50);
+          final Uint8List iconMarker = await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
               patchData: building.patchData[buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
-          if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
-            List<String> parts = landmarks[i].name!.split('-');
-            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+          List<String> parts = landmarks[i].name!.split('-');
+          markerText = parts.isNotEmpty ? parts[0].trim() : '';
+
+          if(markerText != ""){
             textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
           }else{
             textMarker = await bitmapDescriptorFromTextAndImage(landmarks[i].name!,'assets/pin.png');
@@ -8989,526 +8990,544 @@ bool disposed=false;
         MediaQuery.of(context).devicePixelRatio;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            detected
-                ? Semantics(
-                excludeSemantics: true,
-                child: ExploreModePannel())
-                : Semantics(
-                excludeSemantics: true, child: Container()),
-            Stack(
-              children: [Semantics(
-                excludeSemantics: true,
-                child: Container(
-                  child: GoogleMap(
-                    padding: EdgeInsets.only(
-                        left: 20), // <--- padding added here
-                    initialCameraPosition: _initialCameraPosition,
-                    myLocationButtonEnabled: false,
-                    myLocationEnabled: false,
-                    zoomControlsEnabled: false,
-                    zoomGesturesEnabled: true,
-mapToolbarEnabled: false,
-                    polygons: patch
-                        .union(getCombinedPolygons())
-                        .union(otherpatch)
-                        .union(_polygon),
-                    polylines: singleroute[building.floor[
-                    buildingAllApi.getStoredString()]] !=
-                        null
-                        ? getCombinedPolylines().union(singleroute[
-                    building.floor[
-                    buildingAllApi.getStoredString()]]!)
-                        : getCombinedPolylines(),
-                    markers: getCombinedMarkers()
-                        .union(_markers)
-                        .union(focusturnArrow),
-                    onTap: (x) {
-                      mapState.interaction = true;
-                    },
-                    mapType: MapType.normal,
-                    buildingsEnabled: false,
-                    compassEnabled: true,
-                    rotateGesturesEnabled: true,
-                    minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                    onMapCreated: (controller) {
-                      controller.setMapStyle(maptheme);
-                      _googleMapController = controller;
-                      print("tumhari galti hai sb saalo");
-
-                      if (patch.isNotEmpty) {
-                        fitPolygonInScreen(patch.first);
-                      }
-                      _initMarkers();
-                    },
-                    onCameraMove: (CameraPosition cameraPosition) {
-                      // print("plpl ${cameraPosition.tilt}");
-                      focusBuildingChecker(cameraPosition);
-                      mapState.interaction = true;
-                      mapbearing = cameraPosition.bearing;
-                      if (!mapState.interaction) {
-                        mapState.zoom = cameraPosition.zoom;
-                      }
-                      if (true) {
-                        _updateMarkers(cameraPosition.zoom);
-                        //_updateBuilding(cameraPosition.zoom);
-                      }
-                      // _updateMarkers(cameraPosition.zoom);
-                      if (cameraPosition.zoom < 17) {
-                        _markers.clear();
-                        markerSldShown = false;
-                      } else {
-                        if (user.isnavigating) {
-                          _markers.clear();
-                          markerSldShown = false;
-                        } else {
-                          markerSldShown = true;
-                        }
-                      }
-                      if (markerSldShown) {
-                        _updateMarkers11(cameraPosition.zoom);
-                      } else {
-                        print("Notshow");
-                      }
-
-                      // _updateEntryMarkers11(cameraPosition.zoom);
-                      //_markerLocations.clear();
-                      // print("Zoom level: ${cameraPosition.zoom}");
-                    },
-                    onCameraIdle: () {
-                      if (!mapState.interaction) {
-                        mapState.interaction2 = true;
-                      }
-                    },
-                    onCameraMoveStarted: () {
-                      mapState.interaction2 = false;
-                    },
-                    circles: circles,
-                  ),
-                ),
+    return isLoading && isBlueToothLoading
+        ? Scaffold(
+            body: Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.teal,
+                size: 150,
               ),
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: screenWidth,
-                  height: 30,
-                  color: Colors.white,
-                ),
-              )]
             ),
-            //debug----
-
-            DebugToggle.PDRIcon
-                ? Positioned(
-                top: 150,
-                right: 50,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(20),
-                    color: (isPdr) ? Colors.green : Colors.red,
-                  ),
-                  height: 20,
-                  width: 20,
-                ))
-                : Container(),
-            Positioned(
-              bottom: 150.0, // Adjust the position as needed
-              right: 16.0,
-
-              child: Semantics(
-                excludeSemantics: false,
-                child: Column(
-                  children: [
-                    //
-                    // // Text(Building.thresh),
-                    Visibility(
-                      visible: DebugToggle.StepButton,
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(24))),
-                          child: IconButton(
-                              onPressed: () {
-                                //StartPDR();
-
-                                bool isvalid =
-                                MotionModel.isValidStep(
-                                    user,
-                                    building.floorDimenssion[user
-                                        .Bid]![user.floor]![0],
-                                    building.floorDimenssion[user
-                                        .Bid]![user.floor]![1],
-                                    building.nonWalkable[
-                                    user.Bid]![user.floor]!,
-                                    reroute);
-                                if (isvalid) {
-                                  user.move(context).then((value) {
-                                    renderHere();
-                                  });
-                                } else {
-                                  if (user.isnavigating) {
-                                    // reroute();
-                                    // showToast("You are out of path");
-                                  }
-                                }
-                              },
-                              icon: Icon(Icons.directions_walk))),
-                    ),
-
-                    SizedBox(height: 28.0),
-                    DebugToggle.Slider
-                        ? Text("${user.theta}")
-                        : Container(),
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    //     "floor ${user.floor}\n"
-                    //     "userBid ${user.Bid} \n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
-                    DebugToggle.Slider
-                        ? Slider(
-                        value: user.theta,
-                        min: -180,
-                        max: 180,
-                        onChanged: (newvalue) {
-                          double? compassHeading = newvalue;
-                          setState(() {
-                            user.theta = compassHeading!;
-                            if (mapState.interaction2) {
-                              mapState.bearing = compassHeading!;
-                              _googleMapController.moveCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                    target: mapState.target,
-                                    zoom: mapState.zoom,
-                                    bearing: mapState.bearing!,
-                                  ),
-                                ),
-                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              );
-                            } else {
-                              if (markers.length > 0)
-                                markers[user.Bid]?[0] =
-                                    customMarker.rotate(
-                                        compassHeading! -
-                                            mapbearing,
-                                        markers[user.Bid]![0]);
-                            }
-                          });
-                        })
-                        : Container(),
-                    SizedBox(height: 28.0),
-                    !isSemanticEnabled
-                        ? Semantics(
-                      label: "Change floor",
-                      child: SpeedDial(
-                        child: Text(
-                          building.floor == 0
-                              ? 'G'
-                              : '${building.floor[buildingAllApi.getStoredString()]}',
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xff24b9b0),
-                            height: 19 / 16,
-                          ),
-                        ),
-                        activeIcon: Icons.close,
-                        backgroundColor: Colors.white,
-                        children: List.generate(
-                          (Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0]).length, (int i) {
-                          //print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
-                          List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0];
-                          List<int> revfloorList = floorList;
-                          revfloorList.sort();
-                          // building.numberOfFloors[buildingAllApi
-                          //     .getStoredString()];
-                          //
-                          // print(building.numberOfFloors!);
-                          return SpeedDialChild(
-                            child: Semantics(
-                              label: "${revfloorList[i]}",
-                              child: Text(
-                                revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  height: 19 / 16,
-                                ),
-                              ),
-                            ),
-                            backgroundColor: pathMarkers[i] == null? Colors.white : Color(0xff24b9b0),
-                            onTap: () {
-                              _polygon.clear();
-                              circles.clear();
-                              // _markers.clear();
-                              // _markerLocationsMap.clear();
-                              // _markerLocationsMapLanName.clear();
-
-                              building.floor[buildingAllApi
-                                  .getStoredString()] = revfloorList[i];
-                              createRooms(
-                                building.polylinedatamap[
-                                buildingAllApi
-                                    .getStoredString()]!,
-                                building.floor[buildingAllApi
-                                    .getStoredString()]!,
-                              );
-                              if (pathMarkers[i] != null) {
-                                //setCameraPosition(pathMarkers[i]!);
-                              }
-                              // Markers.clear();
-                              building.landmarkdata!
-                                  .then((value) {
-                                createMarkers(
-                                  value,
-                                  building.floor[buildingAllApi
-                                      .getStoredString()]!,
-                                );
-                              });
-                            },
-                          );
+          )
+        : isLoading
+        ? Scaffold(
+            body: Center(
+                child: LoadingAnimationWidget.prograssiveDots(
+                  color: Colors.teal,
+                  size: 150,
+                )
+            ),
+          )
+        : SafeArea(
+          child: Scaffold(
+            body: Stack(
+              children: [
+                detected
+                    ? Semantics(
+                    excludeSemantics: true,
+                    child: ExploreModePannel())
+                    : Semantics(
+                    excludeSemantics: true, child: Container()),
+                Stack(
+                  children: [Semantics(
+                    excludeSemantics: true,
+                    child: Container(
+                      child: GoogleMap(
+                        padding: EdgeInsets.only(
+                            left: 20), // <--- padding added here
+                        initialCameraPosition: _initialCameraPosition,
+                        myLocationButtonEnabled: false,
+                        myLocationEnabled: false,
+                        zoomControlsEnabled: false,
+                        zoomGesturesEnabled: true,
+    mapToolbarEnabled: false,
+                        polygons: patch
+                            .union(getCombinedPolygons())
+                            .union(otherpatch)
+                            .union(_polygon),
+                        polylines: singleroute[building.floor[
+                        buildingAllApi.getStoredString()]] !=
+                            null
+                            ? getCombinedPolylines().union(singleroute[
+                        building.floor[
+                        buildingAllApi.getStoredString()]]!)
+                            : getCombinedPolylines(),
+                        markers: getCombinedMarkers()
+                            .union(_markers)
+                            .union(focusturnArrow),
+                        onTap: (x) {
+                          mapState.interaction = true;
                         },
-                        ),
-                      ),
-                    )
-                        : floorColumn(),
-                    SizedBox(
-                        height: 28.0), // Adjust the height as needed
+                        mapType: MapType.normal,
+                        buildingsEnabled: false,
+                        compassEnabled: true,
+                        rotateGesturesEnabled: true,
+                        minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                        onMapCreated: (controller) {
+                          controller.setMapStyle(maptheme);
+                          _googleMapController = controller;
+                          print("tumhari galti hai sb saalo");
 
-                    // Container(
-                    //   width: 300,
-                    //   height: 100,
-                    //   child: SingleChildScrollView(
-                    //     scrollDirection: Axis.horizontal,
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(testBIn.keys.toString()),
-                    //         Text(testBIn.values.toString()),
-                    //         Text("summap"),
-                    //         Text(sortedsumMapfordebug.toString()),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-
-                    Semantics(
-                      child: FloatingActionButton(
-                        onPressed:() async {
-
-
-                          if(!user.isnavigating){
-                            btadapter.startthescan(apibeaconmap);
-                            setState(() {
-                              isLocalized=true;
-                              resBeacons = apibeaconmap;
-                            });
-                            late Timer _timer;
-                            _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-                              localizeUser().then((value)=>{
-                                setState((){
-                                  isLocalized=false;
-                                })
-                              });
-                              print("localize user is calling itself.....");
-                              _timer.cancel();
-                            });
+                          if (patch.isNotEmpty) {
+                            fitPolygonInScreen(patch.first);
+                          }
+                          _initMarkers();
+                        },
+                        onCameraMove: (CameraPosition cameraPosition) {
+                          // print("plpl ${cameraPosition.tilt}");
+                          focusBuildingChecker(cameraPosition);
+                          mapState.interaction = true;
+                          mapbearing = cameraPosition.bearing;
+                          if (!mapState.interaction) {
+                            mapState.zoom = cameraPosition.zoom;
+                          }
+                          if (true) {
+                            _updateMarkers(cameraPosition.zoom);
+                            //_updateBuilding(cameraPosition.zoom);
+                          }
+                          // _updateMarkers(cameraPosition.zoom);
+                          if (cameraPosition.zoom < 17) {
+                            _markers.clear();
+                            markerSldShown = false;
+                          } else {
+                            if (user.isnavigating) {
+                              _markers.clear();
+                              markerSldShown = false;
+                            } else {
+                              markerSldShown = true;
+                            }
+                          }
+                          if (markerSldShown) {
+                            _updateMarkers11(cameraPosition.zoom);
+                          } else {
+                            print("Notshow");
                           }
 
+                          // _updateEntryMarkers11(cameraPosition.zoom);
+                          //_markerLocations.clear();
+                          // print("Zoom level: ${cameraPosition.zoom}");
                         },
-                        child: Semantics(
-                          label: "Localize",
-                          onDidGainAccessibilityFocus:
-                          close_isnavigationPannelOpen,
-                          child:(isLocalized)?lott.Lottie.asset(
-                            'assets/localized.json', // Path to your Lottie animation
-                            width: 70,
-                            height: 70,
-                          ): Icon(
-                            Icons.my_location_sharp,
-                            color: Colors.black,
-                          ),
-                        ),
-                        backgroundColor:  Colors
-                            .white, // Set the background color of the FAB
-                      ),
-                    ),
-                    SizedBox(height: 28.0),
-                    !user.isnavigating
-                        ? FloatingActionButton(
-                      onPressed: () async {
-                        if (user.initialallyLocalised) {
-                          setState(() {
-                            if (isLiveLocalizing) {
-                              isLiveLocalizing = false;
-                              HelperClass.showToast(
-                                  "Explore mode is disabled");
-                              _exploreModeTimer!.cancel();
-                              _isExploreModePannelOpen = false;
-                              _isBuildingPannelOpen = true;
-                              lastBeaconValue = "";
-                            } else {
-                              speak(
-                                  "${LocaleData.exploremodenabled.getString(context)}",
-                                  _currentLocale);
-                              isLiveLocalizing = true;
-                              HelperClass.showToast(
-                                  "Explore mode enabled");
-                              _exploreModeTimer =
-                                  Timer.periodic(
-                                      Duration(
-                                          milliseconds: 5000),
-                                          (timer) async {
-                                        btadapter.startthescan(resBeacons);
-                                        Future.delayed(Duration(
-                                            milliseconds: 2000))
-                                            .then((value) => {
-                                          realTimeReLocalizeUser(
-                                              resBeacons)
-                                          // listenToBin()
-                                        });
-                                      });
-                              _isBuildingPannelOpen = false;
-                              _isExploreModePannelOpen = true;
-                            }
-                          });
-                        }
-                      },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                      ),
-                      backgroundColor: Color(
-                          0xff24B9B0), // Set the background color of the FAB
-                    )
-                        : Container(), // Adjust the height as needed// Adjust the height as needed
-                  ],
-                ),
-              ),
-            ),
-            //-------
-            Positioned(
-                top: 16,
-                left: 16,
-                right: 16,
-                child: _isLandmarkPanelOpen ||
-                    _isRoutePanelOpen ||
-                    _isnavigationPannelOpen
-                    ? Semantics(
-                    excludeSemantics: true, child: Container())
-                    : FocusScope(
-                  autofocus: true,
-                  child: Focus(
-                    child: Semantics(
-                      sortKey: const OrdinalSortKey(
-                          0), // header: true,
-                      child: HomepageSearch(
-                        onVenueClicked: onLandmarkVenueClicked,
-                        fromSourceAndDestinationPage:
-                        fromSourceAndDestinationPage,
+                        onCameraIdle: () {
+                          if (!mapState.interaction) {
+                            mapState.interaction2 = true;
+                          }
+                        },
+                        onCameraMoveStarted: () {
+                          mapState.interaction2 = false;
+                        },
+                        circles: circles,
                       ),
                     ),
                   ),
-                )),
-            FutureBuilder(
-              future: building.landmarkdata,
-              builder: (context, snapshot) {
-                if (_isLandmarkPanelOpen) {
-                  return landmarkdetailpannel(context, snapshot);
-                } else {
-                  return Semantics(
-                      excludeSemantics: true, child: Container());
-                }
-              },
-            ),
-            routeDeatilPannel(),
-            feedbackPanel(context),
-            navigationPannel(),
-            reroutePannel(context),
-            ExploreModePannel(),
-            detected
-                ? Semantics(child: nearestLandmarkpannel())
-                : Container(),
-            SizedBox(height: 28.0), // Adjust the height as needed
-            // FloatingActionButton(
-            //     onPressed: (){
-            //       print("checkingBuildingfloor");
-            //       //building.floor == 0 ? 'G' : '${building.floor}',
-            //       print(building.floor);
-            //       int firstKey = building.floor.values.first;
-            //       print(firstKey);
-            //       print(singleroute[building.floor.values.first]);
-            //
-            //       print(singleroute.keys);
-            //       print(singleroute.values);
-            //       print(building.floor[buildingAllApi.getStoredString()]);
-            //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
-            //     },
-            //     child: Icon(Icons.add)
-            // ),
+                  Positioned(
+                    bottom: 0,
+                    child: Container(
+                      width: screenWidth,
+                      height: 30,
+                      color: Colors.white,
+                    ),
+                  )]
+                ),
+                //debug----
 
-            // FloatingActionButton(
-            //   onPressed: () async {
-            //
-            //     //StopPDR();
-            //
-            //     if (user.initialallyLocalised) {
-            //       setState(() {
-            //         isLiveLocalizing = !isLiveLocalizing;
-            //       });
-            //       HelperClass.showToast("realTimeReLocalizeUser started");
-            //
-            //       Timer.periodic(
-            //           Duration(milliseconds: 5000),
-            //               (timer) async {
-            //             print(resBeacons);
-            //             btadapter.startScanning(resBeacons);
-            //
-            //
-            //             // setState(() {
-            //             //   sumMap=  btadapter.calculateAverage();
-            //             // });
-            //
-            //
-            //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-            //               realTimeReLocalizeUser(resBeacons)
-            //               // listenToBin()
-            //
-            //
-            //             });
-            //
-            //             setState(() {
-            //               debugPQ = btadapter.returnPQ();
-            //
-            //             });
-            //
-            //           });
-            //
-            //     }
-            //
-            //   },
-            //   child: Icon(
-            //     Icons.location_history_sharp,
-            //     color: (isLiveLocalizing)
-            //         ? Colors.cyan
-            //         : Colors.black,
-            //   ),
-            //   backgroundColor: Colors
-            //       .white, // Set the background color of the FAB
-            // ),
-          ],
-        ),
-      ),
-    );
+                DebugToggle.PDRIcon
+                    ? Positioned(
+                    top: 150,
+                    right: 50,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(20),
+                        color: (isPdr) ? Colors.green : Colors.red,
+                      ),
+                      height: 20,
+                      width: 20,
+                    ))
+                    : Container(),
+                Positioned(
+                  bottom: 150.0, // Adjust the position as needed
+                  right: 16.0,
+
+                  child: Semantics(
+                    excludeSemantics: false,
+                    child: Column(
+                      children: [
+                        //
+                        // // Text(Building.thresh),
+                        Visibility(
+                          visible: DebugToggle.StepButton,
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(24))),
+                              child: IconButton(
+                                  onPressed: () {
+                                    //StartPDR();
+
+                                    bool isvalid =
+                                    MotionModel.isValidStep(
+                                        user,
+                                        building.floorDimenssion[user
+                                            .Bid]![user.floor]![0],
+                                        building.floorDimenssion[user
+                                            .Bid]![user.floor]![1],
+                                        building.nonWalkable[
+                                        user.Bid]![user.floor]!,
+                                        reroute);
+                                    if (isvalid) {
+                                      user.move(context).then((value) {
+                                        renderHere();
+                                      });
+                                    } else {
+                                      if (user.isnavigating) {
+                                        // reroute();
+                                        // showToast("You are out of path");
+                                      }
+                                    }
+                                  },
+                                  icon: Icon(Icons.directions_walk))),
+                        ),
+
+                        SizedBox(height: 28.0),
+                        DebugToggle.Slider
+                            ? Text("${user.theta}")
+                            : Container(),
+                        // Text("coord [${user.coordX},${user.coordY}] \n"
+                        //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                        //     "floor ${user.floor}\n"
+                        //     "userBid ${user.Bid} \n"
+                        //     "index ${user.pathobj.index} \n"
+                        //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                        DebugToggle.Slider
+                            ? Slider(
+                            value: user.theta,
+                            min: -180,
+                            max: 180,
+                            onChanged: (newvalue) {
+                              double? compassHeading = newvalue;
+                              setState(() {
+                                user.theta = compassHeading!;
+                                if (mapState.interaction2) {
+                                  mapState.bearing = compassHeading!;
+                                  _googleMapController.moveCamera(
+                                    CameraUpdate.newCameraPosition(
+                                      CameraPosition(
+                                        target: mapState.target,
+                                        zoom: mapState.zoom,
+                                        bearing: mapState.bearing!,
+                                      ),
+                                    ),
+                                    //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                                  );
+                                } else {
+                                  if (markers.length > 0)
+                                    markers[user.Bid]?[0] =
+                                        customMarker.rotate(
+                                            compassHeading! -
+                                                mapbearing,
+                                            markers[user.Bid]![0]);
+                                }
+                              });
+                            })
+                            : Container(),
+                        SizedBox(height: 28.0),
+                        !isSemanticEnabled
+                            ? Semantics(
+                          label: "Change floor",
+                          child: SpeedDial(
+                            child: Text(
+                              building.floor == 0
+                                  ? 'G'
+                                  : '${building.floor[buildingAllApi.getStoredString()]}',
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff24b9b0),
+                                height: 19 / 16,
+                              ),
+                            ),
+                            activeIcon: Icons.close,
+                            backgroundColor: Colors.white,
+                            children: List.generate(
+                              (Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0]).length, (int i) {
+                              //print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
+                              List<int> floorList = Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()]??[0];
+                              List<int> revfloorList = floorList;
+                              revfloorList.sort();
+                              // building.numberOfFloors[buildingAllApi
+                              //     .getStoredString()];
+                              //
+                              // print(building.numberOfFloors!);
+                              return SpeedDialChild(
+                                child: Semantics(
+                                  label: "${revfloorList[i]}",
+                                  child: Text(
+                                    revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      height: 19 / 16,
+                                    ),
+                                  ),
+                                ),
+                                backgroundColor: pathMarkers[i] == null? Colors.white : Color(0xff24b9b0),
+                                onTap: () {
+                                  _polygon.clear();
+                                  circles.clear();
+                                  // _markers.clear();
+                                  // _markerLocationsMap.clear();
+                                  // _markerLocationsMapLanName.clear();
+
+                                  building.floor[buildingAllApi
+                                      .getStoredString()] = revfloorList[i];
+                                  createRooms(
+                                    building.polylinedatamap[
+                                    buildingAllApi
+                                        .getStoredString()]!,
+                                    building.floor[buildingAllApi
+                                        .getStoredString()]!,
+                                  );
+                                  if (pathMarkers[i] != null) {
+                                    //setCameraPosition(pathMarkers[i]!);
+                                  }
+                                  // Markers.clear();
+                                  building.landmarkdata!
+                                      .then((value) {
+                                    createMarkers(
+                                      value,
+                                      building.floor[buildingAllApi
+                                          .getStoredString()]!,
+                                    );
+                                  });
+                                },
+                              );
+                            },
+                            ),
+                          ),
+                        )
+                            : floorColumn(),
+                        SizedBox(
+                            height: 28.0), // Adjust the height as needed
+
+                        // Container(
+                        //   width: 300,
+                        //   height: 100,
+                        //   child: SingleChildScrollView(
+                        //     scrollDirection: Axis.horizontal,
+                        //     child: Column(
+                        //       crossAxisAlignment: CrossAxisAlignment.start,
+                        //       children: [
+                        //         Text(testBIn.keys.toString()),
+                        //         Text(testBIn.values.toString()),
+                        //         Text("summap"),
+                        //         Text(sortedsumMapfordebug.toString()),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
+
+                        Semantics(
+                          child: FloatingActionButton(
+                            onPressed:() async {
+
+
+                              if(!user.isnavigating){
+                                btadapter.startthescan(apibeaconmap);
+                                setState(() {
+                                  isLocalized=true;
+                                  resBeacons = apibeaconmap;
+                                });
+                                late Timer _timer;
+                                _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                                  localizeUser().then((value)=>{
+                                    setState((){
+                                      isLocalized=false;
+                                    })
+                                  });
+                                  print("localize user is calling itself.....");
+                                  _timer.cancel();
+                                });
+                              }
+
+                            },
+                            child: Semantics(
+                              label: "Localize",
+                              onDidGainAccessibilityFocus:
+                              close_isnavigationPannelOpen,
+                              child:(isLocalized)?lott.Lottie.asset(
+                                'assets/localized.json', // Path to your Lottie animation
+                                width: 70,
+                                height: 70,
+                              ): Icon(
+                                Icons.my_location_sharp,
+                                color: Colors.black,
+                              ),
+                            ),
+                            backgroundColor:  Colors
+                                .white, // Set the background color of the FAB
+                          ),
+                        ),
+                        SizedBox(height: 28.0),
+                        !user.isnavigating
+                            ? FloatingActionButton(
+                          onPressed: () async {
+                            if (user.initialallyLocalised) {
+                              setState(() {
+                                if (isLiveLocalizing) {
+                                  isLiveLocalizing = false;
+                                  HelperClass.showToast(
+                                      "Explore mode is disabled");
+                                  _exploreModeTimer!.cancel();
+                                  _isExploreModePannelOpen = false;
+                                  _isBuildingPannelOpen = true;
+                                  lastBeaconValue = "";
+                                } else {
+                                  speak(
+                                      "${LocaleData.exploremodenabled.getString(context)}",
+                                      _currentLocale);
+                                  isLiveLocalizing = true;
+                                  HelperClass.showToast(
+                                      "Explore mode enabled");
+                                  _exploreModeTimer =
+                                      Timer.periodic(
+                                          Duration(
+                                              milliseconds: 5000),
+                                              (timer) async {
+                                            btadapter.startthescan(resBeacons);
+                                            Future.delayed(Duration(
+                                                milliseconds: 2000))
+                                                .then((value) => {
+                                              realTimeReLocalizeUser(
+                                                  resBeacons)
+                                              // listenToBin()
+                                            });
+                                          });
+                                  _isBuildingPannelOpen = false;
+                                  _isExploreModePannelOpen = true;
+                                }
+                              });
+                            }
+                          },
+                          child: SvgPicture.asset(
+                            "assets/Navigation_RTLIcon.svg",
+                            // color:
+                            // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                          ),
+                          backgroundColor: Color(
+                              0xff24B9B0), // Set the background color of the FAB
+                        )
+                            : Container(), // Adjust the height as needed// Adjust the height as needed
+                      ],
+                    ),
+                  ),
+                ),
+                //-------
+                Positioned(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    child: _isLandmarkPanelOpen ||
+                        _isRoutePanelOpen ||
+                        _isnavigationPannelOpen
+                        ? Semantics(
+                        excludeSemantics: true, child: Container())
+                        : FocusScope(
+                      autofocus: true,
+                      child: Focus(
+                        child: Semantics(
+                          sortKey: const OrdinalSortKey(
+                              0), // header: true,
+                          child: HomepageSearch(
+                            onVenueClicked: onLandmarkVenueClicked,
+                            fromSourceAndDestinationPage:
+                            fromSourceAndDestinationPage,
+                          ),
+                        ),
+                      ),
+                    )),
+                FutureBuilder(
+                  future: building.landmarkdata,
+                  builder: (context, snapshot) {
+                    if (_isLandmarkPanelOpen) {
+                      return landmarkdetailpannel(context, snapshot);
+                    } else {
+                      return Semantics(
+                          excludeSemantics: true, child: Container());
+                    }
+                  },
+                ),
+                routeDeatilPannel(),
+                feedbackPanel(context),
+                navigationPannel(),
+                reroutePannel(context),
+                ExploreModePannel(),
+                detected
+                    ? Semantics(child: nearestLandmarkpannel())
+                    : Container(),
+                SizedBox(height: 28.0), // Adjust the height as needed
+                // FloatingActionButton(
+                //     onPressed: (){
+                //       print("checkingBuildingfloor");
+                //       //building.floor == 0 ? 'G' : '${building.floor}',
+                //       print(building.floor);
+                //       int firstKey = building.floor.values.first;
+                //       print(firstKey);
+                //       print(singleroute[building.floor.values.first]);
+                //
+                //       print(singleroute.keys);
+                //       print(singleroute.values);
+                //       print(building.floor[buildingAllApi.getStoredString()]);
+                //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+                //     },
+                //     child: Icon(Icons.add)
+                // ),
+
+                // FloatingActionButton(
+                //   onPressed: () async {
+                //
+                //     //StopPDR();
+                //
+                //     if (user.initialallyLocalised) {
+                //       setState(() {
+                //         isLiveLocalizing = !isLiveLocalizing;
+                //       });
+                //       HelperClass.showToast("realTimeReLocalizeUser started");
+                //
+                //       Timer.periodic(
+                //           Duration(milliseconds: 5000),
+                //               (timer) async {
+                //             print(resBeacons);
+                //             btadapter.startScanning(resBeacons);
+                //
+                //
+                //             // setState(() {
+                //             //   sumMap=  btadapter.calculateAverage();
+                //             // });
+                //
+                //
+                //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+                //               realTimeReLocalizeUser(resBeacons)
+                //               // listenToBin()
+                //
+                //
+                //             });
+                //
+                //             setState(() {
+                //               debugPQ = btadapter.returnPQ();
+                //
+                //             });
+                //
+                //           });
+                //
+                //     }
+                //
+                //   },
+                //   child: Icon(
+                //     Icons.location_history_sharp,
+                //     color: (isLiveLocalizing)
+                //         ? Colors.cyan
+                //         : Colors.black,
+                //   ),
+                //   backgroundColor: Colors
+                //       .white, // Set the background color of the FAB
+                // ),
+              ],
+            ),
+          ),
+      );
   }
   //
   // int d=0;

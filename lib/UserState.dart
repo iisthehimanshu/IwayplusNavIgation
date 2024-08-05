@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'buildingState.dart' as b;
 
 import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
@@ -35,6 +36,7 @@ class UserState {
   String Bid;
   List<int> offPathDistance = [];
   bool onConnection = false;
+  b.Building? building;
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift = false;
@@ -157,7 +159,7 @@ class UserState {
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
 
@@ -237,7 +239,7 @@ class UserState {
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
-        AlignMapToPath([lat, lng], tools.localtoglobal(nextX, nextY));
+        AlignMapToPath([lat, lng], tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
       }
 
       //lift check
@@ -322,7 +324,7 @@ class UserState {
       List<int> transitionvalue = tools.eightcelltransition(this.theta);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       if (this.isnavigating &&
@@ -410,7 +412,7 @@ class UserState {
       // coordY=coordinateY!;
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       showcoordX = coordX;
@@ -426,7 +428,7 @@ class UserState {
     coordX = showcoordX;
     coordY = showcoordY;
     pathobj.index = index + 1;
-    List<double> values = tools.localtoglobal(coordX, coordY);
+    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
@@ -455,7 +457,7 @@ class UserState {
     showcoordY = Cellpath[pathobj.index].y;
     coordX = showcoordX;
     coordY = showcoordY;
-    List<double> values = tools.localtoglobal(coordX, coordY);
+    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
 

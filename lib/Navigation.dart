@@ -817,7 +817,7 @@ bool disposed=false;
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
-            user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
+            user.showcoordX.toInt(), user.showcoordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
@@ -831,7 +831,7 @@ bool disposed=false;
         ));
 
         List<double> ldvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
+            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
@@ -856,9 +856,9 @@ bool disposed=false;
                   markers[user.Bid]![0] = customMarker.move(
                       LatLng(
                           tools.localtoglobal(user.showcoordX.toInt(),
-                              user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[0],
+                              user.showcoordY.toInt(), building.patchData[user.Bid])[0],
                           tools.localtoglobal(user.showcoordX.toInt(),
-                              user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[1]),
+                              user.showcoordY.toInt(), building.patchData[user.Bid])[1]),
                       markers[user.Bid]![0]);
                 }
               });
@@ -989,14 +989,14 @@ bool disposed=false;
         UserState.ydiff = dvalue[1];
         values =
             tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
+                apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
         print(values);
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
         values =
             tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
+                apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
       }
       print("values");
       print(values);
@@ -1014,7 +1014,7 @@ bool disposed=false;
       user.coordX = userSetLocation.coordinateX!;
       user.coordY = userSetLocation.coordinateY!;
       List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
-          patchData:
+          
           building.patchData[userSetLocation.buildingID]);
       user.lat = ls[0];
       user.lng = ls[1];
@@ -1025,7 +1025,7 @@ bool disposed=false;
         user.coordY = nearestLandInfomation!.doorY!;
         List<double> latlng = tools.localtoglobal(
             nearestLandInfomation!.doorX!, nearestLandInfomation!.doorY!,
-            patchData: building.patchData[nearestLandInfomation!.buildingID]);
+             building.patchData[nearestLandInfomation!.buildingID]);
         print("latlnghhjhj");
         print(latlng);
         user.lat = latlng[0];
@@ -1039,7 +1039,7 @@ bool disposed=false;
         List<double> latlng = tools.localtoglobal(
             nearestLandInfomation!.coordinateX!,
             nearestLandInfomation!.coordinateY!,
-            patchData: building.patchData[nearestLandInfomation!.buildingID]);
+             building.patchData[nearestLandInfomation!.buildingID]);
         print("latlnghhjhj");
         print(latlng);
         user.lat = latlng[0];
@@ -1304,14 +1304,14 @@ bool disposed=false;
           UserState.ydiff = dvalue[1];
           values =
               tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                  apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
+                  apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
           print(values);
         } else {
           UserState.xdiff = 0;
           UserState.ydiff = 0;
           values =
               tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                  apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
+                  apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
         }
         print("values");
         print(values);
@@ -1329,7 +1329,7 @@ bool disposed=false;
         user.coordX = apibeaconmap[nearestBeacon]!.coordinateX!;
         user.coordY = apibeaconmap[nearestBeacon]!.coordinateY!;
         List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
-            patchData:
+            
             building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
         user.lat = ls[0];
         user.lng = ls[1];
@@ -1340,7 +1340,7 @@ bool disposed=false;
           user.coordY = nearestLandInfomation!.doorY!;
           List<double> latlng = tools.localtoglobal(
               nearestLandInfomation!.doorX!, nearestLandInfomation!.doorY!,
-              patchData: building.patchData[nearestLandInfomation!.buildingID]);
+               building.patchData[nearestLandInfomation!.buildingID]);
           print("latlnghhjhj");
           print(latlng);
           user.lat = latlng[0];
@@ -1354,7 +1354,7 @@ bool disposed=false;
           List<double> latlng = tools.localtoglobal(
               nearestLandInfomation!.coordinateX!,
               nearestLandInfomation!.coordinateY!,
-              patchData: building.patchData[nearestLandInfomation!.buildingID]);
+               building.patchData[nearestLandInfomation!.buildingID]);
           print("latlnghhjhj");
           print(latlng);
           user.lat = latlng[0];
@@ -1827,9 +1827,9 @@ bool disposed=false;
                     markers[user.Bid]?[0] = customMarker.move(
                         LatLng(
                             tools.localtoglobal(user.showcoordX.toInt(),
-                                user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[0],
+                                user.showcoordY.toInt(), building.patchData[user.Bid])[0],
                             tools.localtoglobal(user.showcoordX.toInt(),
-                                user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[1]),
+                                user.showcoordY.toInt(), building.patchData[user.Bid])[1]),
                         markers[user.Bid]![0]);
                   }
                 });
@@ -1894,7 +1894,7 @@ bool disposed=false;
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
+            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
@@ -1947,6 +1947,26 @@ bool disposed=false;
   void apiCalls(context) async {
     print("working 1");
     //await DataVersionApi().fetchDataVersionApiData();
+
+    buildingAllApi.allBuildingID.forEach((key,value)async{
+      await beaconapi()
+          .fetchBeaconData(buildingAllApi.selectedBuildingID)
+          .then((value) {
+        print("beacondatacheck");
+        if(building.beacondata == null){
+          building.beacondata = value;
+        }else{
+          building.beacondata?.addAll(value);
+        }
+        for (int i = 0; i < value.length; i++) {
+          beacon beacons = value[i];
+          if (beacons.name != null) {
+            apibeaconmap[beacons.name!] = beacons;
+          }
+        }
+        Building.apibeaconmap = apibeaconmap;
+      });
+    });
 
     await patchAPI()
         .fetchPatchData(id: buildingAllApi.selectedBuildingID)
@@ -2196,18 +2216,6 @@ bool disposed=false;
           }
           createMarkers(value, 0, bid: key);
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
-        });
-
-        await beaconapi().fetchBeaconData(key).then((value) {
-          building.beacondata?.addAll(value);
-          for (int i = 0; i < value.length; i++) {
-            print(value[i].name);
-            beacon beacons = value[i];
-            if (beacons.name != null) {
-              apibeaconmap[beacons.name!] = beacons;
-            }
-          }
-          Building.apibeaconmap = apibeaconmap;
         });
       }
     });
@@ -3017,10 +3025,10 @@ bool disposed=false;
               //coordinates.add(LatLng(node.lat!,node.lon!));
               coordinates.add(LatLng(
                   tools.localtoglobal(node.coordx!, node.coordy!,
-                      patchData:
+                      
                           building.patchData[value.polyline!.buildingID])[0],
                   tools.localtoglobal(node.coordx!, node.coordy!,
-                      patchData:
+                      
                           building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
@@ -3439,7 +3447,7 @@ bool disposed=false;
               await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-              patchData: building.patchData[bid??buildingAllApi.getStoredString()]);
+               building.patchData[bid??buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
@@ -3474,7 +3482,7 @@ bool disposed=false;
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                patchData:
+                
                     building.patchData[bid??buildingAllApi.getStoredString()]);
             Markers.add(Marker(
                 markerId: MarkerId("Door ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
@@ -3508,7 +3516,7 @@ bool disposed=false;
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                patchData:
+                
                     building.patchData[bid??buildingAllApi.getStoredString()]);
 
             // _markerLocations[LatLng(value[0], value[1])] = '1';
@@ -3551,7 +3559,7 @@ bool disposed=false;
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                patchData:
+                
                     building.patchData[bid??buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
@@ -3586,7 +3594,7 @@ bool disposed=false;
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                patchData:
+                
                     building.patchData[bid??buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
@@ -3621,7 +3629,7 @@ bool disposed=false;
           setState(() {
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                patchData:
+                
                     building.patchData[bid??buildingAllApi.getStoredString()]);
             // _markerLocations[LatLng(value[0], value[1])] = '1';
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
@@ -3679,7 +3687,7 @@ bool disposed=false;
           await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-              patchData: building.patchData[bid??buildingAllApi.getStoredString()]);
+               building.patchData[bid??buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
@@ -4941,13 +4949,13 @@ bool disposed=false;
         print("building.patchData[bid]");
         print(building.patchData[bid]!.patchData!.fileName);
         svalue = tools.localtoglobal(sourceX, sourceY,
-            patchData: building.patchData[bid]);
+             building.patchData[bid]);
         dvalue = tools.localtoglobal(destinationX, destinationY,
-            patchData: building.patchData[bid]);
+             building.patchData[bid]);
       } else {
         print("Himanshucheckerpath in else block ");
-        svalue = tools.localtoglobal(sourceX, sourceY);
-        dvalue = tools.localtoglobal(destinationX, destinationY);
+        svalue = tools.localtoglobal(sourceX, sourceY,null);
+        dvalue = tools.localtoglobal(destinationX, destinationY,null);
       }
 
       setCameraPositionusingCoords([LatLng(svalue[0], svalue[1]),LatLng(dvalue[0], dvalue[1])]);
@@ -4956,7 +4964,7 @@ bool disposed=false;
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         List<double> value =
-        tools.localtoglobal(row, col, patchData: building.patchData[bid]);
+        tools.localtoglobal(row, col,  building.patchData[bid]);
         coordinates.add(LatLng(value[0], value[1]));
         if(singleroute[floor] != null){
           gmap.Polyline oldPolyline = singleroute[floor]!.firstWhere(
@@ -5340,7 +5348,7 @@ bool disposed=false;
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
-                                  PathState.destinationY,patchData: building.patchData[PathState.destinationBid]);
+                                  PathState.destinationY, building.patchData[PathState.destinationBid]);
                               _googleMapController.animateCamera(
                                 CameraUpdate.newLatLngZoom(
                                   LatLng(mvalues[0], mvalues[1]),
@@ -6002,7 +6010,7 @@ bool disposed=false;
                                                                 user.showcoordX
                                                                     .toInt(),
                                                                 user.showcoordY
-                                                                    .toInt(),patchData: building.patchData[PathState.sourceBid]);
+                                                                    .toInt(), building.patchData[PathState.sourceBid]);
 
                                                         markers.putIfAbsent(
                                                             user.Bid, () => []);
@@ -6024,7 +6032,7 @@ bool disposed=false;
                                                                 user.coordX
                                                                     .toInt(),
                                                                 user.coordY
-                                                                    .toInt(),patchData: building.patchData[PathState.sourceBid]);
+                                                                    .toInt(), building.patchData[PathState.sourceBid]);
 
                                                         markers[user.Bid]
                                                             ?.add(Marker(
@@ -6589,7 +6597,7 @@ bool disposed=false;
     print("b------- $B");
     mapState.tilt = 33.5;
     List<double> val =
-        tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
+        tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(), building.patchData[user.Bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -6924,7 +6932,7 @@ bool disposed=false;
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
-            user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
+            user.showcoordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]),
             markers[user.Bid]![0]);
@@ -8644,7 +8652,7 @@ bool disposed=false;
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
-          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
+          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(), building.patchData[user.Bid]);
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
@@ -8688,7 +8696,7 @@ bool disposed=false;
             List<double> pvalues = tools.localtoglobal(
                 value.landmarksMap![ID]!.coordinateX!,
                 value.landmarksMap![ID]!.coordinateY!,
-                patchData:
+                
                 building.patchData[value.landmarksMap![ID]!.buildingID]);
             LatLng point = LatLng(pvalues[0], pvalues[1]);
             _googleMapController.animateCamera(
@@ -8911,9 +8919,9 @@ bool disposed=false;
         user.path[i] ~/ turn.numCols!
       ];
       List<double> latlng = tools.localtoglobal(turn.x!, turn.y!,
-          patchData: building.patchData[turn.Bid]);
+           building.patchData[turn.Bid]);
       List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
-          patchData: building.patchData[turn.Bid]);
+           building.patchData[turn.Bid]);
 
       setState(() {
         // focusturn.add(gmap.Polyline(

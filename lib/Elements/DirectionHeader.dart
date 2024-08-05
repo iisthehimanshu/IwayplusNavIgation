@@ -116,7 +116,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     }
     btadapter.startthescan(Building.apibeaconmap,diff: 5);
-    _timer = Timer.periodic(Duration(milliseconds: 1800), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 2500), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -965,6 +965,21 @@ if(disposed)return;
             ),
           ),
 
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //
+          //         Text(sumMap.toString()),
+          //
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

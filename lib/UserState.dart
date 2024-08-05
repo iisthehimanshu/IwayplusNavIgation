@@ -435,11 +435,21 @@ class UserState {
   Future<void> moveToStartofPath() async {
     List<Cell> turnPoints =
         tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
-    if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
-            [turnPoints[0].x, turnPoints[0].y]) <=
-        10) {
-      pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    print("startofpath ${[Cellpath[0].x, Cellpath[0].y]}   ${[turnPoints[0].x, turnPoints[0].y]}");
+    if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
+      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+          [turnPoints[1].x, turnPoints[1].y]) <=
+          10) {
+        pathobj.index = Cellpath.indexOf(turnPoints[0]);
+      }
+    }else{
+      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+          [turnPoints[0].x, turnPoints[0].y]) <=
+          10) {
+        pathobj.index = Cellpath.indexOf(turnPoints[0]);
+      }
     }
+
     floor = pathobj.sourceFloor;
     showcoordX = Cellpath[pathobj.index].x;
     showcoordY = Cellpath[pathobj.index].y;

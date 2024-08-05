@@ -68,6 +68,7 @@ class BLueToothClass {
       _binController.stream;
 
   void startthescan(HashMap<String, beacon> apibeaconmap, {int diff = 10}){
+    BIN.clear();
     FlutterBluePlus.startScan(withNames: apibeaconmap.keys.toList());
     if (Platform.isAndroid) {
       print("starting scanning for android");

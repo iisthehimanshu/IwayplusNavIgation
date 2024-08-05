@@ -964,27 +964,39 @@ bool disposed=false;
       List<double> values = [];
 
       //floor alignment
-      if (userSetLocation.floor != 0) {
+      if (apibeaconmap[nearestBeacon]!.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[
+            apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(
-                userSetLocation.floor!),
-            building.polyLineData!.polyline!.floors!);
+                apibeaconmap[nearestBeacon]!.floor!),
+            building.polylinedatamap[
+            apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
+        print("print cubicle data");
+        for (int i = 0; i < prevFloorLifts.length; i++) {
+          print(prevFloorLifts[i].name);
+        }
+        print("data2");
+        for (int i = 0; i < currFloorLifts.length; i++) {
+          print(currFloorLifts[i].name);
+        }
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+        print("dvalue");
+        print(dvalue);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values =
-            tools.localtoglobal(userSetLocation.coordinateX!,
-                userSetLocation.coordinateY!);
+            tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+                apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
         print(values);
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
         values =
-            tools.localtoglobal(userSetLocation.coordinateX!,
-                userSetLocation.coordinateY!);
+            tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
+                apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
       }
       print("values");
       print(values);
@@ -1154,10 +1166,6 @@ bool disposed=false;
         if (pathMarkers[user.floor] != null) {
           setCameraPosition(pathMarkers[user.floor]!);
         }
-        building.landmarkdata!.then((value) {
-          createMarkers(
-              value, building.floor[buildingAllApi.getStoredString()]!);
-        });
         if (markers.length > 0)
           markers[user.Bid]?[0] =
               customMarker.rotate(0, markers[user.Bid]![0]);
@@ -1274,11 +1282,13 @@ bool disposed=false;
         if (apibeaconmap[nearestBeacon]!.floor != 0) {
           List<PolyArray> prevFloorLifts = findLift(
               tools.numericalToAlphabetical(0),
-              building.polyLineData!.polyline!.floors!);
+              building.polylinedatamap[
+              apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
           List<PolyArray> currFloorLifts = findLift(
               tools.numericalToAlphabetical(
                   apibeaconmap[nearestBeacon]!.floor!),
-              building.polyLineData!.polyline!.floors!);
+              building.polylinedatamap[
+              apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
           print("print cubicle data");
           for (int i = 0; i < prevFloorLifts.length; i++) {
             print(prevFloorLifts[i].name);
@@ -1294,14 +1304,14 @@ bool disposed=false;
           UserState.ydiff = dvalue[1];
           values =
               tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                  apibeaconmap[nearestBeacon]!.coordinateY!);
+                  apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
           print(values);
         } else {
           UserState.xdiff = 0;
           UserState.ydiff = 0;
           values =
               tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                  apibeaconmap[nearestBeacon]!.coordinateY!);
+                  apibeaconmap[nearestBeacon]!.coordinateY!,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
         }
         print("values");
         print(values);
@@ -1424,9 +1434,10 @@ bool disposed=false;
           building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
           apibeaconmap[nearestBeacon]!.floor!;
           createRooms(
-              building.polyLineData!, apibeaconmap[nearestBeacon]!.floor!);
+              building.polylinedatamap[
+              user.Bid]!, apibeaconmap[nearestBeacon]!.floor!);
           building.landmarkdata!.then((value) {
-            createMarkers(value, apibeaconmap[nearestBeacon]!.floor!);
+            createMarkers(value, apibeaconmap[nearestBeacon]!.floor!,bid: user.Bid);
           });
         });
 
@@ -1476,10 +1487,6 @@ bool disposed=false;
           if (pathMarkers[user.floor] != null) {
             setCameraPosition(pathMarkers[user.floor]!);
           }
-          building.landmarkdata!.then((value) {
-            createMarkers(
-                value, building.floor[buildingAllApi.getStoredString()]!);
-          });
           if (markers.length > 0)
             markers[user.Bid]?[0] =
                 customMarker.rotate(0, markers[user.Bid]![0]);
@@ -2042,7 +2049,7 @@ bool disposed=false;
         }
       }
       createARPatch(coordinates);
-      createMarkers(value, 0);
+      createMarkers(value, 0,bid: buildingAllApi.selectedBuildingID);
       return value;
     });
     print("working 4");
@@ -2079,28 +2086,7 @@ bool disposed=false;
 
       print("scanningggg starteddddd");
 
-      btadapter.startthescan(apibeaconmap);
 
-      //btadapter.startScanning(apibeaconmap);
-      setState(() {
-        resBeacons = apibeaconmap;
-      });
-      // print("printing bin");
-      // btadapter.printbin();
-      late Timer _timer;
-      //please wait
-      //searching your location
-
-      speak("${LocaleData.plswait.getString(context)}", _currentLocale);
-      speak("${LocaleData.searchingyourlocation.getString(context)}",
-          _currentLocale);
-
-      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
-
-        print("localize user is calling itself.....");
-        _timer.cancel();
-      });
     });
 
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
@@ -2132,7 +2118,9 @@ bool disposed=false;
           building.patchData[value.patchData!.buildingID!] = value;
           if (key == buildingAllApi.outdoorID) {
             createotherPatch(value);
-          } else {}
+          } else if (buildingAllApi.outdoorID == "") {
+            createotherPatch(value);
+          }
         });
 
         try {
@@ -2212,11 +2200,32 @@ bool disposed=false;
 
         await beaconapi().fetchBeaconData(key).then((value) {
           building.beacondata?.addAll(value);
+          for (int i = 0; i < value.length; i++) {
+            print(value[i].name);
+            beacon beacons = value[i];
+            if (beacons.name != null) {
+              apibeaconmap[beacons.name!] = beacons;
+            }
+          }
+          Building.apibeaconmap = apibeaconmap;
         });
       }
     });
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
+    Future.delayed(Duration(milliseconds: 20000)).then((v){
+      btadapter.startthescan(apibeaconmap);
+      Future.delayed(Duration(milliseconds: 9000)).then((v){
+        localizeUser();
+      });
+    });
+    setState(() {
+      resBeacons = apibeaconmap;
+    });
+    speak("${LocaleData.plswait.getString(context)}", _currentLocale);
+    speak("${LocaleData.searchingyourlocation.getString(context)}",
+        _currentLocale);
+
     await Future.delayed(Duration(seconds: 3));
     setState(() {
       isLoading = false;
@@ -2342,6 +2351,9 @@ bool disposed=false;
     btadapter.stopScanning();
 
     // sumMap = btadapter.calculateAverage();
+    buildingAllApi.setStoredString(Building.apibeaconmap[nearestBeacon]!.buildingID!);
+    buildingAllApi.selectedID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
+    buildingAllApi.selectedBuildingID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
     paintUser(nearestBeacon);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
@@ -5148,6 +5160,7 @@ bool disposed=false;
                                 value,
                                 building
                                     .floor[buildingAllApi.getStoredString()]!,
+                                bid: buildingAllApi.getStoredString()
                               );
                             });
                           },
@@ -8665,7 +8678,7 @@ bool disposed=false;
                 building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
                 building.floor[value.landmarksMap![ID]!.buildingID!]!);
             createMarkers(
-                value, building.floor[value.landmarksMap![ID]!.buildingID!]!);
+                value, building.floor[value.landmarksMap![ID]!.buildingID!]!,bid: value.landmarksMap![ID]!.buildingID!);
             building.selectedLandmarkID = ID;
             singleroute.clear();
             _isRoutePanelOpen = DirectlyStartNavigation;
@@ -8970,7 +8983,6 @@ bool disposed=false;
     }
     compassSubscription.cancel();
     flutterTts.cancelHandler;
-    _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();
     _controller.dispose();
@@ -8979,7 +8991,6 @@ bool disposed=false;
   }
 
   List<String> scannedDevices = [];
-  late Timer _timer;
 
   Set<gmap.Polyline> finalSet = {};
 

@@ -817,7 +817,7 @@ bool disposed=false;
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
-            user.showcoordX.toInt(), user.showcoordY.toInt());
+            user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
 
@@ -831,7 +831,7 @@ bool disposed=false;
         ));
 
         List<double> ldvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
@@ -856,9 +856,9 @@ bool disposed=false;
                   markers[user.Bid]![0] = customMarker.move(
                       LatLng(
                           tools.localtoglobal(user.showcoordX.toInt(),
-                              user.showcoordY.toInt())[0],
+                              user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[0],
                           tools.localtoglobal(user.showcoordX.toInt(),
-                              user.showcoordY.toInt())[1]),
+                              user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[1]),
                       markers[user.Bid]![0]);
                 }
               });
@@ -1827,9 +1827,9 @@ bool disposed=false;
                     markers[user.Bid]?[0] = customMarker.move(
                         LatLng(
                             tools.localtoglobal(user.showcoordX.toInt(),
-                                user.showcoordY.toInt())[0],
+                                user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[0],
                             tools.localtoglobal(user.showcoordX.toInt(),
-                                user.showcoordY.toInt())[1]),
+                                user.showcoordY.toInt(),patchData: building.patchData[user.Bid])[1]),
                         markers[user.Bid]![0]);
                   }
                 });
@@ -1894,7 +1894,7 @@ bool disposed=false;
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue =
-            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt());
+            tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(),patchData: building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
@@ -4886,7 +4886,7 @@ bool disposed=false;
     });
 
     List<Cell> Cellpath = findCorridorSegments(
-        path, building.nonWalkable[bid]![floor]!, numCols, bid, floor);
+        path, building.nonWalkable[bid]![floor]!, numCols, bid, floor,building.patchData);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -4920,10 +4920,12 @@ bool disposed=false;
       if(floor != 0){
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polyLineData!.polyline!.floors!);
+            building.polylinedatamap[
+            bid]!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(floor),
-            building.polyLineData!.polyline!.floors!);
+            tools.numericalToAlphabetical(0),
+            building.polylinedatamap[
+            bid]!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
@@ -5338,7 +5340,7 @@ bool disposed=false;
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
-                                  PathState.destinationY);
+                                  PathState.destinationY,patchData: building.patchData[PathState.destinationBid]);
                               _googleMapController.animateCamera(
                                 CameraUpdate.newLatLngZoom(
                                   LatLng(mvalues[0], mvalues[1]),
@@ -6000,7 +6002,7 @@ bool disposed=false;
                                                                 user.showcoordX
                                                                     .toInt(),
                                                                 user.showcoordY
-                                                                    .toInt());
+                                                                    .toInt(),patchData: building.patchData[PathState.sourceBid]);
 
                                                         markers.putIfAbsent(
                                                             user.Bid, () => []);
@@ -6022,7 +6024,7 @@ bool disposed=false;
                                                                 user.coordX
                                                                     .toInt(),
                                                                 user.coordY
-                                                                    .toInt());
+                                                                    .toInt(),patchData: building.patchData[PathState.sourceBid]);
 
                                                         markers[user.Bid]
                                                             ?.add(Marker(
@@ -6587,7 +6589,7 @@ bool disposed=false;
     print("b------- $B");
     mapState.tilt = 33.5;
     List<double> val =
-        tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+        tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -6922,7 +6924,7 @@ bool disposed=false;
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
-            user.showcoordY.toInt());
+            user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]),
             markers[user.Bid]![0]);
@@ -8642,7 +8644,7 @@ bool disposed=false;
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue =
-          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt());
+          tools.localtoglobal(user.showcoordX.toInt(), user.showcoordY.toInt(),patchData: building.patchData[user.Bid]);
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }

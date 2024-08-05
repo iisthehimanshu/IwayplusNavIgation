@@ -1,6 +1,11 @@
 
+import 'dart:collection';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
@@ -9,6 +14,8 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'API/buildingAllApi.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
@@ -83,6 +90,9 @@ class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket();
+  late AppLinks _appLinks;
+
+
   // Future<bool> _isUserAuthenticated() async {
   //   // Check if the user is already signed in with Google
   //   User? user = FirebaseAuth.instance.currentUser;
@@ -102,11 +112,96 @@ class _MyAppState extends State<MyApp> {
   //   // If the user is not signed in, return false
   //   return false;
   // }
+  Map<String, List<buildingAll>> venueHashMap = Map();
+  HashMap<String,LatLng> allBuildingID = new HashMap();
+
+  List<buildingAll> preSavingBuildingList=[];
+  final deepLinkBID = "";
+  String? buildingNameGetMap = "";
+
+  void _initDeepLinkListener(BuildContext context) async {
+    print("_initDeepLinkListener");
+
+
+    await buildingAllApi().fetchBuildingAllData().then((value) {
+      setState(() {
+        preSavingBuildingList = value;
+      });
+    });
+
+
+    _appLinks = AppLinks();
+    _appLinks.uriLinkStream.listen((Uri? uri) async {
+      if (uri != null) {
+        print('Received deep link: $uri');
+        await buildingAllApi().fetchBuildingAllData().then((value) {
+          setState(() {
+            preSavingBuildingList = value;
+          });
+        });
+        final deepLinkBID = uri.queryParameters['BID'];
+        await takeout();
+        if(venueHashMap[buildingNameGetMap] != null){
+          venueHashMap[buildingNameGetMap]?.forEach((element) {
+            LatLng kk = LatLng(element.coordinates![0], element.coordinates![1]);
+            allBuildingID[element.sId!] = kk;
+          });
+        }
+
+
+        buildingAllApi.setStoredString(deepLinkBID!);
+        buildingAllApi.setSelectedBuildingID(deepLinkBID);
+        buildingAllApi.setStoredAllBuildingID(allBuildingID);
+        print("himanshu ${buildingAllApi.getStoredString()}");
+        //Navigator.of(context).pushNamed('/deepRoute');
+
+
+
+        //print("infooo${info}");
+        // if (accessToken != null) {
+        //   // setState(() {
+        //   //   _accessToken = accessToken;
+        //   // });
+        //   // signinBox.put('rgciCareAccessToken', accessToken);
+        // }
+      }
+    });
+  }
+  Future<void> takeout() async {
+    preSavingBuildingList.forEach((element) {
+      if(element.sId == deepLinkBID){
+        print("Got BID ${element.buildingName}");
+        venueHashMap = createVenueHashMap(preSavingBuildingList);
+        buildingNameGetMap = element.buildingName;
+      }
+    });
+  }
+
+  Map<String, List<buildingAll>> createVenueHashMap(List<buildingAll> buildingList) {
+    Map<String, List<buildingAll>> dummyVenueHashMap = HashMap<String, List<buildingAll>>();
+
+    for (buildingAll building in buildingList) {
+      // Check if the venueName is already a key in the HashMap
+      if (dummyVenueHashMap.containsKey(building.venueName)) {
+        // If yes, add the building to the existing list
+        dummyVenueHashMap[building.venueName]!.add(building);
+      } else {
+        // If no, create a new list with the building and add it to the HashMap
+        dummyVenueHashMap[building.venueName??""] = [building];
+      }
+    }
+    return dummyVenueHashMap;
+  }
 
   @override
   void initState() {
-    configureLocalization();
     super.initState();
+    configureLocalization();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _initDeepLinkListener(context);
+    // });
+
+
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
@@ -148,7 +243,7 @@ class _MyAppState extends State<MyApp> {
     }else if(isAndroid){
       print("Android");
     }
-requestLocationPermission();
+    requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(
@@ -190,9 +285,17 @@ requestLocationPermission();
         Locale('pa'), // Punjabi
       ],
       localizationsDelegates: localization.localizationsDelegates,
+    onGenerateRoute: (RouteSettings settings) {
+        print("settings");
+        print(settings);
+      switch (settings.name) {
+        case '/BID':
+          return MaterialPageRoute(builder: (context) => Navigation());
+
+      }
       //LoginScreen(),
       // MainScreen(initialIndex: 0,),
-
+    }
     );
   }
 }

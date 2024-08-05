@@ -95,9 +95,7 @@ dependencies:
 
   qr_code_scanner:
   loading_animation_widget: ^1.2.1
-
-
-
+  app_links: ^6.1.1
 
 
 

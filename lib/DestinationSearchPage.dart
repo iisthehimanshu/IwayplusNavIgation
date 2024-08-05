@@ -35,11 +35,12 @@ class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
   bool voiceInputEnabled;
+  String userLocalized;
 
   DestinationSearchPage(
       {this.hintText = "",
         this.previousFilter = "",
-        required this.voiceInputEnabled});
+        required this.voiceInputEnabled,this.userLocalized = ""});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
@@ -499,7 +500,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           }
         }
       });
-
   }
 
   void onVenueClicked(String name, String location, String ID, String bid) {
@@ -586,6 +586,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      SizedBox(width: 6,),
                       Container(
                         width: 48,
                         height: 48,
@@ -686,7 +687,35 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       ),
                     ],
                   )),
+              (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
+                onTap: (){
+                  Navigator.pop(context, widget.userLocalized);
+                },
+                child: Container(
+                  margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(width: 16,),
+                          Image.asset("assets/rw.png"),
+                          SizedBox(width: 24,),
+                          Text(style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff000000),
+                          ),"Your Current Location")
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ):Container(),
+              searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
               Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
                 width: screenWidth,
                 child: ChipsChoice<int>.single(
                   value: vall,
@@ -735,10 +764,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   direction: Axis.horizontal,
                 ),
               ),
+              SizedBox(height: 4,),
+              Divider(thickness: 6,color: Color(0xfff2f3f5)),
               Flexible(
                   flex: 1,
                   child: SingleChildScrollView(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: category ? searcCategoryhResults : searchResults,
                       ))),
             ],

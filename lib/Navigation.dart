@@ -1107,7 +1107,7 @@ bool disposed=false;
         createRooms(
             building.polyLineData!, userSetLocation.floor!);
         building.landmarkdata!.then((value) {
-          createMarkers(value, userSetLocation!.floor!);
+          createMarkers(value, userSetLocation!.floor!,bid: user.Bid);
         });
       });
 
@@ -1612,7 +1612,7 @@ bool disposed=false;
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
+                                builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: user.key,))
                         ).then((value){
                           setState(() {
                             //widget.SourceID = value;
@@ -1969,9 +1969,6 @@ bool disposed=false;
         print(element.floor);
       });
       Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = currentBuildingFloor;
-      if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761") {
-        Building.numberOfFloorsDelhi[buildingAllApi.selectedBuildingID] = [5];
-      }
       print("Building.numberOfFloorsDelhi");
       print(Building.numberOfFloorsDelhi);
 
@@ -1979,11 +1976,7 @@ bool disposed=false;
       building.numberOfFloors[buildingAllApi.selectedBuildingID] =
           value.polyline!.floors!.length;
       building.polylinedatamap[buildingAllApi.selectedBuildingID] = value;
-      if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
-        createRooms(value, 5);
-      }else {
         createRooms(value, 0);
-      }
     });
     if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761") {
       building.floor[buildingAllApi.selectedBuildingID] = 5;
@@ -2133,6 +2126,7 @@ bool disposed=false;
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       IDS.add(key);
+      building.floor[key] = 0;
       if (key != buildingAllApi.getSelectedBuildingID()) {
         await patchAPI().fetchPatchData(id: key).then((value) {
           building.patchData[value.patchData!.buildingID!] = value;
@@ -2159,6 +2153,12 @@ bool disposed=false;
           print("value.polyline!.floors!");
           print(value.polyline!.floors!);
           building.numberOfFloors[key] = value.polyline!.floors!.length;
+          List<int> currentBuildingFloor = [];
+          value.polyline!.floors!.forEach((element) {
+            currentBuildingFloor.add(tools.alphabeticalToNumerical(element.floor!));
+            print(element.floor);
+          });
+          Building.numberOfFloorsDelhi[key] = currentBuildingFloor;
           //building.polyLineData!.polyline!.mergePolyline(value.polyline!.floors);
         });
 
@@ -2206,6 +2206,7 @@ bool disposed=false;
               // ];
             }
           }
+          createMarkers(value, 0, bid: key);
           createotherARPatch(coordinates, value.landmarks![0].buildingID!);
         });
 
@@ -3402,18 +3403,18 @@ bool disposed=false;
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
 
-  void createMarkers(land _landData, int floor) async {
+  void createMarkers(land _landData, int floor, {String? bid}) async {
     print("Markercleared");
     print(Markers.length);
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
-    Markers.clear();
+    Markers.removeWhere((marker)=>marker.markerId.value.contains(bid??buildingAllApi.selectedBuildingID));
     List<Landmarks> landmarks = _landData.landmarks!;
 
     for (int i = 0; i < landmarks.length; i++) {
       if (landmarks[i].floor == floor &&
-          landmarks[i].buildingID == buildingAllApi.selectedBuildingID) {
+          landmarks[i].buildingID == (bid??buildingAllApi.selectedBuildingID)) {
         if (landmarks[i].element!.type == "Rooms" &&
             landmarks[i].element!.subType != "main entry" &&
             landmarks[i].coordinateX != null &&
@@ -3426,20 +3427,17 @@ bool disposed=false;
               await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-              patchData: building.patchData[buildingAllApi.getStoredString()]);
+              patchData: building.patchData[bid??buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
-          if(buildingAllApi.selectedBuildingID == "666848685496124d04fc6761"){
             List<String> parts = landmarks[i].name!.split('-');
             markerText = parts.isNotEmpty ? parts[0].trim() : '';
             textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
-          }else{
-            textMarker = await bitmapDescriptorFromTextAndImage(landmarks[i].name!,'assets/pin.png');
-          }
+
 
           Markers.add(Marker(
-              markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
+              markerId: MarkerId("Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
               position: LatLng(value[0], value[1]),
               icon: textMarker,
               anchor: Offset(0.5, 0.5),
@@ -3465,9 +3463,9 @@ bool disposed=false;
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
                 patchData:
-                    building.patchData[buildingAllApi.getStoredString()]);
+                    building.patchData[bid??buildingAllApi.getStoredString()]);
             Markers.add(Marker(
-                markerId: MarkerId("Door ${landmarks[i].properties!.polyId}"),
+                markerId: MarkerId("Door ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
                 position: LatLng(value[0], value[1]),
                 icon: BitmapDescriptor.fromBytes(iconMarker),
                 visible: false,
@@ -3490,8 +3488,8 @@ bool disposed=false;
                 )));
           });
         } else if (landmarks[i].name != null &&
-            landmarks[i].name!.toLowerCase().contains("lift") &&
-            landmarks[i].element!.subType != "room door") {
+            landmarks[i].element!.type == ("FloorConnection") &&
+            landmarks[i].element!.subType == "lift") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/entry.png', 75);
 
@@ -3499,7 +3497,7 @@ bool disposed=false;
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
                 patchData:
-                    building.patchData[buildingAllApi.getStoredString()]);
+                    building.patchData[bid??buildingAllApi.getStoredString()]);
 
             // _markerLocations[LatLng(value[0], value[1])] = '1';
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
@@ -3542,7 +3540,7 @@ bool disposed=false;
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
                 patchData:
-                    building.patchData[buildingAllApi.getStoredString()]);
+                    building.patchData[bid??buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                 landmarks[i].name!;
@@ -3577,7 +3575,7 @@ bool disposed=false;
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
                 patchData:
-                    building.patchData[buildingAllApi.getStoredString()]);
+                    building.patchData[bid??buildingAllApi.getStoredString()]);
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                 landmarks[i].name!;
@@ -3612,7 +3610,7 @@ bool disposed=false;
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
                 patchData:
-                    building.patchData[buildingAllApi.getStoredString()]);
+                    building.patchData[bid??buildingAllApi.getStoredString()]);
             // _markerLocations[LatLng(value[0], value[1])] = '1';
             _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
             _markerLocationsMapLanName[LatLng(value[0], value[1])] =
@@ -3669,7 +3667,7 @@ bool disposed=false;
           await getImagesFromMarker('assets/pin.png', 50);
           List<double> value = tools.localtoglobal(
               landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-              patchData: building.patchData[buildingAllApi.getStoredString()]);
+              patchData: building.patchData[bid??buildingAllApi.getStoredString()]);
           //_markerLocations.add(LatLng(value[0],value[1]));
           BitmapDescriptor textMarker;
           String markerText;
@@ -3682,7 +3680,7 @@ bool disposed=false;
           textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/check-in.png');
 
           Markers.add(Marker(
-              markerId: MarkerId("Room ${landmarks[i].properties!.polyId}"),
+              markerId: MarkerId("Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
               position: LatLng(value[0], value[1]),
               icon: textMarker,
               anchor: Offset(0.5, 0.5),
@@ -4053,6 +4051,7 @@ bool disposed=false;
                                           SourceAndDestinationPage(
                                             DestinationID:
                                                 PathState.destinationPolyID,
+                                            user: user,
                                           ))).then((value) {
                                 if (value != null) {
                                   fromSourceAndDestinationPage(value);
@@ -4291,11 +4290,12 @@ bool disposed=false;
                 "name ${lift1.name} (${lift1.x},${lift1.y}) && (${lift2.x},${lift2.y})");
             commonLifts.add(CommonConnection(
                 name: lift1.name,
-                distance: lift1.distance,
                 x1: lift1.x,
                 y1: lift1.y,
                 x2: lift2.x,
-                y2: lift2.y));
+                y2: lift2.y,
+            d1: lift1.distance,
+            d2: lift2.distance));
             break;
           }
         }
@@ -4310,11 +4310,12 @@ bool disposed=false;
                 "name ${stair1.name} (${stair1.x},${stair1.y}) && (${stair2.x},${stair2.y})");
             commonLifts.add(CommonConnection(
                 name: stair1.name,
-                distance: stair1.distance,
                 x1: stair1.x,
                 y1: stair1.y,
                 x2: stair2.x,
-                y2: stair2.y));
+                y2: stair2.y,
+                d1: stair1.distance,
+                d2: stair2.distance));
             break;
           }
         }
@@ -4329,18 +4330,24 @@ bool disposed=false;
                 "name ${ramp1.name} (${ramp1.x},${ramp1.y}) && (${ramp2.x},${ramp2.y})");
             commonLifts.add(CommonConnection(
                 name: ramp1.name,
-                distance: ramp1.distance,
                 x1: ramp1.x,
                 y1: ramp1.y,
                 x2: ramp2.x,
-                y2: ramp2.y));
+                y2: ramp2.y,
+                d1: ramp1.distance,
+                d2: ramp2.distance));
             break;
           }
         }
       }
     }
     // Sort the commonLifts based on distance
-    commonLifts.sort((a, b) => (a.distance ?? 0).compareTo(b.distance ?? 0));
+    commonLifts.sort((a, b) {
+      // Ensure that d1 and d2 are not null before summing them up
+      final aSum = (a.d1 ?? 0) + (a.d2 ?? 0);
+      final bSum = (b.d1 ?? 0) + (b.d2 ?? 0);
+      return aSum.compareTo(bSum);
+    });
     return commonLifts;
   }
 
@@ -5426,6 +5433,7 @@ bool disposed=false;
                                             DestinationSearchPage(
                                               hintText: 'Source location',
                                               voiceInputEnabled: false,
+                                              userLocalized: user.key,
                                             ))).then((value) async {
                                   // onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
                                   onSourceVenueClicked(value);
@@ -8740,6 +8748,7 @@ bool disposed=false;
                     SourceAndDestinationPage(
                       DestinationID:
                       PathState.destinationPolyID,
+                      user: user,
                     ))).then((value) {
           if (value != null) {
             fromSourceAndDestinationPage(value);
@@ -8804,7 +8813,7 @@ bool disposed=false;
         }
         PathState.sourceFloor = value.landmarksMap![ID]!.floor!;
         PathState.sourcePolyID = ID;
-        PathState.sourceName = value.landmarksMap![ID]!.name!;
+        PathState.sourceName = user.key == ID ? "Your current location":value.landmarksMap![ID]!.name!;
         PathState.sourceBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
@@ -8920,34 +8929,34 @@ bool disposed=false;
   }
 
   void focusBuildingChecker(CameraPosition position) {
-    // LatLng currentLatLng = position.target;
-    // double distanceThreshold = 100.0;
-    // String closestBuildingId = "";
-    // buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+    LatLng currentLatLng = position.target;
+    double distanceThreshold = 100.0;
+    String closestBuildingId = "";
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
 
-    //   if(key != buildingAllApi.outdoorID){
-    //
-    //     // tempMarkers.add(Marker(
-    //     //     markerId: MarkerId("$key"),
-    //     //     position: LatLng(value.latitude, value.longitude),
-    //     //     onTap: () {
-    //     //       print("$key");
-    //     //     },
-    //     // ));
-    //     num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
-    //       geo.LatLng(value.latitude, value.longitude),
-    //       geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
-    //     );
-    //
-    //     print("distance for $key is $distance");
-    //
-    //     if (distance < distanceThreshold) {
-    //       closestBuildingId = key;
-    //       buildingAllApi.setStoredString(key);
-    //     }
+      if(key != buildingAllApi.outdoorID){
 
-    //   }
-    // });
+        // tempMarkers.add(Marker(
+        //     markerId: MarkerId("$key"),
+        //     position: LatLng(value.latitude, value.longitude),
+        //     onTap: () {
+        //       print("$key");
+        //     },
+        // ));
+        num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+          geo.LatLng(value.latitude, value.longitude),
+          geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+        );
+
+        print("distance for $key is $distance");
+
+        if (distance < distanceThreshold) {
+          closestBuildingId = key;
+          buildingAllApi.setStoredString(key);
+        }
+
+      }
+    });
   }
   Set<Circle> circles = Set();
 
@@ -9271,6 +9280,8 @@ mapToolbarEnabled: false,
                                   value,
                                   building.floor[buildingAllApi
                                       .getStoredString()]!,
+                                  bid: buildingAllApi
+                                      .getStoredString()
                                 );
                               });
                             },
@@ -9414,7 +9425,7 @@ mapToolbarEnabled: false,
                       child: HomepageSearch(
                         onVenueClicked: onLandmarkVenueClicked,
                         fromSourceAndDestinationPage:
-                        fromSourceAndDestinationPage,
+                        fromSourceAndDestinationPage, user: user,
                       ),
                     ),
                   ),

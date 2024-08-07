@@ -122,7 +122,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // //print("listen to bin :${listenToBin()}");
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
-        listenToBin();
+        //listenToBin();
       }
 
 

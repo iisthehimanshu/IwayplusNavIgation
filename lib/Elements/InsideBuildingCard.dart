@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
@@ -19,7 +19,7 @@ class InsideBuildingCard extends StatefulWidget {
   String buildingTag;
   String buildingId;
   bool buildingFavourite;
-  HashMap<String,LatLng> allBuildingID ;
+  HashMap<String,g.LatLng> allBuildingID ;
 
   InsideBuildingCard(
       {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite, required this.allBuildingID});

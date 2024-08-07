@@ -448,7 +448,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             searchResults.clear();
             landmarkData.landmarksMap!.forEach((key, value) {
               if (searchResults.length < 10) {
-                if (value.name != null && value.element!.subType != "beacon" && value.buildingID == buildingAllApi.selectedBuildingID) {
+                if (value.name != null && value.element!.subType != "beacon") {
                   if (value.name!
                       .toLowerCase()
                       .contains(searchText.toLowerCase())) {

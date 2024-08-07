@@ -36,6 +36,7 @@ class UserState {
   String Bid;
   List<int> offPathDistance = [];
   bool onConnection = false;
+  bool temporaryExit = false;
   b.Building? building;
   static int xdiff = 0;
   static int ydiff = 0;
@@ -423,6 +424,9 @@ class UserState {
   }
 
   Future<void> moveToPointOnPath(int index) async {
+    if(index>path.length-1){
+      index = path.length-8;
+    }
     showcoordX = path[index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;
@@ -434,23 +438,58 @@ class UserState {
     createCircle(values[0], values[1]);
   }
 
-  Future<void> moveToStartofPath() async {
-    List<Cell> turnPoints =
-        tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
-    print("startofpath ${[Cellpath[0].x, Cellpath[0].y]}   ${[turnPoints[0].x, turnPoints[0].y]}");
-    if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
-      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
-          [turnPoints[1].x, turnPoints[1].y]) <=
-          10) {
-        pathobj.index = Cellpath.indexOf(turnPoints[0]);
-      }
-    }else{
-      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
-          [turnPoints[0].x, turnPoints[0].y]) <=
-          10) {
-        pathobj.index = Cellpath.indexOf(turnPoints[0]);
+  Future<int> moveToNearestPoint()async{
+    double d = 100000000;
+    if(coordX==0 && coordY ==0){
+      return pathobj.index;
+    }
+    for (var e in Cellpath) {
+      if(e.floor == floor && e.bid == Bid){
+        double distance = tools.calculateDistance([coordX,coordY], [e.x,e.y]);
+        if(distance<d){
+          d = distance;
+          pathobj.index = Cellpath.indexOf(e);
+        }
       }
     }
+    return pathobj.index;
+  }
+
+  Future<void> moveToNearestTurn(int index)async{
+    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    for (int i = index; i < Cellpath.length; i++) {
+      for(int j = 0; j< turnPoints.length; j++){
+        if(Cellpath[i] == turnPoints[j]){
+          if (tools.calculateDistance([Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
+              [turnPoints[j].x, turnPoints[j].y]) <=
+              10) {
+            pathobj.index = Cellpath.indexOf(turnPoints[j]);
+          }
+          return;
+        }
+      }
+    }
+  }
+
+  Future<void> moveToStartofPath() async {
+    double d = 100000000;
+    int i = await moveToNearestPoint();
+    print("nearestpoint check ${Cellpath[i].x},${Cellpath[i].y}");
+    await moveToNearestTurn(i);
+
+    // if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
+    //   if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+    //       [turnPoints[1].x, turnPoints[1].y]) <=
+    //       10) {
+    //     pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    //   }
+    // }else{
+    //   if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+    //       [turnPoints[0].x, turnPoints[0].y]) <=
+    //       10) {
+    //     pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    //   }
+    // }
 
     floor = pathobj.sourceFloor;
     showcoordX = Cellpath[pathobj.index].x;

@@ -1130,6 +1130,16 @@ bool disposed=false;
       user.floor = userSetLocation.floor!;
       user.key = userSetLocation.sId!;
       user.initialallyLocalised = true;
+      _controller = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat(reverse: true);
+
+      // Create the animation
+      _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+        ..addListener(() {
+          _updateCircle(user.lat, user.lng);
+        });
       setState(() {
         markers.clear();
         //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[apibeaconmap[nearestBeacon]!.buildingID]);
@@ -2029,8 +2039,12 @@ bool disposed=false;
       }
       Building.apibeaconmap = apibeaconmap;
     }));
+  if(Platform.isAndroid){
+    btadapter.startScanning(apibeaconmap);
+  }else{
+    btadapter.startScanningIOS(apibeaconmap);
+  }
 
-    btadapter.startthescan(apibeaconmap);
     Future<void> timer = Future.delayed(Duration(seconds: 9));
 
     setState(() {
@@ -2403,20 +2417,24 @@ bool disposed=false;
     print("btadapter.BIN");
     print(btadapter.BIN);
 
-    for (int i = 0; i < btadapter.BIN.length; i++) {
-      if (btadapter.BIN[i]!.isNotEmpty) {
-        btadapter.BIN[i]!.forEach((key, value) {
-          if(value<0){
-            value = value * -1;
-          }
-          if (value > highestweight) {
-            highestweight = value;
-            nearestBeacon = key;
-          }
-        });
-        break;
+    if(await FlutterBluePlus.isOn){
+      for (int i = 0; i < btadapter.BIN.length; i++) {
+        if (btadapter.BIN[i]!.isNotEmpty) {
+          btadapter.BIN[i]!.forEach((key, value) {
+            if(value<0){
+              value = value * -1;
+            }
+            if (value > highestweight) {
+              highestweight = value;
+              nearestBeacon = key;
+            }
+          });
+          break;
+        }
       }
     }
+
+
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
@@ -2697,7 +2715,7 @@ bool disposed=false;
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
-    circles.clear();
+   // circles.clear();
     print("WilsonInSelected");
     print(polygonPoints);
     _polygon.add(Polygon(
@@ -3886,7 +3904,7 @@ bool disposed=false;
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
-                          circles.clear();
+                        //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -3928,7 +3946,7 @@ bool disposed=false;
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
-                          circles.clear();
+                        //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -4086,7 +4104,7 @@ bool disposed=false;
                               child: TextButton(
                                 onPressed: () async {
                                   _polygon.clear();
-                                  circles.clear();
+                                 // circles.clear();
                                   Markers.clear();
 
                                   if (user.coordY != 0 && user.coordX != 0) {
@@ -4482,7 +4500,7 @@ bool disposed=false;
     }catch(e){
       print("$e error in finding nearest landmark second");
     }
-    circles.clear();
+   // circles.clear();
     print("landmarksMap");
     // print(landmarksMap.keys);
     // print(landmarksMap.values);
@@ -5986,6 +6004,7 @@ bool disposed=false;
                                                 child: TextButton(
                                                   onPressed: () async {
                                                     setState(() {
+                                                      circles.clear();
                                                       _markers.clear();
                                                       markerSldShown = false;
                                                     });
@@ -9418,10 +9437,15 @@ mapToolbarEnabled: false,
                     Semantics(
                       child: FloatingActionButton(
                         onPressed:() async {
+                          if(!user.isnavigating && !isLocalized){
 
+                            btadapter.stopScanning();
 
-                          if(!user.isnavigating){
-                            btadapter.startthescan(apibeaconmap);
+                            if(Platform.isAndroid){
+                              btadapter.startScanning(apibeaconmap);
+                            }else{
+                              btadapter.startScanningIOS(apibeaconmap);
+                            }
                             setState(() {
                               isLocalized=true;
                               resBeacons = apibeaconmap;
@@ -9482,7 +9506,11 @@ mapToolbarEnabled: false,
                                       Duration(
                                           milliseconds: 5000),
                                           (timer) async {
-                                        btadapter.startthescan(resBeacons);
+                                            if(Platform.isAndroid){
+                                              btadapter.startScanning(apibeaconmap);
+                                            }else{
+                                              btadapter.startScanningIOS(apibeaconmap);
+                                            }
                                         Future.delayed(Duration(
                                             milliseconds: 2000))
                                             .then((value) => {

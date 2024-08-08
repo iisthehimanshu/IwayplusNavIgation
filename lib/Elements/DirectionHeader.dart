@@ -115,14 +115,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-    btadapter.startthescan(Building.apibeaconmap,diff: 5);
-    _timer = Timer.periodic(Duration(milliseconds: 2500), (timer) {
+    btadapter.startScanning(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
-        //listenToBin();
+        listenToBin();
       }
 
 
@@ -334,7 +334,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
 
-              highestweight >= 2.6) {
+              highestweight >= 1.3) {
 
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");

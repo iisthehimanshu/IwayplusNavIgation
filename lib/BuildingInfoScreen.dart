@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -47,7 +47,7 @@ class BuildingInfoScreen extends StatefulWidget {
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAll> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
-  HashMap<String,LatLng> allBuildingID = new HashMap();
+  HashMap<String,g.LatLng> allBuildingID = new HashMap();
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -74,7 +74,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     apiCall();
     print("building list");
     widget.receivedAllBuildingList!.forEach((element) {
-      LatLng kk = LatLng(element.coordinates![0], element.coordinates![1]);
+      g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;
     });
   }

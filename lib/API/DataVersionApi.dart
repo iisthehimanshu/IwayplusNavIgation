@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/API/BuildingAPI.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/APIMODELS/DataVersion.dart';
-import 'package:iwaymaps/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
+import '/API/BuildingAPI.dart';
+import '/API/buildingAllApi.dart';
+import '/APIMODELS/DataVersion.dart';
+import '/DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import '/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import '/Elements/HelperClass.dart';
 
 import '../APIMODELS/beaconData.dart';
 import '../VersioInfo.dart';
@@ -21,7 +21,7 @@ class DataVersionApi {
   String accessToken = signInBox.get("accessToken");
 
 
-  Future<DataVersion> fetchDataVersionApiData(String id) async {
+  Future<Map<String, dynamic>> fetchDataVersionApiData(String id) async {
     accessToken = signInBox.get("accessToken");
 
     final Map<String, dynamic> data = {
@@ -41,6 +41,7 @@ class DataVersionApi {
     if (response.statusCode == 200) {
       print("DATA VERSION API DATA FROM API");
       Map<String, dynamic> responseBody = json.decode(response.body);
+      print(responseBody);
       // print(responseBody);
       // print(DataVersion.fromJson(responseBody).versionData!.landmarksDataVersion);
       DataVersion DataVersionData = DataVersion.fromJson(responseBody);
@@ -67,7 +68,7 @@ class DataVersionApi {
 
       // print(DataVersionList[0].landmarksDataVersion);
 
-      return DataVersion.fromJson(responseBody);
+      return responseBody;
       // return DataVersionData;
 
     } else if (response.statusCode == 403) {
@@ -120,7 +121,7 @@ class DataVersionApi {
 
         // print(DataVersionList[0].landmarksDataVersion);
 
-        return DataVersion.fromJson(responseBody);
+        return responseBody;
         // return DataVersionData;
 
       }else{

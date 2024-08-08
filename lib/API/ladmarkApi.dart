@@ -24,7 +24,7 @@ class landmarkApi {
     print("landmark");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.landmarksDataVersionUpdate){
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) ){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;

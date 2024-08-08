@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import 'DATABASE/BOXES/SignINAPIModelBox.dart';
+import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
@@ -55,6 +56,9 @@ Future<void> main() async {
   await Hive.openBox<OutDoorModel>('OutDoorModelFile');
   Hive.registerAdapter(WayPointModelAdapter());
   await Hive.openBox<WayPointModel>('WayPointModelFile');
+  Hive.registerAdapter(DataVersionLocalModelAdapter());
+  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+
 
 
 

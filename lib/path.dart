@@ -234,6 +234,7 @@ import 'package:iwaymaps/buildingState.dart';
 import 'package:iwaymaps/pathState.dart';
 
 import 'APIMODELS/landmark.dart';
+import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
 import 'navigationTools.dart';
 
@@ -1406,7 +1407,7 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor) {
+    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor,Map<String,patchDataModel> patchData) {
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
@@ -1417,7 +1418,7 @@ List<Cell> findCorridorSegments(
     int nextrow = row;
     int nextcol = col;
 
-    List<double> v = tools.localtoglobal(row, col);
+    List<double> v = tools.localtoglobal(row, col, patchData[bid]);
     double lat = v[0];
     double lng = v[1];
     if (i + 1 < path.length) {

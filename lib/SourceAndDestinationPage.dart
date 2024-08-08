@@ -14,10 +14,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'APIMODELS/landmark.dart';
 import 'DestinationSearchPage.dart';
 import 'Elements/SearchpageResults.dart';
+import 'UserState.dart';
 class SourceAndDestinationPage extends StatefulWidget {
   String SourceID ;
   String DestinationID;
-  SourceAndDestinationPage({this.SourceID = "", this.DestinationID = ""});
+  UserState? user;
+  SourceAndDestinationPage({this.SourceID = "", this.DestinationID = "", this.user});
 
   @override
   State<SourceAndDestinationPage> createState() => _SourceAndDestinationPageState();
@@ -229,12 +231,12 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,))
+                                            builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
                                     ).then((value){
                                       setState(() {
                                         widget.SourceID = value;
                                         print("dataPOpped:$value");
-                                        SourceName = landmarkData.landmarksMap![value]!.name!;
+                                        SourceName = widget.user?.key == value ? "Your current location":landmarkData.landmarksMap![value]!.name!;
                                         if(widget.SourceID != "" && widget.DestinationID != ""){
                                           print("h3");
                                           Navigator.pop(context,[widget.SourceID,widget.DestinationID]);

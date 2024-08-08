@@ -126,9 +126,10 @@ class MyApp extends StatelessWidget {
 
 class Navigation extends StatefulWidget {
   String directLandID = "";
+  String directsourceID = "";
   static bool bluetoothGranted = false;
 
-  Navigation({this.directLandID = ''});
+  Navigation({this.directLandID = '',this.directsourceID = ''});
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -978,6 +979,11 @@ bool disposed=false;
 
 
   void paintUser(String? nearestBeacon, {bool speakTTS = true, bool render = true,String? polyID}) async {
+    if(widget.directsourceID.length>2){
+      nearestBeacon = null;
+      polyID = widget.directsourceID;
+      widget.directsourceID = '';
+    }
     if(nearestBeacon==null && polyID!=null){
       print("Inside");
       Landmarks userSetLocation = Landmarks();
@@ -1128,7 +1134,7 @@ bool disposed=false;
         user.coordY + transitionValue[1]
       ];
       user.floor = userSetLocation.floor!;
-      user.key = userSetLocation.sId!;
+      user.key = userSetLocation.properties!.polyId!;
       user.initialallyLocalised = true;
       setState(() {
         markers.clear();
@@ -4195,11 +4201,11 @@ bool disposed=false;
                             ),
                           ],
                         ),
-                        buildingAllApi.getStoredString()=="65d88662db333f894570bad3"?Container(
+                        Container(
                           margin:EdgeInsets.only(top:8,right: 16),
                             child: IconButton(onPressed: (){
-                              HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/doctor?docId=}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
-                            }, icon: Icon(Icons.share))):Container()
+                              HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
+                            }, icon: Icon(Icons.share)))
                       ],),
 
 
@@ -4473,6 +4479,12 @@ bool disposed=false;
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
+    print("polyidchecker ${PathState.sourcePolyID}");
+    if(PathState.sourcePolyID == ""){
+      PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
+    }else if(landmarksMap[PathState.sourcePolyID]!.lifts == null || landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty ){
+      landmarksMap[PathState.sourcePolyID]!.lifts = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true)!.lifts;
+    }
     try{
     if(PathState.sourcePolyID == ""){
       PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;

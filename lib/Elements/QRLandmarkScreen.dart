@@ -159,7 +159,7 @@ class _QRViewExampleState extends State<QRViewExample> {
         if(polyValue != ""){
           Navigator.pop(context,polyValue);
         }else{
-          HelperClass.showToast("QR Expired !!");
+          HelperClass.showToast("Invalid QR");
         }
       }
     });

@@ -134,11 +134,6 @@ class _MyAppState extends State<MyApp> {
     _appLinks = AppLinks();
     _appLinks.uriLinkStream.listen((Uri? uri) {
       Deeplink.deeplinkConditions(uri, c).then((v){
-        Navigator.push(
-            c,
-            MaterialPageRoute(
-                builder: (context) => Navigation(directLandID: uri!.queryParameters['landmark']??""))
-        );
       });
     });
   }

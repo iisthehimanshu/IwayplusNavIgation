@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -7,6 +8,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+
+import '../APIMODELS/buildingAll.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
@@ -90,6 +94,34 @@ class HelperClass{
       await Share.shareXFiles([XFile(file.path)], text: text);
     } catch (e) {
       print('Error sharing content: $e');
+    }
+  }
+  
+  static Future<HashMap<String,List<buildingAll>>> groupBuildings(List<buildingAll> data)async{
+    HashMap<String,List<buildingAll>> venueMap = HashMap();
+    for(buildingAll building in data){
+      venueMap.putIfAbsent(building.venueName!, ()=>[]);
+      venueMap[building.venueName]!.add(building);
+    }
+    return venueMap;
+  }
+  
+  static Future<Map<String,g.LatLng>> createAllbuildingMap (HashMap<String,List<buildingAll>> venueMap, String venue)async{
+    Map<String,g.LatLng> AllBuildingMap = Map();
+    for (var building in venueMap[venue]!) {
+      AllBuildingMap[building.sId!] = g.LatLng(building.coordinates![0], building.coordinates![1]);
+    }
+    return AllBuildingMap;
+  }
+
+  static String extractLandmark(String url) {
+    final RegExp regex = RegExp(r'source=([^&]*)&appStore');
+    final Match? match = regex.firstMatch(url);
+
+    if (match != null && match.groupCount >= 1) {
+      return match.group(1)!;
+    } else {
+      return '';
     }
   }
 

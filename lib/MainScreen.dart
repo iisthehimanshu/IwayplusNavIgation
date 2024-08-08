@@ -10,6 +10,7 @@ import 'package:iwaymaps/Navigation.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'Elements/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   final screens = [
     VenueSelectionScreen(),
     MapScreen(),
-    VenueSelectionScreen(),
+    QRViewExample(),
     FavouriteScreen(),
     ProfilePage()
   ];
@@ -107,7 +108,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Color(0xffFFFFFF),
           selectedIndex: index,
           onDestinationSelected: (index)=>setState(() {
-            if ( index==3 || index==2){
+            if (index==3){
               // Check if the 4th screen is selected
               showToast('Feature coming soon');
             } else {

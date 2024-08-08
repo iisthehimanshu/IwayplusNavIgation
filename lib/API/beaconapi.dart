@@ -57,12 +57,16 @@ class beaconapi {
       List<dynamic> responseBody = json.decode(response.body);
       List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
       print("response.statusCode");
-      print("beaconList $beaconList");
+      print("beaconList $beaconList $id");
       final beaconData = BeaconAPIModel(responseBody: responseBody);
+      print(beaconData);
+      String i = id;
       if(beaconList.isNotEmpty){
-        BeaconBox.put(beaconList[0].buildingID,beaconData);
-        beaconData.save();
+        i=beaconList[0].buildingID!;
       }
+      BeaconBox.put(i,beaconData);
+      beaconData.save();
+      print(BeaconBox.keys);
 
 
       return beaconList;
@@ -87,10 +91,13 @@ class beaconapi {
         print("response.statusCode");
         print("beaconList $beaconList");
         final beaconData = BeaconAPIModel(responseBody: responseBody);
+        String i = id;
         if(beaconList.isNotEmpty){
-          BeaconBox.put(beaconList[0].buildingID,beaconData);
-          beaconData.save();
+          i=beaconList[0].buildingID!;
         }
+        BeaconBox.put(i,beaconData);
+        beaconData.save();
+
         return beaconList;
 
       }else {

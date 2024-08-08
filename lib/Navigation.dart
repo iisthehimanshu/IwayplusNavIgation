@@ -1021,40 +1021,43 @@ bool disposed=false;
       List<double> values = [];
 
       //floor alignment
-      if (apibeaconmap[nearestBeacon]!.floor != 0) {
-        List<PolyArray> prevFloorLifts = findLift(
-            tools.numericalToAlphabetical(0),
-            building.polylinedatamap[
-            apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
-        List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(
-                apibeaconmap[nearestBeacon]!.floor!),
-            building.polylinedatamap[
-            apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
-        print("print cubicle data");
-        for (int i = 0; i < prevFloorLifts.length; i++) {
-          print(prevFloorLifts[i].name);
+      await building.landmarkdata!.then((land){
+        if (land.landmarksMap![polyID]!.floor != 0) {
+          List<PolyArray> prevFloorLifts = findLift(
+              tools.numericalToAlphabetical(0),
+              building.polylinedatamap[
+              land.landmarksMap![polyID]!.buildingID!]!.polyline!.floors!);
+          List<PolyArray> currFloorLifts = findLift(
+              tools.numericalToAlphabetical(
+                  land.landmarksMap![polyID]!.floor!),
+              building.polylinedatamap[
+              land.landmarksMap![polyID]!.buildingID!]!.polyline!.floors!);
+          print("print cubicle data");
+          for (int i = 0; i < prevFloorLifts.length; i++) {
+            print(prevFloorLifts[i].name);
+          }
+          print("data2");
+          for (int i = 0; i < currFloorLifts.length; i++) {
+            print(currFloorLifts[i].name);
+          }
+          List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+          print("dvalue");
+          print(dvalue);
+          UserState.xdiff = dvalue[0];
+          UserState.ydiff = dvalue[1];
+          values =
+              tools.localtoglobal(land.landmarksMap![polyID]!.coordinateX!,
+                  land.landmarksMap![polyID]!.coordinateY!, building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+          print(values);
+        } else {
+          UserState.xdiff = 0;
+          UserState.ydiff = 0;
+          values =
+              tools.localtoglobal(land.landmarksMap![polyID]!.coordinateX!,
+                  land.landmarksMap![polyID]!.coordinateY!, building.patchData[land.landmarksMap![polyID]!.buildingID!]);
         }
-        print("data2");
-        for (int i = 0; i < currFloorLifts.length; i++) {
-          print(currFloorLifts[i].name);
-        }
-        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-        print("dvalue");
-        print(dvalue);
-        UserState.xdiff = dvalue[0];
-        UserState.ydiff = dvalue[1];
-        values =
-            tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
-        print(values);
-      } else {
-        UserState.xdiff = 0;
-        UserState.ydiff = 0;
-        values =
-            tools.localtoglobal(apibeaconmap[nearestBeacon]!.coordinateX!,
-                apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[apibeaconmap[nearestBeacon]!.buildingID!]);
-      }
+      });
+
       print("values");
       print(values);
 
@@ -1761,6 +1764,7 @@ bool disposed=false;
                           context,
                           MaterialPageRoute(builder: (context) => QRViewExample()),
                         ).then((value){
+                          print("navigation polyID $value");
                           // if(value==""){
                           //   showLocationDialog(context);
                           // }
@@ -5893,6 +5897,7 @@ bool disposed=false;
                                                         _isRoutePanelOpen =
                                                             false;
                                                       });
+                                                      widget.directLandID = "";
                                                       selectedroomMarker
                                                           .clear();
                                                       pathMarkers.clear();

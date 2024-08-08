@@ -1,4 +1,5 @@
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
@@ -17,6 +18,7 @@ import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'Elements/UserCredential.dart';
+import 'Elements/deeplinks.dart';
 import 'Elements/locales.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
@@ -87,6 +89,8 @@ class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket();
+  late AppLinks _appLinks;
+
   // Future<bool> _isUserAuthenticated() async {
   //   // Check if the user is already signed in with Google
   //   User? user = FirebaseAuth.instance.currentUser;
@@ -111,6 +115,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     configureLocalization();
     super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _initDeepLinkListener(context);
+    // });
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
@@ -120,6 +127,19 @@ class _MyAppState extends State<MyApp> {
   void ontranslatedLanguage(Locale? locale){
     setState(() {
 
+    });
+  }
+
+  void _initDeepLinkListener(BuildContext c) async {
+    _appLinks = AppLinks();
+    _appLinks.uriLinkStream.listen((Uri? uri) {
+      Deeplink.deeplinkConditions(uri, c).then((v){
+        Navigator.push(
+            c,
+            MaterialPageRoute(
+                builder: (context) => Navigation(directLandID: uri!.queryParameters['landmark']??""))
+        );
+      });
     });
   }
 
@@ -171,14 +191,17 @@ requestLocationPermission();
             var SignInDatabasebox = Hive.box('SignInDatabase');
             print("SignInDatabasebox.containsKey(accessToken)");
             print(SignInDatabasebox.containsKey("accessToken"));
+
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
             }else{
+              _initDeepLinkListener(context);
               return MainScreen(initialIndex: 0);
             } // Redirect to Sign-In screen if user is not authenticated
           } else {
             print("googleSignInUserName");
             print(googleSignInUserName);
+            _initDeepLinkListener(context);
             return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
           }
         },

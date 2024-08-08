@@ -510,13 +510,14 @@ class Lifts {
 }
 class CommonConnection {
   String? name;
-  int? distance;
+  int? d1;
+  int? d2;
   int? x1;
   int? x2;
   int? y1;
   int? y2;
 
-  CommonConnection({this.name, this.distance, this.x1, this.y1,this.x2,this.y2});
+  CommonConnection({this.name, this.x1, this.y1,this.x2,this.y2,this.d1, this.d2});
 
 }
 class CommonStairs {

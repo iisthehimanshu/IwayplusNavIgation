@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'buildingState.dart' as b;
 
 import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
@@ -35,6 +36,8 @@ class UserState {
   String Bid;
   List<int> offPathDistance = [];
   bool onConnection = false;
+  bool temporaryExit = false;
+  b.Building? building;
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift = false;
@@ -157,7 +160,7 @@ class UserState {
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
 
@@ -237,7 +240,7 @@ class UserState {
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
-        AlignMapToPath([lat, lng], tools.localtoglobal(nextX, nextY));
+        AlignMapToPath([lat, lng], tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
       }
 
       //lift check
@@ -322,7 +325,7 @@ class UserState {
       List<int> transitionvalue = tools.eightcelltransition(this.theta);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       if (this.isnavigating &&
@@ -410,7 +413,7 @@ class UserState {
       // coordY=coordinateY!;
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
-      List<double> values = tools.localtoglobal(coordX, coordY);
+      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       showcoordX = coordX;
@@ -421,41 +424,79 @@ class UserState {
   }
 
   Future<void> moveToPointOnPath(int index) async {
+    if(index>path.length-1){
+      index = path.length-8;
+    }
     showcoordX = path[index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;
     coordY = showcoordY;
     pathobj.index = index + 1;
-    List<double> values = tools.localtoglobal(coordX, coordY);
+    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
   }
 
-  Future<void> moveToStartofPath() async {
-    List<Cell> turnPoints =
-        tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
-    print("startofpath ${[Cellpath[0].x, Cellpath[0].y]}   ${[turnPoints[0].x, turnPoints[0].y]}");
-    if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
-      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
-          [turnPoints[1].x, turnPoints[1].y]) <=
-          10) {
-        pathobj.index = Cellpath.indexOf(turnPoints[0]);
-      }
-    }else{
-      if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
-          [turnPoints[0].x, turnPoints[0].y]) <=
-          10) {
-        pathobj.index = Cellpath.indexOf(turnPoints[0]);
+  Future<int> moveToNearestPoint()async{
+    double d = 100000000;
+    if(coordX==0 && coordY ==0){
+      return pathobj.index;
+    }
+    for (var e in Cellpath) {
+      if(e.floor == floor && e.bid == Bid){
+        double distance = tools.calculateDistance([coordX,coordY], [e.x,e.y]);
+        if(distance<d){
+          d = distance;
+          pathobj.index = Cellpath.indexOf(e);
+        }
       }
     }
+    return pathobj.index;
+  }
+
+  Future<void> moveToNearestTurn(int index)async{
+    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    for (int i = index; i < Cellpath.length; i++) {
+      for(int j = 0; j< turnPoints.length; j++){
+        if(Cellpath[i] == turnPoints[j]){
+          if (tools.calculateDistance([Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
+              [turnPoints[j].x, turnPoints[j].y]) <=
+              10) {
+            pathobj.index = Cellpath.indexOf(turnPoints[j]);
+          }
+          return;
+        }
+      }
+    }
+  }
+
+  Future<void> moveToStartofPath() async {
+    double d = 100000000;
+    int i = await moveToNearestPoint();
+    print("nearestpoint check ${Cellpath[i].x},${Cellpath[i].y}");
+    await moveToNearestTurn(i);
+
+    // if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
+    //   if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+    //       [turnPoints[1].x, turnPoints[1].y]) <=
+    //       10) {
+    //     pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    //   }
+    // }else{
+    //   if (tools.calculateDistance([Cellpath[0].x, Cellpath[0].y],
+    //       [turnPoints[0].x, turnPoints[0].y]) <=
+    //       10) {
+    //     pathobj.index = Cellpath.indexOf(turnPoints[0]);
+    //   }
+    // }
 
     floor = pathobj.sourceFloor;
     showcoordX = Cellpath[pathobj.index].x;
     showcoordY = Cellpath[pathobj.index].y;
     coordX = showcoordX;
     coordY = showcoordY;
-    List<double> values = tools.localtoglobal(coordX, coordY);
+    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
 

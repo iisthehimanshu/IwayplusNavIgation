@@ -35,7 +35,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
     return Semantics(
       label: widget.text + (widget.selected?"selected":""),
       child: AnimatedContainer(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
+        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(

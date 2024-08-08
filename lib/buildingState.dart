@@ -9,6 +9,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'APIMODELS/polylinedata.dart' as poly;
 
 class Building{
+  bool qrOpened = false;
   Map<String,int> floor;
   Map<String,int> numberOfFloors;
   static Map<String,List<int>> numberOfFloorsDelhi = Map();

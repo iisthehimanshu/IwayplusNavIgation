@@ -16,15 +16,17 @@ import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
+import '../UserState.dart';
 import 'HomepageFilter.dart';
 
 
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
+  UserState? user;
   final Function(String ID,{bool DirectlyStartNavigation}) onVenueClicked;
   final Function(List<String>) fromSourceAndDestinationPage;
-  const HomepageSearch({this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage});
+  HomepageSearch({super.key, this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage,required this.user});
 
   @override
   State<HomepageSearch> createState() => _HomepageSearchState();
@@ -176,7 +178,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SourceAndDestinationPage())
+                                builder: (context) => SourceAndDestinationPage(user: widget.user,))
                         ).then((value){
                           widget.fromSourceAndDestinationPage(value);
                         });

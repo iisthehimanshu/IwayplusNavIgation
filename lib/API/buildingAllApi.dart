@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:http/http.dart' as http;
 import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
@@ -16,7 +16,7 @@ class buildingAllApi {
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";
-  static Map<String,LatLng> allBuildingID = {
+  static Map<String,g.LatLng> allBuildingID = {
   };
   static String outdoorID = "";
 
@@ -119,11 +119,11 @@ class buildingAllApi {
     return selectedID;
   }
 
-  static void setStoredAllBuildingID(HashMap<String,LatLng> value){
+  static void setStoredAllBuildingID(HashMap<String,g.LatLng> value){
     allBuildingID = value;
   }
 
-  static Map<String,LatLng> getStoredAllBuildingID(){
+  static Map<String,g.LatLng> getStoredAllBuildingID(){
     return allBuildingID;
   }
 

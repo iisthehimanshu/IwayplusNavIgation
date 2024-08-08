@@ -5,8 +5,13 @@ import 'buildingState.dart';
 
 class MotionModel{
 
+  static int stuckCount = 0;
+
   static bool isValidStep(UserState user, int cols, int rows, List<int> nonWalkable, Function reroute){
-    if(user.onConnection){
+    if(user.pathobj.index+1 > user.Cellpath.length-1){
+      UserState.closeNavigation();
+    }
+    if(user.onConnection || user.temporaryExit){
       return false;
     }
     List<int> transitionValue = tools.eightcelltransition(user.theta);
@@ -25,6 +30,11 @@ class MotionModel{
     }
 
     if(nonWalkable.contains((newY*cols)+newX)){
+      stuckCount++;
+      if(stuckCount==5){
+        user.moveToPointOnPath((user.pathobj.index+(stuckCount*UserState.stepSize)-1).toInt());
+        stuckCount = 0;
+      }
       return false;
     }
 

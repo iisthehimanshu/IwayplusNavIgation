@@ -6015,6 +6015,14 @@ bool disposed=false;
                                                 ),
                                                 child: TextButton(
                                                   onPressed: () async {
+                                                    if(PathState.sourceX == PathState.destinationX && PathState.sourceY == PathState.destinationY){
+                                                      //HelperClass.showToast("Source and Destination can not be same");
+                                                      setState(() {
+                                                        _isRoutePanelOpen = false;
+                                                      });
+                                                      closeNavigation();
+                                                      return;
+                                                    }
                                                     setState(() {
                                                       circles.clear();
                                                       _markers.clear();

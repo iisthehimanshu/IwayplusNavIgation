@@ -9,6 +9,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
@@ -34,6 +35,7 @@ import 'dart:io' show Platform;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  WakelockPlus.enable();
   //await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();

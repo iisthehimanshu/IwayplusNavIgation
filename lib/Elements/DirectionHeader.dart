@@ -169,7 +169,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Go Straight";
 
           speak(
-              "${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance,widget.context)}}",
                 _currentLocale,prevpause: true);
         }else{
           print("look here $angle      ${widget.direction}          ${"Turn ${LocaleData.getProperty5(widget.direction, widget.context)}"}");
@@ -179,7 +179,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               "${widget.direction}",
               _currentLocale,prevpause: true);
         widget.getSemanticValue =
-        "Turn ${widget.direction}, and Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps";
+        "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance,widget.context)}";
 
         }
       });
@@ -374,7 +374,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               print("workingg 4");
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               speak(
-                  "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                  "${widget.direction} ${tools.convertFeet(widget.distance,widget.context)}",
                   _currentLocale
               );
               widget.user.moveToPointOnPath(indexOnPath!);
@@ -648,7 +648,7 @@ if(disposed)return;
           Vibration.vibrate();
 
           speak(
-              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance,context)}}",
               _currentLocale,prevpause: true);
         }
       }
@@ -896,7 +896,7 @@ if(disposed)return;
                   });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
                 const SizedBox(width: 8,),
-                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user,widget.context),
+                scrollableDirection("${widget.direction}", '${tools.convertFeet(widget.distance,widget.context)}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user,widget.context),
                 const SizedBox(width: 8,),
                 Container(
                   width: 44,
@@ -1060,12 +1060,10 @@ class scrollableDirection extends StatelessWidget {
         if (listOfDirections[DirectionIndex].isDestination) {
           return "";
         } else if (DirectionIndex == nextTurnIndex) {
-          return '$steps ${LocaleData.steps.getString(context)}';
+          return '$steps';
         } else {
-          return '${((listOfDirections[DirectionIndex].distanceToNextTurn ??
-              1) /
-              UserState.stepSize).ceil()} ${LocaleData.steps.getString(
-              context)}';
+          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurn ??
+              1).toInt(),context)}';
         }
       } else {
         return "";

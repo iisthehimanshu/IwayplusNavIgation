@@ -708,7 +708,7 @@ bool disposed=false;
       await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
     }
     await flutterTts.stop();
-    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setSpeechRate(0.7);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
@@ -1781,12 +1781,10 @@ bool disposed=false;
                           MaterialPageRoute(builder: (context) => QRViewExample()),
                         ).then((value){
                           print("navigation polyID $value");
-                          // if(value==""){
-                          //   showLocationDialog(context);
-                          // }
-                          // print("Value--${value}");
-                          // String polyValue = value.replaceAll("http://", "");
-                          // print("polyValue$polyValue");
+                          setState(() {
+                            isLoading = false;
+                            isBlueToothLoading = false;
+                          });
                           paintUser(null,polyID: value);
                         });
                         //Navigator.of(context).pop();
@@ -2051,7 +2049,7 @@ bool disposed=false;
     btadapter.startScanningIOS(apibeaconmap);
   }
 
-    Future<void> timer = Future.delayed(Duration(seconds: 9));
+    Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)? 9:0));
 
     setState(() {
       resBeacons = apibeaconmap;
@@ -2224,6 +2222,7 @@ bool disposed=false;
       }
     }));
     print("before Calling localize user");
+
     await Future.wait([timer,allBuildingCalls]);
     print("Calling localize user");
     localizeUser();
@@ -3849,6 +3848,7 @@ bool disposed=false;
 
   PanelController _landmarkPannelController = new PanelController();
   bool calculatingPath = false;
+  double aerialDist=0.0;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
 
@@ -3871,6 +3871,20 @@ bool disposed=false;
       selectedroomMarker.clear();
       building.selectedLandmarkID = null;
       return Container();
+    }
+
+    if(user.initialallyLocalised){
+      double val1=double.parse(snapshot
+          .data!
+          .landmarksMap![
+      building.selectedLandmarkID]!
+          .properties!.latitude!);
+      double val2=double.parse(snapshot
+          .data!
+          .landmarksMap![
+      building.selectedLandmarkID]!
+          .properties!.longitude!);
+      aerialDist=tools.calculateAerialDist(user.lat,user.lng,val1,val2);
     }
 
 
@@ -3980,7 +3994,7 @@ bool disposed=false;
               color: Colors.grey,
             ),
           ],
-          minHeight: 145,
+          minHeight: 150,
           maxHeight: screenHeight,
           snapPoint: 0.6,
           panel: () {
@@ -4061,6 +4075,23 @@ bool disposed=false;
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff8d8c8c),
+                                  height: 25 / 16,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+
+                            Container(
+                              padding: EdgeInsets.only(
+                                left: 17,
+                              ),
+                              child: Text(
+                                "${aerialDist.toStringAsFixed(2)} mtr",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xff8d8c8c),
                                   height: 25 / 16,

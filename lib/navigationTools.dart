@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/UserState.dart';
@@ -12,6 +13,7 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'Elements/locales.dart';
 import 'directionClass.dart';
 import 'path.dart';
 
@@ -1089,6 +1091,23 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
+  static double calculateAerialDist(double lat1, double lon1, double lat2, double lon2) {
+    // Approximate conversion factor: 1 degree of latitude/longitude to meters
+    const double metersPerDegree = 111320;
+
+    // Calculate the differences
+    double latDifference = lat2 - lat1;
+    double lonDifference = lon2 - lon1;
+
+    // Euclidean distance in degrees
+    double distanceDegrees = sqrt(pow(latDifference, 2) + pow(lonDifference, 2));
+
+    // Convert the distance from degrees to meters
+    double distanceMeters = distanceDegrees * metersPerDegree;
+
+    return distanceMeters;
+  }
+
 
 
   static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
@@ -1571,6 +1590,24 @@ class tools {
     int rowDifference = x2 - x1;
     int colDifference = y2 - y1;
     return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
+  }
+
+
+  static double feetToMeters(int feet) {
+    const double feetToMeterConversionFactor = 0.3048;
+    return feet * feetToMeterConversionFactor;
+  }
+
+  static double feetToSteps(int feet,) {
+    return feet / UserState.stepSize.ceil();
+  }
+
+  static String convertFeet(int feet,context) {
+    if (UserCredentials().getUserPathDetails().contains('Distance in meters')) {
+      return '${feetToMeters(feet).toStringAsFixed(0)} meters';
+    }else {
+      return '${feetToSteps(feet).toStringAsFixed(0)} ${LocaleData.steps.getString(context)}';
+    }
   }
 
   static bool allElementsAreSame(List list) {

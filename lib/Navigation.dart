@@ -5113,7 +5113,7 @@ bool disposed=false;
               polylineId: PolylineId("$bid"),
               points: coordinates,
               color: Colors.red,
-              width: 5,
+              width: 8,
             ));
           });
         }

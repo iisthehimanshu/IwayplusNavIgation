@@ -365,7 +365,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return bytes;
   }
   //--------------------------------------------------------------------------------------
-
+double _progressValue=0.0;
   @override
   void initState() {
     super.initState();
@@ -696,21 +696,30 @@ if(allBuildingID.length>1) {
 bool disposed=false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
-    if(disposed)return;
-    if (prevpause) {
-      await flutterTts.pause();
+
+    if(!UserState.ttsAllStop){
+      if(disposed)return;
+      if (prevpause) {
+        await flutterTts.pause();
+      }
+      print("msg $msg");
+      if (lngcode == "hi") {
+        await flutterTts
+            .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+      } else {
+        await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+      }
+      await flutterTts.stop();
+      if(Platform.isAndroid){
+        await flutterTts.setSpeechRate(0.7);
+      }else{
+        await flutterTts.setSpeechRate(0.6);
+      }
+
+      await flutterTts.setPitch(1.0);
+      await flutterTts.speak(msg);
     }
-    print("msg $msg");
-    if (lngcode == "hi") {
-      await flutterTts
-          .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-    } else {
-      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
-    }
-    await flutterTts.stop();
-    await flutterTts.setSpeechRate(0.7);
-    await flutterTts.setPitch(1.0);
-    await flutterTts.speak(msg);
+
   }
 
   void checkPermissions() async {
@@ -2021,11 +2030,22 @@ bool disposed=false;
   HashMap<String, beacon> resBeacons = HashMap();
   bool isBlueToothLoading = false;
   // Initially set to true to show loader
-
+void _updateProgress(){
+  const onsec=const Duration(seconds: 1);
+  Timer.periodic(onsec,(Timer t){
+      setState(() {
+        _progressValue+=0.08;
+        if(_progressValue.toStringAsFixed(1)=='1.0'){
+          t.cancel();
+          return;
+        }
+      });
+  });
+}
   void apiCalls(context) async {
     versionApiCall();
 
-
+    _updateProgress();
     await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
       var key = entry.key;
 
@@ -4083,7 +4103,7 @@ bool disposed=false;
                               ),
                             ),
 
-                            Container(
+                            (user.initialallyLocalised)?  Container(
                               padding: EdgeInsets.only(
                                 left: 17,
                               ),
@@ -4098,7 +4118,7 @@ bool disposed=false;
                                 ),
                                 textAlign: TextAlign.left,
                               ),
-                            ),
+                            ):SizedBox(),
                             // Row(
                             //   mainAxisAlignment: MainAxisAlignment.start,
                             //   children: [
@@ -9163,6 +9183,7 @@ bool disposed=false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized=false;
+  IconData _mainIcon = Icons.volume_up_outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -9308,6 +9329,51 @@ mapToolbarEnabled: false,
                   children: [
                     //
                     // // Text(Building.thresh),
+
+                    SpeedDial(
+                      icon: _mainIcon,
+                      backgroundColor: Colors.white,
+                      visible: true,
+                      curve: Curves.bounceInOut,
+                      children: [
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_up_outlined, color: Colors.black),
+                          backgroundColor: Colors.white,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon=Icons.volume_up_outlined;
+                            }),
+                            UserState.ttsAllStop=false,
+                            UserState.ttsOnlyTurns=false,
+                            print('Pressed Read Later')
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_down_outlined, color: Colors.black),
+                          backgroundColor: Colors.white,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon=Icons.volume_down_outlined;
+                            }),
+                            UserState.ttsOnlyTurns=true,
+                            UserState.ttsAllStop=false,
+                          },
+
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_off_outlined, color: Colors.black),
+                          backgroundColor: Colors.white,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon=Icons.volume_off_outlined;
+                            }),
+                            UserState.ttsAllStop=true,
+                            UserState.ttsOnlyTurns=false,
+
+                          },
+                        ),
+                      ],
+                    ),
                     Visibility(
                       visible: DebugToggle.StepButton,
                       child: Container(
@@ -9699,16 +9765,31 @@ mapToolbarEnabled: false,
             //   backgroundColor: Colors
             //       .white, // Set the background color of the FAB
             // ),
-            (!user.initialallyLocalised && !building.qrOpened)?Container(
-              height: screenHeight,
-              width: screenWidth,
-              color: Colors.white.withOpacity(0.8),
-              child: lott.Lottie.asset(
-                'assets/loding_animation.json', // Path to your Lottie animation
-                width: 500,
-                height: 500,
-              ),
-            ):Container()
+            (!user.initialallyLocalised && !building.qrOpened)?
+                Container(
+                  height: screenHeight,
+                  width: screenWidth,
+                  color: Colors.white.withOpacity(0.8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      lott.Lottie.asset(
+                        'assets/loding_animation.json', // Path to your Lottie animation
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.only(left: 56,right: 56 ),
+                        child: LinearProgressIndicator(
+                          value: _progressValue,
+                          backgroundColor: Colors.grey,valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+
+            :Container()
           ],
         ),
       ),

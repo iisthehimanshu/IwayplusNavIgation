@@ -371,13 +371,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               DirectionIndex = 1;
               return false; //away from path
             } else {
+              double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
               print("workingg 4");
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               speak(
                   "${widget.direction} ${tools.convertFeet(widget.distance,widget.context)}",
                   _currentLocale
               );
-              widget.user.moveToPointOnPath(indexOnPath!);
+              widget.user.moveToPointOnPath(indexOnPath!,onTurn: dis<20);
               widget.moveUser();
               DirectionIndex = nextTurnIndex;
               return true; //moved on path
@@ -657,7 +658,7 @@ if(disposed)return;
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle,widget.context)}",_currentLocale);
           widget.user.move(context);
-        }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
+        }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 10){
           if(!direc.contains("slight") && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){

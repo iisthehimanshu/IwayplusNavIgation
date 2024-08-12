@@ -6195,6 +6195,23 @@ bool disposed=false;
                                                         //   ),
                                                         // );
                                                       });
+                                                      alignMapToPath([
+                                                        user.lat,
+                                                        user.lng
+                                                      ], [
+                                                        PathState
+                                                            .singleCellListPath[
+                                                        user.pathobj
+                                                            .index +
+                                                            1]
+                                                            .lat,
+                                                        PathState
+                                                            .singleCellListPath[
+                                                        user.pathobj
+                                                            .index +
+                                                            1]
+                                                            .lng
+                                                      ]);
                                                     });
                                                     _isRoutePanelOpen = false;
 
@@ -6208,23 +6225,7 @@ bool disposed=false;
                                                         false;
 
                                                     StartPDR();
-                                                    alignMapToPath([
-                                                      user.lat,
-                                                      user.lng
-                                                    ], [
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lat,
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lng
-                                                    ]);
+
                                                     if(building.floor[PathState.sourceBid] != PathState.sourceFloor){
                                                       building.floor[PathState.sourceBid] = PathState.sourceFloor;
                                                       createRooms(building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);

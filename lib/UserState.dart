@@ -160,7 +160,8 @@ class UserState {
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+      List<double> values =
+          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
 
@@ -240,7 +241,8 @@ class UserState {
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
-        AlignMapToPath([lat, lng], tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
+        AlignMapToPath([lat, lng],
+            tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
       }
 
       //lift check
@@ -325,7 +327,8 @@ class UserState {
       List<int> transitionvalue = tools.eightcelltransition(this.theta);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
-      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+      List<double> values =
+          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       if (this.isnavigating &&
@@ -413,7 +416,8 @@ class UserState {
       // coordY=coordinateY!;
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
-      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+      List<double> values =
+          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       showcoordX = coordX;
@@ -423,30 +427,37 @@ class UserState {
     }
   }
 
-  Future<void> moveToPointOnPath(int index) async {
-    if(index>path.length-1){
-      index = path.length-8;
+  Future<void> moveToPointOnPath(int index, {bool onTurn = false}) async {
+    if(onTurn){
+      int? turnIndex = await findTurnPointAround();
+      if (turnIndex != null) {
+        index = turnIndex;
+      }
+    }
+    if (index > path.length - 1) {
+      index = path.length - 9;
     }
     showcoordX = path[index] % pathobj.numCols![Bid]![floor]!;
     showcoordY = path[index] ~/ pathobj.numCols![Bid]![floor]!;
     coordX = showcoordX;
     coordY = showcoordY;
     pathobj.index = index + 1;
-    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+    List<double> values =
+        tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
   }
 
-  Future<int> moveToNearestPoint()async{
+  Future<int> moveToNearestPoint() async {
     double d = 100000000;
-    if(coordX==0 && coordY ==0){
+    if (coordX == 0 && coordY == 0) {
       return pathobj.index;
     }
     for (var e in Cellpath) {
-      if(e.floor == floor && e.bid == Bid){
-        double distance = tools.calculateDistance([coordX,coordY], [e.x,e.y]);
-        if(distance<d){
+      if (e.floor == floor && e.bid == Bid) {
+        double distance = tools.calculateDistance([coordX, coordY], [e.x, e.y]);
+        if (distance < d) {
           d = distance;
           pathobj.index = Cellpath.indexOf(e);
         }
@@ -455,13 +466,15 @@ class UserState {
     return pathobj.index;
   }
 
-  Future<void> moveToNearestTurn(int index)async{
-    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+  Future<void> moveToNearestTurn(int index) async {
+    List<Cell> turnPoints =
+        tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
     for (int i = index; i < Cellpath.length; i++) {
-      for(int j = 0; j< turnPoints.length; j++){
-        if(Cellpath[i] == turnPoints[j]){
-          if (tools.calculateDistance([Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
-              [turnPoints[j].x, turnPoints[j].y]) <=
+      for (int j = 0; j < turnPoints.length; j++) {
+        if (Cellpath[i] == turnPoints[j]) {
+          if (tools.calculateDistance(
+                  [Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
+                  [turnPoints[j].x, turnPoints[j].y]) <=
               10) {
             pathobj.index = Cellpath.indexOf(turnPoints[j]);
           }
@@ -469,6 +482,23 @@ class UserState {
         }
       }
     }
+  }
+
+  Future<int?> findTurnPointAround() async {
+    List<Cell> turnPoints =
+    tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    double d = 11;
+    int? ind;
+    for (int j = 0; j < turnPoints.length; j++) {
+      double distance = tools.calculateDistance(
+          [showcoordX, showcoordY],
+          [turnPoints[j].x, turnPoints[j].y]);
+      if(distance<d){
+        d = distance;
+        ind = Cellpath.indexOf(turnPoints[j]);
+      }
+    }
+    return ind;
   }
 
   Future<void> moveToStartofPath() async {
@@ -496,7 +526,8 @@ class UserState {
     showcoordY = Cellpath[pathobj.index].y;
     coordX = showcoordX;
     coordY = showcoordY;
-    List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+    List<double> values =
+        tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
 

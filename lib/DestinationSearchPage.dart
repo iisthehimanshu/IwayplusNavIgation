@@ -475,7 +475,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       score == 0.0
                           ? print('Matched Name: $matchedName, Score: $score')
                           : print('Matched Name: $matchedName, Score: $score');
-
+                      if(score<0.2){
                         searchResults.add(SearchpageResults(
                           name: "${value.name}",
                           location:
@@ -487,7 +487,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                           coordX: value.coordinateX!,
                           coordY: value.coordinateY!,
                         ));
-                      
+                      }
 
                     });
 

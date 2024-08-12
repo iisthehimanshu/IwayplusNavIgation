@@ -948,23 +948,23 @@ if(disposed)return;
             ),
           ):Container(),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-
-                  Text(sumMap.toString()),
-                  Text(binString),
-
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //
+          //
+          //         Text(sumMap.toString()),
+          //         Text(binString),
+          //
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           // Container(
           //   width: 300,

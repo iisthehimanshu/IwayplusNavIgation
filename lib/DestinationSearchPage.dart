@@ -449,9 +449,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             landmarkData.landmarksMap!.forEach((key, value) {
               if (searchResults.length < 10) {
                 if (value.name != null && value.element!.subType != "beacon") {
-                  if (value.name!
-                      .toLowerCase()
-                      .contains(searchText.toLowerCase())) {
+                  if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
                     final nameList = [value.name!.toLowerCase()];
                     final fuse = Fuzzy(
                       nameList,

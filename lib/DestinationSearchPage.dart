@@ -506,6 +506,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   //}
                 } else {
                   return;
+
                 }
               }
               });

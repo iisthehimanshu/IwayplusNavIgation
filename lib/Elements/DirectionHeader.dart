@@ -375,6 +375,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               DirectionIndex = 1;
               return false; //away from path
             } else {
+              double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
               print("workingg 4");
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               if(!UserState.ttsOnlyTurns) {
@@ -385,6 +386,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 );
               }
               widget.user.moveToPointOnPath(indexOnPath!);
+
               widget.moveUser();
               DirectionIndex = nextTurnIndex;
               return true; //moved on path
@@ -693,6 +695,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           }
             widget.user.move(context);
         }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
+
           if(!direc.contains("slight") && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
@@ -987,23 +990,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ):Container(),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-
-                  Text(sumMap.toString()),
-                  Text(binString),
-
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //
+          //
+          //         Text(sumMap.toString()),
+          //         Text(binString),
+          //
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           // Container(
           //   width: 300,

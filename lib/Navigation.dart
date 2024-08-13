@@ -846,7 +846,7 @@ bool disposed=false;
 
   Future<void> paintMarker(LatLng Location) async {
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+        await getImagesFromMarker('assets/userloc0.png', 130);
     final Uint8List userlocdebug =
         await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -1006,7 +1006,7 @@ bool disposed=false;
         print("userLandmark: ${userSetLocation.name}");
       });
       final Uint8List userloc =
-      await getImagesFromMarker('assets/userloc0.png', 80);
+      await getImagesFromMarker('assets/userloc0.png', 130);
       final Uint8List userlocdebug =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -1322,7 +1322,7 @@ bool disposed=false;
 
 
       final Uint8List userloc =
-      await getImagesFromMarker('assets/userloc0.png', 80);
+      await getImagesFromMarker('assets/userloc0.png', 130);
       final Uint8List userlocdebug =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -1843,7 +1843,7 @@ bool disposed=false;
   void moveUser() async {
     print("User is moving");
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+        await getImagesFromMarker('assets/userloc0.png', 130);
     final Uint8List userlocdebug =
         await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -6155,7 +6155,7 @@ if(mounted){
                                                       final Uint8List userloc =
                                                           await getImagesFromMarker(
                                                               'assets/userloc0.png',
-                                                              80);
+                                                              130);
                                                       final Uint8List
                                                           userlocdebug =
                                                           await getImagesFromMarker(
@@ -6216,6 +6216,23 @@ if(mounted){
                                                         //   ),
                                                         // );
                                                       });
+                                                      alignMapToPath([
+                                                        user.lat,
+                                                        user.lng
+                                                      ], [
+                                                        PathState
+                                                            .singleCellListPath[
+                                                        user.pathobj
+                                                            .index +
+                                                            1]
+                                                            .lat,
+                                                        PathState
+                                                            .singleCellListPath[
+                                                        user.pathobj
+                                                            .index +
+                                                            1]
+                                                            .lng
+                                                      ]);
                                                     });
                                                     _isRoutePanelOpen = false;
 
@@ -6229,23 +6246,7 @@ if(mounted){
                                                         false;
 
                                                     StartPDR();
-                                                    alignMapToPath([
-                                                      user.lat,
-                                                      user.lng
-                                                    ], [
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lat,
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lng
-                                                    ]);
+
                                                     if(building.floor[PathState.sourceBid] != PathState.sourceFloor){
                                                       building.floor[PathState.sourceBid] = PathState.sourceFloor;
                                                       createRooms(building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);
@@ -7496,10 +7497,9 @@ if(mounted){
                                           height: 42,
                                           decoration: BoxDecoration(
                                               color: Color(0xffffffff),
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              border: Border.all(
-                                                  color: Color(0xff000000))),
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              border: Border.all(color: Color(0xff000000))
+                                          ),
                                           child: TextButton(
                                             onPressed: () {},
                                             child: Row(

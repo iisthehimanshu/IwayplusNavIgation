@@ -1636,11 +1636,10 @@ bool disposed=false;
         }
       } else {
         if (speakTTS) {
-          await speak(LocaleData.unabletofindyourlocation.getString(context),
+          speak(LocaleData.unabletofindyourlocation.getString(context),
               _currentLocale);
-          speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
-          building.qrOpened = true;
           showLocationDialog(context);
+          building.qrOpened = true;
         }
       }
       if (widget.directLandID.isNotEmpty) {
@@ -1658,6 +1657,7 @@ bool disposed=false;
 
   void showLocationDialog(BuildContext context) {
     Future.delayed(Duration(milliseconds: 1500)).then((value){
+      speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
       double screenWidth = MediaQuery.of(context).size.width;
 
       showDialog(
@@ -2068,7 +2068,6 @@ void _updateProgress(){
   }else{
     btadapter.startScanningIOS(apibeaconmap);
   }
-
     Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)? 9:0));
 
     setState(() {
@@ -2371,11 +2370,13 @@ void _updateProgress(){
       strokeColor: Colors.blue,
       fillColor: Colors.lightBlue.withOpacity(0.2),
     );
+if(mounted){
+  setState(() {
+    circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
+    circles.add(updatedCircle);
+  });
+}
 
-    setState(() {
-      circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
-      circles.add(updatedCircle);
-    });
   }
 
   void updateCircle(double lat, double lng,

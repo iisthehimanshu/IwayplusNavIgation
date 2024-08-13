@@ -447,57 +447,76 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             vall = -1;
             searchResults.clear();
             landmarkData.landmarksMap!.forEach((key, value) {
+
               if (searchResults.length < 10) {
                 if (value.name != null && value.element!.subType != "beacon") {
-                  if (value.name!.toLowerCase().contains(searchText.toLowerCase())) {
-                    final nameList = [value.name!.toLowerCase()];
-                    final fuse = Fuzzy(
-                      nameList,
-                      options: FuzzyOptions(
-                        findAllMatches: true,
-                        tokenize: true,
-                        threshold: 0.5,
-                      ),
-                    );
+                  // if (value.name!
+                  //     .toLowerCase()
+                  //     .contains(searchText.toLowerCase())) {
+                    String normalizedSearchText = normalizeText(searchText);
 
-                    final result = fuse.search(searchText.toLowerCase());
-                    // Assuming `result` is a List<FuseResult<dynamic>>
-                    result.forEach((fuseResult) {
-                      // Access the item property of the result to get the matched value
-                      String matchedName = fuseResult.item;
+                    // Normalize the name in the list
+                    String normalizedValueName = normalizeText(value.name!);
 
-                      // Access the score of the match
-                      double score = fuseResult.score;
+                    print("normalizedValueName");
+                    print(normalizedValueName);
+                    print(normalizedSearchText);
 
-                      // Do something with the matchedName or score
-                      score == 0.0
-                          ? print('Matched Name: $matchedName, Score: $score')
-                          : print('Matched Name: $matchedName, Score: $score');
-                      if(score<0.2){
-                        searchResults.add(SearchpageResults(
-                          name: "${value.name}",
-                          location:
-                          "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                          onClicked: onVenueClicked,
-                          ID: value.properties!.polyId!,
-                          bid: value.buildingID!,
-                          floor: value.floor!,
-                          coordX: value.coordinateX!,
-                          coordY: value.coordinateY!,
-                        ));
-                      }
+                    if (normalizedValueName.contains(normalizedSearchText)) {
+                      final nameList = [normalizedValueName];
+                      final fuse = Fuzzy(
+                        nameList,
+                        options: FuzzyOptions(
+                          findAllMatches: true,
+                          tokenize: true,
+                          threshold: 0.5,
+                        ),
+                      );
 
-                    });
+                      final result = fuse.search(normalizedSearchText);
+                      // Assuming `result` is a List<FuseResult<dynamic>>
+                      result.forEach((fuseResult) {
+                        // Access the item property of the result to get the matched value
+                        String matchedName = fuseResult.item;
 
-                  }
+                        // Access the score of the match
+                        double score = fuseResult.score;
+
+                        // Do something with the matchedName or score
+                        score == 0.0
+                            ? print('Matched Name: $matchedName, Score: $score')
+                            : print(
+                            'Matched Name: $matchedName, Score: $score');
+                        if (score < 0.2) {
+                          searchResults.add(SearchpageResults(
+                            name: "${value.name}",
+                            location:
+                            "Floor ${value.floor}, ${value
+                                .buildingName}, ${value.venueName}",
+                            onClicked: onVenueClicked,
+                            ID: value.properties!.polyId!,
+                            bid: value.buildingID!,
+                            floor: value.floor!,
+                            coordX: value.coordinateX!,
+                            coordY: value.coordinateY!,
+                          ));
+                        }
+                      });
+                    }
+                  //}
+                } else {
+                  return;
+
                 }
-              } else {
-                return;
               }
-            });
+              });
           }
         }
       });
+  }
+
+  String normalizeText(String text) {
+    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
   }
 
   void onVenueClicked(String name, String location, String ID, String bid) {

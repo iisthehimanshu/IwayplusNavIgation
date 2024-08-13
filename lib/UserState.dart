@@ -37,6 +37,8 @@ class UserState {
   List<int> offPathDistance = [];
   bool onConnection = false;
   bool temporaryExit = false;
+  static bool ttsAllStop=false;
+  static bool ttsOnlyTurns=false;
   b.Building? building;
   static int xdiff = 0;
   static int ydiff = 0;
@@ -282,10 +284,13 @@ class UserState {
                   element.doorY ?? element.coordinateY!
                 ]) <=
                 3) {
-              speak(
-                  convertTolng("Passing by ${element.name}", element.name, 0.0,
-                      context, 0.0),
-                  lngCode);
+              if(!UserState.ttsOnlyTurns){
+                speak(
+                    convertTolng("Passing by ${element.name}", element.name, 0.0,
+                        context, 0.0),
+                    lngCode);
+              }
+
               return false; // Remove this element
             }
           } else {
@@ -307,14 +312,17 @@ class UserState {
                 element.coordinateX!,
                 element.coordinateY!
               ]);
-              speak(
-                  convertTolng(
-                      "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}",
-                      element.name!,
-                      0.0,
-                      context,
-                      0.0),
-                  lngCode);
+              if(!UserState.ttsOnlyTurns){
+                speak(
+                    convertTolng(
+                        "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}",
+                        element.name!,
+                        0.0,
+                        context,
+                        0.0),
+                    lngCode);
+              }
+
               return false; // Remove this element
             }
           }

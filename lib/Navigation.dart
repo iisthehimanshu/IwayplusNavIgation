@@ -280,6 +280,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         } catch (e) {}
+      } else if(values == 'Pharmacy'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/hospital.png', 70);
+        markers.add(
+          MapMarker(
+            id: keys.toString(),
+            position: keys,
+            icon: BitmapDescriptor.fromBytes(iconMarker),
+            Landmarkname: LandmarkValue,
+            mapController: _googleMapController
+          ),
+        );
+      } else if(values == 'Kitchen'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue,
+              mapController: _googleMapController
+          ),
+        );
       } else if (values == 'Female') {
         Uint8List iconMarker =
             await getImagesFromMarker('assets/Femaletoilet.png', 65);
@@ -3652,7 +3674,23 @@ bool disposed=false;
             //     ))
             // );
           });
-        } else if (landmarks[i].properties!.washroomType != null &&
+        } else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("pharmacy")){
+          setState(() {
+            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!, building.patchData[bid??buildingAllApi.getStoredString()]);
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+          });
+          
+        }else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("kitchen")){
+          print("Kitchen");
+          setState(() {
+            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!, building.patchData[bid??buildingAllApi.getStoredString()]);
+            _markerLocationsMap[LatLng(value[0], value[1])] = 'Kitchen';
+            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+          });
+
+        }
+        else if (landmarks[i].properties!.washroomType != null &&
             landmarks[i].properties!.washroomType == "Male") {
           final Uint8List iconMarker =
               await getImagesFromMarker('assets/6.png', 65);

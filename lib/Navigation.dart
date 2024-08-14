@@ -1658,7 +1658,7 @@ bool disposed=false;
         }
       } else {
         if (speakTTS) {
-          speak(LocaleData.unabletofindyourlocation.getString(context),
+          speak("${LocaleData.unabletofindyourlocation.getString(context)}.....${LocaleData.scanQr.getString(context)}",
               _currentLocale);
           showLocationDialog(context);
           building.qrOpened = true;
@@ -1675,13 +1675,10 @@ bool disposed=false;
   String? qrText;
 
 
-
-
   void showLocationDialog(BuildContext context) {
-    Future.delayed(Duration(milliseconds: 1500)).then((value){
-      speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
+    Future.delayed(Duration(milliseconds: 2000)).then((value){
+      //speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
       double screenWidth = MediaQuery.of(context).size.width;
-
       showDialog(
         barrierDismissible: false,
         context: context,
@@ -3513,6 +3510,7 @@ if(mounted){
         .asUint8List();
   }
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(String text, String imagePath, {Size imageSize = const Size(50, 50)}) async {
+    print("bitmapDescriptorFromTextAndImage $text");
     // Load the base marker image
     final ByteData baseImageBytes = await rootBundle.load(imagePath);
     final ui.Codec markerImageCodec = await ui.instantiateImageCodec(baseImageBytes.buffer.asUint8List(), targetWidth: imageSize.width.toInt(), targetHeight: imageSize.height.toInt());
@@ -3574,313 +3572,339 @@ if(mounted){
     _markerLocationsMapLanName.clear();
     Markers.removeWhere((marker)=>marker.markerId.value.contains(bid??buildingAllApi.selectedBuildingID));
     List<Landmarks> landmarks = _landData.landmarks!;
-
-    for (int i = 0; i < landmarks.length; i++) {
-      if (landmarks[i].floor == floor &&
-          landmarks[i].buildingID == (bid??buildingAllApi.selectedBuildingID)) {
-        if (landmarks[i].element!.type == "Rooms" &&
-            landmarks[i].element!.subType != "main entry" &&
-            landmarks[i].coordinateX != null &&
-            !landmarks[i].wasPolyIdNull!) {
-          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-          //   ImageConfiguration(size: Size(44, 44)),
-          //   getImagesFromMarker('assets/location_on.png',50),
-          // );
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/pin.png', 50);
-          List<double> value = tools.localtoglobal(
-              landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-               building.patchData[bid??buildingAllApi.getStoredString()]);
-          //_markerLocations.add(LatLng(value[0],value[1]));
-          BitmapDescriptor textMarker;
-          String markerText;
-            List<String> parts = landmarks[i].name!.split('-');
-            markerText = parts.isNotEmpty ? parts[0].trim() : '';
-            textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/pin.png');
-
-
-          Markers.add(Marker(
-              markerId: MarkerId("Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-              position: LatLng(value[0], value[1]),
-              icon: textMarker,
-              anchor: Offset(0.5, 0.5),
-              visible: false,
-              onTap: () {
-                print("Info Window");
-              },
-              infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: '${landmarks[i].properties!.polyId}',
-                  // Replace with additional information
-                  onTap: () {
-                    print("Info Window ");
-                  })));
-        }
-
-        if (landmarks[i].element!.subType != null &&
-            landmarks[i].element!.subType == "room door" &&
-            landmarks[i].doorX != null) {
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/dooricon.png', 45);
-          setState(() {
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                
-                    building.patchData[bid??buildingAllApi.getStoredString()]);
-            Markers.add(Marker(
-                markerId: MarkerId("Door ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                visible: false,
-                infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: 'Additional Information',
-                  // Replace with additional information
-                  onTap: () {
-                    if (building.selectedLandmarkID !=
-                        landmarks[i].properties!.polyId) {
-                      building.selectedLandmarkID =
-                          landmarks[i].properties!.polyId;
-                      _isRoutePanelOpen = false;
-                      singleroute.clear();
-                      //realWorldPath.clear();
-                      _isLandmarkPanelOpen = true;
-                      addselectedMarker(LatLng(value[0], value[1]));
-                    }
-                  },
-                )));
-          });
-        } else if (landmarks[i].name != null &&
-            landmarks[i].element!.type == ("FloorConnection") &&
-            landmarks[i].element!.subType == "lift") {
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/entry.png', 75);
-
-          setState(() {
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                
-                    building.patchData[bid??buildingAllApi.getStoredString()]);
-
-            // _markerLocations[LatLng(value[0], value[1])] = '1';
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
-            // _markers!.add(Marker(
-            //   markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
-            //   position: LatLng(value[0], value[1]),
-            //   icon: BitmapDescriptor.fromBytes(iconMarker),
-            // ));
-
-            // Markers.add(Marker(
-            //     markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
-            //     position: LatLng(value[0], value[1]),
-            //     icon: BitmapDescriptor.fromBytes(iconMarker),
-            //     visible: false,
-            //     infoWindow: InfoWindow(
-            //       title: landmarks[i].name,
-            //       snippet: 'Additional Information',
-            //       // Replace with additional information
-            //       onTap: () {
-            //         if (building.selectedLandmarkID !=
-            //             landmarks[i].properties!.polyId) {
-            //           building.selectedLandmarkID =
-            //               landmarks[i].properties!.polyId;
-            //           _isRoutePanelOpen = false;
-            //           singleroute.clear();
-            //           _isLandmarkPanelOpen = true;
-            //           addselectedMarker(LatLng(value[0], value[1]));
-            //         }
-            //       },
-            //     ))
+    try {
+      for (int i = 0; i < landmarks.length; i++) {
+        if (landmarks[i].floor == floor &&
+            landmarks[i].buildingID ==
+                (bid ?? buildingAllApi.selectedBuildingID)) {
+          if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType != "main entry" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
             // );
-          });
-        } else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("pharmacy")){
-          setState(() {
-            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!, building.patchData[bid??buildingAllApi.getStoredString()]);
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
-          });
-          
-        }else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("kitchen")){
-          print("Kitchen");
-          setState(() {
-            List<double> value = tools.localtoglobal(landmarks[i].coordinateX!, landmarks[i].coordinateY!, building.patchData[bid??buildingAllApi.getStoredString()]);
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Kitchen';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
-          });
-
-        }
-        else if (landmarks[i].properties!.washroomType != null &&
-            landmarks[i].properties!.washroomType == "Male") {
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/6.png', 65);
-          setState(() {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/pin.png', 50);
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                
-                    building.patchData[bid??buildingAllApi.getStoredString()]);
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
-            // Markers.add(Marker(
-            //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-            //     position: LatLng(value[0], value[1]),
-            //     icon: BitmapDescriptor.fromBytes(iconMarker),
-            //     visible: false,
-            //     infoWindow: InfoWindow(
-            //       title: landmarks[i].name,
-            //       snippet: 'Additional Information',
-            //       // Replace with additional information
-            //       onTap: () {
-            //         if (building.selectedLandmarkID !=
-            //             landmarks[i].properties!.polyId) {
-            //           building.selectedLandmarkID =
-            //               landmarks[i].properties!.polyId;
-            //           _isRoutePanelOpen = false;
-            //           singleroute.clear();
-            //           _isLandmarkPanelOpen = true;
-            //           addselectedMarker(LatLng(value[0], value[1]));
-            //         }
-            //       },
-            //     )));
-          });
-        } else if (landmarks[i].properties!.washroomType != null &&
-            landmarks[i].properties!.washroomType == "Female") {
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/4.png', 65);
+                building.patchData[bid ?? buildingAllApi.getStoredString()]);
+            //_markerLocations.add(LatLng(value[0],value[1]));
+            BitmapDescriptor textMarker;
+            String markerText;
+            // String splitOption;
+            // if(landmarks[i].name!.contains('-')){
+            //   splitOption = '-';
+            // }else if(landmarks[i].name!.contains(' ')){
+            //   splitOption = ' ';
+            // }
+            List<String> parts = landmarks[i].name!.split('-');
+            print("parts $parts");
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/pin.png');
 
-          setState(() {
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                
-                    building.patchData[bid??buildingAllApi.getStoredString()]);
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
-            // Markers.add(Marker(
-            //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-            //     position: LatLng(value[0], value[1]),
-            //     icon: BitmapDescriptor.fromBytes(iconMarker),
-            //     visible: false,
-            //     infoWindow: InfoWindow(
-            //       title: landmarks[i].name,
-            //       snippet: 'Additional Information',
-            //       // Replace with additional information
-            //       onTap: () {
-            //         if (building.selectedLandmarkID !=
-            //             landmarks[i].properties!.polyId) {
-            //           building.selectedLandmarkID =
-            //               landmarks[i].properties!.polyId;
-            //           _isRoutePanelOpen = false;
-            //           singleroute.clear();
-            //           _isLandmarkPanelOpen = true;
-            //           addselectedMarker(LatLng(value[0], value[1]));
-            //         }
-            //       },
-            //     )));
-          });
-        } else if (landmarks[i].element!.subType != null &&
-            landmarks[i].element!.subType == "main entry") {
-          final Uint8List iconMarker =
-              await getImagesFromMarker('assets/1.png', 90);
 
-          setState(() {
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-                
-                    building.patchData[bid??buildingAllApi.getStoredString()]);
-            // _markerLocations[LatLng(value[0], value[1])] = '1';
-            _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
-            _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                landmarks[i].name!;
-            print("_markerLocationsMap");
-            print("$_markerLocationsMap");
-            // _markers!.add(Marker(
-            //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
-            //   position: LatLng(value[0], value[1]),
-            //   icon: BitmapDescriptor.fromBytes(iconMarker),
-            // ));
-
-            // Markers.add(Marker(
-            //     markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
-            //     position: LatLng(value[0], value[1]),
-            //     icon: BitmapDescriptor.fromBytes(iconMarker),
-            //     visible: true,
-            //     infoWindow: InfoWindow(
-            //       title: landmarks[i].name,
-            //       snippet: 'Additional Information',
-            //       // Replace with additional information
-            //       onTap: () {
-            //         if (building.selectedLandmarkID !=
-            //             landmarks[i].properties!.polyId) {
-            //           building.selectedLandmarkID =
-            //               landmarks[i].properties!.polyId;
-            //           _isRoutePanelOpen = false;
-            //           singleroute.clear();
-            //           _isLandmarkPanelOpen = true;
-            //           addselectedMarker(LatLng(value[0], value[1]));
-            //         }
-            //       },
-            //     ),
-            //     onTap: () {
-            //       if (building.selectedLandmarkID !=
-            //           landmarks[i].properties!.polyId) {
-            //         building.selectedLandmarkID =
-            //             landmarks[i].properties!.polyId;
-            //         _isRoutePanelOpen = false;
-            //         singleroute.clear();
-            //         _isLandmarkPanelOpen = true;
-            //         addselectedMarker(LatLng(value[0], value[1]));
-            //       }
-            //     }));
-          });
-        }else if (landmarks[i].element!.type == "Services" &&
-            landmarks[i].element!.subType == "kiosk" &&
-            landmarks[i].coordinateX != null) {
-          // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-          //   ImageConfiguration(size: Size(44, 44)),
-          //   getImagesFromMarker('assets/location_on.png',50),
-          // );
-          final Uint8List iconMarker =
-          await getImagesFromMarker('assets/pin.png', 50);
-          List<double> value = tools.localtoglobal(
-              landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-               building.patchData[bid??buildingAllApi.getStoredString()]);
-          //_markerLocations.add(LatLng(value[0],value[1]));
-          BitmapDescriptor textMarker;
-          String markerText;
-          try{
-            if(landmarks[i].name != "kiosk") {
-              List<String> parts = landmarks[i].name!.split(' ');
-              markerText = parts.isNotEmpty ? parts[1].trim() : '';
-            }else{
-              markerText = "Kiosk";
-            }
-          }catch(e){
-            markerText = "Kiosk";
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i]
+                        .buildingID}"),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 0.5),
+                visible: false,
+                onTap: () {
+                  print("Info Window");
+                },
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {
+                      print("Info Window ");
+                    })));
           }
 
-          textMarker = await bitmapDescriptorFromTextAndImage(markerText,'assets/check-in.png');
+          if (landmarks[i].element!.subType != null &&
+              landmarks[i].element!.subType == "room door" &&
+              landmarks[i].doorX != null) {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/dooricon.png', 45);
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
 
-          Markers.add(Marker(
-              markerId: MarkerId("Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-              position: LatLng(value[0], value[1]),
-              icon: textMarker,
-              anchor: Offset(0.5, 0.5),
-              visible: false,
-              onTap: () {
-                print("Info Window");
-              },
-              infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: '${landmarks[i].properties!.polyId}',
-                  // Replace with additional information
-                  onTap: () {
-                    print("Info Window ");
-                  })));
-        } else {}
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              Markers.add(Marker(
+                  markerId: MarkerId(
+                      "Door ${landmarks[i].properties!.polyId} ${landmarks[i]
+                          .buildingID}"),
+                  position: LatLng(value[0], value[1]),
+                  icon: BitmapDescriptor.fromBytes(iconMarker),
+                  visible: false,
+                  infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: 'Additional Information',
+                    // Replace with additional information
+                    onTap: () {
+                      if (building.selectedLandmarkID !=
+                          landmarks[i].properties!.polyId) {
+                        building.selectedLandmarkID =
+                            landmarks[i].properties!.polyId;
+                        _isRoutePanelOpen = false;
+                        singleroute.clear();
+                        //realWorldPath.clear();
+                        _isLandmarkPanelOpen = true;
+                        addselectedMarker(LatLng(value[0], value[1]));
+                      }
+                    },
+                  )));
+            });
+          } else if (landmarks[i].name != null &&
+              landmarks[i].element!.type == ("FloorConnection") &&
+              landmarks[i].element!.subType == "lift") {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/entry.png', 75);
+
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+              // _markerLocations[LatLng(value[0], value[1])] = '1';
+              _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+              landmarks[i].name!;
+              // _markers!.add(Marker(
+              //   markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
+              //   position: LatLng(value[0], value[1]),
+              //   icon: BitmapDescriptor.fromBytes(iconMarker),
+              // ));
+
+              // Markers.add(Marker(
+              //     markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
+              //     position: LatLng(value[0], value[1]),
+              //     icon: BitmapDescriptor.fromBytes(iconMarker),
+              //     visible: false,
+              //     infoWindow: InfoWindow(
+              //       title: landmarks[i].name,
+              //       snippet: 'Additional Information',
+              //       // Replace with additional information
+              //       onTap: () {
+              //         if (building.selectedLandmarkID !=
+              //             landmarks[i].properties!.polyId) {
+              //           building.selectedLandmarkID =
+              //               landmarks[i].properties!.polyId;
+              //           _isRoutePanelOpen = false;
+              //           singleroute.clear();
+              //           _isLandmarkPanelOpen = true;
+              //           addselectedMarker(LatLng(value[0], value[1]));
+              //         }
+              //       },
+              //     ))
+              // );
+            });
+          } else if (landmarks[i].name != null &&
+              landmarks[i].name!.toLowerCase().contains("pharmacy")) {
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+              landmarks[i].name!;
+            });
+          }
+          // else if (landmarks[i].name != null &&
+          //     landmarks[i].name!.toLowerCase().contains("kitchen")) {
+          //   print("Kitchen");
+          //   setState(() {
+          //     List<double> value = tools.localtoglobal(
+          //         landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+          //         building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          //     _markerLocationsMap[LatLng(value[0], value[1])] = 'Kitchen';
+          //     _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+          //     landmarks[i].name!;
+          //   });
+          // }
+          else if (landmarks[i].properties!.washroomType != null &&
+              landmarks[i].properties!.washroomType == "Male") {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/6.png', 65);
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+              landmarks[i].name!;
+              // Markers.add(Marker(
+              //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
+              //     position: LatLng(value[0], value[1]),
+              //     icon: BitmapDescriptor.fromBytes(iconMarker),
+              //     visible: false,
+              //     infoWindow: InfoWindow(
+              //       title: landmarks[i].name,
+              //       snippet: 'Additional Information',
+              //       // Replace with additional information
+              //       onTap: () {
+              //         if (building.selectedLandmarkID !=
+              //             landmarks[i].properties!.polyId) {
+              //           building.selectedLandmarkID =
+              //               landmarks[i].properties!.polyId;
+              //           _isRoutePanelOpen = false;
+              //           singleroute.clear();
+              //           _isLandmarkPanelOpen = true;
+              //           addselectedMarker(LatLng(value[0], value[1]));
+              //         }
+              //       },
+              //     )));
+            });
+          } else if (landmarks[i].properties!.washroomType != null &&
+              landmarks[i].properties!.washroomType == "Female") {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/4.png', 65);
+
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+              landmarks[i].name!;
+              // Markers.add(Marker(
+              //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
+              //     position: LatLng(value[0], value[1]),
+              //     icon: BitmapDescriptor.fromBytes(iconMarker),
+              //     visible: false,
+              //     infoWindow: InfoWindow(
+              //       title: landmarks[i].name,
+              //       snippet: 'Additional Information',
+              //       // Replace with additional information
+              //       onTap: () {
+              //         if (building.selectedLandmarkID !=
+              //             landmarks[i].properties!.polyId) {
+              //           building.selectedLandmarkID =
+              //               landmarks[i].properties!.polyId;
+              //           _isRoutePanelOpen = false;
+              //           singleroute.clear();
+              //           _isLandmarkPanelOpen = true;
+              //           addselectedMarker(LatLng(value[0], value[1]));
+              //         }
+              //       },
+              //     )));
+            });
+          } else if (landmarks[i].element!.subType != null &&
+              landmarks[i].element!.subType == "main entry") {
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/1.png', 90);
+
+            setState(() {
+              List<double> value = tools.localtoglobal(
+                  landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+
+                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              // _markerLocations[LatLng(value[0], value[1])] = '1';
+              _markerLocationsMap[LatLng(value[0], value[1])] = 'Entry';
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
+              landmarks[i].name!;
+              print("_markerLocationsMap");
+              print("$_markerLocationsMap");
+              // _markers!.add(Marker(
+              //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
+              //   position: LatLng(value[0], value[1]),
+              //   icon: BitmapDescriptor.fromBytes(iconMarker),
+              // ));
+
+              // Markers.add(Marker(
+              //     markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
+              //     position: LatLng(value[0], value[1]),
+              //     icon: BitmapDescriptor.fromBytes(iconMarker),
+              //     visible: true,
+              //     infoWindow: InfoWindow(
+              //       title: landmarks[i].name,
+              //       snippet: 'Additional Information',
+              //       // Replace with additional information
+              //       onTap: () {
+              //         if (building.selectedLandmarkID !=
+              //             landmarks[i].properties!.polyId) {
+              //           building.selectedLandmarkID =
+              //               landmarks[i].properties!.polyId;
+              //           _isRoutePanelOpen = false;
+              //           singleroute.clear();
+              //           _isLandmarkPanelOpen = true;
+              //           addselectedMarker(LatLng(value[0], value[1]));
+              //         }
+              //       },
+              //     ),
+              //     onTap: () {
+              //       if (building.selectedLandmarkID !=
+              //           landmarks[i].properties!.polyId) {
+              //         building.selectedLandmarkID =
+              //             landmarks[i].properties!.polyId;
+              //         _isRoutePanelOpen = false;
+              //         singleroute.clear();
+              //         _isLandmarkPanelOpen = true;
+              //         addselectedMarker(LatLng(value[0], value[1]));
+              //       }
+              //     }));
+            });
+          } else if (landmarks[i].element!.type == "Services" &&
+              landmarks[i].element!.subType == "kiosk" &&
+              landmarks[i].coordinateX != null) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/pin.png', 50);
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!, landmarks[i].coordinateY!,
+                building.patchData[bid ?? buildingAllApi.getStoredString()]);
+            //_markerLocations.add(LatLng(value[0],value[1]));
+            BitmapDescriptor textMarker;
+            String markerText;
+            try {
+              if (landmarks[i].name != "kiosk") {
+                List<String> parts = landmarks[i].name!.split(' ');
+                markerText = parts.isNotEmpty ? parts[1].trim() : '';
+              } else {
+                markerText = "Kiosk";
+              }
+            } catch (e) {
+              markerText = "Kiosk";
+            }
+
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/check-in.png');
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i]
+                        .buildingID}"),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 0.5),
+                visible: false,
+                onTap: () {
+                  print("Info Window");
+                },
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {
+                      print("Info Window ");
+                    })));
+          } else {}
+        }
       }
+    }catch(e){
+
     }
     setState(() {
       Markers.add(Marker(

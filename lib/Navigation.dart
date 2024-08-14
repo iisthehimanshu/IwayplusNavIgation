@@ -256,7 +256,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
       if (values == 'Lift') {
-        Uint8List iconMarker = await getImagesFromMarker('assets/new_lift.png', 65);
+        Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -268,7 +268,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Entry') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/new_entry.png', 65);
+            await getImagesFromMarker('assets/log-in.png', 65);
         try {
           markers.add(
             MapMarker(
@@ -281,7 +281,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } catch (e) {}
       } else if(values == 'Pharmacy'){
-        Uint8List iconMarker = await getImagesFromMarker('assets/new_pharmacy.png', 70);
+        Uint8List iconMarker = await getImagesFromMarker('assets/hospital.png', 70);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -291,22 +291,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             mapController: _googleMapController
           ),
         );
-      }
-      // else if(values == 'Kitchen'){
-      //   Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
-      //   markers.add(
-      //     MapMarker(
-      //         id: keys.toString(),
-      //         position: keys,
-      //         icon: BitmapDescriptor.fromBytes(iconMarker),
-      //         Landmarkname: LandmarkValue,
-      //         mapController: _googleMapController
-      //     ),
-      //   );
-      // }
-      else if (values == 'Female') {
+      } else if(values == 'Kitchen'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
+        markers.add(
+          MapMarker(
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue,
+              mapController: _googleMapController
+          ),
+        );
+      } else if (values == 'Female') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/new_washroom.png', 65);
+            await getImagesFromMarker('assets/Femaletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -318,7 +316,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Male') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/new_washroom.png', 65);
+            await getImagesFromMarker('assets/Maletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),

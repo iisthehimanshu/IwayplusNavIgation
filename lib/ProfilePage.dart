@@ -200,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image: AssetImage('assets/profilePageAssets/User image.png'),
+                            image: AssetImage('assets/User image.png'),
                             fit: BoxFit.cover,
                           ),
                         ),

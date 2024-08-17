@@ -702,10 +702,16 @@ bool disposed=false;
       if (prevpause) {
         await flutterTts.pause();
       }
-      print("msg $msg");
+
       if (lngcode == "hi") {
-        await flutterTts
-            .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+        if(Platform.isAndroid){
+          await flutterTts
+              .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+        }else{
+          await flutterTts
+              .setVoice({"name": "Lekha", "locale": "hi-IN"});
+        }
+
       } else {
         await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
       }
@@ -713,7 +719,7 @@ bool disposed=false;
       if(Platform.isAndroid){
         await flutterTts.setSpeechRate(0.7);
       }else{
-        await flutterTts.setSpeechRate(0.6);
+        await flutterTts.setSpeechRate(0.55);
       }
 
       await flutterTts.setPitch(1.0);
@@ -2149,6 +2155,7 @@ void _updateProgress(){
     createMarkers(landmarkData, 0, bid: buildingAllApi.selectedBuildingID);
 
     await Future.delayed(Duration(seconds: 2));
+    speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
 
     setState(() {
       isBlueToothLoading = true;

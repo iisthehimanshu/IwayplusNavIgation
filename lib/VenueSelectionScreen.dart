@@ -11,6 +11,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart';
@@ -24,6 +25,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'API/buildingAllApi.dart';
@@ -61,10 +63,28 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
+//startScan();
     getLocs();
     apiCall();
     print("venueHashMap");
     print(venueHashMap);
+  }
+
+  void startScan(){
+    FlutterBluePlus.startScan();
+    //  print("himanshu 3");
+    FlutterBluePlus.scanResults.listen((results) async {
+      // print("himanshu 4");
+      for (ScanResult result in results) {
+        if(result.device.platformName.length > 2){
+          //print("himanshu 5 ${result}");
+          String MacId = "${result.device.platformName}";
+          int Rssi = result.rssi;
+          print("mac $MacId    rssi $Rssi");
+          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+        }
+      }
+    });
   }
 
   void loadInfoToFile(){

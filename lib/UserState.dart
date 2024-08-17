@@ -455,6 +455,7 @@ class UserState {
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
+    AlignMapToPath([values[0],values[1]],values);
   }
 
   Future<int> moveToNearestPoint() async {

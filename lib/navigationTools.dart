@@ -1574,6 +1574,57 @@ class tools {
     return res;
   }
 
+  // Function to calculate the dot product of two vectors
+  static double dotProduct(List<double> v1, List<double> v2) {
+    return v1[0] * v2[0] + v1[1] * v2[1];
+  }
+
+// Function to calculate the magnitude of a vector
+  static double magnitude(List<double> v) {
+    return sqrt(v[0] * v[0] + v[1] * v[1]);
+  }
+
+// Function to calculate the angle between two vectors using the dot product
+  static double angleBetweenVectors(List<double> v1, List<double> v2) {
+    return acos(dotProduct(v1, v2) / (magnitude(v1) * magnitude(v2)));
+  }
+
+// Function to find the nearest point
+  static Landmarks findNearestPoint(String source, String destination, List<Landmarks> points) {
+
+    Landmarks s = points.where((e) => e.properties!.polyId == source).first;
+    Landmarks d = points.where((e) => e.properties!.polyId == destination).first;
+    // Create the source-to-destination vector
+    List<double> originalVector = [
+      double.parse(d.properties!.latitude!) - double.parse(s.properties!.latitude!),
+      double.parse(d.properties!.longitude!) - double.parse(s.properties!.longitude!)
+    ];
+
+    Landmarks? nearestPoint;
+    double? minAngle;
+
+    for (Landmarks point in points) {
+      if(point.element!.subType == "main entry" && point.buildingID == s.buildingID){
+        // Create the source-to-point vector
+        List<double> pointVector = [
+          double.parse(point.properties!.latitude!) - double.parse(s.properties!.latitude!),
+          double.parse(point.properties!.longitude!) - double.parse(s.properties!.longitude!)
+        ];
+
+        // Calculate the angle between the original vector and the point vector
+        double angle = angleBetweenVectors(originalVector, pointVector);
+
+        // Track the point with the minimum angle
+        if (minAngle == null || angle < minAngle) {
+          minAngle = angle;
+          nearestPoint = point;
+        }
+      }
+    }
+
+    return nearestPoint!;
+  }
+
   static int distancebetweennodes(int node1, int node2, int numCols){
     print("nextturn $node1 $node2");
     int x1 = node1 % numCols;

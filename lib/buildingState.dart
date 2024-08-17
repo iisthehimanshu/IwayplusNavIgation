@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:iwaymaps/waypoint.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
@@ -27,6 +27,8 @@ class Building{
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
   static Map<String,List<PathModel>> waypoint = {};
+  static Map<String,g.LatLng> allBuildingID = {
+  };
   Building({required this.floor,required this.numberOfFloors});
 
 }

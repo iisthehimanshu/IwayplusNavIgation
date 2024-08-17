@@ -25,6 +25,7 @@ import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
+import 'package:iwaymaps/dijkastra.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -2096,6 +2097,7 @@ void _updateProgress(){
     var patchData = await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
     building.patchData[patchData.patchData!.buildingID!] = patchData;
     createPatch(patchData);
+    findCentroid(patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
     tools.globalData = patchData;
     tools.setBuildingAngle(patchData.patchData!.buildingAngle!);
 
@@ -2198,9 +2200,10 @@ void _updateProgress(){
 
         var patchData = await patchAPI().fetchPatchData(id: key);
         building.patchData[patchData.patchData!.buildingID!] = patchData;
-
         if (key == buildingAllApi.outdoorID || buildingAllApi.outdoorID.isEmpty) {
           createotherPatch(patchData);
+        }else{
+          findCentroid(patchData.patchData!.coordinates!, key);
         }
 
 
@@ -2272,10 +2275,24 @@ void _updateProgress(){
       isLoading = false;
       isBlueToothLoading = false;
     });
+
   }
 
   var versionBox = Hive.box('VersionData');
   final DataVersionLocalModelBox = DataVersionLocalModelBOX.getData();
+
+  void findCentroid(List<Coordinates> vertices, String bid) {
+    double xSum = 0;
+    double ySum = 0;
+    int n = vertices.length;
+
+    for (Coordinates vertex in vertices) {
+      xSum += double.parse(vertex.globalRef!.lat!);
+      ySum += double.parse(vertex.globalRef!.lng!);
+    }
+
+    Building.allBuildingID[bid] = LatLng(xSum / n, ySum / n);
+  }
 
   void versionApiCall() async{
 
@@ -4722,60 +4739,55 @@ if(mounted){
       double destinationEntrylng = 0;
 
       building.landmarkdata!.then((land) async {
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          print("running destination location");
-          if (element.element!.subType != null &&
-              element.element!.subType!.toLowerCase().contains("entry") &&
-              element.buildingID == PathState.destinationBid) {
-            destinationEntrylat = double.parse(element.properties!.latitude!);
-            destinationEntrylng = double.parse(element.properties!.longitude!);
-            if (element.floor == PathState.destinationFloor) {
-              await fetchroute(
-                  element.coordinateX!,
-                  element.coordinateY!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  bid: PathState.destinationBid);
-              print("running destination location no lift run");
-            } else if (element.floor != PathState.destinationFloor) {
-              List<dynamic> commonlifts = findCommonLifts(element,
-                  landmarksMap[PathState.destinationPolyID]!, accessibleby);
-              if (commonlifts.isEmpty) {
-                setState(() {
-                  PathState.noPathFound = true;
-                  _isLandmarkPanelOpen = false;
-                  _isRoutePanelOpen = true;
-                });
-                return;
-              }
-              await fetchroute(
-                  commonlifts[0].x2!,
-                  commonlifts[0].y2!,
-                  PathState.destinationX,
-                  PathState.destinationY,
-                  PathState.destinationFloor,
-                  bid: PathState.destinationBid);
-              await fetchroute(element.coordinateX!, element.coordinateY!,
-                  commonlifts[0].x1!, commonlifts[0].y1!, element.floor!,
-                  bid: PathState.destinationBid);
 
-              PathState.connections[PathState.destinationBid] = {
-                element.floor!: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                        element.floor!]![0]),
-                PathState.destinationFloor: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.destinationBid]![
-                        PathState.destinationFloor]![0])
-              };
-            }
-            break;
+
+
+        Landmarks destinationEntry = tools.findNearestPoint(PathState.destinationPolyID, PathState.sourcePolyID, land.landmarks!);
+        destinationEntrylat = double.parse(destinationEntry.properties!.latitude!);
+        destinationEntrylng = double.parse(destinationEntry.properties!.longitude!);
+        if (destinationEntry.floor == PathState.destinationFloor) {
+          await fetchroute(
+              destinationEntry.coordinateX!,
+              destinationEntry.coordinateY!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: PathState.destinationBid);
+          print("running destination location no lift run");
+        } else if (destinationEntry.floor != PathState.destinationFloor) {
+          List<dynamic> commonlifts = findCommonLifts(destinationEntry,
+              landmarksMap[PathState.destinationPolyID]!, accessibleby);
+          if (commonlifts.isEmpty) {
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
           }
+          await fetchroute(
+              commonlifts[0].x2!,
+              commonlifts[0].y2!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: PathState.destinationBid);
+          await fetchroute(destinationEntry.coordinateX!, destinationEntry.coordinateY!,
+              commonlifts[0].x1!, commonlifts[0].y1!, destinationEntry.floor!,
+              bid: PathState.destinationBid);
+
+          PathState.connections[PathState.destinationBid] = {
+            destinationEntry.floor!: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.destinationBid]![
+                destinationEntry.floor!]![0]),
+            PathState.destinationFloor: calculateindex(
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                building.floorDimenssion[PathState.destinationBid]![
+                PathState.destinationFloor]![0])
+          };
         }
         // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
         // double sourceLat=double.parse(source.properties!.latitude!);
@@ -4785,109 +4797,100 @@ if(mounted){
         // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
-
-        for (int i = 0; i < land.landmarks!.length; i++) {
-          Landmarks element = land.landmarks![i];
-          print("running source location");
-          if (element.element!.subType != null &&
-              element.element!.subType!.toLowerCase().contains("entry") &&
-              element.buildingID == PathState.sourceBid) {
-            sourceEntrylat = double.parse(element.properties!.latitude!);
-            sourceEntrylng = double.parse(element.properties!.longitude!);
-            if (PathState.sourceFloor == element.floor) {
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid);
-              print("running source location no lift run");
-            } else if (PathState.sourceFloor != element.floor) {
-              List<dynamic> commonlifts = findCommonLifts(
-                  landmarksMap[PathState.sourcePolyID]!, element, accessibleby);
-              if (commonlifts.isEmpty) {
-                setState(() {
-                  PathState.noPathFound = true;
-                  _isLandmarkPanelOpen = false;
-                  _isRoutePanelOpen = true;
-                });
-                return;
-              }
-
-              await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
-                  element.coordinateX!, element.coordinateY!, element.floor!,
-                  bid: PathState.sourceBid);
-              await fetchroute(PathState.sourceX, PathState.sourceY,
-                  commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-                  bid: PathState.sourceBid);
-
-              PathState.connections[PathState.sourceBid] = {
-                PathState.sourceFloor: calculateindex(
-                    commonlifts[0].x1!,
-                    commonlifts[0].y1!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                        PathState.sourceFloor]![0]),
-                element.floor!: calculateindex(
-                    commonlifts[0].x2!,
-                    commonlifts[0].y2!,
-                    building.floorDimenssion[PathState.sourceBid]![
-                        element.floor!]![0])
-              };
-            }
-            break;
+        Landmarks sourceEntry = tools.findNearestPoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!);
+        sourceEntrylat = double.parse(sourceEntry.properties!.latitude!);
+        sourceEntrylng = double.parse(sourceEntry.properties!.longitude!);
+        if (PathState.sourceFloor == sourceEntry.floor) {
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+              sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
+              bid: PathState.sourceBid);
+          print("running source location no lift run");
+        } else if (PathState.sourceFloor != sourceEntry.floor) {
+          List<dynamic> commonlifts = findCommonLifts(
+              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby);
+          if (commonlifts.isEmpty) {
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
           }
+
+          await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+              sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
+              bid: PathState.sourceBid);
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+              commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+              bid: PathState.sourceBid);
+
+          PathState.connections[PathState.sourceBid] = {
+            PathState.sourceFloor: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.sourceBid]![
+                PathState.sourceFloor]![0]),
+            sourceEntry.floor!: calculateindex(
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                building.floorDimenssion[PathState.sourceBid]![
+                sourceEntry.floor!]![0])
+          };
         }
 
+        List<double> sourceEntryCoordinates = tools.localtoglobal(sourceEntry.coordinateX!, sourceEntry.coordinateY!, building.patchData[sourceEntry.buildingID]);
+        List<double> destinationEntryCoordinates = tools.localtoglobal(destinationEntry.coordinateX!, destinationEntry.coordinateY!, building.patchData[destinationEntry.buildingID]);
+
         OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
-            sourceEntrylat,
-            sourceEntrylng,
-            destinationEntrylat,
-            destinationEntrylng);
+            sourceEntryCoordinates[0],
+            sourceEntryCoordinates[1],
+            destinationEntryCoordinates[0],
+            destinationEntryCoordinates[1]
+        );
         print("build data: $buildData");
+        List<LatLng> coords = [LatLng(sourceEntryCoordinates[0], sourceEntryCoordinates[1])];
         PathState.realWorldCoordinates.clear();
-        List<LatLng> coords = [LatLng(sourceEntrylat, sourceEntrylng)];
+        PathState.realWorldCoordinates.add(sourceEntryCoordinates);
         final Uint8List realWorldPathMarker =
             await getImagesFromMarker('assets/rw.png', 30);
-        PathState.realWorldCoordinates.add([sourceEntrylat, sourceEntrylng]);
-        // realWorldPath.add(Marker(
-        //   markerId: MarkerId('rw [$sourceEntrylat,$sourceEntrylng]'),
-        //   position: LatLng(sourceEntrylat,
-        //       sourceEntrylng),
-        //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
-        // ),);
 
-        // if (buildData != null) { uncomment here
-        //   int len = buildData.path.length;
-        //   for (int i = 0; i < len; i++) {
-        //     // realWorldPath.add(Marker(
-        //     //   markerId: MarkerId('rw [${buildData.path[i][1]},${buildData.path[i][0]}]'),
-        //     //   position: LatLng(buildData.path[i][1],
-        //     //       buildData.path[i][0]),
-        //     //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
-        //     // ),);
-        //     coords.add(LatLng(buildData.path[i][1], buildData.path[i][0]));
-        //     PathState.realWorldCoordinates
-        //         .add([buildData.path[i][1], buildData.path[i][0]]);
-        //   }
-        //   coords.add(LatLng(destinationEntrylat, destinationEntrylng));
-        //   PathState.realWorldCoordinates
-        //       .add([destinationEntrylat, destinationEntrylng]);
-        //   print(coords);
-        //   List<String> key = [PathState.sourceBid, PathState.destinationBid];
-        //   setState(() {
-        //     singleroute[bid].putIfAbsent(0, () => Set());
-        //     singleroute[0]?.add(gmap.Polyline(
-        //       polylineId: PolylineId(buildData.pathId),
-        //       points: coords,
-        //       color: Colors.red,
-        //       width: 5,
-        //     ));
-        //   });
-        //   // List<Cell> interBuildingPath = [];
-        //   // for(LatLng c in coords){
-        //   //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
-        //   //   int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
-        //   //   interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
-        //   // }
-        //   // PathState.listofPaths.insert(1, interBuildingPath);
-        // } till here
+
+        if (buildData != null) { //uncomment here
+          int len = buildData.path.length;
+          for (int i = 0; i < len; i++) {
+            // realWorldPath.add(Marker(
+            //   markerId: MarkerId('rw [${buildData.path[i][1]},${buildData.path[i][0]}]'),
+            //   position: LatLng(buildData.path[i][1],
+            //       buildData.path[i][0]),
+            //   icon: BitmapDescriptor.fromBytes(realWorldPathMarker),
+            // ),);
+            coords.add(LatLng(buildData.path[i][1], buildData.path[i][0]));
+            PathState.realWorldCoordinates
+                .add([buildData.path[i][1], buildData.path[i][0]]);
+          }
+          coords.add(LatLng(destinationEntrylat, destinationEntrylng));
+          PathState.realWorldCoordinates
+              .add([destinationEntrylat, destinationEntrylng]);
+          print(coords);
+          List<String> key = [PathState.sourceBid, PathState.destinationBid];
+          setState(() {
+            singleroute.putIfAbsent(buildingAllApi.outdoorID, ()=>Map());
+            singleroute[buildingAllApi.outdoorID]!.putIfAbsent(0, () => Set());
+            singleroute[buildingAllApi.outdoorID]![0]?.add(gmap.Polyline(
+              polylineId: PolylineId(buildData.pathId),
+              points: coords,
+              color: Colors.red,
+              width: 8,
+            ));
+          });
+          // List<Cell> interBuildingPath = [];
+          // for(LatLng c in coords){
+          //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
+          //   int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
+          //   interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
+          // }
+          // PathState.listofPaths.insert(1, interBuildingPath);
+        } //till here
       });
       print("different building detected");
 
@@ -4992,27 +4995,54 @@ if(mounted){
 
     List<int> path = [];
 
+    PathModel model = Building.waypoint[bid]!
+        .firstWhere((element) => element.floor == floor);
+    Map<String, List<dynamic>> adjList = model.pathNetwork;
+    path = await findShortestPath(adjList, sourceX, sourceY, destinationX, destinationY, building.nonWalkable[bid]![floor]!, numCols, numRows);
+    // try {
+    //   PathModel model = Building.waypoint[bid]!
+    //       .firstWhere((element) => element.floor == floor);
+    //   Map<String, List<dynamic>> adjList = model.pathNetwork;
+    //   var graph = Graph(adjList);
+    //   List<int> path2 = await graph.bfs(
+    //       sourceX,
+    //       sourceY,
+    //       destinationX,
+    //       destinationY,
+    //       adjList,
+    //       numRows,
+    //       numCols,
+    //       building.nonWalkable[bid]![floor]!);
+    //   // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
+    //   //   path = path2;
+    //   //   print("path from waypoint $path");
+    //   // }else{
+    //   //   print("Faulty wayPoint path $path2");
+    //   //   throw Exception("wrong path");
+    //   // }
+    //   path = path2;
+    //   print("path from waypoint $path");
+    // } catch (e) {
+    //   print("inside exception $e");
+    //
+    //   List<int> path2 = await findPath(
+    //     numRows,
+    //     numCols,
+    //     building.nonWalkable[bid]![floor]!,
+    //     sourceIndex,
+    //     destinationIndex,
+    //   );
+    //   path2 = getFinalOptimizedPath(path2, building.nonWalkable[bid]![floor]!,
+    //       numCols, sourceX, sourceY, destinationX, destinationY);
+    //   path = path2;
+    //   print("path from A* $path");
+    // }
+
     try {
       PathModel model = Building.waypoint[bid]!
           .firstWhere((element) => element.floor == floor);
       Map<String, List<dynamic>> adjList = model.pathNetwork;
-      var graph = Graph(adjList);
-      List<int> path2 = await graph.bfs(
-          sourceX,
-          sourceY,
-          destinationX,
-          destinationY,
-          adjList,
-          numRows,
-          numCols,
-          building.nonWalkable[bid]![floor]!);
-      // if(path2.first==(sourceY*numCols)+sourceX && path2.last == (destinationY*numCols)+destinationX){
-      //   path = path2;
-      //   print("path from waypoint $path");
-      // }else{
-      //   print("Faulty wayPoint path $path2");
-      //   throw Exception("wrong path");
-      // }
+      List<int>path2 = await findShortestPath(adjList, sourceX, sourceY, destinationX, destinationY, building.nonWalkable[bid]![floor]!, numCols, numRows);
       path = path2;
       print("path from waypoint $path");
     } catch (e) {
@@ -8707,20 +8737,30 @@ if(mounted){
 
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
-    // poly.add(gmap.Polyline(
-    //   polylineId: PolylineId('animated_route'),
-    //   points: _visibleWhitePolyline,
-    //   color: Colors.red,
-    //   width: 8,
-    // ));
+
+    // Existing logic to union polylines
     polylines.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
     });
+
     interBuildingPath.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
     });
+
+    // Conditional logic to add additional polylines
+
+
+    buildingAllApi.allBuildingID.forEach((key,value){
+      if (singleroute[key] != null &&
+          singleroute[key]![building.floor[key]] != null) {
+        poly = poly.union(singleroute[key]![
+        building.floor[key]]!);
+      }
+    });
+
     return poly;
   }
+
 
   void _updateMarkers(double zoom) {
     print(zoom);
@@ -9191,33 +9231,32 @@ if(mounted){
 
   void focusBuildingChecker(CameraPosition position) {
     LatLng currentLatLng = position.target;
-    double distanceThreshold = 100.0;
     String closestBuildingId = "";
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+    double? minDistance;
 
-      if(key != buildingAllApi.outdoorID){
-
-        // tempMarkers.add(Marker(
-        //     markerId: MarkerId("$key"),
-        //     position: LatLng(value.latitude, value.longitude),
-        //     onTap: () {
-        //       print("$key");
-        //     },
-        // ));
+    Building.allBuildingID.forEach((key, value) {
+      if (key != buildingAllApi.outdoorID) {
         num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
           geo.LatLng(value.latitude, value.longitude),
           geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
         );
 
-        print("distance for $key is $distance");
+        print("Distance for $key is $distance");
 
-        if (distance < distanceThreshold) {
+        // Update closestBuildingId if this building is closer
+        if (minDistance == null || distance < minDistance!) {
+          minDistance = distance.toDouble();
           closestBuildingId = key;
-          buildingAllApi.setStoredString(key);
         }
-
       }
     });
+
+    // Store the nearest building ID
+    if (closestBuildingId.isNotEmpty) {
+      buildingAllApi.setStoredString(closestBuildingId);
+    }
+
+    print("Closest building ID is $closestBuildingId");
   }
   Set<Circle> circles = Set();
 
@@ -9285,13 +9324,7 @@ mapToolbarEnabled: false,
                         .union(getCombinedPolygons())
                         .union(otherpatch)
                         .union(_polygon),
-                    polylines: (singleroute[buildingAllApi.getStoredString()] != null && singleroute[buildingAllApi.getStoredString()]![building.floor[
-                    buildingAllApi.getStoredString()]] !=
-                        null)
-                        ? getCombinedPolylines().union(singleroute[buildingAllApi.getStoredString()]![
-                    building.floor[
-                    buildingAllApi.getStoredString()]]!)
-                        : getCombinedPolylines(),
+                    polylines: getCombinedPolylines(),
                     markers: getCombinedMarkers()
                         .union(_markers)
                         .union(focusturnArrow),

@@ -2069,7 +2069,7 @@ void _updateProgress(){
   });
 }
   void apiCalls(context) async {
-    //await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
 
     _updateProgress();
     await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
@@ -2204,9 +2204,11 @@ void _updateProgress(){
       } catch (_) {}
 
       if (key != buildingAllApi.getSelectedBuildingID()) {
-        // try {
-        //   await DataVersionApi().fetchDataVersionApiData(key);
-        // }catch(e)
+        try {
+          await DataVersionApi().fetchDataVersionApiData(key);
+        }catch(e){
+
+        }
 
 
         var patchData = await patchAPI().fetchPatchData(id: key);

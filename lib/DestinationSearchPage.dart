@@ -22,6 +22,7 @@ import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import 'APIMODELS/landmark.dart';
@@ -383,38 +384,40 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               }
             }
             searcCategoryhResults.clear();
-            landmarkData.landmarksMap!.forEach((key, value) {
-              if (searcCategoryhResults.length < 10) {
-                if (value.name != null && value.element!.subType != "beacons") {
-                  if (value.name!.toLowerCase() == searchText.toLowerCase()) {
-                    optionListItemBuildingName.add(value.buildingName!);
-                    searcCategoryhResults.clear();
-                    optionListItemBuildingName.forEach((element) {
-                      searcCategoryhResults.add(SearchpageCategoryResults(
-                        name: searchText,
-                        buildingName: element,
-                        onClicked: onVenueClicked,
-                      ));
-                    });
+            if(landmarkData.landmarksMap != null){
+              landmarkData.landmarksMap!.forEach((key, value) {
+                if (searcCategoryhResults.length < 10) {
+                  if (value.name != null && value.element!.subType != "beacons") {
+                    if (value.name!.toLowerCase() == searchText.toLowerCase()) {
+                      optionListItemBuildingName.add(value.buildingName!);
+                      searcCategoryhResults.clear();
+                      optionListItemBuildingName.forEach((element) {
+                        searcCategoryhResults.add(SearchpageCategoryResults(
+                          name: searchText,
+                          buildingName: element,
+                          onClicked: onVenueClicked,
+                        ));
+                      });
+                    }
+                    if (value.name!
+                        .toLowerCase()
+                        .contains(searchText.toLowerCase())) {
+                      optionListItemBuildingName.add(value.buildingName!);
+                      searcCategoryhResults.clear();
+                      optionListItemBuildingName.forEach((element) {
+                        searcCategoryhResults.add(SearchpageCategoryResults(
+                          name: searchText,
+                          buildingName: element,
+                          onClicked: onVenueClicked,
+                        ));
+                      });
+                    }
                   }
-                  if (value.name!
-                      .toLowerCase()
-                      .contains(searchText.toLowerCase())) {
-                    optionListItemBuildingName.add(value.buildingName!);
-                    searcCategoryhResults.clear();
-                    optionListItemBuildingName.forEach((element) {
-                      searcCategoryhResults.add(SearchpageCategoryResults(
-                        name: searchText,
-                        buildingName: element,
-                        onClicked: onVenueClicked,
-                      ));
-                    });
-                  }
+                } else {
+                  return;
                 }
-              } else {
-                return;
-              }
-            });
+              });
+            }
           } else {
             category = false;
             vall = -1;

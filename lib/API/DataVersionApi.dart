@@ -46,6 +46,9 @@ class DataVersionApi {
       print("DATA VERSION API DATA FROM API");
       Map<String, dynamic> responseBody = json.decode(response.body);
       final apiData = DataVersion.fromJson(responseBody);
+      print("apiData.versionData!.buildingID");
+      print(apiData.versionData!.buildingID);
+
       if(DataBox.containsKey(apiData.versionData!.buildingID)){
         print('DATA ALREADY PRESENT');
         final databaseData = DataVersion.fromJson(DataBox.get(apiData.versionData!.buildingID)!.responseBody);

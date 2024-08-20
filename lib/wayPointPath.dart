@@ -44,74 +44,72 @@ class Graph {
     return temppath;
   }
 
+  List<String> findNearestAndSecondNearestVertices(
+      Map<String, List<dynamic>> pathNetwork,
+      List<int> coord1,
+      List<int> coord2) {
+    String nearestToCoord1 = '';
+    String secondNearestToCoord1 = '';
+    String nearestToCoord2 = '';
+    String secondNearestToCoord2 = '';
+    double minDistToCoord1 = double.infinity;
+    double secondMinDistToCoord1 = double.infinity;
+    double minDistToCoord2 = double.infinity;
+    double secondMinDistToCoord2 = double.infinity;
+
+    // Iterate through each vertex in the pathNetwork
+    pathNetwork.forEach((vertex, neighbors) {
+      List<int> v = vertex.split(',').map((e) => int.parse(e)).toList();
+
+      // Calculate distances from coord1 and coord2 to vertex v
+      double distToCoord1 = sqrt(pow(v[0] - coord1[0], 2) + pow(v[1] - coord1[1], 2));
+      double distToCoord2 = sqrt(pow(v[0] - coord2[0], 2) + pow(v[1] - coord2[1], 2));
+
+      // Update nearest and second nearest vertices for coord1
+      if (distToCoord1 < minDistToCoord1) {
+        secondMinDistToCoord1 = minDistToCoord1;
+        secondNearestToCoord1 = nearestToCoord1;
+        minDistToCoord1 = distToCoord1;
+        nearestToCoord1 = vertex;
+      } else if (distToCoord1 < secondMinDistToCoord1) {
+        secondMinDistToCoord1 = distToCoord1;
+        secondNearestToCoord1 = vertex;
+      }
+
+      // Update nearest and second nearest vertices for coord2
+      if (distToCoord2 < minDistToCoord2) {
+        secondMinDistToCoord2 = minDistToCoord2;
+        secondNearestToCoord2 = nearestToCoord2;
+        minDistToCoord2 = distToCoord2;
+        nearestToCoord2 = vertex;
+      } else if (distToCoord2 < secondMinDistToCoord2) {
+        secondMinDistToCoord2 = distToCoord2;
+        secondNearestToCoord2 = vertex;
+      }
+    });
+
+    if(nearestToCoord1 == "${coord1[0]},${coord1[1]}"){
+      secondNearestToCoord1 = nearestToCoord1;
+    }
+    if(nearestToCoord2 == "${coord2[0]},${coord2[1]}"){
+      secondNearestToCoord2 = nearestToCoord2;
+    }
+    return [
+      nearestToCoord1,
+      secondNearestToCoord1,
+      nearestToCoord2,
+      secondNearestToCoord2
+    ];
+  }
+
 
 
   Future<List<int>> bfs(int sourceX, int sourceY, int destinationX, int destinationY, Map<String, List<dynamic>> pathNetwork, int numRows,
       int numCols,
       List<int> nonWalkableCells)async{
 
-    List<String> findNearestAndSecondNearestVertices(
-        Map<String, List<dynamic>> pathNetwork,
-        List<int> coord1,
-        List<int> coord2) {
-      String nearestToCoord1 = '';
-      String secondNearestToCoord1 = '';
-      String nearestToCoord2 = '';
-      String secondNearestToCoord2 = '';
-      double minDistToCoord1 = double.infinity;
-      double secondMinDistToCoord1 = double.infinity;
-      double minDistToCoord2 = double.infinity;
-      double secondMinDistToCoord2 = double.infinity;
 
-      // Iterate through each vertex in the pathNetwork
-      pathNetwork.forEach((vertex, neighbors) {
-        List<int> v = vertex.split(',').map((e) => int.parse(e)).toList();
-
-        // Calculate distances from coord1 and coord2 to vertex v
-        double distToCoord1 = sqrt(pow(v[0] - coord1[0], 2) + pow(v[1] - coord1[1], 2));
-        double distToCoord2 = sqrt(pow(v[0] - coord2[0], 2) + pow(v[1] - coord2[1], 2));
-
-        // Update nearest and second nearest vertices for coord1
-        if (distToCoord1 < minDistToCoord1) {
-          secondMinDistToCoord1 = minDistToCoord1;
-          secondNearestToCoord1 = nearestToCoord1;
-          minDistToCoord1 = distToCoord1;
-          nearestToCoord1 = vertex;
-        } else if (distToCoord1 < secondMinDistToCoord1) {
-          secondMinDistToCoord1 = distToCoord1;
-          secondNearestToCoord1 = vertex;
-        }
-
-        // Update nearest and second nearest vertices for coord2
-        if (distToCoord2 < minDistToCoord2) {
-          secondMinDistToCoord2 = minDistToCoord2;
-          secondNearestToCoord2 = nearestToCoord2;
-          minDistToCoord2 = distToCoord2;
-          nearestToCoord2 = vertex;
-        } else if (distToCoord2 < secondMinDistToCoord2) {
-          secondMinDistToCoord2 = distToCoord2;
-          secondNearestToCoord2 = vertex;
-        }
-      });
-
-      if(nearestToCoord1 == "${coord1[0]},${coord1[1]}"){
-        secondNearestToCoord1 = nearestToCoord1;
-      }
-      if(nearestToCoord2 == "${coord2[0]},${coord2[1]}"){
-        secondNearestToCoord2 = nearestToCoord2;
-      }
-      return [
-        nearestToCoord1,
-        secondNearestToCoord1,
-        nearestToCoord2,
-        secondNearestToCoord2
-      ];
-    }
-    List<int> tpath = [];
     List<String> states = findNearestAndSecondNearestVertices(pathNetwork, [sourceX,sourceY], [destinationX,destinationY]);
-    List<int> ws = states[0].split(',').map(int.parse).toList();
-    List<int> we = states[1].split(',').map(int.parse).toList();
-
     String start1 = states[0];
     String start2 = states[1];
     String goal1 = states[2];

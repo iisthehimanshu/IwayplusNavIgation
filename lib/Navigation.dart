@@ -2089,6 +2089,7 @@ void _updateProgress(){
       }
       Building.apibeaconmap = apibeaconmap;
     }));
+    print("apibeaconmap $apibeaconmap");
   if(Platform.isAndroid){
     btadapter.startScanning(apibeaconmap);
   }else{
@@ -2127,6 +2128,7 @@ void _updateProgress(){
     createRooms(polylineData, 0);
 
     building.floor[buildingAllApi.selectedBuildingID] = buildingAllApi.selectedBuildingID == "666848685496124d04fc6761" ? 5 : 0;
+
 
     var landmarkData = await landmarkApi().fetchLandmarkData(id: buildingAllApi.selectedBuildingID);
     building.landmarkdata = Future.value(landmarkData);
@@ -2190,6 +2192,9 @@ void _updateProgress(){
       if (outBuildingData != null) {
         buildingAllApi.outdoorID = outBuildingData.data!.campusId!;
         buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] = LatLng(0.0, 0.0);
+        if(buildingAllApi.outdoorID == "65d9cacfdb333f8945861f0f"){
+          building.floor["65d9cacfdb333f8945861f0f"] = 1;
+        }
       }
     } catch (_) {}
 
@@ -2264,8 +2269,9 @@ void _updateProgress(){
             building.floorDimenssion[key] = currentFloorDimensions;
           }
         }
-
-        createMarkers(otherLandmarkData, 0, bid: key);
+        if(key == "65d9cacfdb333f8945861f0f"){
+          createMarkers(otherLandmarkData, 1, bid: key);
+        }
         createotherARPatch(otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
     }));
@@ -2781,7 +2787,7 @@ if(mounted){
 
   Set<Polygon> _polygon = Set();
 
-  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints) async {
+  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints, {Color? color}) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
    // circles.clear();
@@ -2790,10 +2796,15 @@ if(mounted){
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
       points: polygonPoints,
-      fillColor: Colors.lightBlueAccent.withOpacity(0.4),
-      strokeColor: Colors.blue,
+      fillColor: color != null ? color.withOpacity(0.4):Colors.lightBlueAccent.withOpacity(0.4),
+      strokeColor: color??Colors.blue,
       strokeWidth: 2,
     )); // Clear existing markers
+
+    List<geo.LatLng> points = [];
+    for (var e in polygonPoints) {
+      points.add(geo.LatLng(e.latitude,e.longitude));
+    }
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
@@ -3275,7 +3286,7 @@ if(mounted){
                     }));
               }
             } else if (polyArray.polygonType == 'Cubicle') {
-              if (polyArray.cubicleName == "Green Area") {
+              if (polyArray.cubicleName == "Green Area" || polyArray.cubicleName == "Green Area | Pots" ) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -3306,15 +3317,47 @@ if(mounted){
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Colors.black,
+                      consumeTapEvents: true,
                       fillColor: polyArray.cubicleColor != null &&
                               polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                               '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFFFF00),
                       onTap: () {
-                        print("polyArray.id! ${polyArray.id!}");
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (building.selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1, -1, -1, -1, -1, -1, null, 0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            building.selectedLandmarkID = polyArray.id;
+                            building.ignoredMarker.clear();
+                            building.ignoredMarker.add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates,color: Colors.greenAccent);
+                          }
+                        });
                       }));
                 }
               } else if (polyArray.cubicleName == "Male Washroom") {
@@ -3326,7 +3369,7 @@ if(mounted){
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
+                      consumeTapEvents: true,
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
                               polyArray.cubicleColor != "undefined"
@@ -3334,7 +3377,40 @@ if(mounted){
                               '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff0000FF),
                       onTap: () {
-                        print("polyArray.id! ${polyArray.id!}");
+                        print("wahsroom tapped with ID ${polyArray.id}");
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (building.selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1, -1, -1, -1, -1, -1, null, 0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            building.selectedLandmarkID = polyArray.id;
+                            building.ignoredMarker.clear();
+                            building.ignoredMarker.add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates,color:Colors.white);
+                          }
+                        });
                       }));
                 }
               } else if (polyArray.cubicleName == "Female Washroom") {
@@ -3346,7 +3422,7 @@ if(mounted){
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
+                      consumeTapEvents: true,
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
                               polyArray.cubicleColor != "undefined"
@@ -3354,7 +3430,39 @@ if(mounted){
                               '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFF69B4),
                       onTap: () {
-                        print("polyArray.id! ${polyArray.id!}");
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (building.selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1, -1, -1, -1, -1, -1, null, 0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            building.selectedLandmarkID = polyArray.id;
+                            building.ignoredMarker.clear();
+                            building.ignoredMarker.add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates,color: Colors.white);
+                          }
+                        });
                       }));
                 }
               } else if (polyArray.cubicleName!
@@ -4639,7 +4747,10 @@ if(mounted){
     if(PathState.sourcePolyID == ""){
       PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
     }else if(landmarksMap[PathState.sourcePolyID]!.lifts == null || landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty ){
-      landmarksMap[PathState.sourcePolyID]!.lifts = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true)!.lifts;
+      Landmarks? land = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true);
+      if(land != null){
+        landmarksMap[PathState.sourcePolyID]!.lifts = land.lifts;
+      }
     }
     try{
     if(PathState.sourcePolyID == ""){
@@ -4884,10 +4995,18 @@ if(mounted){
             singleroute.putIfAbsent(buildingAllApi.outdoorID, ()=>Map());
             singleroute[buildingAllApi.outdoorID]!.putIfAbsent(0, () => Set());
             singleroute[buildingAllApi.outdoorID]![0]?.add(gmap.Polyline(
+                polylineId: PolylineId("buildData.pathId"),
+                points: coords,
+                color: Colors.lightBlueAccent,
+                width:8,
+                zIndex: 0
+            ));
+            singleroute[buildingAllApi.outdoorID]![0]?.add(gmap.Polyline(
               polylineId: PolylineId(buildData.pathId),
               points: coords,
-              color: Colors.red,
-              width: 8,
+              color: Colors.blueAccent,
+              width: 5,
+              zIndex: 2
             ));
           });
           // List<Cell> interBuildingPath = [];
@@ -4953,6 +5072,7 @@ if(mounted){
   Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null, String? liftName}) async {
+    print("checks for campus $bid ${building.floorDimenssion[bid]}");
     int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
     int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
@@ -5002,10 +5122,11 @@ if(mounted){
 
     List<int> path = [];
 
-    PathModel model = Building.waypoint[bid]!
-        .firstWhere((element) => element.floor == floor);
-    Map<String, List<dynamic>> adjList = model.pathNetwork;
-    path = await findShortestPath(adjList, sourceX, sourceY, destinationX, destinationY, building.nonWalkable[bid]![floor]!, numCols, numRows);
+    // PathModel model = Building.waypoint[bid]!
+    //     .firstWhere((element) => element.floor == floor);
+    // Map<String, List<dynamic>> adjList = model.pathNetwork;
+    // print("adjList $adjList");
+    // path = await findShortestPath(adjList, sourceX, sourceY, destinationX, destinationY, building.nonWalkable[bid]![floor]!, numCols, numRows);
     // try {
     //   PathModel model = Building.waypoint[bid]!
     //       .firstWhere((element) => element.floor == floor);
@@ -5232,7 +5353,7 @@ if(mounted){
             singleroute[bid]![floor]?.add(gmap.Polyline(
               polylineId: PolylineId("$bid"),
               points: coordinates,
-              color: Colors.red,
+              color: Colors.blueAccent,
               width: 8,
             ));
           });
@@ -9124,7 +9245,7 @@ if(mounted){
       print("Himanshuchecker ${land.landmarksMap}");
       print("Himanshuchecker ${value[0]}");
       building.selectedLandmarkID =
-          land.landmarksMap![value[0]]!.properties!.polyId!;
+          land.landmarksMap![value[1]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {

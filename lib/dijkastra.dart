@@ -94,11 +94,6 @@ List<List<int>> addCoordinatesBetweenVertices(List<List<int>> coordinates, int c
   // Add the last coordinate
   newCoordinates.add([coordinates.last[0], coordinates.last[1]]);
 
-  List<int> l = [];
-  for (var e in newCoordinates) {
-    l.add((e[1]*col)+e[0]);
-  }
-
   return newCoordinates;
 }
 

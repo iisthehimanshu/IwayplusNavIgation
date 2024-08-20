@@ -9003,6 +9003,26 @@ if(mounted){
       List<double> coords=tools.localtoglobal(value[0], value[1],building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
       int floor=snapshot!.landmarksMap![ID]!.floor!;
 
+        print("value.landmarksMap![ID]!.floor");
+        try{
+          List<Nodes>? nodes = building.polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!.polyline!.floors!.firstWhere((element) => element.floor == tools.numericalToAlphabetical(floor)).polyArray!.firstWhere((element) => element.id == snapshot!.landmarksMap![ID]!.properties!.polyId).nodes;
+          List<LatLng>corners = [];
+          for (var element in nodes!) {
+            List<double> value = tools.localtoglobal(element.coordx!, element.coordy!, building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
+            corners.add(LatLng(value[0], value[1]));
+          }
+          _polygon.add(Polygon(
+            polygonId: PolygonId("$ID"),
+            points: corners,
+            fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+            strokeColor: Colors.blue,
+            strokeWidth: 2,
+          ));
+        }catch(e){
+          
+        }
+
+
 
      _googleMapController.animateCamera(
        CameraUpdate.newLatLngZoom(

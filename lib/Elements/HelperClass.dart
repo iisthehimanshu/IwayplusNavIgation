@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 
+import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
+import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
@@ -40,6 +43,9 @@ class HelperClass{
 
     return Map.fromEntries(sortedEntries);
   }
+
+
+
 
   static Future<void> shareContent(String text) async {
     try {
@@ -123,6 +129,67 @@ class HelperClass{
     } else {
       return '';
     }
+  }
+
+  static Map<String, List<buildingAll>> createVenueHashMap(List<buildingAll> buildingList) {
+    Map<String, List<buildingAll>> dummyVenueHashMap = HashMap<String, List<buildingAll>>();
+
+    for (buildingAll building in buildingList) {
+      // Check if the venueName is already a key in the HashMap
+      if (dummyVenueHashMap.containsKey(building.venueName)) {
+        // If yes, add the building to the existing list
+        dummyVenueHashMap[building.venueName]!.add(building);
+      } else {
+        // If no, create a new list with the building and add it to the HashMap
+        dummyVenueHashMap[building.venueName??""] = [building];
+      }
+    }
+    return dummyVenueHashMap;
+  }
+  static List<VenueModel> createVenueList(Map<String, List<buildingAll>> venueHashMap){
+    List<VenueModel> newList = [];
+    for (var entry in venueHashMap.entries) {
+      String key = entry.key;
+      List<buildingAll> value = entry.value;
+      newList.add(VenueModel(venueName: key, distance: 190, buildingNumber: value.length, imageURL: value[0].venuePhoto??"", Tag: value[0].venueCategory??"", address: value[0].address,description: value[0].description,phoneNo: value[0].phone,website: value[0].website,coordinates: value[0].coordinates!, dist: 0));
+      // print('Key: $key');
+      // print('Value: $value');
+    }
+    return newList;
+  }
+  static Map<String, List<buildingAll>> venueHashMap=new HashMap();
+  static List<VenueModel> venueList=[];
+  static List<VenueModel> buildingsPos=[];
+  static buildingApicall()async{
+    await buildingAllApi().fetchBuildingAllData().then((value) {
+     // print(value);
+     venueHashMap=createVenueHashMap(value);
+     venueList = createVenueList(venueHashMap);
+     for(int i=0;i<venueList.length;i++)
+     {
+       buildingsPos.add(venueList[i]);
+     }
+    });
+
+  }
+
+  static Future<int> getGeoFenced(String venueName,Position userPos)async{
+  await buildingApicall();
+  List<buildingAll>? buildingList=venueHashMap[venueName];
+  for(int i=0;i<buildingList!.length;i++){
+    var currentData=buildingList[i];
+    if(currentData.geofencing!=null && currentData.geofencing!){
+      for(int j=0;j<venueList.length;j++){
+        if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
+          return 0;
+        }
+      }
+    }else{
+      return 1;
+    }
+  }
+  return 2;
+
   }
 
 

@@ -111,7 +111,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                                     builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                             ).then((value){
                               print("POP22");
-                              widget.onVenueClicked(value,DirectlyStartNavigation: true);
+                              widget.onVenueClicked(value,DirectlyStartNavigation: false);
                             });
                           },
                           child: Container(

@@ -24,10 +24,9 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    print("checking data");
+    print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
-
 
     accessToken = signInBox.get("accessToken");
 
@@ -93,7 +92,7 @@ class patchAPI {
     } else {
       print("PATCH API in else error");
       print(Exception);
-      throw Exception('Failed to load data');
+      throw Exception('Failed to load data ${id??buildingAllApi.getStoredString()} ${response.statusCode} ${response.body}');
     }
   }
 

@@ -26,7 +26,7 @@ class PolyLineApi {
     final PolyLineBox = PolylineAPIModelBOX.getData();
     accessToken = signInBox.get("accessToken");
 
-    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPolylineDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPolylineDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;

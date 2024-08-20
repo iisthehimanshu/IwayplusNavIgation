@@ -11,7 +11,7 @@ class DataVersion {
         : null;
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
     if (this.versionData != null) {
@@ -43,7 +43,7 @@ class DataVersionModel {
         this.updatedAt,
         this.iV});
 
-  DataVersionModel.fromJson(Map<String, dynamic> json) {
+  DataVersionModel.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     buildingID = json['building_ID'];
     buildingDataVersion = json['buildingDataVersion'];
@@ -55,8 +55,8 @@ class DataVersionModel {
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['building_ID'] = this.buildingID;
     data['buildingDataVersion'] = this.buildingDataVersion;

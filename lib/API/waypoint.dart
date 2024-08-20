@@ -20,7 +20,7 @@ class waypointapi {
 
     final WayPointBox = WayPointModeBOX.getData();
 
-    if(WayPointBox.containsKey(id)){
+    if(WayPointBox.containsKey(id) && VersionInfo.buildingPolylineDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPolylineDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("WAYPOINT DATA FROM DATABASE");
       List<dynamic> responseBody = WayPointBox.get(id)!.responseBody;
       List<PathModel> wayPointList = responseBody.map((data) => PathModel.fromJson(data as Map<dynamic, dynamic>)).toList();

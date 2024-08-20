@@ -57,19 +57,20 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     print("In calfloor");
     setState(() {
       try{
-        landmarkData.landmarksMap!.forEach((key, value) {
-          if (value.floor != null && value.buildingName == widget.buildingName) {
-            floors.add(value.floor!);
-            //floors.sort();
-            print("floors");
-            print(floors);
-          } else {
-            return;
-          }
-        });
+
       }catch(e){
 
       }
+      landmarkData.landmarksMap!.forEach((key, value) {
+        if (value.floor != null && value.buildingName == widget.buildingName) {
+          floors.add(value.floor!);
+          //floors.sort();
+          print("floors");
+          print(floors);
+        } else {
+          return;
+        }
+      });
     });
   }
 

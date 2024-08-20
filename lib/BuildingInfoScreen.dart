@@ -18,6 +18,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/Navigation.dart';
+import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
@@ -289,7 +290,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
-                          currentData.geofencing;
+                          print("currentData.geofencing");
+                          print(currentData.geofencing);
 
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
@@ -301,6 +303,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
 
 
                                 onTap: (){
+
                                  // if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) ){
                                     wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
                                     wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;

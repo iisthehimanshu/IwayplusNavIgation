@@ -8923,36 +8923,86 @@ if(mounted){
     _isBuildingPannelOpen = false;
 
     if(!DirectlyStartNavigation) {
-      setState(() {
-        if (building.selectedLandmarkID != ID) {
-          building.landmarkdata!.then((value) {
-            _isBuildingPannelOpen = false;
-            building.floor[value.landmarksMap![ID]!.buildingID!] =
-            value.landmarksMap![ID]!.floor!;
-            createRooms(
-                building.polylinedatamap[value.landmarksMap![ID]!.buildingID]!,
-                building.floor[value.landmarksMap![ID]!.buildingID!]!);
-            createMarkers(
-                value, building.floor[value.landmarksMap![ID]!.buildingID!]!,bid: value.landmarksMap![ID]!.buildingID!);
-            building.selectedLandmarkID = ID;
-            singleroute.clear();
-            _isRoutePanelOpen = DirectlyStartNavigation;
-            _isLandmarkPanelOpen = !DirectlyStartNavigation;
-            List<double> pvalues = tools.localtoglobal(
-                value.landmarksMap![ID]!.coordinateX!,
-                value.landmarksMap![ID]!.coordinateY!,
-                
-                building.patchData[value.landmarksMap![ID]!.buildingID]);
-            LatLng point = LatLng(pvalues[0], pvalues[1]);
-            _googleMapController.animateCamera(
-              CameraUpdate.newLatLngZoom(
-                point,
-                22,
-              ),
-            );
-            addselectedMarker(point);
-          });
+
+
+        if (snapshot!.landmarksMap![ID]!.floor != 0) {
+          List<PolyArray> prevFloorLifts = findLift(
+              tools.numericalToAlphabetical(0),
+              building.polylinedatamap[
+              snapshot!.landmarksMap![ID]!.buildingID!]!.polyline!.floors!);
+          List<PolyArray> currFloorLifts = findLift(
+              tools.numericalToAlphabetical(
+                  snapshot!.landmarksMap![ID]!.floor!),
+              building.polylinedatamap[
+              snapshot!.landmarksMap![ID]!.buildingID!]!.polyline!.floors!);
+          print("print cubicle data");
+          for (int i = 0; i < prevFloorLifts.length; i++) {
+            print(prevFloorLifts[i].name);
+          }
+          print("data2");
+          for (int i = 0; i < currFloorLifts.length; i++) {
+            print(currFloorLifts[i].name);
+          }
+          List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+          print("dvalue");
+          print(dvalue);
+          UserState.xdiff = dvalue[0];
+          UserState.ydiff = dvalue[1];
+        } else {
+          UserState.xdiff = 0;
+          UserState.ydiff = 0;
         }
+
+
+
+
+
+
+
+     List<int> value=[snapshot!.landmarksMap![ID]!.coordinateX!,snapshot!.landmarksMap![ID]!.coordinateY!];
+      List<double> coords=tools.localtoglobal(value[0], value[1],building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
+      int floor=snapshot!.landmarksMap![ID]!.floor!;
+
+
+     _googleMapController.animateCamera(
+       CameraUpdate.newLatLngZoom(
+         LatLng(coords[0], coords[1]),
+         22,
+       ),
+     );
+
+     if(building.floor[snapshot!.landmarksMap![ID]!.buildingID]!=floor){
+
+       building.floor[snapshot!.landmarksMap![ID]!.buildingID!]=floor;
+       createRooms(building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!, floor);
+       createMarkers(snapshot!, floor);
+
+     }
+
+      setState(() {
+        user.reset();
+        PathState = pathState.withValues(
+            -1, -1, -1, -1, -1, -1, null, 0);
+        pathMarkers.clear();
+        PathState.path.clear();
+        PathState.sourcePolyID = "";
+        PathState.destinationPolyID = "";
+        singleroute.clear();
+
+        user.isnavigating = false;
+        _isnavigationPannelOpen = false;
+        building.selectedLandmarkID = ID;
+        building.ignoredMarker.clear();
+        building.ignoredMarker.add(ID);
+        _isBuildingPannelOpen = false;
+        _isRoutePanelOpen = false;
+        singleroute.clear();
+        _isLandmarkPanelOpen = true;
+        PathState.directions = [];
+        interBuildingPath.clear();
+
+
+        addselectedMarker(LatLng(coords[0], coords[1]));
       });
     }else{
     setState(() {

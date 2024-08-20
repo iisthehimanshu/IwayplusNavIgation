@@ -65,6 +65,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     super.initState();
 //startScan();
     getLocs();
+
     apiCall();
     print("venueHashMap");
     print(venueHashMap);
@@ -462,11 +463,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
                             return GestureDetector(
-                              onTap: () {
+                              onTap: () async{
                                 // Handle onTap for the specific item here
                                 // For example, you can navigate to a new screen or perform some action
                                 // print("Tapped on item at index $index");
                                 buildingAllApi.setStoredVenue(currentData.venueName!);
+                                print("await HelperClass.getGeoFenced");
+                                print(await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!));
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

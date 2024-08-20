@@ -2069,7 +2069,7 @@ void _updateProgress(){
   });
 }
   void apiCalls(context) async {
-    versionApiCall();
+    //await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
 
     _updateProgress();
     await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
@@ -2089,11 +2089,11 @@ void _updateProgress(){
       }
       Building.apibeaconmap = apibeaconmap;
     }));
-  if(Platform.isAndroid){
-    btadapter.startScanning(apibeaconmap);
-  }else{
-    btadapter.startScanningIOS(apibeaconmap);
-  }
+    if(Platform.isAndroid){
+      btadapter.startScanning(apibeaconmap);
+    }else{
+      btadapter.startScanningIOS(apibeaconmap);
+    }
     Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)? 9:0));
 
     setState(() {
@@ -2204,6 +2204,10 @@ void _updateProgress(){
       } catch (_) {}
 
       if (key != buildingAllApi.getSelectedBuildingID()) {
+        // try {
+        //   await DataVersionApi().fetchDataVersionApiData(key);
+        // }catch(e)
+
 
         var patchData = await patchAPI().fetchPatchData(id: key);
         building.patchData[patchData.patchData!.buildingID!] = patchData;
@@ -2301,106 +2305,6 @@ void _updateProgress(){
     Building.allBuildingID[bid] = LatLng(xSum / n, ySum / n);
   }
 
-  void versionApiCall() async{
-
-    try{
-      print("buildingAllApi.selectedBuildingID");
-      print(buildingAllApi.selectedBuildingID);
-      Map<String, dynamic> apiresponseBody = await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-      DataVersion apiDataVersion = DataVersion.fromJson(apiresponseBody);
-
-      if (DataVersionLocalModelBox.containsKey(apiDataVersion.versionData!.sId)) {
-        Map<String, dynamic> responseBody = DataVersionLocalModelBox.get(apiDataVersion.versionData!.sId)!.responseBody;
-
-        print("Already present");
-        print(responseBody);
-        DataVersion currentLocalData = DataVersion.fromJson(responseBody);
-        print(currentLocalData.versionData);
-        bool flagOfUpdate = false;
-
-        if (apiDataVersion.versionData!.buildingDataVersion == currentLocalData.versionData!.buildingDataVersion) {
-          VersionInfo.buildingPolylineDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-          print("BuildingDataVersion change: False");
-        } else {
-          VersionInfo.buildingPolylineDataVersionUpdate[apiDataVersion.versionData!.sId!] = true;
-          flagOfUpdate = true;
-          print("BuildingDataVersion change: True");
-        }
-
-        if (apiDataVersion.versionData!.polylineDataVersion == currentLocalData!.versionData!.polylineDataVersion) {
-          VersionInfo.buildingPolylineDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-          print("PolylineVersion change: False");
-          print("${apiDataVersion.versionData!.polylineDataVersion} ${currentLocalData.versionData!.polylineDataVersion}");
-        } else {
-          VersionInfo.buildingPolylineDataVersionUpdate[apiDataVersion.versionData!.sId!] = true;
-          flagOfUpdate = true;
-          print("PolylineVersion change: True");
-        }
-
-        if (apiDataVersion.versionData!.landmarksDataVersion == currentLocalData.versionData!.landmarksDataVersion) {
-          VersionInfo.buildingLandmarkDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-          print("LandmarkVersion change: False");
-        } else {
-          VersionInfo.buildingLandmarkDataVersionUpdate[apiDataVersion.versionData!.sId!] = true;
-          flagOfUpdate = true;
-          print("LandmarkVersion change: True");
-        }
-
-        if (apiDataVersion.versionData!.patchDataVersion == currentLocalData.versionData!.patchDataVersion) {
-          VersionInfo.buildingPatchDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-          print("PatchDataVersion change: False");
-        } else {
-          VersionInfo.buildingPatchDataVersionUpdate[apiDataVersion.versionData!.sId!] = true;
-          flagOfUpdate = true;
-          print("PatchDataVersion change: True");
-        }
-        if(flagOfUpdate){
-          final data = DataVersionLocalModel(responseBody: responseBody);
-          DataVersionLocalModelBox.put(apiDataVersion.versionData!.sId, data);
-          data.save();
-        }else{
-          print("Data Unchanged");
-        }
-        print(versionBox.keys);
-        print(versionBox.values);
-      }
-      else {
-
-        print("Not present");
-        // versionBox.put("landmarksDataVersion",
-        //     dataVersion.versionData!.landmarksDataVersion);
-        // versionBox.put("polylineDataVersion",
-        //     dataVersion.versionData!.polylineDataVersion);
-        // versionBox.put("buildingDataVersion",
-        //     dataVersion.versionData!.buildingDataVersion);
-        // versionBox.put(
-        //     "patchDataVersion", dataVersion.versionData!.patchDataVersion);
-        final data = DataVersionLocalModel(responseBody: apiresponseBody);
-        print("data-----");
-        print(data.responseBody);
-        // if(DataVersionLocalModelBox.containsKey(apiDataVersion.versionData!.sId)){
-        //   DataVersionLocalModelBox.delete(apiDataVersion.versionData!.sId);
-        // }
-        DataVersionLocalModelBox.put(apiDataVersion.versionData!.sId, data);
-        data.save();
-        VersionInfo.buildingPolylineDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-        VersionInfo.buildingBuildingDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-        VersionInfo.buildingPatchDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-        VersionInfo.buildingLandmarkDataVersionUpdate[apiDataVersion.versionData!.sId!] = false;
-
-        // versionBox.put("iV", dataVersion.versionData!.iV);
-        // versionBox.put("createdAt", dataVersion.versionData!.createdAt);
-        // versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
-        // versionBox.put("buildingID", dataVersion.versionData!.buildingID);
-      }
-    }catch(e){
-
-    }
-
-
-
-
-  }
 
   void _updateCircle(double lat, double lng) {
     // Create a new Tween with the provided begin and end values

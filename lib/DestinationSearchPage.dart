@@ -70,7 +70,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   @override
   void initState() {
     super.initState();
-    print("In search page");
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
 
@@ -167,21 +166,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     });
     if(containsPrompt){
       if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
-      print("Entered");
 
       _searchDebounce = Timer(Duration(seconds: 3), () {
         setState(() {
           promptLoader = true;
         });
-        print("Entered2");
 
         // Perform search
         //_performSearch(_controller.text);
 
         String modifiedString = _controller.text.replaceAll(stringToRemove, "");
-        print("modifiedString$modifiedString");
         if(modifiedString.trim().length>0){
-          print("modifiedStringisnOtEmpty");
           final fuse = Fuzzy(
             landmarkData.landmarkNames,
             options: FuzzyOptions(
@@ -192,7 +187,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           );
           final outputresult = fuse.search(modifiedString.toLowerCase());
           // Assuming `result` is a List<FuseResult<dynamic>>
-          print("outputresult");
           outputresult.forEach((fuseResult) {
             // Access the item property of the result to get the matched value
             String matchedName = fuseResult.item;
@@ -207,18 +201,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             //     : print("");
             if (score <= 0.3) { //0.5 for normal
               finalName = fuseResult.item;
-              print(fuseResult);
             }
           });
-          print("finalName is $finalName");
-
-
-
 
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
               if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
-                print("yess");
                 name = value.name!;
                 floor = value.name!;
                 polyID = value.properties!.polyId!;
@@ -232,7 +220,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           if(landmarkData.landmarkNames!.contains(finalName)){
             //onVenueClicked(name, floor, polyID, buildingID);
             if(polyID.isNotEmpty){
-              print("polyidis${polyID}");
               HelperClass.showToast("Navigating to ${finalName}");
               setState(() {
                 promptLoader = false;
@@ -240,22 +227,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               //Future.delayed(Duration(seconds: 2));
               Navigator.pop(context, polyID);
             }else{
-              print("elsepolyID");
-              print(polyID);
             }
           }
           
         }else{
           HelperClass.showToast("Provide a Landmark name !!");
-          print("modifiedStringempty");
         }
 
 
 
 
       });
-
-
     }else{
       print("Prompt not used");
     }
@@ -287,14 +269,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await Future.delayed(Duration(seconds: 5));
     micColor = Colors.black;
     setState(() {});
-    print("In initSpeech");
   }
 
   void onSpeechResult(result) {
     setState(() {
       print("Listening from mic");
 
-      print(result.recognizedWords);
       setState(() {
         _controller.text = result.recognizedWords;
         search(result.recognizedWords);
@@ -311,7 +291,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       //   });
       // }
     });
-    print("In onSpeechResult");
   }
 
   void stopListening() async {
@@ -331,7 +310,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       if (_controller.text.isNotEmpty) {
         search(_controller.text);
       } else {
-        print("Filter cleared");
+        // print("Filter cleared");
         searchResults = [];
         searcCategoryhResults = [];
         vall = -1;
@@ -344,12 +323,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
       });
-      print("landmarkData.landmarks!.length");
-      try {
-        print(landmarkData.landmarks);
-      }catch(e){
-        print("landmarkData.landmarks!.length$e");
-      }
+
     });
 
 
@@ -361,7 +335,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       recent.add([name, location, ID, bid]);
       await prefs.setString('recents', jsonEncode(recent)).then((value) {
-        print("saved $name");
+        //print("saved $name");
       });
     }
   }
@@ -399,7 +373,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   void search(String searchText) {
-    print("insearch");
       setState(() {
         if (searchText.isNotEmpty) {
           if (optionList.contains(searchText.toLowerCase())) {
@@ -458,10 +431,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     // Normalize the name in the list
                     String normalizedValueName = normalizeText(value.name!);
 
-                    print("normalizedValueName");
-                    print(normalizedValueName);
-                    print(normalizedSearchText);
-
                     if (normalizedValueName.contains(normalizedSearchText)) {
                       final nameList = [normalizedValueName];
                       final fuse = Fuzzy(
@@ -483,10 +452,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         double score = fuseResult.score;
 
                         // Do something with the matchedName or score
-                        score == 0.0
-                            ? print('Matched Name: $matchedName, Score: $score')
-                            : print(
-                            'Matched Name: $matchedName, Score: $score');
+                        // score == 0.0
+                        //     ? print('Matched Name: $matchedName, Score: $score')
+                        //     : print(
+                        //     'Matched Name: $matchedName, Score: $score');
                         if (score < 0.2) {
                           searchResults.add(SearchpageResults(
                             name: "${value.name}",
@@ -643,17 +612,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     } else {
                                       containerBoxColor = Color(0xffA1A1AA);
                                     }
-                                    print("Final Set");
                                   },
                                   onSubmitted: (value) {
-                                    // print("Final Set");
-                                    print(value);
+
                                     search(value);
                                   },
                                   onChanged: (value) {
                                     search(value);
                                     // print("Final Set");
-                                    print(cardSet);
+                                    // print(cardSet);
                                   },
                                 )),
                           ),
@@ -668,7 +635,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                               ? IconButton(
                               onPressed: () {
                                 _controller.text = "";
-                                print("Tapped----");
                                 setState(() {
                                   vall = -1;
                                   search(_controller.text);
@@ -745,8 +711,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     selectedButton = optionListForUI[val];
                     setState(() => vall = val);
                     lastval = val;
-                    print("wilsonchecker");
-                    print(val);
+
 
                     _controller.text = optionListForUI[val];
                     search(optionListForUI[val]);

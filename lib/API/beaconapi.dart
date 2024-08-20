@@ -28,7 +28,7 @@ class beaconapi {
       print(BeaconBox.keys);
       print(BeaconBox.values);
 
-      if(BeaconBox.get(id) != null){
+      if(BeaconBox.get(id) != null && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false){
 
         List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();

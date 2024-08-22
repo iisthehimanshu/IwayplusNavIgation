@@ -742,67 +742,67 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(direction.toLowerCase().contains("lift")){
       return Icon(
         Icons.elevator,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 23,
       );
     }else if(direction.toLowerCase().contains("stair")){
       return Icon(
         Icons.stairs,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 23,
       );
     }else if(direction == "Straight"){
       return Icon(
         Icons.straight,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Slight Right"){
       return Icon(
         Icons.turn_slight_right,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Right"){
       return Icon(
         Icons.turn_right,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Sharp Right"){
       return Icon(
         Icons.turn_sharp_right,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "U Turn"){
       return Icon(
         Icons.u_turn_right,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Sharp Left"){
       return Icon(
         Icons.turn_sharp_left,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Left"){
       return Icon(
         Icons.turn_left,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else if(direction == "Slight Left"){
       return Icon(
         Icons.turn_slight_left,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }else{
       return Icon(
         Icons.check_box_outline_blank,
-        color: Colors.white,
+        color: Color(0xff01544f),
         size: 40,
       );
     }
@@ -1130,7 +1130,7 @@ class scrollableDirection extends StatelessWidget {
           DirectionIndex < listOfDirections.length) {
         if (listOfDirections[DirectionIndex].isDestination) {
           return const Icon(
-            Icons.place_rounded, color: Colors.white, size: 40,);
+            Icons.place_rounded, color: Colors.blueAccent, size: 40,);
         } else if (DirectionIndex == nextTurnIndex) {
           return i;
         } else {
@@ -1171,17 +1171,17 @@ class scrollableDirection extends StatelessWidget {
             width: 4,
           ),
           Container(
-            width: 75,
-            height: 70,
+            width: 85,
+            height: 75,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ((chooseDirection().toLowerCase().contains("lift") || chooseDirection().toLowerCase().contains("stair")) || listOfDirections.isEmpty || (DirectionIndex>0 && listOfDirections.length>DirectionIndex && listOfDirections[DirectionIndex].isDestination))?Container():Text(
-                  chooseSteps(),
+                  chooseSteps().replaceAll("meter", "mtr"),
                   style: const TextStyle(
                     fontFamily: "Roboto",
                     fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                     height: 26/16,
                   ),
@@ -1192,8 +1192,13 @@ class scrollableDirection extends StatelessWidget {
                 Container(
                   height: 40,
                   width: 40,
-                  child: chooseIcon(),
-                ),
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Set background color to white
+                    shape: BoxShape.circle, // Make the container a circle
+                  ),
+                  child: chooseIcon(), // Your icon or widget inside the circle
+                )
+
               ],
             ),
           )],

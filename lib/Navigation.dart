@@ -8811,13 +8811,18 @@ if(mounted){
         building.floor[key]]!);
       }
 
-      if((!_isRoutePanelOpen || !_isnavigationPannelOpen) && markers[key] != null){
-        combinedMarkers = combinedMarkers.union(Set<Marker>.of(markers[key]!));
+      if((!_isRoutePanelOpen || !_isnavigationPannelOpen) && markers[key] != null ){
+        combinedMarkers = combinedMarkers.union(Markers);
       }
     });
 
     // Always union the general Markers set at the end
-    combinedMarkers = combinedMarkers.union(Markers);
+    if(building.floor[user.Bid] == user.floor){
+      markers.forEach((key,value){
+        combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
+      });
+    }
+
 
     return combinedMarkers;
   }
@@ -9535,7 +9540,7 @@ mapToolbarEnabled: false,
                     onCameraMove: (CameraPosition cameraPosition) {
                       // print("plpl ${cameraPosition.tilt}");
                       focusBuildingChecker(cameraPosition);
-                      print("camers pos ${cameraPosition.target}    target ${mapState.target}");
+
                       if(cameraPosition.target.latitude.toStringAsFixed(5)!=mapState.target.latitude.toStringAsFixed(5)){
                             mapState.aligned=false;
 

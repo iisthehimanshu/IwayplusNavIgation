@@ -1724,61 +1724,58 @@ bool disposed=false;
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 20),
-                  Container(
+                Semantics(
+                  label:"Search your current location",
+                  child: Container(
                     width: screenWidth,
-                    child: TextField(
-                      onTap: (){
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.teal, width: 1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        print("onTapsearchfield");
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: user.key,))
-                        ).then((value){
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DestinationSearchPage(
+                              hintText: 'Source location',
+                              voiceInputEnabled: false,
+                              userLocalized: user.key,
+                            ),
+                          ),
+                        ).then((value) {
                           setState(() {
-                            //widget.SourceID = value;
                             print("dataPOpped:$value");
 
-                            if(value!=null){
+                            if (value != null) {
                               Navigator.of(context).pop();
-                              paintUser(null,polyID: value);
-                            }else{
+                              paintUser(null, polyID: value);
+                            } else {
                               print("selectionvalnotempty");
                             }
-
-                            // SourceName = landmarkData.landmarksMap![value]!.name!;
-                            // if(widget.SourceID != "" && widget.DestinationID != ""){
-                            //   print("h3");
-                            //   Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                            // }
                           });
                         });
                       },
-
-                      decoration: InputDecoration(
-                        hintText: 'Search your current location',
-                        hintStyle: TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xffa1a1aa),
-                          height: 20/14,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Center(
+                          child: Text(
+                            isSemanticEnabled ? "" : 'Search your current location',
+                            style: TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffa1a1aa),
+                              height: 20 / 14,
+                            ),
+                          ),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.teal,width: 1),
-                        ),
-
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.teal, width: 1),
-                        ),
-
-                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 0), // Adjust vertical padding to center text
-
                       ),
-                      textAlign: TextAlign.center, // Center the text and hint
-
                     ),
                   ),
+                ),
+
                   SizedBox(height: 20),
                   Text(
                     "Or",
@@ -1805,43 +1802,46 @@ bool disposed=false;
                   ),
                   SizedBox(height: 10),
                   Center(
-                    child: GestureDetector(
-                      onTap: () async {
-                        setState(() {
-                          _isExpanded = !_isExpanded;
-                        });
-                        // Navigator.of(context).pop();
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => QRViewExample()),
-                        ).then((value){
-                          print("navigation polyID $value");
+                    child: Semantics(
+                      label: "Open Qr Scanner to know your location",
+                      child: GestureDetector(
+                        onTap: () async {
                           setState(() {
-                            isLoading = false;
-                            isBlueToothLoading = false;
+                            _isExpanded = !_isExpanded;
                           });
-                          paintUser(null,polyID: value);
-                        });
-                        //Navigator.of(context).pop();
-                        // if (result != null) {
-                        //   setState(() {
-                        //     qrText = result;
-                        //   });
-                        //   print('QR Code: $qrText');
-                        //   // Handle the scanned QR code text
-                        // }else{
-                        //   print("resultNull");
-                        // }
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(seconds: 3),
-                        width: _isExpanded ? 120 : 80,
-                        height: _isExpanded ? 120 : 80,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.teal),
-                          borderRadius: BorderRadius.circular(10),
+                          // Navigator.of(context).pop();
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => QRViewExample()),
+                          ).then((value){
+                            print("navigation polyID $value");
+                            setState(() {
+                              isLoading = false;
+                              isBlueToothLoading = false;
+                            });
+                            paintUser(null,polyID: value);
+                          });
+                          //Navigator.of(context).pop();
+                          // if (result != null) {
+                          //   setState(() {
+                          //     qrText = result;
+                          //   });
+                          //   print('QR Code: $qrText');
+                          //   // Handle the scanned QR code text
+                          // }else{
+                          //   print("resultNull");
+                          // }
+                        },
+                        child: AnimatedContainer(
+                          duration: Duration(seconds: 3),
+                          width: _isExpanded ? 120 : 80,
+                          height: _isExpanded ? 120 : 80,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.teal),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
                         ),
-                        child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
                       ),
                     ),
                   ),
@@ -4375,7 +4375,9 @@ if(mounted){
                           margin:EdgeInsets.only(top:8,right: 16),
                             child: IconButton(onPressed: (){
                               HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
-                            }, icon: Icon(Icons.share)))
+                            }, icon: Semantics(
+                              label:"Share route information" ,
+                                child: Icon(Icons.share))))
                       ],),
 
 
@@ -4387,6 +4389,7 @@ if(mounted){
                       ),
                       Semantics(
                         label: "Information",
+                        excludeSemantics: true ,
                         child: Container(
                           margin: EdgeInsets.only(left: 17, top: 20),
                           child: Text(
@@ -5407,7 +5410,7 @@ if(mounted){
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
       child: Container(
-        height: 300,
+        height: 100,
         width: 100,
         child: ListView.builder(
             itemCount:
@@ -7140,44 +7143,48 @@ if(mounted){
                               ),
                             ),
                           ),
-                          Container(
-                            height: 40,
-                            width: 65,
-                            decoration: BoxDecoration(
-                              color: Color(0xffDF3535),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: TextButton(
-                                onPressed: (){
-                                  setState(() {
-                                    StopPDR();
-                                    PathState.sourceX = user.coordX;
-                                    PathState.sourceY = user.coordY;
-                                    PathState.sourceFloor = user.floor;
-                                    PathState.sourceBid = user.Bid;
-                                    PathState.sourceLat = user.lat;
-                                    PathState.sourceLng = user.lng;
-                                    PathState.sourceName = "Your current location";
+                          Semantics(
+                            label:"Exit navigation",
+                            excludeSemantics: true,
+                            child: Container(
+                              height: 40,
+                              width: 65,
+                              decoration: BoxDecoration(
+                                color: Color(0xffDF3535),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: TextButton(
+                                  onPressed: (){
+                                    setState(() {
+                                      StopPDR();
+                                      PathState.sourceX = user.coordX;
+                                      PathState.sourceY = user.coordY;
+                                      PathState.sourceFloor = user.floor;
+                                      PathState.sourceBid = user.Bid;
+                                      PathState.sourceLat = user.lat;
+                                      PathState.sourceLng = user.lng;
+                                      PathState.sourceName = "Your current location";
 
-                                    user.temporaryExit = true;
-                                    user.isnavigating = false;
-                                    _isRoutePanelOpen = true;
-                                    _isnavigationPannelOpen = false;
-                                    print("building floor ${building.floor}");
-                                    setCameraPosition(pathMarkers[building.floor[user.Bid]]!);
-                                  });
-                                },
-                                child: Text(
-                                  "${LocaleData.exit.getString(context)}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xffFFFFFF),
-                                    height: 20 / 14,
-                                  ),
-                                  textAlign: TextAlign.left,
-                                )),
+                                      user.temporaryExit = true;
+                                      user.isnavigating = false;
+                                      _isRoutePanelOpen = true;
+                                      _isnavigationPannelOpen = false;
+                                      print("building floor ${building.floor}");
+                                      setCameraPosition(pathMarkers[building.floor[user.Bid]]!);
+                                    });
+                                  },
+                                  child: Text(
+                                    "${LocaleData.exit.getString(context)}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xffFFFFFF),
+                                      height: 20 / 14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )),
+                            ),
                           ),
                         ],
                       ),
@@ -9530,7 +9537,7 @@ mapToolbarEnabled: false,
                     //
                     // // Text(Building.thresh),
 
-                    SpeedDial(
+                    isSemanticEnabled? Container() : SpeedDial(
                       icon: _mainIcon,
                       backgroundColor: Colors.white,
                       visible: true,
@@ -9798,8 +9805,7 @@ mapToolbarEnabled: false,
                       ),
                     ),
                     SizedBox(height: 28.0),
-                    !user.isnavigating
-                        ? FloatingActionButton(
+                    !user.isnavigating || !_isLandmarkPanelOpen ? FloatingActionButton(
                       onPressed: () async {
                         if (user.initialallyLocalised) {
                           setState(() {
@@ -9842,10 +9848,13 @@ mapToolbarEnabled: false,
                           });
                         }
                       },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                      child: Semantics(
+                        label: 'Explore Mode',
+                        child: SvgPicture.asset(
+                          "assets/Navigation_RTLIcon.svg",
+                          // color:
+                          // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                        ),
                       ),
                       backgroundColor: Color(
                           0xff24B9B0), // Set the background color of the FAB

@@ -121,7 +121,7 @@ mixin LocaleData {
   static const String clickstarttonavigate= 'Click Start to Navigate';
   static const String exploremodenabled= 'Explore Mode Enabled';
   static const String direction='Direction';
-  static const String turnfrm='turn from';
+  static const String turnfrm='Turn from';
   static const String approaching='Approaching';
   static const String location='Location';
   static const String none='None';
@@ -287,13 +287,13 @@ mixin LocaleData {
     'Slight Left':'Slight Left',
     'Sharp Right':'Sharp Right',
 
-    'tsRight':'turn right and go straight',
-    'tsU Turn':'turn around and go straight',
-    'tsSharp Left':'turn sharp left and go straight',
-    'tsLeft':'turn left and go straight',
-    'tsSlight Right':'turn slight right and go straight',
-    'tsSlight Left':'turn slight left and go straight',
-    'tsSharp Right':'turn sharp right and go straight',
+    'tsRight':'Turn right and go straight',
+    'tsU Turn':'Turn around and go straight',
+    'tsSharp Left':'Turn sharp left and go straight',
+    'tsLeft':'Turn left and go straight',
+    'tsSlight Right':'Turn slight right and go straight',
+    'tsSlight Left':'Turn slight left and go straight',
+    'tsSharp Right':'Turn sharp right and go straight',
 
     'tRight':'Right',
     'tLeft':'Left',
@@ -343,7 +343,7 @@ mixin LocaleData {
     'Click Start to Navigate' : 'Click Start to Navigate',
     'Explore Mode Enabled' : 'Explore Mode Enabled',
     'Direction':'Direction',
-    'turn from':'turn from',
+    'Turn from':'Turn from',
     'Approaching': 'Approaching',
     'hRight':'',
     'hLeft':'',
@@ -469,7 +469,7 @@ mixin LocaleData {
     'Click Start to Navigate' : 'नेविगेट करने के लिए इस्टार्ट पर क्लिक करें',
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
     'Direction':'दिशा',
-    'turn from':'से मुड़ो',
+    'Turn from':'से मुड़ो',
     'Approaching': 'पास आ रहे हैं',
     'Location':'लोकेशन',
 

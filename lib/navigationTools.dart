@@ -1655,7 +1655,7 @@ class tools {
 
   static String convertFeet(int feet,context) {
     if (UserCredentials().getUserPathDetails().contains('Distance in meters')) {
-      return '${feetToMeters(feet).toStringAsFixed(0)} meters';
+      return '${feetToMeters(feet).toStringAsFixed(0)} meter';
     }else {
       return '${feetToSteps(feet).toStringAsFixed(0)} ${LocaleData.steps.getString(context)}';
     }

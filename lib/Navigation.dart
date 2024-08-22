@@ -481,35 +481,35 @@ double _progressValue=0.0;
 
   Future<void> zoomWhileWait(Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
 if(allBuildingID.length>1) {
-  while (!user.initialallyLocalised && !building.qrOpened) {
+  while ( !building.destinationQr && !user.initialallyLocalised && !building.qrOpened) {
     for (var entry in allBuildingID.entries) {
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr || user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 16),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await Future.delayed(Duration(milliseconds: 500));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 20),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await Future.delayed(Duration(seconds: 3));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 16),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
     }
@@ -1230,8 +1230,11 @@ bool disposed=false;
 
         building.floor[userSetLocation.buildingID!] =
         userSetLocation.floor!;
-        createRooms(
-            building.polyLineData!, userSetLocation.floor!);
+        if(widget.directLandID.length<2){
+          createRooms(
+              building.polyLineData!, userSetLocation.floor!);
+        }
+
         building.landmarkdata!.then((value) {
           createMarkers(value, userSetLocation!.floor!,bid: user.Bid);
         });
@@ -1262,7 +1265,7 @@ bool disposed=false;
 
       // print("final value");
       // print(finalvalue);
-      if (user.isnavigating == false) {
+      if (user.isnavigating == false && speakTTS) {
         detected = true;
         if (!_isExploreModePannelOpen && speakTTS) {
           _isBuildingPannelOpen = true;
@@ -1545,11 +1548,16 @@ bool disposed=false;
             ));
           }
 
-          building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
-          apibeaconmap[nearestBeacon]!.floor!;
-          createRooms(
-              building.polylinedatamap[
-              user.Bid]!, apibeaconmap[nearestBeacon]!.floor!);
+
+          if(widget.directLandID.length<2){
+            circles.clear();
+            building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
+            apibeaconmap[nearestBeacon]!.floor!;
+            createRooms(
+                building.polylinedatamap[
+                user.Bid]!, apibeaconmap[nearestBeacon]!.floor!);
+          }
+
           building.landmarkdata!.then((value) {
             createMarkers(value, apibeaconmap[nearestBeacon]!.floor!,bid: user.Bid);
           });
@@ -1583,7 +1591,7 @@ bool disposed=false;
 
         // print("final value");
         // print(finalvalue);
-        if (user.isnavigating == false) {
+        if (user.isnavigating == false && speakTTS) {
           detected = true;
           if (!_isExploreModePannelOpen && speakTTS) {
             _isBuildingPannelOpen = true;
@@ -1671,11 +1679,8 @@ bool disposed=false;
           building.qrOpened = true;
         }
       }
-      if (widget.directLandID.isNotEmpty) {
-        print("checkdirectLandID");
-        onLandmarkVenueClicked(
-            widget.directLandID, DirectlyStartNavigation: false);
-      }
+
+
     }
   }
   bool _isExpanded = false;
@@ -2285,7 +2290,17 @@ void _updateProgress(){
 
     await Future.wait([timer,allBuildingCalls]);
     print("Calling localize user");
-    localizeUser();
+    if(widget.directLandID.length<2){
+      localizeUser();
+    }else{
+      btadapter.stopScanning();
+      //got here using a destination qr
+      localizeUser(speakTTS: false);
+      onLandmarkVenueClicked(
+          widget.directLandID, DirectlyStartNavigation: false);
+      building.destinationQr=true;
+    }
+
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
 
     await Future.delayed(Duration(seconds: 3));
@@ -2391,7 +2406,7 @@ if(mounted){
 
   nearestLandInfo? nearestLandInfomation;
 
-  Future<void> localizeUser() async {
+  Future<void> localizeUser({bool speakTTS = true}) async {
     print("Beacon searching started");
     double highestweight = 0;
     String nearestBeacon = "";
@@ -2437,7 +2452,7 @@ if(mounted){
       buildingAllApi.selectedID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
-    paintUser(nearestBeacon);
+    paintUser(nearestBeacon,speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
@@ -3071,9 +3086,11 @@ if(mounted){
     closedpolygons[value.polyline!.buildingID!]?.clear();
     print(
         "createroomschecker ${closedpolygons[buildingAllApi.getStoredString()]}");
-    selectedroomMarker.clear();
-    _isLandmarkPanelOpen = false;
-    building.selectedLandmarkID = null;
+    if(widget.directLandID.length<2){
+      selectedroomMarker.clear();
+      _isLandmarkPanelOpen = false;
+      building.selectedLandmarkID = null;
+    }
     polylines[value.polyline!.buildingID!]?.clear();
 
     if (floor != 0) {
@@ -9434,7 +9451,30 @@ if(mounted){
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized=false;
+
   IconData _mainIcon = Icons.volume_up_outlined;
+  void _recenterMap(){
+    alignMapToPath([
+      user.lat,
+      user.lng
+    ], [
+      PathState
+          .singleCellListPath[
+      user.pathobj
+          .index +
+          1]
+          .lat,
+      PathState
+          .singleCellListPath[
+      user.pathobj
+          .index +
+          1]
+          .lng
+    ]);
+mapState.aligned = true;
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -9495,6 +9535,13 @@ mapToolbarEnabled: false,
                     onCameraMove: (CameraPosition cameraPosition) {
                       // print("plpl ${cameraPosition.tilt}");
                       focusBuildingChecker(cameraPosition);
+                      print("camers pos ${cameraPosition.target}    target ${mapState.target}");
+                      if(cameraPosition.target.latitude.toStringAsFixed(5)!=mapState.target.latitude.toStringAsFixed(5)){
+                            mapState.aligned=false;
+
+                      }else{
+                        mapState.aligned=true;
+                      }
                       mapState.interaction = true;
                       mapbearing = cameraPosition.bearing;
                       if (!mapState.interaction) {
@@ -9742,6 +9789,7 @@ mapToolbarEnabled: false,
                             onTap: () {
                               _polygon.clear();
                               circles.clear();
+
                               // _markers.clear();
                               // _markerLocationsMap.clear();
                               // _markerLocationsMapLanName.clear();
@@ -9822,6 +9870,8 @@ mapToolbarEnabled: false,
                               print("localize user is calling itself.....");
                               _timer.cancel();
                             });
+                          }else{
+                            _recenterMap();
                           }
 
                         },
@@ -9834,11 +9884,15 @@ mapToolbarEnabled: false,
                             width: 70,
                             height: 70,
                           ): Icon(
-                            Icons.my_location_sharp,
-                            color: Colors.black,
+                              (!user.isnavigating)?Icons.my_location_sharp:(mapState.aligned?CupertinoIcons.location_north_fill:CupertinoIcons.location_north),
+                            color: (!user.isnavigating)?Colors
+                                .black:Colors.blue
                           ),
                         ),
-                        backgroundColor:  Colors
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26.0), // Change radius here
+                        ),
+                        backgroundColor:Colors
                             .white, // Set the background color of the FAB
                       ),
                     ),
@@ -9901,6 +9955,36 @@ mapToolbarEnabled: false,
               ),
             ),
             //-------
+            // (user.isnavigating && recenter)? Positioned(
+            //   bottom: 145,
+            //   right: 220,
+            //   child: Container(
+            //     height: 50,
+            //     width: 150, // Adjust width as needed
+            //     child: ElevatedButton(
+            //       onPressed: () {
+            //         // Implement recenter logic here
+            //         _recenterMap();
+            //       },
+            //       style: ElevatedButton.styleFrom(
+            //         foregroundColor: Colors.white, // Background color
+            //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(30), // Rounded corners
+            //         ),
+            //       ),
+            //       child: Row(
+            //         mainAxisSize: MainAxisSize.min,
+            //         mainAxisAlignment: MainAxisAlignment.center,
+            //         children: [
+            //           Icon(Icons.my_location, size: 24),
+            //           SizedBox(width: 8), // Space between icon and text
+            //           Text('Recenter', style: TextStyle(fontSize: 16)),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ):Container(),
             Positioned(
                 top: 16,
                 left: 16,
@@ -10010,7 +10094,7 @@ mapToolbarEnabled: false,
             //   backgroundColor: Colors
             //       .white, // Set the background color of the FAB
             // ),
-            (!user.initialallyLocalised && !building.qrOpened)?
+            ( !building.destinationQr && !user.initialallyLocalised && !building.qrOpened)?
                 Container(
                   height: screenHeight,
                   width: screenWidth,

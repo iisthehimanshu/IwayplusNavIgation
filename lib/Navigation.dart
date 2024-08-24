@@ -481,35 +481,35 @@ double _progressValue=0.0;
 
   Future<void> zoomWhileWait(Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
 if(allBuildingID.length>1) {
-  while (!user.initialallyLocalised && !building.qrOpened) {
+  while ( !building.destinationQr && !user.initialallyLocalised && !building.qrOpened) {
     for (var entry in allBuildingID.entries) {
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr || user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 16),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await Future.delayed(Duration(milliseconds: 500));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 20),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await Future.delayed(Duration(seconds: 3));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
       await controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: entry.value, zoom: 16),
       ));
-      if (user.initialallyLocalised || building.qrOpened) {
+      if (building.destinationQr ||user.initialallyLocalised || building.qrOpened) {
         return;
       }
     }
@@ -1235,8 +1235,11 @@ bool disposed=false;
 
         building.floor[userSetLocation.buildingID!] =
         userSetLocation.floor!;
-        createRooms(
-            building.polyLineData!, userSetLocation.floor!);
+        if(widget.directLandID.length<2){
+          createRooms(
+              building.polyLineData!, userSetLocation.floor!);
+        }
+
         building.landmarkdata!.then((value) {
           createMarkers(value, userSetLocation!.floor!,bid: user.Bid);
         });
@@ -1267,7 +1270,7 @@ bool disposed=false;
 
       // print("final value");
       // print(finalvalue);
-      if (user.isnavigating == false) {
+      if (user.isnavigating == false && speakTTS) {
         detected = true;
         if (!_isExploreModePannelOpen && speakTTS) {
           _isBuildingPannelOpen = true;
@@ -1550,11 +1553,16 @@ bool disposed=false;
             ));
           }
 
-          building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
-          apibeaconmap[nearestBeacon]!.floor!;
-          createRooms(
-              building.polylinedatamap[
-              user.Bid]!, apibeaconmap[nearestBeacon]!.floor!);
+
+          if(widget.directLandID.length<2){
+            circles.clear();
+            building.floor[apibeaconmap[nearestBeacon]!.buildingID!] =
+            apibeaconmap[nearestBeacon]!.floor!;
+            createRooms(
+                building.polylinedatamap[
+                user.Bid]!, apibeaconmap[nearestBeacon]!.floor!);
+          }
+
           building.landmarkdata!.then((value) {
             createMarkers(value, apibeaconmap[nearestBeacon]!.floor!,bid: user.Bid);
           });
@@ -1588,7 +1596,7 @@ bool disposed=false;
 
         // print("final value");
         // print(finalvalue);
-        if (user.isnavigating == false) {
+        if (user.isnavigating == false && speakTTS) {
           detected = true;
           if (!_isExploreModePannelOpen && speakTTS) {
             _isBuildingPannelOpen = true;
@@ -1676,11 +1684,8 @@ bool disposed=false;
           building.qrOpened = true;
         }
       }
-      if (widget.directLandID.isNotEmpty) {
-        print("checkdirectLandID");
-        onLandmarkVenueClicked(
-            widget.directLandID, DirectlyStartNavigation: false);
-      }
+
+
     }
   }
   bool _isExpanded = false;
@@ -1729,61 +1734,58 @@ bool disposed=false;
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 20),
-                  Container(
+                Semantics(
+                  label:"Search your current location",
+                  child: Container(
                     width: screenWidth,
-                    child: TextField(
-                      onTap: (){
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.teal, width: 1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        print("onTapsearchfield");
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: user.key,))
-                        ).then((value){
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DestinationSearchPage(
+                              hintText: 'Source location',
+                              voiceInputEnabled: false,
+                              userLocalized: user.key,
+                            ),
+                          ),
+                        ).then((value) {
                           setState(() {
-                            //widget.SourceID = value;
                             print("dataPOpped:$value");
 
-                            if(value!=null){
+                            if (value != null) {
                               Navigator.of(context).pop();
-                              paintUser(null,polyID: value);
-                            }else{
+                              paintUser(null, polyID: value);
+                            } else {
                               print("selectionvalnotempty");
                             }
-
-                            // SourceName = landmarkData.landmarksMap![value]!.name!;
-                            // if(widget.SourceID != "" && widget.DestinationID != ""){
-                            //   print("h3");
-                            //   Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                            // }
                           });
                         });
                       },
-
-                      decoration: InputDecoration(
-                        hintText: 'Search your current location',
-                        hintStyle: TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xffa1a1aa),
-                          height: 20/14,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Center(
+                          child: Text(
+                            isSemanticEnabled ? "" : 'Search your current location',
+                            style: TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffa1a1aa),
+                              height: 20 / 14,
+                            ),
+                          ),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.teal,width: 1),
-                        ),
-
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.teal, width: 1),
-                        ),
-
-                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 0), // Adjust vertical padding to center text
-
                       ),
-                      textAlign: TextAlign.center, // Center the text and hint
-
                     ),
                   ),
+                ),
+
                   SizedBox(height: 20),
                   Text(
                     "Or",
@@ -1810,43 +1812,46 @@ bool disposed=false;
                   ),
                   SizedBox(height: 10),
                   Center(
-                    child: GestureDetector(
-                      onTap: () async {
-                        setState(() {
-                          _isExpanded = !_isExpanded;
-                        });
-                        // Navigator.of(context).pop();
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => QRViewExample()),
-                        ).then((value){
-                          print("navigation polyID $value");
+                    child: Semantics(
+                      label: "Open Qr Scanner to know your location",
+                      child: GestureDetector(
+                        onTap: () async {
                           setState(() {
-                            isLoading = false;
-                            isBlueToothLoading = false;
+                            _isExpanded = !_isExpanded;
                           });
-                          paintUser(null,polyID: value);
-                        });
-                        //Navigator.of(context).pop();
-                        // if (result != null) {
-                        //   setState(() {
-                        //     qrText = result;
-                        //   });
-                        //   print('QR Code: $qrText');
-                        //   // Handle the scanned QR code text
-                        // }else{
-                        //   print("resultNull");
-                        // }
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(seconds: 3),
-                        width: _isExpanded ? 120 : 80,
-                        height: _isExpanded ? 120 : 80,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.teal),
-                          borderRadius: BorderRadius.circular(10),
+                          // Navigator.of(context).pop();
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => QRViewExample()),
+                          ).then((value){
+                            print("navigation polyID $value");
+                            setState(() {
+                              isLoading = false;
+                              isBlueToothLoading = false;
+                            });
+                            paintUser(null,polyID: value);
+                          });
+                          //Navigator.of(context).pop();
+                          // if (result != null) {
+                          //   setState(() {
+                          //     qrText = result;
+                          //   });
+                          //   print('QR Code: $qrText');
+                          //   // Handle the scanned QR code text
+                          // }else{
+                          //   print("resultNull");
+                          // }
+                        },
+                        child: AnimatedContainer(
+                          duration: Duration(seconds: 3),
+                          width: _isExpanded ? 120 : 80,
+                          height: _isExpanded ? 120 : 80,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.teal),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
                         ),
-                        child: Icon(Icons.qr_code_scanner, size: 50, color: Colors.teal),
                       ),
                     ),
                   ),
@@ -2290,7 +2295,17 @@ void _updateProgress(){
 
     await Future.wait([timer,allBuildingCalls]);
     print("Calling localize user");
-    localizeUser();
+    if(widget.directLandID.length<2){
+      localizeUser();
+    }else{
+      btadapter.stopScanning();
+      //got here using a destination qr
+      localizeUser(speakTTS: false);
+      onLandmarkVenueClicked(
+          widget.directLandID, DirectlyStartNavigation: false);
+      building.destinationQr=true;
+    }
+
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
 
     await Future.delayed(Duration(seconds: 3));
@@ -2396,7 +2411,7 @@ if(mounted){
 
   nearestLandInfo? nearestLandInfomation;
 
-  Future<void> localizeUser() async {
+  Future<void> localizeUser({bool speakTTS = true}) async {
     print("Beacon searching started");
     double highestweight = 0;
     String nearestBeacon = "";
@@ -2442,7 +2457,7 @@ if(mounted){
       buildingAllApi.selectedID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID = Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
-    paintUser(nearestBeacon);
+    paintUser(nearestBeacon,speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
@@ -3076,9 +3091,11 @@ if(mounted){
     closedpolygons[value.polyline!.buildingID!]?.clear();
     print(
         "createroomschecker ${closedpolygons[buildingAllApi.getStoredString()]}");
-    selectedroomMarker.clear();
-    _isLandmarkPanelOpen = false;
-    building.selectedLandmarkID = null;
+    if(widget.directLandID.length<2){
+      selectedroomMarker.clear();
+      _isLandmarkPanelOpen = false;
+      building.selectedLandmarkID = null;
+    }
     polylines[value.polyline!.buildingID!]?.clear();
 
     if (floor != 0) {
@@ -4381,7 +4398,9 @@ if(mounted){
                           margin:EdgeInsets.only(top:8,right: 16),
                             child: IconButton(onPressed: (){
                               HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
-                            }, icon: Icon(Icons.share)))
+                            }, icon: Semantics(
+                              label:"Share route information" ,
+                                child: Icon(Icons.share))))
                       ],),
 
 
@@ -4393,6 +4412,7 @@ if(mounted){
                       ),
                       Semantics(
                         label: "Information",
+                        excludeSemantics: true ,
                         child: Container(
                           margin: EdgeInsets.only(left: 17, top: 20),
                           child: Text(
@@ -5455,7 +5475,7 @@ if(mounted){
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
       child: Container(
-        height: 300,
+        height: 100,
         width: 100,
         child: ListView.builder(
             itemCount:
@@ -7189,24 +7209,28 @@ if(mounted){
                               ),
                             ),
                           ),
-                          Container(
-                            height: 40,
-                            width: 65,
-                            decoration: BoxDecoration(
-                              color: Color(0xffDF3535),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: TextButton(
-                                onPressed: (){
-                                  setState(() {
-                                    StopPDR();
-                                    PathState.sourceX = user.coordX;
-                                    PathState.sourceY = user.coordY;
-                                    PathState.sourceFloor = user.floor;
-                                    PathState.sourceBid = user.Bid;
-                                    PathState.sourceLat = user.lat;
-                                    PathState.sourceLng = user.lng;
-                                    PathState.sourceName = "Your current location";
+                          Semantics(
+                            label:"Exit navigation",
+                            excludeSemantics: true,
+                            child: Container(
+                              height: 40,
+                              width: 65,
+                              decoration: BoxDecoration(
+                                color: Color(0xffDF3535),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: TextButton(
+                                  onPressed: (){
+                                    setState(() {
+                                      StopPDR();
+                                      PathState.sourceX = user.coordX;
+                                      PathState.sourceY = user.coordY;
+                                      PathState.sourceFloor = user.floor;
+                                      PathState.sourceBid = user.Bid;
+                                      PathState.sourceLat = user.lat;
+                                      PathState.sourceLng = user.lng;
+                                      PathState.sourceName = "Your current location";
+
 
                                     user.temporaryExit = true;
                                     user.isnavigating = false;
@@ -7229,6 +7253,7 @@ if(mounted){
                                   ),
                                   textAlign: TextAlign.left,
                                 )),
+                            ),
                           ),
                         ],
                       ),
@@ -9440,7 +9465,30 @@ if(mounted){
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized=false;
+
   IconData _mainIcon = Icons.volume_up_outlined;
+  void _recenterMap(){
+    alignMapToPath([
+      user.lat,
+      user.lng
+    ], [
+      PathState
+          .singleCellListPath[
+      user.pathobj
+          .index +
+          1]
+          .lat,
+      PathState
+          .singleCellListPath[
+      user.pathobj
+          .index +
+          1]
+          .lng
+    ]);
+mapState.aligned = true;
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -9501,6 +9549,13 @@ mapToolbarEnabled: false,
                     onCameraMove: (CameraPosition cameraPosition) {
                       // print("plpl ${cameraPosition.tilt}");
                       focusBuildingChecker(cameraPosition);
+                      print("camers pos ${cameraPosition.target}    target ${mapState.target}");
+                      if(cameraPosition.target.latitude.toStringAsFixed(5)!=mapState.target.latitude.toStringAsFixed(5)){
+                            mapState.aligned=false;
+
+                      }else{
+                        mapState.aligned=true;
+                      }
                       mapState.interaction = true;
                       mapbearing = cameraPosition.bearing;
                       if (!mapState.interaction) {
@@ -9581,7 +9636,7 @@ mapToolbarEnabled: false,
                     //
                     // // Text(Building.thresh),
 
-                    SpeedDial(
+                    isSemanticEnabled? Container() : SpeedDial(
                       icon: _mainIcon,
                       backgroundColor: Colors.white,
                       visible: true,
@@ -9748,6 +9803,7 @@ mapToolbarEnabled: false,
                             onTap: () {
                               _polygon.clear();
                               circles.clear();
+
                               // _markers.clear();
                               // _markerLocationsMap.clear();
                               // _markerLocationsMapLanName.clear();
@@ -9828,6 +9884,8 @@ mapToolbarEnabled: false,
                               print("localize user is calling itself.....");
                               _timer.cancel();
                             });
+                          }else{
+                            _recenterMap();
                           }
 
                         },
@@ -9840,17 +9898,20 @@ mapToolbarEnabled: false,
                             width: 70,
                             height: 70,
                           ): Icon(
-                            Icons.my_location_sharp,
-                            color: Colors.black,
+                              (!user.isnavigating)?Icons.my_location_sharp:(mapState.aligned?CupertinoIcons.location_north_fill:CupertinoIcons.location_north),
+                            color: (!user.isnavigating)?Colors
+                                .black:Colors.blue
                           ),
                         ),
-                        backgroundColor:  Colors
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26.0), // Change radius here
+                        ),
+                        backgroundColor:Colors
                             .white, // Set the background color of the FAB
                       ),
                     ),
                     SizedBox(height: 28.0),
-                    !user.isnavigating
-                        ? FloatingActionButton(
+                    !user.isnavigating || !_isLandmarkPanelOpen ? FloatingActionButton(
                       onPressed: () async {
                         if (user.initialallyLocalised) {
                           setState(() {
@@ -9893,10 +9954,13 @@ mapToolbarEnabled: false,
                           });
                         }
                       },
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                      child: Semantics(
+                        label: 'Explore Mode',
+                        child: SvgPicture.asset(
+                          "assets/Navigation_RTLIcon.svg",
+                          // color:
+                          // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                        ),
                       ),
                       backgroundColor: Color(
                           0xff24B9B0), // Set the background color of the FAB
@@ -9907,6 +9971,36 @@ mapToolbarEnabled: false,
               ),
             ),
             //-------
+            // (user.isnavigating && recenter)? Positioned(
+            //   bottom: 145,
+            //   right: 220,
+            //   child: Container(
+            //     height: 50,
+            //     width: 150, // Adjust width as needed
+            //     child: ElevatedButton(
+            //       onPressed: () {
+            //         // Implement recenter logic here
+            //         _recenterMap();
+            //       },
+            //       style: ElevatedButton.styleFrom(
+            //         foregroundColor: Colors.white, // Background color
+            //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(30), // Rounded corners
+            //         ),
+            //       ),
+            //       child: Row(
+            //         mainAxisSize: MainAxisSize.min,
+            //         mainAxisAlignment: MainAxisAlignment.center,
+            //         children: [
+            //           Icon(Icons.my_location, size: 24),
+            //           SizedBox(width: 8), // Space between icon and text
+            //           Text('Recenter', style: TextStyle(fontSize: 16)),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ):Container(),
             Positioned(
                 top: 16,
                 left: 16,
@@ -10016,7 +10110,7 @@ mapToolbarEnabled: false,
             //   backgroundColor: Colors
             //       .white, // Set the background color of the FAB
             // ),
-            (!user.initialallyLocalised && !building.qrOpened)?
+            ( !building.destinationQr && !user.initialallyLocalised && !building.qrOpened)?
                 Container(
                   height: screenHeight,
                   width: screenWidth,

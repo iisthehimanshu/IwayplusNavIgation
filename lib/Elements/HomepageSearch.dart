@@ -103,6 +103,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                       child: Semantics(
                         sortKey: const OrdinalSortKey(0),
                         label: "${LocaleData.waytogo.getString(context)}",
+
                         child: InkWell(
                           onTap: (){
                             Navigator.push(
@@ -114,18 +115,21 @@ class _HomepageSearchState extends State<HomepageSearch> {
                               widget.onVenueClicked(value,DirectlyStartNavigation: false);
                             });
                           },
-                          child: Container(
-                              margin: EdgeInsets.only(left: 16),
-                              child: Text(
-                                "${LocaleData.waytogo.getString(context)}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff8e8d8d),
-                                  height: 25 / 16,
-                                ),
-                              )),
+                          child: Semantics(
+                            excludeSemantics: true,
+                            child: Container(
+                                margin: EdgeInsets.only(left: 16),
+                                child: Text(
+                                  "${LocaleData.waytogo.getString(context)}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8e8d8d),
+                                    height: 25 / 16,
+                                  ),
+                                )),
+                          ),
                         ),
                       ),
                     ),

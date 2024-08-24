@@ -23,13 +23,11 @@ class beaconapi {
     print("beacon");
     accessToken = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
-    if(BeaconBox.containsKey(id)){
+    if(BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false){
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);
-
-      if(BeaconBox.get(id) != null && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false){
-
+      if(BeaconBox.get(id) != null ){
         List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         return beaconList;

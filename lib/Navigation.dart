@@ -909,13 +909,18 @@ bool disposed=false;
     }
   }
 
+  void changeBuilding(String oldBid, String newBid){
+    markers[newBid] = markers[oldBid]!;
+    tools.setBuildingAngle(building.patchData[newBid]!.patchData!.buildingAngle!);
+  }
+
   void renderHere() {
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(), user.showcoordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
-            LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+            LatLng(user.lat,user.lng), markers[user.Bid]![0]);
 
         mapState.target = LatLng(lvalue[0], lvalue[1]);
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -929,7 +934,7 @@ bool disposed=false;
         List<double> ldvalue =
             tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
-            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+            LatLng(user.lat,user.lng), markers[user.Bid]![1]);
       }
     });
   }
@@ -6304,6 +6309,7 @@ if(mounted){
                                                     UserState.speak = speak;
                                                     UserState.paintMarker = paintMarker;
                                                     UserState.createCircle = updateCircle;
+                                                    UserState.changeBuilding = changeBuilding;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                                     user.floor =
                                                         PathState.sourceFloor;
@@ -9658,12 +9664,12 @@ mapToolbarEnabled: false,
                     DebugToggle.Slider
                         ? Text("${user.theta}")
                         : Container(),
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    //     "floor ${user.floor}\n"
-                    //     "userBid ${user.Bid} \n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    Text("coord [${user.coordX},${user.coordY}] \n"
+                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                        "floor ${user.floor}\n"
+                        "userBid ${user.Bid} \n"
+                        "index ${user.pathobj.index} \n"
+                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                         value: user.theta,

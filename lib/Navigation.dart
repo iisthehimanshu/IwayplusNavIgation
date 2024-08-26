@@ -9719,12 +9719,12 @@ mapToolbarEnabled: false,
                     DebugToggle.Slider
                         ? Text("${user.theta}")
                         : Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                        "floor ${user.floor}\n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                         value: user.theta,

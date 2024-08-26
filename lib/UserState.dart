@@ -257,8 +257,10 @@ class UserState {
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
-        // AlignMapToPath([lat, lng],
-        //     tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
+        if(Cellpath[pathobj.index+1].bid == Cellpath[pathobj.index].bid){
+          AlignMapToPath([lat, lng],
+              tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
+        }
       }
 
       //lift check

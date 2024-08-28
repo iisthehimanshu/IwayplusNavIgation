@@ -657,9 +657,7 @@ class tools {
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
-    if(user.move == tools.twocelltransitionhorizontal || user.move == tools.twocelltransitionvertical){
-      tval = tools.fourcelltransition(theta);
-    }else if(user.move == tools.eightcelltransitionforTurns){
+    if(user.move == tools.eightcelltransitionforTurns){
       tval = tools.eightcelltransition(theta);
     }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
@@ -685,6 +683,50 @@ class tools {
     // Calculate the magnitude of each vector
     double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
     double magnitudeAC = sqrt(ac[0] * ac[0] + ac[1] * ac[1]);
+
+    // Calculate the cosine of the angle between the two vectors
+    double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+    // Calculate the angle in radians
+    double angleInRadians = acos(cosineTheta);
+
+    // Check the sign of the cross product to determine the orientation
+    if (crossProduct < 0) {
+      angleInRadians = 2 * pi - angleInRadians;
+    }
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+
+    return angleInDegrees;
+  }
+
+  static double calculateAngleonPath(Cell current, Cell prev , Cell next) {
+    List<int> a = [current.x, current.y];
+    List<int> b = [next.x, next.y];
+    List<int> c = [prev.x , prev.y];
+
+
+    // print("AA $a");
+    // print("BB $b");
+    // print("CC $c");
+    // print("theta $theta");
+    // print("DD ${user.move.toString()}");
+    // //print("EE ${theta}");
+    // Convert the points to vectors
+    List<int> ab = [b[0] - a[0], b[1] - a[1]];
+    List<int> ca = [a[0] - c[0], a[1] - c[1]];
+
+    // Calculate the dot product of the two vectors
+    double dotProduct = ab[0] * ca[0].toDouble() + ab[1] * ca[1].toDouble();
+
+    // Calculate the cross product of the two vectors
+    double crossProduct = ab[0] * ca[1].toDouble() - ab[1] * ca[0].toDouble();
+
+    // Calculate the magnitude of each vector
+    double magnitudeAB = sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+    double magnitudeAC = sqrt(ca[0] * ca[0] + ca[1] * ca[1]);
 
     // Calculate the cosine of the angle between the two vectors
     double cosineTheta = dotProduct / (magnitudeAB * magnitudeAC);

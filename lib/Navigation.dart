@@ -26,6 +26,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/dijkastra.dart';
+import 'package:iwaymaps/realWorldModel.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -4878,30 +4879,14 @@ if(mounted){
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
       ///campusPath algorithm
-        if (CampusSourceEntry != null &&
-            CampusDestinationEntry != null &&
-            CampusSourceEntry.coordinateX != null &&
-            CampusSourceEntry.coordinateY != null &&
-            CampusDestinationEntry.coordinateX != null &&
-            CampusDestinationEntry.coordinateY != null &&
-            CampusSourceEntry.floor != null &&
-            CampusSourceEntry.buildingID != null) {
           try{
-            await fetchroute(
-              CampusSourceEntry.coordinateX!,
-              CampusSourceEntry.coordinateY!,
-              CampusDestinationEntry.coordinateX!,
-              CampusDestinationEntry.coordinateY!,
-              1,
-              bid: CampusSourceEntry.buildingID,
-            );
-          }catch(e){
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+          }catch(e){
+          HelperClass.showToast("Outdoor path error");
+            print("error in outdoor path $e");
           }
 
-        }else{
-          CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-        }
+
       /// source to source Entry finding
         if (PathState.sourceFloor == sourceEntry.floor) {
           await fetchroute(PathState.sourceX, PathState.sourceY,
@@ -5047,6 +5032,7 @@ if(mounted){
       // }
       // PathState.listofPaths.insert(1, interBuildingPath);
     }
+   
   }
 
   List<int> beaconCord = [];

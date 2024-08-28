@@ -167,7 +167,7 @@ class UserState {
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values =
-          tools.localtoglobal(coordX, coordY, building!.patchData[Cellpath[pathobj.index].bid]);
+          tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
       lat = values[0];
       lng = values[1];
 

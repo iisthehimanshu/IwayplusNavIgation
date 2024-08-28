@@ -26,6 +26,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/dijkastra.dart';
+import 'package:iwaymaps/realWorldModel.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -909,13 +910,18 @@ bool disposed=false;
     }
   }
 
+  void changeBuilding(String oldBid, String newBid){
+    markers[newBid] = markers[oldBid]!;
+    tools.setBuildingAngle(building.patchData[newBid]!.patchData!.buildingAngle!);
+  }
+
   void renderHere() {
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(), user.showcoordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
-            LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+            LatLng(user.lat,user.lng), markers[user.Bid]![0]);
 
         mapState.target = LatLng(lvalue[0], lvalue[1]);
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -929,7 +935,7 @@ bool disposed=false;
         List<double> ldvalue =
             tools.localtoglobal(user.coordX.toInt(), user.coordY.toInt(), building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
-            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+            LatLng(user.lat,user.lng), markers[user.Bid]![1]);
       }
     });
   }
@@ -4873,30 +4879,14 @@ if(mounted){
         // double destinationLat=double.parse(source.properties!.latitude!);
         // double destinationLng=double.parse(source.properties!.longitude!);
       ///campusPath algorithm
-        if (CampusSourceEntry != null &&
-            CampusDestinationEntry != null &&
-            CampusSourceEntry.coordinateX != null &&
-            CampusSourceEntry.coordinateY != null &&
-            CampusDestinationEntry.coordinateX != null &&
-            CampusDestinationEntry.coordinateY != null &&
-            CampusSourceEntry.floor != null &&
-            CampusSourceEntry.buildingID != null) {
           try{
-            await fetchroute(
-              CampusSourceEntry.coordinateX!,
-              CampusSourceEntry.coordinateY!,
-              CampusDestinationEntry.coordinateX!,
-              CampusDestinationEntry.coordinateY!,
-              1,
-              bid: CampusSourceEntry.buildingID,
-            );
-          }catch(e){
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+          }catch(e){
+          HelperClass.showToast("Outdoor path error");
+            print("error in outdoor path $e");
           }
 
-        }else{
-          CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-        }
+
       /// source to source Entry finding
         if (PathState.sourceFloor == sourceEntry.floor) {
           await fetchroute(PathState.sourceX, PathState.sourceY,
@@ -5042,6 +5032,7 @@ if(mounted){
       // }
       // PathState.listofPaths.insert(1, interBuildingPath);
     }
+   
   }
 
   List<int> beaconCord = [];
@@ -6324,6 +6315,7 @@ if(mounted){
                                                     UserState.speak = speak;
                                                     UserState.paintMarker = paintMarker;
                                                     UserState.createCircle = updateCircle;
+                                                    UserState.changeBuilding = changeBuilding;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                                     user.floor =
                                                         PathState.sourceFloor;

@@ -645,8 +645,18 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
-        double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+
+        double angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        if(widget.user.pathobj.index != 0){
+           angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }
+        double userangle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+
         widget.direction = tools.angleToClocks(angle,widget.context) == "None"?oldWidget.direction:tools.angleToClocks(angle,widget.context);
+        String userdirection = tools.angleToClocks(userangle,widget.context) == "None"?oldWidget.direction:tools.angleToClocks(userangle,widget.context);
+        if(userdirection == "Straight"){
+          widget.direction = "Straight";
+        }
         int index = widget.user.path.indexOf(nextTurn);
         //print("index $index");
         double a =0;

@@ -1,5 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
@@ -21,8 +25,10 @@ import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'Elements/UserCredential.dart';
 import 'Elements/deeplinks.dart';
 import 'Elements/locales.dart';
+import 'FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
+
 import 'VenueSelectionScreen.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -33,15 +39,57 @@ import 'MainScreen.dart';
 import 'Navigation.dart';
 import 'dart:io' show Platform;
 
+Future _firebaseBackgroundMessage(RemoteMessage message) async {
+  if(message.notification != null){
+    print("Some notification Received");
+  }
+}
+final navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
-  //await Firebase.initializeApp();
 
+  await Firebase.initializeApp(
+    //options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  //ON BACKGROUND TAPPED
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    if(message.notification != null){
+      print("BACKGROUNG NOTIFICATION TAPPED");
+      //navigatorKey.currentState!.pushNamed("/message",arguments: message);
+    }
+  });
+
+  PushNotifications.init();
+  PushNotifications.localNotiInit();
+  //firebase listen to background notification
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
+
+  //to handle foreground notifications
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    String payloadData = jsonEncode(message.data);
+    print("Got a message in foreground");
+    if(message.notification!=null){
+      PushNotifications.showSimpleNotification(title: message.notification!.title!, body: message.notification!.body!, payload: payloadData);
+    }
+  });
+
+  // for handling in terminated state
+  FirebaseMessaging.instance.getInitialMessage().then((message){
+    if (message != null) {
+      print("Launched from terminated state");
+      Future.delayed(Duration(seconds: 1), () {
+        navigatorKey.currentState!.pushNamed("/message", arguments: message);
+      });
+    }
+  });
+
+  WakelockPlus.enable();
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   Hive.registerAdapter(LandMarkApiModelAdapter());
-  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile'); //LandMarkApiModelFile name ke ek file bn rhi hy and usme LandMarkApiModelFile type ke object store ho rhe hy
+  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
   Hive.registerAdapter(PatchAPIModelAdapter());
   await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
   Hive.registerAdapter(PolyLineAPIModelAdapter());
@@ -62,16 +110,8 @@ Future<void> main() async {
   await Hive.openBox<WayPointModel>('WayPointModelFile');
   Hive.registerAdapter(DataVersionLocalModelAdapter());
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-
-
-
-
-  // await Firebase.initializeApp();
-
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
-  //var userInformationBox = Hive.box('UserInformation');
-  //userInformationBox.put("UserHeight ", 5.8);
 
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
@@ -92,26 +132,6 @@ class _MyAppState extends State<MyApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket();
   late AppLinks _appLinks;
-
-  // Future<bool> _isUserAuthenticated() async {
-  //   // Check if the user is already signed in with Google
-  //   User? user = FirebaseAuth.instance.currentUser;
-  //
-  //   // If the user is signed in, return true
-  //   if (user != null) {
-  //     googleSignInUserName = user.displayName!;
-  //     print(user.metadata);
-  //     print(user.emailVerified);
-  //     print(user.phoneNumber);
-  //     print(user.photoURL);
-  //     print(user.tenantId);
-  //     print(user.refreshToken);
-  //
-  //     return true;
-  //   }
-  //   // If the user is not signed in, return false
-  //   return false;
-  // }
 
   @override
   void initState() {

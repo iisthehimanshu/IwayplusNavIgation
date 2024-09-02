@@ -16,7 +16,7 @@ class waypointapi {
   String token = "";
 
 
-  Future<List<PathModel>> fetchwaypoint( id) async {
+  Future<List<PathModel>> fetchwaypoint( id, {bool outdoor = false}) async {
 
     final WayPointBox = WayPointModeBOX.getData();
 
@@ -29,7 +29,8 @@ class waypointapi {
     }
 
     final Map<String, dynamic> data = {
-      "building_ID": id??buildingAllApi.getStoredString()
+      "building_ID": id??buildingAllApi.getStoredString(),
+      "outdoor": outdoor
     };
 
     await guestApi().guestlogin().then((value){

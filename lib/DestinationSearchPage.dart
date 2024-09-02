@@ -386,7 +386,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             searcCategoryhResults.clear();
             if(landmarkData.landmarksMap != null){
               landmarkData.landmarksMap!.forEach((key, value) {
-                if (searcCategoryhResults.length < 10) {
                   if (value.name != null && value.element!.subType != "beacons") {
                     if (value.name!.toLowerCase() == searchText.toLowerCase()) {
                       optionListItemBuildingName.add(value.buildingName!);
@@ -413,9 +412,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       });
                     }
                   }
-                } else {
-                  return;
-                }
               });
             }
           } else {

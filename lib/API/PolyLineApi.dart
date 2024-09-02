@@ -21,7 +21,7 @@ class PolyLineApi {
 
 
 
-  Future<polylinedata> fetchPolyData({String? id = null}) async {
+  Future<polylinedata> fetchPolyData({String? id = null, bool outdoor = false}) async {
     print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();
     accessToken = signInBox.get("accessToken");
@@ -37,6 +37,7 @@ class PolyLineApi {
 
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
+      "outdoor": outdoor
     };
 
     final response = await http.post(

@@ -54,6 +54,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   List<Widget> searchResults = [];
 
   List<Widget> recentResults = [];
+  List<Widget> topSearches=[];
 
   List<dynamic> recent = [];
 
@@ -73,8 +74,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     super.initState();
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
-
-
     for (int i = 0; i < optionListForUI.length; i++) {
       if (optionListForUI[i].toLowerCase() ==
           widget.previousFilter.toLowerCase()) {
@@ -312,6 +311,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         search(_controller.text);
       } else {
         // print("Filter cleared");
+        topSearchesFunc();
         searchResults = [];
         searcCategoryhResults = [];
         vall = -1;
@@ -324,7 +324,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
       });
-
     });
 
 
@@ -347,6 +346,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   bool category = false;
+  bool topCategory=false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
   List<String> optionList = [
@@ -386,6 +386,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
       if (optionList.contains(searchText)) {
         category = true;
+        topCategory=false;
         vall = optionList.indexOf(searchText);
 
         if (landmarkData.landmarksMap != null) {
@@ -413,7 +414,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       } else {
         category = false;
         vall = -1;
-
+topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
 
@@ -480,6 +481,47 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           });
         }
       }
+    });
+  }
+  void topSearchesFunc(){
+    setState(() {
+      topSearches.add(Container(margin:EdgeInsets.only(left: 26,top: 12,bottom: 12),child: Row(
+        children: [
+          Icon(Icons.search_sharp),
+          SizedBox(width: 26,),
+          Text(
+            "Top Searches",
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xff000000),
+              height: 24/18,
+            ),
+            textAlign: TextAlign.left,
+          )
+        ],
+      ),));
+      landmarkData.landmarksMap!.forEach((key, value) {
+        if (value.name != null && value.element!.subType != "beacon") {
+          if(value.priority!=null && value.priority!>1){
+            topCategory = true;
+            topSearches.add(SearchpageResults(
+              name: "${value.name}",
+              location:
+              "Floor ${value.floor}, ${value
+                  .buildingName}, ${value.venueName}",
+              onClicked: onVenueClicked,
+              ID: value.properties!.polyId!,
+              bid: value.buildingID!,
+              floor: value.floor!,
+              coordX: value.coordinateX!,
+              coordY: value.coordinateY!,
+            ));
+          }
+
+        }
+      });
     });
   }
 
@@ -619,6 +661,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                   },
                                   onChanged: (value) {
                                     search(value);
+                                    if(_controller.text.isEmpty){
+                                      topSearches.clear();
+                                      topSearchesFunc();
+                                    }
                                     // print("Final Set");
                                     // print(cardSet);
                                   },
@@ -633,13 +679,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         child: Center(
                           child: _controller.text.isNotEmpty
                               ? IconButton(
-                              onPressed: () {
+                              onPressed: (){
                                 _controller.text = "";
-                                setState(() {
+                                setState((){
                                   vall = -1;
                                   search(_controller.text);
                                   recentResults = [];
                                   searcCategoryhResults = [];
+                                  category=false;
+                                  topSearches.clear();
+                                  topSearchesFunc();
                                 });
                               },
                               icon: Semantics(
@@ -753,7 +802,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: category ? searcCategoryhResults : searchResults,
+                        children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
                       ))),
             ],
           ) : Center(

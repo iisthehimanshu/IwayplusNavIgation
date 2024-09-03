@@ -7,7 +7,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
-
+import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
 import 'package:collection/collection.dart' as pac;
@@ -1331,8 +1331,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         building.floor[buildingAllApi.getStoredString()] = user.floor;
         createRooms(building.polyLineData!,
             building.floor[buildingAllApi.getStoredString()]!);
-        if (pathMarkers[user.Bid] != null &&
-            pathMarkers[user.Bid]![user.floor] != null) {
+        if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
           setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
         }
         if (markers.length > 0)
@@ -4818,6 +4817,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print(PathState.sourcePolyID!);
         print(landmarksMap[PathState.sourcePolyID]!.lifts);
         print(landmarksMap[PathState.destinationPolyID]!.lifts!);
+
         List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,
@@ -4843,9 +4843,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             bid: PathState.destinationBid,
             liftName: commonlifts[0].name);
 
+
         await fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-            bid: PathState.destinationBid);
+            bid: PathState.destinationBid,liftName: commonlifts[0].name);
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -5308,7 +5309,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     getPoints.add([destinationX, destinationY]);
     print("getPointss: ${getPoints}");
     List<Landmarks> nearbyPathLandmarks = [];
-    building.landmarkdata!.then((value) {
+    Set<Marker> innerMarker = Set();
+    await building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 5, numCols, floor, bid!);
       pathState.nearbyLandmarks = nearbyLandmarks;
@@ -5317,25 +5319,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       // });
       tools
           .associateTurnWithLandmark(path, nearbyLandmarks, numCols)
-          .then((value) {
+          .then((value) async {
         PathState.associateTurnWithLandmark = value;
         PathState.associateTurnWithLandmark.removeWhere((key, value) =>
             value.properties!.polyId == PathState.destinationPolyID);
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //   print("${key} , ${value.name}");
         // });
+        destiPoly=PathState.destinationPolyID;
         List<direction> directions = [];
         if (liftName != null) {
-          directions.add(direction(
-              -1,
-              "Take ${liftName} and Go to ${PathState.destinationFloor} Floor",
-              null,
-              null,
-              floor.toDouble(),
-              null,
-              null,
-              floor,
-              bid ?? ""));
+          directions.add(direction(-1, "Take ${liftName} and Go to ${PathState.destinationFloor} Floor", null, null,
+              floor.toDouble(), null, null, floor, bid ?? ""));
         }
         directions.addAll(tools.getDirections(
             path, numCols, value, floor, bid ?? "", PathState, context));
@@ -5345,7 +5340,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         directions.addAll(PathState.directions);
         PathState.directions = directions;
+
+        for(int i=1;i<PathState.directions.length-1;i++){
+
+         List<double> dvalue = tools.localtoglobal(PathState.directions[i].x!, PathState.directions[i].y!,
+              building.patchData[bid]);
+         if(PathState.directions[i].turnDirection!=null) {
+           innerMarker.add(Marker(
+             markerId: MarkerId("${PathState.directions[i].node} ${floor}_${bid}"),
+             position: LatLng(dvalue[0], dvalue[1]),
+             icon: await TurnCustomMarker(text: "",
+                 dirIcon: directionInstruction.getCustomIcon(
+                     PathState.directions[i].turnDirection!, context))
+                 .toBitmapDescriptor(
+                 logicalSize: const Size(150, 150),
+                 imageSize: const Size(300, 400)),
+             visible: false,
+             onTap: () {},
+           ));
+         }
+        }
+
       });
+
 
       if (destinationX == PathState.destinationX &&
           destinationY == PathState.destinationY) {
@@ -5361,7 +5378,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             bid,
             isDestination: true));
       }
+
     });
+
+
+
+
 
     List<Cell> Cellpath = findCorridorSegments(
         path,
@@ -5422,9 +5444,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print("Himanshucheckerpath in if block ");
         print("building.patchData[bid]");
         print(building.patchData[bid]!.patchData!.fileName);
-        svalue = tools.localtoglobal(sourceX, sourceY, building.patchData[bid]);
-        dvalue = tools.localtoglobal(
-            destinationX, destinationY, building.patchData[bid]);
+        svalue = tools.localtoglobal(sourceX, sourceY,
+             building.patchData[bid]);
+        dvalue = tools.localtoglobal(destinationX, destinationY,
+             building.patchData[bid]);
+
+
+
+        print(dvalue);
       } else {
         print("Himanshucheckerpath in else block ");
         svalue = tools.localtoglobal(sourceX, sourceY, null);
@@ -5475,17 +5502,58 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
       }
 
+
       final Uint8List tealtorch =
           await getImagesFromMarker('assets/tealtorch.png', 35);
 
-      Set<Marker> innerMarker = Set();
 
-      setState(() {
-        if (renderDestination) {
-          innerMarker.add(Marker(
-              markerId: MarkerId("destination${bid}"),
+      if(liftName!=null){
+       innerMarker.add(Marker(
+            markerId: MarkerId("lift${bid}"),
+            position: sourceX == PathState.sourceX?LatLng(dvalue[0], dvalue[1]):LatLng(svalue[0], svalue[1]),
+            icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.elevator_outlined:Icons.elevator_outlined).toBitmapDescriptor(
+                logicalSize: const Size(150, 150), imageSize: const Size(300, 400)),
+           anchor: Offset(0.0, 1.0),
+         onTap: (){
+              if(!user.isnavigating){
+                _polygon.clear();
+                circles.clear();
+                building.floor[buildingAllApi
+                    .getStoredString()] = PathState.sourceFloor==floor?PathState.destinationFloor:PathState.sourceFloor;
+                createRooms(
+                  building.polylinedatamap[
+                  buildingAllApi
+                      .getStoredString()]!,
+                  building.floor[buildingAllApi
+                      .getStoredString()]!,
+                );
+                building.landmarkdata!
+                    .then((value) {
+                  createMarkers(
+                      value,
+                      building.floor[buildingAllApi
+                          .getStoredString()]!,
+                      bid: buildingAllApi
+                          .getStoredString()
+                  );
+                });
+              }
+
+       },
+        ));
+
+      }
+
+
+      setState((){
+        if(renderDestination){
+          innerMarker.add(
+            Marker(
+              markerId: MarkerId('destination${bid}'),
               position: LatLng(dvalue[0], dvalue[1]),
-              icon: BitmapDescriptor.defaultMarker));
+              icon: BitmapDescriptor.defaultMarker,
+            ),
+          );
         }
         if (renderSource) {
           innerMarker.add(
@@ -5497,7 +5565,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         }
-
         PathState.innerMarker[floor] = innerMarker;
         pathMarkers.putIfAbsent(bid, () => Map());
         pathMarkers[bid]![floor] = innerMarker;
@@ -6866,238 +6933,300 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     _feedbackController.close();
   }
 
+
+
+
+String destiName='';
+  String destiPoly='';
+  String? BuildingName;
   Widget feedbackPanel(BuildContext context) {
-    minHight = MediaQuery.of(context).size.height / 2.5;
+
+    String destpoly=destiPoly.length>1?destiPoly:destiPoly;
+    String destiN=destiName.length>1?destiName:destiName;
+
+    if(building.landmarkdata != null){
+
+       building.landmarkdata!.then((value){
+        if(value.landmarksMap![destpoly]!=null){
+          print(value.landmarksMap![destpoly]!.venueName!);
+          setState(() {
+            BuildingName =  value.landmarksMap![destpoly]!.venueName!;
+          });
+
+        }
+
+      });
+
+      print(BuildingName);
+    }
+    minHight = MediaQuery.of(context).size.height/2.3;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
-        child: SlidingUpPanel(
-          controller: _feedbackController,
-          minHeight: minHight,
-          maxHeight: MediaQuery.of(context).size.height - 20,
-          snapPoint: 0.9,
-          borderRadius: BorderRadius.all(Radius.circular(24.0)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20.0,
-              color: Colors.grey,
-            ),
-          ],
-          panel: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16),
-                  Text(
-                    "How was your navigation experience ?",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xff000000),
-                    ),
-                    textAlign: TextAlign.left,
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SlidingUpPanel(
+                controller: _feedbackController,
+                minHeight: minHight,
+                maxHeight: MediaQuery.of(context).size.height-85,
+                snapPoint: 0.9,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.0),  // Apply radius to top left corner
+                  topRight: Radius.circular(24.0), // Apply radius to top right corner
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 20.0,
+                    color: Colors.grey,
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Your Feedback Helps Us Do Better",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xffa1a1aa),
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  SizedBox(height: 36),
-                  Text(
-                    "Rate Your Experience",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xff000000),
-                      height: 24 / 18,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  SizedBox(height: 32),
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        return GestureDetector(
-                          onTap: () {
-                            _rating = index + 1;
-                            if (_rating >= 4) {
-                              __feedbackControllerUp(0.3);
-                              // _feedbackTextController.clear();
-                            } else if (_rating <= 3) {
-                              __feedbackControllerUp(0.9);
-                            } else if (_rating == 3 || _rating == 4) {
-                              _feedbackTextController.clear();
-                            }
-                            print("minHight");
-                            print(minHight);
-
-                            setState(() {});
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: index < _rating
-                                ? SvgPicture.asset(
-                                    'assets/ratingStarFilled.svg',
-                                    width: 48.0,
-                                    height: 48.0,
-                                  )
-                                : SvgPicture.asset(
-                                    'assets/ratingStarBorder.svg',
-                                    width: 48.0,
-                                    height: 48.0,
-                                  ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  if (_rating > 0 && _rating < 4) ...[
-                    SizedBox(height: 16),
-                    Text(
-                      "Select the Issues ",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff000000),
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                    SizedBox(height: 16),
-                    ChipFilterWidget(
-                      options: [
-                        'Bad map route',
-                        'Wrong turns',
-                        'UI Issue',
-                        'App speed',
-                        'Search Function',
-                        'Map Accuracy'
-                      ],
-                      onSelected: (selectedOption) {
-                        print('Selected: $selectedOption');
-                        // Handle the selection here
-                        _feedbackTextController.text = selectedOption;
-                        _feedback = _feedbackTextController.text;
-                        print(_feedback);
-                        setState(() {});
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      "Add a Detailed Review",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff000000),
-                        height: 24 / 18,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                        controller: _feedbackTextController,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          hintText: 'Please share your thoughts...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: false,
-                          fillColor: Colors.white,
-                        ),
-                        onChanged: (value) {
-                          _feedback = value;
-                          print("onchange--");
-                          setState(() {});
-                        }),
-                  ],
-                  SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: (_rating > 0 &&
-                              (_rating >= 4 || _feedback.length >= 5))
-                          ? () {
-                              // TODO: Submit feedback
-                              print('Rating: $_rating');
-                              var signInBox = Hive.box('UserInformation');
-                              print(signInBox.keys);
-                              var infoBox = Hive.box('SignInDatabase');
-                              String accessToken = infoBox.get('accessToken');
-                              //print('loadInfoToFile');
-                              print(infoBox.get('userId'));
-                              //String userId = signInBox.get("sId");
-                              //String username = signInBox.get("username");
-
-                              RatingsaveAPI().saveRating(
-                                  _feedback,
-                                  _rating,
-                                  UserCredentials().getUserId(),
-                                  UserCredentials().getuserName(),
-                                  PathState.sourcePolyID,
-                                  PathState.destinationPolyID,
-                                  "com.iwayplus.navigation");
-
-                              if (_feedback.isNotEmpty) {
-                                print('Feedback: $_feedback');
-                              }
-                              showFeedback = false;
-                              _feedbackController.hide();
-                              print("_feedbackTextController.clear()");
-                              print(_feedbackTextController.text);
-                              _feedbackTextController.clear();
-                              print(_feedbackTextController.text);
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        MainScreen(initialIndex: 0)),
-                                (Route<dynamic> route) => false,
-                              );
-                            }
-                          : null,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Text(
-                          'Submit',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: (_rating > 0 &&
-                                (_rating >= 4 ||
-                                    _feedback
-                                            .split(' ')
-                                            .where((w) => w.isNotEmpty)
-                                            .length >=
-                                        0))
-                            ? Color(0xff24B9B0)
-                            : Colors.grey,
-                        disabledBackgroundColor: Colors.grey,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 36),
                 ],
+                panel: SingleChildScrollView(
+                  child:
+                  Column(
+
+                    children:[
+                      Container(
+                        width: screenWidth,
+                        padding: EdgeInsets.fromLTRB(17, 32, 17, 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(topRight:Radius.circular(24.0),topLeft:Radius.circular(24.0)),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset('assets/success1.png'),
+                            ),
+                            SizedBox(height: 12,),
+                            Text(
+                              "You’ve Arrived",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                                height: 25/16,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 8,),
+                            Text(
+                              "${destiN.isEmpty?"Your Destination":destiN}",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 32,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xff000000),
+                                height: 30/32,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 8,),
+                            Text(
+                              "${BuildingName??""}",
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color:Color(0xff000000),
+                                height: 20/14,
+                              ),
+                              textAlign: TextAlign.left,
+                            )
+                          ],
+                        ),
+                      ),
+
+                      Divider(indent: 24,endIndent: 24,),
+                      Padding(
+                      padding: EdgeInsets.all(18.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+
+                          Text(
+                            "How was your experience?",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff000000),
+                              height: 24/18,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+
+                          SizedBox(height: 16),
+
+
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    _rating = index + 1;
+                                    if (_rating >=4) {
+                                      //__feedbackControllerUp(0.3);
+                                      // _feedbackTextController.clear();
+                                    } else if (_rating <= 3) {
+                                     // __feedbackControllerUp(0.9);
+
+                                    }else if(_rating == 3 || _rating==4){
+                                      _feedbackTextController.clear();
+                                    }
+                                    print("minHight");
+                                    print(minHight);
+
+                                    setState(() {
+
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
+                                    child: index < _rating ? SvgPicture.asset('assets/ratingStarFilled.svg', width: 48.0, height: 48.0,) : SvgPicture.asset('assets/ratingStarBorder.svg', width: 48.0, height: 48.0,),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                          // SizedBox(height: 20),
+                          // if (_rating > 0 && _rating < 4) ...[
+                          //   SizedBox(height: 16),
+                          //   Text(
+                          //     "Select the Issues ",
+                          //     style: const TextStyle(
+                          //       fontFamily: "Roboto",
+                          //       fontSize: 18,
+                          //       fontWeight: FontWeight.w700,
+                          //       color: Color(0xff000000),
+                          //     ),
+                          //     textAlign: TextAlign.left,
+                          //   ),
+                          //   SizedBox(height: 16),
+                          //   ChipFilterWidget(
+                          //
+                          //     options: ['Bad map route', 'Wrong turns', 'UI Issue', 'App speed','Search Function','Map Accuracy'],
+                          //     onSelected: (selectedOption) {
+                          //       print('Selected: $selectedOption');
+                          //       // Handle the selection here
+                          //       _feedbackTextController.text = selectedOption;
+                          //       _feedback = _feedbackTextController.text;
+                          //       print(_feedback);
+                          //       setState(() {
+                          //
+                          //       });
+                          //     },
+                          //
+                          //   ),
+                          //   SizedBox(height: 20),
+                          //   Text(
+                          //     "Add a Detailed Review",
+                          //     style: const TextStyle(
+                          //       fontFamily: "Roboto",
+                          //       fontSize: 18,
+                          //       fontWeight: FontWeight.w700,
+                          //       color: Color(0xff000000),
+                          //       height: 24/18,
+                          //     ),
+                          //     textAlign: TextAlign.left,
+                          //   ),
+                          //   SizedBox(height: 20),
+                          //   TextFormField(
+                          //       controller: _feedbackTextController,
+                          //       maxLines: 4,
+                          //       decoration: InputDecoration(
+                          //         hintText: 'Please share your thoughts...',
+                          //         border: OutlineInputBorder(
+                          //           borderRadius: BorderRadius.circular(12),
+                          //         ),
+                          //         filled: false,
+                          //         fillColor: Colors.white,
+                          //       ),
+                          //       onChanged: (value)  {
+                          //         _feedback = value;
+                          //         print("onchange--");
+                          //         setState(() {
+                          //
+                          //         });
+                          //       }
+                          //   ),
+                          // ],
+
+
+
+                        ],
+                      ),
+                    ) ,
+                ],
+                  )
+
+                ),
               ),
-            ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TODO: Submit feedback
+                    print('Rating: $_rating');
+                    var signInBox = Hive.box('UserInformation');
+                    print(signInBox.keys);
+                    var infoBox=Hive.box('SignInDatabase');
+                    String accessToken = infoBox.get('accessToken');
+                    //print('loadInfoToFile');
+                    print(infoBox.get('userId'));
+                    //String userId = signInBox.get("sId");
+                    //String username = signInBox.get("username");
+
+
+
+
+
+                    RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+
+                    if (_feedback.isNotEmpty) {
+                      print('Feedback: $_feedback');
+                    }
+                    showFeedback= false;
+                    _feedbackController.hide();
+                    print("_feedbackTextController.clear()");
+                    print(_feedbackTextController.text);
+                    _feedbackTextController.clear();
+                    print(_feedbackTextController.text);
+                    BuildingName=null;
+                    Navigator.pop(context);
+
+                  },
+
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      (_rating>0)?'Done':'Exit',
+                      style: TextStyle(fontSize: 18,color: Colors.white),
+
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Color(0xff24B9B0),
+                  //  disabledBackgroundColor: Colors.grey,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),
@@ -7444,6 +7573,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               focusOnTurn: focusOnTurn,
               clearFocusTurnArrow: clearFocusTurnArrow,
               context: context,
+              //turnMarkersVisible:turnMarkersVisible,
             )
           ],
         ));
@@ -8988,7 +9118,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         combinedMarkers =
             combinedMarkers.union(pathMarkers[key]![building.floor[key]]!);
       }
-
       if ((!_isRoutePanelOpen || !_isnavigationPannelOpen) &&
           markers[key] != null &&
           user.floor == building.floor[key]) {
@@ -8997,7 +9126,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
 
     // Always union the general Markers set at the end
-    combinedMarkers = combinedMarkers.union(Markers);
+    if(building.floor[user.Bid] == user.floor){
+      markers.forEach((key,value){
+        combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
+      });
+    }
+
 
     return combinedMarkers;
   }
@@ -9164,8 +9298,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void closeNavigation() {
-    print("close navigation");
+
     String destname = PathState.destinationName;
+    //String destPolyyy=PathState.destinationPolyID;
+    destiName=destname;
+
+
     List<int> tv = tools.eightcelltransition(user.theta);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
@@ -9212,15 +9350,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
-    //avigator.push(context, MaterialPageRoute(builder: (context) => UserExperienceRatingScreen()));
-    // showFeedback = true;
-    // Future.delayed(Duration(seconds: 5));
-    // _feedbackController.open();
-    // Navigator.pushAndRemoveUntil(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
-    //       (Route<dynamic> route) => false,
-    // );
+    showFeedback = true;
+    Future.delayed(Duration(seconds: 5));
+    _feedbackController.open();
+
+
+
   }
 
   void onLandmarkVenueClicked(String ID,
@@ -9542,7 +9677,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         //   color: Colors.blue,
         //   width: 5,
         // ));
-
         focusturnArrow.add(Marker(
             markerId: MarkerId("focusturn"),
             position: LatLng(latlng[0], latlng[1]),
@@ -9562,6 +9696,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       ));
     }
   }
+
+  // void turnMarkersVisible(int node){
+  //   Set<Marker> tempSet=Set();
+  //
+  //   if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
+  //
+  //     for(var marker in pathMarkers[user.Bid]![user.floor]!){
+  //       print("searching ${node.toString()} in marker with id ${marker.markerId.value}");
+  //       if(marker.markerId.value.contains(node.toString())){
+  //         tempSet.add(customMarker.visibility(true, marker));
+  //       }else{
+  //         tempSet.add(marker);
+  //       }
+  //     }
+  //     pathMarkers[user.Bid]![user.floor]!=tempSet;
+  //   }
+  //
+  //   for (var marker in pathMarkers[user.Bid]![user.floor]!) {
+  //     if(marker.visible == true){
+  //       print("visible marker with ID ${marker.markerId.value} found");
+  //     }
+  //   }
+  //
+  // }
 
   void focusBuildingChecker(CameraPosition position) {
     LatLng currentLatLng = position.target;
@@ -9633,6 +9791,105 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     ]);
     mapState.aligned = true;
   }
+
+  Future<BitmapDescriptor> createBitmapDescriptorFromWidget(BuildContext context, Widget widget) async {
+    final GlobalKey key = GlobalKey();
+
+    // Wrap the widget in an Offstage widget to prevent it from being displayed on the screen
+    final offstageWidget = Offstage(
+      child: Material(
+        type: MaterialType.transparency,
+        child: RepaintBoundary(
+          key: key,
+          child: widget,
+        ),
+      ),
+    );
+
+    // Add the widget to the overlay for rendering off-screen
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(builder: (context) => offstageWidget);
+    overlayState.insert(overlayEntry);
+
+    // Allow some time for the widget to render
+    await Future.delayed(Duration(milliseconds: 10000));
+    print("tried to render");
+    // Capture the widget as an image
+    final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+    // Remove the widget from the overlay
+    overlayEntry.remove();
+
+    return BitmapDescriptor.fromBytes(pngBytes);
+  }
+
+  // Future<void> addCustomMarker(LatLng position, String bid, int floor) async {
+  //   print("error debug");
+  //   pathMarkers.putIfAbsent(bid, ()=>Map());
+  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
+  //   pathMarkers[bid]![floor]!.add(Marker(
+  //       markerId: MarkerId("destination${bid}"),
+  //       position: position,
+  //       icon: await  CustomMarker(text: "hello").toBitmapDescriptor(
+  //           logicalSize: const Size(150, 150), imageSize: const Size(300, 400))
+  //   ));
+  //   setState(() {
+  //
+  //   });
+  // }
+
+  Future<RenderRepaintBoundary> _capturePngFromWidget(BuildContext context, Widget widget, GlobalKey key) async {
+    final RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    return await Future.delayed(Duration(milliseconds: 20), () {
+      return boundary;
+    });
+  }
+
+  // Future<RenderRepaintBoundary> _capturePngFromWidget(BuildContext context, Widget widget) async {
+  //   final RenderRepaintBoundary boundary = RenderRepaintBoundary();
+  //   final RenderView renderView = RenderView(
+  //     child: RenderProxyBox(boundary),
+  //     configuration: ViewConfiguration(devicePixelRatio: MediaQuery.of(context).devicePixelRatio),
+  //     view: WidgetsBinding.instance.window,
+  //   );
+  //   final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = renderView;
+  //   renderView.prepareInitialFrame();
+  //   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+  //   final RenderObjectToWidgetElement<RenderBox> rootElement =
+  //   RenderObjectToWidgetAdapter<RenderBox>(
+  //     container: boundary,
+  //     child: widget,
+  //   ).attachToRenderTree(buildOwner);
+  //   buildOwner.buildScope(rootElement);
+  //   buildOwner.finalizeTree();
+  //   await Future.delayed(Duration(milliseconds: 20)); // wait for widget to build
+  //   pipelineOwner.flushLayout();
+  //   pipelineOwner.flushCompositingBits();
+  //   pipelineOwner.flushPaint();
+  //   return boundary;
+  // }
+
+  // void _addCustomMarker(String bid, int floor, LatLng position) async {
+  //   print("got into it");
+  //   final customMarker = await createCustomMarkerBitmap(context, 'Your Text', Icons.location_on);
+  //   pathMarkers.putIfAbsent(bid, ()=>Map());
+  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
+  //   pathMarkers[bid]![floor]!.add(Marker(
+  //     markerId: MarkerId('custom_marker'),
+  //     position: position, // Your desired position
+  //     icon: BitmapDescriptor.defaultMarker,
+  //     onTap: () {
+  //       print("tapedddd");
+  //       // Handle tap functionality here
+  //     },
+  //   ));
+  // }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -10423,3 +10680,110 @@ class CircleAnimation {
 
   CircleAnimation(this.controller, this.animation);
 }
+class CustomMarker extends StatelessWidget {
+  final String text;
+  final IconData dirIcon;
+
+  CustomMarker({required this.text,required this.dirIcon});
+  
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Color(0xffFFFF00), // Set the background color to yellow
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(35),
+            topRight: Radius.circular(35),
+            bottomRight: Radius.circular(35),
+            bottomLeft: Radius.circular(1)
+          ),
+          border: Border.all(
+            color: Colors.black, // Set the border color to white
+            width: 2, // Set the border width (adjust as needed)
+          ),
+        ),
+
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(dirIcon, color: Colors.black, size: 32),
+            SizedBox(width: 4),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(
+                text,
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  }
+}
+class TurnCustomMarker extends StatelessWidget {
+  final String text;
+  final IconData dirIcon;
+
+  TurnCustomMarker({required this.text,required this.dirIcon});
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+
+      child: Icon(
+        dirIcon,
+        color: Colors.black,
+        size: 40,
+        shadows: [
+          BoxShadow(
+            color: Colors.white, // Color of the shadow
+            blurRadius: 6, // Spread of the shadow
+            offset: Offset(-2, -2),
+             // Position of the shadow
+          ),
+        ],
+      ),
+    );
+
+  }
+}
+class ChatMessageClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    // Starting from top left
+    path.moveTo(0, 20);
+
+    // Top left corner
+    path.quadraticBezierTo(0, 0, 20, 0);
+
+    // Top right corner
+    path.lineTo(size.width - 20, 0);
+    path.quadraticBezierTo(size.width, 0, size.width, 20);
+
+    // Bottom right corner
+    path.lineTo(size.width, size.height - 20);
+    path.quadraticBezierTo(size.width, size.height, size.width - 20, size.height);
+
+    // Bottom left corner with squeezed effect
+    path.lineTo(20, size.height);
+    path.quadraticBezierTo(0, size.height - 10, 0, size.height - 30);
+
+    // Complete the path
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+

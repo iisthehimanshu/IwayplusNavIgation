@@ -113,7 +113,7 @@ class Landmarks {
         this.iV,
         this.buildingName,
         this.venueName,
-      this.wasPolyIdNull});
+        this.wasPolyIdNull});
 
   Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =

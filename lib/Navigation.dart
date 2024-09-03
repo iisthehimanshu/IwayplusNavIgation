@@ -5397,7 +5397,7 @@ if(mounted){
        innerMarker.add(Marker(
             markerId: MarkerId("lift${bid}"),
             position: sourceX == PathState.sourceX?LatLng(dvalue[0], dvalue[1]):LatLng(svalue[0], svalue[1]),
-            icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.arrow_downward:Icons.arrow_upward).toBitmapDescriptor(
+            icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.elevator_outlined:Icons.elevator_outlined).toBitmapDescriptor(
                 logicalSize: const Size(150, 150), imageSize: const Size(300, 400)),
            anchor: Offset(0.0, 1.0),
          onTap: (){
@@ -5438,7 +5438,6 @@ if(mounted){
               markerId: MarkerId('destination${bid}'),
               position: LatLng(dvalue[0], dvalue[1]),
               icon: BitmapDescriptor.defaultMarker,
-
             ),
           );
         }

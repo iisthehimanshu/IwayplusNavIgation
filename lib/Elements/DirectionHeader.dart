@@ -41,7 +41,8 @@ class DirectionHeader extends StatefulWidget {
 
 
 
-  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn,required this.clearFocusTurnArrow,required this.context}){
+
+  DirectionHeader({this.distance = 0, required this.user , this.direction = "", required this.paint, required this.repaint, required this.reroute, required this.moveUser, required this.closeNavigation,required this.isRelocalize,this.getSemanticValue='', required this.focusOnTurn,required this.clearFocusTurnArrow,required this.context,}){
     try{
       double angle = tools.calculateAngleBWUserandCellPath(
           user.Cellpath[0], user.Cellpath[1], user.pathobj.numCols![user.Bid]![user.floor]!,user.theta);
@@ -622,10 +623,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             }
           });
         });
-
-
-
-
         List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
         // print("nextTurn remainingPath $remainingPath");
         // print("nextturn turnpoint $turnPoints");

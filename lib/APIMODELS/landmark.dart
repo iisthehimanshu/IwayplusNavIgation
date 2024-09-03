@@ -69,6 +69,7 @@ class Landmarks {
   Element? element;
   Properties? properties;
   String? sId;
+  int? priority;
   String? buildingID;
   int? coordinateX;
   int? coordinateY;
@@ -92,6 +93,7 @@ class Landmarks {
   Landmarks(
       {this.element,
         this.properties,
+        this.priority,
         this.sId,
         this.buildingID,
         this.coordinateX,
@@ -111,7 +113,7 @@ class Landmarks {
         this.iV,
         this.buildingName,
         this.venueName,
-      this.wasPolyIdNull});
+        this.wasPolyIdNull});
 
   Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =
@@ -159,6 +161,7 @@ class Landmarks {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    priority = json['priority'];
     buildingName = json['buildingName'];
     venueName = json['venueName'];
   }
@@ -194,6 +197,7 @@ class Landmarks {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['priority'] = this.priority;
     data['buildingName'] = this.buildingName;
     data['venueName'] = this.venueName;
     return data;

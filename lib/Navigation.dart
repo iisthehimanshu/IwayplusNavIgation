@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -281,6 +282,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
               mapController: _googleMapController,
+              offset: [0.5,0.5]
             ),
           );
         } catch (e) {}
@@ -2328,9 +2330,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             building.floorDimenssion[key] = currentFloorDimensions;
           }
         }
-        if (key == "65d9cacfdb333f8945861f0f") {
-          createMarkers(otherLandmarkData, 1, bid: key);
-        }
+          createMarkers(otherLandmarkData, 0, bid: key);
         createotherARPatch(
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
@@ -3933,8 +3933,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       : 'Entry';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
-              print("_markerLocationsMap");
-              print("$_markerLocationsMap");
+
+
               // _markers!.add(Marker(
               //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
               //   position: LatLng(value[0], value[1]),
@@ -4755,34 +4755,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
     print("polyidchecker ${PathState.sourcePolyID}");
-    if (PathState.sourcePolyID == "") {
-      PathState.sourcePolyID = tools
-          .localizefindNearbyLandmarkSecond(user, landmarksMap)!
-          .properties!
-          .polyId!;
-    } else if (landmarksMap[PathState.sourcePolyID]!.lifts == null ||
-        landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty) {
-      Landmarks? land = tools.localizefindNearbyLandmarkSecond(
-          user, landmarksMap,
-          increaserange: true);
-      if (land != null) {
+    if(PathState.sourcePolyID == ""){
+      PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
+    }else if(landmarksMap[PathState.sourcePolyID]!.lifts == null || landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty ){
+      Landmarks? land = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true);
+      if(land != null){
         landmarksMap[PathState.sourcePolyID]!.lifts = land.lifts;
       }
     }
-    try {
-      if (PathState.sourcePolyID == "") {
-        PathState.sourcePolyID = tools
-            .localizefindNearbyLandmarkSecond(user, landmarksMap)!
-            .properties!
-            .polyId!;
-      } else if (landmarksMap[PathState.sourcePolyID]!.lifts == null ||
-          landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty) {
-        landmarksMap[PathState.sourcePolyID]!.lifts = tools
-            .localizefindNearbyLandmarkSecond(user, landmarksMap,
-                increaserange: true)!
-            .lifts;
+    try{
+      if(PathState.sourcePolyID == ""){
+        PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
+      }else if(landmarksMap[PathState.sourcePolyID]!.lifts == null || landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty ){
+        landmarksMap[PathState.sourcePolyID]!.lifts = tools.localizefindNearbyLandmarkSecond(user, landmarksMap,increaserange: true)!.lifts;
       }
-    } catch (e) {
+    }catch(e){
       print("$e error in finding nearest landmark second");
     }
     // circles.clear();
@@ -4792,35 +4779,33 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // print(landmarksMap[PathState.destinationPolyID]!.buildingID);
     // print(landmarksMap[PathState.sourcePolyID]!.buildingID);
 
-    PathState.noPathFound = false;
+    PathState.noPathFound=false;
     singleroute.clear();
     pathMarkers.clear();
     Markers.clear();
 
     PathState.destinationX =
-        landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
-        landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
       PathState.destinationX =
-          landmarksMap[PathState.destinationPolyID]!.doorX!;
+      landmarksMap[PathState.destinationPolyID]!.doorX!;
       PathState.destinationY =
-          landmarksMap[PathState.destinationPolyID]!.doorY!;
+      landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
         print("Calculateroute if statement");
         print(
             "${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
-
-        await compute(fetchRouteInIsolate, fetchrouteParams(
-            sourceX: PathState.sourceX,
-            sourceY: PathState.sourceY,
-            destinationX: PathState.destinationX,
-            destinationY: PathState.destinationY,
-            floor: PathState.destinationFloor,
-            bid: PathState.destinationBid)) ;
-
+        await fetchroute(
+            PathState.sourceX,
+            PathState.sourceY,
+            PathState.destinationX,
+            PathState.destinationY,
+            PathState.destinationFloor,
+            bid: PathState.destinationBid);
         building.floor[buildingAllApi.getStoredString()] = user.floor;
 
         if (markers.length > 0)
@@ -4849,36 +4834,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         print(commonlifts);
 
-
-        await compute(fetchRouteInIsolate, fetchrouteParams(
-            sourceX: commonlifts[0].x2!,
-            sourceY: commonlifts[0].y2!,
-            destinationX: PathState.destinationX,
-            destinationY: PathState.destinationY,
-            floor: PathState.destinationFloor,
+        await fetchroute(
+            commonlifts[0].x2!,
+            commonlifts[0].y2!,
+            PathState.destinationX,
+            PathState.destinationY,
+            PathState.destinationFloor,
             bid: PathState.destinationBid,
-            liftName: commonlifts[0].name!)) ;
+            liftName: commonlifts[0].name);
 
-        await compute(fetchRouteInIsolate, fetchrouteParams(
-            sourceX: PathState.sourceX,
-            sourceY: PathState.sourceY,
-            destinationX: commonlifts[0].x1!,
-            destinationY: commonlifts[0].y1!,
-            floor: PathState.sourceFloor,
-            bid: PathState.destinationBid)) ;
-
+        await fetchroute(PathState.sourceX, PathState.sourceY,
+            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+            bid: PathState.destinationBid);
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
               commonlifts[0].x1!,
               commonlifts[0].y1!,
               building.floorDimenssion[PathState.destinationBid]![
-                  PathState.sourceFloor]![0]),
+              PathState.sourceFloor]![0]),
           PathState.destinationFloor: calculateindex(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
               building.floorDimenssion[PathState.destinationBid]![
-                  PathState.destinationFloor]![0])
+              PathState.destinationFloor]![0])
         };
       }
     } else {
@@ -4889,104 +4868,96 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       double destinationEntrylng = 0;
 
       building.landmarkdata!.then((land) async {
+
+
         ///destination Entry finding
-        Landmarks destinationEntry = tools.findNearestPoint(
-            PathState.destinationPolyID,
-            PathState.sourcePolyID,
-            land.landmarks!);
-
+        Landmarks destinationEntry = tools.findNearestPoint(PathState.destinationPolyID, PathState.sourcePolyID, land.landmarks!);
         /// source Entry finding
-        Landmarks sourceEntry = tools.findNearestPoint(PathState.sourcePolyID,
-            PathState.destinationPolyID, land.landmarks!);
-
+        Landmarks sourceEntry = tools.findNearestPoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!);
         /// destinationEntryINCAMPUS
-        Landmarks? CampusDestinationEntry;
+        Landmarks? CampusDestinationEntry ;
         try {
           CampusDestinationEntry = land.landmarks!.firstWhere(
-            (element) =>
-                element.name == destinationEntry.name &&
+                (element) =>
+            element.name == destinationEntry.name &&
                 element.buildingID == buildingAllApi.outdoorID,
             orElse: () => throw Exception('No matching landmark found'),
           );
-        } catch (e) {}
+        } catch (e) {
+
+        }
 
         /// sourceEntryINCAMPUS
-        Landmarks? CampusSourceEntry;
+        Landmarks? CampusSourceEntry ;
         try {
           CampusSourceEntry = land.landmarks!.firstWhere(
-            (element) =>
-                element.name == sourceEntry.name &&
+                (element) =>
+            element.name == sourceEntry.name &&
                 element.buildingID == buildingAllApi.outdoorID,
             orElse: () => throw Exception('No matching landmark found'),
           );
-        } catch (e) {}
+        } catch (e) {
+
+        }
+
 
         ///destination to destination Entry path algorithm
-        // if (destinationEntry.floor == PathState.destinationFloor) {
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: destinationEntry.coordinateX!,
-        //       sourceY: destinationEntry.coordinateY!,
-        //       destinationX: PathState.destinationX,
-        //       destinationY: PathState.destinationY,
-        //       floor: PathState.destinationFloor,
-        //       bid: PathState.destinationBid,
-        //       renderSource: false)) ;
-        //
-        //   print("running destination location no lift run");
-        // } else if (destinationEntry.floor != PathState.destinationFloor) {
-        //   List<dynamic> commonlifts = findCommonLifts(destinationEntry,
-        //       landmarksMap[PathState.destinationPolyID]!, accessibleby);
-        //   if (commonlifts.isEmpty) {
-        //     setState(() {
-        //       PathState.noPathFound = true;
-        //       _isLandmarkPanelOpen = false;
-        //       _isRoutePanelOpen = true;
-        //     });
-        //     return;
-        //   }
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: commonlifts[0].x2!,
-        //       sourceY: commonlifts[0].y2!,
-        //       destinationX: PathState.destinationX,
-        //       destinationY: PathState.destinationY,
-        //       floor: PathState.destinationFloor,
-        //       bid: PathState.destinationBid)) ;
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: destinationEntry.coordinateX!,
-        //       sourceY: destinationEntry.coordinateY!,
-        //       destinationX: commonlifts[0].x1!,
-        //       destinationY: commonlifts[0].y1!,
-        //       floor: destinationEntry.floor!,
-        //       bid: PathState.destinationBid,
-        //       renderSource: false)) ;
-        //
-        //   PathState.connections[PathState.destinationBid] = {
-        //     destinationEntry.floor!: calculateindex(
-        //         commonlifts[0].x1!,
-        //         commonlifts[0].y1!,
-        //         building.floorDimenssion[PathState.destinationBid]![
-        //             destinationEntry.floor!]![0]),
-        //     PathState.destinationFloor: calculateindex(
-        //         commonlifts[0].x2!,
-        //         commonlifts[0].y2!,
-        //         building.floorDimenssion[PathState.destinationBid]![
-        //             PathState.destinationFloor]![0])
-        //   };
-        // }
-        // Landmarks source= landmarksMap[PathState.sourcePolyID]!;
-        // double sourceLat=double.parse(source.properties!.latitude!);
-        // double sourceLng=double.parse(source.properties!.longitude!);
-        //
-        //
-        // Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
-        // double destinationLat=double.parse(source.properties!.latitude!);
-        // double destinationLng=double.parse(source.properties!.longitude!);
+        if (destinationEntry.floor == PathState.destinationFloor) {
+          await fetchroute(
+              destinationEntry.coordinateX!,
+              destinationEntry.coordinateY!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: PathState.destinationBid,
+              renderSource: false);
+          print("running destination location no lift run");
+        } else if (destinationEntry.floor != PathState.destinationFloor) {
+          List<dynamic> commonlifts = findCommonLifts(destinationEntry,
+              landmarksMap[PathState.destinationPolyID]!, accessibleby);
+          if (commonlifts.isEmpty) {
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
+          await fetchroute(
+              commonlifts[0].x2!,
+              commonlifts[0].y2!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: PathState.destinationBid);
+          await fetchroute(destinationEntry.coordinateX!, destinationEntry.coordinateY!,
+              commonlifts[0].x1!, commonlifts[0].y1!, destinationEntry.floor!,
+              bid: PathState.destinationBid,
+              renderSource: false);
+
+          PathState.connections[PathState.destinationBid] = {
+            destinationEntry.floor!: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.destinationBid]![
+                destinationEntry.floor!]![0]),
+            PathState.destinationFloor: calculateindex(
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                building.floorDimenssion[PathState.destinationBid]![
+                PathState.destinationFloor]![0])
+          };
+        }
+        Landmarks source= landmarksMap[PathState.sourcePolyID]!;
+        double sourceLat=double.parse(source.properties!.latitude!);
+        double sourceLng=double.parse(source.properties!.longitude!);
+
+
+        Landmarks destination= landmarksMap[PathState.destinationPolyID]!;
+        double destinationLat=double.parse(source.properties!.latitude!);
+        double destinationLng=double.parse(source.properties!.longitude!);
+
         ///campusPath algorithm
-
-
         if (CampusSourceEntry != null &&
             CampusDestinationEntry != null &&
             CampusSourceEntry.coordinateX != null &&
@@ -4995,94 +4966,91 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             CampusDestinationEntry.coordinateY != null &&
             CampusSourceEntry.floor != null &&
             CampusSourceEntry.buildingID != null) {
-          try {
-            await compute(fetchRouteInIsolate, fetchrouteParams(
-                sourceX: PathState.sourceX,
-                sourceY: PathState.sourceY,
-                destinationX: PathState.destinationX,
-                destinationY: PathState.destinationY,
-                floor: PathState.destinationFloor,
-                bid: PathState.destinationBid)) ;
-          } catch (e) {
-            print("error in path finding $e");
+          try{
+            await fetchroute(
+              CampusSourceEntry.coordinateX!,
+              CampusSourceEntry.coordinateY!,
+              CampusDestinationEntry.coordinateX!,
+              CampusDestinationEntry.coordinateY!,
+              CampusSourceEntry.floor!,
+              bid: CampusSourceEntry.buildingID,
+              renderDestination: false,
+              renderSource: false
+            );
+          }catch(e){
+            print("error in campus way finding $e");
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
           }
-        } else {
-          // Check and print which variables are null
-          if (CampusSourceEntry == null) print("CampusSourceEntry is null");
-          if (CampusDestinationEntry == null)
-            print("CampusDestinationEntry is null");
-          if (CampusSourceEntry?.coordinateX == null)
-            print("CampusSourceEntry.coordinateX is null");
-          if (CampusSourceEntry?.coordinateY == null)
-            print("CampusSourceEntry.coordinateY is null");
-          if (CampusDestinationEntry?.coordinateX == null)
-            print("CampusDestinationEntry.coordinateX is null");
-          if (CampusDestinationEntry?.coordinateY == null)
-            print("CampusDestinationEntry.coordinateY is null");
-          if (CampusSourceEntry?.floor == null)
-            print("CampusSourceEntry.floor is null");
-          if (CampusSourceEntry?.buildingID == null)
-            print("CampusSourceEntry.buildingID is null");
 
+        }else{
+          if (CampusSourceEntry == null) {
+            print('CampusSourceEntry is null');
+          }
+          if (CampusDestinationEntry == null) {
+            print('CampusDestinationEntry is null');
+          }
+          if (CampusSourceEntry?.coordinateX == null) {
+            print('CampusSourceEntry.coordinateX is null');
+          }
+          if (CampusSourceEntry?.coordinateY == null) {
+            print('CampusSourceEntry.coordinateY is null');
+          }
+          if (CampusDestinationEntry?.coordinateX == null) {
+            print('CampusDestinationEntry.coordinateX is null');
+          }
+          if (CampusDestinationEntry?.coordinateY == null) {
+            print('CampusDestinationEntry.coordinateY is null');
+          }
+          if (CampusSourceEntry?.floor == null) {
+            print('CampusSourceEntry.floor is null');
+          }
+          if (CampusSourceEntry?.buildingID == null) {
+            print('CampusSourceEntry.buildingID is null');
+          }
           CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
         }
 
+
         /// source to source Entry finding
-        // if (PathState.sourceFloor == sourceEntry.floor) {
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: PathState.sourceX,
-        //       sourceY: PathState.sourceY,
-        //       destinationX: sourceEntry.coordinateX!,
-        //       destinationY: sourceEntry.coordinateY!,
-        //       floor: sourceEntry.floor!,
-        //       bid: PathState.sourceBid,
-        //       renderDestination: false)) ;
-        //
-        //   print("running source location no lift run");
-        // } else if (PathState.sourceFloor != sourceEntry.floor) {
-        //   List<dynamic> commonlifts = findCommonLifts(
-        //       landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby);
-        //   if (commonlifts.isEmpty) {
-        //     setState(() {
-        //       PathState.noPathFound = true;
-        //       _isLandmarkPanelOpen = false;
-        //       _isRoutePanelOpen = true;
-        //     });
-        //     return;
-        //   }
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: commonlifts[0].x2!,
-        //       sourceY: commonlifts[0].y2!,
-        //       destinationX: sourceEntry.coordinateX!,
-        //       destinationY: sourceEntry.coordinateY!,
-        //       floor: sourceEntry.floor!,
-        //       bid: PathState.sourceBid,
-        //       renderDestination: false)) ;
-        //
-        //   await compute(fetchRouteInIsolate, fetchrouteParams(
-        //       sourceX: PathState.sourceX,
-        //       sourceY: PathState.sourceY,
-        //       destinationX: commonlifts[0].x1!,
-        //       destinationY: commonlifts[0].y1!,
-        //       floor: PathState.sourceFloor,
-        //       bid: PathState.sourceBid)) ;
-        //
-        //   PathState.connections[PathState.sourceBid] = {
-        //     PathState.sourceFloor: calculateindex(
-        //         commonlifts[0].x1!,
-        //         commonlifts[0].y1!,
-        //         building.floorDimenssion[PathState.sourceBid]![
-        //             PathState.sourceFloor]![0]),
-        //     sourceEntry.floor!: calculateindex(
-        //         commonlifts[0].x2!,
-        //         commonlifts[0].y2!,
-        //         building.floorDimenssion[PathState.sourceBid]![
-        //             sourceEntry.floor!]![0])
-        //   };
-        // }
+        if (PathState.sourceFloor == sourceEntry.floor) {
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+              sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
+              bid: PathState.sourceBid,
+              renderDestination: false);
+          print("running source location no lift run");
+        } else if (PathState.sourceFloor != sourceEntry.floor) {
+          List<dynamic> commonlifts = findCommonLifts(
+              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby);
+          if (commonlifts.isEmpty) {
+            setState(() {
+              PathState.noPathFound = true;
+              _isLandmarkPanelOpen = false;
+              _isRoutePanelOpen = true;
+            });
+            return;
+          }
+
+          await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+              sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
+              bid: PathState.sourceBid,
+              renderDestination: false);
+          await fetchroute(PathState.sourceX, PathState.sourceY,
+            commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+            bid: PathState.sourceBid,);
+
+          PathState.connections[PathState.sourceBid] = {
+            PathState.sourceFloor: calculateindex(
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                building.floorDimenssion[PathState.sourceBid]![
+                PathState.sourceFloor]![0]),
+            sourceEntry.floor!: calculateindex(
+                commonlifts[0].x2!,
+                commonlifts[0].y2!,
+                building.floorDimenssion[PathState.sourceBid]![
+                sourceEntry.floor!]![0])
+          };
+        }
       });
       print("different building detected");
 

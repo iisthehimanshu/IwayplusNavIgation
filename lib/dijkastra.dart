@@ -41,7 +41,7 @@ Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start,
       }
       path.add(currentNode.split(',').map(int.parse).toList()); // Add the start node
       // if(isoutdoorPath){
-        return path.reversed.toList();
+        //return path.reversed.toList();
       // }
       return addCoordinatesBetweenVertices(path.reversed.toList(), col);
     }
@@ -289,29 +289,29 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
   List<int>l1 = [];
   List<int>l2 = [];
   List<int>l3 = [];
-  // if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0]){
-  //   await findPath(row, col, nonWalkableCells, ((sourceY*col) + sourceX), ((temppath[s][1]*col)+temppath[s][0])).then((value){
-  //     //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-  //     print("path inside 1  between ${((sourceY*col) + sourceX)} and ${((temppath[s][1]*col)+temppath[s][0])} is $value");
-  //     l1 = value;
-  //     print("l1 $l1");
-  //   });
-  // }
+  if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && !isoutdoorPath){
+    await findPath(row, col, nonWalkableCells, ((sourceY*col) + sourceX), ((temppath[s][1]*col)+temppath[s][0])).then((value){
+      //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+      print("path inside 1  between ${((sourceY*col) + sourceX)} and ${((temppath[s][1]*col)+temppath[s][0])} is $value");
+      l1 = value;
+      print("l1 $l1");
+    });
+  }
   for(int i = s ; i<=e; i++){
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
   print("l2 $l2");
-  // if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX){
-  //
-  //   await findPath(row, col, nonWalkableCells, ((temppath[e][1]*col)+temppath[e][0]), ((destinationY*col) + destinationX)).then((value){
-  //     //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-  //     print("path inside 2 $value");
-  //     l3 = value;
-  //     print("l3 $l3");
-  //   });
-  //
-  //
-  // }
+  if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX && !isoutdoorPath){
+
+    await findPath(row, col, nonWalkableCells, ((temppath[e][1]*col)+temppath[e][0]), ((destinationY*col) + destinationX)).then((value){
+      //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+      print("path inside 2 $value");
+      l3 = value;
+      print("l3 $l3");
+    });
+
+
+  }
 
   if(l1.isNotEmpty || l3.isNotEmpty){
     return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, col, sourceX, sourceY, destinationX, destinationY);

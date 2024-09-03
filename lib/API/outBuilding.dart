@@ -43,10 +43,8 @@ class outBuilding {
       print("OUTBUILDING DATA FORM API");
 
 
-      for (var element in ids) {
-        OutBuildingBox.put(element, outBuildingData);
-        outBuildingData.save();
-      }
+      OutBuildingBox.put(ids[0], outBuildingData);
+      outBuildingData.save();
 
       return outdoormodel.fromJson(responseBody);
 

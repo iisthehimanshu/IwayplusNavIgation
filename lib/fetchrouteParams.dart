@@ -20,4 +20,44 @@ class fetchrouteParams {
     this.liftName,
     this.renderDestination = true
   });
+
+  Map<String, dynamic> toMap() {
+    print({
+      'sourceX': sourceX,
+      'sourceY': sourceY,
+      'destinationX': destinationX,
+      'destinationY': destinationY,
+      'floor': floor,
+      'bid': bid,
+      'liftName': liftName,
+      'renderSource': renderSource,
+      'renderDestination': renderDestination,
+    });
+    return {
+      'sourceX': sourceX,
+      'sourceY': sourceY,
+      'destinationX': destinationX,
+      'destinationY': destinationY,
+      'floor': floor,
+      'bid': bid,
+      'liftName': liftName,
+      'renderSource': renderSource,
+      'renderDestination': renderDestination,
+    };
+  }
+
+  static fetchrouteParams fromMap(Map<String, dynamic> map) {
+    return fetchrouteParams(
+      sourceX: map['sourceX'],
+      sourceY: map['sourceY'],
+      destinationX: map['destinationX'],
+      destinationY: map['destinationY'],
+      floor: map['floor'],
+      bid: map['bid'],
+      liftName: map['liftName'],
+      renderSource: map['renderSource'],
+      renderDestination: map['renderDestination'],
+    );
+  }
+
 }

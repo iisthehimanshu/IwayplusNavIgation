@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:fluster/fluster.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -6,9 +8,10 @@ class MapMarker extends Clusterable {
   final LatLng position;
   BitmapDescriptor? icon;
   String Landmarkname;
+  List<double> offset;
   GoogleMapController? mapController;
 
-  MapMarker({required this.id, required this.position, this.icon,required this.Landmarkname, isCluster = false, clusterId, pointsSize, childMarkerId,this.mapController,}) : super(
+  MapMarker({required this.id, required this.position, this.icon,required this.Landmarkname, isCluster = false, clusterId, pointsSize, childMarkerId,this.mapController, this.offset = const [0.0,0.0]}) : super(
     markerId: id,
     latitude: position.latitude,
     longitude: position.longitude,
@@ -18,6 +21,7 @@ class MapMarker extends Clusterable {
     childMarkerId: childMarkerId,
   );
   Marker toMarker() => Marker(
+    anchor: Offset(offset[0], offset[1]),
       markerId: MarkerId(id),
       position: LatLng(
         position.latitude,

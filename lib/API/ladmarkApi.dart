@@ -20,7 +20,7 @@ class landmarkApi {
 
 
 
-  Future<land> fetchLandmarkData({String? id = null}) async {
+  Future<land> fetchLandmarkData({String? id = null, bool outdoor = false}) async {
     print("landmark");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
@@ -36,9 +36,10 @@ class landmarkApi {
       return land.fromJson(responseBody);
     }
 
-
+    print("outdoor boolean $outdoor");
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
+      "outdoor": outdoor
     };
 
     final response = await http.post(

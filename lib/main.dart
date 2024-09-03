@@ -4,10 +4,12 @@ import 'dart:convert';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/API/slackApi.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
@@ -128,6 +130,16 @@ Future<void> main() async {
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+  // FlutterError.onError = (FlutterErrorDetails details) {
+  //   // Log the error or send it to a monitoring service
+  //   print("global error handler");
+  //   print(details.exceptionAsString());
+  //
+  //   // Perform your desired action
+  //   sendErrorToSlack(details.exceptionAsString(), details.stack);
+  //   // Forward to the default handler
+  //   FlutterError.dumpErrorToConsole(details);
+  // };
   runApp(const MyApp());
 }
 

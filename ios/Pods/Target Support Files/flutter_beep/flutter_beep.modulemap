@@ -1,0 +1,6 @@
+framework module flutter_beep {
+  umbrella header "flutter_beep-umbrella.h"
+
+  export *
+  module * { export * }
+}

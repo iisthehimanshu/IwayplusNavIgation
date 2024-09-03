@@ -672,6 +672,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if(oldWidget.direction != widget.direction){
 
         if(oldWidget.direction == "Straight"){
+          
 
           Vibration.vibrate();
 

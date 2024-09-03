@@ -49,10 +49,10 @@ dependencies:
   flutter_svg: ^2.0.9
   path_provider:
   hive: ^2.2.3
+  firebase_core: ^3.3.0
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
-
   shared_preferences: ^2.2.2
   easter_egg_trigger: ^1.0.1
   fluttertoast:
@@ -66,12 +66,10 @@ dependencies:
   chips_choice: ^3.0.1
   turf: ^0.0.10
   geolocator: ^11.0.0
-
-
   upgrader:
+  firebase_messaging: ^15.0.4
   intl_phone_number_input: ^0.7.3+1
   lottie: ^2.6.0
-
   speech_to_text:
   fuzzy: <1.0.0
   flutter_animator: ^3.2.2
@@ -84,22 +82,17 @@ dependencies:
   socket_io_client: ^2.0.3+1
   bluetooth_enable_fork: ^0.1.6
   fluster: ^1.2.0
+  flutter_local_notifications: ^17.2.2
   flutter_cache_manager:
   translator: ^1.0.0
   qr_flutter: ^4.1.0
-
-
-
   test: ^1.16.0
   mockito: ^5.1.0
   flutter_beep: ^1.0.0
   app_links: ^6.1.1
-
   qr_code_scanner:
   loading_animation_widget: ^1.2.1
   wakelock_plus: ^1.2.7
-
-
 
 
 dev_dependencies:

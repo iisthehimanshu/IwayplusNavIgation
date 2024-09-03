@@ -1,0 +1,30 @@
+{
+  "name": "flutter_blue_plus",
+  "version": "0.0.1",
+  "summary": "Flutter plugin for connecting and communicationg with Bluetooth Low Energy devices, on Android and iOS",
+  "description": "Flutter plugin for connecting and communicationg with Bluetooth Low Energy devices, on Android and iOS",
+  "homepage": "https://github.com/boskokg/flutter_blue_plus",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Chip Weinberger": "weinberger.c@gmail.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": [
+
+    ]
+  },
+  "platforms": {
+    "ios": "9.0"
+  },
+  "frameworks": "CoreBluetooth",
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES"
+  }
+}

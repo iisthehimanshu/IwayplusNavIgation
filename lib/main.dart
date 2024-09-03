@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
@@ -65,11 +66,21 @@ Future<void> main() async {
   PushNotifications.localNotiInit();
   //firebase listen to background notification
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
+  PushNotifications().foregroundMessage();
 
   //to handle foreground notifications
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
     String payloadData = jsonEncode(message.data);
     print("Got a message in foreground");
+    if(kDebugMode){
+      print("notificationtitle ${message.notification!.title}");
+      print("notificationbody ${message.notification!.body}");
+    }
+    if(Platform.isIOS){
+      PushNotifications().foregroundMessage();
+    }
+
     if(message.notification!=null){
       PushNotifications.showSimpleNotification(title: message.notification!.title!, body: message.notification!.body!, payload: payloadData);
     }

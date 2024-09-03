@@ -110,6 +110,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   void fetchandBuild()async{
     await fetchlist();
     if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
+      print("fetchandbuild debug ${[int.parse(widget.floors[0])]}");
       search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
     }
   }

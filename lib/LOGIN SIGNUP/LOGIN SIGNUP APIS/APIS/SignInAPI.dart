@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwaymaps/FIREBASE%20NOTIFICATION%20API/FCMServer.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
 
@@ -54,6 +55,7 @@ class SignInAPI{
         print(responseBody["payload"]["roles"].runtimeType);
         signInBox.put("roles", roles);
 
+
         //------STORING USER CREDENTIALS FROM DATABASE----------
         // UserCredentials.setAccessToken(signInBox.get("accessToken"));
         // UserCredentials.setRefreshToken(signInBox.get("refreshToken"));
@@ -65,6 +67,7 @@ class SignInAPI{
 
         print("Sign in details saved to database");
         // Use signInResponse as needed
+
 
         return ss;
       } catch (e) {

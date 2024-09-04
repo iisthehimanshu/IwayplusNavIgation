@@ -425,6 +425,23 @@ class tools {
     return angle;
   }
 
+  static double calculateAnglefifth_inCell(Cell node1, Cell node2, Cell node3) {
+    List<int> a = [node1.x , node1.y];
+    List<int> b = [node2.x , node2.y];
+    List<int> c = [node3.x , node3.y];
+
+    double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
+    double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
+
+    double angle = (angle2 - angle1) * 180 / pi;
+
+    if (angle < 0) {
+      angle += 360;
+    }
+
+    return angle;
+  }
+
   static double toRadians(double degree) {
     return degree * pi / 180.0;
   }
@@ -1454,6 +1471,50 @@ class tools {
     return res;
   }
 
+  static List<Cell> getTurnpoints_inCell(List<Cell> pathNodes){
+    List<Cell> res=[];
+
+
+
+    for(int i=1;i<pathNodes.length-1;i++){
+
+
+
+      Cell currPos = pathNodes[i];
+      Cell nextPos=pathNodes[i+1];
+      Cell prevPos=pathNodes[i-1];
+
+      int x1 = (currPos.x);
+      int y1 = (currPos.y);
+
+      int x2 = (nextPos.x);
+      int y2 = (nextPos.y);
+
+      int x3 = (prevPos.x);
+      int y3 = (prevPos.y);
+
+      int prevDeltaX=x1-x3;
+      int prevDeltaY=y1-y3;
+      int nextDeltaX=x2-x1;
+      int nextDeltaY=y2-y1;
+
+      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
+        if(prevDeltaX==0 && nextDeltaX==0){
+
+        }else if(prevDeltaY==0 && nextDeltaY==0){
+
+        }else{
+          res.add(currPos);
+        }
+
+      }
+
+
+
+    }
+    return res;
+  }
+
   static List<Cell> getCellTurnpoints(List<Cell> pathNodes,int numCols){
     List<Cell> res=[];
 
@@ -1670,7 +1731,25 @@ class tools {
     return nearestPoint!;
   }
 
-  static int distancebetweennodes(Cell node1, Cell node2){
+  static int distancebetweennodes(int node1, int node2, int numCols){
+    print("nextturn $node1 $node2");
+    int x1 = node1 % numCols;
+    int y1 = node1 ~/ numCols;
+
+    int x2 = node2 % numCols;
+    int y2 = node2 ~/ numCols;
+
+    print("nextturn [$x1,$y1] [$x2,$y2]");
+
+
+    // //print("@@@@@ $x1,$y1");
+    // //print("&&&&& $x2,$y2");
+    int rowDifference = x2 - x1;
+    int colDifference = y2 - y1;
+    return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
+  }
+
+  static int distancebetweennodes_inCell(Cell node1, Cell node2){
     print("nextturn $node1 $node2");
     double x1 = node1.lat;
     double y1 = node1.lng;
@@ -1678,6 +1757,11 @@ class tools {
     double x2 = node2.lat;
     double y2 = node2.lng;
 
+    print("nextturn [$x1,$y1] [$x2,$y2]");
+
+
+    // //print("@@@@@ $x1,$y1");
+    // //print("&&&&& $x2,$y2");
     return calculateDistanceInFeet(x1,y1,x2,y2).toInt();
   }
 

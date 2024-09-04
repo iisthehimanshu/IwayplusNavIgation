@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'APIMODELS/beaconData.dart';
@@ -30,6 +31,7 @@ class Building{
   static Map<String,List<PathModel>> waypoint = {};
   static Map<String,g.LatLng> allBuildingID = {
   };
+  Map<String,Map<int, g.LatLng>> ARCoordinates = {};
   Building({required this.floor,required this.numberOfFloors});
 
 }

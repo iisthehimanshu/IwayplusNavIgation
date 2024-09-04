@@ -65,6 +65,10 @@ class BLueToothClass {
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
+   bool isScanningOn(){
+    return FlutterBluePlus.isScanningNow;
+  }
+
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
     // print("himanshu 1");
@@ -80,10 +84,11 @@ class BLueToothClass {
           // print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          // print("mac $MacId    rssi $Rssi");
+
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
+            print("mac $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes

@@ -198,11 +198,25 @@ class UserState {
               tools.localtoglobal(coordX, coordY, building!.patchData[Cellpath[pathobj.index].bid]);
           lat = values[0];
           lng = values[1];
-          changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
+          String? previousBuildingName = b.Building.buildingData?[Cellpath[pathobj.index - 1].bid];
+          String? nextBuildingName = b.Building.buildingData?[pathobj.destinationBid];
+
+          if (previousBuildingName != null && nextBuildingName != null) {
+            if(Cellpath[pathobj.index - 1].bid == pathobj.sourceBid){
+              speak("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.",lngCode);
+            }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
+              speak("Entering ${nextBuildingName}. Continue ahead.",lngCode);
+            }
+
+          }          changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
         }
       } else {
         showcoordX = coordX;
         showcoordY = coordY;
+        values =
+            tools.localtoglobal(coordX, coordY, building!.patchData[Cellpath[pathobj.index].bid]);
+        lat = values[0];
+        lng = values[1];
       }
 
 

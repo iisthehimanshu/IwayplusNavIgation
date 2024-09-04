@@ -655,6 +655,9 @@ class tools {
 
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
+    if(user.bid != node.bid){
+      return double.nan;
+    }
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
     if(user.move == tools.eightcelltransitionforTurns){
@@ -1667,22 +1670,36 @@ class tools {
     return nearestPoint!;
   }
 
-  static int distancebetweennodes(int node1, int node2, int numCols){
+  static int distancebetweennodes(Cell node1, Cell node2){
     print("nextturn $node1 $node2");
-    int x1 = node1 % numCols;
-    int y1 = node1 ~/ numCols;
+    double x1 = node1.lat;
+    double y1 = node1.lng;
 
-    int x2 = node2 % numCols;
-    int y2 = node2 ~/ numCols;
+    double x2 = node2.lat;
+    double y2 = node2.lng;
 
-    print("nextturn [$x1,$y1] [$x2,$y2]");
+    return calculateDistanceInFeet(x1,y1,x2,y2).toInt();
+  }
 
+  static double calculateDistanceInFeet(double lat1, double lon1, double lat2, double lon2) {
+    const double radiusOfEarthInMiles = 3958.8; // Radius of Earth in miles
+    const double feetPerMile = 5280; // Feet per mile
 
-    // //print("@@@@@ $x1,$y1");
-    // //print("&&&&& $x2,$y2");
-    int rowDifference = x2 - x1;
-    int colDifference = y2 - y1;
-    return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
+    double toRadians(double degree) => degree * pi / 180.0;
+
+    double dLat = toRadians(lat2 - lat1);
+    double dLon = toRadians(lon2 - lon1);
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(toRadians(lat1)) * cos(toRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    double distanceInMiles = radiusOfEarthInMiles * c;
+    double distanceInFeet = distanceInMiles * feetPerMile;
+
+    return distanceInFeet;
   }
 
 

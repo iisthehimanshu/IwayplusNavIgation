@@ -349,19 +349,35 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   bool topCategory=false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
+  int selectedChipIndex = -1; // Track selected chip index
+
   List<String> optionList = [
     'washroom',
+    'cafeteria',
+    'drinking water',
+    'atm',
     'entry',
-    'reception',
     'lift',
+    'reception',
+
+
   ];
   List<String> optionListForUI = [
     'Washroom',
+    'Cafeteria',
+    'Drinking water',
+    'ATM',
     'Entry',
-    'Reception',
     'Lift',
-  ];
+    'Reception',
 
+
+  ];
+  void onChipSelected(int index) {
+    setState(() {
+      selectedChipIndex = index;
+    });
+  }
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   FlutterTts flutterTts  = FlutterTts();
@@ -785,6 +801,8 @@ topCategory=false;
                         if (Text.isNotEmpty) {
                           search(Text);
                         } else {
+                          search(Text);
+                          _controller.text="";
                           searchResults = [];
                           searcCategoryhResults = [];
                           vall = -1;
@@ -803,7 +821,41 @@ topCategory=false;
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
-                      ))),
+
+                      ),
+                  )),
+              if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+
+                Column(
+                 children: [
+                   SizedBox(height: 16,),
+                   Padding(
+                     padding: const EdgeInsets.all(8.0),
+                     child: Image.asset('assets/noResults.png'),
+                   ),
+                   Text(
+                     'Sorry, No Results Found',
+                     textAlign: TextAlign.center,
+                     style: TextStyle(
+                       color: Colors.black,
+                       fontSize: 16,
+                       fontFamily: 'Roboto',
+                       fontWeight: FontWeight.w500,
+                     ),
+                   ),
+                   Text(
+                     ' Try something new  with different keywords',
+                     textAlign: TextAlign.center,
+                     style: TextStyle(
+                       color: Color(0xFFA1A1AA),
+                       fontSize: 14,
+                       fontFamily: 'Roboto',
+                       fontWeight: FontWeight.w400,
+                     ),
+                   )
+                 ]
+                )
+
             ],
           ) : Center(
             child: CircularProgressIndicator(

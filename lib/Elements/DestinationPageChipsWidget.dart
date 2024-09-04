@@ -89,9 +89,17 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              widget.selected? InkWell(
+                onTap: (){
+                  setState(() {
+                    widget.selected=!widget.selected;
+                    widget.onTap("");
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 4),
+                  child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                ),
               ) : Container()
 
 

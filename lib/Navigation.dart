@@ -48,6 +48,7 @@ import 'Elements/locales.dart';
 import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'VersioInfo.dart';
+import 'centeroid.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 import 'package:turf/turf.dart' as turf;
@@ -3005,15 +3006,18 @@ if(SingletonFunctionController.timer!=null){
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     // Convert LatLng to a list of Points for Turf
-    List<turf.Position> coordinates = polygonPoints
-        .map((point) => turf.Position(point.longitude, point.latitude))
+    List<GeoPoint> coordinates = polygonPoints
+        .map((point) => GeoPoint(point.latitude, point.longitude))
         .toList();
 
     // Create a Polygon object for Turf
-    turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
+    //turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
+
+    GeoPoint centroid = calculatePolygonCentroid(coordinates);
 
     // Convert centroid back to LatLng
-    return LatLng(turf.centroid(polygon).geometry!.coordinates[1]!.toDouble(), turf.centroid(polygon).geometry!.coordinates[0]!.toDouble());
+    print(LatLng(centroid.latitude, centroid.longitude));
+    return LatLng(centroid.latitude, centroid.longitude);
   }
 
 
@@ -7150,7 +7154,6 @@ String destiName='';
 
       });
 
-      print(BuildingName);
     }
     minHight = MediaQuery.of(context).size.height/2.3;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -10496,7 +10499,7 @@ String destiName='';
                             });
                           }else{
                             _recenterMap();
-                        },
+                        };},
                         child: Semantics(
                           label: "Localize",
                           onDidGainAccessibilityFocus:

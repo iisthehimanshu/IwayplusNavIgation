@@ -38,8 +38,10 @@ import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import 'FIREBASE NOTIFICATION API/FCMServer.dart';
 import 'HomeNestedSearch.dart';
 import 'Navigation.dart';
+
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -87,9 +89,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       }
     });
   }
-
+  static var infoBox=Hive.box('SignInDatabase');
   void loadInfoToFile(){
-    var infoBox=Hive.box('SignInDatabase');
+
     String accessToken = infoBox.get('accessToken');
     print('loadInfoToFile');
     print(infoBox.get('userId'));
@@ -110,34 +112,21 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     }
 
   }
+
   var locBox=Hive.box('LocationPermission');
   Position? userLoc;
+
   Future<Position?> getUsersCurrentLatLng()async{
-
-    // if ((locBox.get('location')==null)?false:locBox.get('location')) {
-    //
-    //   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    //
-    //
-    //   return position;
-
-
-    //}else{
-
-
       Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
-    //}
-
-
-
-
-
   }
 
+  String? _FCMToken = infoBox.get("FCMToken");
+
   void apiCall() async  {
-    // print('Running api');
-    //await Future.delayed(Duration(milliseconds: 1300));
+    if(_FCMToken != null){
+      await FCMServer().sendFCM(_FCMToken!);
+    }
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);
       setState(() {

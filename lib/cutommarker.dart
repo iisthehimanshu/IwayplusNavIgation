@@ -23,6 +23,8 @@ class customMarker {
     );
   }
 
+
+
   static Marker visibility(bool visible , Marker marker ) {
     return Marker(
         markerId: marker.markerId,

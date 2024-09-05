@@ -54,6 +54,7 @@ class UserState {
   static Function closeNavigation = () {};
   static Function speak = (String lngcode) {};
   static Function AlignMapToPath = () {};
+  static Function changeBuilding = (){};
   static Function startOnPath = () {};
   static Function paintMarker = (geo.LatLng Location) {};
   static Function createCircle = (double lat, double lng) {};
@@ -157,13 +158,16 @@ class UserState {
     if (isnavigating) {
       checkForMerge();
       pathobj.index = pathobj.index + 1;
+      if(Cellpath[pathobj.index].bid != null) {
+        Bid = Cellpath[pathobj.index].bid!;
+      }
       List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
       List<int> transitionvalue = Cellpath[pathobj.index]
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values =
-          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+          tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
       lat = values[0];
       lng = values[1];
 
@@ -187,10 +191,34 @@ class UserState {
           pathobj.numCols != 0) {
         showcoordX = Cellpath[pathobj.index].x;
         showcoordY = Cellpath[pathobj.index].y;
+        if(Cellpath[pathobj.index-1].bid != Cellpath[pathobj.index].bid){
+          coordX = showcoordX;
+          coordY = showcoordY;
+          values =
+              tools.localtoglobal(coordX, coordY, building!.patchData[Cellpath[pathobj.index].bid]);
+          lat = values[0];
+          lng = values[1];
+          String? previousBuildingName = b.Building.buildingData?[Cellpath[pathobj.index - 1].bid];
+          String? nextBuildingName = b.Building.buildingData?[pathobj.destinationBid];
+
+          if (previousBuildingName != null && nextBuildingName != null) {
+            if(Cellpath[pathobj.index - 1].bid == pathobj.sourceBid){
+              speak("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.",lngCode);
+            }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
+              speak("Entering ${nextBuildingName}. Continue ahead.",lngCode);
+            }
+
+          }          changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
+        }
       } else {
         showcoordX = coordX;
         showcoordY = coordY;
+        values =
+            tools.localtoglobal(coordX, coordY, building!.patchData[Cellpath[pathobj.index].bid]);
+        lat = values[0];
+        lng = values[1];
       }
+
 
       int prevX = Cellpath[pathobj.index - 1].x;
       int prevY = Cellpath[pathobj.index - 1].y;
@@ -243,8 +271,10 @@ class UserState {
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
-        AlignMapToPath([lat, lng],
-            tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
+        if(Cellpath[pathobj.index+1].bid == Cellpath[pathobj.index].bid){
+          AlignMapToPath([lat, lng],
+              tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
+        }
       }
 
       //lift check

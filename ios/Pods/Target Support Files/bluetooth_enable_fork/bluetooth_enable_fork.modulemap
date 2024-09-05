@@ -1,0 +1,6 @@
+framework module bluetooth_enable_fork {
+  umbrella header "bluetooth_enable_fork-umbrella.h"
+
+  export *
+  module * { export * }
+}

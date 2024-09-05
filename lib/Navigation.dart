@@ -256,18 +256,102 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("mapMarkerLocationMapAndName.length");
     print(mapMarkerLocationMapAndName.length);
 
-    mapMarkerLocationMapAndName.forEach((element) async {
-      print(element.tag);
+    // mapMarkerLocationMapAndName.forEach((element) async {
+    //   print(element.tag);
+    //
+    //   final String values = element.tag;
+    //   final String LandmarkValue = element.landMarkName;
+    //
+    //   if (values == 'Lift') {
+    //     Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   } else if (values == 'Entry') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/log-in.png', 65);
+    //     try {
+    //       markers.add(
+    //         MapMarker(
+    //             id: element.latLng.toString(),
+    //             position: element.latLng,
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //             Landmarkname: LandmarkValue,
+    //             mapController: _googleMapController,
+    //             offset: [0.5,0.5]
+    //         ),
+    //       );
+    //     } catch (e) {}
+    //   } else if (values == 'Pharmacy') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/hospital.png', 70);
+    //     markers.add(
+    //       MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController),
+    //     );
+    //   } else if (values == 'Kitchen') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/cutlery.png', 60);
+    //     markers.add(
+    //       MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController),
+    //     );
+    //   } else if (values == 'Female') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/Femaletoilet.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   } else if (values == 'Male') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/Maletoilet.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   }
+    // });
+    for (LatLng keys in _markerLocationsMap.keys) {
+      final String values = _markerLocationsMap[keys]!;
+      final String LandmarkValue = _markerLocationsMapLanName[keys]!;
 
-      final String values = element.tag;
-      final String LandmarkValue = element.landMarkName;
+      // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
+      // print("values$values");
+      final BitmapDescriptor markerImage =
+      await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+      //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
       if (values == 'Lift') {
         Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
         markers.add(
           MapMarker(
-            id: element.latLng.toString(),
-            position: element.latLng,
+            id: keys.toString(),
+            position: keys,
             icon: BitmapDescriptor.fromBytes(iconMarker),
             Landmarkname: LandmarkValue,
             mapController: _googleMapController,
@@ -275,48 +359,47 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Entry') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/log-in.png', 65);
+        await getImagesFromMarker('assets/log-in.png', 65);
         try {
           markers.add(
             MapMarker(
-                id: element.latLng.toString(),
-                position: element.latLng,
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                Landmarkname: LandmarkValue,
-                mapController: _googleMapController,
-                offset: [0.5,0.5]
+              id: keys.toString(),
+              position: keys,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              Landmarkname: LandmarkValue,
+              mapController: _googleMapController,
             ),
           );
         } catch (e) {}
-      } else if (values == 'Pharmacy') {
-        Uint8List iconMarker =
-            await getImagesFromMarker('assets/hospital.png', 70);
+      } else if(values == 'Pharmacy'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/hospital.png', 70);
         markers.add(
           MapMarker(
-              id: element.latLng.toString(),
-              position: element.latLng,
+              id: keys.toString(),
+              position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController),
+              mapController: _googleMapController
+          ),
         );
-      } else if (values == 'Kitchen') {
-        Uint8List iconMarker =
-            await getImagesFromMarker('assets/cutlery.png', 60);
+      } else if(values == 'Kitchen'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
         markers.add(
           MapMarker(
-              id: element.latLng.toString(),
-              position: element.latLng,
+              id: keys.toString(),
+              position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController),
+              mapController: _googleMapController
+          ),
         );
       } else if (values == 'Female') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Femaletoilet.png', 65);
+        await getImagesFromMarker('assets/Femaletoilet.png', 65);
         markers.add(
           MapMarker(
-            id: element.latLng.toString(),
-            position: element.latLng,
+            id: keys.toString(),
+            position: keys,
             icon: BitmapDescriptor.fromBytes(iconMarker),
             Landmarkname: LandmarkValue,
             mapController: _googleMapController,
@@ -324,18 +407,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Male') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Maletoilet.png', 65);
+        await getImagesFromMarker('assets/Maletoilet.png', 65);
         markers.add(
           MapMarker(
-            id: element.latLng.toString(),
-            position: element.latLng,
+            id: keys.toString(),
+            position: keys,
             icon: BitmapDescriptor.fromBytes(iconMarker),
             Landmarkname: LandmarkValue,
             mapController: _googleMapController,
           ),
         );
       }
-    });
+
+      // markers.add(
+      //   MapMarker(
+      //     id: keys.toString(),
+      //     position: keys,
+      //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
+      //   ),
+      // );
+    }
 
 
     _clusterManager = await MapHelper.initClusterManager(
@@ -2745,6 +2836,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }else{
 
       }
+
 
     });
   }

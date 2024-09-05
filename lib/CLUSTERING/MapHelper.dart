@@ -163,7 +163,7 @@ class MapHelper {
           double? lat,
           ) =>
           MapMarker(
-            id: cluster!.markerId!,
+            id: cluster!.id.toString(),
             position: LatLng(lat!, lng!),
             isCluster: cluster.isCluster,
             clusterId: cluster.id,

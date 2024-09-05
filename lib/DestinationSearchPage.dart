@@ -20,6 +20,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/SearchNearby.dart';
 import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/pathState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test/expect.dart';
@@ -31,6 +32,8 @@ import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+import 'package:iwaymaps/buildingState.dart';
+
 
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
@@ -74,6 +77,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     super.initState();
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
+    // //optionListItemBuildingNameNew.clear();
+    // print("optionListItemBuildingNameNew");
+    // print(optionListItemBuildingNameNew);
+    // Building.buildingData?.forEach((key, value) {
+    //   optionListItemBuildingNameNew.add(value!);
+    // });
+    // print(optionListItemBuildingNameNew);
     for (int i = 0; i < optionListForUI.length; i++) {
       if (optionListForUI[i].toLowerCase() ==
           widget.previousFilter.toLowerCase()) {
@@ -150,6 +160,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String buildingID = "";
   String finalName = "";
   bool promptLoader = false;
+  Set<String> optionListItemBuildingNameNew = {};
+
 
 
   void _onSearchChanged() {
@@ -323,6 +335,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
+        optionListItemBuildingNameNew.add(value.landmarks!.first.buildingName!);
       });
     });
 
@@ -381,7 +394,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       selectedChipIndex = index;
     });
   }
-  Set<String> optionListItemBuildingName = {"AC02","AC03","AC04"};
+  Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   FlutterTts flutterTts  = FlutterTts();
 
@@ -438,7 +451,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           String normalizedSearchText = normalizeText(searchText);
 
           landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length >= 10 || value.name == null || value.element!.subType == "beacon") {
+            if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
               return;
             }
 
@@ -457,17 +470,36 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               final result = fuse.search(normalizedSearchText);
 
               result.forEach((fuseResult) {
+                print("fuseResult");
+                print(fuseResult);
                 if (fuseResult.score < 0.2) {
-                  searchResults.add(SearchpageResults(
-                    name: value.name!,
-                    location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                    onClicked: onVenueClicked,
-                    ID: value.properties!.polyId!,
-                    bid: value.buildingID!,
-                    floor: value.floor!,
-                    coordX: value.coordinateX!,
-                    coordY: value.coordinateY!,
-                  ));
+
+                  if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){
+                    print('In--IF');
+                    searchResults.add(SearchpageResults(
+                      name: value.name!,
+                      location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                      onClicked: onVenueClicked,
+                      ID: value.properties!.polyId!,
+                      bid: value.buildingID!,
+                      floor: value.floor!,
+                      coordX: value.coordinateX!,
+                      coordY: value.coordinateY!,
+                    ));
+                  }else{
+                    print('In--ELSE');
+                    searchResults.add(SearchpageResults(
+                      name: value.name!,
+                      location: "Floor ${value.floor}, ${value
+                          .buildingName}, ${value.venueName}",
+                      onClicked: onVenueClicked,
+                      ID: value.properties!.polyId!,
+                      bid: value.buildingID!,
+                      floor: value.floor!,
+                      coordX: value.coordinateX!,
+                      coordY: value.coordinateY!,
+                    ));
+                  }
                 }
               });
             }else if (normalizedValueName.contains(normalizedSearchText)) {
@@ -481,6 +513,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               );
 
               final result = fuse.search(normalizedSearchText);
+              print("fuseresult");
+              print(result);
 
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.2) {
@@ -817,57 +851,59 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   direction: Axis.horizontal,
                 ),
               ),
-              !category ? Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: newvall,
-                  onChanged: (val) {
-
-                    if(HelperClass.SemanticEnabled) {
-                      speak("${optionListItemBuildingName.toList()[val]} selected");
-                    }
-
-                    selectedButton = optionListItemBuildingName.toList()[val];
-                    setState(() => newvall = val);
-                    lastval = val;
-
-
-                    //_controller.text = optionListItemBuildingName.toList()[val];
-                    search(optionListItemBuildingName.toList()[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListItemBuildingName.toList(),
-                    value: (i, v) => i,
-                    label: (i, v) => v,
-                  ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      newvall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListItemBuildingName.toList()[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                        } else {
-                          search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          newvall = -1;
-                        }
-                      },
-                    );
-                  },
-                  direction: Axis.horizontal,
-                ),
-              ) : Container(),
+              // !category && _controller.text.isNotEmpty ? Container(
+              //   margin: EdgeInsets.only(left: 7,top: 4),
+              //   width: screenWidth,
+              //   child: ChipsChoice<int>.single(
+              //     value: newvall,
+              //     onChanged: (val) {
+              //
+              //       // if(HelperClass.SemanticEnabled) {
+              //       //   speak("${optionListItemBuildingName.toList()[val]} selected");
+              //       // }
+              //       //
+              //       // selectedButton = optionListItemBuildingName.toList()[val];
+              //       setState(() => newvall = val);
+              //       //
+              //       //
+              //       // //_controller.text = optionListItemBuildingName.toList()[val];
+              //       // search(optionListItemBuildingName.toList()[val]);
+              //     },
+              //     choiceItems: C2Choice.listFrom<int, String>(
+              //       source: optionListItemBuildingNameNew.toList(),
+              //       value: (i, v) => i,
+              //       label: (i, v) => v,
+              //     ),
+              //
+              //     choiceBuilder: (item, i) {
+              //       if(!item.selected){
+              //         newvall = -1;
+              //       }
+              //       return DestinationPageChipsWidget(
+              //         svgPath: '',
+              //         text: optionListItemBuildingNameNew.toList()[i],
+              //         onSelect: item.select!,
+              //         selected: item.selected,
+              //
+              //         onTap: (String Text) {
+              //           print("tapped$Text");
+              //
+              //           if (Text.isNotEmpty) {
+              //             search(_controller.text,wantToFilter: Text);
+              //           }
+              //           // else {
+              //           //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+              //           //   _controller.text="";
+              //           //   searchResults = [];
+              //           //   searcCategoryhResults = [];
+              //           //   newvall = -1;
+              //           // }
+              //         },
+              //       );
+              //     },
+              //     direction: Axis.horizontal,
+              //   ),
+              // ) : Container(),
 
               SizedBox(height: 4,),
               Divider(thickness: 6,color: Color(0xfff2f3f5)),

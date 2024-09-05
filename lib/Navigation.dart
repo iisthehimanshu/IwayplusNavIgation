@@ -2971,65 +2971,75 @@ if(SingletonFunctionController.timer!=null){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      if(key != skipID ){
-        if(key != PathState.sourceBid || key!= PathState.destinationBid){
-          currentCoordinated = innerMap;
-          if (currentCoordinated.isNotEmpty) {
-            List<LatLng> points = [];
-            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-            entryList.sort((a, b) => a.key.compareTo(b.key));
-            LinkedHashMap<int, LatLng> sortedCoordinates =
-            LinkedHashMap.fromEntries(entryList);
-            sortedCoordinates.forEach((key, value) {
-              points.add(value);
-            });
-            setState(() {
-              blurPatch.add(
-                Polygon(
-                    polygonId: PolygonId('patch${points}'),
-                    points: points,
-                    strokeWidth: 1,
-                    strokeColor: Colors.black,
-                    fillColor: Color(0xffE5F9FF),
-                    geodesic: false,
-                    consumeTapEvents: true,
-                    zIndex: 5),
-              );
-            });
-          }
-        }else{
-          currentCoordinated = innerMap;
-          if (currentCoordinated.isNotEmpty) {
-            List<LatLng> points = [];
-            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-            entryList.sort((a, b) => a.key.compareTo(b.key));
-            LinkedHashMap<int, LatLng> sortedCoordinates =
-            LinkedHashMap.fromEntries(entryList);
-            sortedCoordinates.forEach((key, value) {
-              points.add(value);
-            });
-            setState(() {
-              blurPatch.add(
-                Polygon(
-                    polygonId: PolygonId('patch${points}'),
-                    points: points,
-                    strokeWidth: 1,
-                    strokeColor: Colors.black,
-                    fillColor: Color(0xffE5F9FF),
-                    geodesic: false,
-                    consumeTapEvents: true,
-                    zIndex: 5),
-              );
-            });
-          }
-        }
 
+      if(PathState.sourceBid!="" && PathState.destinationBid == ""){
+        if(key != skipID  && key !=PathState.sourceBid){
+          print("Got id source + key");
+          currentCoordinated = innerMap;
+          patchGeneration(currentCoordinated);
+          patchGenerationMarker([skipID,PathState.sourceBid]);
+        }
+      }else if(PathState.destinationBid != "" && PathState.sourceBid==""){
+        if(key != skipID  && key != PathState.destinationBid){
+          print("Got id dest + key");
+          currentCoordinated = innerMap;
+          patchGeneration(currentCoordinated);
+          patchGenerationMarker([skipID,PathState.destinationBid]);
+        }
+      }else if(PathState.destinationBid != "" && PathState.sourceBid != ""){
+        if(key != skipID  && key !=PathState.destinationBid && key!=PathState.sourceBid){
+          print("Got id source + dest + key");
+          currentCoordinated = innerMap;
+          patchGeneration(currentCoordinated);
+          print(skipID);
+          print(PathState.destinationBid);
+          print(PathState.sourceBid);
+          patchGenerationMarker([skipID,PathState.destinationBid,PathState.sourceBid]);
+
+        }
+      }else{
+        print("Got id inelse");
+        if(key != skipID){
+          print("Got id only key}");
+          currentCoordinated = innerMap;
+          patchGeneration(currentCoordinated);
+          patchGenerationMarker([skipID]);
+        }
       }
     });
-    restBuildingMarker.clear();
+  }
 
+  void patchGeneration(Map<int, LatLng> currentCoordinated){
+    if (currentCoordinated.isNotEmpty) {
+      List<LatLng> points = [];
+      List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+      entryList.sort((a, b) => a.key.compareTo(b.key));
+      LinkedHashMap<int, LatLng> sortedCoordinates =
+      LinkedHashMap.fromEntries(entryList);
+      sortedCoordinates.forEach((key, value) {
+        points.add(value);
+      });
+      setState(() {
+        blurPatch.add(
+          Polygon(
+              polygonId: PolygonId('patch${points}'),
+              points: points,
+              strokeWidth: 1,
+              strokeColor: Colors.black,
+              fillColor: Color(0xffE5F9FF),
+              geodesic: false,
+              consumeTapEvents: true,
+              zIndex: 5),
+        );
+      });
+    }
+  }
+  void patchGenerationMarker(List<String> skipIDs){
+    restBuildingMarker.clear();
     Building.allBuildingID.forEach((Key,Value) async {
-      if(Key!= skipID) {
+      if(!skipIDs.contains(Key)) {
+        print("!skipIDs.contains(Key)");
+        print(skipIDs);
         String? showBuildingName ="";
         Building.buildingData?.forEach((currKey,currValue){
           if(currKey == Key){

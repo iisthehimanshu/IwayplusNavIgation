@@ -49,7 +49,7 @@ import 'UserExperienceRatingScreen.dart';
 import 'VersioInfo.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
-
+import 'package:turf/turf.dart' as turf;
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
@@ -2929,9 +2929,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       {Color? color}) async {
     selectedroomMarker.clear(); // Clear existing markers
     _polygon.clear(); // Clear existing markers
-    // circles.clear();
-    print("WilsonInSelected");
-    print(polygonPoints);
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
       points: polygonPoints,
@@ -2997,23 +2994,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
   }
 
+
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
-    double lat = 0.0;
-    double long = 0.0;
-    if (polygonPoints.length <= 4) {
-      for (int i = 0; i < polygonPoints.length; i++) {
-        lat = lat + polygonPoints[i].latitude;
-        long = long + polygonPoints[i].longitude;
-      }
-      return LatLng(lat / polygonPoints.length, long / polygonPoints.length);
-    } else {
-      for (int i = 0; i < 4; i++) {
-        lat = lat + polygonPoints[i].latitude;
-        long = long + polygonPoints[i].longitude;
-      }
-      return LatLng(lat / 4, long / 4);
-    }
+    // Convert LatLng to a list of Points for Turf
+    List<turf.Position> coordinates = polygonPoints
+        .map((point) => turf.Position(point.longitude, point.latitude))
+        .toList();
+
+    // Create a Polygon object for Turf
+    turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
+
+    // Convert centroid back to LatLng
+    return LatLng(turf.centroid(polygon).geometry!.coordinates[1]!.toDouble(), turf.centroid(polygon).geometry!.coordinates[0]!.toDouble());
   }
+
 
   void fitPolygonInScreen(Polygon polygon) {
     List<LatLng> polygonPoints = getPolygonPoints(polygon);
@@ -5544,7 +5538,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                  dirIcon: directionInstruction.getCustomIcon(
                      PathState.directions[i].turnDirection!, context))
                  .toBitmapDescriptor(
-                 logicalSize: const Size(150, 150),
+                 //logicalSize: const Size(150, 150),
                  imageSize: const Size(300, 400)),
              visible: false,
              onTap: () {},
@@ -5703,7 +5697,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             markerId: MarkerId("lift${bid}"),
             position: sourceX == PathState.sourceX?LatLng(dvalue[0], dvalue[1]):LatLng(svalue[0], svalue[1]),
             icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.elevator_outlined:Icons.elevator_outlined).toBitmapDescriptor(
-                logicalSize: const Size(150, 150), imageSize: const Size(300, 400)),
+                //logicalSize: const Size(150, 150),
+                imageSize: const Size(300, 400)),
            anchor: Offset(0.0, 1.0),
          onTap: (){
               if(!user.isnavigating){

@@ -908,7 +908,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
           );
         } else {
-          if (markers.length > 0)
+          if (markers.length > 0 && markers[user.Bid] != null)
             markers[user.Bid]![0] = customMarker.rotate(
                 compassHeading! - mapbearing, markers[user.Bid]![0]);
         }
@@ -2987,8 +2987,8 @@ if(SingletonFunctionController.timer!=null){
               Polygon(
                   polygonId: PolygonId('patch${points}'),
                   points: points,
-                  strokeWidth: 1,
-                  strokeColor: Colors.black,
+                  strokeWidth: 2,
+                  strokeColor: Colors.blueAccent,
                   fillColor: Color(0xffE5F9FF),
                   geodesic: false,
                   consumeTapEvents: true,
@@ -7690,7 +7690,7 @@ String destiName='';
       if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
         int col = user.pathobj.numCols![user.Bid]![user.floor]!;
 
-        if (MotionModel.reached(user, col) == false) {
+        if (MotionModel.reached(user, col) == false && user.Bid == user.Cellpath[user.pathobj.index+1].bid) {
           List<int> a = [user.showcoordX, user.showcoordY];
           List<int> tval = tools.eightcelltransition(user.theta);
           //print(tval);
@@ -10474,12 +10474,14 @@ String destiName='';
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    //     "floor ${user.floor}\n"
-                    //     "userBid ${user.Bid} \n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    Text("coord [${user.coordX},${user.coordY}] \n"
+                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
+                    "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                        "floor ${user.floor}\n"
+                        "userBid ${user.Bid} \n"
+                        "index ${user.pathobj.index} \n"
+                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                             value: user.theta,

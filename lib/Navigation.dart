@@ -1681,6 +1681,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
           print("latlnghhjhj");
           print(latlng);
+          print(SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID);
           user.lat = latlng[0];
           user.lng = latlng[1];
           user.locationName = nearestLandInfomation!.name ??
@@ -2329,7 +2330,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
-    SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction():null;
+    SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction(buildingAllApi.allBuildingID):null;
 
 
     setState(() {
@@ -2969,7 +2970,6 @@ if(SingletonFunctionController.timer!=null){
   void patchTransition(String skipID){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
-
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
       if(key != skipID){
         currentCoordinated = innerMap;
@@ -4135,7 +4135,6 @@ if(SingletonFunctionController.timer!=null){
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
-
             });
           } else if (landmarks[i].name != null &&
               landmarks[i].name!.toLowerCase().contains("pharmacy")) {
@@ -5696,7 +5695,7 @@ if(SingletonFunctionController.timer!=null){
                  dirIcon: directionInstruction.getCustomIcon(
                      PathState.directions[i].turnDirection!, context))
                  .toBitmapDescriptor(
-                 //logicalSize: const Size(150, 150),
+                 logicalSize: const Size(150, 150),
                  imageSize: const Size(300, 400)),
              visible: false,
              onTap: () {},
@@ -5855,7 +5854,7 @@ if(SingletonFunctionController.timer!=null){
             markerId: MarkerId("lift${bid}"),
             position: sourceX == PathState.sourceX?LatLng(dvalue[0], dvalue[1]):LatLng(svalue[0], svalue[1]),
             icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.elevator_outlined:Icons.elevator_outlined).toBitmapDescriptor(
-                //logicalSize: const Size(150, 150),
+                logicalSize: const Size(150, 150),
                 imageSize: const Size(300, 400)),
            anchor: Offset(0.0, 1.0),
          onTap: (){

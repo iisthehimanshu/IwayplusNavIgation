@@ -37,6 +37,7 @@ import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'CLUSTERING/InitMarkerModel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
@@ -152,6 +153,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   late GoogleMapController _googleMapController;
   Set<Polygon> patch = Set();
   Set<Polygon> otherpatch = Set();
+  Set<Polygon> blurPatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
   Set<gmap.Polyline> otherpolylines = Set();
   Set<gmap.Polyline> focusturn = Set();
@@ -243,13 +245,97 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   final Color _clusterTextColor = Colors.white;
 
   /// Example marker coordinates
+  final List<InitMarkerModel> mapMarkerLocationMapAndName = [];
   final Map<LatLng, String> _markerLocationsMap = {};
   final Map<LatLng, String> _markerLocationsMapLanName = {};
 
   /// Inits [Fluster] and all the markers with network images and updates the loading state.
   void _initMarkers() async {
+    print("calledinitmarker");
     final List<MapMarker> markers = [];
+    print("mapMarkerLocationMapAndName.length");
+    print(mapMarkerLocationMapAndName.length);
 
+    // mapMarkerLocationMapAndName.forEach((element) async {
+    //   print(element.tag);
+    //
+    //   final String values = element.tag;
+    //   final String LandmarkValue = element.landMarkName;
+    //
+    //   if (values == 'Lift') {
+    //     Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   } else if (values == 'Entry') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/log-in.png', 65);
+    //     try {
+    //       markers.add(
+    //         MapMarker(
+    //             id: element.latLng.toString(),
+    //             position: element.latLng,
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //             Landmarkname: LandmarkValue,
+    //             mapController: _googleMapController,
+    //             offset: [0.5,0.5]
+    //         ),
+    //       );
+    //     } catch (e) {}
+    //   } else if (values == 'Pharmacy') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/hospital.png', 70);
+    //     markers.add(
+    //       MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController),
+    //     );
+    //   } else if (values == 'Kitchen') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/cutlery.png', 60);
+    //     markers.add(
+    //       MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController),
+    //     );
+    //   } else if (values == 'Female') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/Femaletoilet.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   } else if (values == 'Male') {
+    //     Uint8List iconMarker =
+    //         await getImagesFromMarker('assets/Maletoilet.png', 65);
+    //     markers.add(
+    //       MapMarker(
+    //         id: element.latLng.toString(),
+    //         position: element.latLng,
+    //         icon: BitmapDescriptor.fromBytes(iconMarker),
+    //         Landmarkname: LandmarkValue,
+    //         mapController: _googleMapController,
+    //       ),
+    //     );
+    //   }
+    // });
     for (LatLng keys in _markerLocationsMap.keys) {
       final String values = _markerLocationsMap[keys]!;
       final String LandmarkValue = _markerLocationsMapLanName[keys]!;
@@ -257,7 +343,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
       // print("values$values");
       final BitmapDescriptor markerImage =
-          await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+      await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
       //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
       if (values == 'Lift') {
@@ -273,7 +359,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Entry') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/log-in.png', 65);
+        await getImagesFromMarker('assets/log-in.png', 65);
         try {
           markers.add(
             MapMarker(
@@ -282,48 +368,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
               mapController: _googleMapController,
-              offset: [0.5,0.5]
             ),
           );
         } catch (e) {}
-      } else if (values == 'Campus Entry') {
-        try {
-          markers.add(
-            MapMarker(
-              id: keys.toString(),
-              position: keys,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueRose),
-              Landmarkname: LandmarkValue,
-              mapController: _googleMapController,
-            ),
-          );
-        } catch (e) {}
-      } else if (values == 'Pharmacy') {
-        Uint8List iconMarker =
-            await getImagesFromMarker('assets/hospital.png', 70);
+      } else if(values == 'Pharmacy'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/hospital.png', 70);
         markers.add(
           MapMarker(
               id: keys.toString(),
               position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController),
+              mapController: _googleMapController
+          ),
         );
-      } else if (values == 'Kitchen') {
-        Uint8List iconMarker =
-            await getImagesFromMarker('assets/cutlery.png', 60);
+      } else if(values == 'Kitchen'){
+        Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
         markers.add(
           MapMarker(
               id: keys.toString(),
               position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController),
+              mapController: _googleMapController
+          ),
         );
       } else if (values == 'Female') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Femaletoilet.png', 65);
+        await getImagesFromMarker('assets/Femaletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -335,7 +407,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       } else if (values == 'Male') {
         Uint8List iconMarker =
-            await getImagesFromMarker('assets/Maletoilet.png', 65);
+        await getImagesFromMarker('assets/Maletoilet.png', 65);
         markers.add(
           MapMarker(
             id: keys.toString(),
@@ -355,6 +427,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //   ),
       // );
     }
+
 
     _clusterManager = await MapHelper.initClusterManager(
         markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
@@ -387,6 +460,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       _markers
         ..clear()
         ..addAll(updatedMarkers);
+      print("_markers.length");
+      print(_markers.length);
 
       setState(() {
         _areMarkersLoading = false;
@@ -2232,6 +2307,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     }
 
+
+    if(building.ARCoordinates.containsKey(buildingAllApi.selectedBuildingID) && coordinates.isNotEmpty){
+      building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+      print("Updates normal patch ARcoord");
+      print(building.ARCoordinates.keys);
+    }
+
     createARPatch(coordinates);
     createMarkers(landmarkData, 0, bid: buildingAllApi.selectedBuildingID);
 
@@ -2275,10 +2357,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         Building.buildingData ??= Map();
         Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
         building.patchData[patchData.patchData!.buildingID!] = patchData;
-        if (key == buildingAllApi.outdoorID ||
-            buildingAllApi.outdoorID.isEmpty) {
-          createotherPatch(patchData);
-        } else {
+        if(key != buildingAllApi.outdoorID){
+          createotherPatch(key,patchData);
+        }
+
+        if (key != buildingAllApi.outdoorID){
           findCentroid(patchData.patchData!.coordinates!, key);
         }
 
@@ -2334,6 +2417,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
         }
           createMarkers(otherLandmarkData, 0, bid: key);
+
+
+
         createotherARPatch(
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
@@ -2592,19 +2678,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         zoom: 20,
       );
 
+      Map<int, LatLng> coordinates = {};
+
       for (int i = 0; i < 4; i++) {
-        polygonPoints.add(LatLng(
-            latcenterofmap +
-                1.1 *
-                    (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
-                        latcenterofmap),
-            lngcenterofmap +
-                1.1 *
-                    (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
-                        lngcenterofmap)));
+        coordinates[i] = LatLng(latcenterofmap + 1.1 * (double.parse(value.patchData!.coordinates![i].globalRef!.lat!) - latcenterofmap), lngcenterofmap + 1.1 * (double.parse(value.patchData!.coordinates![i].globalRef!.lng!) - lngcenterofmap));
+        polygonPoints.add(LatLng(latcenterofmap + 1.1 * (double.parse(value.patchData!.coordinates![i].globalRef!.lat!) - latcenterofmap), lngcenterofmap + 1.1 * (double.parse(value.patchData!.coordinates![i].globalRef!.lng!) - lngcenterofmap)));
       }
+      print("coordinates.keys");
+      print(coordinates.keys);
+      print(coordinates.values);
+      building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+      print("Updates normal patch");
+      print(building.ARCoordinates.keys);
+
+
       setState(() {
         patch.add(
           Polygon(
@@ -2641,7 +2728,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return wayPoints;
   }
 
-  void createotherPatch(patchDataModel value) async {
+  void createotherPatch(String key,patchDataModel value) async {
+    print("calling other patch");
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -2656,7 +2744,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       latcenterofmap = latcenterofmap / 4;
       lngcenterofmap = lngcenterofmap / 4;
 
+      Map<int, LatLng> coordinates = {};
+
       for (int i = 0; i < 4; i++) {
+        coordinates[i] = LatLng(
+            latcenterofmap +
+                1.1 *
+                    (double.parse(
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
+                        latcenterofmap),
+            lngcenterofmap +
+                1.1 *
+                    (double.parse(
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
+                        lngcenterofmap));
+
         polygonPoints.add(LatLng(
             latcenterofmap +
                 1.1 *
@@ -2669,6 +2771,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
+      building.ARCoordinates[key] = coordinates;
+      print("Updates normal other patch");
+      print(building.ARCoordinates.keys);
       setState(() {
         otherpatch.add(
           Polygon(
@@ -2683,6 +2788,62 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         );
       });
     }
+  }
+
+  void showRestBuildingPatch(String skipID){
+    print("showRestBuildingPatch");
+    Map<int, LatLng> currentCoordinated = {};
+    blurPatch.clear();
+    print("building.ARCoordinates.length");
+    print(building.ARCoordinates.length);
+    building.ARCoordinates.forEach((key, innerMap) {
+      if(key != skipID){
+        print("key != skipID ${key}");
+        currentCoordinated = innerMap;
+        if (currentCoordinated.isNotEmpty) {
+          print("_markers");
+          // print(_clusterManager.clusters(bbox, zoom));
+
+          print("currentCoordinated$currentCoordinated");
+          // print("$currentCoordinated");
+          // print("${currentCoordinated.length}");
+          List<LatLng> points = [];
+          List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+
+          // Sort the list by keys
+          entryList.sort((a, b) => a.key.compareTo(b.key));
+
+          // Create a new LinkedHashMap from the sorted list
+          LinkedHashMap<int, LatLng> sortedCoordinates =
+          LinkedHashMap.fromEntries(entryList);
+
+          // Print the sorted map
+          sortedCoordinates.forEach((key, value) {
+            points.add(value);
+          });
+          setState(() {
+            blurPatch.add(
+              Polygon(
+                  polygonId: PolygonId('patch${points}'),
+                  points: points,
+                  strokeWidth: 1,
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffE5F9FF),
+                  geodesic: false,
+                  consumeTapEvents: true,
+                  zIndex: 5),
+            );
+            print("patch.length ${patch.length}");
+
+          });
+          print("blurPatch.length${blurPatch.length}");
+        }
+      }else{
+
+      }
+
+
+    });
   }
 
   void createARPatch(Map<int, LatLng> coordinates) async {
@@ -2739,9 +2900,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print("adding $key ${value.latitude},${value.longitude}");
         points.add(value);
       });
+      if(building.ARCoordinates.containsKey(bid)){
+        building.ARCoordinates[bid] = coordinates;
+        print("Updates foundARCoordinates of ${bid}");
+        print(building.ARCoordinates.keys);
+      }
+
       setState(() {
-        otherpatch
-            .removeWhere((element) => element.polygonId.value.contains(bid));
+        otherpatch.removeWhere((element) => element.polygonId.value.contains(bid));
         otherpatch.add(
           Polygon(
               polygonId: PolygonId('otherpatch $bid'),
@@ -3691,8 +3857,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
-    Markers.removeWhere((marker) => marker.markerId.value
-        .contains(bid ?? buildingAllApi.selectedBuildingID));
+    // Markers.removeWhere((marker) => marker.markerId.value
+    //     .contains(bid ?? buildingAllApi.selectedBuildingID));
     List<Landmarks> landmarks = _landData.landmarks!;
     try {
       for (int i = 0; i < landmarks.length; i++) {
@@ -3794,6 +3960,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   building.patchData[bid ?? buildingAllApi.getStoredString()]);
 
               // _markerLocations[LatLng(value[0], value[1])] = '1';
+              mapMarkerLocationMapAndName.add(InitMarkerModel('Lift', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
@@ -3833,6 +4000,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
                   building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              mapMarkerLocationMapAndName.add(InitMarkerModel('Pharmacy', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
+
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
@@ -3859,6 +4028,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
                   building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              mapMarkerLocationMapAndName.add(InitMarkerModel('Male', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
+
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
@@ -3894,6 +4065,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
                   building.patchData[bid ?? buildingAllApi.getStoredString()]);
+              mapMarkerLocationMapAndName.add(InitMarkerModel('Female', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
+
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
@@ -3930,6 +4103,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   landmarks[i].coordinateY!,
                   building.patchData[bid ?? buildingAllApi.getStoredString()]);
               // _markerLocations[LatLng(value[0], value[1])] = '1';
+              mapMarkerLocationMapAndName.add(InitMarkerModel(landmarks[i].buildingID == buildingAllApi.outdoorID
+                  ? "Campus Entry"
+                  : 'Entry', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
+
               _markerLocationsMap[LatLng(value[0], value[1])] =
                   landmarks[i].buildingID == buildingAllApi.outdoorID
                       ? "Campus Entry"
@@ -4038,7 +4215,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     print("_markerLocationsMap");
     print("$_markerLocationsMap");
-
     _initMarkers();
   }
 
@@ -9738,6 +9914,7 @@ String destiName='';
   void focusBuildingChecker(CameraPosition position) {
     LatLng currentLatLng = position.target;
     String closestBuildingId = "";
+    String newBuildingID = "";
     double? minDistance;
 
     Building.allBuildingID.forEach((key, value) {
@@ -9756,6 +9933,14 @@ String destiName='';
         }
       }
     });
+    if(newBuildingID != closestBuildingId){
+      print("newBuildingID");
+      print(newBuildingID);
+      print(closestBuildingId);
+      newBuildingID = closestBuildingId;
+      showRestBuildingPatch(closestBuildingId);
+
+    }
 
     // Store the nearest building ID
     if (closestBuildingId.isNotEmpty) {
@@ -9938,11 +10123,11 @@ String destiName='';
                     polygons: patch
                         .union(getCombinedPolygons())
                         .union(otherpatch)
-                        .union(_polygon),
+                        .union(_polygon).union(blurPatch),
                     polylines: getCombinedPolylines(),
                     markers: getCombinedMarkers()
                         .union(_markers)
-                        .union(focusturnArrow),
+                        .union(focusturnArrow).union(Markers),
                     onTap: (x) {
                       mapState.interaction = true;
                     },
@@ -9960,6 +10145,7 @@ String destiName='';
                     },
                     onCameraMove: (CameraPosition cameraPosition) {
                       // print("plpl ${cameraPosition.tilt}");
+
                       focusBuildingChecker(cameraPosition);
                       print(
                           "camers pos ${cameraPosition.target}    target ${mapState.target}");

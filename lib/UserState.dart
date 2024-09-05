@@ -111,6 +111,7 @@ class UserState {
 
       if (!MotionModel.isValidStep(
           this, cols, rows, nonWalkable[Bid]![floor]!, reroute)) {
+        print("movement blocked 1");
         movementAllowed = false;
       }
 
@@ -123,12 +124,14 @@ class UserState {
 
         //destination check
         if (Cellpath.length - pathobj.index < 6) {
+          print("movement blocked 2");
           movementAllowed = false;
         }
 
         //turn check
         if (tools
             .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
+          print("movement blocked 3");
           movementAllowed = false;
         }
 
@@ -136,6 +139,7 @@ class UserState {
 
         if (pathobj.connections[Bid]?[floor] ==
             showcoordY * cols + showcoordX) {
+          print("movement blocked 4");
           movementAllowed = false;
         }
       }
@@ -158,14 +162,16 @@ class UserState {
     if (isnavigating) {
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      if(Cellpath[pathobj.index].bid != null) {
+      if(Cellpath[pathobj.index].bid != null && Bid != Cellpath[pathobj.index].bid) {
         Bid = Cellpath[pathobj.index].bid!;
+        cols = building!.floorDimenssion[Bid]![floor]![0];
+        rows = building!.floorDimenssion[Bid]![floor]![1];
       }
       List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
       List<int> transitionvalue = Cellpath[pathobj.index]
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
-      coordX = coordX + transitionvalue[0];
-      coordY = coordY + transitionvalue[1];
+      coordX = Cellpath[pathobj.index].x;
+      coordY = Cellpath[pathobj.index].y;
       List<double> values =
           tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
       lat = values[0];
@@ -192,6 +198,7 @@ class UserState {
         showcoordX = Cellpath[pathobj.index].x;
         showcoordY = Cellpath[pathobj.index].y;
         if(Cellpath[pathobj.index-1].bid != Cellpath[pathobj.index].bid){
+          print("changing building");
           coordX = showcoordX;
           coordY = showcoordY;
           values =

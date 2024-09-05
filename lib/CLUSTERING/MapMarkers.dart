@@ -11,7 +11,7 @@ class MapMarker extends Clusterable {
   List<double> offset;
   GoogleMapController? mapController;
 
-  MapMarker({required this.id, required this.position, this.icon,required this.Landmarkname, isCluster = false, clusterId, pointsSize, childMarkerId,this.mapController, this.offset = const [0.0,0.0]}) : super(
+  MapMarker({required this.id, required this.position, this.icon,required this.Landmarkname, isCluster = false, clusterId, pointsSize, childMarkerId,this.mapController, this.offset = const [0.5,0.5]}) : super(
     markerId: id,
     latitude: position.latitude,
     longitude: position.longitude,

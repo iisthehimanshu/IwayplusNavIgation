@@ -8,7 +8,7 @@ class UserCredentials{
   List<dynamic> Roles = [];
   String UserId = "";
   String UserHeight = "";
-  String UserPersonWithDisability = "";
+  int UserPersonWithDisability = 0;
   String UserNavigationModeSetting = "";
   String UserOrentationSetting = "";
   String UserPathDetails = '';
@@ -30,12 +30,12 @@ class UserCredentials{
     return UserHeight;
   }
 
-  void setUserPersonWithDisability(String userdisabilitytype){
+  void setUserPersonWithDisability(int userdisabilitytype){
     userInformationBox.put('UserDisabilityType', userdisabilitytype);
   }
-  String getUserPersonWithDisability(){
-    UserHeight = userInformationBox.get('UserDisabilityType');
-    return UserHeight;
+  int getUserPersonWithDisability(){
+    UserPersonWithDisability = userInformationBox.get('UserDisabilityType')??0;
+    return UserPersonWithDisability;
   }
 
   void setUserNavigationModeSetting(String userNavigationModeSetting){

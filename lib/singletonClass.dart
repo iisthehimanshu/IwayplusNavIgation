@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/buildingState.dart';
 
 import 'API/beaconapi.dart';
@@ -17,7 +18,7 @@ class SingletonFunctionController {
  static HashMap<String, beacon> apibeaconmap = HashMap();
  static Building building = Building(floor: Map(), numberOfFloors: Map());
  static Future<void>? timer;
-  Future<void> executeFunction() async {
+  Future<void> executeFunction(Map<String,LatLng> allBuildingID) async {
     if (_isRunning) {
       // Wait for the currently running instance to finish
       return _completer?.future;
@@ -30,8 +31,11 @@ class SingletonFunctionController {
     try {
       // Perform your task here
       print("Function is running...");
-      await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
+      print(buildingAllApi.allBuildingID);
+      await Future.wait(allBuildingID.entries.map((entry) async {
         var key = entry.key;
+        print("apibeaconmap");
+        print(apibeaconmap);
 
         var beaconData = await beaconapi().fetchBeaconData(key);
         if (building.beacondata == null) {
@@ -46,14 +50,17 @@ class SingletonFunctionController {
           }
         }
         Building.apibeaconmap = apibeaconmap;
-      }));
 
-      if(Platform.isAndroid){
-        btadapter.startScanning(apibeaconmap);
-      }else{
-        btadapter.startScanningIOS(apibeaconmap);
-      }
-     timer= Future.delayed(Duration(seconds:9));// Simulate a long-running task
+      })).then((value){
+        if(Platform.isAndroid){
+          btadapter.startScanning(apibeaconmap);
+        }else{
+          btadapter.startScanningIOS(apibeaconmap);
+        }
+        timer= Future.delayed(Duration(seconds:9));
+      });
+
+ // Simulate a long-running task
       print("Function completed.");
     } finally {
       // Mark the function as complete

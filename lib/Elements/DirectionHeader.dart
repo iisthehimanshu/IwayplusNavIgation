@@ -22,6 +22,7 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
+import 'UserCredential.dart';
 import 'locales.dart';
 
 
@@ -643,11 +644,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
         double angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         if(widget.user.pathobj.index != 0){
-          print("Aaaaaa ${widget.user.Cellpath[widget.user.pathobj.index-1].x},${widget.user.Cellpath[widget.user.pathobj.index-1].y}");
-          print("Bbbbbb ${widget.user.Cellpath[widget.user.pathobj.index].x},${widget.user.Cellpath[widget.user.pathobj.index].y}");
-          print("Cccccc ${widget.user.Cellpath[widget.user.pathobj.index+1].x},${widget.user.Cellpath[widget.user.pathobj.index+1].y}");
            angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-           print("angleangleangleangle $angle");
         }
         double userangle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
 
@@ -657,6 +654,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Straight";
         }
       if(widget.user.pathobj.index<3){
+        widget.direction = userdirection;
+      }
+
+      if(UserCredentials().getUserPersonWithDisability()==1 || UserCredentials().getUserPersonWithDisability()==2){
         widget.direction = userdirection;
       }
 

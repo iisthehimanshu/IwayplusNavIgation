@@ -165,7 +165,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<String, Map<int, Set<Marker>>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
- // Building building = Building(floor: Map(), numberOfFloors: Map());
+ // Building SingletonFunctionController.building = Building(floor: Map(), numberOfFloors: Map());
   Map<String,Map<int, Set<gmap.Polyline>>> singleroute = {};
   Map<int, Set<Marker>> dottedSingleRoute = {};
  // BLueToothClass SingletonFunctionController.btadapter = new BLueToothClass();
@@ -509,7 +509,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         _updateCircle(user.lat, user.lng);
       });
 
-    building.floor.putIfAbsent("", () => 0);
+    SingletonFunctionController.building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
       isLoading = true;
@@ -578,49 +578,49 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Future<void> zoomWhileWait(
       Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
     if (allBuildingID.length > 1) {
-      while (!building.destinationQr &&
+      while (!SingletonFunctionController.building.destinationQr &&
           !user.initialallyLocalised &&
-          !building.qrOpened) {
+          !SingletonFunctionController.building.qrOpened) {
         for (var entry in allBuildingID.entries) {
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
           await controller.animateCamera(CameraUpdate.newCameraPosition(
             CameraPosition(target: entry.value, zoom: 16),
           ));
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
           await Future.delayed(Duration(milliseconds: 500));
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
           await controller.animateCamera(CameraUpdate.newCameraPosition(
             CameraPosition(target: entry.value, zoom: 20),
           ));
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
           await Future.delayed(Duration(seconds: 3));
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
           await controller.animateCamera(CameraUpdate.newCameraPosition(
             CameraPosition(target: entry.value, zoom: 16),
           ));
-          if (building.destinationQr ||
+          if (SingletonFunctionController.building.destinationQr ||
               user.initialallyLocalised ||
-              building.qrOpened) {
+              SingletonFunctionController.building.qrOpened) {
             return;
           }
         }
@@ -628,7 +628,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         print("Completed zooming on all locations.");
 
         // Check the conditions before starting the next loop iteration
-        if (user.initialallyLocalised || building.qrOpened) {
+        if (user.initialallyLocalised || SingletonFunctionController.building.qrOpened) {
           print("Condition met after looping through all locations, stopping.");
           return; // Exit the function if conditions are met
         }
@@ -947,9 +947,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             print("prev [${user.coordX},${user.coordY}]");
             bool isvalid = MotionModel.isValidStep(
                 user,
-                building.floorDimenssion[user.Bid]![user.floor]![0],
-                building.floorDimenssion[user.Bid]![user.floor]![1],
-                building.nonWalkable[user.Bid]![user.floor]!,
+                SingletonFunctionController.building.floorDimenssion[user.Bid]![user.floor]![0],
+                SingletonFunctionController.building.floorDimenssion[user.Bid]![user.floor]![1],
+                SingletonFunctionController.building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
               user.move(context).then((value) {
@@ -1018,14 +1018,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void changeBuilding(String oldBid, String newBid) {
     markers[newBid] = markers[oldBid]!;
     tools.setBuildingAngle(
-        building.patchData[newBid]!.patchData!.buildingAngle!);
+        SingletonFunctionController.building.patchData[newBid]!.patchData!.buildingAngle!);
   }
 
   void renderHere() {
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-            user.showcoordY.toInt(), building.patchData[user.Bid]);
+            user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
@@ -1039,7 +1039,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ));
 
         List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
-            user.coordY.toInt(), building.patchData[user.Bid]);
+            user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(user.lat, user.lng), markers[user.Bid]![1]);
       }
@@ -1053,9 +1053,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             _userAccelerometerEvent!.y < -step_threshold) {
           bool isvalid = MotionModel.isValidStep(
               user,
-              building.floorDimenssion[user.Bid]![user.floor]![0],
-              building.floorDimenssion[user.Bid]![user.floor]![1],
-              building.nonWalkable[user.Bid]![user.floor]!,
+              SingletonFunctionController.building.floorDimenssion[user.Bid]![user.floor]![0],
+              SingletonFunctionController.building.floorDimenssion[user.Bid]![user.floor]![1],
+              SingletonFunctionController.building.nonWalkable[user.Bid]![user.floor]!,
               reroute);
           if (isvalid) {
             user.move(context).then((value) {
@@ -1066,11 +1066,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
-                              building.patchData[user.Bid])[0],
+                              SingletonFunctionController.building.patchData[user.Bid])[0],
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
-                              building.patchData[user.Bid])[1]),
+                              SingletonFunctionController.building.patchData[user.Bid])[1]),
                       markers[user.Bid]![0]);
                 }
               });
@@ -1141,7 +1141,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     if (nearestBeacon == null && polyID != null) {
       print("Inside");
       Landmarks userSetLocation = Landmarks();
-      await building.landmarkdata!.then((value) {
+      await SingletonFunctionController.building.landmarkdata!.then((value) {
         print("value.landmarksMap");
         value.landmarksMap?.forEach((key, valuee) {
           if (key == polyID) {
@@ -1155,7 +1155,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       final Uint8List userlocdebug =
           await getImagesFromMarker('assets/tealtorch.png', 35);
 
-      tools.setBuildingAngle(building
+      tools.setBuildingAngle(SingletonFunctionController.building
           .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
 
       //nearestLandmark compute
@@ -1190,15 +1190,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       List<double> values = [];
 
       //floor alignment
-      await building.landmarkdata!.then((land) {
+      await SingletonFunctionController.building.landmarkdata!.then((land) {
         if (land.landmarksMap![polyID]!.floor != 0) {
           List<PolyArray> prevFloorLifts = findLift(
               tools.numericalToAlphabetical(0),
-              building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+              SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
                   .polyline!.floors!);
           List<PolyArray> currFloorLifts = findLift(
               tools.numericalToAlphabetical(land.landmarksMap![polyID]!.floor!),
-              building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+              SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
                   .polyline!.floors!);
           print("print cubicle data");
           for (int i = 0; i < prevFloorLifts.length; i++) {
@@ -1216,7 +1216,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           values = tools.localtoglobal(
               land.landmarksMap![polyID]!.coordinateX!,
               land.landmarksMap![polyID]!.coordinateY!,
-              building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+              SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
           print(values);
         } else {
           UserState.xdiff = 0;
@@ -1224,7 +1224,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           values = tools.localtoglobal(
               land.landmarksMap![polyID]!.coordinateX!,
               land.landmarksMap![polyID]!.coordinateY!,
-              building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+              SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
         }
       });
 
@@ -1244,7 +1244,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       user.coordX = userSetLocation.coordinateX!;
       user.coordY = userSetLocation.coordinateY!;
       List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
-          building.patchData[userSetLocation.buildingID]);
+          SingletonFunctionController.building.patchData[userSetLocation.buildingID]);
       user.lat = ls[0];
       user.lng = ls[1];
 
@@ -1255,7 +1255,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> latlng = tools.localtoglobal(
             nearestLandInfomation!.doorX!,
             nearestLandInfomation!.doorY!,
-            building.patchData[nearestLandInfomation!.buildingID]);
+            SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
         print("latlnghhjhj");
         print(latlng);
         user.lat = latlng[0];
@@ -1269,7 +1269,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> latlng = tools.localtoglobal(
             nearestLandInfomation!.coordinateX!,
             nearestLandInfomation!.coordinateY!,
-            building.patchData[nearestLandInfomation!.buildingID]);
+            SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
         print("latlnghhjhj");
         print(latlng);
         user.lat = latlng[0];
@@ -1279,9 +1279,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
-      UserState.cols = building.floorDimenssion[userSetLocation.buildingID]![
+      UserState.cols = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
           userSetLocation.floor]![0];
-      UserState.rows = building.floorDimenssion[userSetLocation.buildingID]![
+      UserState.rows = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
           userSetLocation.floor]![1];
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
@@ -1314,7 +1314,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         });
       setState(() {
         markers.clear();
-        //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
+        //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
           markers.putIfAbsent(user.Bid, () => []);
           markers[user.Bid]?.add(Marker(
@@ -1356,12 +1356,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           ));
         }
 
-        building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
+        SingletonFunctionController.building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
         if (widget.directLandID.length < 2) {
-          createRooms(building.polyLineData!, userSetLocation.floor!);
+          createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
         }
 
-        building.landmarkdata!.then((value) {
+        SingletonFunctionController.building.landmarkdata!.then((value) {
           createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
         });
       });
@@ -1406,9 +1406,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           : nearestLandInfomation!.name!;
       if (nearestLandInfomation == null) {
         //updating user pointer
-        building.floor[buildingAllApi.getStoredString()] = user.floor;
-        createRooms(building.polyLineData!,
-            building.floor[buildingAllApi.getStoredString()]!);
+        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
+        createRooms(SingletonFunctionController.building.polyLineData!,
+            SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!);
         if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
           setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
         }
@@ -1477,7 +1477,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       if (SingletonFunctionController.apibeaconmap[nearestBeacon] != null) {
         //buildingAngle compute
 
-        tools.setBuildingAngle(building
+        tools.setBuildingAngle(SingletonFunctionController.building
             .patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]!
             .patchData!
             .buildingAngle!);
@@ -1485,7 +1485,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         //nearestLandmark compute
 
         try {
-          await building.landmarkdata!.then((value) {
+          await SingletonFunctionController.building.landmarkdata!.then((value) {
             nearestLandInfomation = tools.localizefindNearbyLandmark(
                 SingletonFunctionController.apibeaconmap[nearestBeacon]!, value.landmarksMap!);
           });
@@ -1515,12 +1515,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         if (SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor != 0) {
           List<PolyArray> prevFloorLifts = findLift(
               tools.numericalToAlphabetical(0),
-              building.polylinedatamap[
+              SingletonFunctionController.building.polylinedatamap[
               SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
           List<PolyArray> currFloorLifts = findLift(
               tools.numericalToAlphabetical(
                   SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!),
-              building.polylinedatamap[
+              SingletonFunctionController.building.polylinedatamap[
               SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]!.polyline!.floors!);
           print("print cubicle data");
           for (int i = 0; i < prevFloorLifts.length; i++) {
@@ -1537,14 +1537,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           UserState.ydiff = dvalue[1];
           values =
               tools.localtoglobal(SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,
-                  SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]);
+                  SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!, SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]);
           print(values);
         } else {
           UserState.xdiff = 0;
           UserState.ydiff = 0;
           values =
               tools.localtoglobal(SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,
-                  SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!, building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]);
+                  SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!, SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!]);
         }
         print("values");
         print(values);
@@ -1562,7 +1562,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         user.coordX = SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!;
         user.coordY = SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!;
         List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
-            building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
+            SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         user.lat = ls[0];
         user.lng = ls[1];
 
@@ -1573,9 +1573,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           List<double> latlng = tools.localtoglobal(
               nearestLandInfomation!.doorX!,
               nearestLandInfomation!.doorY!,
-              building.patchData[nearestLandInfomation!.buildingID]);
+              SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
           print("latlnghhjhj");
           print(latlng);
+          print(SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID);
           user.lat = latlng[0];
           user.lng = latlng[1];
           user.locationName = nearestLandInfomation!.name ??
@@ -1587,7 +1588,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           List<double> latlng = tools.localtoglobal(
               nearestLandInfomation!.coordinateX!,
               nearestLandInfomation!.coordinateY!,
-              building.patchData[nearestLandInfomation!.buildingID]);
+              SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
           print("latlnghhjhj");
           print(latlng);
           user.lat = latlng[0];
@@ -1597,9 +1598,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
-        UserState.cols = building.floorDimenssion[SingletonFunctionController.apibeaconmap[nearestBeacon]!
+        UserState.cols = SingletonFunctionController.building.floorDimenssion[SingletonFunctionController.apibeaconmap[nearestBeacon]!
             .buildingID]![SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![0];
-        UserState.rows = building.floorDimenssion[SingletonFunctionController.apibeaconmap[nearestBeacon]!
+        UserState.rows = SingletonFunctionController.building.floorDimenssion[SingletonFunctionController.apibeaconmap[nearestBeacon]!
             .buildingID]![SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![1];
         UserState.lngCode = _currentLocale;
         UserState.reroute = reroute;
@@ -1622,7 +1623,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         user.initialallyLocalised = true;
         setState(() {
           markers.clear();
-          //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
+          //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
           if (render) {
             markers.putIfAbsent(user.Bid, () => []);
             markers[user.Bid]?.add(Marker(
@@ -1666,14 +1667,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           if (widget.directLandID.length < 2) {
             circles.clear();
-            building.floor[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!] =
+            SingletonFunctionController.building.floor[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID!] =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
             createRooms(
-                building.polylinedatamap[
+                SingletonFunctionController.building.polylinedatamap[
                 user.Bid]!, SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!);
           }
 
-          building.landmarkdata!.then((value) {
+          SingletonFunctionController.building.landmarkdata!.then((value) {
             createMarkers(value, SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!,bid: user.Bid);
           });
         });
@@ -1719,9 +1720,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             : nearestLandInfomation!.name!;
         if (nearestLandInfomation == null) {
           //updating user pointer
-          building.floor[buildingAllApi.getStoredString()] = user.floor;
-          createRooms(building.polyLineData!,
-              building.floor[buildingAllApi.getStoredString()]!);
+          SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
+          createRooms(SingletonFunctionController.building.polyLineData!,
+              SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!);
           if (pathMarkers[user.Bid] != null &&
               pathMarkers[user.Bid]![user.floor] != null) {
             setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
@@ -1786,7 +1787,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               "${LocaleData.unabletofindyourlocation.getString(context)}.....${LocaleData.scanQr.getString(context)}",
               _currentLocale);
           showLocationDialog(context);
-          building.qrOpened = true;
+          SingletonFunctionController.building.qrOpened = true;
         }
       }
     }
@@ -2035,7 +2036,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
         PathState.sourceName = "Your current location";
-        building.landmarkdata!.then((value) async {
+        SingletonFunctionController.building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
@@ -2055,20 +2056,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
-                                building.patchData[user.Bid])[0],
+                                SingletonFunctionController.building.patchData[user.Bid])[0],
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
-                                building.patchData[user.Bid])[1]),
+                                SingletonFunctionController.building.patchData[user.Bid])[1]),
                         markers[user.Bid]![0]);
                   }
                 });
               });
               _isRoutePanelOpen = false;
-              building.selectedLandmarkID = null;
+              SingletonFunctionController.building.selectedLandmarkID = null;
               _isnavigationPannelOpen = true;
               _isreroutePannelOpen = false;
-              int numCols = building.floorDimenssion[PathState.sourceBid]![
+              int numCols = SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
                   PathState.sourceFloor]![0]; //floor length
               double angle = tools.calculateAngleBWUserandPath(
                   user, PathState.path[PathState.sourceFloor]![1], numCols);
@@ -2125,7 +2126,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(user.coordX.toInt(),
-            user.coordY.toInt(), building.patchData[user.Bid]);
+            user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
       }
@@ -2191,7 +2192,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
 
     print("stateofeachvariable");
-    print("${building.destinationQr} || ${user.initialallyLocalised} || ${building.qrOpened}");
+    print("${SingletonFunctionController.building.destinationQr} || ${user.initialallyLocalised} || ${SingletonFunctionController.building.qrOpened}");
 
     _updateProgress();
 
@@ -2202,10 +2203,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //   var key = entry.key;
     //
     //   var beaconData = await beaconapi().fetchBeaconData(key);
-    //   if (building.beacondata == null) {
-    //     building.beacondata = List.from(beaconData);
+    //   if (SingletonFunctionController.building.beacondata == null) {
+    //     SingletonFunctionController.building.beacondata = List.from(beaconData);
     //   } else {
-    //     building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
+    //     SingletonFunctionController.building.beacondata = List.from(SingletonFunctionController.building.beacondata!)..addAll(beaconData);
     //   }
     //
     //   for (var beacon in beaconData) {
@@ -2224,7 +2225,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
-    SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction():null;
+    SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction(buildingAllApi.allBuildingID):null;
 
 
     setState(() {
@@ -2235,7 +2236,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
-    building.patchData[patchData.patchData!.buildingID!] = patchData;
+    SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
     createPatch(patchData);
     findCentroid(
         patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
@@ -2250,10 +2251,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     var polylineData = await PolyLineApi()
         .fetchPolyData(id: buildingAllApi.selectedBuildingID);
-    building.polyLineData = polylineData;
-    building.numberOfFloors[buildingAllApi.selectedBuildingID] =
+    SingletonFunctionController.building.polyLineData = polylineData;
+    SingletonFunctionController.building.numberOfFloors[buildingAllApi.selectedBuildingID] =
         polylineData.polyline!.floors!.length;
-    building.polylinedatamap[buildingAllApi.selectedBuildingID] = polylineData;
+    SingletonFunctionController.building.polylinedatamap[buildingAllApi.selectedBuildingID] = polylineData;
 
     List<int> currentBuildingFloor =
         polylineData.polyline!.floors!.map((element) {
@@ -2264,12 +2265,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         currentBuildingFloor;
     createRooms(polylineData, 0);
 
-    building.floor[buildingAllApi.selectedBuildingID] =
+    SingletonFunctionController.building.floor[buildingAllApi.selectedBuildingID] =
         buildingAllApi.selectedBuildingID == "666848685496124d04fc6761" ? 5 : 0;
 
     var landmarkData = await landmarkApi()
         .fetchLandmarkData(id: buildingAllApi.selectedBuildingID);
-    building.landmarkdata = Future.value(landmarkData);
+    SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);
     var coordinates = <int, LatLng>{};
 
     for (var landmark in landmarkData.landmarks!) {
@@ -2294,31 +2295,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             matches.map((match) => int.parse(match.group(0)!)).toList();
 
         var currentNonWalkable =
-            building.nonWalkable[landmark.buildingID!] ?? {};
+            SingletonFunctionController.building.nonWalkable[landmark.buildingID!] ?? {};
         currentNonWalkable[landmark.floor!] = allIntegers;
 
-        building.nonWalkable[landmark.buildingID!] = currentNonWalkable;
-        UserState.nonWalkable = building.nonWalkable;
+        SingletonFunctionController.building.nonWalkable[landmark.buildingID!] = currentNonWalkable;
+        UserState.nonWalkable = SingletonFunctionController.building.nonWalkable;
         localizedData.nonWalkable = currentNonWalkable;
 
         var currentFloorDimensions =
-            building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? {};
+            SingletonFunctionController.building.floorDimenssion[buildingAllApi.selectedBuildingID] ?? {};
         currentFloorDimensions[landmark.floor!] = [
           landmark.properties!.floorLength!,
           landmark.properties!.floorBreadth!
         ];
 
-        building.floorDimenssion[buildingAllApi.selectedBuildingID] =
+        SingletonFunctionController.building.floorDimenssion[buildingAllApi.selectedBuildingID] =
             currentFloorDimensions;
         localizedData.currentfloorDimenssion = currentFloorDimensions;
       }
     }
 
 
-    if(building.ARCoordinates.containsKey(buildingAllApi.selectedBuildingID) && coordinates.isNotEmpty){
-      building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+    if(SingletonFunctionController.building.ARCoordinates.containsKey(buildingAllApi.selectedBuildingID) && coordinates.isNotEmpty){
+      SingletonFunctionController.building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
       print("Updates normal patch ARcoord");
-      print(building.ARCoordinates.keys);
+      print(SingletonFunctionController.building.ARCoordinates.keys);
     }
 
     createARPatch(coordinates);
@@ -2347,7 +2348,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
       var key = entry.key;
 
-      building.floor[key] = 0;
+      SingletonFunctionController.building.floor[key] = 0;
 
       try {
         var waypointData = await waypointapi()
@@ -2363,7 +2364,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         var patchData = await patchAPI().fetchPatchData(id: key);
         Building.buildingData ??= Map();
         Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
-        building.patchData[patchData.patchData!.buildingID!] = patchData;
+        SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
         if(key != buildingAllApi.outdoorID){
           createotherPatch(key,patchData);
         }
@@ -2374,8 +2375,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         var polylineData = await PolyLineApi()
             .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
-        building.polylinedatamap[key] = polylineData;
-        building.numberOfFloors[key] = polylineData.polyline!.floors!.length;
+        SingletonFunctionController.building.polylinedatamap[key] = polylineData;
+        SingletonFunctionController.building.numberOfFloors[key] = polylineData.polyline!.floors!.length;
 
         List<int> currentBuildingFloor =
             polylineData.polyline!.floors!.map((element) {
@@ -2388,7 +2389,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         var otherLandmarkData = await landmarkApi().fetchLandmarkData(
             id: key, outdoor: key == buildingAllApi.outdoorID);
-        var otherLandmarkdata = await building.landmarkdata;
+        var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
         otherLandmarkdata?.mergeLandmarks(otherLandmarkData.landmarks);
 
         var otherCoordinates = <int, LatLng>{};
@@ -2409,18 +2410,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             var allIntegers =
                 matches.map((match) => int.parse(match.group(0)!)).toList();
 
-            var currentNonWalkable = building.nonWalkable[key] ?? {};
+            var currentNonWalkable = SingletonFunctionController.building.nonWalkable[key] ?? {};
             currentNonWalkable[landmark.floor!] = allIntegers;
 
-            building.nonWalkable[key] = currentNonWalkable;
+            SingletonFunctionController.building.nonWalkable[key] = currentNonWalkable;
 
-            var currentFloorDimensions = building.floorDimenssion[key] ?? {};
+            var currentFloorDimensions = SingletonFunctionController.building.floorDimenssion[key] ?? {};
             currentFloorDimensions[landmark.floor!] = [
               landmark.properties!.floorLength!,
               landmark.properties!.floorBreadth!
             ];
 
-            building.floorDimenssion[key] = currentFloorDimensions;
+            SingletonFunctionController.building.floorDimenssion[key] = currentFloorDimensions;
           }
         }
           createMarkers(otherLandmarkData, 0, bid: key);
@@ -2447,7 +2448,7 @@ if(SingletonFunctionController.timer!=null){
       localizeUser(speakTTS: false);
       onLandmarkVenueClicked(widget.directLandID,
           DirectlyStartNavigation: false);
-      building.destinationQr = true;
+      SingletonFunctionController.building.destinationQr = true;
     }
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
@@ -2640,7 +2641,7 @@ if(SingletonFunctionController.timer!=null){
           sortedsumMap.entries.first.value >= 0.4) {
         SingletonFunctionController.btadapter.stopScanning();
 
-        await building.landmarkdata!.then((value) {
+        await SingletonFunctionController.building.landmarkdata!.then((value) {
           getallnearestInfo = tools.localizefindAllNearbyLandmark(
               apibeaconmap[firstValue]!, value.landmarksMap!);
         });
@@ -2695,9 +2696,9 @@ if(SingletonFunctionController.timer!=null){
       print("coordinates.keys");
       print(coordinates.keys);
       print(coordinates.values);
-      building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+      SingletonFunctionController.building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
       print("Updates normal patch");
-      print(building.ARCoordinates.keys);
+      print(SingletonFunctionController.building.ARCoordinates.keys);
 
 
       setState(() {
@@ -2779,9 +2780,9 @@ if(SingletonFunctionController.timer!=null){
                             value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
-      building.ARCoordinates[key] = coordinates;
+      SingletonFunctionController.building.ARCoordinates[key] = coordinates;
       print("Updates normal other patch");
-      print(building.ARCoordinates.keys);
+      print(SingletonFunctionController.building.ARCoordinates.keys);
       setState(() {
         otherpatch.add(
           Polygon(
@@ -2802,9 +2803,9 @@ if(SingletonFunctionController.timer!=null){
     print("showRestBuildingPatch");
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
-    print("building.ARCoordinates.length");
-    print(building.ARCoordinates.length);
-    building.ARCoordinates.forEach((key, innerMap) {
+    print("SingletonFunctionController.building.ARCoordinates.length");
+    print(SingletonFunctionController.building.ARCoordinates.length);
+    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
       if(key != skipID){
         print("key != skipID ${key}");
         currentCoordinated = innerMap;
@@ -2908,10 +2909,10 @@ if(SingletonFunctionController.timer!=null){
         print("adding $key ${value.latitude},${value.longitude}");
         points.add(value);
       });
-      if(building.ARCoordinates.containsKey(bid)){
-        building.ARCoordinates[bid] = coordinates;
+      if(SingletonFunctionController.building.ARCoordinates.containsKey(bid)){
+        SingletonFunctionController.building.ARCoordinates[bid] = coordinates;
         print("Updates foundARCoordinates of ${bid}");
-        print(building.ARCoordinates.keys);
+        print(SingletonFunctionController.building.ARCoordinates.keys);
       }
 
       setState(() {
@@ -3311,7 +3312,7 @@ if(SingletonFunctionController.timer!=null){
     if (widget.directLandID.length < 2) {
       selectedroomMarker.clear();
       _isLandmarkPanelOpen = false;
-      building.selectedLandmarkID = null;
+      SingletonFunctionController.building.selectedLandmarkID = null;
     }
     polylines[value.polyline!.buildingID!]?.clear();
 
@@ -3346,9 +3347,9 @@ if(SingletonFunctionController.timer!=null){
               //coordinates.add(LatLng(node.lat!,node.lon!));
               coordinates.add(LatLng(
                   tools.localtoglobal(node.coordx!, node.coordy!,
-                      building.patchData[value.polyline!.buildingID])[0],
+                      SingletonFunctionController.building.patchData[value.polyline!.buildingID])[0],
                   tools.localtoglobal(node.coordx!, node.coordy!,
-                      building.patchData[value.polyline!.buildingID])[1]));
+                      SingletonFunctionController.building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
               closedpolygons.putIfAbsent(
@@ -3401,7 +3402,7 @@ if(SingletonFunctionController.timer!=null){
                         ),
                       );
                       setState(() {
-                        if (building.selectedLandmarkID != polyArray.id &&
+                        if (SingletonFunctionController.building.selectedLandmarkID != polyArray.id &&
                             !user.isnavigating &&
                             !_isRoutePanelOpen) {
                           user.reset();
@@ -3415,9 +3416,9 @@ if(SingletonFunctionController.timer!=null){
 
                           user.isnavigating = false;
                           _isnavigationPannelOpen = false;
-                          building.selectedLandmarkID = polyArray.id;
-                          building.ignoredMarker.clear();
-                          building.ignoredMarker.add(polyArray.id!);
+                          SingletonFunctionController.building.selectedLandmarkID = polyArray.id;
+                          SingletonFunctionController.building.ignoredMarker.clear();
+                          SingletonFunctionController.building.ignoredMarker.add(polyArray.id!);
                           _isBuildingPannelOpen = false;
                           _isRoutePanelOpen = false;
                           singleroute.clear();
@@ -3477,7 +3478,7 @@ if(SingletonFunctionController.timer!=null){
                           ),
                         );
                         setState(() {
-                          if (building.selectedLandmarkID != polyArray.id &&
+                          if (SingletonFunctionController.building.selectedLandmarkID != polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -3491,9 +3492,9 @@ if(SingletonFunctionController.timer!=null){
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            building.selectedLandmarkID = polyArray.id;
-                            building.ignoredMarker.clear();
-                            building.ignoredMarker.add(polyArray.id!);
+                            SingletonFunctionController.building.selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker.clear();
+                            SingletonFunctionController.building.ignoredMarker.add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
                             singleroute.clear();
@@ -3531,7 +3532,7 @@ if(SingletonFunctionController.timer!=null){
                           ),
                         );
                         setState(() {
-                          if (building.selectedLandmarkID != polyArray.id &&
+                          if (SingletonFunctionController.building.selectedLandmarkID != polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -3545,9 +3546,9 @@ if(SingletonFunctionController.timer!=null){
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            building.selectedLandmarkID = polyArray.id;
-                            building.ignoredMarker.clear();
-                            building.ignoredMarker.add(polyArray.id!);
+                            SingletonFunctionController.building.selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker.clear();
+                            SingletonFunctionController.building.ignoredMarker.add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
                             singleroute.clear();
@@ -3584,7 +3585,7 @@ if(SingletonFunctionController.timer!=null){
                           ),
                         );
                         setState(() {
-                          if (building.selectedLandmarkID != polyArray.id &&
+                          if (SingletonFunctionController.building.selectedLandmarkID != polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -3598,9 +3599,9 @@ if(SingletonFunctionController.timer!=null){
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            building.selectedLandmarkID = polyArray.id;
-                            building.ignoredMarker.clear();
-                            building.ignoredMarker.add(polyArray.id!);
+                            SingletonFunctionController.building.selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker.clear();
+                            SingletonFunctionController.building.ignoredMarker.add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
                             singleroute.clear();
@@ -3880,7 +3881,7 @@ if(SingletonFunctionController.timer!=null){
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
-                building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
             //_markerLocations.add(LatLng(value[0],value[1]));
             BitmapDescriptor textMarker;
             String markerText;
@@ -3924,7 +3925,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
               Markers.add(Marker(
                   markerId: MarkerId(
                       "Door ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
@@ -3936,9 +3937,9 @@ if(SingletonFunctionController.timer!=null){
                     // snippet: 'Additional Information',
                     // Replace with additional information
                     onTap: () {
-                      if (building.selectedLandmarkID !=
+                      if (SingletonFunctionController.building.selectedLandmarkID !=
                           landmarks[i].properties!.polyId) {
-                        building.selectedLandmarkID =
+                        SingletonFunctionController.building.selectedLandmarkID =
                             landmarks[i].properties!.polyId;
                         _isRoutePanelOpen = false;
                         singleroute.clear();
@@ -3959,7 +3960,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
 
               // _markerLocations[LatLng(value[0], value[1])] = '1';
               mapMarkerLocationMapAndName.add(InitMarkerModel('Lift', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
@@ -3982,9 +3983,9 @@ if(SingletonFunctionController.timer!=null){
               //       snippet: 'Additional Information',
               //       // Replace with additional information
               //       onTap: () {
-              //         if (building.selectedLandmarkID !=
+              //         if (SingletonFunctionController.building.selectedLandmarkID !=
               //             landmarks[i].properties!.polyId) {
-              //           building.selectedLandmarkID =
+              //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
               //           singleroute.clear();
@@ -4001,7 +4002,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
               mapMarkerLocationMapAndName.add(InitMarkerModel('Pharmacy', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
@@ -4015,7 +4016,7 @@ if(SingletonFunctionController.timer!=null){
           //   setState(() {
           //     List<double> value = tools.localtoglobal(
           //         landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-          //         building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          //         SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
           //     _markerLocationsMap[LatLng(value[0], value[1])] = 'Kitchen';
           //     _markerLocationsMapLanName[LatLng(value[0], value[1])] =
           //     landmarks[i].name!;
@@ -4029,7 +4030,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
               mapMarkerLocationMapAndName.add(InitMarkerModel('Male', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
@@ -4045,9 +4046,9 @@ if(SingletonFunctionController.timer!=null){
               //       snippet: 'Additional Information',
               //       // Replace with additional information
               //       onTap: () {
-              //         if (building.selectedLandmarkID !=
+              //         if (SingletonFunctionController.building.selectedLandmarkID !=
               //             landmarks[i].properties!.polyId) {
-              //           building.selectedLandmarkID =
+              //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
               //           singleroute.clear();
@@ -4066,7 +4067,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
               mapMarkerLocationMapAndName.add(InitMarkerModel('Female', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
@@ -4082,9 +4083,9 @@ if(SingletonFunctionController.timer!=null){
               //       snippet: 'Additional Information',
               //       // Replace with additional information
               //       onTap: () {
-              //         if (building.selectedLandmarkID !=
+              //         if (SingletonFunctionController.building.selectedLandmarkID !=
               //             landmarks[i].properties!.polyId) {
-              //           building.selectedLandmarkID =
+              //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
               //           singleroute.clear();
@@ -4103,7 +4104,7 @@ if(SingletonFunctionController.timer!=null){
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
                   landmarks[i].coordinateY!,
-                  building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                  SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
               // _markerLocations[LatLng(value[0], value[1])] = '1';
               mapMarkerLocationMapAndName.add(InitMarkerModel(landmarks[i].buildingID == buildingAllApi.outdoorID
                   ? "Campus Entry"
@@ -4133,9 +4134,9 @@ if(SingletonFunctionController.timer!=null){
               //       snippet: 'Additional Information',
               //       // Replace with additional information
               //       onTap: () {
-              //         if (building.selectedLandmarkID !=
+              //         if (SingletonFunctionController.building.selectedLandmarkID !=
               //             landmarks[i].properties!.polyId) {
-              //           building.selectedLandmarkID =
+              //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
               //           singleroute.clear();
@@ -4145,9 +4146,9 @@ if(SingletonFunctionController.timer!=null){
               //       },
               //     ),
               //     onTap: () {
-              //       if (building.selectedLandmarkID !=
+              //       if (SingletonFunctionController.building.selectedLandmarkID !=
               //           landmarks[i].properties!.polyId) {
-              //         building.selectedLandmarkID =
+              //         SingletonFunctionController.building.selectedLandmarkID =
               //             landmarks[i].properties!.polyId;
               //         _isRoutePanelOpen = false;
               //         singleroute.clear();
@@ -4168,7 +4169,7 @@ if(SingletonFunctionController.timer!=null){
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
-                building.patchData[bid ?? buildingAllApi.getStoredString()]);
+                SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
             //_markerLocations.add(LatLng(value[0],value[1]));
             BitmapDescriptor textMarker;
             String markerText;
@@ -4224,7 +4225,7 @@ if(SingletonFunctionController.timer!=null){
     setState(() {
       _isLandmarkPanelOpen = !_isLandmarkPanelOpen;
       selectedroomMarker.clear();
-      building.selectedLandmarkID = null;
+      SingletonFunctionController.building.selectedLandmarkID = null;
       _googleMapController.animateCamera(CameraUpdate.zoomOut());
     });
   }
@@ -4243,23 +4244,23 @@ if(SingletonFunctionController.timer!=null){
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
-        snapshot.data!.landmarksMap![building.selectedLandmarkID] == null) {
+        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID] == null) {
       print("object");
-      //print(building.selectedLandmarkID);
+      //print(SingletonFunctionController.building.selectedLandmarkID);
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
       _isreroutePannelOpen = false;
       showMarkers();
       selectedroomMarker.clear();
-      building.selectedLandmarkID = null;
+      SingletonFunctionController.building.selectedLandmarkID = null;
       return Container();
     }
 
     if (user.initialallyLocalised) {
       double val1 = double.parse(snapshot.data!
-          .landmarksMap![building.selectedLandmarkID]!.properties!.latitude!);
+          .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.latitude!);
       double val2 = double.parse(snapshot.data!
-          .landmarksMap![building.selectedLandmarkID]!.properties!.longitude!);
+          .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.longitude!);
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
     }
 
@@ -4317,11 +4318,11 @@ if(SingletonFunctionController.timer!=null){
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
                               .name ??
                           snapshot
                               .data!
-                              .landmarksMap![building.selectedLandmarkID]!
+                              .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
                               .element!
                               .subType!,
                       style: const TextStyle(
@@ -4420,12 +4421,12 @@ if(SingletonFunctionController.timer!=null){
                                       snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .name ??
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .element!
                                               .subType!,
                                       style: const TextStyle(
@@ -4445,7 +4446,7 @@ if(SingletonFunctionController.timer!=null){
                                   left: 17,
                                 ),
                                 child: Text(
-                                  "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.venueName!}",
+                                  "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName!}",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
                                     fontSize: 16,
@@ -4462,7 +4463,7 @@ if(SingletonFunctionController.timer!=null){
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .floor!)
                                   ? Container(
                                       padding: EdgeInsets.only(
@@ -4535,29 +4536,29 @@ if(SingletonFunctionController.timer!=null){
                                       PathState.sourceName =
                                           "Your current location";
                                       PathState.destinationPolyID =
-                                          building.selectedLandmarkID!;
+                                          SingletonFunctionController.building.selectedLandmarkID!;
                                       PathState.destinationName = snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .name ??
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .element!
                                               .subType!;
                                       PathState.destinationFloor = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                              SingletonFunctionController.building.selectedLandmarkID]!
                                           .floor!;
                                       PathState.sourceBid = user.Bid;
 
                                       PathState.destinationBid = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                              SingletonFunctionController.building.selectedLandmarkID]!
                                           .buildingID!;
 
                                       setState(() {
@@ -4577,24 +4578,24 @@ if(SingletonFunctionController.timer!=null){
                                       PathState.sourceName =
                                           "Choose Starting Point";
                                       PathState.destinationPolyID =
-                                          building.selectedLandmarkID!;
+                                          SingletonFunctionController.building.selectedLandmarkID!;
                                       PathState.destinationName = snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .name ??
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  building.selectedLandmarkID]!
+                                                  SingletonFunctionController.building.selectedLandmarkID]!
                                               .element!
                                               .subType!;
                                       PathState.destinationFloor = snapshot
                                           .data!
                                           .landmarksMap![
-                                              building.selectedLandmarkID]!
+                                              SingletonFunctionController.building.selectedLandmarkID]!
                                           .floor!;
-                                      building.selectedLandmarkID = "";
+                                      SingletonFunctionController.building.selectedLandmarkID = "";
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -4643,7 +4644,7 @@ if(SingletonFunctionController.timer!=null){
                               child: IconButton(
                                   onPressed: () {
                                     HelperClass.shareContent(
-                                        "https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
+                                        "https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
                                   },
                                   icon: Semantics(
                                       label: "Share route information",
@@ -4712,7 +4713,7 @@ if(SingletonFunctionController.timer!=null){
                                   children: [
                                     TextSpan(
                                       text:
-                                          "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.name ?? snapshot.data!.landmarksMap![building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.buildingName!}",
+                                          "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name ?? snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName!}",
                                     ),
                                   ],
                                 ),
@@ -4721,7 +4722,7 @@ if(SingletonFunctionController.timer!=null){
                           ],
                         ),
                       ),
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
                                   .properties!.contactNo !=
                               null
                           ? Container(
@@ -4763,7 +4764,7 @@ if(SingletonFunctionController.timer!=null){
                                         children: [
                                           TextSpan(
                                             text:
-                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.contactNo!}",
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
                                           ),
                                         ],
                                       ),
@@ -4773,13 +4774,13 @@ if(SingletonFunctionController.timer!=null){
                               ),
                             )
                           : Container(),
-                      snapshot.data!.landmarksMap![building.selectedLandmarkID]!
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
                                       .properties!.email !=
                                   "" &&
                               snapshot
                                       .data!
                                       .landmarksMap![
-                                          building.selectedLandmarkID]!
+                                          SingletonFunctionController.building.selectedLandmarkID]!
                                       .properties!
                                       .email !=
                                   null
@@ -4818,7 +4819,7 @@ if(SingletonFunctionController.timer!=null){
                                         children: [
                                           TextSpan(
                                             text:
-                                                "${snapshot.data!.landmarksMap![building.selectedLandmarkID]!.properties!.email!}",
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
                                           ),
                                         ],
                                       ),
@@ -4987,7 +4988,7 @@ if(SingletonFunctionController.timer!=null){
             PathState.destinationY,
             PathState.destinationFloor,
             bid: PathState.destinationBid);
-        building.floor[buildingAllApi.getStoredString()] = user.floor;
+        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
 
         if (markers.length > 0)
           markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
@@ -5034,12 +5035,12 @@ if(SingletonFunctionController.timer!=null){
           PathState.sourceFloor: calculateindex(
               commonlifts[0].x1!,
               commonlifts[0].y1!,
-              building.floorDimenssion[PathState.destinationBid]![
+              SingletonFunctionController.building.floorDimenssion[PathState.destinationBid]![
               PathState.sourceFloor]![0]),
           PathState.destinationFloor: calculateindex(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
-              building.floorDimenssion[PathState.destinationBid]![
+              SingletonFunctionController.building.floorDimenssion[PathState.destinationBid]![
               PathState.destinationFloor]![0])
         };
       }
@@ -5050,7 +5051,7 @@ if(SingletonFunctionController.timer!=null){
       double destinationEntrylat = 0;
       double destinationEntrylng = 0;
 
-      building.landmarkdata!.then((land) async {
+      SingletonFunctionController.building.landmarkdata!.then((land) async {
 
 
         ///destination Entry finding
@@ -5122,12 +5123,12 @@ if(SingletonFunctionController.timer!=null){
             destinationEntry.floor!: calculateindex(
                 commonlifts[0].x1!,
                 commonlifts[0].y1!,
-                building.floorDimenssion[PathState.destinationBid]![
+                SingletonFunctionController.building.floorDimenssion[PathState.destinationBid]![
                 destinationEntry.floor!]![0]),
             PathState.destinationFloor: calculateindex(
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
-                building.floorDimenssion[PathState.destinationBid]![
+                SingletonFunctionController.building.floorDimenssion[PathState.destinationBid]![
                 PathState.destinationFloor]![0])
           };
         }
@@ -5236,17 +5237,17 @@ if(SingletonFunctionController.timer!=null){
             PathState.sourceFloor: calculateindex(
                 commonlifts[0].x1!,
                 commonlifts[0].y1!,
-                building.floorDimenssion[PathState.sourceBid]![
+                SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
                 PathState.sourceFloor]![0]),
             sourceEntry.floor!: calculateindex(
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
-                building.floorDimenssion[PathState.sourceBid]![
+                SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
                 sourceEntry.floor!]![0])
           };
         }
       });
-      print("different building detected");
+      print("different SingletonFunctionController.building detected");
 
       print(PathState.path.keys);
       print(pathMarkers.keys);
@@ -5276,7 +5277,7 @@ if(SingletonFunctionController.timer!=null){
       }
     }
     setState(() {
-      building.floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
+      SingletonFunctionController.building.floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
     });
   }
 
@@ -5294,11 +5295,11 @@ if(SingletonFunctionController.timer!=null){
     List<double> sourceEntryCoordinates = tools.localtoglobal(
         sourceEntry.coordinateX!,
         sourceEntry.coordinateY!,
-        building.patchData[sourceEntry.buildingID]);
+        SingletonFunctionController.building.patchData[sourceEntry.buildingID]);
     List<double> destinationEntryCoordinates = tools.localtoglobal(
         destinationEntry.coordinateX!,
         destinationEntry.coordinateY!,
-        building.patchData[destinationEntry.buildingID]);
+        SingletonFunctionController.building.patchData[destinationEntry.buildingID]);
 
     OutBuildingModel? buildData = await OutBuildingData.outBuildingData(
         sourceEntryCoordinates[0],
@@ -5351,8 +5352,8 @@ if(SingletonFunctionController.timer!=null){
       });
       // List<Cell> interBuildingPath = [];
       // for(LatLng c in coords){
-      //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
-      //   int node = (local["lng"]!.round()*building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
+      //   Map<String,double> local = CoordinateConverter.globalToLocal(c.latitude, c.longitude, SingletonFunctionController.building.patchData[buildingAllApi.outdoorID]!.patchData!.toJson());
+      //   int node = (local["lng"]!.round()*SingletonFunctionController.building.floorDimenssion[buildingAllApi.outdoorID]![1]![0])+local["lat"]!.round() ;
       //   interBuildingPath.add(Cell(node, local["lat"]!.round().toInt(), local["lng"]!.round().toInt(), tools.eightcelltransition, c.latitude, c.longitude, buildingAllApi.outdoorID));
       // }
       // PathState.listofPaths.insert(1, interBuildingPath);
@@ -5382,9 +5383,9 @@ if(SingletonFunctionController.timer!=null){
       String? liftName,
       bool renderSource = true,
       bool renderDestination = true}) async {
-    print("checks for campus $bid ${building.floorDimenssion[bid]}");
-    int numRows = building.floorDimenssion[bid]![floor]![1]; //floor breadth
-    int numCols = building.floorDimenssion[bid]![floor]![0]; //floor length
+    print("checks for campus $bid ${SingletonFunctionController.building.floorDimenssion[bid]}");
+    int numRows = SingletonFunctionController.building.floorDimenssion[bid]![floor]![1]; //floor breadth
+    int numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0]; //floor length
     int sourceIndex = calculateindex(sourceX, sourceY, numCols);
     int destinationIndex = calculateindex(destinationX, destinationY, numCols);
 
@@ -5399,7 +5400,7 @@ if(SingletonFunctionController.timer!=null){
     //   [1, 1]    // Bottom-right
     // ];
     print("all landmarks");
-    // building.landmarkdata!.then((value) {
+    // SingletonFunctionController.building.landmarkdata!.then((value) {
     //   value.landmarksMap!.forEach((key, value) {
     //     // if(value.properties!.node==null){
     //     //   print("nodenull${value.name}");
@@ -5408,12 +5409,12 @@ if(SingletonFunctionController.timer!=null){
     //
     //     if(value.doorX==null && value.element!.type!="floor" ){
     //
-    //       if(building.nonWalkable[bid]![floor]!.contains(value.coordinateX!+value.coordinateY!*numCols)){
+    //       if(SingletonFunctionController.building.nonWalkable[bid]![floor]!.contains(value.coordinateX!+value.coordinateY!*numCols)){
     //         print("${value.name} ${value.coordinateX}");
     //       }
     //     }else{
     //
-    //       if(building.nonWalkable[bid]![floor]!.contains(value.doorX!+value.doorY!*numCols)){
+    //       if(SingletonFunctionController.building.nonWalkable[bid]![floor]!.contains(value.doorX!+value.doorY!*numCols)){
     //         print(value.name);
     //       }
     //
@@ -5421,11 +5422,11 @@ if(SingletonFunctionController.timer!=null){
     //   });
     // });
 
-    if (building.nonWalkable[bid]![floor]!
+    if (SingletonFunctionController.building.nonWalkable[bid]![floor]!
         .contains(destinationY * numCols + destinationX)) {
       print("DestinationinNonWalkable");
     }
-    if (building.nonWalkable[bid]![floor]!
+    if (SingletonFunctionController.building.nonWalkable[bid]![floor]!
         .contains(sourceY * numCols + sourceX)) {
       print("SourceNonWalkable");
     }
@@ -5443,7 +5444,7 @@ if(SingletonFunctionController.timer!=null){
     //     sourceY,
     //     destinationX,
     //     destinationY,
-    //     building.nonWalkable[bid]![floor]!,
+    //     SingletonFunctionController.building.nonWalkable[bid]![floor]!,
     //     numCols,
     //     numRows,
     //     isoutdoorPath: bid == buildingAllApi.outdoorID);
@@ -5461,7 +5462,7 @@ if(SingletonFunctionController.timer!=null){
           sourceY,
           destinationX,
           destinationY,
-          building.nonWalkable[bid]![floor]!,
+          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
           numCols,
           numRows,
           isoutdoorPath: bid == buildingAllApi.outdoorID);
@@ -5473,11 +5474,11 @@ if(SingletonFunctionController.timer!=null){
       List<int> path2 = await findPath(
         numRows,
         numCols,
-        building.nonWalkable[bid]![floor]!,
+        SingletonFunctionController.building.nonWalkable[bid]![floor]!,
         sourceIndex,
         destinationIndex,
       );
-      path2 = getFinalOptimizedPath(path2, building.nonWalkable[bid]![floor]!,
+      path2 = getFinalOptimizedPath(path2, SingletonFunctionController.building.nonWalkable[bid]![floor]!,
           numCols, sourceX, sourceY, destinationX, destinationY);
       path = path2;
       print("path from A* $path");
@@ -5503,7 +5504,7 @@ if(SingletonFunctionController.timer!=null){
     print("getPointss: ${getPoints}");
     List<Landmarks> nearbyPathLandmarks = [];
     Set<Marker> innerMarker = Set();
-    await building.landmarkdata!.then((value) {
+    await SingletonFunctionController.building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(
           path, value.landmarksMap!, 5, numCols, floor, bid!);
       pathState.nearbyLandmarks = nearbyLandmarks;
@@ -5537,7 +5538,7 @@ if(SingletonFunctionController.timer!=null){
         for(int i=1;i<PathState.directions.length-1;i++){
 
          List<double> dvalue = tools.localtoglobal(PathState.directions[i].x!, PathState.directions[i].y!,
-              building.patchData[bid]);
+              SingletonFunctionController.building.patchData[bid]);
          if(PathState.directions[i].turnDirection!=null) {
            innerMarker.add(Marker(
              markerId: MarkerId("${PathState.directions[i].node} ${floor}_${bid}"),
@@ -5546,7 +5547,7 @@ if(SingletonFunctionController.timer!=null){
                  dirIcon: directionInstruction.getCustomIcon(
                      PathState.directions[i].turnDirection!, context))
                  .toBitmapDescriptor(
-                 //logicalSize: const Size(150, 150),
+                 logicalSize: const Size(150, 150),
                  imageSize: const Size(300, 400)),
              visible: false,
              onTap: () {},
@@ -5580,11 +5581,11 @@ if(SingletonFunctionController.timer!=null){
 
     List<Cell> Cellpath = findCorridorSegments(
         path,
-        building.nonWalkable[bid]![floor]!,
+        SingletonFunctionController.building.nonWalkable[bid]![floor]!,
         numCols,
         bid,
         floor,
-        building.patchData);
+        SingletonFunctionController.building.patchData);
     PathState.CellTurnPoints = tools.getCellTurnpoints(Cellpath, numCols);
     List<int> temp = [];
     List<Cell> Celltemp = [];
@@ -5609,19 +5610,19 @@ if(SingletonFunctionController.timer!=null){
     }
 
     if (path.isNotEmpty) {
-      if (building.floor[bid] != PathState.sourceFloor) {
+      if (SingletonFunctionController.building.floor[bid] != PathState.sourceFloor) {
         setState(() {
-          building.floor[bid] = PathState.sourceFloor;
+          SingletonFunctionController.building.floor[bid] = PathState.sourceFloor;
         });
-        await createRooms(building.polyLineData!, PathState.sourceFloor);
+        await createRooms(SingletonFunctionController.building.polyLineData!, PathState.sourceFloor);
       }
       if (floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polylinedatamap[bid]!.polyline!.floors!);
+            SingletonFunctionController.building.polylinedatamap[bid]!.polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(floor),
-            building.polylinedatamap[bid]!.polyline!.floors!);
+            SingletonFunctionController.building.polylinedatamap[bid]!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
         print("dvalue in fetchroute $dvalue");
         UserState.xdiff = dvalue[0];
@@ -5635,12 +5636,12 @@ if(SingletonFunctionController.timer!=null){
       List<double> dvalue = [];
       if (bid != null) {
         print("Himanshucheckerpath in if block ");
-        print("building.patchData[bid]");
-        print(building.patchData[bid]!.patchData!.fileName);
+        print("SingletonFunctionController.building.patchData[bid]");
+        print(SingletonFunctionController.building.patchData[bid]!.patchData!.fileName);
         svalue = tools.localtoglobal(sourceX, sourceY,
-             building.patchData[bid]);
+             SingletonFunctionController.building.patchData[bid]);
         dvalue = tools.localtoglobal(destinationX, destinationY,
-             building.patchData[bid]);
+             SingletonFunctionController.building.patchData[bid]);
 
 
 
@@ -5658,7 +5659,7 @@ if(SingletonFunctionController.timer!=null){
         int row = (node % numCols); //divide by floor length
         int col = (node ~/ numCols); //divide by floor length
         List<double> value =
-            tools.localtoglobal(row, col, building.patchData[bid]);
+            tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[bid]);
         coordinates.add(LatLng(value[0], value[1]));
         if (singleroute[bid] == null) {
           singleroute.putIfAbsent(bid, () => Map());
@@ -5690,7 +5691,7 @@ if(SingletonFunctionController.timer!=null){
           });
         }
         if (buildingAllApi.getStoredString() == bid &&
-            building.floor[bid] == PathState.sourceFloor) {
+            SingletonFunctionController.building.floor[bid] == PathState.sourceFloor) {
           await Future.delayed(Duration(microseconds: 1500));
         }
       }
@@ -5705,27 +5706,27 @@ if(SingletonFunctionController.timer!=null){
             markerId: MarkerId("lift${bid}"),
             position: sourceX == PathState.sourceX?LatLng(dvalue[0], dvalue[1]):LatLng(svalue[0], svalue[1]),
             icon: await  CustomMarker(text: "To Floor ${sourceX == PathState.sourceX?PathState.destinationFloor:PathState.sourceFloor}", dirIcon: (sourceX==PathState.sourceX)?Icons.elevator_outlined:Icons.elevator_outlined).toBitmapDescriptor(
-                //logicalSize: const Size(150, 150),
+                logicalSize: const Size(150, 150),
                 imageSize: const Size(300, 400)),
            anchor: Offset(0.0, 1.0),
          onTap: (){
               if(!user.isnavigating){
                 _polygon.clear();
                 circles.clear();
-                building.floor[buildingAllApi
+                SingletonFunctionController.building.floor[buildingAllApi
                     .getStoredString()] = PathState.sourceFloor==floor?PathState.destinationFloor:PathState.sourceFloor;
                 createRooms(
-                  building.polylinedatamap[
+                  SingletonFunctionController.building.polylinedatamap[
                   buildingAllApi
                       .getStoredString()]!,
-                  building.floor[buildingAllApi
+                  SingletonFunctionController.building.floor[buildingAllApi
                       .getStoredString()]!,
                 );
-                building.landmarkdata!
+                SingletonFunctionController.building.landmarkdata!
                     .then((value) {
                   createMarkers(
                       value,
-                      building.floor[buildingAllApi
+                      SingletonFunctionController.building.floor[buildingAllApi
                           .getStoredString()]!,
                       bid: buildingAllApi
                           .getStoredString()
@@ -5843,7 +5844,7 @@ if(SingletonFunctionController.timer!=null){
 
   Widget floorColumn() {
     List<int> floorNumbers = List.generate(
-        building.numberOfFloors[buildingAllApi.getStoredString()]!,
+        SingletonFunctionController.building.numberOfFloors[buildingAllApi.getStoredString()]!,
         (index) => index);
 
     return Semantics(
@@ -5853,7 +5854,7 @@ if(SingletonFunctionController.timer!=null){
         width: 100,
         child: ListView.builder(
             itemCount:
-                building.numberOfFloors[buildingAllApi.getStoredString()]!,
+                SingletonFunctionController.building.numberOfFloors[buildingAllApi.getStoredString()]!,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.only(top: 10),
@@ -5869,20 +5870,20 @@ if(SingletonFunctionController.timer!=null){
                         height: 42,
                         child: ListTile(
                           onTap: () {
-                            building.floor[buildingAllApi.getStoredString()] =
+                            SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] =
                                 index;
                             createRooms(
-                              building.polylinedatamap[
+                              SingletonFunctionController.building.polylinedatamap[
                                   buildingAllApi.getStoredString()]!,
-                              building.floor[buildingAllApi.getStoredString()]!,
+                              SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!,
                             );
                             if (pathMarkers[index] != null) {
                               //setCameraPosition(pathMarkers[i]!);
                             }
-                            building.landmarkdata!.then((value) {
+                            SingletonFunctionController.building.landmarkdata!.then((value) {
                               createMarkers(
                                   value,
-                                  building
+                                  SingletonFunctionController.building
                                       .floor[buildingAllApi.getStoredString()]!,
                                   bid: buildingAllApi.getStoredString());
                             });
@@ -6059,7 +6060,7 @@ if(SingletonFunctionController.timer!=null){
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
                                   PathState.destinationY,
-                                  building.patchData[PathState.destinationBid]);
+                                  SingletonFunctionController.building.patchData[PathState.destinationBid]);
                               _googleMapController.animateCamera(
                                 CameraUpdate.newLatLngZoom(
                                   LatLng(mvalues[0], mvalues[1]),
@@ -6227,7 +6228,7 @@ if(SingletonFunctionController.timer!=null){
                                 if (user.isnavigating == false) {
                                   clearPathVariables();
                                 }
-                                building.landmarkdata!.then((value) {
+                                SingletonFunctionController.building.landmarkdata!.then((value) {
                                   calculateroute(value.landmarksMap!);
                                 });
                               });
@@ -6255,7 +6256,7 @@ if(SingletonFunctionController.timer!=null){
                                     onPressed: () {
                                       PathState.accessiblePath = "Stairs";
                                       PathState.clearforaccessiblepath();
-                                      building.landmarkdata!.then((value) {
+                                      SingletonFunctionController.building.landmarkdata!.then((value) {
                                         try {
                                           calculateroute(value.landmarksMap!,
                                               accessibleby: "Stairs");
@@ -6310,7 +6311,7 @@ if(SingletonFunctionController.timer!=null){
                                     onPressed: () {
                                       PathState.accessiblePath = "Lifts";
                                       PathState.clearforaccessiblepath();
-                                      building.landmarkdata!.then((value) {
+                                      SingletonFunctionController.building.landmarkdata!.then((value) {
                                         try {
                                           calculateroute(value.landmarksMap!,
                                               accessibleby: "Lifts");
@@ -6365,7 +6366,7 @@ if(SingletonFunctionController.timer!=null){
                                     onPressed: () {
                                       PathState.accessiblePath = "ramp";
                                       PathState.clearforaccessiblepath();
-                                      building.landmarkdata!.then((value) {
+                                      SingletonFunctionController.building.landmarkdata!.then((value) {
                                         try {
                                           calculateroute(value.landmarksMap!,
                                               accessibleby: "ramp");
@@ -6549,7 +6550,7 @@ if(SingletonFunctionController.timer!=null){
                                                           .clear();
                                                       pathMarkers.clear();
 
-                                                      building.selectedLandmarkID =
+                                                      SingletonFunctionController.building.selectedLandmarkID =
                                                           null;
 
                                                       PathState =
@@ -6655,13 +6656,13 @@ if(SingletonFunctionController.timer!=null){
                                                     PathState.didPathStart =
                                                         true;
 
-                                                    UserState.cols = building
+                                                    UserState.cols = SingletonFunctionController.building
                                                                 .floorDimenssion[
                                                             PathState
                                                                 .sourceBid]![
                                                         PathState
                                                             .sourceFloor]![0];
-                                                    UserState.rows = building
+                                                    UserState.rows = SingletonFunctionController.building
                                                                 .floorDimenssion[
                                                             PathState
                                                                 .destinationBid]![
@@ -6683,7 +6684,7 @@ if(SingletonFunctionController.timer!=null){
                                                         updateCircle;
 
                                                     //detected=false;
-                                                    //user.building = building;
+                                                    //user.SingletonFunctionController.building = SingletonFunctionController.building;
                                                     wsocket.message["path"]
                                                             ["source"] =
                                                         PathState.sourceName;
@@ -6692,20 +6693,20 @@ if(SingletonFunctionController.timer!=null){
                                                         PathState
                                                             .destinationName;
                                                     // user.ListofPaths = PathState.listofPaths;
-                                                    // user.patchData = building.patchData;
+                                                    // user.patchData = SingletonFunctionController.building.patchData;
                                                     // user.buildingNumber = PathState.listofPaths.length-1;
                                                     buildingAllApi.selectedID =
                                                         PathState.sourceBid;
                                                     buildingAllApi
                                                             .selectedBuildingID =
                                                         PathState.sourceBid;
-                                                    UserState.cols = building
+                                                    UserState.cols = SingletonFunctionController.building
                                                                 .floorDimenssion[
                                                             PathState
                                                                 .sourceBid]![
                                                         PathState
                                                             .sourceFloor]![0];
-                                                    UserState.rows = building
+                                                    UserState.rows = SingletonFunctionController.building
                                                                 .floorDimenssion[
                                                             PathState
                                                                 .sourceBid]![
@@ -6767,7 +6768,7 @@ if(SingletonFunctionController.timer!=null){
                                                                     .toInt(),
                                                                 user.showcoordY
                                                                     .toInt(),
-                                                                building.patchData[
+                                                                SingletonFunctionController.building.patchData[
                                                                     PathState
                                                                         .sourceBid]);
 
@@ -6789,7 +6790,7 @@ if(SingletonFunctionController.timer!=null){
                                                         val = tools.localtoglobal(
                                                             user.coordX.toInt(),
                                                             user.coordY.toInt(),
-                                                            building.patchData[
+                                                            SingletonFunctionController.building.patchData[
                                                                 PathState
                                                                     .sourceBid]);
 
@@ -6836,7 +6837,7 @@ if(SingletonFunctionController.timer!=null){
                                                     });
                                                     _isRoutePanelOpen = false;
 
-                                                    building.selectedLandmarkID =
+                                                    SingletonFunctionController.building.selectedLandmarkID =
                                                         null;
 
                                                     _isnavigationPannelOpen =
@@ -6847,19 +6848,19 @@ if(SingletonFunctionController.timer!=null){
 
                                                     StartPDR();
 
-                                                    if (building.floor[PathState
+                                                    if (SingletonFunctionController.building.floor[PathState
                                                             .sourceBid] !=
                                                         PathState.sourceFloor) {
-                                                      building.floor[PathState
+                                                      SingletonFunctionController.building.floor[PathState
                                                               .sourceBid] =
                                                           PathState.sourceFloor;
                                                       createRooms(
-                                                          building.polylinedatamap[
+                                                          SingletonFunctionController.building.polylinedatamap[
                                                               PathState
                                                                   .sourceBid]!,
                                                           PathState
                                                               .sourceFloor);
-                                                      building.landmarkdata!
+                                                      SingletonFunctionController.building.landmarkdata!
                                                           .then((value) {
                                                         createMarkers(
                                                             value,
@@ -7138,9 +7139,9 @@ String destiName='';
     String destpoly=destiPoly.length>1?destiPoly:destiPoly;
     String destiN=destiName.length>1?destiName:destiName;
 
-    if(building.landmarkdata != null){
+    if(SingletonFunctionController.building.landmarkdata != null){
 
-       building.landmarkdata!.then((value){
+       SingletonFunctionController.building.landmarkdata!.then((value){
         if(value.landmarksMap![destpoly]!=null){
           setState(() {
             BuildingName =  value.landmarksMap![destpoly]!.venueName!;
@@ -7452,7 +7453,7 @@ String destiName='';
     print("b------- $B");
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(user.showcoordX.toInt(),
-        user.showcoordY.toInt(), building.patchData[user.Bid]);
+        user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -7723,10 +7724,10 @@ String destiName='';
                                       user.isnavigating = false;
                                       _isRoutePanelOpen = true;
                                       _isnavigationPannelOpen = false;
-                                      print("building floor ${building.floor}");
+                                      print("SingletonFunctionController.building floor ${SingletonFunctionController.building.floor}");
                                       if (pathMarkers[user.Bid] != null) {
                                         setCameraPosition(pathMarkers[user
-                                            .Bid]![building.floor[user.Bid]]!);
+                                            .Bid]![SingletonFunctionController.building.floor[user.Bid]]!);
                                       }
                                     });
                                   },
@@ -7797,7 +7798,7 @@ String destiName='';
     setState(() {
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-            user.showcoordY.toInt(), building.patchData[user.Bid]);
+            user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
       }
@@ -9291,7 +9292,7 @@ String destiName='';
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
 
-    if (user.floor == building.floor[buildingAllApi.getStoredString()]) {
+    if (user.floor == SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
         selectedroomMarker.forEach((key, value) {
           combinedMarkers = combinedMarkers.union(value);
@@ -9307,19 +9308,19 @@ String destiName='';
 
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathMarkers[key] != null &&
-          pathMarkers[key]![building.floor[key]] != null) {
+          pathMarkers[key]![SingletonFunctionController.building.floor[key]] != null) {
         combinedMarkers =
-            combinedMarkers.union(pathMarkers[key]![building.floor[key]]!);
+            combinedMarkers.union(pathMarkers[key]![SingletonFunctionController.building.floor[key]]!);
       }
       if ((!_isRoutePanelOpen || !_isnavigationPannelOpen) &&
           markers[key] != null &&
-          user.floor == building.floor[key]) {
+          user.floor == SingletonFunctionController.building.floor[key]) {
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(markers[key]!));
       }
     });
 
     // Always union the general Markers set at the end
-    if(building.floor[user.Bid] == user.floor){
+    if(SingletonFunctionController.building.floor[user.Bid] == user.floor){
       markers.forEach((key,value){
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
       });
@@ -9353,8 +9354,8 @@ String destiName='';
 
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (singleroute[key] != null &&
-          singleroute[key]![building.floor[key]] != null) {
-        poly = poly.union(singleroute[key]![building.floor[key]]!);
+          singleroute[key]![SingletonFunctionController.building.floor[key]] != null) {
+        poly = poly.union(singleroute[key]![SingletonFunctionController.building.floor[key]]!);
       }
     });
 
@@ -9363,7 +9364,7 @@ String destiName='';
 
   void _updateMarkers(double zoom) {
     print(zoom);
-    if (building.updateMarkers) {
+    if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
       if (user.isnavigating) {
         setState(() {
@@ -9389,7 +9390,7 @@ String destiName='';
               Marker _marker = customMarker.visibility(false, marker);
               updatedMarkers.add(_marker);
             }
-            if (building.ignoredMarker.contains(words[1])) {
+            if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(false, marker);
                 print(_marker);
@@ -9428,7 +9429,7 @@ String destiName='';
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
             }
-            if (building.ignoredMarker.contains(words[1])) {
+            if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(true, marker);
                 print(_marker);
@@ -9447,7 +9448,7 @@ String destiName='';
   }
 
   void hideMarkers() {
-    building.updateMarkers = false;
+    SingletonFunctionController.building.updateMarkers = false;
     Set<Marker> updatedMarkers = Set();
     Markers.forEach((marker) {
       Marker _marker = customMarker.visibility(false, marker);
@@ -9457,8 +9458,8 @@ String destiName='';
   }
 
   void showMarkers() {
-    building.ignoredMarker.clear();
-    building.updateMarkers = true;
+    SingletonFunctionController.building.ignoredMarker.clear();
+    SingletonFunctionController.building.updateMarkers = true;
   }
 
   void _updateBuilding(double zoom) {
@@ -9538,7 +9539,7 @@ String destiName='';
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-          user.showcoordY.toInt(), building.patchData[user.Bid]);
+          user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
@@ -9554,8 +9555,8 @@ String destiName='';
   void onLandmarkVenueClicked(String ID,
       {bool DirectlyStartNavigation = false}) async {
     print('DirectlyStartNavigation');
-    final snapshot = await building.landmarkdata;
-    building.selectedLandmarkID = ID;
+    final snapshot = await SingletonFunctionController.building.landmarkdata;
+    SingletonFunctionController.building.selectedLandmarkID = ID;
 
     _isBuildingPannelOpen = false;
 
@@ -9563,11 +9564,11 @@ String destiName='';
       if (snapshot!.landmarksMap![ID]!.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
-            building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
+            SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
                 .polyline!.floors!);
         List<PolyArray> currFloorLifts = findLift(
             tools.numericalToAlphabetical(snapshot!.landmarksMap![ID]!.floor!),
-            building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
+            SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
                 .polyline!.floors!);
         print("print cubicle data");
         for (int i = 0; i < prevFloorLifts.length; i++) {
@@ -9592,12 +9593,12 @@ String destiName='';
         snapshot!.landmarksMap![ID]!.coordinateY!
       ];
       List<double> coords = tools.localtoglobal(value[0], value[1],
-          building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
+          SingletonFunctionController.building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
       int floor = snapshot!.landmarksMap![ID]!.floor!;
 
       print("value.landmarksMap![ID]!.floor");
       try {
-        List<Nodes>? nodes = building
+        List<Nodes>? nodes = SingletonFunctionController.building
             .polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!
             .polyline!
             .floors!
@@ -9612,7 +9613,7 @@ String destiName='';
           List<double> value = tools.localtoglobal(
               element.coordx!,
               element.coordy!,
-              building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
+              SingletonFunctionController.building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
           corners.add(LatLng(value[0], value[1]));
         }
         _polygon.add(Polygon(
@@ -9631,10 +9632,10 @@ String destiName='';
         ),
       );
 
-      if (building.floor[snapshot!.landmarksMap![ID]!.buildingID] != floor) {
-        building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
+      if (SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID] != floor) {
+        SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
         createRooms(
-            building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!,
+            SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!,
             floor);
         createMarkers(snapshot!, floor);
       }
@@ -9650,9 +9651,9 @@ String destiName='';
 
         user.isnavigating = false;
         _isnavigationPannelOpen = false;
-        building.selectedLandmarkID = ID;
-        building.ignoredMarker.clear();
-        building.ignoredMarker.add(ID);
+        SingletonFunctionController.building.selectedLandmarkID = ID;
+        SingletonFunctionController.building.ignoredMarker.clear();
+        SingletonFunctionController.building.ignoredMarker.add(ID);
         _isBuildingPannelOpen = false;
         _isRoutePanelOpen = false;
         singleroute.clear();
@@ -9671,17 +9672,17 @@ String destiName='';
           PathState.sourcePolyID = user.key;
           print("object ${PathState.sourcePolyID}");
           PathState.sourceName = "Your current location";
-          PathState.destinationPolyID = building.selectedLandmarkID!;
+          PathState.destinationPolyID = SingletonFunctionController.building.selectedLandmarkID!;
           PathState.destinationName =
-              snapshot!.landmarksMap![building.selectedLandmarkID]!.name ??
-                  snapshot!.landmarksMap![building.selectedLandmarkID]!.element!
+              snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name ??
+                  snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.element!
                       .subType!;
           PathState.destinationFloor =
-              snapshot!.landmarksMap![building.selectedLandmarkID]!.floor!;
+              snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!;
           PathState.sourceBid = user.Bid;
 
           PathState.destinationBid =
-              snapshot!.landmarksMap![building.selectedLandmarkID]!.buildingID!;
+              snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingID!;
 
           setState(() {
             print("valuechanged");
@@ -9696,14 +9697,14 @@ String destiName='';
           });
         } else {
           PathState.sourceName = "Choose Starting Point";
-          PathState.destinationPolyID = building.selectedLandmarkID!;
+          PathState.destinationPolyID = SingletonFunctionController.building.selectedLandmarkID!;
           PathState.destinationName =
-              snapshot!.landmarksMap![building.selectedLandmarkID]!.name ??
-                  snapshot!.landmarksMap![building.selectedLandmarkID]!.element!
+              snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name ??
+                  snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.element!
                       .subType!;
           PathState.destinationFloor =
-              snapshot!.landmarksMap![building.selectedLandmarkID]!.floor!;
-          building.selectedLandmarkID = "";
+              snapshot!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!;
+          SingletonFunctionController.building.selectedLandmarkID = "";
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -9723,10 +9724,10 @@ String destiName='';
   void fromSourceAndDestinationPage(List<String> value) {
     _isBuildingPannelOpen = false;
     markers.clear();
-    building.landmarkdata!.then((land) {
+    SingletonFunctionController.building.landmarkdata!.then((land) {
       print("Himanshuchecker ${land.landmarksMap}");
       print("Himanshuchecker ${value[0]}");
-      building.selectedLandmarkID =
+      SingletonFunctionController.building.selectedLandmarkID =
           land.landmarksMap![value[1]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
@@ -9764,7 +9765,7 @@ String destiName='';
 
   void onSourceVenueClicked(String ID) {
     setState(() {
-      building.landmarkdata!.then((value) {
+      SingletonFunctionController.building.landmarkdata!.then((value) {
         _isLandmarkPanelOpen = false;
         PathState.sourceX = value.landmarksMap![ID]!.coordinateX!;
         PathState.sourceY = value.landmarksMap![ID]!.coordinateY!;
@@ -9791,7 +9792,7 @@ String destiName='';
 
   void onDestinationVenueClicked(String ID) {
     setState(() {
-      building.landmarkdata!.then((value) {
+      SingletonFunctionController.building.landmarkdata!.then((value) {
         _isLandmarkPanelOpen = false;
         PathState.destinationX = value.landmarksMap![ID]!.coordinateX!;
         PathState.destinationY = value.landmarksMap![ID]!.coordinateY!;
@@ -9818,7 +9819,7 @@ String destiName='';
     focusturnArrow.clear();
     if (turn.x != null && turn.y != null && turn.numCols != null) {
       int i = user.path.indexWhere((element) => element == turn.node);
-      if (building.floor[buildingAllApi.getStoredString()] != turn.floor) {
+      if (SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] != turn.floor) {
         i++;
       } else {
         i--;
@@ -9848,10 +9849,10 @@ String destiName='';
       // }
 
       if (turn.floor != null &&
-          building.floor[buildingAllApi.getStoredString()] != turn.floor) {
-        building.floor[buildingAllApi.getStoredString()] = turn.floor!;
-        createRooms(building.polyLineData!,
-            building.floor[buildingAllApi.getStoredString()]!);
+          SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] != turn.floor) {
+        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = turn.floor!;
+        createRooms(SingletonFunctionController.building.polyLineData!,
+            SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!);
       }
 
       List<int> nextPoint = [
@@ -9859,9 +9860,9 @@ String destiName='';
         user.path[i] ~/ turn.numCols!
       ];
       List<double> latlng =
-          tools.localtoglobal(turn.x!, turn.y!, building.patchData[turn.Bid]);
+          tools.localtoglobal(turn.x!, turn.y!, SingletonFunctionController.building.patchData[turn.Bid]);
       List<double> latlng2 = tools.localtoglobal(
-          nextPoint[0], nextPoint[1], building.patchData[turn.Bid]);
+          nextPoint[0], nextPoint[1], SingletonFunctionController.building.patchData[turn.Bid]);
 
       setState(() {
         // focusturn.add(gmap.Polyline(
@@ -9929,7 +9930,7 @@ String destiName='';
 
         print("Distance for $key is $distance");
 
-        // Update closestBuildingId if this building is closer
+        // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
           minDistance = distance.toDouble();
           closestBuildingId = key;
@@ -9945,12 +9946,12 @@ String destiName='';
 
     }
 
-    // Store the nearest building ID
+    // Store the nearest SingletonFunctionController.building ID
     if (closestBuildingId.isNotEmpty) {
       buildingAllApi.setStoredString(closestBuildingId);
     }
 
-    print("Closest building ID is $closestBuildingId");
+    print("Closest SingletonFunctionController.building ID is $closestBuildingId");
   }
 
   Set<Circle> circles = Set();
@@ -10195,7 +10196,7 @@ String destiName='';
                       }
                     },
                     onCameraMoveStarted: () {
-                      user.building = building;
+                      user.building = SingletonFunctionController.building;
                       mapState.interaction2 = false;
                     },
                     circles: circles,
@@ -10302,11 +10303,11 @@ String destiName='';
 
                                 bool isvalid = MotionModel.isValidStep(
                                     user,
-                                    building.floorDimenssion[user.Bid]![
+                                    SingletonFunctionController.building.floorDimenssion[user.Bid]![
                                         user.floor]![0],
-                                    building.floorDimenssion[user.Bid]![
+                                    SingletonFunctionController.building.floorDimenssion[user.Bid]![
                                         user.floor]![1],
-                                    building
+                                    SingletonFunctionController.building
                                         .nonWalkable[user.Bid]![user.floor]!,
                                     reroute);
                                 if (isvalid) {
@@ -10366,9 +10367,9 @@ String destiName='';
                             label: "Change floor",
                             child: SpeedDial(
                               child: Text(
-                                building.floor == 0
+                                SingletonFunctionController.building.floor == 0
                                     ? 'G'
-                                    : '${building.floor[buildingAllApi.getStoredString()]}',
+                                    : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
                                 style: const TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,
@@ -10385,17 +10386,17 @@ String destiName='';
                                         [0])
                                     .length,
                                 (int i) {
-                                  //print("building.numberOfFloors[buildingAllApi.getStoredString()]!");
+                                  //print("SingletonFunctionController.building.numberOfFloors[buildingAllApi.getStoredString()]!");
                                   List<int> floorList = Building
                                               .numberOfFloorsDelhi[
                                           buildingAllApi.getStoredString()] ??
                                       [0];
                                   List<int> revfloorList = floorList;
                                   revfloorList.sort();
-                                  // building.numberOfFloors[buildingAllApi
+                                  // SingletonFunctionController.building.numberOfFloors[buildingAllApi
                                   //     .getStoredString()];
                                   //
-                                  // print(building.numberOfFloors!);
+                                  // print(SingletonFunctionController.building.numberOfFloors!);
                                   return SpeedDialChild(
                                     child: Semantics(
                                       label: "${revfloorList[i]}",
@@ -10422,22 +10423,22 @@ String destiName='';
                                       // _markerLocationsMap.clear();
                                       // _markerLocationsMapLanName.clear();
 
-                                      building.floor[buildingAllApi
+                                      SingletonFunctionController.building.floor[buildingAllApi
                                           .getStoredString()] = revfloorList[i];
                                       createRooms(
-                                        building.polylinedatamap[
+                                        SingletonFunctionController.building.polylinedatamap[
                                             buildingAllApi.getStoredString()]!,
-                                        building.floor[
+                                        SingletonFunctionController.building.floor[
                                             buildingAllApi.getStoredString()]!,
                                       );
                                       if (pathMarkers[i] != null) {
                                         //setCameraPosition(pathMarkers[i]!);
                                       }
                                       // Markers.clear();
-                                      building.landmarkdata!.then((value) {
+                                      SingletonFunctionController.building.landmarkdata!.then((value) {
                                         createMarkers(
                                             value,
-                                            building.floor[buildingAllApi
+                                            SingletonFunctionController.building.floor[buildingAllApi
                                                 .getStoredString()]!,
                                             bid: buildingAllApi
                                                 .getStoredString());
@@ -10496,7 +10497,7 @@ String destiName='';
                             });
                           }else{
                             _recenterMap();
-                        },
+                        };},
                         child: Semantics(
                           label: "Localize",
                           onDidGainAccessibilityFocus:
@@ -10641,7 +10642,7 @@ String destiName='';
                         ),
                       )),
             FutureBuilder(
-              future: building.landmarkdata,
+              future: SingletonFunctionController.building.landmarkdata,
               builder: (context, snapshot) {
                 if (_isLandmarkPanelOpen) {
                   return landmarkdetailpannel(context, snapshot);
@@ -10660,16 +10661,16 @@ String destiName='';
             // FloatingActionButton(
             //     onPressed: (){
             //       print("checkingBuildingfloor");
-            //       //building.floor == 0 ? 'G' : '${building.floor}',
-            //       print(building.floor);
-            //       int firstKey = building.floor.values.first;
+            //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
+            //       print(SingletonFunctionController.building.floor);
+            //       int firstKey = SingletonFunctionController.building.floor.values.first;
             //       print(firstKey);
-            //       print(singleroute[building.floor.values.first]);
+            //       print(singleroute[SingletonFunctionController.building.floor.values.first]);
             //
             //       print(singleroute.keys);
             //       print(singleroute.values);
-            //       print(building.floor[buildingAllApi.getStoredString()]);
-            //       print(singleroute[building.floor[buildingAllApi.getStoredString()]]);
+            //       print(SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]);
+            //       print(singleroute[SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]]);
             //     },
             //     child: Icon(Icons.add)
             // ),
@@ -10723,9 +10724,9 @@ String destiName='';
             //   backgroundColor: Colors
             //       .white, // Set the background color of the FAB
             // ),
-            (!building.destinationQr &&
+            (!SingletonFunctionController.building.destinationQr &&
                     !user.initialallyLocalised &&
-                    !building.qrOpened)
+                    !SingletonFunctionController.building.qrOpened)
                 ? Container(
                     height: screenHeight,
                     width: screenWidth,

@@ -22,7 +22,7 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   bool NotificationswitchValue = true;
-  bool DisabilityswitchValue = false;
+  bool DisabilityswitchValue = !(UserCredentials().getUserPersonWithDisability()==0);
   bool ColorContrastswitchValue = false;
   bool isNaturalDirectionSelected = true;
   bool isFocusMode = true;
@@ -35,7 +35,10 @@ class _SettingScreenState extends State<SettingScreen> {
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    if(UserCredentials().getUserPersonWithDisability()>0){
+      _selectedDisability[UserCredentials().getUserPersonWithDisability()-1]=true;
 
+    }
     super.initState();
   }
 
@@ -49,6 +52,7 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials().getuserNavigationModeSetting());
 
   }
+
 
   void _toggleSelection2() {
     setState(() {
@@ -70,7 +74,7 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials().getUserPathDetails());
   }
 
-  final List<bool> _selectedDisability = <bool>[true, false, false];
+  final List<bool> _selectedDisability = <bool>[false, false, false];
   final List<bool> _selectedHeight = <bool>[true, false, false];
   // List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
   // List<Widget> disability = <Widget>[
@@ -418,6 +422,14 @@ class _SettingScreenState extends State<SettingScreen> {
                           value: DisabilityswitchValue,
                           onChanged: (bool value) {
                             setState(() {
+                              if(!value){
+                                UserCredentials().setUserPersonWithDisability(0);
+                              }else{
+                                UserCredentials().setUserPersonWithDisability(1);
+                                setState(() {
+                                  _selectedDisability[0]=true;
+                                });
+                              }
                               DisabilityswitchValue = value;
                             });
                           },
@@ -451,6 +463,9 @@ class _SettingScreenState extends State<SettingScreen> {
                         _selectedDisability[i] = i == index;
                       }
                     });
+
+                    UserCredentials().setUserPersonWithDisability(index+1);
+
                   },
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                   selectedBorderColor: Color(0xff0B6B94),

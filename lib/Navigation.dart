@@ -424,8 +424,10 @@ double _progressValue=0.0;
     //  calibrate();
 
     //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
+
 
       apiCalls(context);
     });
@@ -2078,6 +2080,9 @@ void _updateProgress(){
   void apiCalls(context) async {
     await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
 
+    print("stateofeachvariable");
+    print("${SingletonFunctionController.building.destinationQr} || ${user.initialallyLocalised} || ${SingletonFunctionController.building.qrOpened}");
+
     _updateProgress();
 
 
@@ -2108,7 +2113,7 @@ void _updateProgress(){
     // }\
 
 
-    Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
+    // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
     SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction():null;
 
 
@@ -2298,8 +2303,12 @@ void _updateProgress(){
       }
     }));
     print("before Calling localize user");
+if(SingletonFunctionController.timer!=null){
+  await Future.wait([SingletonFunctionController.timer!,allBuildingCalls]);
+}
+    print("timestamppp2");
+    print(DateTime.timestamp());
 
-    await Future.wait([timer,allBuildingCalls]);
     print("Calling localize user");
     if(widget.directLandID.length<2){
       localizeUser();

@@ -15,8 +15,8 @@ class SingletonFunctionController {
   Completer<void>? _completer;
  static BLueToothClass btadapter = new BLueToothClass();
  static HashMap<String, beacon> apibeaconmap = HashMap();
-  static Building building = Building(floor: Map(), numberOfFloors: Map());
-
+ static Building building = Building(floor: Map(), numberOfFloors: Map());
+ static Future<void>? timer;
   Future<void> executeFunction() async {
     if (_isRunning) {
       // Wait for the currently running instance to finish
@@ -49,16 +49,18 @@ class SingletonFunctionController {
       }));
 
       if(Platform.isAndroid){
-        print(apibeaconmap);
         btadapter.startScanning(apibeaconmap);
       }else{
         btadapter.startScanningIOS(apibeaconmap);
-      } // Simulate a long-running task
+      }
+     timer= Future.delayed(Duration(seconds:9));// Simulate a long-running task
       print("Function completed.");
     } finally {
       // Mark the function as complete
       _isRunning = false;
       _completer?.complete();
+      building.qrOpened=false;
+      building.destinationQr=false;
     }
   }
 }

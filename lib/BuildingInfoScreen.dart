@@ -76,12 +76,27 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(widget.receivedAllBuildingList);
     apiCall();
     print("building list");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      processBuildingData().then((_) {
+        print("timestamppp1");
+        print(DateTime.timestamp());
+        print(allBuildingID);
+        controller.executeFunction();
+      });
+    });
+    // widget.receivedAllBuildingList!.forEach((element) {
+    //   g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
+    //   allBuildingID[element.sId!] = kk;
+    // });
+
+    // controller.executeFunction();
+
+  }
+  Future<void> processBuildingData() async {
     widget.receivedAllBuildingList!.forEach((element) {
       g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;
     });
-    controller.executeFunction();
-
   }
 
   void apiCall() async{

@@ -75,7 +75,7 @@ class BLueToothClass {
 
     startbin();
     // print("himanshu 2");
-    FlutterBluePlus.startScan();
+    FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
       // print("himanshu 4");
@@ -176,7 +176,7 @@ class BLueToothClass {
 
     }
     try {
-      await FlutterBluePlus.startScan();
+      await FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     } catch (e) {
 
     }

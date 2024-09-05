@@ -136,6 +136,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   buildingAllApi.setSelectedBuildingID(widget.buildingId);
 
                   buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -65,13 +65,17 @@ class BLueToothClass {
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
+   bool isScanningOn(){
+    return FlutterBluePlus.isScanningNow;
+  }
+
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
     // print("himanshu 1");
 
     startbin();
     // print("himanshu 2");
-    FlutterBluePlus.startScan();
+    FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
       // print("himanshu 4");
@@ -80,10 +84,11 @@ class BLueToothClass {
           // print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          // print("mac $MacId    rssi $Rssi");
+
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
+            print("mac $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes
@@ -171,7 +176,7 @@ class BLueToothClass {
 
     }
     try {
-      await FlutterBluePlus.startScan();
+      await FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     } catch (e) {
 
     }

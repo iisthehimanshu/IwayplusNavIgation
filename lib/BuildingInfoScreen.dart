@@ -18,6 +18,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/Navigation.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
@@ -67,6 +68,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     }
   }
   bool bluetoohEnabled = false;
+  SingletonFunctionController controller = SingletonFunctionController();
 
   @override
   void initState() {
@@ -74,6 +76,23 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(widget.receivedAllBuildingList);
     apiCall();
     print("building list");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      processBuildingData().then((_) {
+        print("timestamppp1");
+        print(DateTime.timestamp());
+        print(allBuildingID);
+        controller.executeFunction();
+      });
+    });
+    // widget.receivedAllBuildingList!.forEach((element) {
+    //   g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
+    //   allBuildingID[element.sId!] = kk;
+    // });
+
+    // controller.executeFunction();
+
+  }
+  Future<void> processBuildingData() async {
     widget.receivedAllBuildingList!.forEach((element) {
       g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;

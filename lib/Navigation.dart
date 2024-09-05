@@ -2950,7 +2950,7 @@ if(SingletonFunctionController.timer!=null){
 
     // Draw the base marker image below the text
     final double imageX = (canvasWidth - imageSize.width) / 2;
-    final double imageY = textHeight + 10.0; // Padding between text and image
+    final double imageY = textHeight + 5.0; // Padding between text and image
     canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
 
     // Generate the final image
@@ -2971,31 +2971,59 @@ if(SingletonFunctionController.timer!=null){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      if(key != skipID){
-        currentCoordinated = innerMap;
-        if (currentCoordinated.isNotEmpty) {
-          List<LatLng> points = [];
-          List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-          entryList.sort((a, b) => a.key.compareTo(b.key));
-          LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
-          sortedCoordinates.forEach((key, value) {
-            points.add(value);
-          });
-          setState(() {
-            blurPatch.add(
-              Polygon(
-                  polygonId: PolygonId('patch${points}'),
-                  points: points,
-                  strokeWidth: 1,
-                  strokeColor: Colors.black,
-                  fillColor: Color(0xffE5F9FF),
-                  geodesic: false,
-                  consumeTapEvents: true,
-                  zIndex: 5),
-            );
-          });
+      if(key != skipID ){
+        if(key != PathState.sourceBid || key!= PathState.destinationBid){
+          currentCoordinated = innerMap;
+          if (currentCoordinated.isNotEmpty) {
+            List<LatLng> points = [];
+            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+            entryList.sort((a, b) => a.key.compareTo(b.key));
+            LinkedHashMap<int, LatLng> sortedCoordinates =
+            LinkedHashMap.fromEntries(entryList);
+            sortedCoordinates.forEach((key, value) {
+              points.add(value);
+            });
+            setState(() {
+              blurPatch.add(
+                Polygon(
+                    polygonId: PolygonId('patch${points}'),
+                    points: points,
+                    strokeWidth: 1,
+                    strokeColor: Colors.black,
+                    fillColor: Color(0xffE5F9FF),
+                    geodesic: false,
+                    consumeTapEvents: true,
+                    zIndex: 5),
+              );
+            });
+          }
+        }else{
+          currentCoordinated = innerMap;
+          if (currentCoordinated.isNotEmpty) {
+            List<LatLng> points = [];
+            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+            entryList.sort((a, b) => a.key.compareTo(b.key));
+            LinkedHashMap<int, LatLng> sortedCoordinates =
+            LinkedHashMap.fromEntries(entryList);
+            sortedCoordinates.forEach((key, value) {
+              points.add(value);
+            });
+            setState(() {
+              blurPatch.add(
+                Polygon(
+                    polygonId: PolygonId('patch${points}'),
+                    points: points,
+                    strokeWidth: 1,
+                    strokeColor: Colors.black,
+                    fillColor: Color(0xffE5F9FF),
+                    geodesic: false,
+                    consumeTapEvents: true,
+                    zIndex: 5),
+              );
+            });
+          }
         }
+
       }
     });
     restBuildingMarker.clear();

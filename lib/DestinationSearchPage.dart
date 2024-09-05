@@ -373,12 +373,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   ];
+
+
+
   void onChipSelected(int index) {
     setState(() {
       selectedChipIndex = index;
     });
   }
-  Set<String> optionListItemBuildingName = {};
+  Set<String> optionListItemBuildingName = {"AC02","AC03","AC04"};
   List<Widget> searcCategoryhResults = [];
   FlutterTts flutterTts  = FlutterTts();
 
@@ -389,7 +392,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
 
-  void search(String searchText) {
+  void search(String searchText,{String wantToFilter=''}) {
     setState(() {
       if (searchText.isEmpty) {
         return;
@@ -430,7 +433,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       } else {
         category = false;
         vall = -1;
-topCategory=false;
+        topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
 
@@ -584,6 +587,7 @@ topCategory=false;
   Color micColor = Colors.black;
   bool micselected = false;
   int vall = -1;
+  int newvall = -1;
   int lastval =-1;
 
 
@@ -813,6 +817,58 @@ topCategory=false;
                   direction: Axis.horizontal,
                 ),
               ),
+              !category ? Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: newvall,
+                  onChanged: (val) {
+
+                    if(HelperClass.SemanticEnabled) {
+                      speak("${optionListItemBuildingName.toList()[val]} selected");
+                    }
+
+                    selectedButton = optionListItemBuildingName.toList()[val];
+                    setState(() => newvall = val);
+                    lastval = val;
+
+
+                    //_controller.text = optionListItemBuildingName.toList()[val];
+                    search(optionListItemBuildingName.toList()[val]);
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: optionListItemBuildingName.toList(),
+                    value: (i, v) => i,
+                    label: (i, v) => v,
+                  ),
+
+                  choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      newvall = -1;
+                    }
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
+                      text: optionListItemBuildingName.toList()[i],
+                      onSelect: item.select!,
+                      selected: item.selected,
+
+                      onTap: (String Text) {
+                        if (Text.isNotEmpty) {
+                          search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                        } else {
+                          search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                          _controller.text="";
+                          searchResults = [];
+                          searcCategoryhResults = [];
+                          newvall = -1;
+                        }
+                      },
+                    );
+                  },
+                  direction: Axis.horizontal,
+                ),
+              ) : Container(),
+
               SizedBox(height: 4,),
               Divider(thickness: 6,color: Color(0xfff2f3f5)),
               Flexible(

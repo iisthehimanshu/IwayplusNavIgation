@@ -48,6 +48,7 @@ import 'Elements/locales.dart';
 import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'VersioInfo.dart';
+import 'centeroid.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
 import 'package:turf/turf.dart' as turf;
@@ -162,6 +163,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Map<String, Set<Polygon>> closedpolygons = Map();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
+  Set<Marker> builidngNameMarker = Set();
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<String, Map<int, Set<Marker>>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -249,8 +251,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   final List<InitMarkerModel> mapMarkerLocationMapAndName = [];
   final Map<LatLng, String> _markerLocationsMap = {};
   final Map<LatLng, String> _markerLocationsMapLanName = {};
+  final Map<LatLng, String> _markerLocationsMapLanNameBID = {};
 
   /// Inits [Fluster] and all the markers with network images and updates the loading state.
+
   void _initMarkers() async {
     print("calledinitmarker");
     final List<MapMarker> markers = [];
@@ -258,176 +262,265 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print(mapMarkerLocationMapAndName.length);
 
     // mapMarkerLocationMapAndName.forEach((element) async {
-    //   print(element.tag);
-    //
     //   final String values = element.tag;
     //   final String LandmarkValue = element.landMarkName;
-    //
-    //   if (values == 'Lift') {
-    //     Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-    //     markers.add(
-    //       MapMarker(
-    //         id: element.latLng.toString(),
-    //         position: element.latLng,
-    //         icon: BitmapDescriptor.fromBytes(iconMarker),
-    //         Landmarkname: LandmarkValue,
-    //         mapController: _googleMapController,
-    //       ),
-    //     );
-    //   } else if (values == 'Entry') {
-    //     Uint8List iconMarker =
-    //         await getImagesFromMarker('assets/log-in.png', 65);
-    //     try {
+    //   if(closestBuildingId!=""){
+    //     print("INIF");
+    //     if (values == 'Lift' && element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
+    //       markers.add(
+    //         MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController,
+    //         ),
+    //       );
+    //     } else if (values == 'Entry'&& element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/log-in.png', 65);
+    //       try {
+    //         markers.add(
+    //           MapMarker(
+    //               id: element.latLng.toString(),
+    //               position: element.latLng,
+    //               icon: BitmapDescriptor.fromBytes(iconMarker),
+    //               Landmarkname: LandmarkValue,
+    //               mapController: _googleMapController,
+    //               offset: [0.5,0.5]
+    //           ),
+    //         );
+    //       } catch (e) {}
+    //     } else if (values == 'Pharmacy'&& element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/hospital.png', 70);
     //       markers.add(
     //         MapMarker(
     //             id: element.latLng.toString(),
     //             position: element.latLng,
     //             icon: BitmapDescriptor.fromBytes(iconMarker),
     //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController,
-    //             offset: [0.5,0.5]
+    //             mapController: _googleMapController),
+    //       );
+    //     } else if (values == 'Kitchen'&& element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/cutlery.png', 60);
+    //       markers.add(
+    //         MapMarker(
+    //             id: element.latLng.toString(),
+    //             position: element.latLng,
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //             Landmarkname: LandmarkValue,
+    //             mapController: _googleMapController),
+    //       );
+    //     } else if (values == 'Female'&& element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
+    //       markers.add(
+    //         MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController,
     //         ),
     //       );
-    //     } catch (e) {}
-    //   } else if (values == 'Pharmacy') {
-    //     Uint8List iconMarker =
-    //         await getImagesFromMarker('assets/hospital.png', 70);
-    //     markers.add(
-    //       MapMarker(
+    //     } else if (values == 'Male'&& element.specBuildingID == closestBuildingId) {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
+    //       markers.add(
+    //         MapMarker(
     //           id: element.latLng.toString(),
     //           position: element.latLng,
     //           icon: BitmapDescriptor.fromBytes(iconMarker),
     //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController),
-    //     );
-    //   } else if (values == 'Kitchen') {
-    //     Uint8List iconMarker =
-    //         await getImagesFromMarker('assets/cutlery.png', 60);
-    //     markers.add(
-    //       MapMarker(
+    //           mapController: _googleMapController,
+    //         ),
+    //       );
+    //     }
+    //   }else{
+    //     if (values == 'Lift') {
+    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
+    //       markers.add(
+    //         MapMarker(
     //           id: element.latLng.toString(),
     //           position: element.latLng,
     //           icon: BitmapDescriptor.fromBytes(iconMarker),
     //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController),
-    //     );
-    //   } else if (values == 'Female') {
-    //     Uint8List iconMarker =
-    //         await getImagesFromMarker('assets/Femaletoilet.png', 65);
-    //     markers.add(
-    //       MapMarker(
-    //         id: element.latLng.toString(),
-    //         position: element.latLng,
-    //         icon: BitmapDescriptor.fromBytes(iconMarker),
-    //         Landmarkname: LandmarkValue,
-    //         mapController: _googleMapController,
-    //       ),
-    //     );
-    //   } else if (values == 'Male') {
-    //     Uint8List iconMarker =
-    //         await getImagesFromMarker('assets/Maletoilet.png', 65);
-    //     markers.add(
-    //       MapMarker(
-    //         id: element.latLng.toString(),
-    //         position: element.latLng,
-    //         icon: BitmapDescriptor.fromBytes(iconMarker),
-    //         Landmarkname: LandmarkValue,
-    //         mapController: _googleMapController,
-    //       ),
-    //     );
+    //           mapController: _googleMapController,
+    //         ),
+    //       );
+    //     } else if (values == 'Entry') {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/log-in.png', 65);
+    //       try {
+    //         markers.add(
+    //           MapMarker(
+    //               id: element.latLng.toString(),
+    //               position: element.latLng,
+    //               icon: BitmapDescriptor.fromBytes(iconMarker),
+    //               Landmarkname: LandmarkValue,
+    //               mapController: _googleMapController,
+    //               offset: [0.5,0.5]
+    //           ),
+    //         );
+    //       } catch (e) {}
+    //     } else if (values == 'Pharmacy') {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/hospital.png', 70);
+    //       markers.add(
+    //         MapMarker(
+    //             id: element.latLng.toString(),
+    //             position: element.latLng,
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //             Landmarkname: LandmarkValue,
+    //             mapController: _googleMapController),
+    //       );
+    //     } else if (values == 'Kitchen') {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/cutlery.png', 60);
+    //       markers.add(
+    //         MapMarker(
+    //             id: element.latLng.toString(),
+    //             position: element.latLng,
+    //             icon: BitmapDescriptor.fromBytes(iconMarker),
+    //             Landmarkname: LandmarkValue,
+    //             mapController: _googleMapController),
+    //       );
+    //     } else if (values == 'Female') {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
+    //       markers.add(
+    //         MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController,
+    //         ),
+    //       );
+    //     } else if (values == 'Male') {
+    //       Uint8List iconMarker =
+    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
+    //       markers.add(
+    //         MapMarker(
+    //           id: element.latLng.toString(),
+    //           position: element.latLng,
+    //           icon: BitmapDescriptor.fromBytes(iconMarker),
+    //           Landmarkname: LandmarkValue,
+    //           mapController: _googleMapController,
+    //         ),
+    //       );
+    //     }
     //   }
+    //
+    //
+    //
+    //
     // });
-    for (LatLng keys in _markerLocationsMap.keys) {
-      final String values = _markerLocationsMap[keys]!;
-      final String LandmarkValue = _markerLocationsMapLanName[keys]!;
+    try {
+      for (LatLng keys in _markerLocationsMap.keys) {
+        final String values = _markerLocationsMap[keys]!;
+        final String LandmarkValue = _markerLocationsMapLanName[keys]!;
+        final String buildingValue = _markerLocationsMapLanNameBID[keys]!;
 
-      // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
-      // print("values$values");
-      final BitmapDescriptor markerImage =
-      await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
-      //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
+        // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
+        // print("values$values");
+        final BitmapDescriptor markerImage =
+        await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+        //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
-      if (values == 'Lift') {
-        Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-        markers.add(
-          MapMarker(
-            id: keys.toString(),
-            position: keys,
-            icon: BitmapDescriptor.fromBytes(iconMarker),
-            Landmarkname: LandmarkValue,
-            mapController: _googleMapController,
-          ),
-        );
-      } else if (values == 'Entry') {
-        Uint8List iconMarker =
-        await getImagesFromMarker('assets/log-in.png', 65);
-        try {
+        if (values == 'Lift') {
+          Uint8List iconMarker = await getImagesFromMarker(
+              'assets/MapLift.png', 65);
           markers.add(
             MapMarker(
-              id: keys.toString(),
+              id: keys.toString() + buildingValue,
               position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
               mapController: _googleMapController,
             ),
           );
-        } catch (e) {}
-      } else if(values == 'Pharmacy'){
-        Uint8List iconMarker = await getImagesFromMarker('assets/hospital.png', 70);
-        markers.add(
-          MapMarker(
-              id: keys.toString(),
+        } else if (values == 'Entry') {
+          Uint8List iconMarker =
+          await getImagesFromMarker('assets/MapEntry.png', 65);
+          try {
+            markers.add(
+              MapMarker(
+                id: keys.toString() + buildingValue,
+                position: keys,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
+                Landmarkname: LandmarkValue,
+                mapController: _googleMapController,
+              ),
+            );
+          } catch (e) {}
+        } else if (values == 'Pharmacy') {
+          Uint8List iconMarker = await getImagesFromMarker(
+              'assets/hospital.png', 70);
+          markers.add(
+            MapMarker(
+                id: keys.toString() + buildingValue,
+                position: keys,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
+                Landmarkname: LandmarkValue,
+                mapController: _googleMapController
+            ),
+          );
+        } else if (values == 'Kitchen') {
+          Uint8List iconMarker = await getImagesFromMarker(
+              'assets/cutlery.png', 60);
+          markers.add(
+            MapMarker(
+                id: keys.toString() + buildingValue,
+                position: keys,
+                icon: BitmapDescriptor.fromBytes(iconMarker),
+                Landmarkname: LandmarkValue,
+                mapController: _googleMapController
+            ),
+          );
+        } else if (values == 'Female') {
+          Uint8List iconMarker =
+          await getImagesFromMarker('assets/MapFemaleWashroom.png', 65);
+          markers.add(
+            MapMarker(
+              id: keys.toString() + buildingValue,
               position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController
-          ),
-        );
-      } else if(values == 'Kitchen'){
-        Uint8List iconMarker = await getImagesFromMarker('assets/cutlery.png', 60);
-        markers.add(
-          MapMarker(
-              id: keys.toString(),
+              mapController: _googleMapController,
+            ),
+          );
+        } else if (values == 'Male') {
+          Uint8List iconMarker =
+          await getImagesFromMarker('assets/MapMaleWashroom.png', 65);
+          markers.add(
+            MapMarker(
+              id: keys.toString() + buildingValue,
               position: keys,
               icon: BitmapDescriptor.fromBytes(iconMarker),
               Landmarkname: LandmarkValue,
-              mapController: _googleMapController
-          ),
-        );
-      } else if (values == 'Female') {
-        Uint8List iconMarker =
-        await getImagesFromMarker('assets/Femaletoilet.png', 65);
-        markers.add(
-          MapMarker(
-            id: keys.toString(),
-            position: keys,
-            icon: BitmapDescriptor.fromBytes(iconMarker),
-            Landmarkname: LandmarkValue,
-            mapController: _googleMapController,
-          ),
-        );
-      } else if (values == 'Male') {
-        Uint8List iconMarker =
-        await getImagesFromMarker('assets/Maletoilet.png', 65);
-        markers.add(
-          MapMarker(
-            id: keys.toString(),
-            position: keys,
-            icon: BitmapDescriptor.fromBytes(iconMarker),
-            Landmarkname: LandmarkValue,
-            mapController: _googleMapController,
-          ),
-        );
-      }
+              mapController: _googleMapController,
+            ),
+          );
+        }
 
-      // markers.add(
-      //   MapMarker(
-      //     id: keys.toString(),
-      //     position: keys,
-      //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
-      //   ),
-      // );
+        // markers.add(
+        //   MapMarker(
+        //     id: keys.toString(),
+        //     position: keys,
+        //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
+        //   ),
+        // );
+      }
+    }catch(e){
+      print("_initMarkersexception");
     }
+
+
+    
 
 
     _clusterManager = await MapHelper.initClusterManager(
@@ -458,11 +551,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           70,
           _googleMapController);
 
+
+      print("_markers.length");
+      print(_markers.length);
+      updatedMarkers.forEach((currentMarker){
+        print("currentMarker.markerId");
+        if(currentMarker.markerId.toString().contains(closestBuildingId)){
+          currentMarker.visible = true;
+        } else{
+          currentMarker.visible = false;
+        }
+      });
       _markers
         ..clear()
         ..addAll(updatedMarkers);
-      print("_markers.length");
-      print(_markers.length);
+
+
+      print(updatedMarkers);
 
       setState(() {
         _areMarkersLoading = false;
@@ -2238,8 +2343,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
     SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
     createPatch(patchData);
-    findCentroid(
-        patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
+    findCentroid(patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
+
     tools.globalData = patchData;
     tools.setBuildingAngle(patchData.patchData!.buildingAngle!);
 
@@ -2424,10 +2529,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             SingletonFunctionController.building.floorDimenssion[key] = currentFloorDimensions;
           }
         }
-          createMarkers(otherLandmarkData, 0, bid: key);
-
-
-
+        createMarkers(otherLandmarkData, 0, bid: key);
         createotherARPatch(
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
@@ -2454,7 +2556,6 @@ if(SingletonFunctionController.timer!=null){
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
 
     await Future.delayed(Duration(seconds: 3));
-
     setState(() {
       isLoading = false;
       isBlueToothLoading = false;
@@ -2798,35 +2899,86 @@ if(SingletonFunctionController.timer!=null){
       });
     }
   }
+  Future<BitmapDescriptor> bitmapDescriptorFromTextAndImageForPatchTransition(
+      String text, String imagePath,
+      {Size imageSize = const Size(50, 50)}) async {
+    print("bitmapDescriptorFromTextAndImage $text");
+    // Load the base marker image
+    final ByteData baseImageBytes = await rootBundle.load(imagePath);
+    final ui.Codec markerImageCodec = await ui.instantiateImageCodec(
+        baseImageBytes.buffer.asUint8List(),
+        targetWidth: imageSize.width.toInt(),
+        targetHeight: imageSize.height.toInt());
+    final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+    final ui.Image markerImage = markerImageFrame.image;
 
-  void showRestBuildingPatch(String skipID){
-    print("showRestBuildingPatch");
+    // Set the text style and layout
+    final TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontSize: 40.0, // Increased font size
+        color: Colors.black,
+        fontFamily: "Roboto",
+        fontWeight: FontWeight.w500,
+        height: 23/16,
+      ),
+
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: double.infinity,
+    );
+
+    // Calculate the overall canvas size
+    final double textWidth = textPainter.width;
+    final double textHeight = textPainter.height;
+    final double canvasWidth =
+    textWidth > imageSize.width ? textWidth : imageSize.width;
+    final double canvasHeight =
+        textHeight + imageSize.height + 20.0; // Increased padding
+
+    final PictureRecorder pictureRecorder = PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Draw the text centered above the marker image
+    final double textX = (canvasWidth - textWidth) / 2;
+    final double textY = 0.0;
+    textPainter.paint(canvas, Offset(textX, textY));
+
+    // Draw the base marker image below the text
+    final double imageX = (canvasWidth - imageSize.width) / 2;
+    final double imageY = textHeight + 10.0; // Padding between text and image
+    canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
+
+    // Generate the final image
+    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
+
+    final ByteData? byteData =
+    await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List? pngBytes = byteData?.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(pngBytes!);
+  }
+
+  Set<Marker> restBuildingMarker = Set();
+  void patchTransition(String skipID){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
-    print("SingletonFunctionController.building.ARCoordinates.length");
-    print(SingletonFunctionController.building.ARCoordinates.length);
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
       if(key != skipID){
-        print("key != skipID ${key}");
         currentCoordinated = innerMap;
         if (currentCoordinated.isNotEmpty) {
-          print("_markers");
-          // print(_clusterManager.clusters(bbox, zoom));
-
-          print("currentCoordinated$currentCoordinated");
-          // print("$currentCoordinated");
-          // print("${currentCoordinated.length}");
           List<LatLng> points = [];
           List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-
-          // Sort the list by keys
           entryList.sort((a, b) => a.key.compareTo(b.key));
-
-          // Create a new LinkedHashMap from the sorted list
           LinkedHashMap<int, LatLng> sortedCoordinates =
           LinkedHashMap.fromEntries(entryList);
-
-          // Print the sorted map
           sortedCoordinates.forEach((key, value) {
             points.add(value);
           });
@@ -2842,16 +2994,29 @@ if(SingletonFunctionController.timer!=null){
                   consumeTapEvents: true,
                   zIndex: 5),
             );
-            print("patch.length ${patch.length}");
-
           });
-          print("blurPatch.length${blurPatch.length}");
         }
-      }else{
-
       }
+    });
+    restBuildingMarker.clear();
 
-
+    Building.allBuildingID.forEach((Key,Value) async {
+      if(Key!= skipID) {
+        String? showBuildingName ="";
+        Building.buildingData?.forEach((currKey,currValue){
+          if(currKey == Key){
+            showBuildingName = currValue;
+          }
+        });
+        restBuildingMarker.add(
+          Marker(
+            markerId: MarkerId(Key + Value.toString()),
+            position: Value,
+            icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
+                showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
+          ),
+        );
+      }
     });
   }
 
@@ -3006,15 +3171,18 @@ if(SingletonFunctionController.timer!=null){
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     // Convert LatLng to a list of Points for Turf
-    List<turf.Position> coordinates = polygonPoints
-        .map((point) => turf.Position(point.longitude, point.latitude))
+    List<GeoPoint> coordinates = polygonPoints
+        .map((point) => GeoPoint(point.latitude, point.longitude))
         .toList();
 
     // Create a Polygon object for Turf
-    turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
+    //turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
+
+    GeoPoint centroid = calculatePolygonCentroid(coordinates);
 
     // Convert centroid back to LatLng
-    return LatLng(turf.centroid(polygon).geometry!.coordinates[1]!.toDouble(), turf.centroid(polygon).geometry!.coordinates[0]!.toDouble());
+    print(LatLng(centroid.latitude, centroid.longitude));
+    return LatLng(centroid.latitude, centroid.longitude);
   }
 
 
@@ -3522,7 +3690,7 @@ if(SingletonFunctionController.timer!=null){
                               polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                               '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xff0000FF),
+                          : Color(0xff1496c2).withOpacity(1.0),
                       onTap: () {
                         print("wahsroom tapped with ID ${polyArray.id}");
                         _googleMapController.animateCamera(
@@ -3576,7 +3744,7 @@ if(SingletonFunctionController.timer!=null){
                               polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                               '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffFF69B4),
+                          : Color(0xffFF69B4).withOpacity(0.4),
                       onTap: () {
                         _googleMapController.animateCamera(
                           CameraUpdate.newLatLngZoom(
@@ -3965,36 +4133,8 @@ if(SingletonFunctionController.timer!=null){
               // _markerLocations[LatLng(value[0], value[1])] = '1';
               mapMarkerLocationMapAndName.add(InitMarkerModel('Lift', landmarks[i].name!, LatLng(value[0], value[1]), landmarks[i].buildingID!));
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
-              // _markers!.add(Marker(
-              //   markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
-              //   position: LatLng(value[0], value[1]),
-              //   icon: BitmapDescriptor.fromBytes(iconMarker),
-              // ));
-
-              // Markers.add(Marker(
-              //     markerId: MarkerId("Lift ${landmarks[i].properties!.polyId}"),
-              //     position: LatLng(value[0], value[1]),
-              //     icon: BitmapDescriptor.fromBytes(iconMarker),
-              //     visible: false,
-              //     infoWindow: InfoWindow(
-              //       title: landmarks[i].name,
-              //       snippet: 'Additional Information',
-              //       // Replace with additional information
-              //       onTap: () {
-              //         if (SingletonFunctionController.building.selectedLandmarkID !=
-              //             landmarks[i].properties!.polyId) {
-              //           SingletonFunctionController.building.selectedLandmarkID =
-              //               landmarks[i].properties!.polyId;
-              //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
-              //           _isLandmarkPanelOpen = true;
-              //           addselectedMarker(LatLng(value[0], value[1]));
-              //         }
-              //       },
-              //     ))
-              // );
+              _markerLocationsMapLanName[LatLng(value[0], value[1])] = landmarks[i].name!;
+              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
             });
           } else if (landmarks[i].name != null &&
               landmarks[i].name!.toLowerCase().contains("pharmacy")) {
@@ -4008,6 +4148,8 @@ if(SingletonFunctionController.timer!=null){
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
+              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
+
             });
           }
           // else if (landmarks[i].name != null &&
@@ -4036,6 +4178,8 @@ if(SingletonFunctionController.timer!=null){
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
+              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
+
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
               //     position: LatLng(value[0], value[1]),
@@ -4073,6 +4217,8 @@ if(SingletonFunctionController.timer!=null){
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
+              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
+
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
               //     position: LatLng(value[0], value[1]),
@@ -4116,6 +4262,8 @@ if(SingletonFunctionController.timer!=null){
                       : 'Entry';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
                   landmarks[i].name!;
+              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] = landmarks[i].buildingID!;
+
 
 
               // _markers!.add(Marker(
@@ -7151,7 +7299,6 @@ String destiName='';
 
       });
 
-      print(BuildingName);
     }
     minHight = MediaQuery.of(context).size.height/2.3;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -9914,11 +10061,12 @@ String destiName='';
   //   }
   //
   // }
-
+  String closestBuildingId = "";
+  String newBuildingID = "";
   void focusBuildingChecker(CameraPosition position) {
     LatLng currentLatLng = position.target;
-    String closestBuildingId = "";
-    String newBuildingID = "";
+    // String closestBuildingId = "";
+    
     double? minDistance;
 
     Building.allBuildingID.forEach((key, value) {
@@ -9941,10 +10089,10 @@ String destiName='';
       print("newBuildingID");
       print(newBuildingID);
       print(closestBuildingId);
-      newBuildingID = closestBuildingId;
-      showRestBuildingPatch(closestBuildingId);
+      patchTransition(closestBuildingId);
 
     }
+    newBuildingID = closestBuildingId;
 
     // Store the nearest SingletonFunctionController.building ID
     if (closestBuildingId.isNotEmpty) {
@@ -10131,7 +10279,7 @@ String destiName='';
                     polylines: getCombinedPolylines(),
                     markers: getCombinedMarkers()
                         .union(_markers)
-                        .union(focusturnArrow).union(Markers),
+                        .union(focusturnArrow).union(Markers).union(restBuildingMarker),
                     onTap: (x) {
                       mapState.interaction = true;
                     },
@@ -10326,12 +10474,12 @@ String destiName='';
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                        "floor ${user.floor}\n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                             value: user.theta,

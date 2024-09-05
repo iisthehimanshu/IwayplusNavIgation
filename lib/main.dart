@@ -52,6 +52,40 @@ final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+
+
+  WakelockPlus.enable();
+  var directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+  Hive.registerAdapter(LandMarkApiModelAdapter());
+  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
+  Hive.registerAdapter(PatchAPIModelAdapter());
+  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
+  Hive.registerAdapter(PolyLineAPIModelAdapter());
+  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
+  Hive.registerAdapter(BuildingAllAPIModelAdapter());
+  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+  Hive.registerAdapter(BeaconAPIModelAdapter());
+  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
+  Hive.registerAdapter(BuildingAPIModelAdapter());
+  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
+  Hive.registerAdapter(SignINAPIModelAdapter());
+  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+  Hive.registerAdapter(OutDoorModelAdapter());
+  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+  Hive.registerAdapter(WayPointModelAdapter());
+  await Hive.openBox<WayPointModel>('WayPointModelFile');
+  Hive.registerAdapter(DataVersionLocalModelAdapter());
+  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+  await Hive.openBox('Favourites');
+  await Hive.openBox('UserInformation');
+
+  await Hive.openBox('Filters');
+  await Hive.openBox('SignInDatabase');
+  await Hive.openBox('LocationPermission');
+  await Hive.openBox('VersionData');
   await Firebase.initializeApp(
     //options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -98,38 +132,6 @@ Future<void> main() async {
     }
   });
 
-  WakelockPlus.enable();
-  var directory = await getApplicationDocumentsDirectory();
-  Hive.init(directory.path);
-  Hive.registerAdapter(LandMarkApiModelAdapter());
-  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
-  Hive.registerAdapter(PatchAPIModelAdapter());
-  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
-  Hive.registerAdapter(PolyLineAPIModelAdapter());
-  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
-  Hive.registerAdapter(BuildingAllAPIModelAdapter());
-  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
-  Hive.registerAdapter(BeaconAPIModelAdapter());
-  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
-  Hive.registerAdapter(BuildingAPIModelAdapter());
-  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  Hive.registerAdapter(SignINAPIModelAdapter());
-  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
-  Hive.registerAdapter(OutDoorModelAdapter());
-  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
-  Hive.registerAdapter(WayPointModelAdapter());
-  await Hive.openBox<WayPointModel>('WayPointModelFile');
-  Hive.registerAdapter(DataVersionLocalModelAdapter());
-  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-  await Hive.openBox('Favourites');
-  await Hive.openBox('UserInformation');
-
-  await Hive.openBox('Filters');
-  await Hive.openBox('SignInDatabase');
-  await Hive.openBox('LocationPermission');
-  await Hive.openBox('VersionData');
   // FlutterError.onError = (FlutterErrorDetails details) {
   //   // Log the error or send it to a monitoring service
   //   print("global error handler");

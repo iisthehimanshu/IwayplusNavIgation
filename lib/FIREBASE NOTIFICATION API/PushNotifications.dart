@@ -8,7 +8,6 @@ import '../main.dart';
 // import '../userdata.dart';
 
 class PushNotifications {
-
   static var signInBox = Hive.box('SignInDatabase');
 
 

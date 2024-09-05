@@ -10,6 +10,7 @@ import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'guestloginapi.dart';
 
+
 class buildingAllApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
   String token = "";

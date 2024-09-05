@@ -2224,7 +2224,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       resBeacons = apibeaconmap;
     });
 
-    var patchData = await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
+    var patchData =
+        await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
+    Building.buildingData ??= Map();
+    Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
     building.patchData[patchData.patchData!.buildingID!] = patchData;
     createPatch(patchData);
     findCentroid(
@@ -2351,6 +2354,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         } catch (e) {}
 
         var patchData = await patchAPI().fetchPatchData(id: key);
+        Building.buildingData ??= Map();
+        Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
         building.patchData[patchData.patchData!.buildingID!] = patchData;
         if(key != buildingAllApi.outdoorID){
           createotherPatch(key,patchData);
@@ -5133,58 +5138,69 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         double destinationLat=double.parse(source.properties!.latitude!);
         double destinationLng=double.parse(source.properties!.longitude!);
 
-        ///campusPath algorithm
-        if (CampusSourceEntry != null &&
-            CampusDestinationEntry != null &&
-            CampusSourceEntry.coordinateX != null &&
-            CampusSourceEntry.coordinateY != null &&
-            CampusDestinationEntry.coordinateX != null &&
-            CampusDestinationEntry.coordinateY != null &&
-            CampusSourceEntry.floor != null &&
-            CampusSourceEntry.buildingID != null) {
-          try{
-            await fetchroute(
-              CampusSourceEntry.coordinateX!,
-              CampusSourceEntry.coordinateY!,
-              CampusDestinationEntry.coordinateX!,
-              CampusDestinationEntry.coordinateY!,
-              CampusSourceEntry.floor!,
-              bid: CampusSourceEntry.buildingID,
-              renderDestination: false,
-              renderSource: false
-            );
-          }catch(e){
-            print("error in campus way finding $e");
-            CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-          }
+        await fetchroute(
+            CampusSourceEntry!.coordinateX!,
+            CampusSourceEntry.coordinateY!,
+            CampusDestinationEntry!.coordinateX!,
+            CampusDestinationEntry.coordinateY!,
+            CampusSourceEntry.floor!,
+            bid: CampusSourceEntry.buildingID,
+            renderDestination: false,
+            renderSource: false
+        );
 
-        }else{
-          if (CampusSourceEntry == null) {
-            print('CampusSourceEntry is null');
-          }
-          if (CampusDestinationEntry == null) {
-            print('CampusDestinationEntry is null');
-          }
-          if (CampusSourceEntry?.coordinateX == null) {
-            print('CampusSourceEntry.coordinateX is null');
-          }
-          if (CampusSourceEntry?.coordinateY == null) {
-            print('CampusSourceEntry.coordinateY is null');
-          }
-          if (CampusDestinationEntry?.coordinateX == null) {
-            print('CampusDestinationEntry.coordinateX is null');
-          }
-          if (CampusDestinationEntry?.coordinateY == null) {
-            print('CampusDestinationEntry.coordinateY is null');
-          }
-          if (CampusSourceEntry?.floor == null) {
-            print('CampusSourceEntry.floor is null');
-          }
-          if (CampusSourceEntry?.buildingID == null) {
-            print('CampusSourceEntry.buildingID is null');
-          }
-          CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-        }
+        // ///campusPath algorithm
+        // if (CampusSourceEntry != null &&
+        //     CampusDestinationEntry != null &&
+        //     CampusSourceEntry.coordinateX != null &&
+        //     CampusSourceEntry.coordinateY != null &&
+        //     CampusDestinationEntry.coordinateX != null &&
+        //     CampusDestinationEntry.coordinateY != null &&
+        //     CampusSourceEntry.floor != null &&
+        //     CampusSourceEntry.buildingID != null) {
+        //   try{
+        //     await fetchroute(
+        //       CampusSourceEntry.coordinateX!,
+        //       CampusSourceEntry.coordinateY!,
+        //       CampusDestinationEntry.coordinateX!,
+        //       CampusDestinationEntry.coordinateY!,
+        //       CampusSourceEntry.floor!,
+        //       bid: CampusSourceEntry.buildingID,
+        //       renderDestination: false,
+        //       renderSource: false
+        //     );
+        //   }catch(e){
+        //     print("error in campus way finding $e");
+        //     CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+        //   }
+        //
+        // }else{
+        //   if (CampusSourceEntry == null) {
+        //     print('CampusSourceEntry is null');
+        //   }
+        //   if (CampusDestinationEntry == null) {
+        //     print('CampusDestinationEntry is null');
+        //   }
+        //   if (CampusSourceEntry?.coordinateX == null) {
+        //     print('CampusSourceEntry.coordinateX is null');
+        //   }
+        //   if (CampusSourceEntry?.coordinateY == null) {
+        //     print('CampusSourceEntry.coordinateY is null');
+        //   }
+        //   if (CampusDestinationEntry?.coordinateX == null) {
+        //     print('CampusDestinationEntry.coordinateX is null');
+        //   }
+        //   if (CampusDestinationEntry?.coordinateY == null) {
+        //     print('CampusDestinationEntry.coordinateY is null');
+        //   }
+        //   if (CampusSourceEntry?.floor == null) {
+        //     print('CampusSourceEntry.floor is null');
+        //   }
+        //   if (CampusSourceEntry?.buildingID == null) {
+        //     print('CampusSourceEntry.buildingID is null');
+        //   }
+        //   CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+        // }
 
 
         /// source to source Entry finding
@@ -7123,7 +7139,6 @@ String destiName='';
 
        building.landmarkdata!.then((value){
         if(value.landmarksMap![destpoly]!=null){
-          print(value.landmarksMap![destpoly]!.venueName!);
           setState(() {
             BuildingName =  value.landmarksMap![destpoly]!.venueName!;
           });

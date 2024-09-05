@@ -14,6 +14,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/navigationTools.dart';
 import 'package:vibration/vibration.dart';
 
+import '../Cell.dart';
 import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
@@ -62,7 +63,7 @@ class DirectionHeader extends StatefulWidget {
 }
 
 class _DirectionHeaderState extends State<DirectionHeader> {
-  List<int> turnPoints = [];
+  List<Cell> turnPoints = [];
   BLueToothClass btadapter = new BLueToothClass();
   late Timer _timer;
   String turnDirection = "";
@@ -143,18 +144,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           , _currentLocale, prevpause:true);
     }else if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
 
-      turnPoints = tools.getTurnpoints(widget.user.pathobj.path[widget.user.pathobj.sourceFloor]!, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.pathobj.sourceFloor]!);
-      turnPoints.add(widget.user.pathobj.path[widget.user.pathobj.sourceFloor]!.last);
-      List<int> tp = tools.getTurnpoints(widget.user.pathobj.path[widget.user.pathobj.destinationFloor]!, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.pathobj.destinationFloor]!);
-      turnPoints.addAll(tp);
+      turnPoints = tools.getTurnpoints_inCell(widget.user.Cellpath);
+      turnPoints.add(widget.user.Cellpath.last);
 
       print("turnpoints $turnPoints");
 
-      (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
+      (widget.user.Cellpath.length%2==0)? turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-2]):turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-1]);
 
-      List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
-      int nextTurn = findNextTurn(turnPoints, remainingPath);
-      widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      List<Cell> remainingPath = widget.user.Cellpath.sublist(widget.user.pathobj.index+1);
+      Cell nextTurn = findNextTurn(turnPoints, remainingPath);
+        widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
         //print("p1 $angle");
@@ -526,7 +525,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   }
 
-  int findNextTurn(List<int> turns, List<int> path) {
+  Cell findNextTurn(List<Cell> turns, List<Cell> path) {
     // Iterate through the sorted list
     for (int i = 0; i < path.length; i++) {
       for(int j = 0; j< turns.length; j++){
@@ -540,7 +539,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(path.length >= widget.user.pathobj.index){
       return path[widget.user.pathobj.index];
     }else{
-      return 0;
+      return Cell(0, 0, 0, (double angle, {int? currPointer,int? totalCells}){}, 0.0, 0.0, "", 0);
     }
   }
 
@@ -623,29 +622,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             }
           });
         });
-        List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
+        List<Cell> remainingPath = widget.user.Cellpath.sublist(widget.user.pathobj.index+1);
         // print("nextTurn remainingPath $remainingPath");
         // print("nextturn turnpoint $turnPoints");
-        int nextTurn = findNextTurn(turnPoints, remainingPath);
+        Cell nextTurn = findNextTurn(turnPoints, remainingPath);
         // print("nextTurn $nextTurn");
         // print(remainingPath);
 
-        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn);
+        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn.node);
         // print("nextTurn index $nextTurnIndex");
 
-        if(turnPoints.contains(widget.user.path[widget.user.pathobj.index])){
-          if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
-          DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
+        if(turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index])){
+          if(DirectionIndex + 1 < widget.user.pathobj.directions.length) {
+            DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.Cellpath[widget.user.pathobj.index].node)+1;
+          }
           if(DirectionIndex >= widget.user.pathobj.directions.length){
             DirectionIndex = widget.user.pathobj.directions.length -1;
           }
         }
-        widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
-
-
+          widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
         double angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         if(widget.user.pathobj.index != 0){
+          print("Aaaaaa ${widget.user.Cellpath[widget.user.pathobj.index-1].x},${widget.user.Cellpath[widget.user.pathobj.index-1].y}");
+          print("Bbbbbb ${widget.user.Cellpath[widget.user.pathobj.index].x},${widget.user.Cellpath[widget.user.pathobj.index].y}");
+          print("Cccccc ${widget.user.Cellpath[widget.user.pathobj.index+1].x},${widget.user.Cellpath[widget.user.pathobj.index+1].y}");
            angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+           print("angleangleangleangle $angle");
         }
         double userangle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
 
@@ -654,7 +656,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if(userdirection == "Straight"){
           widget.direction = "Straight";
         }
-        int index = widget.user.path.indexOf(nextTurn);
+      if(widget.user.pathobj.index<3){
+        widget.direction = userdirection;
+      }
+
+      print("angleangleangleangle ${widget.direction }");
+
+      int index = widget.user.path.indexOf(nextTurn!.node);
         //print("index $index");
         double a =0;
         if(index+1 == widget.user.path.length){
@@ -722,7 +730,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                         _currentLocale,
                         '',
                         direc,
-                        nextTurn,""),
+                        nextTurn!.node,""),
                     _currentLocale);
               }
 
@@ -732,7 +740,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               if(!UserState.ttsOnlyTurns) {
                 speak(
                     convertTolng("You are approaching ${direc} turn",
-                        _currentLocale, '', direc, nextTurn, ""),
+                        _currentLocale, '', direc, nextTurn!.node, ""),
                     _currentLocale);
               }
               widget.user.move(widget.context);

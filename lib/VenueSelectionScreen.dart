@@ -42,6 +42,7 @@ import 'FIREBASE NOTIFICATION API/FCMServer.dart';
 import 'HomeNestedSearch.dart';
 import 'Navigation.dart';
 
+
 class VenueSelectionScreen extends StatefulWidget{
 
   VenueSelectionScreen({super.key});
@@ -120,10 +121,12 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       return pos;
   }
 
-  String _FCMToken = infoBox.get("FCMToken");
+  String? _FCMToken = infoBox.get("FCMToken");
 
   void apiCall() async  {
-    await FCMServer().sendFCM(_FCMToken);
+    if(_FCMToken != null){
+      await FCMServer().sendFCM(_FCMToken!);
+    }
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);
       setState(() {

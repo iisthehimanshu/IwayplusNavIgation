@@ -339,7 +339,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
 
-              highestweight >= 4.0) {
+              highestweight >= 5) {
 
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
@@ -1015,23 +1015,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ):Container(),
 
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //
-          //
-          //         Text(sumMap.toString()),
-          //         Text(binString),
-          //
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+
+                  Text(sumMap.toString()),
+                  Text(binString),
+
+                ],
+              ),
+            ),
+          ),
 
           // Container(
           //   width: 300,

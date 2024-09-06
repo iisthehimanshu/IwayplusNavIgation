@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:app_settings/app_settings.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -2251,12 +2252,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
       wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
-      print("Bluetooth permission is granted");
+      print("requestBluetoothConnectPermission Bluetooth permission is granted ");
       //widget.bluetoothGranted = true;
       // Permission granted, you can now perform Bluetooth operations
     } else {
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
       wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
+      print("requestBluetoothConnectPermission Bluetooth permission is denied ");
+
+
+
 
       // Permission denied, handle accordingly
     }
@@ -10414,6 +10419,7 @@ String destiName='';
                       width: 20,
                     ))
                 : Container(),
+
             Positioned(
               bottom: 150.0, // Adjust the position as needed
               right: 16.0,
@@ -10512,14 +10518,14 @@ String destiName='';
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                    "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
-                        "floor ${user.floor}\n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
+                    // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                             value: user.theta,
@@ -10772,6 +10778,14 @@ String destiName='';
                           0xff24B9B0), // Set the background color of the FAB
                     )
                         : Container(), // Adjust the height as needed// Adjust the height as needed
+                    // FloatingActionButton(
+                    //   onPressed: () async {
+                    //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
+                    //   },
+                    //   child: Icon(Icons.settings),
+                    //   backgroundColor: Color(
+                    //       0xff24B9B0), // Set the background color of the FAB
+                    // )
                   ],
                 ),
               ),

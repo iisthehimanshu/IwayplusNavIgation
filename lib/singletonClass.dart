@@ -34,8 +34,6 @@ class SingletonFunctionController {
       print(buildingAllApi.allBuildingID);
       await Future.wait(allBuildingID.entries.map((entry) async {
         var key = entry.key;
-        print("apibeaconmap");
-        print(apibeaconmap);
 
         var beaconData = await beaconapi().fetchBeaconData(key);
         if (building.beacondata == null) {

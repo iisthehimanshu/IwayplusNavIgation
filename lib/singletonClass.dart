@@ -14,19 +14,19 @@ import 'bluetooth_scanning.dart';
 class SingletonFunctionController {
   bool _isRunning = false;
   Completer<void>? _completer;
- static BLueToothClass btadapter = new BLueToothClass();
- static HashMap<String, beacon> apibeaconmap = HashMap();
- static Building building = Building(floor: Map(), numberOfFloors: Map());
- static Future<void>? timer;
+  static BLueToothClass btadapter = new BLueToothClass();
+  static HashMap<String, beacon> apibeaconmap = HashMap();
+  static Building building = Building(floor: Map(), numberOfFloors: Map());
+  static Future<void>? timer;
   Future<void> executeFunction(Map<String,LatLng> allBuildingID) async {
     if (_isRunning) {
       // Wait for the currently running instance to finish
       return _completer?.future;
     }
 
-      // Mark the function as running and create a new Completer
-      _isRunning = true;
-      _completer = Completer<void>();
+    // Mark the function as running and create a new Completer
+    _isRunning = true;
+    _completer = Completer<void>();
 
     try {
       // Perform your task here
@@ -35,17 +35,16 @@ class SingletonFunctionController {
       await Future.wait(allBuildingID.entries.map((entry) async {
         var key = entry.key;
 
-          var beaconData = await beaconapi().fetchBeaconData(key);
-          if (building.beacondata == null) {
-            building.beacondata = List.from(beaconData);
-          } else {
-            building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
-          }
+        var beaconData = await beaconapi().fetchBeaconData(key);
+        if (building.beacondata == null) {
+          building.beacondata = List.from(beaconData);
+        } else {
+          building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
+        }
 
-          for (var beacon in beaconData) {
-            if (beacon.name != null) {
-              apibeaconmap[beacon.name!] = beacon;
-            }
+        for (var beacon in beaconData) {
+          if (beacon.name != null) {
+            apibeaconmap[beacon.name!] = beacon;
           }
         }
         Building.apibeaconmap = apibeaconmap;
@@ -59,7 +58,7 @@ class SingletonFunctionController {
         timer= Future.delayed(Duration(seconds:9));
       });
 
- // Simulate a long-running task
+      // Simulate a long-running task
       print("Function completed.");
     } finally {
       // Mark the function as complete
@@ -68,4 +67,5 @@ class SingletonFunctionController {
       building.qrOpened=false;
       building.destinationQr=false;
     }
+  }
 }

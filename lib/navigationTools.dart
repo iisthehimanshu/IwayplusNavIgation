@@ -1786,6 +1786,27 @@ class tools {
     return distanceInFeet;
   }
 
+  static double calculateDistanceInFeet2(LatLng point1, LatLng point2) {
+    const double radiusOfEarthInMiles = 3958.8; // Radius of Earth in miles
+    const double feetPerMile = 5280; // Feet per mile
+
+    double toRadians(double degree) => degree * pi / 180.0;
+
+    double dLat = toRadians(point2.latitude - point1.latitude);
+    double dLon = toRadians(point2.longitude - point1.longitude);
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(toRadians(point1.latitude)) * cos(toRadians(point2.latitude)) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    double distanceInMiles = radiusOfEarthInMiles * c;
+    double distanceInFeet = distanceInMiles * feetPerMile;
+
+    return distanceInFeet;
+  }
+
 
   static double feetToMeters(int feet) {
     const double feetToMeterConversionFactor = 0.3048;

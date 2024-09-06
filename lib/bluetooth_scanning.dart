@@ -225,7 +225,7 @@ class BLueToothClass {
     for (int i = 0; i < BIN.length; i++) {
       BIN[i]!.clear();
     }
-    //HelperClass.showToast(BIN.toString());
+    print("entereddd");
     numberOfSample.clear();
     rs.clear();
   }

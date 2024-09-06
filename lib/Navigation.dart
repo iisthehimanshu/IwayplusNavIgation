@@ -599,6 +599,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     // StartPDR();
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+
+    if(UserCredentials().getUserOrentationSetting()=='Focus Mode'){
+      UserState.ttsOnlyTurns = true;
+    UserState.ttsAllStop = false;
+    }else{
+      UserState.ttsOnlyTurns = false;
+      UserState.ttsAllStop = false;
+    }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
     });
@@ -2296,9 +2304,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void apiCalls(context) async {
     await DataVersionApi()
         .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-
-    print("stateofeachvariable");
-    print("${SingletonFunctionController.building.destinationQr} || ${user.initialallyLocalised} || ${SingletonFunctionController.building.qrOpened}");
 
     _updateProgress();
 
@@ -4664,7 +4669,7 @@ if(SingletonFunctionController.timer!=null){
                                         left: 17,
                                       ),
                                       child: Text(
-                                        "${aerialDist.toStringAsFixed(2)} mtr",
+                                        "${aerialDist.toStringAsFixed(2)} m",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 10,
@@ -10556,6 +10561,7 @@ String destiName='';
                                     color: Colors.black),
                                 backgroundColor: Colors.blueAccent,
                                 onTap: () => {
+
                                   setState(() {
                                     _mainIcon = Icons.volume_down_outlined;
                                     _mainColor = Colors.blueAccent;
@@ -10763,6 +10769,9 @@ String destiName='';
                       child: FloatingActionButton(
                         onPressed:() async {
                           if(!user.isnavigating && !isLocalized){
+
+
+                            SingletonFunctionController.btadapter.emptyBin();
 
                             SingletonFunctionController.btadapter.stopScanning();
 

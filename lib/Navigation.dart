@@ -4763,6 +4763,7 @@ if(SingletonFunctionController.timer!=null){
                                         calculateroute(
                                                 snapshot.data!.landmarksMap!)
                                             .then((value) {
+                                              print("valuechangeddddddddd");
                                           calculatingPath = false;
                                           _isLandmarkPanelOpen = false;
                                           _isRoutePanelOpen = true;
@@ -5130,7 +5131,7 @@ if(SingletonFunctionController.timer!=null){
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
-
+    List<Future> fetchrouteFutures = [];
     print("polyidchecker ${PathState.sourcePolyID}");
     if(PathState.sourcePolyID == ""){
       PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
@@ -5176,13 +5177,13 @@ if(SingletonFunctionController.timer!=null){
         print("Calculateroute if statement");
         print(
             "${PathState.sourceX},${PathState.sourceY}    ${PathState.destinationX},${PathState.destinationY}");
-        await fetchroute(
+        fetchrouteFutures.add( fetchroute(
             PathState.sourceX,
             PathState.sourceY,
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid);
+            bid: PathState.destinationBid));
         SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
 
         if (markers.length > 0)
@@ -5212,19 +5213,19 @@ if(SingletonFunctionController.timer!=null){
 
         print(commonlifts);
 
-        await fetchroute(
+        fetchrouteFutures.add(fetchroute(
             commonlifts[0].x2!,
             commonlifts[0].y2!,
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
             bid: PathState.destinationBid,
-            liftName: commonlifts[0].name);
+            liftName: commonlifts[0].name));
 
 
-        await fetchroute(PathState.sourceX, PathState.sourceY,
+        fetchrouteFutures.add( fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-            bid: PathState.destinationBid,liftName: commonlifts[0].name);
+            bid: PathState.destinationBid,liftName: commonlifts[0].name));
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -5261,13 +5262,12 @@ if(SingletonFunctionController.timer!=null){
         }
 
         if(PathState.destinationBid == buildingAllApi.outdoorID){
-          print("here 1");
-          await fetchroute(CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationX, PathState.destinationY, CampusEntry.floor!,bid: CampusEntry.buildingID);
+          fetchrouteFutures.add( fetchroute(CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationX, PathState.destinationY, CampusEntry.floor!,bid: CampusEntry.buildingID));
           if (PathState.sourceFloor == buildingEntry!.floor) {
-            await fetchroute(PathState.sourceX, PathState.sourceY,
+            fetchrouteFutures.add( fetchroute(PathState.sourceX, PathState.sourceY,
                 buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false);
+                renderDestination: false));
             print("running source location no lift run");
           } else if (PathState.sourceFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
@@ -5281,13 +5281,13 @@ if(SingletonFunctionController.timer!=null){
               return;
             }
 
-            await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+            fetchrouteFutures.add( fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
                 buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false);
-            await fetchroute(PathState.sourceX, PathState.sourceY,
+                renderDestination: false));
+            fetchrouteFutures.add( fetchroute(PathState.sourceX, PathState.sourceY,
               commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-              bid: PathState.sourceBid,);
+              bid: PathState.sourceBid,));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
@@ -5304,7 +5304,7 @@ if(SingletonFunctionController.timer!=null){
           }
         }else{
           if (PathState.sourceFloor == buildingEntry!.floor) {
-            await fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, PathState.sourceX, PathState.sourceY, PathState.sourceFloor,bid: buildingEntry.buildingID,renderDestination: false);
+            fetchrouteFutures.add( fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, PathState.sourceX, PathState.sourceY, PathState.sourceFloor,bid: buildingEntry.buildingID,renderDestination: false));
             print("running source location no lift run");
           } else if (PathState.sourceFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
@@ -5318,14 +5318,14 @@ if(SingletonFunctionController.timer!=null){
               return;
             }
 
-            await fetchroute(commonlifts[0].x1!, commonlifts[0].y1!,PathState.sourceX, PathState.sourceY,
+            fetchrouteFutures.add( fetchroute(commonlifts[0].x1!, commonlifts[0].y1!,PathState.sourceX, PathState.sourceY,
                PathState.sourceFloor,
-              bid: PathState.sourceBid,);
+              bid: PathState.sourceBid,));
 
-            await fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!,commonlifts[0].x2!, commonlifts[0].y2!,
+            fetchrouteFutures.add( fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!,commonlifts[0].x2!, commonlifts[0].y2!,
                  buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false);
+                renderDestination: false));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
@@ -5340,7 +5340,7 @@ if(SingletonFunctionController.timer!=null){
                   buildingEntry!.floor!]![0])
             };
           }
-          await fetchroute(PathState.destinationX, PathState.destinationY, CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationFloor,bid: CampusEntry.buildingID);
+          fetchrouteFutures.add( fetchroute(PathState.destinationX, PathState.destinationY, CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationFloor,bid: CampusEntry.buildingID));
         }
       });
     } else {
@@ -5386,14 +5386,14 @@ if(SingletonFunctionController.timer!=null){
 
         ///destination to destination Entry path algorithm
         if (destinationEntry.floor == PathState.destinationFloor) {
-          await fetchroute(
+          fetchrouteFutures.add(fetchroute(
               destinationEntry.coordinateX!,
               destinationEntry.coordinateY!,
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
               bid: PathState.destinationBid,
-              renderSource: false);
+              renderSource: false));
           print("running destination location no lift run");
         } else if (destinationEntry.floor != PathState.destinationFloor) {
           List<dynamic> commonlifts = findCommonLifts(destinationEntry,
@@ -5406,17 +5406,17 @@ if(SingletonFunctionController.timer!=null){
             });
             return;
           }
-          await fetchroute(
+          fetchrouteFutures.add(fetchroute(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: PathState.destinationBid);
-          await fetchroute(destinationEntry.coordinateX!, destinationEntry.coordinateY!,
+              bid: PathState.destinationBid));
+          fetchrouteFutures.add(fetchroute(destinationEntry.coordinateX!, destinationEntry.coordinateY!,
               commonlifts[0].x1!, commonlifts[0].y1!, destinationEntry.floor!,
               bid: PathState.destinationBid,
-              renderSource: false);
+              renderSource: false));
 
           PathState.connections[PathState.destinationBid] = {
             destinationEntry.floor!: calculateindex(
@@ -5451,7 +5451,7 @@ if(SingletonFunctionController.timer!=null){
             CampusSourceEntry.floor != null &&
             CampusSourceEntry.buildingID != null) {
           try{
-            await fetchroute(
+            fetchrouteFutures.add(fetchroute(
                 CampusSourceEntry!.coordinateX!,
                 CampusSourceEntry.coordinateY!,
                 CampusDestinationEntry!.coordinateX!,
@@ -5460,7 +5460,7 @@ if(SingletonFunctionController.timer!=null){
                 bid: CampusSourceEntry.buildingID,
                 renderDestination: false,
                 renderSource: false
-            );
+            ));
           }catch(e){
             print("error in campus way finding $e");
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
@@ -5497,10 +5497,10 @@ if(SingletonFunctionController.timer!=null){
 
         /// source to source Entry finding
         if (PathState.sourceFloor == sourceEntry.floor) {
-          await fetchroute(PathState.sourceX, PathState.sourceY,
+          fetchrouteFutures.add(fetchroute(PathState.sourceX, PathState.sourceY,
               sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
               bid: PathState.sourceBid,
-              renderDestination: false);
+              renderDestination: false));
           print("running source location no lift run");
         } else if (PathState.sourceFloor != sourceEntry.floor) {
           List<dynamic> commonlifts = findCommonLifts(
@@ -5514,13 +5514,13 @@ if(SingletonFunctionController.timer!=null){
             return;
           }
 
-          await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+          fetchrouteFutures.add( fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
               sourceEntry.coordinateX!, sourceEntry.coordinateY!, sourceEntry.floor!,
               bid: PathState.sourceBid,
-              renderDestination: false);
-          await fetchroute(PathState.sourceX, PathState.sourceY,
+              renderDestination: false));
+          fetchrouteFutures.add( fetchroute(PathState.sourceX, PathState.sourceY,
             commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
-            bid: PathState.sourceBid,);
+            bid: PathState.sourceBid,));
 
           PathState.connections[PathState.sourceBid] = {
             PathState.sourceFloor: calculateindex(
@@ -5541,30 +5541,34 @@ if(SingletonFunctionController.timer!=null){
       print(PathState.path.keys);
       print(pathMarkers.keys);
     }
-    _isLandmarkPanelOpen = false;
-    double time = 0;
-    double distance = 0;
-    DateTime currentTime = DateTime.now();
-    if (PathState.path.isNotEmpty) {
-      PathState.path.forEach((key, value) {
-        time = time + value.length / 120;
-        distance = distance + value.length;
-      });
-      time = time.ceil().toDouble();
+    if (fetchrouteFutures.isNotEmpty){
+      await Future.wait(fetchrouteFutures);
+      double time = 0;
+      double distance = 0;
+      DateTime currentTime = DateTime.now();
+      if (PathState.singleCellListPath.isNotEmpty) {
+        time = time + PathState.singleCellListPath.length / 120;
+        distance = PathState.singleCellListPath.length.toDouble();
+        time = time.ceil().toDouble();
 
-      distance = distance * 0.3048;
-      distance = double.parse(distance.toStringAsFixed(1));
-      if (PathState.destinationName ==
-          "${LocaleData.yourcurrentloc.getString(context)}") {
-        speak(
-            " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-            _currentLocale);
-      } else {
-        speak(
-            "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-            _currentLocale);
+        distance = distance * 0.3048;
+        distance = double.parse(distance.toStringAsFixed(1));
+        if (PathState.destinationName ==
+            "${LocaleData.yourcurrentloc.getString(context)}") {
+          print("in cond 1");
+          speak(
+              " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+              _currentLocale);
+        } else {
+          print("in cond 2");
+          speak(
+              "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+              _currentLocale);
+        }
       }
     }
+    _isLandmarkPanelOpen = false;
+
     setState(() {
       SingletonFunctionController.building.floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
     });
@@ -5668,7 +5672,7 @@ if(SingletonFunctionController.timer!=null){
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
 
-  Future<void> fetchroute(
+  Future<List<int>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
       String? liftName,
@@ -5925,6 +5929,8 @@ if(SingletonFunctionController.timer!=null){
 
       List<double> svalue = [];
       List<double> dvalue = [];
+      List<double> p1 = [];
+      List<double> p2 = [];
       if (bid != null) {
         print("Himanshucheckerpath in if block ");
         print("SingletonFunctionController.building.patchData[bid]");
@@ -5934,8 +5940,6 @@ if(SingletonFunctionController.timer!=null){
         dvalue = tools.localtoglobal(destinationX, destinationY,
              SingletonFunctionController.building.patchData[bid]);
 
-
-
         print(dvalue);
       } else {
         print("Himanshucheckerpath in else block ");
@@ -5943,49 +5947,88 @@ if(SingletonFunctionController.timer!=null){
         dvalue = tools.localtoglobal(destinationX, destinationY, null);
       }
 
-      setCameraPositionusingCoords(
-          [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
+      if(sourceX == PathState.sourceX || sourceY == PathState.sourceY){
+        List<double> p1 = tools.localtoglobal(PathState.sourceX, PathState.sourceY,
+            SingletonFunctionController.building.patchData[PathState.sourceBid]);
+        List<double> p2 = tools.localtoglobal(PathState.destinationX, PathState.destinationY,
+            SingletonFunctionController.building.patchData[PathState.destinationBid]);
+        if(PathState.sourceFloor == PathState.destinationFloor){
+          print("ine 1  ${PathState.sourceX}  ${PathState.sourceY}   ${PathState.destinationX} ${PathState.destinationY}");
+          setCameraPositionusingCoords(
+              [LatLng(p1[0],p1[1]), LatLng(p2[0],p2[1])]);
+        }else{
+          print("ine 2");
+          setCameraPositionusingCoords(
+              [LatLng(svalue[0],svalue[1]), LatLng(dvalue[0],dvalue[1])]);
+        }
+      }
+
       List<LatLng> coordinates = [];
-      for (var node in path) {
-        int row = (node % numCols); //divide by floor length
-        int col = (node ~/ numCols); //divide by floor length
-        List<double> value =
-            tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[bid]);
-        coordinates.add(LatLng(value[0], value[1]));
+      if(PathState.sourceBid== bid &&
+          floor == PathState.sourceFloor){
+        for (var node in path) {
+          int row = (node % numCols); //divide by floor length
+          int col = (node ~/ numCols); //divide by floor length
+          List<double> value =
+          tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[bid]);
+          coordinates.add(LatLng(value[0], value[1]));
+          if (singleroute[bid] == null) {
+            singleroute.putIfAbsent(bid, () => Map());
+          }
+          if (singleroute[bid]![floor] != null) {
+            gmap.Polyline oldPolyline = singleroute[bid]![floor]!.firstWhere(
+                  (polyline) => polyline.polylineId.value == bid,
+            );
+            gmap.Polyline updatedPolyline = gmap.Polyline(
+              polylineId: oldPolyline.polylineId,
+              points: coordinates,
+              color: oldPolyline.color,
+              width: oldPolyline.width,
+            );
+            setState(() {
+              // Remove the old polyline and add the updated polyline
+              singleroute[bid]![floor]!.remove(oldPolyline);
+              singleroute[bid]![floor]!.add(updatedPolyline);
+            });
+          } else {
+            setState(() {
+              singleroute[bid]!.putIfAbsent(floor, () => Set());
+              singleroute[bid]![floor]?.add(gmap.Polyline(
+                polylineId: PolylineId("$bid"),
+                points: coordinates,
+                color: Colors.blueAccent,
+                width: 8,
+              ));
+            });
+          }
+          await Future.delayed(Duration(microseconds: 1500));
+        }
+      }else{
         if (singleroute[bid] == null) {
           singleroute.putIfAbsent(bid, () => Map());
         }
-        if (singleroute[bid]![floor] != null) {
-          gmap.Polyline oldPolyline = singleroute[bid]![floor]!.firstWhere(
-            (polyline) => polyline.polylineId.value == bid,
-          );
-          gmap.Polyline updatedPolyline = gmap.Polyline(
-            polylineId: oldPolyline.polylineId,
+        for (var node in path) {
+          int row = (node % numCols); //divide by floor length
+          int col = (node ~/ numCols); //divide by floor length
+
+            List<double> value =
+            tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[bid]);
+
+            coordinates.add(LatLng(value[0], value[1]));
+
+        }
+
+        setState(() {
+          singleroute[bid]!.putIfAbsent(floor, () => Set());
+          singleroute[bid]![floor]?.add(gmap.Polyline(
+            polylineId: PolylineId("$bid"),
             points: coordinates,
-            color: oldPolyline.color,
-            width: oldPolyline.width,
-          );
-          setState(() {
-            // Remove the old polyline and add the updated polyline
-            singleroute[bid]![floor]!.remove(oldPolyline);
-            singleroute[bid]![floor]!.add(updatedPolyline);
-          });
-        } else {
-          setState(() {
-            singleroute[bid]!.putIfAbsent(floor, () => Set());
-            singleroute[bid]![floor]?.add(gmap.Polyline(
-              polylineId: PolylineId("$bid"),
-              points: coordinates,
-              color: Colors.blueAccent,
-              width: 8,
-            ));
-          });
-        }
-        if (buildingAllApi.getStoredString() == bid &&
-            SingletonFunctionController.building.floor[bid] == PathState.sourceFloor) {
-          await Future.delayed(Duration(microseconds: 1500));
-        }
+            color: Colors.blueAccent,
+            width: 8,
+          ));
+        });
       }
+
 
 
       final Uint8List tealtorch =
@@ -6069,7 +6112,7 @@ if(SingletonFunctionController.timer!=null){
     //   ));
     //   singleroute[floor] = innerset;
     // });
-    return ;
+    return path;
   }
 
   void _initializePolylineAndMarker() {
@@ -9978,6 +10021,7 @@ String destiName='';
           });
           Future.delayed(Duration(seconds: 1), () {
             calculateroute(snapshot!.landmarksMap!).then((value) {
+              print("valueeee changeddd");
               calculatingPath = false;
               _isLandmarkPanelOpen = false;
               _isRoutePanelOpen = true;

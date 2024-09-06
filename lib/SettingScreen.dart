@@ -26,7 +26,7 @@ class _SettingScreenState extends State<SettingScreen> {
   bool ColorContrastswitchValue = false;
   bool isNaturalDirectionSelected = true;
   bool isFocusMode = true;
-  bool isDistanceinM = true;
+  bool isDistanceinM = false;
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
@@ -37,8 +37,26 @@ class _SettingScreenState extends State<SettingScreen> {
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
     if(UserCredentials().getUserPersonWithDisability()>0){
       _selectedDisability[UserCredentials().getUserPersonWithDisability()-1]=true;
-
     }
+     if(UserCredentials().getUserPathDetails()=='Distance in meters' || UserCredentials().getUserPathDetails()=='मीटर में दूरी' ){
+       isDistanceinM=true;
+     }else{
+       isDistanceinM=false;
+     }
+
+    if(UserCredentials().getuserNavigationModeSetting()=='Natural Direction' || UserCredentials().getuserNavigationModeSetting()=='प्राकृतिक दिशा' ){
+      isNaturalDirectionSelected=true;
+    }else{
+      isNaturalDirectionSelected=false;
+    }
+
+    if(UserCredentials().getUserOrentationSetting()=='Focus Mode' || UserCredentials().getUserPathDetails()=='फोकस मोड' ){
+      isFocusMode=true;
+    }else{
+      isFocusMode=false;
+    }
+
+
     super.initState();
   }
 

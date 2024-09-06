@@ -1023,11 +1023,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-
                   Text(sumMap.toString()),
                   Text(binString),
-
                 ],
               ),
             ),
@@ -1194,7 +1191,7 @@ class scrollableDirection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ((chooseDirection().toLowerCase().contains("lift") || chooseDirection().toLowerCase().contains("stair")) || listOfDirections.isEmpty || (DirectionIndex>0 && listOfDirections.length>DirectionIndex && listOfDirections[DirectionIndex].isDestination))?Container():Text(
-                  chooseSteps().replaceAll("meter", "mtr"),
+                  chooseSteps().replaceAll("meter", "m"),
                   style: const TextStyle(
                     fontFamily: "Roboto",
                     fontSize: 16,

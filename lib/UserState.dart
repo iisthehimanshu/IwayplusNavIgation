@@ -197,6 +197,10 @@ class UserState {
           pathobj.numCols != 0) {
         showcoordX = Cellpath[pathobj.index].x;
         showcoordY = Cellpath[pathobj.index].y;
+        List<double> values =
+        tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
+        lat = values[0];
+        lng = values[1];
         if(Cellpath[pathobj.index-1].bid != Cellpath[pathobj.index].bid){
           print("changing building");
           coordX = showcoordX;
@@ -236,28 +240,25 @@ class UserState {
       //destination check
       List<Cell> turnPoints =
           tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
-      print("angleeeeeeeee ${tools.calculateDistance([
-            showcoordX,
-            showcoordY
-          ], [
-            pathobj.destinationX,
-            pathobj.destinationY
-          ])}");
-      if (floor == pathobj.destinationFloor &&
-          Bid == pathobj.destinationBid &&
-          ((tools.calculateDistance([
-                        turnPoints[turnPoints.length - 1].x,
-                        turnPoints[turnPoints.length - 1].y
-                      ], [
-                        pathobj.destinationX,
-                        pathobj.destinationY
-                      ]) <
-                      10 &&
-                  showcoordX == turnPoints[turnPoints.length - 1].x &&
-                  showcoordY == turnPoints[turnPoints.length - 1].y) ||
-              (tools.calculateDistance([showcoordX, showcoordY],
-                      [pathobj.destinationX, pathobj.destinationY]) <
-                  6))) {
+      print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
+          [pathobj.destinationX, pathobj.destinationY]) <
+          6)}");
+      bool isSameFloorAndBuilding = floor == pathobj.destinationFloor &&
+          Bid == pathobj.destinationBid;
+
+      bool isNearLastTurnPoint = tools.calculateDistance(
+          [turnPoints.last.x, turnPoints.last.y],
+          [pathobj.destinationX, pathobj.destinationY]) < 10;
+
+      bool isAtLastTurnPoint = showcoordX == turnPoints.last.x &&
+          showcoordY == turnPoints.last.y;
+
+      bool isNearDestination = tools.calculateDistance(
+          [showcoordX, showcoordY],
+          [pathobj.destinationX, pathobj.destinationY]) < 6;
+
+      if (isSameFloorAndBuilding &&
+          ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination)) {
         createCircle(lat, lng);
         closeNavigation();
       }

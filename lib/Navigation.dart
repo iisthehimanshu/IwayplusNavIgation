@@ -36,6 +36,7 @@ import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
+import 'API/slackApi.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/InitMarkerModel.dart';
@@ -2419,7 +2420,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         localizedData.currentfloorDimenssion = currentFloorDimensions;
       }
     }
-
+    if(SingletonFunctionController.building.floorDimenssion[buildingAllApi.selectedBuildingID] == null){
+      sendErrorToSlack("Floor data is null for ${buildingAllApi.selectedBuildingID}", null);
+    }
 
     if(SingletonFunctionController.building.ARCoordinates.containsKey(buildingAllApi.selectedBuildingID) && coordinates.isNotEmpty){
       SingletonFunctionController.building.ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
@@ -2528,6 +2531,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
             SingletonFunctionController.building.floorDimenssion[key] = currentFloorDimensions;
           }
+        }
+        if(SingletonFunctionController.building.floorDimenssion[key] == null){
+          sendErrorToSlack("Floor data is null for ${key}", null);
         }
         createMarkers(otherLandmarkData, 0, bid: key);
         createotherARPatch(
@@ -3208,19 +3214,21 @@ if(SingletonFunctionController.timer!=null){
 
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
-    // Convert LatLng to a list of Points for Turf
-    List<GeoPoint> coordinates = polygonPoints
-        .map((point) => GeoPoint(point.latitude, point.longitude))
-        .toList();
-
-    // Create a Polygon object for Turf
-    //turf.Polygon polygon = turf.Polygon(coordinates: [coordinates]);
-
-    GeoPoint centroid = calculatePolygonCentroid(coordinates);
-
-    // Convert centroid back to LatLng
-    print(LatLng(centroid.latitude, centroid.longitude));
-    return LatLng(centroid.latitude, centroid.longitude);
+    double lat = 0.0;
+    double long = 0.0;
+    if (polygonPoints.length <= 4) {
+      for (int i = 0; i < polygonPoints.length; i++) {
+        lat = lat + polygonPoints[i].latitude;
+        long = long + polygonPoints[i].longitude;
+      }
+      return LatLng(lat / polygonPoints.length, long / polygonPoints.length);
+    } else {
+      for (int i = 0; i < 4; i++) {
+        lat = lat + polygonPoints[i].latitude;
+        long = long + polygonPoints[i].longitude;
+      }
+      return LatLng(lat / 4, long / 4);
+    }
   }
 
 
@@ -5122,6 +5130,7 @@ if(SingletonFunctionController.timer!=null){
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String accessibleby = "Lifts"}) async {
+
     print("polyidchecker ${PathState.sourcePolyID}");
     if(PathState.sourcePolyID == ""){
       PathState.sourcePolyID = tools.localizefindNearbyLandmarkSecond(user, landmarksMap)!.properties!.polyId!;
@@ -5230,6 +5239,110 @@ if(SingletonFunctionController.timer!=null){
               PathState.destinationFloor]![0])
         };
       }
+    }else if(PathState.sourceBid == buildingAllApi.outdoorID || PathState.destinationBid == buildingAllApi.outdoorID){
+      SingletonFunctionController.building.landmarkdata!.then((land) async {
+        Landmarks? buildingEntry;
+        Landmarks? CampusEntry ;
+        if(PathState.destinationBid == buildingAllApi.outdoorID){
+          buildingEntry = tools.findNearestPoint(PathState.sourcePolyID, PathState.destinationPolyID, land.landmarks!);
+        }else{
+          buildingEntry = tools.findNearestPoint(PathState.destinationPolyID, PathState.sourcePolyID, land.landmarks!);
+        }
+
+        try {
+          CampusEntry = land.landmarks!.firstWhere(
+                (element) =>
+            element.name == buildingEntry!.name &&
+                element.buildingID == buildingAllApi.outdoorID,
+            orElse: () => throw Exception('No matching landmark found'),
+          );
+        } catch (e) {
+
+        }
+
+        if(PathState.destinationBid == buildingAllApi.outdoorID){
+          print("here 1");
+          await fetchroute(CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationX, PathState.destinationY, CampusEntry.floor!,bid: CampusEntry.buildingID);
+          if (PathState.sourceFloor == buildingEntry!.floor) {
+            await fetchroute(PathState.sourceX, PathState.sourceY,
+                buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, buildingEntry!.floor!,
+                bid: PathState.sourceBid,
+                renderDestination: false);
+            print("running source location no lift run");
+          } else if (PathState.sourceFloor != buildingEntry!.floor) {
+            List<dynamic> commonlifts = findCommonLifts(
+                landmarksMap[PathState.sourcePolyID]!, buildingEntry!, accessibleby);
+            if (commonlifts.isEmpty) {
+              setState(() {
+                PathState.noPathFound = true;
+                _isLandmarkPanelOpen = false;
+                _isRoutePanelOpen = true;
+              });
+              return;
+            }
+
+            await fetchroute(commonlifts[0].x2!, commonlifts[0].y2!,
+                buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, buildingEntry!.floor!,
+                bid: PathState.sourceBid,
+                renderDestination: false);
+            await fetchroute(PathState.sourceX, PathState.sourceY,
+              commonlifts[0].x1!, commonlifts[0].y1!, PathState.sourceFloor,
+              bid: PathState.sourceBid,);
+
+            PathState.connections[PathState.sourceBid] = {
+              PathState.sourceFloor: calculateindex(
+                  commonlifts[0].x1!,
+                  commonlifts[0].y1!,
+                  SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
+                  PathState.sourceFloor]![0]),
+              buildingEntry!.floor!: calculateindex(
+                  commonlifts[0].x2!,
+                  commonlifts[0].y2!,
+                  SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
+                  buildingEntry!.floor!]![0])
+            };
+          }
+        }else{
+          if (PathState.sourceFloor == buildingEntry!.floor) {
+            await fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!, PathState.sourceX, PathState.sourceY, PathState.sourceFloor,bid: buildingEntry.buildingID,renderDestination: false);
+            print("running source location no lift run");
+          } else if (PathState.sourceFloor != buildingEntry!.floor) {
+            List<dynamic> commonlifts = findCommonLifts(
+                landmarksMap[PathState.sourcePolyID]!, buildingEntry!, accessibleby);
+            if (commonlifts.isEmpty) {
+              setState(() {
+                PathState.noPathFound = true;
+                _isLandmarkPanelOpen = false;
+                _isRoutePanelOpen = true;
+              });
+              return;
+            }
+
+            await fetchroute(commonlifts[0].x1!, commonlifts[0].y1!,PathState.sourceX, PathState.sourceY,
+               PathState.sourceFloor,
+              bid: PathState.sourceBid,);
+
+            await fetchroute(buildingEntry!.coordinateX!, buildingEntry!.coordinateY!,commonlifts[0].x2!, commonlifts[0].y2!,
+                 buildingEntry!.floor!,
+                bid: PathState.sourceBid,
+                renderDestination: false);
+
+            PathState.connections[PathState.sourceBid] = {
+              PathState.sourceFloor: calculateindex(
+                  commonlifts[0].x1!,
+                  commonlifts[0].y1!,
+                  SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
+                  PathState.sourceFloor]![0]),
+              buildingEntry!.floor!: calculateindex(
+                  commonlifts[0].x2!,
+                  commonlifts[0].y2!,
+                  SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![
+                  buildingEntry!.floor!]![0])
+            };
+          }
+          await fetchroute(PathState.destinationX, PathState.destinationY, CampusEntry!.coordinateX!, CampusEntry!.coordinateY!, PathState.destinationFloor,bid: CampusEntry.buildingID);
+        }
+      });
     } else {
       print("calculateroute else statement");
       double sourceEntrylat = 0;
@@ -5327,69 +5440,59 @@ if(SingletonFunctionController.timer!=null){
         double destinationLat=double.parse(source.properties!.latitude!);
         double destinationLng=double.parse(source.properties!.longitude!);
 
-        await fetchroute(
-            CampusSourceEntry!.coordinateX!,
-            CampusSourceEntry.coordinateY!,
-            CampusDestinationEntry!.coordinateX!,
-            CampusDestinationEntry.coordinateY!,
-            CampusSourceEntry.floor!,
-            bid: CampusSourceEntry.buildingID,
-            renderDestination: false,
-            renderSource: false
-        );
 
-        // ///campusPath algorithm
-        // if (CampusSourceEntry != null &&
-        //     CampusDestinationEntry != null &&
-        //     CampusSourceEntry.coordinateX != null &&
-        //     CampusSourceEntry.coordinateY != null &&
-        //     CampusDestinationEntry.coordinateX != null &&
-        //     CampusDestinationEntry.coordinateY != null &&
-        //     CampusSourceEntry.floor != null &&
-        //     CampusSourceEntry.buildingID != null) {
-        //   try{
-        //     await fetchroute(
-        //       CampusSourceEntry.coordinateX!,
-        //       CampusSourceEntry.coordinateY!,
-        //       CampusDestinationEntry.coordinateX!,
-        //       CampusDestinationEntry.coordinateY!,
-        //       CampusSourceEntry.floor!,
-        //       bid: CampusSourceEntry.buildingID,
-        //       renderDestination: false,
-        //       renderSource: false
-        //     );
-        //   }catch(e){
-        //     print("error in campus way finding $e");
-        //     CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-        //   }
-        //
-        // }else{
-        //   if (CampusSourceEntry == null) {
-        //     print('CampusSourceEntry is null');
-        //   }
-        //   if (CampusDestinationEntry == null) {
-        //     print('CampusDestinationEntry is null');
-        //   }
-        //   if (CampusSourceEntry?.coordinateX == null) {
-        //     print('CampusSourceEntry.coordinateX is null');
-        //   }
-        //   if (CampusSourceEntry?.coordinateY == null) {
-        //     print('CampusSourceEntry.coordinateY is null');
-        //   }
-        //   if (CampusDestinationEntry?.coordinateX == null) {
-        //     print('CampusDestinationEntry.coordinateX is null');
-        //   }
-        //   if (CampusDestinationEntry?.coordinateY == null) {
-        //     print('CampusDestinationEntry.coordinateY is null');
-        //   }
-        //   if (CampusSourceEntry?.floor == null) {
-        //     print('CampusSourceEntry.floor is null');
-        //   }
-        //   if (CampusSourceEntry?.buildingID == null) {
-        //     print('CampusSourceEntry.buildingID is null');
-        //   }
-        //   CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
-        // }
+        ///campusPath algorithm
+        if (CampusSourceEntry != null &&
+            CampusDestinationEntry != null &&
+            CampusSourceEntry.coordinateX != null &&
+            CampusSourceEntry.coordinateY != null &&
+            CampusDestinationEntry.coordinateX != null &&
+            CampusDestinationEntry.coordinateY != null &&
+            CampusSourceEntry.floor != null &&
+            CampusSourceEntry.buildingID != null) {
+          try{
+            await fetchroute(
+                CampusSourceEntry!.coordinateX!,
+                CampusSourceEntry.coordinateY!,
+                CampusDestinationEntry!.coordinateX!,
+                CampusDestinationEntry.coordinateY!,
+                CampusSourceEntry.floor!,
+                bid: CampusSourceEntry.buildingID,
+                renderDestination: false,
+                renderSource: false
+            );
+          }catch(e){
+            print("error in campus way finding $e");
+            CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+          }
+
+        }else{
+          if (CampusSourceEntry == null) {
+            print('CampusSourceEntry is null');
+          }
+          if (CampusDestinationEntry == null) {
+            print('CampusDestinationEntry is null');
+          }
+          if (CampusSourceEntry?.coordinateX == null) {
+            print('CampusSourceEntry.coordinateX is null');
+          }
+          if (CampusSourceEntry?.coordinateY == null) {
+            print('CampusSourceEntry.coordinateY is null');
+          }
+          if (CampusDestinationEntry?.coordinateX == null) {
+            print('CampusDestinationEntry.coordinateX is null');
+          }
+          if (CampusDestinationEntry?.coordinateY == null) {
+            print('CampusDestinationEntry.coordinateY is null');
+          }
+          if (CampusSourceEntry?.floor == null) {
+            print('CampusSourceEntry.floor is null');
+          }
+          if (CampusSourceEntry?.buildingID == null) {
+            print('CampusSourceEntry.buildingID is null');
+          }
+          CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
+        }
 
 
         /// source to source Entry finding
@@ -5465,7 +5568,9 @@ if(SingletonFunctionController.timer!=null){
     setState(() {
       SingletonFunctionController.building.floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
     });
+    return;
   }
+
 
   void CampusPathAPIAlgorithm(
       Landmarks sourceEntry, Landmarks destinationEntry) async {
@@ -5563,7 +5668,7 @@ if(SingletonFunctionController.timer!=null){
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
 
-  Future<List<int>> fetchroute(
+  Future<void> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
       String? liftName,
@@ -5796,11 +5901,11 @@ if(SingletonFunctionController.timer!=null){
     }
 
     if (path.isNotEmpty) {
-      if (SingletonFunctionController.building.floor[bid] != PathState.sourceFloor) {
+      if (SingletonFunctionController.building.floor[bid] != floor) {
         setState(() {
-          SingletonFunctionController.building.floor[bid] = PathState.sourceFloor;
+          SingletonFunctionController.building.floor[bid] = floor;
         });
-        await createRooms(SingletonFunctionController.building.polyLineData!, PathState.sourceFloor);
+        await createRooms(SingletonFunctionController.building.polyLineData!, floor);
       }
       if (floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
@@ -5964,7 +6069,7 @@ if(SingletonFunctionController.timer!=null){
     //   ));
     //   singleroute[floor] = innerset;
     // });
-    return path;
+    return ;
   }
 
   void _initializePolylineAndMarker() {
@@ -6197,15 +6302,13 @@ if(SingletonFunctionController.timer!=null){
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
-    if (PathState.path.isNotEmpty) {
-      PathState.path.forEach((key, value) {
-        time = time + value.length / 120;
-        distance = distance + value.length;
-      });
-      time = time.ceil().toDouble();
+    if (PathState.singleCellListPath.isNotEmpty) {
+        time = time + PathState.singleCellListPath.length / 120;
+        distance = PathState.singleCellListPath.length.toDouble();
+        time = time.ceil().toDouble();
 
-      distance = distance * 0.3048;
-      distance = double.parse(distance.toStringAsFixed(1));
+        distance = distance * 0.3048;
+        distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
@@ -10486,7 +10589,6 @@ String destiName='';
                           child: IconButton(
                               onPressed: () {
                                 //StartPDR();
-
                                 bool isvalid = MotionModel.isValidStep(
                                     user,
                                     SingletonFunctionController.building.floorDimenssion[user.Bid]![
@@ -10512,14 +10614,14 @@ String destiName='';
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                    Text("coord [${user.coordX},${user.coordY}] \n"
-                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                    "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
-                        "floor ${user.floor}\n"
-                        "userBid ${user.Bid} \n"
-                        "index ${user.pathobj.index} \n"
-                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
+                    // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.Bid} \n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                             value: user.theta,

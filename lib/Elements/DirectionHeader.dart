@@ -165,7 +165,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       //print("angleeeeee $angle")  ;
       setState(() {
 
-        widget.direction = tools.angleToClocks(angle,widget.context);
+        widget.direction = tools.angleToClocks(angle,widget.context) == "None"?"Straight":tools.angleToClocks(angle,widget.context);
         if(widget.direction == "Straight"){
           widget.direction = "Go Straight";
           if(!UserState.ttsOnlyTurns) {
@@ -339,7 +339,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
 
-              highestweight >= 3.5) {
+              highestweight >= 5) {
 
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
@@ -612,7 +612,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget){
     super.didUpdateWidget(oldWidget);
 
-    if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
+    if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]?[widget.user.pathobj.sourceFloor]){
 
     }else if (widget.user.path.isNotEmpty && widget.user.Cellpath.length-1>widget.user.pathobj.index){
       print("nextTurn debug");
@@ -661,17 +661,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = userdirection;
       }
 
-      print("angleangleangleangle ${widget.direction }");
 
-      int index = widget.user.path.indexOf(nextTurn!.node);
+
+      int index = widget.user.Cellpath.indexOf(nextTurn);
         //print("index $index");
         double a =0;
         if(index+1 == widget.user.path.length){
-          a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          if(widget.user.Cellpath[index-2].bid == widget.user.Cellpath[index-1].bid && widget.user.Cellpath[index-1].bid == widget.user.Cellpath[index].bid){
+            a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          }
         }else{
-          a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          if(widget.user.Cellpath[index-1].bid == widget.user.Cellpath[index].bid && widget.user.Cellpath[index].bid == widget.user.Cellpath[index+1].bid){
+            a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          }
         }
-
+      print("angleangleangleangle ${widget.direction }");
+      print(a);
         String direc = tools.angleToClocks(a,widget.context);
         turnDirection = direc;
 
@@ -721,7 +726,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             widget.user.move(context);
         }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
 
-          if(!direc.contains("slight") && widget.user.pathobj.index > 4){
+          if((!direc.toLowerCase().contains("slight") || !direc.toLowerCase().contains("straight")) && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
               if(!UserState.ttsOnlyTurns){

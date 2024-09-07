@@ -82,6 +82,7 @@ class _MainScreenState extends State<MainScreen> {
       // Permission granted, you can now perform Bluetooth operations
     } else {
       // Permission denied, handle accordingly
+      print("Bluetooth permission is denied");
     }
   }
 

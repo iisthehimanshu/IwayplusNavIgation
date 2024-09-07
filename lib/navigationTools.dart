@@ -1695,6 +1695,36 @@ class tools {
     return acos(dotProduct(v1, v2) / (magnitude(v1) * magnitude(v2)));
   }
 
+  static Landmarks modifyLandmark(Landmarks landmark, {int? x, int? y}) {
+    // Clone the existing object with modifications to the desired parameter
+    return Landmarks(
+      element: landmark.element,
+      properties: landmark.properties,
+      priority: landmark.priority, // Change the priority here
+      sId: landmark.sId,
+      buildingID: landmark.buildingID,
+      coordinateX: x??landmark.coordinateX,
+      coordinateY: y??landmark.coordinateY,
+      doorX: landmark.doorX,
+      doorY: landmark.doorY,
+      featureType: landmark.featureType,
+      type: landmark.type,
+      floor: landmark.floor,
+      geometryType: landmark.geometryType,
+      name: landmark.name,
+      lifts: landmark.lifts,
+      stairs: landmark.stairs,
+      others: landmark.others,
+      createdAt: landmark.createdAt,
+      updatedAt: landmark.updatedAt,
+      iV: landmark.iV,
+      buildingName: landmark.buildingName,
+      venueName: landmark.venueName,
+      wasPolyIdNull: landmark.wasPolyIdNull,
+    );
+  }
+
+
 // Function to find the nearest point
   static Landmarks findNearestPoint(String source, String destination, List<Landmarks> points) {
 
@@ -1716,6 +1746,11 @@ class tools {
           double.parse(point.properties!.latitude!) - double.parse(s.properties!.latitude!),
           double.parse(point.properties!.longitude!) - double.parse(s.properties!.longitude!)
         ];
+
+
+        if(point.sId == s.sId){
+          return point;
+        }
 
         // Calculate the angle between the original vector and the point vector
         double angle = angleBetweenVectors(originalVector, pointVector);
@@ -1776,6 +1811,27 @@ class tools {
 
     double a = sin(dLat / 2) * sin(dLat / 2) +
         cos(toRadians(lat1)) * cos(toRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    double distanceInMiles = radiusOfEarthInMiles * c;
+    double distanceInFeet = distanceInMiles * feetPerMile;
+
+    return distanceInFeet;
+  }
+
+  static double calculateDistanceInFeet2(LatLng point1, LatLng point2) {
+    const double radiusOfEarthInMiles = 3958.8; // Radius of Earth in miles
+    const double feetPerMile = 5280; // Feet per mile
+
+    double toRadians(double degree) => degree * pi / 180.0;
+
+    double dLat = toRadians(point2.latitude - point1.latitude);
+    double dLon = toRadians(point2.longitude - point1.longitude);
+
+    double a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(toRadians(point1.latitude)) * cos(toRadians(point2.latitude)) *
             sin(dLon / 2) * sin(dLon / 2);
 
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));

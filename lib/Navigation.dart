@@ -171,7 +171,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
  // Building SingletonFunctionController.building = Building(floor: Map(), numberOfFloors: Map());
   Map<String,Map<int, Set<gmap.Polyline>>> singleroute = {};
   Map<int, Set<Marker>> dottedSingleRoute = {};
- // BLueToothClass SingletonFunctionController.btadapter = new BLueToothClass();
+ // BLueToothClass SingletonFunctionController.btadBLueToothClass();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
   bool _isnavigationPannelOpen = false;

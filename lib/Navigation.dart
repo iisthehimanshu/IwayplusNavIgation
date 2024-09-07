@@ -7,7 +7,6 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'package:app_settings/app_settings.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';

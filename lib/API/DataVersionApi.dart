@@ -102,6 +102,10 @@ class DataVersionApi {
         }
       }else{
         print('DATA NOT PRESENT');
+        VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+        VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+        VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+        VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] = false;
         if(!shouldBeInjected){
           print('DATA INJECTED');
           final dataVersionData = DataVersionLocalModel(responseBody: responseBody);
@@ -189,6 +193,10 @@ class DataVersionApi {
           }
         }else{
           print('DATA NOT PRESENT');
+          VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+          VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+          VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+          VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] = false;
           if(!shouldBeInjected){
             print('DATA INJECTED');
             final dataVersionData = DataVersionLocalModel(responseBody: responseBody);

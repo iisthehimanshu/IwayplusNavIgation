@@ -726,7 +726,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             widget.user.move(context);
         }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
 
-          if((!direc.toLowerCase().contains("slight") || !direc.toLowerCase().contains("straight")) && widget.user.pathobj.index > 4){
+          if((!direc.toLowerCase().contains("slight") && !direc.toLowerCase().contains("straight")) && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
               if(!UserState.ttsOnlyTurns){

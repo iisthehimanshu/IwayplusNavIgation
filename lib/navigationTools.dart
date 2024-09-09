@@ -865,6 +865,8 @@ class tools {
       String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
+    Directions.add(direction(turns.last, "Straight", null, null, null,turns.last%columns,turns.last~/columns,floor,Bid,numCols:columns));
+
     return Directions;
   }
 

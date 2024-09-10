@@ -602,7 +602,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     if(UserCredentials().getUserOrentationSetting()=='Focus Mode'){
       UserState.ttsOnlyTurns = true;
-    UserState.ttsAllStop = false;
+      UserState.ttsAllStop = false;
     }else{
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
@@ -1895,7 +1895,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       } else {
         if (speakTTS) {
           speak(
-              "${LocaleData.unabletofindyourlocation.getString(context)}.....${LocaleData.scanQr.getString(context)}",
+              "${LocaleData.unabletofindyourlocation.getString(context)}",
               _currentLocale);
           showLocationDialog(context);
           SingletonFunctionController.building.qrOpened = true;
@@ -1976,7 +1976,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 Navigator.of(context).pop();
                                 paintUser(null, polyID: value);
                               } else {
-
                               }
                             });
                           });
@@ -2313,6 +2312,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       });
   });
 }
+  bool isBinEmpty() {
+    for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
+      if (SingletonFunctionController.btadapter.BIN[i] != null && SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+        // If any bin is not empty, return false
+        return false;
+      }
+    }
+    // If all bins are empty, return true
+    return true;
+  }
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
     await DataVersionApi()
@@ -2349,7 +2358,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
-    SingletonFunctionController.btadapter.isScanningOn()==false? controller.executeFunction(buildingAllApi.allBuildingID):null;
+    (SingletonFunctionController.btadapter.isScanningOn()==false && isBinEmpty()==true)? controller.executeFunction(buildingAllApi.allBuildingID):null;
 
 
     setState(() {
@@ -11087,11 +11096,7 @@ class CircleAnimation {
 class CustomMarker extends StatelessWidget {
   final String text;
   final IconData dirIcon;
-
   CustomMarker({required this.text,required this.dirIcon});
-  
-  
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -11126,7 +11131,6 @@ class CustomMarker extends StatelessWidget {
           ],
         ),
       );
-
   }
 }
 class TurnCustomMarker extends StatelessWidget {

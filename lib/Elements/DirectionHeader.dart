@@ -125,7 +125,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // //
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
-        //listenToBin();
+
+        listenToBin();
+
       }
 
 
@@ -705,7 +707,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
         }else if(widget.direction == "Straight"){
-          
           Vibration.vibrate();
           if(!UserState.ttsOnlyTurns) {
             speak(

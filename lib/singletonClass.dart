@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/buildingState.dart';
+import '/buildingState.dart';
 
 import 'API/beaconapi.dart';
 import 'API/buildingAllApi.dart';
@@ -31,7 +31,8 @@ class SingletonFunctionController {
     try {
       // Perform your task here
       print("Function is running...");
-      print(buildingAllApi.allBuildingID);
+      building.qrOpened=false;
+      building.destinationQr=false;
       await Future.wait(allBuildingID.entries.map((entry) async {
         var key = entry.key;
 
@@ -48,6 +49,8 @@ class SingletonFunctionController {
           }
         }
         Building.apibeaconmap = apibeaconmap;
+        print(buildingAllApi.allBuildingID);
+        print(apibeaconmap);
 
       })).then((value){
         if(Platform.isAndroid){
@@ -64,8 +67,7 @@ class SingletonFunctionController {
       // Mark the function as complete
       _isRunning = false;
       _completer?.complete();
-      building.qrOpened=false;
-      building.destinationQr=false;
+
     }
   }
 }

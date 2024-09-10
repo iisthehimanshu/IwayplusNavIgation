@@ -865,6 +865,8 @@ class tools {
       String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
+    Directions.add(direction(turns.last, "Straight", null, null, null,turns.last%columns,turns.last~/columns,floor,Bid,numCols:columns));
+
     return Directions;
   }
 
@@ -1695,6 +1697,36 @@ class tools {
     return acos(dotProduct(v1, v2) / (magnitude(v1) * magnitude(v2)));
   }
 
+  static Landmarks modifyLandmark(Landmarks landmark, {int? x, int? y}) {
+    // Clone the existing object with modifications to the desired parameter
+    return Landmarks(
+      element: landmark.element,
+      properties: landmark.properties,
+      priority: landmark.priority, // Change the priority here
+      sId: landmark.sId,
+      buildingID: landmark.buildingID,
+      coordinateX: x??landmark.coordinateX,
+      coordinateY: y??landmark.coordinateY,
+      doorX: landmark.doorX,
+      doorY: landmark.doorY,
+      featureType: landmark.featureType,
+      type: landmark.type,
+      floor: landmark.floor,
+      geometryType: landmark.geometryType,
+      name: landmark.name,
+      lifts: landmark.lifts,
+      stairs: landmark.stairs,
+      others: landmark.others,
+      createdAt: landmark.createdAt,
+      updatedAt: landmark.updatedAt,
+      iV: landmark.iV,
+      buildingName: landmark.buildingName,
+      venueName: landmark.venueName,
+      wasPolyIdNull: landmark.wasPolyIdNull,
+    );
+  }
+
+
 // Function to find the nearest point
   static Landmarks findNearestPoint(String source, String destination, List<Landmarks> points) {
 
@@ -1716,6 +1748,11 @@ class tools {
           double.parse(point.properties!.latitude!) - double.parse(s.properties!.latitude!),
           double.parse(point.properties!.longitude!) - double.parse(s.properties!.longitude!)
         ];
+
+
+        if(point.sId == s.sId){
+          return point;
+        }
 
         // Calculate the angle between the original vector and the point vector
         double angle = angleBetweenVectors(originalVector, pointVector);

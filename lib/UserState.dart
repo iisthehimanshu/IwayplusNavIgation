@@ -170,8 +170,8 @@ class UserState {
       List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
       List<int> transitionvalue = Cellpath[pathobj.index]
           .move(this.theta, currPointer: p[1], totalCells: p[0]);
-      coordX = Cellpath[pathobj.index].x;
-      coordY = Cellpath[pathobj.index].y;
+      coordX = coordX+transitionvalue[0];
+      coordY = coordY+transitionvalue[1];
       List<double> values =
           tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
       lat = values[0];

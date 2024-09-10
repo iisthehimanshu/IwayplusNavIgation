@@ -27,7 +27,6 @@ class pathState {
   Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];
   List<Cell> singleCellListPath = [];
-  List<Cell> CellTurnPoints = [];
   List<List<Cell>> listofPaths = [];
   Map<String,patchDataModel> patchData = Map();
   List<direction> directions = [];
@@ -56,7 +55,6 @@ class pathState {
     path.clear();
     Cellpath.clear();
     singleListPath.clear();
-    CellTurnPoints.clear();
     directions.clear();
     connections.clear();
     nearbyLandmarks.clear();
@@ -105,7 +103,6 @@ class pathState {
     Cellpath.clear();
     singleListPath.clear();
     singleCellListPath.clear();
-    CellTurnPoints.clear();
     listofPaths.clear();
     directions.clear();
     connections.clear();

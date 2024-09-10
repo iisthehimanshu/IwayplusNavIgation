@@ -16,7 +16,7 @@ class UserCredentials{
 
 
   String getuserName(){
-    userName = userInformationBox.get('username');
+    userName = userInformationBox.get('username')??'username';
     return userName;
   }
 

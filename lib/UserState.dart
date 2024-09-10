@@ -75,11 +75,11 @@ class UserState {
       this.coordYf = 0.0});
 
   // Future<void> move()async {
-  //   print("prev----- coord $coordX,$coordY");
-  //   print("prev----- show $showcoordX,$showcoordY");
-  //   print("prev----- index ${pathobj.index}");
+  //   
+  //   
+  //   
   //   pathobj.index = pathobj.index + 1;
-  //   print("prev----- index ${pathobj.index}");
+  //   
   //
   //   List<int> transitionvalue = tools.eightcelltransition(this.theta);
   //   coordX = coordX + transitionvalue[0];
@@ -97,9 +97,9 @@ class UserState {
   //     showcoordY = coordY;
   //   }
   //
-  //   print("curr----- coord $coordX,$coordY");
-  //   print("curr----- show $showcoordX,$showcoordY");
-  //   print("curr----- index ${pathobj.index}");
+  //   
+  //   
+  //   
   //
   // }
 
@@ -111,7 +111,7 @@ class UserState {
 
       if (!MotionModel.isValidStep(
           this, cols, rows, nonWalkable[Bid]![floor]!, reroute)) {
-        print("movement blocked 1");
+        
         movementAllowed = false;
       }
 
@@ -124,14 +124,14 @@ class UserState {
 
         //destination check
         if (Cellpath.length - pathobj.index < 6) {
-          print("movement blocked 2");
+          
           movementAllowed = false;
         }
 
         //turn check
         if (tools
             .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
-          print("movement blocked 3");
+          
           movementAllowed = false;
         }
 
@@ -139,7 +139,7 @@ class UserState {
 
         if (pathobj.connections[Bid]?[floor] ==
             showcoordY * cols + showcoordX) {
-          print("movement blocked 4");
+          
           movementAllowed = false;
         }
       }
@@ -202,7 +202,7 @@ class UserState {
         lat = values[0];
         lng = values[1];
         if(Cellpath[pathobj.index-1].bid != Cellpath[pathobj.index].bid){
-          print("changing building");
+          
           coordX = showcoordX;
           coordY = showcoordY;
           values =
@@ -239,7 +239,7 @@ class UserState {
 
       //destination check
       List<Cell> turnPoints =
-          tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+          tools.getCellTurnpoints(Cellpath);
       print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
           [pathobj.destinationX, pathobj.destinationY]) <
           6)}");
@@ -286,8 +286,8 @@ class UserState {
       }
 
       //lift check
-      print("iwiwiwi ${pathobj.connections[Bid]?[floor]}");
-      print("iwwwwi ${showcoordY * cols + showcoordX}");
+      
+      
 
       if (floor != pathobj.destinationFloor &&
           pathobj.connections[Bid]?[floor] ==
@@ -398,7 +398,7 @@ class UserState {
   String convertTolng(
       String msg, String? name, double agl, BuildContext context, double a,
       {String destname = ""}) {
-    print("msgggg");
+    
     print(
         "${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}");
     if (msg ==
@@ -515,7 +515,7 @@ class UserState {
 
   Future<void> moveToNearestTurn(int index) async {
     List<Cell> turnPoints =
-        tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+        tools.getCellTurnpoints(Cellpath);
     for (int i = index; i < Cellpath.length; i++) {
       for (int j = 0; j < turnPoints.length; j++) {
         if (Cellpath[i] == turnPoints[j]) {
@@ -533,7 +533,7 @@ class UserState {
 
   Future<int?> findTurnPointAround() async {
     List<Cell> turnPoints =
-    tools.getCellTurnpoints(Cellpath, pathobj.numCols![Bid]![floor]!);
+    tools.getCellTurnpoints(Cellpath);
     double d = 11;
     int? ind;
     for (int j = 0; j < turnPoints.length; j++) {
@@ -551,7 +551,7 @@ class UserState {
   Future<void> moveToStartofPath() async {
     double d = 100000000;
     int i = await moveToNearestPoint();
-    print("nearestpoint check ${Cellpath[i].x},${Cellpath[i].y}");
+    
     await moveToNearestTurn(i);
 
     // if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
@@ -578,7 +578,7 @@ class UserState {
     lat = values[0];
     lng = values[1];
 
-    print("moveToStartofPath [$coordX,$coordY] === [$showcoordX,$showcoordY]");
+    
   }
 
   Future<void> reset() async {

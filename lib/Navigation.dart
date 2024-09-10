@@ -259,8 +259,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void _initMarkers() async {
     print("calledinitmarker");
     final List<MapMarker> markers = [];
-    print("mapMarkerLocationMapAndName.length");
-    print(mapMarkerLocationMapAndName.length);
+
 
     // mapMarkerLocationMapAndName.forEach((element) async {
     //   final String values = element.tag;
@@ -553,10 +552,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           _googleMapController);
 
 
-      print("_markers.length");
-      print(_markers.length);
+
       updatedMarkers.forEach((currentMarker){
-        print("currentMarker.markerId");
+
         if(currentMarker.markerId.toString().contains(closestBuildingId)){
           currentMarker.visible = true;
         } else{
@@ -568,7 +566,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ..addAll(updatedMarkers);
 
 
-      print(updatedMarkers);
 
       setState(() {
         _areMarkersLoading = false;
@@ -4114,7 +4111,7 @@ if(SingletonFunctionController.timer!=null){
             //   splitOption = ' ';
             // }
             List<String> parts = landmarks[i].name!.split('-');
-            print("parts $parts");
+            // print("parts $parts");
             markerText = parts.isNotEmpty ? parts[0].trim() : '';
             textMarker = await bitmapDescriptorFromTextAndImage(
                 markerText, 'assets/pin.png');
@@ -10291,7 +10288,7 @@ String destiName='';
       buildingAllApi.setStoredString(closestBuildingId);
     }
 
-    print("Closest SingletonFunctionController.building ID is $closestBuildingId");
+    // print("Closest SingletonFunctionController.building ID is $closestBuildingId");
   }
 
   Set<Circle> circles = Set();
@@ -10491,8 +10488,7 @@ String destiName='';
                       // print("plpl ${cameraPosition.tilt}");
 
                       focusBuildingChecker(cameraPosition);
-                      print(
-                          "camers pos ${cameraPosition.target}    target ${mapState.target}");
+                      // print("camers pos ${cameraPosition.target}    target ${mapState.target}");
                       if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                           mapState.target.latitude.toStringAsFixed(5)) {
                         mapState.aligned = false;

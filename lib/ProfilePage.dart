@@ -10,6 +10,17 @@ import 'package:iwaymaps/API/DeleteApi.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 
+import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'DebugToggle.dart';
 import 'EditProfile.dart';
 import 'FavouriteRGCIScreen.dart';
@@ -126,6 +137,27 @@ class _ProfilePageState extends State<ProfilePage> {
       // Handle errors
     }
   }
+
+  Future<void> clearHiveDataOnLogout() async {
+    await Hive.box<LandMarkApiModel>('LandMarkApiModelFile').clear();
+    await Hive.box<PatchAPIModel>('PatchAPIModelFile').clear();
+    await Hive.box<PolyLineAPIModel>('PolyLineAPIModelFile').clear();
+    await Hive.box<BuildingAllAPIModel>('BuildingAllAPIModelFile').clear();
+    await Hive.box<FavouriteDataBaseModel>('FavouriteDataBaseModelFile').clear();
+    await Hive.box<BeaconAPIModel>('BeaconAPIModelFile').clear();
+    await Hive.box<BuildingAPIModel>('BuildingAPIModelFile').clear();
+    await Hive.box<SignINAPIModel>('SignINAPIModelFile').clear();
+    await Hive.box<OutDoorModel>('OutDoorModelFile').clear();
+    await Hive.box<WayPointModel>('WayPointModelFile').clear();
+    await Hive.box<DataVersionLocalModel>('DataVersionLocalModelFile').clear();
+    await Hive.box('Favourites').clear();
+    await Hive.box('UserInformation').clear();
+    await Hive.box('Filters').clear();
+    await Hive.box('SignInDatabase').clear();
+    await Hive.box('LocationPermission').clear();
+    await Hive.box('VersionData').clear();
+  }
+
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
     final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
 
@@ -557,8 +589,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: MediaQuery.sizeOf(context).width*0.9,
                 child: OutlinedButton(
                   onPressed: () async {
-                    var signInBox = Hive.box('SignInDatabase');
-                    signInBox.clear();
+                    // var signInBox = Hive.box('SignInDatabase');
+                    // signInBox.clear();
+                    clearHiveDataOnLogout();
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => SignIn()),

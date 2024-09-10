@@ -1979,7 +1979,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 Navigator.of(context).pop();
                                 paintUser(null, polyID: value);
                               } else {
-                                print("selectionvalnotempty");
+                                print("selectionvalnotemptyy");
                               }
                             });
                           });

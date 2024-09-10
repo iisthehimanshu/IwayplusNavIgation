@@ -3026,12 +3026,12 @@ if(SingletonFunctionController.timer!=null){
   }
 
   void patchGeneration(Map<int, LatLng> currentCoordinated){
+    print("patchGeneration");
     if (currentCoordinated.isNotEmpty) {
       List<LatLng> points = [];
       List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
       entryList.sort((a, b) => a.key.compareTo(b.key));
-      LinkedHashMap<int, LatLng> sortedCoordinates =
-      LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
       sortedCoordinates.forEach((key, value) {
         points.add(value);
       });
@@ -3045,7 +3045,9 @@ if(SingletonFunctionController.timer!=null){
               fillColor: Color(0xffE5F9FF),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex: 5),
+              zIndex: 5,
+
+          ),
         );
       });
     }
@@ -10240,7 +10242,7 @@ String destiName='';
       print("newBuildingID");
       print(newBuildingID);
       print(closestBuildingId);
-      patchTransition(closestBuildingId);
+      //patchTransition(closestBuildingId);
 
     }
     newBuildingID = closestBuildingId;

@@ -149,6 +149,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>app_settings.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>bluetooth_enable_fork.xcscheme</key>
 		<dict>
 			<key>isShown</key>

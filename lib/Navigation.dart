@@ -259,8 +259,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void _initMarkers() async {
     
     final List<MapMarker> markers = [];
-    
-    
 
     // mapMarkerLocationMapAndName.forEach((element) async {
     //   final String values = element.tag;
@@ -553,8 +551,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           _googleMapController);
 
 
-
-
       updatedMarkers.forEach((currentMarker){
 
         if(currentMarker.markerId.toString().contains(closestBuildingId)){
@@ -566,8 +562,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       _markers
         ..clear()
         ..addAll(updatedMarkers);
-
-
 
 
       setState(() {
@@ -3043,12 +3037,12 @@ if(SingletonFunctionController.timer!=null){
   }
 
   void patchGeneration(Map<int, LatLng> currentCoordinated){
+    print("patchGeneration");
     if (currentCoordinated.isNotEmpty) {
       List<LatLng> points = [];
       List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
       entryList.sort((a, b) => a.key.compareTo(b.key));
-      LinkedHashMap<int, LatLng> sortedCoordinates =
-      LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
       sortedCoordinates.forEach((key, value) {
         points.add(value);
       });
@@ -3062,7 +3056,9 @@ if(SingletonFunctionController.timer!=null){
               fillColor: Color(0xffE5F9FF),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex: 5),
+              zIndex: 5,
+
+          ),
         );
       });
     }
@@ -4096,18 +4092,15 @@ if(SingletonFunctionController.timer!=null){
 
   void createMarkers(land _landData, int floor, {String? bid}) async {
 
-
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
-    // Markers.removeWhere((marker) => marker.markerId.value
-    //     .contains(bid ?? buildingAllApi.selectedBuildingID));
+    Markers.removeWhere((marker) => marker.markerId.value
+        .contains(bid ?? buildingAllApi.selectedBuildingID));
     List<Landmarks> landmarks = _landData.landmarks!;
     try {
       for (int i = 0; i < landmarks.length; i++) {
-        if (landmarks[i].floor == floor &&
-            landmarks[i].buildingID ==
-                (bid ?? buildingAllApi.selectedBuildingID)) {
+        if (landmarks[i].floor == floor && landmarks[i].buildingID == (bid ?? buildingAllApi.selectedBuildingID)) {
           if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType != "main entry" &&
               landmarks[i].coordinateX != null &&
@@ -4154,9 +4147,7 @@ if(SingletonFunctionController.timer!=null){
                     onTap: () {
 
                     })));
-          }
-
-          if (landmarks[i].element!.subType != null &&
+          }else if (landmarks[i].element!.subType != null &&
               landmarks[i].element!.subType == "room door" &&
               landmarks[i].doorX != null) {
             final Uint8List iconMarker =
@@ -10134,7 +10125,6 @@ String destiName='';
         );
 
 
-
         // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
           minDistance = distance.toDouble();
@@ -10351,7 +10341,6 @@ String destiName='';
                       //
 
                       focusBuildingChecker(cameraPosition);
-
                       if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                           mapState.target.latitude.toStringAsFixed(5)) {
                         mapState.aligned = false;
@@ -10620,9 +10609,9 @@ String destiName='';
                                       _polygon.clear();
                                       circles.clear();
 
-                                      // _markers.clear();
-                                      // _markerLocationsMap.clear();
-                                      // _markerLocationsMapLanName.clear();
+                                      _markers.clear();
+                                      _markerLocationsMap.clear();
+                                      _markerLocationsMapLanName.clear();
 
                                       SingletonFunctionController.building.floor[buildingAllApi
                                           .getStoredString()] = revfloorList[i];

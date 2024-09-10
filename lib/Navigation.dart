@@ -4080,19 +4080,16 @@ if(SingletonFunctionController.timer!=null){
   }
 
   void createMarkers(land _landData, int floor, {String? bid}) async {
-    print("Markercleared");
-    print(Markers.length);
+
     _markers.clear();
     _markerLocationsMap.clear();
     _markerLocationsMapLanName.clear();
-    // Markers.removeWhere((marker) => marker.markerId.value
-    //     .contains(bid ?? buildingAllApi.selectedBuildingID));
+    Markers.removeWhere((marker) => marker.markerId.value
+        .contains(bid ?? buildingAllApi.selectedBuildingID));
     List<Landmarks> landmarks = _landData.landmarks!;
     try {
       for (int i = 0; i < landmarks.length; i++) {
-        if (landmarks[i].floor == floor &&
-            landmarks[i].buildingID ==
-                (bid ?? buildingAllApi.selectedBuildingID)) {
+        if (landmarks[i].floor == floor && landmarks[i].buildingID == (bid ?? buildingAllApi.selectedBuildingID)) {
           if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType != "main entry" &&
               landmarks[i].coordinateX != null &&
@@ -4139,9 +4136,7 @@ if(SingletonFunctionController.timer!=null){
                     onTap: () {
                       print("Info Window ");
                     })));
-          }
-
-          if (landmarks[i].element!.subType != null &&
+          }else if (landmarks[i].element!.subType != null &&
               landmarks[i].element!.subType == "room door" &&
               landmarks[i].doorX != null) {
             final Uint8List iconMarker =
@@ -10273,7 +10268,7 @@ String destiName='';
           geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
         );
 
-        print("Distance for $key is $distance");
+        //print("Distance for $key is $distance");
 
         // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
@@ -10286,7 +10281,7 @@ String destiName='';
       print("newBuildingID");
       print(newBuildingID);
       print(closestBuildingId);
-      //patchTransition(closestBuildingId);
+      patchTransition(closestBuildingId);
 
     }
     newBuildingID = closestBuildingId;
@@ -10767,9 +10762,9 @@ String destiName='';
                                       _polygon.clear();
                                       circles.clear();
 
-                                      // _markers.clear();
-                                      // _markerLocationsMap.clear();
-                                      // _markerLocationsMapLanName.clear();
+                                      _markers.clear();
+                                      _markerLocationsMap.clear();
+                                      _markerLocationsMapLanName.clear();
 
                                       SingletonFunctionController.building.floor[buildingAllApi
                                           .getStoredString()] = revfloorList[i];

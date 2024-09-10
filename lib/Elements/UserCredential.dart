@@ -50,7 +50,7 @@ class UserCredentials{
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
   String getUserOrentationSetting(){
-    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')?? "Focus Mode";
+    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')??"Explore Mode";
     return UserOrentationSetting;
   }
 

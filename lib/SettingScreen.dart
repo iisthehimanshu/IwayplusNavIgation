@@ -25,7 +25,7 @@ class _SettingScreenState extends State<SettingScreen> {
   bool DisabilityswitchValue = !(UserCredentials().getUserPersonWithDisability()==0);
   bool ColorContrastswitchValue = false;
   bool isNaturalDirectionSelected = true;
-  bool isFocusMode = true;
+  bool isFocusMode = false;
   bool isDistanceinM = false;
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
@@ -51,6 +51,7 @@ class _SettingScreenState extends State<SettingScreen> {
     }
 
     if(UserCredentials().getUserOrentationSetting()=='Focus Mode' || UserCredentials().getUserPathDetails()=='फोकस मोड' ){
+      print(UserCredentials().getUserOrentationSetting());
       isFocusMode=true;
     }else{
       isFocusMode=false;

@@ -125,7 +125,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // //print("listen to bin :${listenToBin()}");
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
-        listenToBin();
+       // listenToBin();
       }
 
 
@@ -705,7 +705,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
         }else if(widget.direction == "Straight"){
-          print("aiims debug 2 ${widget.direction}");
+          print("aiims debug 2 ${widget.direction}  ${UserState.ttsOnlyTurns}");
           Vibration.vibrate();
           if(!UserState.ttsOnlyTurns) {
             speak(

@@ -602,7 +602,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     if(UserCredentials().getUserOrentationSetting()=='Focus Mode'){
       UserState.ttsOnlyTurns = true;
-    UserState.ttsAllStop = false;
+      UserState.ttsAllStop = false;
     }else{
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;

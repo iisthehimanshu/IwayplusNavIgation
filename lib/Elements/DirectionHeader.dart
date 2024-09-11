@@ -120,12 +120,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-      //print("Pathposition");
-      //print(widget.user.path);
-      // //print("listen to bin :${listenToBin()}");
+      //
+      //
+      // //
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
+
         listenToBin();
+
       }
 
 
@@ -148,7 +150,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       turnPoints = tools.getTurnpoints_inCell(widget.user.Cellpath);
       turnPoints.add(widget.user.Cellpath.last);
 
-      print("turnpoints $turnPoints");
+      
 
       (widget.user.Cellpath.length%2==0)? turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-2]):turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-1]);
 
@@ -157,9 +159,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
-        //print("p1 $angle");
+        //
         angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-        //print("p2 $angle");
+        //
       }
 
       //print("angleeeeee $angle")  ;
@@ -176,7 +178,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 _currentLocale, prevpause: true);
           }
         }else{
-          print("look here $angle      ${widget.direction}          ${"Turn ${LocaleData.getProperty5(widget.direction, widget.context)}"}");
+          
           widget.direction = convertTolng("Turn ${LocaleData.getProperty5(widget.direction, widget.context)}", _currentLocale, widget.direction,"",0, "");
          if(!UserState.ttsOnlyTurns) {
             speak(
@@ -220,9 +222,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
-    //print("calledsumMap $sumMap");
+    //
     sortedsumMap.clear();
-    //print("sortedsumMapcleared $sortedsumMap");
+    //
 
 
     sumMap.forEach((key, value) {
@@ -249,23 +251,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     highestweight = element.value;
     //   }
     // });
-    // //print("-90---   ${sumMap.length}");
-    // //print("checkingavgmap   ${sumMap}");
+    // //
+    // //
 
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
     //
     //     btadapter.BIN[i]!.forEach((key, value) {
-    //       //print("Wilsonchecker");
-    //       //print(value.toString());
-    //       //print(key);
+    //       //
+    //       //
+    //       //
     //
     //       setState(() {
     //             widget.direction = "${widget.direction}$key   $value\n";
     //           });
     //
-    //       //print("-90-   $key   $value");
+    //       //
     //
     //       if (value > highestweight) {
     //         highestweight = value;
@@ -285,7 +287,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     widget.direction = "${widget.direction}$key   $value\n";
     //   });
     //
-    //   //print("-90-   $key   $value");
+    //   //
     //
     //   if(value>highestweight){
     //     highestweight =  value;
@@ -300,23 +302,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     });
 
-    ////print("$nearestBeacon   $highestweight");
+    ////
 
-  // print("nearest${nearestBeacon}");
+  // 
     if(nearestBeacon !=""){
-      print("WilsonInsideCall");
+      
 
       if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
-        print("WilsonInsideCall2");
-        print(widget.user.key);
-        print(Building.apibeaconmap[nearestBeacon]!.sId);
+        
+        
+        
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
-          print("WilsonInsideCall3");
+          
 
           //widget.user.pathobj.destinationFloor
           if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor!=widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
             widget.user.onConnection = false;
-            print("workingg 5");
+            
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             UserState.createCircle(widget.user.lat,widget.user.lng);
             speak(
@@ -342,7 +344,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               highestweight >= 5) {
 
             widget.user.onConnection = false;
-            //print("workingg user floor ${widget.user.floor}");
+            //
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
               Building.apibeaconmap[nearestBeacon]!.coordinateY!
@@ -361,15 +363,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
               if (d1 < distanceFromPath) {
                 distanceFromPath = d1.toInt();
-                //print("node on path $node");
-                //print("distanceFromPath $distanceFromPath");
+                //
+                //
                 indexOnPath = widget.user.path.indexOf(node);
-                //print(indexOnPath);
+                //
               }
             });
 
             if (distanceFromPath > 10) {
-              print("workingg 3");
+              
               _timer.cancel();
               widget.repaint(nearestBeacon);
               widget.reroute;
@@ -377,7 +379,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               return false; //away from path
             } else {
               double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
-              print("workingg 4");
+              
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               if(!UserState.ttsOnlyTurns) {
                 speak(
@@ -393,11 +395,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               return true; //moved on path
             }
             // if (d < 5) {
-            //   print("workingg 1");
+            //   
             //   //near to user so nothing to do
             //   return true;
             // } else {
-            //   //print("workingg 2");
+            //   //
             //   int distanceFromPath = 100000000;
             //   int? indexOnPath = null;
             //   int numCols = widget.user.pathobj.numCols![widget.user
@@ -407,22 +409,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
             //     if (d1 < distanceFromPath) {
             //       distanceFromPath = d1.toInt();
-            //       //print("node on path $node");
-            //       //print("distanceFromPath $distanceFromPath");
+            //       //
+            //       //
             //       indexOnPath = widget.user.path.indexOf(node);
-            //       //print(indexOnPath);
+            //       //
             //     }
             //   });
             //
             //   if (distanceFromPath > 10) {
-            //     print("workingg 3");
+            //     
             //     _timer.cancel();
             //     widget.repaint(nearestBeacon);
             //     widget.reroute;
             //     DirectionIndex = 1;
             //     return false; //away from path
             //   } else {
-            //     print("workingg 4");
+            //     
             //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             //     speak(
             //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
@@ -436,23 +438,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             // }
 
 
-            //print("d $d");
-            //print("widget.user.key ${widget.user.key}");
-            //print("beaconcoord ${beaconcoord}");
-            //print("usercoord ${usercoord}");
-            //print(nearestBeacon);
+            //
+            //
+            //
+            //
+            //
           }
         }
 
 
       }else{
-        print("WilsonInsideCall4");
+        
 
-        print("workingg 6");
-        //print("listening");
-        //print("inelese");
+        
+        //
+        //
 
-        //print(nearestBeacon);
+        //
         if(highestweight>1.2){
           _timer.cancel();
           widget.repaint(nearestBeacon);
@@ -540,7 +542,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(path.length >= widget.user.pathobj.index){
       return path[widget.user.pathobj.index];
     }else{
-      return Cell(0, 0, 0, (double angle, {int? currPointer,int? totalCells}){}, 0.0, 0.0, "", 0);
+      return Cell(0, 0, 0, (double angle, {int? currPointer,int? totalCells}){}, 0.0, 0.0, "", 0,0);
     }
   }
 
@@ -615,7 +617,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]?[widget.user.pathobj.sourceFloor]){
 
     }else if (widget.user.path.isNotEmpty && widget.user.Cellpath.length-1>widget.user.pathobj.index){
-      print("nextTurn debug");
+      
         widget.user.pathobj.connections.forEach((key, value) {
           value.forEach((inkey, invalue) {
             if(widget.user.path[widget.user.pathobj.index] == invalue){
@@ -624,14 +626,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           });
         });
         List<Cell> remainingPath = widget.user.Cellpath.sublist(widget.user.pathobj.index+1);
-        // print("nextTurn remainingPath $remainingPath");
-        // print("nextturn turnpoint $turnPoints");
+        // 
+        // 
         Cell nextTurn = findNextTurn(turnPoints, remainingPath);
-        // print("nextTurn $nextTurn");
-        // print(remainingPath);
+        // 
+        // 
 
         nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn.node);
-        // print("nextTurn index $nextTurnIndex");
+        // 
 
         if(turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index])){
           if(DirectionIndex + 1 < widget.user.pathobj.directions.length) {
@@ -664,7 +666,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
       int index = widget.user.Cellpath.indexOf(nextTurn);
-        //print("index $index");
+        //
         double a =0;
         if(index+1 == widget.user.path.length){
           if(widget.user.Cellpath[index-2].bid == widget.user.Cellpath[index-1].bid && widget.user.Cellpath[index-1].bid == widget.user.Cellpath[index].bid){
@@ -675,8 +677,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             a = tools.calculateAnglefifth(widget.user.path[index-1], widget.user.path[index], widget.user.path[index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           }
         }
-      print("angleangleangleangle ${widget.direction }");
-      print(a);
+      
+      
         String direc = tools.angleToClocks(a,widget.context);
         turnDirection = direc;
 
@@ -693,7 +695,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           // }else{
           //   speak("${widget.direction} ${widget.distance} meter");
           // }
-          print("aiims debug 1 ${widget.direction}");
+          
 
 
             speak(convertTolng(
@@ -705,7 +707,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
         }else if(widget.direction == "Straight"){
-          print("aiims debug 2 ${widget.direction}");
           Vibration.vibrate();
           if(!UserState.ttsOnlyTurns) {
             speak(
@@ -1069,7 +1070,7 @@ class scrollableDirection extends StatelessWidget {
   scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user,this.context);
 
   String chooseDirection(){
-    print("Direction $DirectionIndex $nextTurnIndex");
+    
     try {
       if (listOfDirections.isNotEmpty &&
           listOfDirections.length > DirectionIndex) {

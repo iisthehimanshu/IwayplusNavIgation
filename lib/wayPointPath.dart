@@ -150,22 +150,20 @@ class Graph {
     if((sourceY*numCols)+sourceX != (temppath[s][1]*numCols)+temppath[s][0]){
       await findPath(numRows, numCols, nonWalkableCells, ((sourceY*numCols) + sourceX), ((temppath[s][1]*numCols)+temppath[s][0])).then((value){
         //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-        print("path inside 1  between ${((sourceY*numCols) + sourceX)} and ${((temppath[s][1]*numCols)+temppath[s][0])} is $value");
         l1 = value;
-        print("l1 $l1");
+        //print("l1 $l1");
       });
     }
     for(int i = s ; i<=e; i++){
       l2.add((temppath[i][1]*numCols) + temppath[i][0]);
     }
-    print("l2 $l2");
+    //print("l2 $l2");
     if((temppath[e][1]*numCols)+temppath[e][0] != (destinationY*numCols)+destinationX){
 
         await findPath(numRows, numCols, nonWalkableCells, ((temppath[e][1]*numCols)+temppath[e][0]), ((destinationY*numCols) + destinationX)).then((value){
           //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-          print("path inside 2 $value");
           l3 = value;
-          print("l3 $l3");
+          //print("l3 $l3");
         });
 
 

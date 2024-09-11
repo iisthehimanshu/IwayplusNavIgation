@@ -14,7 +14,7 @@ class RatingsaveAPI{
   Future<void> saveRating(String feedback,int rating,String userId,String username, String sourceId,String destinationID,String appId) async {
     final Map<String, dynamic> data = {
       "userId": userId,
-      "username": username,
+      "username": username??'username',
       "sourceId": sourceId,
       "destinationId": destinationID,
       "rating": rating,

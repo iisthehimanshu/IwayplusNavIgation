@@ -73,7 +73,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String selectedButton = "";
 
   @override
-  void initState() {
+
+  void initState()  {
     super.initState();
     fetchandBuild();
     _controller.addListener(_onSearchChanged);

@@ -292,22 +292,22 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
   if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && !isoutdoorPath){
     await findPath(row, col, nonWalkableCells, ((sourceY*col) + sourceX), ((temppath[s][1]*col)+temppath[s][0])).then((value){
       //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-      print("path inside 1  between ${((sourceY*col) + sourceX)} and ${((temppath[s][1]*col)+temppath[s][0])} is $value");
+      // print("path inside 1  between ${((sourceY*col) + sourceX)} and ${((temppath[s][1]*col)+temppath[s][0])} is $value");
       l1 = value;
-      print("l1 $l1");
+      // print("l1 $l1");
     });
   }
   for(int i = s ; i<=e; i++){
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
-  print("l2 $l2");
+  // print("l2 $l2");
   if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX && !isoutdoorPath){
 
     await findPath(row, col, nonWalkableCells, ((temppath[e][1]*col)+temppath[e][0]), ((destinationY*col) + destinationX)).then((value){
       //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
-      print("path inside 2 $value");
+      // print("path inside 2 $value");
       l3 = value;
-      print("l3 $l3");
+      // print("l3 $l3");
     });
 
 

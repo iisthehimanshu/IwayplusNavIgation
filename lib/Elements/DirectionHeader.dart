@@ -930,14 +930,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    String binString = btadapter.BIN.entries.map((entry) {
-      int key = entry.key;
-      Map<String, double> valueMap = entry.value;
-      String valueString = valueMap.entries.map((e) {
-        return '${e.key}: ${e.value}';
-      }).join(', ');
-      return 'BIN[$key]: {$valueString}';
-    }).join('\n');
+    // String binString = btadapter.BIN.entries.map((entry) {
+    //   int key = entry.key;
+    //   Map<String, double> valueMap = entry.value;
+    //   String valueString = valueMap.entries.map((e) {
+    //     return '${e.key}: ${e.value}';
+    //   }).join(', ');
+    //   return 'BIN[$key]: {$valueString}';
+    // }).join('\n');
     setState(() {
 
     });

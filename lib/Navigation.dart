@@ -1149,7 +1149,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
             user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
-            LatLng(user.lat, user.lng), markers[user.Bid]![1]);
+            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
     });
   }
@@ -5239,7 +5239,10 @@ if(SingletonFunctionController.timer!=null){
         print("starting calc not happening");
       }
     }catch(e){
-      PathState.noPathFound = true;
+      setState(() {
+        PathState.noPathFound = true;
+      });
+      return;
     }
   }
 
@@ -5740,15 +5743,17 @@ if(SingletonFunctionController.timer!=null){
       print("path from waypoint for bid $bid $path");
     } catch (e) {
       print("error in path finding $e");
-      path= await findPath(
-        numRows,
-        numCols,
-        SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-        sourceIndex,
-        destinationIndex,
-      );
-      path = getFinalOptimizedPath(path, SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-          numCols, sourceX, sourceY, destinationX, destinationY);
+      if(bid != buildingAllApi.outdoorID){
+        path= await findPath(
+          numRows,
+          numCols,
+          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+          sourceIndex,
+          destinationIndex,
+        );
+        path = getFinalOptimizedPath(path, SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+            numCols, sourceX, sourceY, destinationX, destinationY);
+      }
     }
 
     wsocket.message["path"]["didPathForm"] = path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
@@ -10517,7 +10522,8 @@ String destiName='';
                     Text("coord [${user.coordX},${user.coordY}] \n"
                         "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                     "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                    "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                    "prev coord [${(user.pathobj.index-1<user.Cellpath.length && user.pathobj.index-1>0)?user.Cellpath[user.pathobj.index-1].x:0},${(user.pathobj.index-1<user.Cellpath.length && user.pathobj.index-1>0)?user.Cellpath[user.pathobj.index-1].y:0}]\n"
+                    "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}\n"
                         "floor ${user.floor}\n"
                         "userBid ${user.Bid} \n"
                         "index ${user.pathobj.index} \n"

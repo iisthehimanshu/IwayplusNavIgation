@@ -10530,6 +10530,7 @@ if(SingletonFunctionController.timer!=null){
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
+
                     // Text("coord [${user.coordX},${user.coordY}] \n"
                     //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                     // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"

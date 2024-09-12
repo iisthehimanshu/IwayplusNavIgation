@@ -114,7 +114,7 @@ mixin LocaleData {
   static const String youareon= 'You are on';
   static const String isonyour='is on your';
   static const String near='near';
-  static const String unabletofindyourlocation='Unable to find your location';
+  static const String unabletofindyourlocation='Unable to find your location. Scan nearby QR to know your location';
   static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
   static const String issss= 'is';
   static const String meteraway='meter away';

@@ -74,155 +74,163 @@ class _HomepageSearchState extends State<HomepageSearch> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
-        Container(
-            width: screenWidth - 32,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: Colors.white, // You can customize the border color
-                width: 1.0, // You can customize the border width
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey, // Shadow color
-                  offset:
-                  Offset(0, 2), // Offset of the shadow
-                  blurRadius: 4, // Spread of the shadow
+        Semantics(
+          header: true,
+          label: "Search Bar",
+          child: Container(
+              width: screenWidth - 32,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: Colors.white, // You can customize the border color
+                  width: 1.0, // You can customize the border width
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: FocusScope(
-                    autofocus: true,
-                    child: Focus(
-                      child: Semantics(
-                        sortKey: const OrdinalSortKey(0),
-                        label: "${LocaleData.waytogo.getString(context)}",
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey, // Shadow color
+                    offset:
+                    Offset(0, 2), // Offset of the shadow
+                    blurRadius: 4, // Spread of the shadow
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: FocusScope(
+                      autofocus: true,
+                      child: Focus(
+                        child: Semantics(
+                          sortKey: const OrdinalSortKey(0),
+                          label: "${LocaleData.waytogo.getString(context)}",
 
-                        child: InkWell(
-                          onTap: (){
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                            ).then((value){
-                              print("POP22");
-                              widget.onVenueClicked(value,DirectlyStartNavigation: false);
-                            });
-                          },
-                          child: Semantics(
-                            excludeSemantics: true,
-                            child: Container(
-                                margin: EdgeInsets.only(left: 16),
-                                child: Text(
-                                  "${LocaleData.waytogo.getString(context)}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff8e8d8d),
-                                    height: 25 / 16,
-                                  ),
-                                )),
+                          child: InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                              ).then((value){
+                                print("POP22");
+                                widget.onVenueClicked(value,DirectlyStartNavigation: false);
+                              });
+                            },
+                            child: Semantics(
+                              excludeSemantics: true,
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  child: Text(
+                                    "${LocaleData.waytogo.getString(context)}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8e8d8d),
+                                      height: 25 / 16,
+                                    ),
+                                  )),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  width: 40,
-                  height: 48,
-                  margin: EdgeInsets.only(right: 5),
-                  child: Center(
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
-                        ).then((value){
-                          print("POPPP");
-                          widget.onVenueClicked(value);
-                        });
-                      },
-                      icon: Semantics(
-                        label: "Voice search",
-                        sortKey: const OrdinalSortKey(1),
-                        child: Icon(
-                          Icons.mic_none_sharp,
-                          color: Color(0xff8E8C8C),
-                          size: 24,
+                  Container(
+                    width: 40,
+                    height: 48,
+                    margin: EdgeInsets.only(right: 5),
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
+                          ).then((value){
+                            print("POPPP");
+                            widget.onVenueClicked(value);
+                          });
+                        },
+                        icon: Semantics(
+                          label: "Voice search",
+                          sortKey: const OrdinalSortKey(1),
+                          child: Icon(
+                            Icons.mic_none_sharp,
+                            color: Color(0xff8E8C8C),
+                            size: 24,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                Container(
-                  width: 47,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Color(0xff24B9B0),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(3), // Adjust the radius as needed
-                      bottomRight: Radius.circular(3), // Adjust the radius as needed
-                      topLeft: Radius.circular(3), // Adjust the radius as needed
-                      bottomLeft: Radius.circular(3), // Adjust the radius as needed
-                    ),
-                  ),
-                  child: Center(
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SourceAndDestinationPage(user: widget.user,))
-                        ).then((value){
-                          widget.fromSourceAndDestinationPage(value);
-                        });
-                      },
-
-                      icon: Semantics(
-                        label: "Get Direction",
-                        child: SvgPicture.asset(
-                            "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                  Container(
+                    width: 47,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Color(0xff24B9B0),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(3), // Adjust the radius as needed
+                        bottomRight: Radius.circular(3), // Adjust the radius as needed
+                        topLeft: Radius.circular(3), // Adjust the radius as needed
+                        bottomLeft: Radius.circular(3), // Adjust the radius as needed
                       ),
                     ),
-                  ),
-                )
-              ],
-            )),
-        Container(
-          width: screenWidth,
-          child: ChipsChoice<int>.single(
-            value: vall,
-            onChanged: (val){
-              setState(() => vall = val);
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SourceAndDestinationPage(user: widget.user,))
+                          ).then((value){
+                            widget.fromSourceAndDestinationPage(value);
+                          });
+                        },
 
-              if(HelperClass.SemanticEnabled){
-                speak("${options[val]} selected");
-              }else if(lastValueStored == val){
-                speak("${options[val]} selected");
-              }
-              lastValueStored = val;
-              print("wilsonchecker");
-              print(val);
-            },
-            choiceItems: C2Choice.listFrom<int, String>(
-              source: options,
-              value: (i, v) => i,
-              label: (i, v) => v,
+                        icon: Semantics(
+                          label: "Get Direction",
+                          child: SvgPicture.asset(
+                              "assets/HomepageSearch_topBarDirectionIcon.svg"),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              )),
+        ),
+        Semantics(
+          header: true,
+          label: "Filters",
+          child: Container(
+            width: screenWidth,
+            child: ChipsChoice<int>.single(
+              value: vall,
+              onChanged: (val){
+                setState(() => vall = val);
+
+                if(HelperClass.SemanticEnabled){
+                  speak("${options[val]} selected");
+                }else if(lastValueStored == val){
+                  speak("${options[val]} selected");
+                }
+                lastValueStored = val;
+                print("wilsonchecker");
+                print(val);
+              },
+              choiceItems: C2Choice.listFrom<int, String>(
+                source: options,
+                value: (i, v) => i,
+                label: (i, v) => v,
+              ),
+              choiceBuilder: (item, i) {
+                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked,);
+              },
+              direction: Axis.horizontal,
             ),
-            choiceBuilder: (item, i) {
-              return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked,);
-            },
-            direction: Axis.horizontal,
           ),
         ),
       ],

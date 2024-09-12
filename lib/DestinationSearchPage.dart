@@ -654,127 +654,133 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
 
-              Container(
-                  width: screenWidth - 32,
-                  height: 48,
-                  margin: EdgeInsets.only(top: 16, left: 16, right: 17),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color:
-                      containerBoxColor, // You can customize the border color
-                      width: 1.0, // You can customize the border width
+              Semantics(
+                header: true,
+                label: "Search",
+                child: Container(
+                    width: screenWidth - 32,
+                    height: 48,
+                    margin: EdgeInsets.only(top: 16, left: 16, right: 17),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color:
+                        containerBoxColor, // You can customize the border color
+                        width: 1.0, // You can customize the border width
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: 6,),
-                      Container(
-                        width: 48,
-                        height: 48,
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Semantics(
-                            label: "Back",
-                            child: SvgPicture.asset(
-                                "assets/DestinationSearchPage_BackIcon.svg"),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: FocusScope(
-                          autofocus: true,
-                          child: Focus(
-                            child: Container(
-                                child: TextField(
-                                  autofocus: true,
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "${searchHintString}",
-                                    border: InputBorder.none, // Remove default border
-                                  ),
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff18181b),
-                                    height: 25 / 16,
-                                  ),
-                                  onTap: () {
-                                    if (containerBoxColor == Color(0xffA1A1AA)) {
-                                      containerBoxColor = Color(0xff24B9B0);
-                                    } else {
-                                      containerBoxColor = Color(0xffA1A1AA);
-                                    }
-                                  },
-                                  onSubmitted: (value) {
-
-                                    search(value);
-                                  },
-                                  onChanged: (value) {
-                                    search(value);
-                                    if(_controller.text.isEmpty){
-                                      topSearches.clear();
-                                      topSearchesFunc();
-                                    }
-                                    // print("Final Set");
-                                    // print(cardSet);
-                                  },
-                                )),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(right: 6),
-                        width: 40,
-                        height: 48,
-                        child: Center(
-                          child: _controller.text.isNotEmpty
-                              ? IconButton(
-                              onPressed: (){
-                                _controller.text = "";
-                                setState((){
-                                  vall = -1;
-                                  search(_controller.text);
-                                  recentResults = [];
-                                  searcCategoryhResults = [];
-                                  category=false;
-                                  topSearches.clear();
-                                  topSearchesFunc();
-                                });
-                              },
-                              icon: Semantics(
-                                  label: "Close", child: Icon(Icons.close)))
-                              : IconButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 6,),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          child: IconButton(
                             onPressed: () {
-                              initSpeech();
-                              setState(() {
-                                speetchText.isListening
-                                    ? stopListening()
-                                    : startListening();
-                              });
-                              if (!micselected) {
-                                micColor = Color(0xff24B9B0);
-                              }
-
-                              setState(() {});
+                              Navigator.pop(context);
                             },
                             icon: Semantics(
-                              label: "Voice Search",
-                              child: Icon(
-                                Icons.mic,
-                                color: micColor,
+                              label: "Back",
+                              child: SvgPicture.asset(
+                                  "assets/DestinationSearchPage_BackIcon.svg"),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: FocusScope(
+                            autofocus: true,
+                            child: Focus(
+                              child: Container(
+                                  child: TextField(
+                                    autofocus: true,
+                                    controller: _controller,
+                                    decoration: InputDecoration(
+                                      hintText: "${searchHintString}",
+                                      border: InputBorder.none, // Remove default border
+                                    ),
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff18181b),
+                                      height: 25 / 16,
+                                    ),
+                                    onTap: () {
+                                      if (containerBoxColor == Color(0xffA1A1AA)) {
+                                        containerBoxColor = Color(0xff24B9B0);
+                                      } else {
+                                        containerBoxColor = Color(0xffA1A1AA);
+                                      }
+                                    },
+                                    onSubmitted: (value) {
+
+                                      search(value);
+                                    },
+                                    onChanged: (value) {
+                                      search(value);
+                                      if(_controller.text.isEmpty){
+                                        topSearches.clear();
+                                        topSearchesFunc();
+                                      }
+                                      // print("Final Set");
+                                      // print(cardSet);
+                                    },
+                                  )),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(right: 6),
+                          width: 40,
+                          height: 48,
+                          child: Center(
+                            child: _controller.text.isNotEmpty
+                                ? IconButton(
+                                onPressed: (){
+                                  _controller.text = "";
+                                  setState((){
+                                    vall = -1;
+                                    search(_controller.text);
+                                    recentResults = [];
+                                    searcCategoryhResults = [];
+                                    category=false;
+                                    topSearches.clear();
+                                    topSearchesFunc();
+                                  });
+                                },
+                                icon: Semantics(
+                                    container: true,
+
+                                    label: "Close", child: Icon(Icons.close)))
+                                : IconButton(
+                              onPressed: () {
+                                initSpeech();
+                                setState(() {
+                                  speetchText.isListening
+                                      ? stopListening()
+                                      : startListening();
+                                });
+                                if (!micselected) {
+                                  micColor = Color(0xff24B9B0);
+                                }
+
+                                setState(() {});
+                              },
+                              icon: Semantics(
+                                label: "Voice Search",
+                                child: Icon(
+                                  Icons.mic,
+                                  color: micColor,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  )),
+                      ],
+                    )),
+              ),
               (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
                 onTap: (){
                   Navigator.pop(context, widget.userLocalized);
@@ -802,108 +808,116 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               ):Container(),
               searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-              Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: vall,
-                  onChanged: (val) {
+              Semantics(
+                label: "Filter Section",
+                header: true,
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: vall,
+                    onChanged: (val) {
 
-                    if(HelperClass.SemanticEnabled) {
-                      speak("${optionListForUI[val]} selected");
-                    }
+                      if(HelperClass.SemanticEnabled) {
+                        speak("${optionListForUI[val]} selected");
+                      }
 
-                    selectedButton = optionListForUI[val];
-                    setState(() => vall = val);
-                    lastval = val;
+                      selectedButton = optionListForUI[val];
+                      setState(() => vall = val);
+                      lastval = val;
 
 
-                    _controller.text = optionListForUI[val];
-                    search(optionListForUI[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListForUI,
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+                      _controller.text = optionListForUI[val];
+                      search(optionListForUI[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListForUI,
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        vall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListForUI[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
+
+                        onTap: (String Text) {
+                          if (Text.isNotEmpty) {
+                            search(Text);
+                          } else {
+                            search(Text);
+                            _controller.text="";
+                            searchResults = [];
+                            searcCategoryhResults = [];
+                            vall = -1;
+                          }
+                        },
+                      );
+                    },
+                    direction: Axis.horizontal,
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      vall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListForUI[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text);
-                        } else {
-                          search(Text);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                        }
-                      },
-                    );
-                  },
-                  direction: Axis.horizontal,
                 ),
               ),
-              !category && _controller.text.isNotEmpty ? Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: newvall,
-                  onChanged: (val) {
+              !category && _controller.text.isNotEmpty ? Semantics(
+                header: true,
+                label: "Building Filter section",
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: newvall,
+                    onChanged: (val) {
 
-                    // if(HelperClass.SemanticEnabled) {
-                    //   speak("${optionListItemBuildingName.toList()[val]} selected");
-                    // }
-                    //
-                    // selectedButton = optionListItemBuildingName.toList()[val];
-                    setState(() => newvall = val);
-                    //
-                    //
-                    // //_controller.text = optionListItemBuildingName.toList()[val];
-                    // search(optionListItemBuildingName.toList()[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListItemBuildingNameNew.toList(),
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+                      // if(HelperClass.SemanticEnabled) {
+                      //   speak("${optionListItemBuildingName.toList()[val]} selected");
+                      // }
+                      //
+                      // selectedButton = optionListItemBuildingName.toList()[val];
+                      setState(() => newvall = val);
+                      //
+                      //
+                      // //_controller.text = optionListItemBuildingName.toList()[val];
+                      // search(optionListItemBuildingName.toList()[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListItemBuildingNameNew.toList(),
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        newvall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListItemBuildingNameNew.toList()[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
+
+                        onTap: (String Text) {
+                          print("tapped$Text");
+
+                          if (Text.isNotEmpty) {
+                            search(_controller.text,wantToFilter: Text);
+                          }
+                          // else {
+                          //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                          //   _controller.text="";
+                          //   searchResults = [];
+                          //   searcCategoryhResults = [];
+                          //   newvall = -1;
+                          // }
+                        },
+                      );
+                    },
+                    direction: Axis.horizontal,
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      newvall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListItemBuildingNameNew.toList()[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        print("tapped$Text");
-
-                        if (Text.isNotEmpty) {
-                          search(_controller.text,wantToFilter: Text);
-                        }
-                        // else {
-                        //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                        //   _controller.text="";
-                        //   searchResults = [];
-                        //   searcCategoryhResults = [];
-                        //   newvall = -1;
-                        // }
-                      },
-                    );
-                  },
-                  direction: Axis.horizontal,
                 ),
               ) : Container(),
 
@@ -912,10 +926,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               Flexible(
                   flex: 1,
                   child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
+                      child: Semantics(
+                        label: "Search Results",
+                        header: true,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
 
+                        ),
                       ),
                   )),
               if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)

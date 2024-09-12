@@ -125,7 +125,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
   void apiCall() async  {
     if(_FCMToken != null){
-      await FCMServer().sendFCM(_FCMToken!);
+      try {
+        await FCMServer().sendFCM(_FCMToken!);
+      }catch(e){}
     }
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);

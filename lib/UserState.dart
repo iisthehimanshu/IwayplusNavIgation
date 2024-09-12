@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
@@ -104,6 +105,7 @@ class UserState {
   // }
 
   Future<void> move(context) async {
+
     moveOneStep(context);
 
     for (int i = 1; i < stepSize.toInt(); i++) {
@@ -161,7 +163,52 @@ class UserState {
 
     if (isnavigating) {
       checkForMerge();
+      moveinCampus(context);
       pathobj.index = pathobj.index + 1;
+      if((Bid == buildingAllApi.outdoorID && Cellpath[pathobj.index].bid == buildingAllApi.outdoorID) && tools.calculateDistance([showcoordX, showcoordY], [Cellpath[pathobj.index].x,Cellpath[pathobj.index].y])>=3){
+
+        //destination check
+        List<Cell> turnPoints =
+        tools.getCellTurnpoints(Cellpath);
+        print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
+            [pathobj.destinationX, pathobj.destinationY]) <
+            6)}");
+        bool isSameFloorAndBuilding = floor == pathobj.destinationFloor &&
+            Bid == pathobj.destinationBid;
+
+        bool isNearLastTurnPoint = tools.calculateDistance(
+            [turnPoints.last.x, turnPoints.last.y],
+            [pathobj.destinationX, pathobj.destinationY]) < 10;
+
+        bool isAtLastTurnPoint = showcoordX == turnPoints.last.x &&
+            showcoordY == turnPoints.last.y;
+
+        bool isNearDestination = tools.calculateDistance(
+            [showcoordX, showcoordY],
+            [pathobj.destinationX, pathobj.destinationY]) < 6;
+
+        if (isSameFloorAndBuilding &&
+            ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination)) {
+          createCircle(lat, lng);
+          closeNavigation();
+        }
+
+
+        Cell point = tools.findingprevpoint(Cellpath,pathobj.index);
+        double angle = tools.calculateBearing([lat,lng], [Cellpath[pathobj.index].lat, Cellpath[pathobj.index].lng]);
+        Map<String, double> data = tools.findslopeandintercept(point.x, point.y, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y);
+        List<int> transitionvalue = tools.findpoint(coordX,coordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
+        showcoordX = transitionvalue[0];
+        showcoordY = transitionvalue[1];
+        coordX = transitionvalue[0];
+        coordY = transitionvalue[1];
+        List<double> values = tools.moveLatLng([lat,lng], angle, 1);
+        lat = values[0];
+        lng = values[1];
+        path.insert(pathobj.index, (showcoordY*cols)+showcoordX);
+        Cellpath.insert(pathobj.index, Cell((showcoordY*cols)+showcoordX, showcoordX, showcoordY, tools.eightcelltransition, lat, lng, buildingAllApi.outdoorID, floor, cols,imaginedCell: true));
+        return;
+      }
       if(Cellpath[pathobj.index].bid != null && Bid != Cellpath[pathobj.index].bid) {
         Bid = Cellpath[pathobj.index].bid!;
         cols = building!.floorDimenssion[Bid]![floor]![0];
@@ -191,7 +238,6 @@ class UserState {
       //   coordY = coordY + transitionvalue[1];
       //   coordYf = 0.0;
       // }
-
       if (this.isnavigating &&
           pathobj.Cellpath.isNotEmpty &&
           pathobj.numCols != 0) {
@@ -214,12 +260,17 @@ class UserState {
 
           if (previousBuildingName != null && nextBuildingName != null) {
             if(Cellpath[pathobj.index - 1].bid == pathobj.sourceBid){
-              speak("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.",lngCode);
+              speak(convertTolng("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.", "", 0.0, context, 0.0,nextBuildingName,previousBuildingName),lngCode);
             }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
-              speak("Entering ${nextBuildingName}. Continue ahead.",lngCode);
+
+              if(pathobj.destinationBid == buildingAllApi.outdoorID){
+                speak(convertTolng("Continue ahead towards ${pathobj.destinationName}.", "", 0.0, context, 0.0, "", "",destname:pathobj.destinationName ) ,lngCode);
+              }else{
+                speak(convertTolng("Entering ${nextBuildingName}. Continue ahead.", "", 0.0, context, 0.0,nextBuildingName,""),lngCode);
+              }
             }
 
-          }          changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
+          } changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
         }
       } else {
         showcoordX = coordX;
@@ -301,7 +352,7 @@ class UserState {
                 "",
                 0.0,
                 context,
-                0.0),
+                0.0,"",""),
             lngCode,
             prevpause: true);
       }
@@ -325,7 +376,7 @@ class UserState {
               if(!UserState.ttsOnlyTurns){
                 speak(
                     convertTolng("Passing by ${element.name}", element.name, 0.0,
-                        context, 0.0),
+                        context, 0.0,"",""),
                     lngCode);
               }
 
@@ -357,7 +408,7 @@ class UserState {
                         element.name!,
                         0.0,
                         context,
-                        0.0),
+                        0.0,"",""),
                     lngCode);
               }
 
@@ -395,12 +446,16 @@ class UserState {
     }
   }
 
+  Future<void> moveinCampus(context) async {
+
+  }
+
   String convertTolng(
-      String msg, String? name, double agl, BuildContext context, double a,
+      String msg, String? name, double agl, BuildContext context, double a,String nextBuildingName ,String currentBuildingName,
       {String destname = ""}) {
     
     print(
-        "${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}");
+        "$msg");
     if (msg ==
         "You have reached ${destname}. It is ${tools.angleToClocks3(a, context)}") {
       if (lngCode == 'en') {
@@ -438,6 +493,33 @@ class UserState {
         return msg;
       } else {
         return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)} पर है";
+      }
+    }else if (nextBuildingName != "" && currentBuildingName!="" &&
+        msg ==
+            "Exiting $currentBuildingName. Continue along the path towards $nextBuildingName.") {
+
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        print("entereddddd");
+        print(msg);
+        return "${currentBuildingName} से बाहर निकलते हुए। ${nextBuildingName} की ओर बढ़ते हुए रास्ते पर चलते रहें";
+      }
+    }else if (nextBuildingName != "" &&
+        msg ==
+            "Entering ${nextBuildingName}. Continue ahead.") {
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        return "${nextBuildingName} में प्रवेश कर रहे हैं। आगे बढ़ते रहें।";
+      }
+    }else if (destname != "" &&
+        msg ==
+            "Continue ahead towards $destname") {
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        return "$destname की ओर आगे बढ़ते रहें";
       }
     }
     return "";

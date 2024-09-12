@@ -43,6 +43,9 @@ Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start,
       // if(isoutdoorPath){
         //return path.reversed.toList();
       // }
+      if(isoutdoorPath){
+        return path.reversed.toList();
+      }
       return addCoordinatesBetweenVertices(path.reversed.toList(), col);
     }
 

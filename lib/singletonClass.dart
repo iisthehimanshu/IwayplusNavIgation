@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '/buildingState.dart';
 
@@ -52,13 +53,16 @@ class SingletonFunctionController {
         print(buildingAllApi.allBuildingID);
         print(apibeaconmap);
 
-      })).then((value){
+      })).then((value) async {
+        print("blue statusssss");
+        print(await FlutterBluePlus.isOn);
         if(Platform.isAndroid){
+
           btadapter.startScanning(apibeaconmap);
         }else{
           btadapter.startScanningIOS(apibeaconmap);
         }
-        timer= Future.delayed(Duration(seconds:9));
+        timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
 
       // Simulate a long-running task

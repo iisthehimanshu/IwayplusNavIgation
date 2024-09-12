@@ -1150,7 +1150,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
             user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
-            LatLng(user.lat, user.lng), markers[user.Bid]![1]);
+            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
     });
   }
@@ -5241,7 +5241,10 @@ if(SingletonFunctionController.timer!=null){
         print("starting calc not happening");
       }
     }catch(e){
-      PathState.noPathFound = true;
+      setState(() {
+        PathState.noPathFound = true;
+      });
+      return;
     }
   }
 
@@ -5742,15 +5745,17 @@ if(SingletonFunctionController.timer!=null){
       print("path from waypoint for bid $bid $path");
     } catch (e) {
       print("error in path finding $e");
-      path= await findPath(
-        numRows,
-        numCols,
-        SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-        sourceIndex,
-        destinationIndex,
-      );
-      path = getFinalOptimizedPath(path, SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-          numCols, sourceX, sourceY, destinationX, destinationY);
+      if(bid != buildingAllApi.outdoorID){
+        path= await findPath(
+          numRows,
+          numCols,
+          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+          sourceIndex,
+          destinationIndex,
+        );
+        path = getFinalOptimizedPath(path, SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+            numCols, sourceX, sourceY, destinationX, destinationY);
+      }
     }
 
     wsocket.message["path"]["didPathForm"] = path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
@@ -9717,7 +9722,7 @@ if(SingletonFunctionController.timer!=null){
     flutterTts.pause().then((value) {
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
-              "", 0.0, context, angle,
+              "", 0.0, context, angle,"","",
               destname: destname),
           _currentLocale);
     });
@@ -10533,6 +10538,7 @@ if(SingletonFunctionController.timer!=null){
                     //     "userBid ${user.Bid} \n"
                     //     "index ${user.pathobj.index} \n"
                     //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+
                     DebugToggle.Slider
                         ? Slider(
                             value: user.theta,

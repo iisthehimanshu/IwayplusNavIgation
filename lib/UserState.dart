@@ -257,15 +257,17 @@ class UserState {
           lng = values[1];
           String? previousBuildingName = b.Building.buildingData?[Cellpath[pathobj.index - 1].bid];
           String? nextBuildingName = b.Building.buildingData?[pathobj.destinationBid];
-          if(pathobj.destinationBid == buildingAllApi.outdoorID){
-            nextBuildingName = pathobj.destinationName;
-          }
 
           if (previousBuildingName != null && nextBuildingName != null) {
             if(Cellpath[pathobj.index - 1].bid == pathobj.sourceBid){
               speak(convertTolng("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.", "", 0.0, context, 0.0,nextBuildingName,previousBuildingName),lngCode);
             }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
-              speak(convertTolng("Entering ${nextBuildingName}. Continue ahead.", "", 0.0, context, 0.0,nextBuildingName,""),lngCode);
+
+              if(pathobj.destinationBid == buildingAllApi.outdoorID){
+                speak("Continue ahead towards ${pathobj.destinationName}.",lngCode);
+              }else{
+                speak(convertTolng("Entering ${nextBuildingName}. Continue ahead.", "", 0.0, context, 0.0,nextBuildingName,""),lngCode);
+              }
             }
 
           } changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);

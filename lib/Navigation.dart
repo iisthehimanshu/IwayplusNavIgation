@@ -1238,14 +1238,51 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   // land userSetLandmarkMap = land().landmarksMap;
+  Future<Landmarks?> getglobalcoords()async{
+Landmarks? temp;
+double? minDistance;
+   await SingletonFunctionController.building.landmarkdata!.then((value) {
+      value.landmarks?.forEach((value){
+        //if(value.buildingID=='65d9cacfdb333f8945861f0f'){
+          if(value.coordinateX!=null && value.coordinateY!=null){
+            List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
+
+
+              double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
+            print("users lat lng ${dist}  ${latlngvalue}  ${UserState.geoLat} ${UserState.geoLng}");
+
+            if (dist < 50) {
+              if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
+
+                // If no closest landmark yet or if this one is closer, update
+                if (minDistance == null || dist < minDistance!) {
+                  minDistance = dist;
+                  temp = value; // Update the closest landmark
+                }
+              }
+            }
+
+          }
+
+       // }
+      });
+    });
+    return temp;
+  }
 
   void paintUser(String? nearestBeacon,
       {bool speakTTS = true, bool render = true, String? polyID}) async {
+print("nearestbeacon");
+print(nearestBeacon);
     if (widget.directsourceID.length > 2) {
       nearestBeacon = null;
       polyID = widget.directsourceID;
       widget.directsourceID = '';
     }
+    Landmarks? latlngLandmark=await getglobalcoords();
+    print("latlnglandmarks ${latlngLandmark!.name}");
+    print(latlngLandmark);
+
     if (nearestBeacon == null && polyID != null) {
       
       Landmarks userSetLocation = Landmarks();
@@ -1572,7 +1609,335 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           ),
         );
       }
-    } else {
+    }
+    else if((nearestBeacon==null || nearestBeacon.isEmpty) && (latlngLandmark!=null) && polyID==null){
+      Landmarks userSetLocation = latlngLandmark;
+      polyID=latlngLandmark.properties!.polyId!;
+      // await SingletonFunctionController.building.landmarkdata!.then((value) {
+      //
+      //   value.landmarksMap?.forEach((key, valuee) {
+      //     if (key == polyID) {
+      //       userSetLocation = valuee;
+      //     }
+      //   });
+      //
+      // });
+      final Uint8List userloc =
+      await getImagesFromMarker('assets/userloc0.png', 130);
+      final Uint8List userlocdebug =
+      await getImagesFromMarker('assets/tealtorch.png', 35);
+
+      tools.setBuildingAngle(SingletonFunctionController.building
+          .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
+
+      //nearestLandmark compute
+      nearestLandInfo currentnearest = nearestLandInfo(
+          sId: userSetLocation.sId,
+          buildingID: userSetLocation.buildingID,
+          coordinateX: userSetLocation.coordinateX,
+          coordinateY: userSetLocation.coordinateY,
+          doorX: userSetLocation.doorX,
+          doorY: userSetLocation.doorY,
+          type: userSetLocation.type,
+          floor: userSetLocation.floor,
+          name: userSetLocation.name,
+          updatedAt: userSetLocation.updatedAt,
+          buildingName: userSetLocation.buildingName,
+          venueName: userSetLocation.venueName);
+      nearestLandInfomation = currentnearest;
+
+      setState(() {
+        buildingAllApi.selectedID = userSetLocation!.buildingID!;
+        buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
+      });
+
+      List<int> localBeconCord = [];
+      localBeconCord.add(userSetLocation.coordinateX!);
+      localBeconCord.add(userSetLocation.coordinateY!);
+
+
+      pathState().beaconCords = localBeconCord;
+
+      List<double> values = [];
+
+      //floor alignment
+      await SingletonFunctionController.building.landmarkdata!.then((land) {
+        if (land.landmarksMap![polyID]!.floor != 0) {
+          List<PolyArray> prevFloorLifts = findLift(
+              tools.numericalToAlphabetical(0),
+              SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+                  .polyline!.floors!);
+          List<PolyArray> currFloorLifts = findLift(
+              tools.numericalToAlphabetical(land.landmarksMap![polyID]!.floor!),
+              SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+                  .polyline!.floors!);
+
+          for (int i = 0; i < prevFloorLifts.length; i++) {
+
+          }
+
+          for (int i = 0; i < currFloorLifts.length; i++) {
+
+          }
+          List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+
+
+          UserState.xdiff = dvalue[0];
+          UserState.ydiff = dvalue[1];
+          values = tools.localtoglobal(
+              land.landmarksMap![polyID]!.coordinateX!,
+              land.landmarksMap![polyID]!.coordinateY!,
+              SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+
+        } else {
+          UserState.xdiff = 0;
+          UserState.ydiff = 0;
+          values = tools.localtoglobal(
+              land.landmarksMap![polyID]!.coordinateX!,
+              land.landmarksMap![polyID]!.coordinateY!,
+              SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+        }
+      });
+
+
+
+
+      mapState.target = LatLng(values[0], values[1]);
+
+      user.Bid = userSetLocation.buildingID!;
+      user.locationName = userSetLocation.name;
+
+      //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
+
+      //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+      //did this change over here UDIT...
+      user.coordX = userSetLocation.coordinateX!;
+      user.coordY = userSetLocation.coordinateY!;
+      List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
+          SingletonFunctionController.building.patchData[userSetLocation.buildingID]);
+      user.lat = ls[0];
+      user.lng = ls[1];
+
+      if (nearestLandInfomation != null &&
+          nearestLandInfomation!.doorX != null) {
+        user.coordX = nearestLandInfomation!.doorX!;
+        user.coordY = nearestLandInfomation!.doorY!;
+        List<double> latlng = tools.localtoglobal(
+            nearestLandInfomation!.doorX!,
+            nearestLandInfomation!.doorY!,
+            SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
+
+
+        user.lat = latlng[0];
+        user.lng = latlng[1];
+        user.locationName = nearestLandInfomation!.name ??
+            nearestLandInfomation!.element!.subType;
+      } else if (nearestLandInfomation != null &&
+          nearestLandInfomation!.doorX == null) {
+        user.coordX = nearestLandInfomation!.coordinateX!;
+        user.coordY = nearestLandInfomation!.coordinateY!;
+        List<double> latlng = tools.localtoglobal(
+            nearestLandInfomation!.coordinateX!,
+            nearestLandInfomation!.coordinateY!,
+            SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
+
+
+        user.lat = latlng[0];
+        user.lng = latlng[1];
+        user.locationName = nearestLandInfomation!.name ??
+            nearestLandInfomation!.element!.subType;
+      }
+      user.showcoordX = user.coordX;
+      user.showcoordY = user.coordY;
+      UserState.cols = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
+      userSetLocation.floor]![0];
+      UserState.rows = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
+      userSetLocation.floor]![1];
+      UserState.lngCode = _currentLocale;
+      UserState.reroute = reroute;
+      UserState.closeNavigation = closeNavigation;
+      UserState.AlignMapToPath = alignMapToPath;
+      UserState.startOnPath = startOnPath;
+      UserState.speak = speak;
+      UserState.paintMarker = paintMarker;
+      UserState.createCircle = updateCircle;
+      List<int> userCords = [];
+      userCords.add(user.coordX);
+      userCords.add(user.coordY);
+      List<int> transitionValue = tools.eightcelltransition(user.theta);
+      List<int> newUserCord = [
+        user.coordX + transitionValue[0],
+        user.coordY + transitionValue[1]
+      ];
+      user.floor = userSetLocation.floor!;
+      user.key = userSetLocation.properties!.polyId!;
+      user.initialallyLocalised = true;
+      _controller = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 3),
+      )..repeat(reverse: true);
+
+      // Create the animation
+      _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+        ..addListener(() {
+          _updateCircle(user.lat, user.lng);
+        });
+      setState(() {
+        markers.clear();
+        //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
+        if (render) {
+          markers.putIfAbsent(user.Bid, () => []);
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userloc),
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userlocdebug),
+            anchor: Offset(0.5, 0.829),
+          ));
+          circles.add(
+            Circle(
+              circleId: CircleId("circle"),
+              center: LatLng(user.lat, user.lng),
+              radius: _animation.value,
+              strokeWidth: 1,
+              strokeColor: Colors.blue,
+              fillColor: Colors.lightBlue.withOpacity(0.2),
+            ),
+          );
+        } else {
+          user.moveToFloor(userSetLocation.floor!);
+          markers.putIfAbsent(user.Bid, () => []);
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userloc),
+            anchor: Offset(0.5, 0.829),
+          ));
+          markers[user.Bid]?.add(Marker(
+            markerId: MarkerId("debug"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userlocdebug),
+            anchor: Offset(0.5, 0.829),
+          ));
+        }
+
+        SingletonFunctionController.building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
+        if (widget.directLandID.length < 2) {
+          createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
+        }
+
+        SingletonFunctionController.building.landmarkdata!.then((value) {
+          createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+        });
+      });
+
+      double value = 0;
+      if (nearestLandInfomation != null) {
+        value = tools.calculateAngle2(
+            [
+              userSetLocation.doorX ?? userSetLocation.coordinateX!,
+              userSetLocation.doorY ?? userSetLocation.coordinateY!
+            ],
+            newUserCord,
+            [
+              nearestLandInfomation!.coordinateX!,
+              nearestLandInfomation!.coordinateY!
+            ]);
+      }
+
+      mapState.zoom = 22;
+
+
+      String? finalvalue = value == 0
+          ? null
+          : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+
+      // double value =
+      //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
+      //
+      // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+      //
+      //
+      if (user.isnavigating == false && speakTTS) {
+        detected = true;
+        if (!_isExploreModePannelOpen && speakTTS) {
+          _isBuildingPannelOpen = true;
+        }
+        nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+      }
+      String name = nearestLandInfomation == null
+          ? userSetLocation.name!
+          : nearestLandInfomation!.name!;
+      if (nearestLandInfomation == null) {
+        //updating user pointer
+        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
+        createRooms(SingletonFunctionController.building.polyLineData!,
+            SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!);
+        if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
+          setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+        }
+        if (markers.length > 0)
+          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+        if (user.initialallyLocalised) {
+          mapState.interaction = !mapState.interaction;
+        }
+        fitPolygonInScreen(patch.first);
+
+        if (speakTTS) {
+          if (finalvalue == null) {
+            speak(
+                convertTolng(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                    _currentLocale,
+                    ''),
+                _currentLocale);
+          } else {
+            speak(
+                convertTolng(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                    _currentLocale,
+                    finalvalue),
+                _currentLocale);
+          }
+        }
+      } else {
+        if (speakTTS) {
+          if (finalvalue == null) {
+            speak(
+                convertTolng(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                    _currentLocale,
+                    ''),
+                _currentLocale);
+          } else {
+            speak(
+                convertTolng(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                    _currentLocale,
+                    finalvalue),
+                _currentLocale);
+          }
+        }
+      }
+
+      if (speakTTS) {
+        mapState.zoom = 22.0;
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(user.lat, user.lng),
+            22, // Specify your custom zoom level here
+          ),
+        );
+      }
+    }
+    else {
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
 
 

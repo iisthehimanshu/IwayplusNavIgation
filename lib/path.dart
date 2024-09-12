@@ -1363,6 +1363,9 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 
 List<Cell> findCorridorSegments(
     List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor,Map<String,patchDataModel> patchData) {
+  int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
+  print("coorirdor width");
+  print(coorridorWidth);
   List<Cell> single = [];
   List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
@@ -1382,13 +1385,13 @@ List<Cell> findCorridorSegments(
     }
 
     bool northCollision =
-    checkDirection(nonWalkable, row, col, numCols, -1, 0, 10);
+    checkDirection(nonWalkable, row, col, numCols, -1, 0,coorridorWidth);
     bool southCollision =
-    checkDirection(nonWalkable, row, col, numCols, 1, 0, 10);
+    checkDirection(nonWalkable, row, col, numCols, 1, 0,coorridorWidth);
     bool eastCollision =
-    checkDirection(nonWalkable, row, col, numCols, 0, 1, 10);
+    checkDirection(nonWalkable, row, col, numCols, 0, 1,coorridorWidth);
     bool westCollision =
-    checkDirection(nonWalkable, row, col, numCols, 0, -1, 10);
+    checkDirection(nonWalkable, row, col, numCols, 0, -1,coorridorWidth);
 
     int collisionCount = (northCollision ? 1 : 0) +
         (southCollision ? 1 : 0) +

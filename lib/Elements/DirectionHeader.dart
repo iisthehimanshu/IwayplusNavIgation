@@ -644,7 +644,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           }
         }
           widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
-        double angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        double angle = 0.0;
+        try{
+          angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }catch(e){
+          print("error to be solved later $e");
+        }
         if(widget.user.pathobj.index != 0){
            angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         }
@@ -718,7 +723,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
 
         if(nextTurn == turnPoints.last && widget.distance == 7){
-          double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          double angle = 0.0;
+          try{
+            angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          }catch(e){
+            print("problem to be solved later $e");
+          }
           if(!UserState.ttsOnlyTurns) {
             speak("${widget.direction} ${widget.distance} steps. ${widget.user
                 .pathobj.destinationName} will be ${tools.angleToClocks2(

@@ -264,7 +264,7 @@ class UserState {
             }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
 
               if(pathobj.destinationBid == buildingAllApi.outdoorID){
-                speak("Continue ahead towards ${pathobj.destinationName}.",lngCode);
+                speak(convertTolng("Continue ahead towards ${pathobj.destinationName}.", "", 0.0, context, 0.0, "", "",destname:pathobj.destinationName ) ,lngCode);
               }else{
                 speak(convertTolng("Entering ${nextBuildingName}. Continue ahead.", "", 0.0, context, 0.0,nextBuildingName,""),lngCode);
               }
@@ -512,6 +512,14 @@ class UserState {
         return msg;
       } else {
         return "${nextBuildingName} में प्रवेश कर रहे हैं। आगे बढ़ते रहें।";
+      }
+    }else if (destname != "" &&
+        msg ==
+            "Continue ahead towards $destname") {
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        return "$destname की ओर आगे बढ़ते रहें";
       }
     }
     return "";

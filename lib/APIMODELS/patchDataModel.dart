@@ -34,6 +34,8 @@ class PatchData {
   String? updatedAt;
   String? buildingAngle;
   String? buildingName;
+  String? corridorWidth;
+  String? realtimeLocalisationThreshold;
   int? iV;
 
   PatchData(
@@ -49,6 +51,8 @@ class PatchData {
         this.updatedAt,
         this.buildingAngle,
         this.buildingName,
+        this.corridorWidth,
+        this.realtimeLocalisationThreshold,
         this.iV});
 
   PatchData.fromJson(Map<dynamic, dynamic> json) {
@@ -79,6 +83,8 @@ class PatchData {
     updatedAt = json['updatedAt'];
     buildingAngle = json['buildingAngle'];
     buildingName = json['buildingName'];
+    corridorWidth = json['corridorWidth'];
+    realtimeLocalisationThreshold = json['realtimeLocalisationThreshold'];
     iV = json['__v'];
   }
 
@@ -104,6 +110,8 @@ class PatchData {
     data['buildingAngle'] = this.buildingAngle;
     data['buildingName'] = this.buildingName;
     data['__v'] = this.iV;
+    data['corridorWidth'] = this.corridorWidth;
+    data['realtimeLocalisationThreshold'] = this.realtimeLocalisationThreshold;
     return data;
   }
 }

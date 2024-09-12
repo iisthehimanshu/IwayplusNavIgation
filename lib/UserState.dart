@@ -260,16 +260,17 @@ class UserState {
 
           if (previousBuildingName != null && nextBuildingName != null) {
             if(Cellpath[pathobj.index - 1].bid == pathobj.sourceBid){
-              speak("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.",lngCode);
+              speak(convertTolng("Exiting $previousBuildingName. Continue along the path towards $nextBuildingName.", "", 0.0, context, 0.0,nextBuildingName,previousBuildingName),lngCode);
             }else if(Cellpath[pathobj.index].bid == pathobj.destinationBid){
+
               if(pathobj.destinationBid == buildingAllApi.outdoorID){
                 speak("Continue ahead towards ${pathobj.destinationName}.",lngCode);
               }else{
-                speak("Entering ${nextBuildingName}. Continue ahead.",lngCode);
+                speak(convertTolng("Entering ${nextBuildingName}. Continue ahead.", "", 0.0, context, 0.0,nextBuildingName,""),lngCode);
               }
             }
 
-          }          changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
+          } changeBuilding(Cellpath[pathobj.index-1].bid, Cellpath[pathobj.index].bid);
         }
       } else {
         showcoordX = coordX;
@@ -351,7 +352,7 @@ class UserState {
                 "",
                 0.0,
                 context,
-                0.0),
+                0.0,"",""),
             lngCode,
             prevpause: true);
       }
@@ -375,7 +376,7 @@ class UserState {
               if(!UserState.ttsOnlyTurns){
                 speak(
                     convertTolng("Passing by ${element.name}", element.name, 0.0,
-                        context, 0.0),
+                        context, 0.0,"",""),
                     lngCode);
               }
 
@@ -407,7 +408,7 @@ class UserState {
                         element.name!,
                         0.0,
                         context,
-                        0.0),
+                        0.0,"",""),
                     lngCode);
               }
 
@@ -450,11 +451,11 @@ class UserState {
   }
 
   String convertTolng(
-      String msg, String? name, double agl, BuildContext context, double a,
+      String msg, String? name, double agl, BuildContext context, double a,String nextBuildingName ,String currentBuildingName,
       {String destname = ""}) {
     
     print(
-        "${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}");
+        "$msg");
     if (msg ==
         "You have reached ${destname}. It is ${tools.angleToClocks3(a, context)}") {
       if (lngCode == 'en') {
@@ -492,6 +493,25 @@ class UserState {
         return msg;
       } else {
         return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)} पर है";
+      }
+    }else if (nextBuildingName != "" && currentBuildingName!="" &&
+        msg ==
+            "Exiting $currentBuildingName. Continue along the path towards $nextBuildingName.") {
+
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        print("entereddddd");
+        print(msg);
+        return "${currentBuildingName} से बाहर निकलते हुए। ${nextBuildingName} की ओर बढ़ते हुए रास्ते पर चलते रहें";
+      }
+    }else if (nextBuildingName != "" &&
+        msg ==
+            "Entering ${nextBuildingName}. Continue ahead.") {
+      if (lngCode == 'en') {
+        return msg;
+      } else {
+        return "${nextBuildingName} में प्रवेश कर रहे हैं। आगे बढ़ते रहें।";
       }
     }
     return "";

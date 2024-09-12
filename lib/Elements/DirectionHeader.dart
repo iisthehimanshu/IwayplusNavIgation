@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -78,6 +79,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
   bool isSpeaking=false;
+  String? threshold;
 
   void initTts() {
     flutterTts.setCompletionHandler(() {
@@ -125,9 +127,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // //
       // HelperClass.showToast("Bin cleared");
       if(widget.user.pathobj.index>1) {
-
         listenToBin();
-
       }
 
 
@@ -222,6 +222,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
+    print("threshold");
+    threshold=(widget.user.building!.patchData[widget.user.Bid]!.patchData!.realtimeLocalisationThreshold!=null)?widget.user.building!.patchData[widget.user.Bid]!.patchData!.realtimeLocalisationThreshold!:'5';
+    print(threshold);
     //
     sortedsumMap.clear();
     //
@@ -341,7 +344,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
 
-              highestweight >= 5) {
+              highestweight >=int.parse(threshold!)) {
 
             widget.user.onConnection = false;
             //
@@ -940,14 +943,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    String binString = btadapter.BIN.entries.map((entry) {
-      int key = entry.key;
-      Map<String, double> valueMap = entry.value;
-      String valueString = valueMap.entries.map((e) {
-        return '${e.key}: ${e.value}';
-      }).join(', ');
-      return 'BIN[$key]: {$valueString}';
-    }).join('\n');
+    // String binString = btadapter.BIN.entries.map((entry) {
+    //   int key = entry.key;
+    //   Map<String, double> valueMap = entry.value;
+    //   String valueString = valueMap.entries.map((e) {
+    //     return '${e.key}: ${e.value}';
+    //   }).join(', ');
+    //   return 'BIN[$key]: {$valueString}';
+    // }).join('\n');
     setState(() {
 
     });

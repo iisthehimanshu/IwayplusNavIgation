@@ -9706,7 +9706,7 @@ String destiName='';
     flutterTts.pause().then((value) {
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
-              "", 0.0, context, angle,
+              "", 0.0, context, angle,"","",
               destname: destname),
           _currentLocale);
     });

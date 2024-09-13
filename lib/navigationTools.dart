@@ -536,6 +536,44 @@ class tools {
     return [newLat,newLng];
   }
 
+  static double PathDistance(List<Cell> mergedList) {
+    double totalDistance = 0.0;
+
+    if (mergedList.isEmpty) return totalDistance;
+
+    Cell? firstCell;
+    String? currentBid;
+    int? currentFloor;
+
+    for (int i = 0; i < mergedList.length; i++) {
+      Cell currentCell = mergedList[i];
+
+      if (firstCell == null || currentCell.bid != currentBid || currentCell.floor != currentFloor) {
+        // If first cell is null or bid/floor changes, finalize the previous sublist distance
+        if (firstCell != null && i > 0) {
+          // Calculate distance between firstCell and the previous cell in the list
+          Cell lastCell = mergedList[i - 1];
+          double distance = calculateDistance([firstCell.x,firstCell.y],[lastCell.x,lastCell.y]);
+          totalDistance += distance;
+        }
+
+        // Update the first cell, currentBid, and currentFloor for the new sublist
+        firstCell = currentCell;
+        currentBid = currentCell.bid;
+        currentFloor = currentCell.floor;
+      }
+
+      // Check if it's the last iteration to calculate the last sublist distance
+      if (i == mergedList.length - 1 && firstCell != null) {
+        Cell lastCell = currentCell;
+        double distance = calculateDistance([firstCell.x,firstCell.y], [lastCell.x,lastCell.y]);
+        totalDistance += distance;
+      }
+    }
+
+    return totalDistance;
+  }
+
   static Map<String, double> findslopeandintercept(int x1, int y1, int x2, int y2) {
     var slope = (y2 - y1) / (x2 - x1);
     if (x1 == x2) {

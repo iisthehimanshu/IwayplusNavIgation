@@ -1243,20 +1243,18 @@ Landmarks? temp;
 double? minDistance;
    await SingletonFunctionController.building.landmarkdata!.then((value) {
       value.landmarks?.forEach((value){
-        //if(value.buildingID=='65d9cacfdb333f8945861f0f'){
+        if(value.buildingID=='65d9cacfdb333f8945861f0f'){
           if(value.coordinateX!=null && value.coordinateY!=null){
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
-
-
               double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
-            print("users lat lng ${dist}  ${latlngvalue}  ${UserState.geoLat} ${UserState.geoLng}");
-
             if (dist < 50) {
               if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
-
                 // If no closest landmark yet or if this one is closer, update
                 if (minDistance == null || dist < minDistance!) {
                   minDistance = dist;
+                  print("userslatlng");
+                  print(minDistance);
+                  print(temp);
                   temp = value; // Update the closest landmark
                 }
               }
@@ -1264,7 +1262,7 @@ double? minDistance;
 
           }
 
-       // }
+        }
       });
     });
     return temp;
@@ -8140,38 +8138,45 @@ String destiName='';
           //
 
           //
-          for (int i = 0; i < getPoints.length; i++) {
-            //
-            //
-            //
-            //
-            //
+          print("condition check");
+          print(user.Bid);
+          print(buildingAllApi.outdoorID);
+          if(user.Bid!=buildingAllApi.outdoorID)
+            {
+              for (int i = 0; i < getPoints.length; i++) {
+                //
+                //
+                //
+                //
+                //
 
-            //
+                //
 
-            //
-            if (isPdrStop && val == 0) {
-              //
+                //
+                if (isPdrStop && val == 0) {
+                  //
 
-              Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+                  Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                     StartPDR(),
                   });
 
-              setState(() {
-                isPdrStop = false;
-              });
+                  setState(() {
+                    isPdrStop = false;
+                  });
 
-              break;
-            }
-            if (getPoints[i][0] == user.showcoordX &&
-                getPoints[i][1] == user.showcoordY) {
-              //
+                  break;
+                }
+                if (getPoints[i][0] == user.showcoordX &&
+                    getPoints[i][1] == user.showcoordY) {
+                  //
 
-              StopPDR();
-              getPoints.removeAt(i);
-              break;
+                  StopPDR();
+                  getPoints.removeAt(i);
+                  break;
+                }
+              }
             }
-          }
+
         }
       }
     } catch (e) {}

@@ -6243,8 +6243,8 @@ if(SingletonFunctionController.timer!=null){
     double distance = 0;
     DateTime currentTime = DateTime.now();
     if (PathState.singleCellListPath.isNotEmpty) {
-        time = time + PathState.singleCellListPath.length / 120;
-        distance = PathState.singleCellListPath.length.toDouble();
+        distance = tools.PathDistance(PathState.singleCellListPath);
+        time = distance / 120;
         time = time.ceil().toDouble();
 
         distance = distance * 0.3048;
@@ -7741,12 +7741,11 @@ if(SingletonFunctionController.timer!=null){
     double time = 0;
     double distance = 0;
     DateTime currentTime = DateTime.now();
-    if (PathState.path.isNotEmpty) {
-      PathState.path.forEach((key, value) {
-        time = time + value.length / 120;
-        distance = distance + value.length;
-      });
+    if (PathState.singleCellListPath.isNotEmpty) {
+      distance = tools.PathDistance(PathState.singleCellListPath);
+      time = distance / 120;
       time = time.ceil().toDouble();
+
       distance = distance * 0.3048;
       distance = double.parse(distance.toStringAsFixed(1));
     }

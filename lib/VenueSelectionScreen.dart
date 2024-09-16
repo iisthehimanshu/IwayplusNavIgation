@@ -123,18 +123,18 @@ UserState.geoLng=userLoc!.longitude;
 
   Future<Position?> getUsersCurrentLatLng()async{
    // if ((locBox.get('location')==null)?false:locBox.get('location')) {
-
-    //   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    //
-    //
-    //   return position;
-    //
-    //
-    // }
-    //else{
+   //
+   //    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+   //  print("accuracyy");
+   //  print(position.accuracy);
+   //    return position;
+   //
+   //
+   //  }
+   //  else{
       Position pos=Position(longitude: 77.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
-    //}
+   // }
 
   }
 

@@ -51,9 +51,6 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
-
   WakelockPlus.enable();
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);

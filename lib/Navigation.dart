@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -594,6 +595,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
+
+
     if(UserCredentials().getUserOrentationSetting()=='Focus Mode'){
       UserState.ttsOnlyTurns = true;
       UserState.ttsAllStop = false;
@@ -633,7 +636,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       apiCalls(context);
     });
-
+    listenToMagnetometer();
     !DebugToggle.Slider ? handleCompassEvents() : () {};
 
     DefaultAssetBundle.of(context)
@@ -896,6 +899,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
       double? compassHeading = event.heading!;
+
       setState(() {
         user.theta = compassHeading!;
         if (mapState.interaction2) {
@@ -1247,7 +1251,7 @@ double? minDistance;
           if(value.coordinateX!=null && value.coordinateY!=null){
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
               double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
-            if (dist < 50) {
+            if (dist <=25) {
               if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
                 // If no closest landmark yet or if this one is closer, update
                 if (minDistance == null || dist < minDistance!) {
@@ -1267,6 +1271,47 @@ double? minDistance;
     });
     return temp;
   }
+  double currentHeading = 10.0; // Example current heading
+  double referenceHeading = 0.0; // Example reference heading (North)
+  double threshold = 10.0;
+// Function to check compass accuracy with field strength
+  double expectedFieldStrength = 50.0; // µT, typical for Earth
+  double acceptableDeviationPercentage = 0.2;
+  List<double> magneticValues=[];// 20% deviation is acceptable
+
+
+// Function to check if calibration is needed
+  bool isCalibrationNeeded(List<double> magneticFieldStrengths) {
+    double acceptableLowerBound = expectedFieldStrength * (1 - acceptableDeviationPercentage);
+    double acceptableUpperBound = expectedFieldStrength * (1 + acceptableDeviationPercentage);
+    double averageStrength = magneticFieldStrengths.reduce((a, b) => a + b) / magneticFieldStrengths.length;
+
+    print(magneticFieldStrengths);
+
+    if (averageStrength < acceptableLowerBound || averageStrength > acceptableUpperBound) {
+      return true; // Calibration needed
+    }
+    return false; // No calibration needed
+  }
+  double calculateMagneticFieldStrength(double x, double y, double z) {
+
+    return sqrt(x * x + y * y + z * z);
+  }
+
+  void listenToMagnetometer() {
+    magnetometerEvents.listen((MagnetometerEvent event) {
+      double x = event.x;
+      double y = event.y;
+      double z = event.z;
+
+      // Calculate magnetic field strength
+      double magneticFieldStrength = calculateMagneticFieldStrength(x, y, z);
+if(magneticValues.length<6){
+  magneticValues.add(sqrt(x * x + y * y + z * z));
+}
+      // print('Magnetic Field Strength: $magneticFieldStrength µT');
+    });
+  }
 
   void paintUser(String? nearestBeacon,
       {bool speakTTS = true, bool render = true, String? polyID}) async {
@@ -1280,6 +1325,8 @@ print(nearestBeacon);
     Landmarks? latlngLandmark=await getglobalcoords();
     // print("latlnglandmarks ${latlngLandmark!.name}");
     // print(latlngLandmark);
+
+print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
 
     if (nearestBeacon == null && polyID != null) {
       
@@ -1936,6 +1983,10 @@ print(nearestBeacon);
       }
     }
     else {
+      if(isCalibrationNeeded(magneticValues)==true){
+        showLowAccuracyDialog();
+      }
+     
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
 
 
@@ -2448,6 +2499,32 @@ print(nearestBeacon);
     });
   }
 
+  void showLowAccuracyDialog() {
+
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Low Compass Accuracy"),
+          content: Image.asset('assets/calibrate.gif'),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                setState(() {
+
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void moveUser() async {
 
     final Uint8List userloc =
@@ -2657,6 +2734,22 @@ print(nearestBeacon);
   HashMap<String, beacon> resBeacons = HashMap();
   bool isBlueToothLoading = false;
   // Initially set to true to show loader
+  LatLng? _userLocation;
+  double? _accuracy;
+  Future<void> _getUserLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      _userLocation = LatLng(position.latitude, position.longitude);
+      _accuracy = position.accuracy; 
+      print(_accuracy);// Get accuracy in meters
+    });
+
+    // Move the map camera to the user's location
+    _googleMapController.animateCamera(CameraUpdate.newLatLng(_userLocation!));
+  }
   void _updateProgress() {
     const onsec = const Duration(seconds: 1);
     Timer.periodic(onsec, (Timer t) {
@@ -10520,6 +10613,8 @@ String destiName='';
   void dispose() {
     disposed = true;
     flutterTts.stop();
+
+    magneticValues.clear();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -10679,11 +10774,12 @@ String destiName='';
                     padding:
                         EdgeInsets.only(left: 20), // <--- padding added here
                     initialCameraPosition: _initialCameraPosition,
-                    myLocationButtonEnabled: false,
-                    myLocationEnabled: false,
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
                     mapToolbarEnabled: false,
+
                     polygons: patch
                         .union(getCombinedPolygons())
                         .union(otherpatch)
@@ -10698,6 +10794,8 @@ String destiName='';
                     mapType: MapType.normal,
                     buildingsEnabled: false,
                     compassEnabled: true,
+
+
                     rotateGesturesEnabled: true,
                     minMaxZoomPreference: MinMaxZoomPreference(2, 30),
                     onMapCreated: (controller) {
@@ -10891,6 +10989,7 @@ String destiName='';
                         "floor ${user.floor}\n"
                         "userBid ${user.Bid} \n"
                         "index ${user.pathobj.index} \n"
+                    "accuarcy ${_accuracy} \n"
                         "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
@@ -11032,13 +11131,13 @@ String destiName='';
                     Semantics(
                       child: FloatingActionButton(
                         onPressed:() async {
+
+
+                          //_getUserLocation();
+
                           if(!user.isnavigating && !isLocalized){
-
-
                             SingletonFunctionController.btadapter.emptyBin();
-
                             SingletonFunctionController.btadapter.stopScanning();
-
                             if(Platform.isAndroid){
                               SingletonFunctionController.btadapter.startScanning(SingletonFunctionController.apibeaconmap);
                             }else{
@@ -11060,7 +11159,9 @@ String destiName='';
                             });
                           }else{
                             _recenterMap();
-                        };},
+                        };
+
+                          },
                         child: Semantics(
                           label: "Localize",
                           onDidGainAccessibilityFocus:

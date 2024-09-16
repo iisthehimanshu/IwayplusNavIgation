@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -17,7 +18,7 @@ import 'guestloginapi.dart';
 class patchAPI {
 
   String token = "";
-  final String baseUrl = "https://dev.iwayplus.in/secured/patch/get";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/RefreshTokenAPI.dart';
@@ -9,7 +10,7 @@ import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'guestloginapi.dart';
 
 class outBuilding {
-  final String baseUrl = "https://dev.iwayplus.in/secured/outdoor";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/outdoor" : "https://maps.iwayplus.in/secured/outdoor";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
 

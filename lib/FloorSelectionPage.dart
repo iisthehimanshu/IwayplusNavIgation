@@ -155,7 +155,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
                 }else{
                   print("NO");
                 }
@@ -167,7 +167,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
                 }else{
                   print("NO-");
                 }

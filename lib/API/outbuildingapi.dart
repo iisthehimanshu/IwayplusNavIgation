@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -22,7 +23,7 @@ class OutBuildingData{
       'Content-Type': 'application/json',
       'x-access-token':'${accessToken}'
     };
-    var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/outdoor-wayfinding/'));
+    var request = http.Request('POST', Uri.parse(kDebugMode? 'https://dev.iwayplus.in/secured/outdoor-wayfinding/' : 'https://maps.iwayplus.in/secured/outdoor-wayfinding/'));
     request.body = json.encode({
       "campusId": buildingAllApi.outdoorID,
       "source": [longitude1, latitude1],

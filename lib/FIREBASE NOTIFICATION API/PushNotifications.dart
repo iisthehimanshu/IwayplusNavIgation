@@ -58,7 +58,8 @@ class PushNotifications {
         linux: initializationSettingsLinux);
         _flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse: onNotificationTap,
-        onDidReceiveBackgroundNotificationResponse: onNotificationTap);
+        onDidReceiveBackgroundNotificationResponse: onNotificationTap
+        );
   }
 
   // on tap local notification in foreground

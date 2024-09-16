@@ -1278,8 +1278,8 @@ print(nearestBeacon);
       widget.directsourceID = '';
     }
     Landmarks? latlngLandmark=await getglobalcoords();
-    print("latlnglandmarks ${latlngLandmark!.name}");
-    print(latlngLandmark);
+    // print("latlnglandmarks ${latlngLandmark!.name}");
+    // print(latlngLandmark);
 
     if (nearestBeacon == null && polyID != null) {
       
@@ -1608,7 +1608,7 @@ print(nearestBeacon);
         );
       }
     }
-    else if((nearestBeacon==null || nearestBeacon.isEmpty) && (latlngLandmark!=null) && polyID==null){
+    else if((nearestBeacon==null || nearestBeacon.isEmpty) && latlngLandmark!=null && polyID==null){
       Landmarks userSetLocation = latlngLandmark;
       polyID=latlngLandmark.properties!.polyId!;
       // await SingletonFunctionController.building.landmarkdata!.then((value) {

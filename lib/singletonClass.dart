@@ -35,13 +35,19 @@ class SingletonFunctionController {
       building.qrOpened=false;
       building.destinationQr=false;
       await Future.wait(allBuildingID.entries.map((entry) async {
+        print("entry$entry");
         var key = entry.key;
 
         var beaconData = await beaconapi().fetchBeaconData(key);
+        print("keydata${beaconData.length}");
         if (building.beacondata == null) {
-          building.beacondata = List.from(beaconData);
+          print("entryprintifstate${key}");
+          building.beacondata = beaconData;
+          print("entryprintifstate${building.beacondata!.length}");
         } else {
+          print("entryprint${building.beacondata!.length}");
           building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
+          print("entryprint${building.beacondata!.length}");
         }
 
         for (var beacon in beaconData) {

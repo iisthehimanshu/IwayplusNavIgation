@@ -647,7 +647,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           }
         }
           widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
-        double angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        double angle = 0.0;
+        try{
+          angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }catch(e){
+          print("error to be solved later $e");
+        }
         if(widget.user.pathobj.index != 0){
            angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         }
@@ -721,7 +726,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
 
         if(nextTurn == turnPoints.last && widget.distance == 7){
-          double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          double angle = 0.0;
+          try{
+            angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          }catch(e){
+            print("problem to be solved later $e");
+          }
           if(!UserState.ttsOnlyTurns) {
             speak("${widget.direction} ${widget.distance} steps. ${widget.user
                 .pathobj.destinationName} will be ${tools.angleToClocks2(
@@ -945,7 +955,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     });
     return Semantics(
-      excludeSemantics: true,
+      excludeSemantics: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -959,68 +969,78 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex - 1 >=1){
-                      DirectionIndex--;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
+                Semantics(
+
+                  excludeSemantics: true,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    child: IconButton(onPressed: (){setState(() {
+                      if(DirectionIndex - 1 >=1){
+                        DirectionIndex--;
+                        widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                        if(DirectionIndex == nextTurnIndex){
+                          widget.clearFocusTurnArrow();
+                        }
                       }
-                    }
-                  });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
+                    });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
+                  ),
                 ),
                 const SizedBox(width: 8,),
                 scrollableDirection("${widget.direction}", '${tools.convertFeet(widget.distance,widget.context)}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user,widget.context),
                 const SizedBox(width: 8,),
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                      DirectionIndex++;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                Semantics(
+                  excludeSemantics: true,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    child: IconButton(onPressed: (){setState(() {
+                      if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
                         DirectionIndex++;
+                        widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                        if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                          DirectionIndex++;
+                        }
+                        if(DirectionIndex == nextTurnIndex){
+                          widget.clearFocusTurnArrow();
+                        }
                       }
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
-                      }
-                    }
-                  });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                    });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                  ),
                 )
               ],
             ),
           ),
-          DirectionIndex == nextTurnIndex?Container(
-            width: 98,
-            height: 39,
-            margin: EdgeInsets.only(left: 9,top: 5),
-            padding: EdgeInsets.only(left: 16,right: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              color: Color(0xff013633),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  "${LocaleData.then.getString(context)}",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xffFFFFFF),
-                    height: 25/16,
+          DirectionIndex == nextTurnIndex?Semantics(
+            excludeSemantics: true,
+            child: Container(
+              width: 98,
+              height: 39,
+              margin: EdgeInsets.only(left: 9,top: 5),
+              padding: EdgeInsets.only(left: 16,right: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                color: Color(0xff013633),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    "${LocaleData.then.getString(context)}",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffFFFFFF),
+                      height: 25/16,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                SizedBox(width: 6,),
-                // Text(DirectionIndex.toString()),
-                // Text(nextTurnIndex.toString())
-                getNextCustomIcon(turnDirection)
-              ],
+                  SizedBox(width: 6,),
+                  // Text(DirectionIndex.toString()),
+                  // Text(nextTurnIndex.toString())
+                  getNextCustomIcon(turnDirection)
+                ],
+              ),
             ),
           ):Container(),
 
@@ -1177,15 +1197,19 @@ class scrollableDirection extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Center(
-              child: Text(
-                chooseDirection(),
-                style: const TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 30/24,
+            child: Semantics(
+              label: "${chooseDirection() } ${chooseSteps()}",
+              excludeSemantics: true,
+              child: Center(
+                child: Text(
+                  chooseDirection(),
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 30/24,
+                  ),
                 ),
               ),
             ),
@@ -1193,36 +1217,39 @@ class scrollableDirection extends StatelessWidget {
           SizedBox(
             width: 4,
           ),
-          Container(
-            width: 85,
-            height: 75,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ((chooseDirection().toLowerCase().contains("lift") || chooseDirection().toLowerCase().contains("stair")) || listOfDirections.isEmpty || (DirectionIndex>0 && listOfDirections.length>DirectionIndex && listOfDirections[DirectionIndex].isDestination))?Container():Text(
-                  chooseSteps().replaceAll("meter", "m"),
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 26/16,
+          Semantics(
+            excludeSemantics: true,
+            child: Container(
+              width: 85,
+              height: 75,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ((chooseDirection().toLowerCase().contains("lift") || chooseDirection().toLowerCase().contains("stair")) || listOfDirections.isEmpty || (DirectionIndex>0 && listOfDirections.length>DirectionIndex && listOfDirections[DirectionIndex].isDestination))?Container():Text(
+                    chooseSteps().replaceAll("meter", "m"),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 26/16,
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Set background color to white
-                    shape: BoxShape.circle, // Make the container a circle
+                  SizedBox(
+                    height: 4,
                   ),
-                  child: chooseIcon(), // Your icon or widget inside the circle
-                )
+                  Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Set background color to white
+                      shape: BoxShape.circle, // Make the container a circle
+                    ),
+                    child: chooseIcon(), // Your icon or widget inside the circle
+                  )
 
-              ],
+                ],
+              ),
             ),
           )],
       ),

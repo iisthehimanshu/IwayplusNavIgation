@@ -16,6 +16,7 @@ class SearchpageResults extends StatefulWidget {
   final int floor;
   int coordX;
   int coordY;
+  String accessible;
 
   SearchpageResults({
     required this.name,
@@ -26,6 +27,7 @@ class SearchpageResults extends StatefulWidget {
     required this.floor,
     required this.coordX,
     required this.coordY,
+    required this.accessible
   });
 
   @override
@@ -79,37 +81,46 @@ class _SearchpageResultsState extends State<SearchpageResults> {
               ),
             ),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 12, left: 18),
-                    child: Text(
-                      widget.name,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff000000),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 12, left: 18),
+                        child: Text(
+                          widget.name,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff000000),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
-                    child: Text(
-                      widget.location,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8d8c8c),
+                      Container(
+                        margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
+                        child: Text(
+                          HelperClass.truncateString(widget.location, 40),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8d8c8c),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
+                    ],
                   ),
+                  Spacer(),
+                  widget.accessible == "true"? Container(
+                    margin: EdgeInsets.only(right: 15),
+                    child: Icon(Icons.accessible,color: Colors.black,),
+                  ) : Container()
                 ],
               ),
             ),

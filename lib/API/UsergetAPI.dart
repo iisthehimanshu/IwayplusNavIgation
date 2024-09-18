@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/APIMODELS/UsergetAPIModel.dart';
@@ -10,7 +11,7 @@ import 'RefreshTokenAPI.dart';
 
 class UsergetAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/user/get" : "https://maps.iwayplus.in/secured/user/get";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   var userInfoBox=Hive.box('UserInformation');

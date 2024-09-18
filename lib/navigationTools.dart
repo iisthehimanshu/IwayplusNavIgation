@@ -456,7 +456,7 @@ class tools {
   //   double dLon = lon2 - lon1;
   //
   //   // Debugging prints
-  //   
+  //
   //
   //   // Adjust dLon for wrap-around at the International Date Line
   //   if (dLon > pi) {
@@ -466,7 +466,7 @@ class tools {
   //   }
   //
   //   // Debugging prints
-  //   
+  //
   //
   //   double x = sin(dLon) * cos(lat2);
   //   double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
@@ -478,11 +478,11 @@ class tools {
   //   bearingDegrees = (bearingDegrees + 360) % 360;
   //
   //   // Debugging prints
-  //   
-  //   
-  //   
-  //   
-  //   
+  //
+  //
+  //
+  //
+  //
   //
   //   return bearingDegrees;
   // }
@@ -508,6 +508,154 @@ class tools {
 
     return bearingDegrees;
   }
+
+  static List<double> moveLatLng(List<double> startPoint, double angleInDegrees, double distanceInFeet) {
+    // Convert distance from feet to meters (1 foot = 0.3048 meters)
+    double distanceInMeters = distanceInFeet * 0.3048;
+
+    // Convert latitude and longitude from degrees to radians
+    double latInRadians = startPoint[0] * pi / 180;
+    double lngInRadians = startPoint[1] * pi / 180;
+
+    // Convert the angle from degrees to radians
+    double angleInRadians = angleInDegrees * pi / 180;
+
+    // Radius of the Earth in meters
+    double earthRadius = 6378137.0;
+
+    // Calculate the new latitude
+    double newLat = latInRadians + (distanceInMeters / earthRadius) * cos(angleInRadians);
+
+    // Calculate the new longitude
+    double newLng = lngInRadians + (distanceInMeters / (earthRadius * cos(latInRadians))) * sin(angleInRadians);
+
+    // Convert the new coordinates back to degrees
+    newLat = newLat * 180 / pi;
+    newLng = newLng * 180 / pi;
+
+    return [newLat,newLng];
+  }
+
+  static double PathDistance(List<Cell> mergedList) {
+    double totalDistance = 0.0;
+
+    if (mergedList.isEmpty) return totalDistance;
+
+    Cell? firstCell;
+    String? currentBid;
+    int? currentFloor;
+
+    for (int i = 0; i < mergedList.length; i++) {
+      Cell currentCell = mergedList[i];
+
+      if (firstCell == null || currentCell.bid != currentBid || currentCell.floor != currentFloor) {
+        // If first cell is null or bid/floor changes, finalize the previous sublist distance
+        if (firstCell != null && i > 0) {
+          // Calculate distance between firstCell and the previous cell in the list
+          Cell lastCell = mergedList[i - 1];
+          double distance = calculateDistance([firstCell.x,firstCell.y],[lastCell.x,lastCell.y]);
+          totalDistance += distance;
+        }
+
+        // Update the first cell, currentBid, and currentFloor for the new sublist
+        firstCell = currentCell;
+        currentBid = currentCell.bid;
+        currentFloor = currentCell.floor;
+      }
+
+      // Check if it's the last iteration to calculate the last sublist distance
+      if (i == mergedList.length - 1 && firstCell != null) {
+        Cell lastCell = currentCell;
+        double distance = calculateDistance([firstCell.x,firstCell.y], [lastCell.x,lastCell.y]);
+        totalDistance += distance;
+      }
+    }
+
+    return totalDistance;
+  }
+
+  static Map<String, double> findslopeandintercept(int x1, int y1, int x2, int y2) {
+    var slope = (y2 - y1) / (x2 - x1);
+    if (x1 == x2) {
+      // If x1 == x2, the line is vertical and the slope is undefined (90 degrees)
+      slope = 90.0;
+    }
+    // Calculate the slope (m)
+
+
+    // Calculate the y-intercept (b)
+    double intercept = y1 - slope * x1;
+    print("recieved [$x1,$y1]  and  [$x2,$y2]  data ${{
+      'slope': slope,
+      'intercept': intercept,
+    }}");
+    // Return the slope and intercept as a map
+    return {
+      'slope': slope,
+      'intercept': intercept,
+    };
+  }
+
+  static List<int> findpoint(int x1, int y1, int x2, int y2, Map<String, double> data) {
+    // Calculate the slope (m)
+    double angleInRadians = atan(data['slope']!);
+    double angleInDegrees = angleInRadians * (180 / pi);
+    double normalizedSlope = angleInDegrees % 360;
+    if (normalizedSlope < 0) {
+      normalizedSlope += 360;
+    }
+    int dx = x2-x1;
+    int dy = y2-y1;
+    if(dx<0){
+      dx = dx*-1;
+    }
+    if(dy<0){
+      dy = dy*-1;
+    }
+
+    if(dy<dx){
+      if(x1<x2){
+        x1++;
+      }else{
+        x1--;
+      }
+      print("returned ${[x1,((x1*data['slope']!)+data['intercept']!).round()]}");
+      return [x1,((x1*data['slope']!)+data['intercept']!).round()];
+    }else if(dx<dy){
+      if(y1<y2){
+        y1++;
+      }else{
+        y1--;
+      }
+      print("returned ${[((y1-data['intercept']!)/data['slope']!).round(),y1]}");
+      return [((y1-data['intercept']!)/data['slope']!).round(),y1];
+    }else{
+      if(x1<x2){
+        x1++;
+      }else{
+        x1--;
+      }
+      if(y1<y2){
+        y1++;
+      }else{
+        y1--;
+      }
+      return [x1,y1];
+    }
+  }
+
+  static Cell findingprevpoint(List<Cell> path, int index){
+    for(int i = index-1; i>=0; i--){
+      if(!path[i].imaginedCell){
+        print("found ${path[i].x},${path[i].y}");
+        return path[i];
+      }
+    }
+    print("not found");
+    return path[index];
+  }
+
+
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
@@ -1854,6 +2002,33 @@ class tools {
       }
     }
     return true;
+  }
+
+  static String convertClockDirectionToLRFB(String clockDirection) {
+    switch (clockDirection.toLowerCase()) {
+      case '12':
+        return 'Front';
+      case '1':
+      case '2':
+        return 'slight Right';
+      case '3':
+        return 'Right';
+      case '4':
+      case '5':
+        return 'sharp Right';
+      case '6':
+        return 'Back';
+      case '7':
+      case '8':
+        return 'sharp Left';
+      case '9':
+        return 'Left';
+      case '10':
+      case '11':
+        return 'slight Left';
+      default:
+        return 'Invalid clock direction';
+    }
   }
 
 }

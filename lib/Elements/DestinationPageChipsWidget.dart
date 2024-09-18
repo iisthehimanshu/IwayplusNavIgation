@@ -98,7 +98,9 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                 },
                 child: Container(
                   margin: EdgeInsets.only(left: 4),
-                  child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                  child: Semantics(
+                    label: "Unselect ${widget.text}",
+                      child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
                 ),
               ) : Container()
 

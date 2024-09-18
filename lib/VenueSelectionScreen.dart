@@ -142,7 +142,9 @@ UserState.geoLng=userLoc!.longitude;
 
   void apiCall() async  {
     if(_FCMToken != null){
-      await FCMServer().sendFCM(_FCMToken!);
+      try {
+        await FCMServer().sendFCM(_FCMToken!);
+      }catch(e){}
     }
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);

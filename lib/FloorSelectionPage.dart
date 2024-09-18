@@ -155,7 +155,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
                 }else{
                   print("NO");
                 }
@@ -167,7 +167,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
                 }else{
                   print("NO-");
                 }
@@ -246,146 +246,161 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(
-                  width: screenWidth - 32,
-                  height: 48,
-                  margin: EdgeInsets.only(top: 16,left: 16,right: 17),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: containerBoxColor, // You can customize the border color
-                      width: 1.0, // You can customize the border width
+              Semantics(
+                header: true,
+                child: Container(
+                    width: screenWidth - 32,
+                    height: 48,
+                    margin: EdgeInsets.only(top: 16,left: 16,right: 17),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: containerBoxColor, // You can customize the border color
+                        width: 1.0, // You can customize the border width
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        child: Center(
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Semantics(label:"Back",child: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg")),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: Semantics(label:"Back",child: SvgPicture.asset("assets/DestinationSearchPage_BackIcon.svg")),
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Focus(
-                          autofocus: true,
-                          child: Semantics(
-                            label: "Search field",
-                            child: Container(
-                                child: TextField(
-                                  autofocus: true,
-                                  enabled: false,
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "${searchHintString}",
-                                    border: InputBorder.none, // Remove default border
-                                  ),
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff18181b),
-                                    height: 25/16,
-                                  ),
-                                  onTap: (){
-                                    if(containerBoxColor==Color(0xffA1A1AA)){
-                                      containerBoxColor = Color(0xff24B9B0);
-                                    }else{
-                                      containerBoxColor = Color(0xffA1A1AA);
-                                    }
-                                    print("Final Set");
+                        Expanded(
+                          child: Focus(
+                            autofocus: true,
+                            child: Semantics(
+                              label: "Search field",
+                              child: Container(
+                                  child: TextField(
+                                    autofocus: true,
+                                    enabled: false,
+                                    controller: _controller,
+                                    decoration: InputDecoration(
+                                      hintText: "${searchHintString}",
+                                      border: InputBorder.none, // Remove default border
+                                    ),
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff18181b),
+                                      height: 25/16,
+                                    ),
+                                    onTap: (){
+                                      if(containerBoxColor==Color(0xffA1A1AA)){
+                                        containerBoxColor = Color(0xff24B9B0);
+                                      }else{
+                                        containerBoxColor = Color(0xffA1A1AA);
+                                      }
+                                      print("Final Set");
 
-                                  },
-                                )),
+                                    },
+                                  )),
+                            ),
                           ),
                         ),
-                      ),
 
-                    ],
-                  )
-              ),
-
-              Container(
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: vall,
-                  onChanged: (val){
-                    setState(() => vall = val);
-                    print("wilsonchecker");
-                    print(optionListForUI.length);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListForUI,
-                    value: (i, v) => i,
-                    label: (i, v) => v,
-                  ),
-                  choiceBuilder: (item, i) {
-                    return DestinationPageChipsWidgetForFloorSelectionPage(svgPath: '',
-                      text: optionListForUI[i],
-                      onSelect: (bool selected) {},selected: true,);
-                  },
-                  direction: Axis.horizontal,
-                ),
-              ),
-              Container(
-                width: screenWidth,
-                margin: EdgeInsets.only(bottom: 10),
-                child: ChipsChoice<int>.single(
-                  value: tag,
-                  onChanged: (val){
-                    setState(() => tag = val);
-                    if(HelperClass.SemanticEnabled) {
-                      speak("Floor ${widget.floors[val]} selected");
-                    }
-                    // print("wilsonchecker");
-                    // print(val);
-                    print("Floor check");
-                    print(val);
-                    checkfloors.clear();
-                    checkfloors.add(int.parse(widget.floors[val]));
-                    print(checkfloors);
-                    search(widget.filterName, widget.filterBuildingName, checkfloors);
-                    print(searchResults);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: widget.floors,
-                    value: (i, v) => i,
-                    label: (i, v) => v,
-                  ),
-                  choiceBuilder: (item, i) {
-                    return FloorWidgetForFloorSelectionPage(
-                      // onSelect: (setVal) {
-                      //   floors.clear();
-                      //   floors.add(i);
-                      //   setState(() {
-                      //     search(widget.filterName, widget.filterBuildingName, floors);
-                      //     selVal = !selVal;
-                      //   });
-                      //
-                      //   print("selVal");
-                      //   print(selVal);
-                      //
-                      // },
-                      onSelect: item.select!,selected: item.selected,
-                      floorNo: widget.floors[i].toString(),
-                      // selected: selVal,
-
-                    );
-                  },
-                  direction: Axis.horizontal,
+                      ],
+                    )
                 ),
               ),
 
-              Flexible(flex:1,
+              Semantics(
+                header: true,
+                label: "Filter Chip",
+                child: Container(
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: vall,
+                    onChanged: (val){
+                      setState(() => vall = val);
+                      print("wilsonchecker");
+                      print(optionListForUI.length);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListForUI,
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+                    choiceBuilder: (item, i) {
+                      return DestinationPageChipsWidgetForFloorSelectionPage(svgPath: '',
+                        text: optionListForUI[i],
+                        onSelect: (bool selected) {},selected: true,);
+                    },
+                    direction: Axis.horizontal,
+                  ),
+                ),
+              ),
+              Semantics(
+                header: true,
+                label: "Floor Filter",
+                child: Container(
+                  width: screenWidth,
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: ChipsChoice<int>.single(
+                    value: tag,
+                    onChanged: (val){
+                      setState(() => tag = val);
+                      if(HelperClass.SemanticEnabled) {
+                        speak("Floor ${widget.floors[val]} selected");
+                      }
+                      // print("wilsonchecker");
+                      // print(val);
+                      print("Floor check");
+                      print(val);
+                      checkfloors.clear();
+                      checkfloors.add(int.parse(widget.floors[val]));
+                      print(checkfloors);
+                      search(widget.filterName, widget.filterBuildingName, checkfloors);
+                      print(searchResults);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: widget.floors,
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+                    choiceBuilder: (item, i) {
+                      return FloorWidgetForFloorSelectionPage(
+                        // onSelect: (setVal) {
+                        //   floors.clear();
+                        //   floors.add(i);
+                        //   setState(() {
+                        //     search(widget.filterName, widget.filterBuildingName, floors);
+                        //     selVal = !selVal;
+                        //   });
+                        //
+                        //   print("selVal");
+                        //   print(selVal);
+                        //
+                        // },
+                        onSelect: item.select!,selected: item.selected,
+                        floorNo: widget.floors[i].toString(),
+                        // selected: selVal,
+
+                      );
+                    },
+                    direction: Axis.horizontal,
+                  ),
+                ),
+              ),
+
+              Flexible(
+                  flex: 1,
                   child: SingleChildScrollView(
-                      child: Column(children:searchResults,)
+                      child: Semantics(
+                        header: true,
+                        label: "Column",
+                          child: Column(children:searchResults,))
                   )
               ),
 

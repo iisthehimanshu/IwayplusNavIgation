@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
@@ -17,7 +18,7 @@ import 'guestloginapi.dart';
 
 
 class DataVersionApi {
-  final String baseUrl = "https://dev.iwayplus.in/secured/data-version";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/data-version" : "https://maps.iwayplus.in/secured/data-version";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");

@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:http/http.dart' as http;
 import '../APIMODELS/beaconData.dart';
@@ -12,7 +13,7 @@ import 'guestloginapi.dart';
 
 
 class buildingAllApi {
-  final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/all" : "https://maps.iwayplus.in/secured/building/all";
   String token = "";
   static String selectedID="";
   static String selectedBuildingID="";

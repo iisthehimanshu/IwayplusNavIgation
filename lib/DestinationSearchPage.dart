@@ -487,6 +487,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
+                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
                     ));
                   }else{
                     print('In--ELSE');
@@ -500,6 +501,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
+                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"
                     ));
                   }
                 }
@@ -529,6 +531,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     floor: value.floor!,
                     coordX: value.coordinateX!,
                     coordY: value.coordinateY!,
+                    accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
                   ));
                 }
               });
@@ -572,6 +575,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               floor: value.floor!,
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
+              accessible:  value.properties!.wheelChairAccessibility??"",
+
             ));
           }
 

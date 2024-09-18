@@ -2004,6 +2004,33 @@ class tools {
     return true;
   }
 
+  static String convertClockDirectionToLRFB(String clockDirection) {
+    switch (clockDirection.toLowerCase()) {
+      case '12':
+        return 'Front';
+      case '1':
+      case '2':
+        return 'slight Right';
+      case '3':
+        return 'Right';
+      case '4':
+      case '5':
+        return 'sharp Right';
+      case '6':
+        return 'Back';
+      case '7':
+      case '8':
+        return 'sharp Left';
+      case '9':
+        return 'Left';
+      case '10':
+      case '11':
+        return 'slight Left';
+      default:
+        return 'Invalid clock direction';
+    }
+  }
+
 }
 class nearestLandInfo{
   Element? element;

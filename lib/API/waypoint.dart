@@ -16,7 +16,7 @@ import 'guestloginapi.dart';
 
 class waypointapi {
 
-  final String baseUrl = "https://dev.iwayplus.in/secured/indoor-path-network";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/indoor-path-network" : "https://maps.iwayplus.in/secured/indoor-path-network";
   String token = "";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");

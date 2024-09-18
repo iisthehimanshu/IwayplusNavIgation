@@ -419,6 +419,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //
     // });
     try {
+
       for (LatLng keys in _markerLocationsMap.keys) {
         final String values = _markerLocationsMap[keys]!;
         final String LandmarkValue = _markerLocationsMapLanName[keys]!;
@@ -1520,8 +1521,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
           setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
         }
-        if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+        if (markers.length > 0) markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -3188,13 +3188,15 @@ if(SingletonFunctionController.timer!=null){
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
+    Uint8List iconMarker = await getImagesFromMarker(
+        'assets/IwaymapsDefaultMarker.png', 140);
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
           Marker(
               markerId: MarkerId('selectedroomMarker'),
               position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.defaultMarker,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
               onTap: () {
 
               }),
@@ -3205,7 +3207,7 @@ if(SingletonFunctionController.timer!=null){
           Marker(
               markerId: MarkerId('selectedroomMarker'),
               position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.defaultMarker,
+              icon: BitmapDescriptor.fromBytes(iconMarker),
               onTap: () {
 
               }),
@@ -3625,12 +3627,8 @@ if(SingletonFunctionController.timer!=null){
                     strokeWidth: 1,
                     // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor: Colors.black,
-                    fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
-                        ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                        : Color(0xffE5F9FF),
+                    strokeColor:Color(0xffCCB8C8),
+                    fillColor: Color(0xffE8E3E7),
                     consumeTapEvents: true,
                     onTap: () {
                       _googleMapController.animateCamera(
@@ -3755,12 +3753,8 @@ if(SingletonFunctionController.timer!=null){
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
-                      strokeColor: Colors.black,
-                      fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
-                          ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xff1496c2).withOpacity(1.0),
+                      strokeColor: Color(0xffB6DDFB),
+                      fillColor: Color(0xFFE7F4FE),
                       onTap: () {
 
                         _googleMapController.animateCamera(
@@ -3809,12 +3803,8 @@ if(SingletonFunctionController.timer!=null){
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
-                      strokeColor: Colors.black,
-                      fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
-                          ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffFF69B4).withOpacity(0.4),
+                      strokeColor: Color(0xffB6DDFB),
+                      fillColor: Color(0xFFE7F4FE),
                       onTap: () {
                         _googleMapController.animateCamera(
                           CameraUpdate.newLatLngZoom(
@@ -4936,9 +4926,7 @@ if(SingletonFunctionController.timer!=null){
                           ],
                         ),
                       ),
-                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
-                                  .properties!.contactNo !=
-                              null
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo != null
                           ? Container(
                               margin: EdgeInsets.only(left: 16, right: 16),
                               padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
@@ -5042,6 +5030,55 @@ if(SingletonFunctionController.timer!=null){
                                 ],
                               ),
                             )
+                          : Container(),
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
+                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
+                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null ?
+                      Container(
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  width: 1.0, color: Color(0xffebebeb))),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(right: 16),
+                                width: 32,
+                                height: 32,
+                                child: Icon(
+                                  Icons.accessible,
+                                  color: Color(0xff24B9B0),
+                                  size: 24,
+                                )),
+                            Container(
+                              width: screenWidth - 100,
+                              margin: EdgeInsets.only(top: 8),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff4a4545),
+                                    height: 25 / 16,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                      "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles}"
+                                          " toilet cubicles on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                           : Container(),
                     ],
                   ),

@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:iwaymaps/singletonClass.dart';
+import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -604,6 +605,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
+
     });
     setPdrThreshold();
 
@@ -2499,12 +2501,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
         SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
         if(key != buildingAllApi.outdoorID){
-          createotherPatch(key,patchData);
+
         }
+        createotherPatch(key,patchData);
 
         if (key != buildingAllApi.outdoorID){
-          findCentroid(patchData.patchData!.coordinates!, key);
+
         }
+        findCentroid(patchData.patchData!.coordinates!, key);
 
         var polylineData = await PolyLineApi()
             .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
@@ -2565,6 +2569,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
     }));
+
 
 if(SingletonFunctionController.timer!=null){
   await Future.wait([SingletonFunctionController.timer!,allBuildingCalls]);
@@ -2996,49 +3001,110 @@ if(SingletonFunctionController.timer!=null){
 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
+  bool campusPatchRendered = false;
+
+  renderCampusPatchTransition(String outDoorID){
+    blurPatch.clear();
+    restBuildingMarker.clear();
+    Map<int, LatLng> currentCoordinated = {};
+
+    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
+      if(key == outDoorID){
+        currentCoordinated = innerMap;
+        if (currentCoordinated.isNotEmpty) {
+          List<LatLng> points = [];
+          List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+          entryList.sort((a, b) => a.key.compareTo(b.key));
+          LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
+          sortedCoordinates.forEach((key, value) {
+            points.add(value);
+          });
+          setState(() {
+            blurPatch.add(
+              Polygon(
+                polygonId: PolygonId('patch${points}'),
+                points: points,
+                strokeWidth: 1,
+                strokeColor: Colors.black,
+                fillColor: Color(0xffE5F9FF),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: 5,
+
+              ),
+            );
+          });
+        }
+        Building.allBuildingID.forEach((Key,Value) async {
+          if(Key == outDoorID ) {
+
+
+            String? showBuildingName ="";
+            Building.buildingData?.forEach((currKey,currValue){
+              if(currKey == Key){
+                showBuildingName = currValue;
+              }
+            });
+            restBuildingMarker.add(
+              Marker(
+                markerId: MarkerId(Key + Value.toString()),
+                position: Value,
+                icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
+                    showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
+              ),
+            );
+          }
+        });
+        campusPatchRendered = true;
+
+      }
+    });
+  }
 
   Set<Marker> restBuildingMarker = Set();
   void patchTransition(String skipID){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
+      print("ARCoordinateskeys ${key}");
 
-      if(PathState.sourceBid!="" && PathState.destinationBid == ""){
-        if(key != skipID  && key !=PathState.sourceBid){
+      if(key != buildingAllApi.outdoorID) {
+        if (PathState.sourceBid != "" && PathState.destinationBid == "") {
+          if (key != skipID && key != PathState.sourceBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID, PathState.sourceBid,buildingAllApi.outdoorID]);
+          }
+        } else
+        if (PathState.destinationBid != "" && PathState.sourceBid == "") {
+          if (key != skipID && key != PathState.destinationBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID, PathState.destinationBid,buildingAllApi.outdoorID]);
+          }
+        } else
+        if (PathState.destinationBid != "" && PathState.sourceBid != "") {
+          if (key != skipID && key != PathState.destinationBid &&
+              key != PathState.sourceBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
 
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID,PathState.sourceBid]);
-        }
-      }else if(PathState.destinationBid != "" && PathState.sourceBid==""){
-        if(key != skipID  && key != PathState.destinationBid){
 
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID,PathState.destinationBid]);
-        }
-      }else if(PathState.destinationBid != "" && PathState.sourceBid != ""){
-        if(key != skipID  && key !=PathState.destinationBid && key!=PathState.sourceBid){
-
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-
-
-
-          patchGenerationMarker([skipID,PathState.destinationBid,PathState.sourceBid]);
-
-        }
-      }else{
-
-        if(key != skipID){
-
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID]);
+            patchGenerationMarker(
+                [skipID, PathState.destinationBid, PathState.sourceBid,buildingAllApi.outdoorID]);
+          }
+        } else {
+          if (key != skipID) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID,buildingAllApi.outdoorID]);
+          }
         }
       }
     });
   }
+
+
 
   void patchGeneration(Map<int, LatLng> currentCoordinated){
     print("patchGeneration");
@@ -3070,7 +3136,7 @@ if(SingletonFunctionController.timer!=null){
   void patchGenerationMarker(List<String> skipIDs){
     restBuildingMarker.clear();
     Building.allBuildingID.forEach((Key,Value) async {
-      if(!skipIDs.contains(Key)) {
+      if(!skipIDs.contains(Key) ) {
 
 
         String? showBuildingName ="";
@@ -3627,8 +3693,8 @@ if(SingletonFunctionController.timer!=null){
                     strokeWidth: 1,
                     // Modify the color and opacity based on the selectedRoomId
 
-                    strokeColor:Color(0xffCCB8C8),
-                    fillColor: Color(0xffE8E3E7),
+                    strokeColor:Color( 0xffCCCCCC),
+                    fillColor: Color(0xffE6E6E6),
                     consumeTapEvents: true,
                     onTap: () {
                       _googleMapController.animateCamera(
@@ -3701,11 +3767,7 @@ if(SingletonFunctionController.timer!=null){
                       // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Colors.black,
                       consumeTapEvents: true,
-                      fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
-                          ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffFFFF00),
+                      fillColor: Color(0xffB5CCE3),
                       onTap: () {
                         _googleMapController.animateCamera(
                           CameraUpdate.newLatLngZoom(
@@ -4412,12 +4474,12 @@ if(SingletonFunctionController.timer!=null){
       }
     } catch (e) {}
     setState(() {
-      Markers.add(Marker(
-        markerId: MarkerId("Building marker"),
-        position: _initialCameraPosition.target,
-        icon: BitmapDescriptor.defaultMarker,
-        visible: false,
-      ));
+      // Markers.add(Marker(
+      //   markerId: MarkerId("Building marker"),
+      //   position: _initialCameraPosition.target,
+      //   icon: BitmapDescriptor.defaultMarker,
+      //   visible: false,
+      // ));
     });
 
 
@@ -5054,32 +5116,89 @@ if(SingletonFunctionController.timer!=null){
                                   color: Color(0xff24B9B0),
                                   size: 24,
                                 )),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles}"
-                                          " toilet cubicles on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                            Column(
+                              children: [
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
+
+                                            "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
+                                                UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
+                                            : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
+                                            }. ":""
+
+                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
+                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != "null"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}. ":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       )
                           : Container(),
+
                     ],
                   ),
                 );
@@ -10390,9 +10509,17 @@ if(SingletonFunctionController.timer!=null){
                       _initMarkers();
                     },
                     onCameraMove: (CameraPosition cameraPosition) {
-                      //
 
-                      focusBuildingChecker(cameraPosition);
+                      if(cameraPosition.zoom>15.5){
+                        focusBuildingChecker(cameraPosition);
+                        campusPatchRendered = false;
+                      }else{
+                        if(!campusPatchRendered) {
+                          renderCampusPatchTransition(buildingAllApi.outdoorID);
+                        }
+                      }
+
+
                       if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                           mapState.target.latitude.toStringAsFixed(5)) {
                         mapState.aligned = false;

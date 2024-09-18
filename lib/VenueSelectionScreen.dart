@@ -25,6 +25,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
+import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -39,6 +40,7 @@ import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'FIREBASE NOTIFICATION API/FCMServer.dart';
+import 'FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'HomeNestedSearch.dart';
 import 'Navigation.dart';
 
@@ -65,6 +67,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
+    //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
+    NotificationSocket.receiveMessage();
 //startScan();
     getLocs();
 

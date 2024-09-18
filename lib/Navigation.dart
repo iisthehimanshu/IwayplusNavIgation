@@ -608,6 +608,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       wsocket.sendmessg();
     });
     setPdrThreshold();
+    listenToMagnetometer();
 
     _controller = AnimationController(
       vsync: this,
@@ -636,7 +637,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       apiCalls(context);
     });
-    listenToMagnetometer();
+
     !DebugToggle.Slider ? handleCompassEvents() : () {};
 
     DefaultAssetBundle.of(context)
@@ -1251,15 +1252,19 @@ double? minDistance;
           if(value.coordinateX!=null && value.coordinateY!=null){
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
               double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
-            if (dist <=25) {
+            if (dist <=15) {
               if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
                 // If no closest landmark yet or if this one is closer, update
                 if (minDistance == null || dist < minDistance!) {
                   minDistance = dist;
                   print("userslatlng");
                   print(minDistance);
-                  print(temp);
-                  temp = value; // Update the closest landmark
+                  temp = value;
+                  if(temp!=null){
+                    print(temp!.name);
+                    print(latlngvalue);
+                  }
+                  return;// Update the closest landmark
                 }
               }
             }
@@ -1282,9 +1287,14 @@ double? minDistance;
 
 // Function to check if calibration is needed
   bool isCalibrationNeeded(List<double> magneticFieldStrengths) {
+
     double acceptableLowerBound = expectedFieldStrength * (1 - acceptableDeviationPercentage);
     double acceptableUpperBound = expectedFieldStrength * (1 + acceptableDeviationPercentage);
-    double averageStrength = magneticFieldStrengths.reduce((a, b) => a + b) / magneticFieldStrengths.length;
+    double averageStrength=0.0;
+    if(magneticFieldStrengths.length>0){
+      averageStrength = magneticFieldStrengths.reduce((a, b) => a + b) / magneticFieldStrengths.length;
+    }
+
 
     print(magneticFieldStrengths);
 
@@ -1312,6 +1322,390 @@ if(magneticValues.length<6){
       // print('Magnetic Field Strength: $magneticFieldStrength µT');
     });
   }
+  late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;
+  void listenToMagnetometeronCalibration() {
+    double lowerThreshold = 40.0;
+    double upperThreshold = 60.0;
+    print("insideee");
+    _magnetometerSubscription= magnetometerEvents.listen((MagnetometerEvent event) {
+      double x = event.x;
+      double y = event.y;
+      double z = event.z;
+
+      // Calculate magnetic field strength
+      double magneticFieldStrength = calculateMagneticFieldStrength(x, y, z);
+
+      if (magneticFieldStrength < lowerThreshold || magneticFieldStrength > upperThreshold) {
+        accuracyNotifier.value = true;
+      } else {
+        Future.delayed(Duration(seconds: 5)).then((onValue){
+          _magnetometerSubscription.cancel();
+          accuracyNotifier.value = false;
+        });
+
+
+        //showLowAccuracyDialog();
+        _timerCompass?.cancel();
+      }
+
+      // if(accuracy==false){
+      //   print("entereddd");
+      //   _magnetometerSubscription.cancel();
+      //   _timerCompass?.cancel();
+      //   showLowAccuracyDialog();
+      // }
+
+
+      // print('Magnetic Field Strength: $magneticFieldStrength µT');
+    });
+
+
+
+  }
+
+  void findNearbyLandmarkUsingGPS()async{
+    Landmarks? latlngLandmark=await getglobalcoords();
+
+    if (latlngLandmark == null) {
+      // Handle null case, you can show a message or just stop the flow
+      speak("No nearby Landmarks Found", _currentLocale);
+      print("No nearby landmarks found.");
+      return;
+    }
+    print("latlngmark");
+    print(latlngLandmark.name);
+
+    Landmarks userSetLocation = latlngLandmark!;
+    String? polyID=latlngLandmark.properties!.polyId!;
+    // await SingletonFunctionController.building.landmarkdata!.then((value) {
+    //
+    //   value.landmarksMap?.forEach((key, valuee) {
+    //     if (key == polyID) {
+    //       userSetLocation = valuee;
+    //     }
+    //   });
+    //
+    // });
+    final Uint8List userloc =
+        await getImagesFromMarker('assets/userloc0.png', 130);
+    final Uint8List userlocdebug =
+        await getImagesFromMarker('assets/tealtorch.png', 35);
+
+    tools.setBuildingAngle(SingletonFunctionController.building
+        .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
+
+    //nearestLandmark compute
+    nearestLandInfo currentnearest = nearestLandInfo(
+        sId: userSetLocation.sId,
+        buildingID: userSetLocation.buildingID,
+        coordinateX: userSetLocation.coordinateX,
+        coordinateY: userSetLocation.coordinateY,
+        doorX: userSetLocation.doorX,
+        doorY: userSetLocation.doorY,
+        type: userSetLocation.type,
+        floor: userSetLocation.floor,
+        name: userSetLocation.name,
+        updatedAt: userSetLocation.updatedAt,
+        buildingName: userSetLocation.buildingName,
+        venueName: userSetLocation.venueName);
+    nearestLandInfomation = currentnearest;
+
+    setState(() {
+      buildingAllApi.selectedID = userSetLocation!.buildingID!;
+      buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
+    });
+
+    List<int> localBeconCord = [];
+    localBeconCord.add(userSetLocation.coordinateX!);
+    localBeconCord.add(userSetLocation.coordinateY!);
+
+
+    pathState().beaconCords = localBeconCord;
+
+    List<double> values = [];
+
+    //floor alignment
+    await SingletonFunctionController.building.landmarkdata!.then((land) {
+      if (land.landmarksMap![polyID]!.floor != 0) {
+        List<PolyArray> prevFloorLifts = findLift(
+            tools.numericalToAlphabetical(0),
+            SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+                .polyline!.floors!);
+        List<PolyArray> currFloorLifts = findLift(
+            tools.numericalToAlphabetical(land.landmarksMap![polyID]!.floor!),
+            SingletonFunctionController.building.polylinedatamap[land.landmarksMap![polyID]!.buildingID!]!
+                .polyline!.floors!);
+
+        for (int i = 0; i < prevFloorLifts.length; i++) {
+
+        }
+
+        for (int i = 0; i < currFloorLifts.length; i++) {
+
+        }
+        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+
+
+        UserState.xdiff = dvalue[0];
+        UserState.ydiff = dvalue[1];
+        values = tools.localtoglobal(
+            land.landmarksMap![polyID]!.coordinateX!,
+            land.landmarksMap![polyID]!.coordinateY!,
+            SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+
+      } else {
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+        values = tools.localtoglobal(
+            land.landmarksMap![polyID]!.coordinateX!,
+            land.landmarksMap![polyID]!.coordinateY!,
+            SingletonFunctionController.building.patchData[land.landmarksMap![polyID]!.buildingID!]);
+      }
+    });
+
+
+
+
+    mapState.target = LatLng(values[0], values[1]);
+
+    user.Bid = userSetLocation.buildingID!;
+    user.locationName = userSetLocation.name;
+
+    //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
+
+    //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
+    //did this change over here UDIT...
+    user.coordX = userSetLocation.coordinateX!;
+    user.coordY = userSetLocation.coordinateY!;
+    List<double> ls = tools.localtoglobal(user.coordX, user.coordY,
+        SingletonFunctionController.building.patchData[userSetLocation.buildingID]);
+    user.lat = ls[0];
+    user.lng = ls[1];
+
+    if (nearestLandInfomation != null &&
+        nearestLandInfomation!.doorX != null) {
+      user.coordX = nearestLandInfomation!.doorX!;
+      user.coordY = nearestLandInfomation!.doorY!;
+
+      List<double> latlng = tools.localtoglobal(
+          nearestLandInfomation!.coordinateX!,
+          nearestLandInfomation!.coordinateY!,
+          SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
+      print("latlngjfhdbj");
+      print(latlng);
+
+      user.lat = latlng[0];
+      user.lng = latlng[1];
+      user.locationName = nearestLandInfomation!.name ??
+          nearestLandInfomation!.element!.subType;
+    } else if (nearestLandInfomation != null &&
+        nearestLandInfomation!.doorX == null) {
+      user.coordX = nearestLandInfomation!.coordinateX!;
+      user.coordY = nearestLandInfomation!.coordinateY!;
+      List<double> latlng = tools.localtoglobal(
+          nearestLandInfomation!.coordinateX!,
+          nearestLandInfomation!.coordinateY!,
+          SingletonFunctionController.building.patchData[nearestLandInfomation!.buildingID]);
+
+
+      user.lat = latlng[0];
+      user.lng = latlng[1];
+
+      user.locationName = nearestLandInfomation!.name ??
+          nearestLandInfomation!.element!.subType;
+    }
+    user.showcoordX = user.coordX;
+    user.showcoordY = user.coordY;
+    UserState.cols = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
+    userSetLocation.floor]![0];
+    UserState.rows = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![
+    userSetLocation.floor]![1];
+    UserState.lngCode = _currentLocale;
+    UserState.reroute = reroute;
+    UserState.closeNavigation = closeNavigation;
+    UserState.AlignMapToPath = alignMapToPath;
+    UserState.startOnPath = startOnPath;
+    UserState.speak = speak;
+    UserState.paintMarker = paintMarker;
+    UserState.createCircle = updateCircle;
+    List<int> userCords = [];
+    userCords.add(user.coordX);
+    userCords.add(user.coordY);
+    List<int> transitionValue = tools.eightcelltransition(user.theta);
+    List<int> newUserCord = [
+      user.coordX + transitionValue[0],
+      user.coordY + transitionValue[1]
+    ];
+    user.floor = userSetLocation.floor!;
+    user.key = userSetLocation.properties!.polyId!;
+    user.initialallyLocalised = true;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
+
+    // Create the animation
+    _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+      ..addListener(() {
+        _updateCircle(user.lat, user.lng);
+      });
+    setState(() {
+      markers.clear();
+      //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
+     // if (render) {
+     //    markers.putIfAbsent(user.Bid, () => []);
+     //    markers[user.Bid]?.add(Marker(
+     //      markerId: MarkerId("UserLocation"),
+     //      position: LatLng(user.lat, user.lng),
+     //      icon: BitmapDescriptor.fromBytes(userloc),
+     //      anchor: Offset(0.5, 0.829),
+     //    ));
+     //    markers[user.Bid]?.add(Marker(
+     //      markerId: MarkerId("debug"),
+     //      position: LatLng(user.lat, user.lng),
+     //      icon: BitmapDescriptor.fromBytes(userlocdebug),
+     //      anchor: Offset(0.5, 0.829),
+     //    ));
+     //    circles.add(
+     //      Circle(
+     //        circleId: CircleId("circle"),
+     //        center: LatLng(user.lat, user.lng),
+     //        radius: _animation.value,
+     //        strokeWidth: 1,
+     //        strokeColor: Colors.blue,
+     //        fillColor: Colors.lightBlue.withOpacity(0.2),
+     //      ),
+     //    );
+    //  }
+
+      // else {
+        user.moveToFloor(userSetLocation.floor!);
+        markers.putIfAbsent(user.Bid, () => []);
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userloc),
+          anchor: Offset(0.5, 0.829),
+        ));
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      // }
+
+      SingletonFunctionController.building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
+      if (widget.directLandID.length < 2) {
+        createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
+      }
+
+      SingletonFunctionController.building.landmarkdata!.then((value) {
+        createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+      });
+    });
+
+    double value = 0;
+    if (nearestLandInfomation != null) {
+      value = tools.calculateAngle2(
+          [
+            userSetLocation.doorX ?? userSetLocation.coordinateX!,
+            userSetLocation.doorY ?? userSetLocation.coordinateY!
+          ],
+          newUserCord,
+          [
+            nearestLandInfomation!.coordinateX!,
+            nearestLandInfomation!.coordinateY!
+          ]);
+    }
+
+    mapState.zoom = 22;
+
+
+    String? finalvalue = value == 0
+        ? null
+        : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+
+    // double value =
+    //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
+    //
+    // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
+
+    //
+    //
+    if (user.isnavigating == false) {
+      detected = true;
+      if (!_isExploreModePannelOpen) {
+        _isBuildingPannelOpen = true;
+      }
+      nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
+    }
+    String name = nearestLandInfomation == null
+        ? userSetLocation.name!
+        : nearestLandInfomation!.name!;
+    if (nearestLandInfomation == null) {
+      //updating user pointer
+      SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = user.floor;
+      createRooms(SingletonFunctionController.building.polyLineData!,
+          SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!);
+      if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
+        setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+      }
+      if (markers.length > 0)
+        markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+      if (user.initialallyLocalised) {
+        mapState.interaction = !mapState.interaction;
+      }
+      fitPolygonInScreen(patch.first);
+
+      if (true) {
+        if (finalvalue == null) {
+          speak(
+              convertTolng(
+                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                  _currentLocale,
+                  ''),
+              _currentLocale);
+        } else {
+          speak(
+              convertTolng(
+                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                  _currentLocale,
+                  finalvalue),
+              _currentLocale);
+        }
+      }
+    } else {
+      if (true) {
+        if (finalvalue == null) {
+          speak(
+              convertTolng(
+                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                  _currentLocale,
+                  ''),
+              _currentLocale);
+        } else {
+          speak(
+              convertTolng(
+                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                  _currentLocale,
+                  finalvalue),
+              _currentLocale);
+        }
+      }
+    }
+
+    if (true) {
+      mapState.zoom = 22.0;
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(user.lat, user.lng),
+          22, // Specify your custom zoom level here
+        ),
+      );
+    }
+  }
 
   void paintUser(String? nearestBeacon,
       {bool speakTTS = true, bool render = true, String? polyID}) async {
@@ -1326,7 +1720,7 @@ print(nearestBeacon);
     // print("latlnglandmarks ${latlngLandmark!.name}");
     // print(latlngLandmark);
 
-print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
+
 
     if (nearestBeacon == null && polyID != null) {
       
@@ -1983,10 +2377,8 @@ print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
       }
     }
     else {
-      if(isCalibrationNeeded(magneticValues)==true){
-        showLowAccuracyDialog();
-      }
-     
+
+
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
 
 
@@ -2498,32 +2890,100 @@ print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
       );
     });
   }
+bool accuracy=false;
+  ValueNotifier<bool> accuracyNotifier = ValueNotifier<bool>(true);
 
   void showLowAccuracyDialog() {
-
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Low Compass Accuracy"),
-          content: Image.asset('assets/calibrate.gif'),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                setState(() {
-
-                });
-                Navigator.of(context).pop();
-              },
+        return StatefulBuilder(builder: (BuildContext context, StateSetter setStateDialog) {
+          return AlertDialog(
+            title: Text("Low Compass Accuracy"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/calibrate.gif'),
+                // Use ValueListenableBuilder to listen to accuracyNotifier changes
+                ValueListenableBuilder<bool>(
+                  valueListenable: accuracyNotifier,
+                  builder: (context, accuracy, child) {
+                    return RichText(
+                      text: TextSpan(
+                        text: "Compass accuracy:",
+                        style: TextStyle(color: Colors.black),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: '${accuracy == true ? "Low" : "High"}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: accuracy == true ? Colors.red : Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        );
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  setState(() {
+                    magneticValues.clear();
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
       },
     );
   }
+
+  // void showLowAccuracyDialog() {
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //
+  //       return StatefulBuilder(builder: (BuildContext context, StateSetter setStateDialog){
+  //
+  //         return AlertDialog(
+  //           title: Text("Low Compass Accuracy"),
+  //           content: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Image.asset('assets/calibrate.gif'),
+  //               RichText(text: TextSpan(text: "Compass accuracy:",style: TextStyle(color: Colors.black), children: <TextSpan>[
+  //                 TextSpan(
+  //                     text: '${accuracy==true?"Low":"High"}', style: TextStyle(fontWeight: FontWeight.bold,color: accuracy==true?Colors.red:Colors.green)),
+  //               ],),)
+  //               // Text("Compass accuracy:${_accuracy==true?"Low":"High"}",style: TextStyle(color: _accuracy==true?Colors.red:Colors.green),),
+  //             ],
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: Text("OK"),
+  //               onPressed: () {
+  //                 setState(() {
+  //                   magneticValues.clear();
+  //                 });
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       });
+  //
+  //
+  //     },
+  //   );
+  // }
 
   void moveUser() async {
 
@@ -2737,17 +3197,29 @@ print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
   LatLng? _userLocation;
   double? _accuracy;
   Future<void> _getUserLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
+    Position position =
+
+    //Position(longitude: 77.10259, latitude:  28.947595, timestamp: DateTime.now(), accuracy: 10, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+
+
+    await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
     setState(() {
       _userLocation = LatLng(position.latitude, position.longitude);
-      _accuracy = position.accuracy; 
-      print(_accuracy);// Get accuracy in meters
+      _accuracy = position.accuracy;
+      UserState.geoLat=position.latitude;
+      UserState.geoLng=position.longitude;
+      print("positionnn");
+      print(_accuracy);
+      print(position);
+      print( UserState.geoLat);
+      print(UserState.geoLng);// Get accuracy in meters
     });
 
     // Move the map camera to the user's location
+    findNearbyLandmarkUsingGPS();
     _googleMapController.animateCamera(CameraUpdate.newLatLng(_userLocation!));
   }
   void _updateProgress() {
@@ -3021,10 +3493,6 @@ print("is calibration needded: ${isCalibrationNeeded(magneticValues)}");
 if(SingletonFunctionController.timer!=null){
   await Future.wait([SingletonFunctionController.timer!,allBuildingCalls]);
 }
-
-
-
-
     if (widget.directLandID.length < 2) {
       localizeUser();
     }else{
@@ -4900,6 +5368,7 @@ if(SingletonFunctionController.timer!=null){
   PanelController _landmarkPannelController = new PanelController();
   bool calculatingPath = false;
   double aerialDist = 0.0;
+  Timer? _timerCompass;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
@@ -4922,6 +5391,8 @@ if(SingletonFunctionController.timer!=null){
       SingletonFunctionController.building.selectedLandmarkID = null;
       return Container();
     }
+
+
 
     if (user.initialallyLocalised) {
       double val1 = double.parse(snapshot.data!
@@ -5194,6 +5665,7 @@ if(SingletonFunctionController.timer!=null){
                                     // circles.clear();
                                     Markers.clear();
 
+
                                     if (user.coordY != 0 && user.coordX != 0) {
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
@@ -5229,15 +5701,51 @@ if(SingletonFunctionController.timer!=null){
                                           .buildingID!;
 
                                       setState(() {
-
                                         calculatingPath = true;
                                       });
+                                      bool calibrate=isCalibrationNeeded(magneticValues);
+                                      print("calibrate1");
+                                      print(calibrate);
+                                      if(calibrate==true){
+                                        setState(() {
+                                          accuracy=true;
+                                        });
+                                        speak("low accuracy found.Please calibrate your device",_currentLocale);
+                                        showLowAccuracyDialog();
+                                        magneticValues.clear();
+                                        listenToMagnetometer();
+                                       _timerCompass= Timer.periodic(Duration(seconds: 1), (timer) {
+                                          calibrate=isCalibrationNeeded(magneticValues);
+                                          print("calibrate2");
+                                          print(calibrate);
+                                          if(calibrate==false){
+                                            setState(() {
+                                              accuracy=false;
+                                            });
+                                            magneticValues.clear();
+                                            _timerCompass?.cancel();
+                                          }else{
+
+                                            listenToMagnetometeronCalibration();
+                                            _timerCompass?.cancel();
+                                          }
+                                        });
+
+
+
+                                      }
+
+
+
+
+
                                       Future.delayed(Duration(seconds: 1), () {
                                         calculateroute(
                                                 snapshot.data!.landmarksMap!)
                                             .then((value) {
 
-                                          calculatingPath = false;
+                                            calculatingPath = false;
+
                                           _isLandmarkPanelOpen = false;
                                           _isRoutePanelOpen = true;
                                         });
@@ -10613,7 +11121,7 @@ String destiName='';
   void dispose() {
     disposed = true;
     flutterTts.stop();
-
+    SingletonFunctionController.apibeaconmap.clear();
     magneticValues.clear();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
@@ -10779,6 +11287,18 @@ String destiName='';
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
                     mapToolbarEnabled: false,
+                    // circles: _userLocation != null && _accuracy != null
+                    //     ? {
+                    //   Circle(
+                    //     circleId: CircleId('accuracyCircle'),
+                    //     center: _userLocation!,
+                    //     radius: _accuracy!,  // Draw accuracy circle
+                    //     strokeColor: Colors.blueAccent,
+                    //     fillColor: Colors.blueAccent.withOpacity(0.2),
+                    //     strokeWidth: 1,
+                    //   )
+                    // }
+                    //     : {},
 
                     polygons: patch
                         .union(getCombinedPolygons())
@@ -11133,33 +11653,33 @@ String destiName='';
                         onPressed:() async {
 
 
-                          //_getUserLocation();
+                          _getUserLocation();
 
-                          if(!user.isnavigating && !isLocalized){
-                            SingletonFunctionController.btadapter.emptyBin();
-                            SingletonFunctionController.btadapter.stopScanning();
-                            if(Platform.isAndroid){
-                              SingletonFunctionController.btadapter.startScanning(SingletonFunctionController.apibeaconmap);
-                            }else{
-                              SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
-                            }
-                            setState(() {
-                              isLocalized=true;
-                              resBeacons = SingletonFunctionController.apibeaconmap;
-                            });
-                            late Timer _timer;
-                            _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-                              localizeUser().then((value)=>{
-                                setState((){
-                                  isLocalized=false;
-                                })
-                              });
-
-                              _timer.cancel();
-                            });
-                          }else{
-                            _recenterMap();
-                        };
+                        //   if(!user.isnavigating && !isLocalized){
+                        //     SingletonFunctionController.btadapter.emptyBin();
+                        //     SingletonFunctionController.btadapter.stopScanning();
+                        //     if(Platform.isAndroid){
+                        //       SingletonFunctionController.btadapter.startScanning(SingletonFunctionController.apibeaconmap);
+                        //     }else{
+                        //       SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+                        //     }
+                        //     setState(() {
+                        //       isLocalized=true;
+                        //       resBeacons = SingletonFunctionController.apibeaconmap;
+                        //     });
+                        //     late Timer _timer;
+                        //     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                        //       localizeUser().then((value)=>{
+                        //         setState((){
+                        //           isLocalized=false;
+                        //         })
+                        //       });
+                        //
+                        //       _timer.cancel();
+                        //     });
+                        //   }else{
+                        //     _recenterMap();
+                        // };
 
                           },
                         child: Semantics(

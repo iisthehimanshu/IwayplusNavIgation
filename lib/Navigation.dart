@@ -2325,8 +2325,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
+    try{
     await DataVersionApi()
         .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    }catch(e){
+      print(" APICALLS DataVersionApi API TRY-CATCH");
+    }
 
     _updateProgress();
 

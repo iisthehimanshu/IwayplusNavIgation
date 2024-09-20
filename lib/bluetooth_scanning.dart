@@ -88,7 +88,7 @@ class BLueToothClass {
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
-            print("mac1 $MacId    rssi $Rssi");
+            //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes

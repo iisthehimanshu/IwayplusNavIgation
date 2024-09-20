@@ -30,6 +30,7 @@ class UserState {
   bool isnavigating;
   int showcoordX;
   int showcoordY;
+  static bool isTurn=false;
   pathState pathobj = pathState();
   List<int> path = [];
   List<Cell> Cellpath = [];
@@ -328,11 +329,16 @@ class UserState {
       //turn check
       if (tools
           .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
+
+        UserState.isTurn=true;
         print("qpalzm turn detected ${[prevX, prevY]}, ${[
           showcoordX,
           showcoordY
         ]}, ${[nextX, nextY]}");
         if(Cellpath[pathobj.index+1].bid == Cellpath[pathobj.index].bid){
+          print("value at turnsss");
+          print([lat, lng]);
+          print(tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
           AlignMapToPath([lat, lng],
               tools.localtoglobal(nextX, nextY, building!.patchData[Bid]));
         }

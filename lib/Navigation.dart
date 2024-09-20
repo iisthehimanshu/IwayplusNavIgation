@@ -1067,7 +1067,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 SingletonFunctionController.building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
+
               user.move(context).then((value) {
+
                 renderHere();
               });
             } else {
@@ -1136,29 +1138,74 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         SingletonFunctionController.building.patchData[newBid]!.patchData!.buildingAngle!);
   }
 
-  void renderHere() {
-    setState(() {
+  // void renderHere() {
+  //   setState(() {
+  //     if (markers.length > 0) {
+  //       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
+  //           user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[0] = customMarker.move(
+  //           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+  //
+  //       print("insideee thiss");
+  //
+  //       mapState.target = LatLng(lvalue[0], lvalue[1]);
+  //       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //             target: mapState.target,
+  //             zoom: mapState.zoom,
+  //             bearing: mapState.bearing!,
+  //             tilt: mapState.tilt),
+  //       ));
+  //
+  //       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
+  //           user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[1] = customMarker.move(
+  //           LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+  //     }
+  //   });
+  // }
+
+  void renderHere() async {
+double screenHeight=MediaQuery.of(context).size.height;
       if (markers.length > 0) {
-        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-            user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+        List<double> lvalue = tools.localtoglobal(
+            user.showcoordX.toInt(), user.showcoordY.toInt(),
+            SingletonFunctionController.building.patchData[user.Bid]);
+
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
+        print("insideee this");
+
         mapState.target = LatLng(lvalue[0], lvalue[1]);
+
+        // Calculate the pixel position of the current center of the map
+        ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+
+        // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+        int newY = screenCenter.y  - (screenHeight*0.58).toInt();  // Adjust 300 as needed for how far you want the user at the bottom
+
+        // Convert the new screen coordinate back to LatLng
+        LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
+        setState(() {
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-              target: mapState.target,
-              zoom: mapState.zoom,
-              bearing: mapState.bearing!,
-              tilt: mapState.tilt),
+            target:(UserState.isTurn || onStart==false)?mapState.target:newCameraTarget,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!??0,
+            tilt: mapState.tilt,
+          ),
         ));
+      });
 
-        List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
-            user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+        List<double> ldvalue = tools.localtoglobal(
+            user.coordX.toInt(), user.coordY.toInt(),
+            SingletonFunctionController.building.patchData[user.Bid]);
+
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
-    });
+
   }
 
   void onStepCount() {
@@ -1340,7 +1387,7 @@ if(magneticValues.length<6){
       if (magneticFieldStrength < lowerThreshold || magneticFieldStrength > upperThreshold) {
         accuracyNotifier.value = true;
       } else {
-        Future.delayed(Duration(seconds: 5)).then((onValue){
+        Future.delayed(Duration(seconds: 3)).then((onValue){
           _magnetometerSubscription.cancel();
           accuracyNotifier.value = false;
         });
@@ -3249,11 +3296,7 @@ bool accuracy=false;
   void apiCalls(context) async {
     await DataVersionApi()
         .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-
     _updateProgress();
-
-
-
 
     // await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
     //   var key = entry.key;
@@ -3511,10 +3554,13 @@ if(SingletonFunctionController.timer!=null){
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
 
     await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      isLoading = false;
-      isBlueToothLoading = false;
-    });
+    if(mounted){
+      setState(() {
+        isLoading = false;
+        isBlueToothLoading = false;
+      });
+    }
+
   }
 
   var versionBox = Hive.box('VersionData');
@@ -5719,12 +5765,15 @@ if(SingletonFunctionController.timer!=null){
                                           }else{
 
                                             listenToMagnetometeronCalibration();
-                                            _timerCompass?.cancel();
+
+                                            if( accuracyNotifier.value ==false){
+                                              print("entereddd heree");
+                                              _timerCompass?.cancel();
+                                              _magnetometerSubscription.cancel();
+                                            }
+
                                           }
                                         });
-
-
-
                                       }
 
 
@@ -7876,6 +7925,7 @@ if(SingletonFunctionController.timer!=null){
                                                         circles.clear();
                                                         _markers.clear();
                                                         markerSldShown = false;
+
                                                       });
                                                       user.onConnection = false;
                                                       PathState.didPathStart =
@@ -8094,6 +8144,12 @@ if(SingletonFunctionController.timer!=null){
                                                                   .sourceBid);
                                                         });
                                                       }
+
+                                                      Future.delayed(Duration(seconds: 2)).then((onValue){
+                                                        setState(() {
+                                                          onStart=true;
+                                                        });
+                                                      });
                                                     },
                                                     child: !startingNavigation
                                                         ? Row(
@@ -8668,22 +8724,31 @@ if(SingletonFunctionController.timer!=null){
       (Route<dynamic> route) => false,
     );
   }
-
   void alignMapToPath(List<double> A, List<double> B) async {
-
-
+print("enteredddd");
+double screenHeight=MediaQuery.of(context).size.height;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(user.showcoordX.toInt(),
         user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
-    await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-          target: mapState.target,
-          zoom: mapState.zoom,
-          bearing: mapState.bearing!,
-          tilt: mapState.tilt),
-    ));
+    ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+
+    // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+    int newX = screenCenter.x-10;
+    int newY=screenCenter.y-(screenHeight*0.58).toInt();// Adjust 300 as needed for how far you want the user at the bottom
+
+    // Convert the new screen coordinate back to LatLng
+    LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
+    setState(() {
+      _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: newCameraTarget,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!,
+            tilt: mapState.tilt),
+      ));
+    });
   }
 
   void shouldBeOpenedVarChangeFunc() {
@@ -8735,7 +8800,7 @@ if(SingletonFunctionController.timer!=null){
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-
+bool onStart=false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -8938,6 +9003,7 @@ if(SingletonFunctionController.timer!=null){
                                   onPressed: () {
                                     setState(() {
                                       StopPDR();
+                                      onStart=false;
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
                                       PathState.sourceFloor = user.floor;
@@ -11173,6 +11239,7 @@ if(SingletonFunctionController.timer!=null){
   void dispose() {
     disposed = true;
     flutterTts.stop();
+    SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();
     magneticValues.clear();
     _googleMapController.dispose();
@@ -11204,6 +11271,15 @@ if(SingletonFunctionController.timer!=null){
       user.lat,
       user.lng
     ], [
+      PathState.singleCellListPath[user.pathobj.index + 1].lat,
+      PathState.singleCellListPath[user.pathobj.index + 1].lng
+    ]);
+    print("value at recenter");
+    print([
+      user.lat,
+      user.lng
+    ]);
+    print([
       PathState.singleCellListPath[user.pathobj.index + 1].lat,
       PathState.singleCellListPath[user.pathobj.index + 1].lng
     ]);
@@ -11539,9 +11615,12 @@ if(SingletonFunctionController.timer!=null){
                                         .nonWalkable[user.Bid]![user.floor]!,
                                     reroute);
                                 if (isvalid) {
+
                                   user.move(context).then((value) {
+                                    print("renderedddd here");
                                     renderHere();
                                   });
+
                                 } else {
                                   if (user.isnavigating) {
                                     // reroute();
@@ -11706,33 +11785,33 @@ if(SingletonFunctionController.timer!=null){
                         onPressed:() async {
 
 
-                          _getUserLocation();
+                          //_getUserLocation();
 
-                        //   if(!user.isnavigating && !isLocalized){
-                        //     SingletonFunctionController.btadapter.emptyBin();
-                        //     SingletonFunctionController.btadapter.stopScanning();
-                        //     if(Platform.isAndroid){
-                        //       SingletonFunctionController.btadapter.startScanning(SingletonFunctionController.apibeaconmap);
-                        //     }else{
-                        //       SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
-                        //     }
-                        //     setState(() {
-                        //       isLocalized=true;
-                        //       resBeacons = SingletonFunctionController.apibeaconmap;
-                        //     });
-                        //     late Timer _timer;
-                        //     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-                        //       localizeUser().then((value)=>{
-                        //         setState((){
-                        //           isLocalized=false;
-                        //         })
-                        //       });
-                        //
-                        //       _timer.cancel();
-                        //     });
-                        //   }else{
-                        //     _recenterMap();
-                        // };
+                          if(!user.isnavigating && !isLocalized){
+                            SingletonFunctionController.btadapter.emptyBin();
+                            SingletonFunctionController.btadapter.stopScanning();
+                            if(Platform.isAndroid){
+                              SingletonFunctionController.btadapter.startScanning(SingletonFunctionController.apibeaconmap);
+                            }else{
+                              SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+                            }
+                            setState(() {
+                              isLocalized=true;
+                              resBeacons = SingletonFunctionController.apibeaconmap;
+                            });
+                            late Timer _timer;
+                            _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+                              localizeUser().then((value)=>{
+                                setState((){
+                                  isLocalized=false;
+                                })
+                              });
+
+                              _timer.cancel();
+                            });
+                          }else{
+                            _recenterMap();
+                        };
 
                           },
                         child: Semantics(
@@ -11767,7 +11846,7 @@ if(SingletonFunctionController.timer!=null){
                             (!_isLandmarkPanelOpen &&
                                 !_isRoutePanelOpen &&
                                 _isBuildingPannelOpen &&
-                                !_isnavigationPannelOpen)
+                                !_isnavigationPannelOpen && user.initialallyLocalised)
                         ? FloatingActionButton(
                       onPressed: () async {
                         if (user.initialallyLocalised) {

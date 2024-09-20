@@ -16,6 +16,7 @@ import 'Cell.dart';
 import 'Elements/locales.dart';
 import 'directionClass.dart';
 import 'path.dart';
+import 'package:intl/intl.dart';
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -720,6 +721,30 @@ class tools {
     if(AngleBetweenBuildingandGlobalNorth>360){
       AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
     }
+  }
+
+  static bool isNowBetween(String startTime, String endTime) {
+    // Get the current time
+    DateTime now = DateTime.now();
+
+    // Define a format to parse the 12-hour time string
+    DateFormat format = DateFormat("hh:mm");
+
+    // Parse the start time as AM
+    DateTime startDateTime = format.parse(startTime).add(Duration(hours: 0)); // AM is already correct
+
+    // Parse the end time as PM
+    DateTime endDateTime = format.parse(endTime).add(Duration(hours: 12)); // Convert to PM
+
+    // Extract the current date without time
+    DateTime today = DateTime(now.year, now.month, now.day);
+
+    // Adjust start and end times to today's date
+    startDateTime = DateTime(today.year, today.month, today.day, startDateTime.hour, startDateTime.minute);
+    endDateTime = DateTime(today.year, today.month, today.day, endDateTime.hour, endDateTime.minute);
+
+    // Check if now is between startTime and endTime
+    return now.isAfter(startDateTime) && now.isBefore(endDateTime);
   }
 
 

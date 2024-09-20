@@ -132,7 +132,7 @@ UserState.geoLng=userLoc!.longitude;
    //
    //  }
    //  else{
-      Position pos=Position(longitude: 77.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+      Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
    // }
 

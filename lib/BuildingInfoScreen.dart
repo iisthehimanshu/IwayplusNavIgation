@@ -338,6 +338,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    print(allBuildingID);
                                     // while({
                                     //
                                     // }

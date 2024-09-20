@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
@@ -93,6 +94,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     // controller.executeFunction();
 
   }
+
+  // Get user's current location
+
   Future<void> processBuildingData() async {
     widget.receivedAllBuildingList!.forEach((element) {
       g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
@@ -113,6 +117,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(dd.length);
   }
   var currentData;
+
+
 
   Future<void> customEnableBT(BuildContext context) async {
     String dialogTitle = "Hey! Please give me permission to use Bluetooth!";
@@ -332,6 +338,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    print(allBuildingID);
                                     // while({
                                     //
                                     // }

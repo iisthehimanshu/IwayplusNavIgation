@@ -38,6 +38,8 @@ class UserState {
   List<int> offPathDistance = [];
   bool onConnection = false;
   bool temporaryExit = false;
+  static double geoLat=0.0;
+  static double geoLng=0.0;
   static bool ttsAllStop=false;
   static bool ttsOnlyTurns=false;
   b.Building? building;
@@ -503,7 +505,7 @@ class UserState {
       } else {
         print("entereddddd");
         print(msg);
-        return "${currentBuildingName} से बाहर निकलते हुए। ${nextBuildingName} की ओर बढ़ते हुए रास्ते पर चलते रहें";
+        return "${currentBuildingName} से बाहर निकलते हुए। ${nextBuildingName} की ओर चलते रहें";
       }
     }else if (nextBuildingName != "" &&
         msg ==

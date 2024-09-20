@@ -26,6 +26,7 @@ import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
+import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -108,6 +109,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       isLocating=true;
     });
     userLoc= await getUsersCurrentLatLng();
+
+
+UserState.geoLat=userLoc!.latitude;
+UserState.geoLng=userLoc!.longitude;
     if(mounted){
       setState(() {
         isLocating=false;
@@ -121,8 +126,20 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   Position? userLoc;
 
   Future<Position?> getUsersCurrentLatLng()async{
-      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+   // if ((locBox.get('location')==null)?false:locBox.get('location')) {
+   //
+   //    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+   //  print("accuracyy");
+   //  print(position.accuracy);
+   //    return position;
+   //
+   //
+   //  }
+   //  else{
+      Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
+   // }
+
   }
 
   String? _FCMToken = infoBox.get("FCMToken");

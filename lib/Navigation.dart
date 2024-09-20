@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/singletonClass.dart';
+import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -505,6 +506,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         }
+        print("__markers");
+        print(markers);
 
         // markers.add(
         //   MapMarker(
@@ -515,6 +518,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // );
       }
     } catch (e) {}
+
 
     _clusterManager = await MapHelper.initClusterManager(
         markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
@@ -554,6 +558,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       _markers
         ..clear()
         ..addAll(updatedMarkers);
+      print("_markers");
+      print(_markers);
 
       setState(() {
         _areMarkersLoading = false;
@@ -594,6 +600,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
+
     });
     setPdrThreshold();
     listenToMagnetometer();
@@ -3242,8 +3249,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
+    try{
     await DataVersionApi()
         .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    }catch(e){
+      print(" APICALLS DataVersionApi API TRY-CATCH");
+    }
 
     _updateProgress();
 
@@ -3433,17 +3444,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         var patchData = await patchAPI().fetchPatchData(id: key);
         Building.buildingData ??= Map();
-        Building.buildingData![patchData.patchData!.buildingID!] =
-            patchData.patchData!.buildingName;
-        SingletonFunctionController
-            .building.patchData[patchData.patchData!.buildingID!] = patchData;
-        if (key != buildingAllApi.outdoorID) {
-          createotherPatch(key, patchData);
-        }
 
-        if (key != buildingAllApi.outdoorID) {
-          findCentroid(patchData.patchData!.coordinates!, key);
-        }
+        Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
+        SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
+        createotherPatch(key,patchData);
+        
+        findCentroid(patchData.patchData!.coordinates!, key);
 
         var polylineData = await PolyLineApi()
             .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
@@ -3511,10 +3517,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
       }
     }));
-
+    
     if (SingletonFunctionController.timer != null) {
       await Future.wait([SingletonFunctionController.timer!, allBuildingCalls]);
     }
+
     if (widget.directLandID.length < 2) {
       localizeUser();
     } else {
@@ -3954,44 +3961,109 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
 
+  renderCampusPatchTransition(String outDoorID){
+    blurPatch.clear();
+    restBuildingMarker.clear();
+    Map<int, LatLng> currentCoordinated = {};
+
+    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
+      if(key == outDoorID){
+        currentCoordinated = innerMap;
+        if (currentCoordinated.isNotEmpty) {
+          List<LatLng> points = [];
+          List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+          entryList.sort((a, b) => a.key.compareTo(b.key));
+          LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
+          sortedCoordinates.forEach((key, value) {
+            points.add(value);
+          });
+          setState(() {
+            blurPatch.add(
+              Polygon(
+                polygonId: PolygonId('patch${points}'),
+                points: points,
+                strokeWidth: 1,
+                strokeColor: Colors.black,
+                fillColor: Color(0xffE5F9FF),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: 5,
+
+              ),
+            );
+          });
+        }
+        Building.allBuildingID.forEach((Key,Value) async {
+          if(Key == outDoorID ) {
+
+
+            String? showBuildingName ="";
+            Building.buildingData?.forEach((currKey,currValue){
+              if(currKey == Key){
+                showBuildingName = currValue;
+              }
+            });
+            restBuildingMarker.add(
+              Marker(
+                markerId: MarkerId(Key + Value.toString()),
+                position: Value,
+                icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
+                    showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
+              ),
+            );
+          }
+        });
+
+      }
+    });
+  }
+
   Set<Marker> restBuildingMarker = Set();
-  void patchTransition(String skipID) {
+  void patchTransition(String skipID){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      if (PathState.sourceBid != "" && PathState.destinationBid == "") {
-        if (key != skipID && key != PathState.sourceBid) {
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID, PathState.sourceBid]);
-        }
-      } else if (PathState.destinationBid != "" && PathState.sourceBid == "") {
-        if (key != skipID && key != PathState.destinationBid) {
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID, PathState.destinationBid]);
-        }
-      } else if (PathState.destinationBid != "" && PathState.sourceBid != "") {
-        if (key != skipID &&
-            key != PathState.destinationBid &&
-            key != PathState.sourceBid) {
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
+      print("ARCoordinateskeys ${key}");
 
-          patchGenerationMarker(
-              [skipID, PathState.destinationBid, PathState.sourceBid]);
-        }
-      } else {
-        if (key != skipID) {
-          currentCoordinated = innerMap;
-          patchGeneration(currentCoordinated);
-          patchGenerationMarker([skipID]);
+      if(key != buildingAllApi.outdoorID) {
+        if (PathState.sourceBid != "" && PathState.destinationBid == "") {
+          if (key != skipID && key != PathState.sourceBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID, PathState.sourceBid,buildingAllApi.outdoorID]);
+          }
+        } else
+        if (PathState.destinationBid != "" && PathState.sourceBid == "") {
+          if (key != skipID && key != PathState.destinationBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID, PathState.destinationBid,buildingAllApi.outdoorID]);
+          }
+        } else
+        if (PathState.destinationBid != "" && PathState.sourceBid != "") {
+          if (key != skipID && key != PathState.destinationBid &&
+              key != PathState.sourceBid) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+
+
+            patchGenerationMarker(
+                [skipID, PathState.destinationBid, PathState.sourceBid,buildingAllApi.outdoorID]);
+          }
+        } else {
+          if (key != skipID) {
+            currentCoordinated = innerMap;
+            patchGeneration(currentCoordinated);
+            patchGenerationMarker([skipID,buildingAllApi.outdoorID]);
+          }
         }
       }
     });
   }
 
-  void patchGeneration(Map<int, LatLng> currentCoordinated) {
+
+
+  void patchGeneration(Map<int, LatLng> currentCoordinated){
     print("patchGeneration");
     if (currentCoordinated.isNotEmpty) {
       List<LatLng> points = [];
@@ -4019,6 +4091,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       });
     }
   }
+
 
   void patchGenerationMarker(List<String> skipIDs) {
     restBuildingMarker.clear();
@@ -4552,63 +4625,199 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     width: 1,
                     onTap: () {}));
               }
-            } else if (polyArray.polygonType == 'Room') {
-              if (coordinates.length > 2) {
-                coordinates.add(coordinates.first);
-                closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                    polygonId: PolygonId(
-                        "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
-                    points: coordinates,
-                    strokeWidth: 1,
-                    // Modify the color and opacity based on the selectedRoomId
+            } else if (polyArray.polygonType == 'Room' ) {
+              print("polyArray.name");
+              print(polyArray.name);
 
-                    strokeColor: Color(0xffCCB8C8),
-                    fillColor: Color(0xffE8E3E7),
-                    consumeTapEvents: true,
-                    onTap: () {
-                      _googleMapController.animateCamera(
-                        CameraUpdate.newLatLngZoom(
-                          tools.calculateRoomCenterinLatLng(coordinates),
-                          22,
-                        ),
-                      );
-                      setState(() {
-                        if (SingletonFunctionController
-                                    .building.selectedLandmarkID !=
-                                polyArray.id &&
-                            !user.isnavigating &&
-                            !_isRoutePanelOpen) {
-                          user.reset();
-                          PathState = pathState.withValues(
-                              -1, -1, -1, -1, -1, -1, null, 0);
-                          pathMarkers.clear();
-                          PathState.path.clear();
-                          PathState.sourcePolyID = "";
-                          PathState.destinationPolyID = "";
-                          singleroute.clear();
+              if(polyArray.name!.toLowerCase().contains('lr') || polyArray.name!.toLowerCase().contains('lab') || polyArray.name!.toLowerCase().contains('office') || polyArray.name!.toLowerCase().contains('pantry') || polyArray.name!.toLowerCase().contains('reception')) {
+                print("COntaining LA");
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Room ${polyArray
+                              .id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
 
-                          user.isnavigating = false;
-                          _isnavigationPannelOpen = false;
-                          SingletonFunctionController
-                              .building.selectedLandmarkID = polyArray.id;
-                          SingletonFunctionController.building.ignoredMarker
-                              .clear();
-                          SingletonFunctionController.building.ignoredMarker
-                              .add(polyArray.id!);
-                          _isBuildingPannelOpen = false;
-                          _isRoutePanelOpen = false;
-                          singleroute.clear();
-                          _isLandmarkPanelOpen = true;
-                          PathState.directions = [];
-                          interBuildingPath.clear();
-                          addselectedRoomMarker(coordinates);
-                        }
-                      });
-                    }));
+                      strokeColor: Color(0xffDDD5DB),
+                      fillColor: Color(0xffE8E3E7),
+                      consumeTapEvents: true,
+                      onTap: () {
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (SingletonFunctionController.building
+                              .selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                null,
+                                0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            SingletonFunctionController.building
+                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker
+                                .clear();
+                            SingletonFunctionController.building.ignoredMarker
+                                .add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates);
+                          }
+                        });
+                      }));
+                }
+              }else if(polyArray.name!.toLowerCase().contains('atm') || polyArray.name!.toLowerCase().contains('health')) {
+                print("COntaining LA");
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Room ${polyArray
+                              .id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
+
+                      strokeColor: Color(0xffF2C0C0),
+                      fillColor: Color(0xffFBEAEA),
+                      consumeTapEvents: true,
+                      onTap: () {
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (SingletonFunctionController.building
+                              .selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                null,
+                                0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            SingletonFunctionController.building
+                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker
+                                .clear();
+                            SingletonFunctionController.building.ignoredMarker
+                                .add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates);
+                          }
+                        });
+                      }));
+                }
+              } else{
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Room ${polyArray
+                              .id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
+
+                      strokeColor: Color(0xffCCCCCC),
+                      fillColor: Color(0xffE6E6E6),
+                      consumeTapEvents: true,
+                      onTap: () {
+                        _googleMapController.animateCamera(
+                          CameraUpdate.newLatLngZoom(
+                            tools.calculateRoomCenterinLatLng(coordinates),
+                            22,
+                          ),
+                        );
+                        setState(() {
+                          if (SingletonFunctionController.building
+                              .selectedLandmarkID != polyArray.id &&
+                              !user.isnavigating &&
+                              !_isRoutePanelOpen) {
+                            user.reset();
+                            PathState = pathState.withValues(
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                -1,
+                                null,
+                                0);
+                            pathMarkers.clear();
+                            PathState.path.clear();
+                            PathState.sourcePolyID = "";
+                            PathState.destinationPolyID = "";
+                            singleroute.clear();
+
+                            user.isnavigating = false;
+                            _isnavigationPannelOpen = false;
+                            SingletonFunctionController.building
+                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController.building.ignoredMarker
+                                .clear();
+                            SingletonFunctionController.building.ignoredMarker
+                                .add(polyArray.id!);
+                            _isBuildingPannelOpen = false;
+                            _isRoutePanelOpen = false;
+                            singleroute.clear();
+                            _isLandmarkPanelOpen = true;
+                            PathState.directions = [];
+                            interBuildingPath.clear();
+                            addselectedRoomMarker(coordinates);
+                          }
+                        });
+                      }));
+                }
               }
             } else if (polyArray.polygonType == 'Cubicle') {
               if (polyArray.cubicleName == "Green Area" ||
-                  polyArray.cubicleName == "Green Area | Pots") {
+                  polyArray.cubicleName == "Green Area | Pots" || polyArray.name!.toLowerCase().contains('auditorium') || polyArray.name!.toLowerCase().contains('basketball') || polyArray.name!.toLowerCase().contains('cricket') || polyArray.name!.toLowerCase().contains('football') || polyArray.name!.toLowerCase().contains('gym') || polyArray.name!.toLowerCase().contains('swimming') || polyArray.name!.toLowerCase().contains('tennis')) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -4618,13 +4827,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Colors.black,
-                      fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
-                          ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffC2F1D5),
-                      onTap: () {}));
+                      strokeColor: Color(0xffD6FCCF),
+                      fillColor: Color(0xffEBFEE7),
+                      onTap: () {
+
+                      }));
                 }
               } else if (polyArray.cubicleName!
                   .toLowerCase()
@@ -4639,11 +4846,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Colors.black,
                       consumeTapEvents: true,
-                      fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
-                          ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffFFFF00),
+                      fillColor: Color(0xffB5CCE3),
                       onTap: () {
                         _googleMapController.animateCamera(
                           CameraUpdate.newLatLngZoom(
@@ -5373,12 +5576,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     } catch (e) {}
     setState(() {
-      Markers.add(Marker(
-        markerId: MarkerId("Building marker"),
-        position: _initialCameraPosition.target,
-        icon: BitmapDescriptor.defaultMarker,
-        visible: false,
-      ));
+      // Markers.add(Marker(
+      //   markerId: MarkerId("Building marker"),
+      //   position: _initialCameraPosition.target,
+      //   icon: BitmapDescriptor.defaultMarker,
+      //   visible: false,
+      // ));
     });
 
     _initMarkers();
@@ -6036,71 +6239,110 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               ),
                             )
                           : Container(),
-                      snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .basinClock !=
-                                  null &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .cubicleClock !=
-                                  null &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .urinalClock !=
-                                  null
-                          ? Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        width: 1.0, color: Color(0xffebebeb))),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      margin: EdgeInsets.only(right: 16),
-                                      width: 32,
-                                      height: 32,
-                                      child: Icon(
-                                        Icons.accessible,
-                                        color: Color(0xff24B9B0),
-                                        size: 24,
-                                      )),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                              text:
-                                                  "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles}"
-                                                  " toilet cubicles on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."),
-                                        ],
+                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
+                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
+                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null ?
+                      Container(
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  width: 1.0, color: Color(0xffebebeb))),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(right: 16),
+                                width: 32,
+                                height: 32,
+                                child: Icon(
+                                  Icons.accessible,
+                                  color: Color(0xff24B9B0),
+                                  size: 24,
+                                )),
+                            Column(
+                              children: [
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
                                       ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
+
+                                            "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
+                                                UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
+                                            : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
+                                            }. ":""
+
+                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
+                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            )
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != "null"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}. ":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
                           : Container(),
                     ],
                   ),
@@ -11806,9 +12048,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       _initMarkers();
                     },
                     onCameraMove: (CameraPosition cameraPosition) {
-                      //
 
-                      focusBuildingChecker(cameraPosition);
+                      if(cameraPosition.zoom>15.5){
+                        focusBuildingChecker(cameraPosition);
+                      }else{
+
+                        renderCampusPatchTransition(buildingAllApi.outdoorID);
+                      }
+
+
                       if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                           mapState.target.latitude.toStringAsFixed(5)) {
                         mapState.aligned = false;
@@ -11826,11 +12074,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       }
                       // _updateMarkers(cameraPosition.zoom);
                       if (cameraPosition.zoom < 17) {
-                        _markers.clear();
+                        //_markers.clear();
                         markerSldShown = false;
                       } else {
                         if (user.isnavigating) {
-                          _markers.clear();
+                          //_markers.clear();
                           markerSldShown = false;
                         } else {
                           markerSldShown = true;

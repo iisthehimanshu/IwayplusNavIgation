@@ -1176,6 +1176,7 @@ double screenHeight=MediaQuery.of(context).size.height;
             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
         print("insideee this");
+        print(onStart);
 
         mapState.target = LatLng(lvalue[0], lvalue[1]);
 
@@ -1297,7 +1298,7 @@ Landmarks? temp;
 double? minDistance;
    await SingletonFunctionController.building.landmarkdata!.then((value) {
       value.landmarks?.forEach((value){
-        if(value.buildingID=='65d9cacfdb333f8945861f0f'){
+        if(value.buildingID==buildingAllApi.outdoorID){
           if(value.coordinateX!=null && value.coordinateY!=null){
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
               double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
@@ -3188,6 +3189,7 @@ bool accuracy=false;
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
     setState(() {
+      onStart=false;
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(user.coordX.toInt(),
             user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
@@ -7855,6 +7857,9 @@ if(SingletonFunctionController.timer!=null){
                                                   fitPolygonInScreen(
                                                       patch.first);
                                                   exitNavigation();
+                                                  setState(() {
+                                                    onStart=false;
+                                                  });
                                                 },
                                                 icon: Semantics(
                                                   label: "Close Navigation",
@@ -8726,6 +8731,7 @@ if(SingletonFunctionController.timer!=null){
   }
   void alignMapToPath(List<double> A, List<double> B) async {
 print("enteredddd");
+print(onStart);
 double screenHeight=MediaQuery.of(context).size.height;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(user.showcoordX.toInt(),
@@ -8743,7 +8749,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     setState(() {
       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: newCameraTarget,
+            target: (onStart==false)?mapState.target:newCameraTarget,
             zoom: mapState.zoom,
             bearing: mapState.bearing!,
             tilt: mapState.tilt),
@@ -11410,8 +11416,8 @@ bool onStart=false;
                     padding:
                         EdgeInsets.only(left: 20), // <--- padding added here
                     initialCameraPosition: _initialCameraPosition,
-                    myLocationButtonEnabled: true,
-                    myLocationEnabled: true,
+                    // myLocationButtonEnabled: true,
+                    // myLocationEnabled: true,
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
                     mapToolbarEnabled: false,

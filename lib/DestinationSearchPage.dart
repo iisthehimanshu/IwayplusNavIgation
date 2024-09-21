@@ -521,7 +521,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               print(result);
 
               result.forEach((fuseResult) {
-                if (fuseResult.score < 0.2) {
+                if (fuseResult.score < 0.5) {
                   searchResults.add(SearchpageResults(
                     name: value.name!,
                     location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",

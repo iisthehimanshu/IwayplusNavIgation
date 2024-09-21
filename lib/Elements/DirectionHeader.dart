@@ -725,6 +725,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         }else if(widget.direction == "Straight"){
           Vibration.vibrate();
+          UserState.isTurn=false;
           if(!UserState.ttsOnlyTurns) {
             speak(
                 "${LocaleData.getProperty6('Go Straight', context)} ${tools

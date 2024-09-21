@@ -1044,7 +1044,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     .building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
+
               user.move(context).then((value) {
+
                 renderHere();
               });
             } else {
@@ -1106,8 +1108,35 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         .building.patchData[newBid]!.patchData!.buildingAngle!);
   }
 
-  void renderHere() {
-    setState(() {
+  // void renderHere() {
+  //   setState(() {
+  //     if (markers.length > 0) {
+  //       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
+  //           user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[0] = customMarker.move(
+  //           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+  //
+  //       print("insideee thiss");
+  //
+  //       mapState.target = LatLng(lvalue[0], lvalue[1]);
+  //       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //             target: mapState.target,
+  //             zoom: mapState.zoom,
+  //             bearing: mapState.bearing!,
+  //             tilt: mapState.tilt),
+  //       ));
+  //
+  //       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
+  //           user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[1] = customMarker.move(
+  //           LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+  //     }
+  //   });
+  // }
+
+  void renderHere() async {
+double screenHeight=MediaQuery.of(context).size.height;
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
@@ -1116,23 +1145,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         markers[user.Bid]?[0] = customMarker.move(
             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
+        print("insideee this");
+
         mapState.target = LatLng(lvalue[0], lvalue[1]);
+
+        // Calculate the pixel position of the current center of the map
+        ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+
+        // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+        int newY = screenCenter.y  - (screenHeight*0.58).toInt();  // Adjust 300 as needed for how far you want the user at the bottom
+
+        // Convert the new screen coordinate back to LatLng
+        LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
+        setState(() {
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-              target: mapState.target,
-              zoom: mapState.zoom,
-              bearing: mapState.bearing!,
-              tilt: mapState.tilt),
+            target:(UserState.isTurn || onStart==false)?mapState.target:newCameraTarget,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!??0,
+            tilt: mapState.tilt,
+          ),
         ));
+      });
 
         List<double> ldvalue = tools.localtoglobal(
-            user.coordX.toInt(),
-            user.coordY.toInt(),
+            user.coordX.toInt(), user.coordY.toInt(),
             SingletonFunctionController.building.patchData[user.Bid]);
         markers[user.Bid]?[1] = customMarker.move(
             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
       }
-    });
+
   }
 
   void onStepCount() {
@@ -1328,7 +1370,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           magneticFieldStrength > upperThreshold) {
         accuracyNotifier.value = true;
       } else {
-        Future.delayed(Duration(seconds: 5)).then((onValue) {
+        Future.delayed(Duration(seconds: 3)).then((onValue){
           _magnetometerSubscription.cancel();
           accuracyNotifier.value = false;
         });
@@ -3255,7 +3297,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }catch(e){
       print(" APICALLS DataVersionApi API TRY-CATCH");
     }
-
     _updateProgress();
 
     // await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
@@ -3536,10 +3577,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
 
     await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      isLoading = false;
-      isBlueToothLoading = false;
-    });
+    if(mounted){
+      setState(() {
+        isLoading = false;
+        isBlueToothLoading = false;
+      });
+    }
+
   }
 
   var versionBox = Hive.box('VersionData');
@@ -8484,6 +8528,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                         circles.clear();
                                                         _markers.clear();
                                                         markerSldShown = false;
+
                                                       });
                                                       user.onConnection = false;
                                                       PathState.didPathStart =
@@ -8722,6 +8767,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                                   .sourceBid);
                                                         });
                                                       }
+
+                                                      Future.delayed(Duration(seconds: 2)).then((onValue){
+                                                        setState(() {
+                                                          onStart=true;
+                                                        });
+                                                      });
                                                     },
                                                     child: !startingNavigation
                                                         ? Row(
@@ -9305,8 +9356,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       (Route<dynamic> route) => false,
     );
   }
-
   void alignMapToPath(List<double> A, List<double> B) async {
+print("enteredddd");
+double screenHeight=MediaQuery.of(context).size.height;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
@@ -9314,13 +9366,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         SingletonFunctionController.building.patchData[user.Bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
-    await _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-          target: mapState.target,
-          zoom: mapState.zoom,
-          bearing: mapState.bearing!,
-          tilt: mapState.tilt),
-    ));
+    ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+
+    // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+    int newX = screenCenter.x-10;
+    int newY=screenCenter.y-(screenHeight*0.58).toInt();// Adjust 300 as needed for how far you want the user at the bottom
+
+    // Convert the new screen coordinate back to LatLng
+    LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
+    setState(() {
+      _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: newCameraTarget,
+            zoom: mapState.zoom,
+            bearing: mapState.bearing!,
+            tilt: mapState.tilt),
+      ));
+    });
   }
 
   void shouldBeOpenedVarChangeFunc() {
@@ -9372,7 +9434,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-
+bool onStart=false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -9574,6 +9636,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                   onPressed: () {
                                     setState(() {
                                       StopPDR();
+                                      onStart=false;
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
                                       PathState.sourceFloor = user.floor;
@@ -11838,6 +11901,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   void dispose() {
     disposed = true;
     flutterTts.stop();
+    SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();
     magneticValues.clear();
     _googleMapController.dispose();
@@ -11869,6 +11933,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       user.lat,
       user.lng
     ], [
+      PathState.singleCellListPath[user.pathobj.index + 1].lat,
+      PathState.singleCellListPath[user.pathobj.index + 1].lng
+    ]);
+    print("value at recenter");
+    print([
+      user.lat,
+      user.lng
+    ]);
+    print([
       PathState.singleCellListPath[user.pathobj.index + 1].lat,
       PathState.singleCellListPath[user.pathobj.index + 1].lng
     ]);
@@ -12214,9 +12287,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                         .nonWalkable[user.Bid]![user.floor]!,
                                     reroute);
                                 if (isvalid) {
+
                                   user.move(context).then((value) {
+                                    print("renderedddd here");
                                     renderHere();
                                   });
+
                                 } else {
                                   if (user.isnavigating) {
                                     // reroute();
@@ -12458,7 +12534,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             (!_isLandmarkPanelOpen &&
                                 !_isRoutePanelOpen &&
                                 _isBuildingPannelOpen &&
-                                !_isnavigationPannelOpen)
+                                !_isnavigationPannelOpen && user.initialallyLocalised)
                         ? FloatingActionButton(
                             onPressed: () async {
                               if (user.initialallyLocalised) {

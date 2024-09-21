@@ -36,4 +36,29 @@ class Building{
   Map<String,Map<int, g.LatLng>> ARCoordinates = {};
   Building({required this.floor,required this.numberOfFloors});
 
+
+  void dispose() {
+    // Clear maps and lists to free memory
+    nonWalkable.clear();
+    floorDimenssion.clear();
+    polylinedatamap.clear();
+    patchData.clear();
+    ignoredMarker.clear();
+    ARCoordinates.clear();
+
+    // Nullify future, lists, and other objects to remove references
+    polyLineData = null;
+    landmarkdata = null;
+    beacondata = null;
+    selectedLandmarkID = null;
+
+    // Static fields should only be cleared if necessary; otherwise, leave them
+    // buildingData = null;  // If you want to clear the static data
+
+    // You don't need to explicitly free primitive types (like bool, int, etc.), as they will be automatically cleaned by Dart's garbage collector.
+
+    print("Building object disposed.");
+  }
+
+
 }

@@ -75,7 +75,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   void initState() {
     super.initState();
     print(widget.receivedAllBuildingList);
-    //allBuildingID["65d9cacfdb333f8945861f0f"] =  g.LatLng(28.9469, 77.1011);
+    allBuildingID["65d9cacfdb333f8945861f0f"] =  g.LatLng(28.9469, 77.1011);
     apiCall();
     print("building list");
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -338,6 +338,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    print(allBuildingID);
                                     // while({
                                     //
                                     // }

@@ -14,6 +14,7 @@ import 'package:iwaymaps/API/slackApi.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -96,7 +97,7 @@ Future<void> main() async {
     }
   });
 
-  PushNotifications.init();
+  // PushNotifications.init();
   PushNotifications.localNotiInit();
   //firebase listen to background notification
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
@@ -161,6 +162,7 @@ class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket();
+  NotificationSocket notificationSocket = NotificationSocket();
   late AppLinks _appLinks;
 
   @override

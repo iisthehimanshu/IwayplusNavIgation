@@ -480,7 +480,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     print('In--IF');
                     searchResults.add(SearchpageResults(
                       name: value.name!,
-                      location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
                       bid: value.buildingID!,
@@ -493,7 +493,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     print('In--ELSE');
                     searchResults.add(SearchpageResults(
                       name: value.name!,
-                      location: "Floor ${value.floor}, ${value
+                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value
                           .buildingName}, ${value.venueName}",
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
@@ -524,7 +524,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 if (fuseResult.score < 0.2) {
                   searchResults.add(SearchpageResults(
                     name: value.name!,
-                    location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                    location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,

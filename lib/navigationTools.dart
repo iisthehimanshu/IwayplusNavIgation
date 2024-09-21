@@ -734,7 +734,7 @@ class tools {
     DateTime startDateTime = format.parse(startTime).add(Duration(hours: 0)); // AM is already correct
 
     // Parse the end time as PM
-    DateTime endDateTime = format.parse(endTime).add(Duration(hours: 12)); // Convert to PM
+    DateTime endDateTime = format.parse(endTime).add(Duration(hours: 24));
 
     // Extract the current date without time
     DateTime today = DateTime(now.year, now.month, now.day);

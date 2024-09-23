@@ -12084,15 +12084,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         }
                       }
                       if (markerSldShown) {
-<<<<<<< Updated upstream
-                        // _updateMarkers11(cameraPosition.zoom);
-                      } else {}
-=======
                        _updateMarkers11(cameraPosition.zoom);
                       } else {
 
                       }
->>>>>>> Stashed changes
 
                       // _updateEntryMarkers11(cameraPosition.zoom);
                       //_markerLocations.clear();

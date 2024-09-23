@@ -5644,7 +5644,7 @@ double screenHeight=MediaQuery.of(context).size.height;
   bool calculatingPath = false;
   double aerialDist = 0.0;
   Timer? _timerCompass;
-  Widget landmarkdetailpannel(
+    Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
     // if(user.isnavigating==false){
@@ -5656,7 +5656,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
         snapshot.data!.landmarksMap![
-                SingletonFunctionController.building.selectedLandmarkID] ==
+        SingletonFunctionController.building.selectedLandmarkID] ==
             null) {
       //
       // If the data is not available, return an empty container
@@ -5672,13 +5672,13 @@ double screenHeight=MediaQuery.of(context).size.height;
       double val1 = double.parse(snapshot
           .data!
           .landmarksMap![
-              SingletonFunctionController.building.selectedLandmarkID]!
+      SingletonFunctionController.building.selectedLandmarkID]!
           .properties!
           .latitude!);
       double val2 = double.parse(snapshot
           .data!
           .landmarksMap![
-              SingletonFunctionController.building.selectedLandmarkID]!
+      SingletonFunctionController.building.selectedLandmarkID]!
           .properties!
           .longitude!);
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
@@ -5791,25 +5791,25 @@ double screenHeight=MediaQuery.of(context).size.height;
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                                  .building.selectedLandmarkID]!
-                              .name ??
                           snapshot
                               .data!
                               .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .name ??
+                              snapshot
+                                  .data!
+                                  .landmarksMap![SingletonFunctionController
                                   .building.selectedLandmarkID]!
-                              .element!
-                              .subType!,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8e8d8d),
-                        height: 25 / 16,
-                      ),
-                    )),
+                                  .element!
+                                  .subType!,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8e8d8d),
+                            height: 25 / 16,
+                          ),
+                        )),
                   ),
                   Container(
                     height: 48,
@@ -5904,18 +5904,18 @@ double screenHeight=MediaQuery.of(context).size.height;
                                   child: Semantics(
                                     child: Text(
                                       snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .selectedLandmarkID]!
-                                              .name ??
+                                          .data!
+                                          .landmarksMap![
+                                      SingletonFunctionController
+                                          .building
+                                          .selectedLandmarkID]!
+                                          .name ??
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .selectedLandmarkID]!
+                                          SingletonFunctionController
+                                              .building
+                                              .selectedLandmarkID]!
                                               .element!
                                               .subType!,
                                       style: const TextStyle(
@@ -5959,71 +5959,71 @@ double screenHeight=MediaQuery.of(context).size.height;
                                 ),
                               ),
                               snapshot
-                                          .data!
-                                          .landmarksMap![
-                                              SingletonFunctionController
-                                                  .building.selectedLandmarkID]!
-                                          .properties!
-                                          .startTime !=
-                                      null
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .startTime !=
+                                  null
                                   ? Container(
-                                      padding:
-                                          EdgeInsets.only(left: 17, bottom: 4),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.startTime!} AM- ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.endTime!} PM  ",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff777777),
-                                              height: 20 / 14,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                          tools.isNowBetween(
-                                                  snapshot
-                                                      .data!
-                                                      .landmarksMap![
-                                                          SingletonFunctionController
-                                                              .building
-                                                              .selectedLandmarkID]!
-                                                      .properties!
-                                                      .startTime!,
-                                                  snapshot
-                                                      .data!
-                                                      .landmarksMap![
-                                                          SingletonFunctionController
-                                                              .building
-                                                              .selectedLandmarkID]!
-                                                      .properties!
-                                                      .endTime!)
-                                              ? Text(
-                                                  "Open Now",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Color(0xff4CAF50),
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              : Text(
-                                                  "Closed",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.redAccent,
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                        ],
+                                padding:
+                                EdgeInsets.only(left: 17, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.startTime!} AM- ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.endTime!} PM  ",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff777777),
+                                        height: 20 / 14,
                                       ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                    tools.isNowBetween(
+                                        snapshot
+                                            .data!
+                                            .landmarksMap![
+                                        SingletonFunctionController
+                                            .building
+                                            .selectedLandmarkID]!
+                                            .properties!
+                                            .startTime!,
+                                        snapshot
+                                            .data!
+                                            .landmarksMap![
+                                        SingletonFunctionController
+                                            .building
+                                            .selectedLandmarkID]!
+                                            .properties!
+                                            .endTime!)
+                                        ? Text(
+                                      "Open Now",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4CAF50),
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
                                     )
+                                        : Text(
+                                      "Closed",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.redAccent,
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ],
+                                ),
+                              )
                                   : Container(),
 
                               // (user.initialallyLocalised &&
@@ -6088,224 +6088,224 @@ double screenHeight=MediaQuery.of(context).size.height;
                         ),
                       ):Container(),
                       snapshot
-                                  .data!
-                                  .landmarksMap![SingletonFunctionController
-                                      .building.selectedLandmarkID]!
-                                  .properties!
-                                  .contactNo !=
-                              null
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .contactNo !=
+                          null
                           ? InkWell(
                         onTap:(){
                           HelperClass.makePhoneCall(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!);
                         },
-                            child: Container(
-                                margin: EdgeInsets.only(left: 16, right: 16),
-                                padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        margin: EdgeInsets.only(right: 12),
-                                        width: 24,
-                                        height: 24,
-                                        child: Semantics(
-                                          excludeSemantics: true,
-                                          child:
-                                              SvgPicture.asset("assets/call.svg"),
-                                        )),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Phone",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff777777),
-                                            height: 16 / 12,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff055aa5),
-                                                height: 24 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                        child: Container(
+                          margin: EdgeInsets.only(left: 16, right: 16),
+                          padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(right: 12),
+                                  width: 24,
+                                  height: 24,
+                                  child: Semantics(
+                                    excludeSemantics: true,
+                                    child:
+                                    SvgPicture.asset("assets/call.svg"),
+                                  )),
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phone",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff777777),
+                                      height: 16 / 12,
                                     ),
-                                  ],
-                                ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff055aa5),
+                                          height: 24 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                          )
+                            ],
+                          ),
+                        ),
+                      )
                           : Container(),
                       snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .email !=
-                                  "" &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .email !=
-                                  null
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .email !=
+                          "" &&
+                          snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .email !=
+                              null
                           ? InkWell(
                         onTap:(){
                           HelperClass.sendMailto(email:snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!);
                         }             ,child: Container(
-                                margin: EdgeInsets.only(left: 16, right: 16),
-                                padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        margin: EdgeInsets.only(right: 12),
-                                        width: 24,
-                                        height: 24,
-                                        child:
-                                            SvgPicture.asset("assets/email.svg")),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(right: 12),
+                                width: 24,
+                                height: 24,
+                                child:
+                                SvgPicture.asset("assets/email.svg")),
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Email",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff777777),
+                                    height: 16 / 12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                                SizedBox(
+                                  height: 4,
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff055aa5),
+                                        height: 24 / 16,
+                                      ),
                                       children: [
-                                        Text(
-                                          "Email",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff777777),
-                                            height: 16 / 12,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff055aa5),
-                                                height: 24 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                        TextSpan(
+                                          text:
+                                          "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                          )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      )
                           : Container(),
                       snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .url !=
-                                  "" &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![SingletonFunctionController
-                                          .building.selectedLandmarkID]!
-                                      .properties!
-                                      .url !=
-                                  null
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .url !=
+                          "" &&
+                          snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .url !=
+                              null
                           ? InkWell(
                         onTap: (){
                           HelperClass.launchURL(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!);
                         },
-                            child: Container(
-                                margin: EdgeInsets.only(left: 16, right: 16),
-                                padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        margin: EdgeInsets.only(right: 12),
-                                        width: 24,
-                                        height: 24,
-                                        child: SvgPicture.asset(
-                                            "assets/website.svg")),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Website",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xff777777),
-                                            height: 16 / 12,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Container(
-                                          width: screenWidth - 100,
-                                          child: RichText(
-                                            text: TextSpan(
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xff055aa5),
-                                                height: 24 / 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text:
-                                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!}",
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                        child: Container(
+                          margin: EdgeInsets.only(left: 16, right: 16),
+                          padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(right: 12),
+                                  width: 24,
+                                  height: 24,
+                                  child: SvgPicture.asset(
+                                      "assets/website.svg")),
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Website",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff777777),
+                                      height: 16 / 12,
                                     ),
-                                  ],
-                                ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff055aa5),
+                                          height: 24 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                          )
+                            ],
+                          ),
+                        ),
+                      )
                           : Container(),
                       microService? Container(
                         margin: EdgeInsets.only(left: 16, right: 16),
@@ -6343,17 +6343,17 @@ double screenHeight=MediaQuery.of(context).size.height;
                                       ),
                                       children: [
                                         TextSpan(
-                                          text:
+                                            text:
                                             snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
 
                                             "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
                                                 UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
-                                            : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
+                                                    : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
                                             }. ":""
 
-                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
-                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
                                         ),
                                       ],
                                     ),
@@ -6397,7 +6397,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                                         TextSpan(
                                             text:
                                             snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
                                         ),
                                       ],
                                     ),
@@ -6457,30 +6457,30 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                         PathState.sourceName = "Your current location";
                         PathState.destinationPolyID =
-                            SingletonFunctionController
-                                .building.selectedLandmarkID!;
+                        SingletonFunctionController
+                            .building.selectedLandmarkID!;
                         PathState.destinationName = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
-                                .name ??
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .name ??
                             snapshot
                                 .data!
                                 .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
+                                .building.selectedLandmarkID]!
                                 .element!
                                 .subType!;
                         PathState.destinationFloor = snapshot
                             .data!
                             .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
+                            .building.selectedLandmarkID]!
                             .floor!;
                         PathState.sourceBid = user.Bid;
 
                         PathState.destinationBid = snapshot
                             .data!
                             .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
+                            .building.selectedLandmarkID]!
                             .buildingID!;
 
                         setState(() {
@@ -6501,20 +6501,20 @@ double screenHeight=MediaQuery.of(context).size.height;
                           listenToMagnetometer();
                           _timerCompass =
                               Timer.periodic(Duration(seconds: 1), (timer) {
-                            calibrate = isCalibrationNeeded(magneticValues);
-                            print("calibrate2");
-                            print(calibrate);
-                            if (calibrate == false) {
-                              setState(() {
-                                accuracy = false;
+                                calibrate = isCalibrationNeeded(magneticValues);
+                                print("calibrate2");
+                                print(calibrate);
+                                if (calibrate == false) {
+                                  setState(() {
+                                    accuracy = false;
+                                  });
+                                  magneticValues.clear();
+                                  _timerCompass?.cancel();
+                                } else {
+                                  listenToMagnetometeronCalibration();
+                                  _timerCompass?.cancel();
+                                }
                               });
-                              magneticValues.clear();
-                              _timerCompass?.cancel();
-                            } else {
-                              listenToMagnetometeronCalibration();
-                              _timerCompass?.cancel();
-                            }
-                          });
                         }
 
                         Future.delayed(Duration(seconds: 1), () {
@@ -6529,23 +6529,23 @@ double screenHeight=MediaQuery.of(context).size.height;
                       } else {
                         PathState.sourceName = "Choose Starting Point";
                         PathState.destinationPolyID =
-                            SingletonFunctionController
-                                .building.selectedLandmarkID!;
+                        SingletonFunctionController
+                            .building.selectedLandmarkID!;
                         PathState.destinationName = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
-                                .name ??
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .name ??
                             snapshot
                                 .data!
                                 .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
+                                .building.selectedLandmarkID]!
                                 .element!
                                 .subType!;
                         PathState.destinationFloor = snapshot
                             .data!
                             .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
+                            .building.selectedLandmarkID]!
                             .floor!;
                         SingletonFunctionController
                             .building.selectedLandmarkID = "";
@@ -6553,10 +6553,10 @@ double screenHeight=MediaQuery.of(context).size.height;
                             context,
                             MaterialPageRoute(
                                 builder: (context) => SourceAndDestinationPage(
-                                      DestinationID:
-                                          PathState.destinationPolyID,
-                                      user: user,
-                                    ))).then((value) {
+                                  DestinationID:
+                                  PathState.destinationPolyID,
+                                  user: user,
+                                ))).then((value) {
                           if (value != null) {
                             fromSourceAndDestinationPage(value);
                           }
@@ -6565,28 +6565,28 @@ double screenHeight=MediaQuery.of(context).size.height;
                     },
                     child: (!calculatingPath)
                         ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.directions,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "${LocaleData.direction.getString(context)}",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              )
-                            ],
-                          )
-                        : Container(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.directions,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "${LocaleData.direction.getString(context)}",
+                          style: TextStyle(
+                            color: Colors.white,
                           ),
+                        )
+                      ],
+                    )
+                        : Container(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               )),

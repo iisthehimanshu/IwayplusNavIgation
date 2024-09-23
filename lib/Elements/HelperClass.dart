@@ -18,19 +18,20 @@ import '../MODELS/VenueModel.dart';
 class HelperClass{
   static bool SemanticEnabled = false;
 
-  static Future<void> makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    await launch(launchUri.toString());
+  static Future<void> launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   static Future<void> sendMailto({
     String email = "mail@example.com",
   }) async {
-    final String emailSubject = "Support";
-    final Uri parsedMailto = Uri.parse("mailto:<$email>?subject=$emailSubject");
+    final String emailSubject = "Feedbacks";
+    final Uri parsedMailto = Uri.parse(
+        "mailto:<$email>?subject=$emailSubject");
 
     if (!await launchUrl(
       parsedMailto,
@@ -40,12 +41,12 @@ class HelperClass{
     }
   }
 
-  static Future<void> launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+  static Future<void> makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launch(launchUri.toString());
   }
 
 

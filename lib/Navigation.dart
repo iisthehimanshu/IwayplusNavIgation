@@ -3850,8 +3850,8 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('patch'),
               points: polygonPoints,
               strokeWidth: 1,
-              strokeColor: Colors.white,
-              fillColor: Color(0xff5e697d),
+              strokeColor: Colors.black,
+              fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
               zIndex: -1),
@@ -3930,8 +3930,8 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
               points: polygonPoints,
               strokeWidth: 1,
-              strokeColor: Colors.white,
-              fillColor: Color(0xff5e697d),
+              strokeColor: Colors.black,
+              fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
               zIndex: -1),
@@ -4183,8 +4183,8 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('patch'),
               points: points,
               strokeWidth: 1,
-              strokeColor: Colors.white,
-              fillColor: Color(0xff5e697d),
+              strokeColor: Colors.black,
+              fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
               zIndex: -1),
@@ -4221,8 +4221,8 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('otherpatch $bid'),
               points: points,
               strokeWidth: 1,
-              strokeColor: Colors.white,
-              fillColor: Color(0xff5e697d),
+              strokeColor: Colors.black,
+              fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
               zIndex: -1),
@@ -4606,7 +4606,7 @@ double screenHeight=MediaQuery.of(context).size.height;
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
-          findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
+      findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
           tools.numericalToAlphabetical(floor), value.polyline!.floors!);
       List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -4662,9 +4662,9 @@ double screenHeight=MediaQuery.of(context).size.height;
                         "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
                     points: coordinates,
                     color: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.black,
                     width: 1,
                     onTap: () {}));
@@ -4900,8 +4900,8 @@ double screenHeight=MediaQuery.of(context).size.height;
                         );
                         setState(() {
                           if (SingletonFunctionController
-                                      .building.selectedLandmarkID !=
-                                  polyArray.id &&
+                              .building.selectedLandmarkID !=
+                              polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -4954,8 +4954,8 @@ double screenHeight=MediaQuery.of(context).size.height;
                         );
                         setState(() {
                           if (SingletonFunctionController
-                                      .building.selectedLandmarkID !=
-                                  polyArray.id &&
+                              .building.selectedLandmarkID !=
+                              polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -5008,8 +5008,8 @@ double screenHeight=MediaQuery.of(context).size.height;
                         );
                         setState(() {
                           if (SingletonFunctionController
-                                      .building.selectedLandmarkID !=
-                                  polyArray.id &&
+                              .building.selectedLandmarkID !=
+                              polyArray.id &&
                               !user.isnavigating &&
                               !_isRoutePanelOpen) {
                             user.reset();
@@ -5055,9 +5055,9 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffFF4500),
                       onTap: () {}));
                 }
@@ -5075,9 +5075,9 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff00FFFF),
                       onTap: () {}));
                 }
@@ -5095,9 +5095,9 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffCCCCCC),
                       onTap: () {}));
                 }
@@ -5113,9 +5113,9 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff800000),
                       onTap: () {}));
                 }
@@ -5131,9 +5131,9 @@ double screenHeight=MediaQuery.of(context).size.height;
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                              polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xff333333),
                       onTap: () {}));
                 }
@@ -5148,9 +5148,9 @@ double screenHeight=MediaQuery.of(context).size.height;
                     strokeColor: Colors.black,
                     onTap: () {},
                     fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.black.withOpacity(0.2),
                   ));
                 }
@@ -5166,9 +5166,9 @@ double screenHeight=MediaQuery.of(context).size.height;
                     // Modify the color and opacity based on the selectedRoomId
                     strokeColor: Colors.black,
                     fillColor: polyArray.cubicleColor != null &&
-                            polyArray.cubicleColor != "undefined"
+                        polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Color(0xffCCCCCC),
                     consumeTapEvents: true,
                     onTap: () {}));
@@ -5178,9 +5178,9 @@ double screenHeight=MediaQuery.of(context).size.height;
                   polylineId: PolylineId(polyArray.id!),
                   points: coordinates,
                   color: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                      polyArray.cubicleColor != "undefined"
                       ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                      '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                       : Colors.black,
                   width: 1,
                   onTap: () {}));
@@ -5191,6 +5191,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     });
     return;
   }
+
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
     ByteData data = await rootBundle.load(path);

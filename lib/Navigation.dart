@@ -12147,7 +12147,6 @@ bool onStart=false;
                       if(cameraPosition.zoom>15.5){
                         focusBuildingChecker(cameraPosition);
                       }else{
-
                         renderCampusPatchTransition(buildingAllApi.outdoorID);
                       }
 
@@ -12169,19 +12168,21 @@ bool onStart=false;
                       }
                       // _updateMarkers(cameraPosition.zoom);
                       if (cameraPosition.zoom < 17) {
-                        //_markers.clear();
+                        _markers.clear();
                         markerSldShown = false;
                       } else {
                         if (user.isnavigating) {
-                          //_markers.clear();
+                          _markers.clear();
                           markerSldShown = false;
                         } else {
                           markerSldShown = true;
                         }
                       }
                       if (markerSldShown) {
-                        // _updateMarkers11(cameraPosition.zoom);
-                      } else {}
+                       _updateMarkers11(cameraPosition.zoom);
+                      } else {
+
+                      }
 
                       // _updateEntryMarkers11(cameraPosition.zoom);
                       //_markerLocations.clear();

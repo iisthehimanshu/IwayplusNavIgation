@@ -5288,6 +5288,42 @@ double? minDistance;
             landmarks[i].buildingID ==
                 (bid ?? buildingAllApi.selectedBuildingID)) {
           if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Classroom" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/Classroom.png',imageSize: const Size(95, 95),color: Color(0xff544551));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/Classroom.png', 85);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
             landmarks[i].element!.subType == "Cafeteria" &&
             landmarks[i].coordinateX != null &&
             !landmarks[i].wasPolyIdNull!) {

@@ -654,7 +654,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           print("error to be solved later $e");
         }
         if(widget.user.pathobj.index != 0){
-           angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index-1].node, widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          try {
+            angle = tools.calculateAnglefifth(
+                widget.user.Cellpath[widget.user.pathobj.index - 1].node,
+                widget.user.Cellpath[widget.user.pathobj.index].node,
+                widget.user.Cellpath[widget.user.pathobj.index + 1].node,
+                widget.user.pathobj.numCols![widget.user.Bid]![widget.user
+                    .floor]!);
+          }catch(e){
+            print("problem to be solved later $e");
+          }
         }
         double userangle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
 
@@ -716,6 +725,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         }else if(widget.direction == "Straight"){
           Vibration.vibrate();
+          UserState.isTurn=false;
           if(!UserState.ttsOnlyTurns) {
             speak(
                 "${LocaleData.getProperty6('Go Straight', context)} ${tools

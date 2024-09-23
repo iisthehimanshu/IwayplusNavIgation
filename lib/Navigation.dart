@@ -3184,6 +3184,7 @@ double? minDistance;
     user.showcoordY = user.coordY;
     setState(() {
       onStart=false;
+      startingNavigation=false;
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),

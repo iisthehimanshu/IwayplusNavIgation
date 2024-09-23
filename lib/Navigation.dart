@@ -12052,7 +12052,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       if(cameraPosition.zoom>15.5){
                         focusBuildingChecker(cameraPosition);
                       }else{
-
                         renderCampusPatchTransition(buildingAllApi.outdoorID);
                       }
 
@@ -12074,19 +12073,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       }
                       // _updateMarkers(cameraPosition.zoom);
                       if (cameraPosition.zoom < 17) {
-                        //_markers.clear();
+                        _markers.clear();
                         markerSldShown = false;
                       } else {
                         if (user.isnavigating) {
-                          //_markers.clear();
+                          _markers.clear();
                           markerSldShown = false;
                         } else {
                           markerSldShown = true;
                         }
                       }
                       if (markerSldShown) {
+<<<<<<< Updated upstream
                         // _updateMarkers11(cameraPosition.zoom);
                       } else {}
+=======
+                       _updateMarkers11(cameraPosition.zoom);
+                      } else {
+
+                      }
+>>>>>>> Stashed changes
 
                       // _updateEntryMarkers11(cameraPosition.zoom);
                       //_markerLocations.clear();

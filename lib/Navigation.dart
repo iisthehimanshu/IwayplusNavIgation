@@ -435,7 +435,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         if (values == 'Lift') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapLift.png', 65);
+              await getImagesFromMarker('assets/MapLift.png', 85);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -447,7 +447,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Entry') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapEntry.png', 65);
+              await getImagesFromMarker('assets/MapEntry.png', 85);
           try {
             markers.add(
               MapMarker(
@@ -461,7 +461,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           } catch (e) {}
         } else if (values == 'Pharmacy') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/hospital.png', 70);
+              await getImagesFromMarker('assets/hospital.png', 85);
           markers.add(
             MapMarker(
                 id: keys.toString() + buildingValue,
@@ -472,7 +472,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Kitchen') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/cutlery.png', 60);
+              await getImagesFromMarker('assets/cutlery.png', 85);
           markers.add(
             MapMarker(
                 id: keys.toString() + buildingValue,
@@ -483,7 +483,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Female') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapFemaleWashroom.png', 65);
+              await getImagesFromMarker('assets/MapFemaleWashroom.png', 95);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -495,7 +495,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Male') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapMaleWashroom.png', 65);
+              await getImagesFromMarker('assets/MapMaleWashroom.png', 95);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -3298,7 +3298,7 @@ double screenHeight=MediaQuery.of(context).size.height;
       print(" APICALLS DataVersionApi API TRY-CATCH");
     }
     _updateProgress();
-
+    print("apicalls testing 1");
     // await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
     //   var key = entry.key;
     //
@@ -3332,7 +3332,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     setState(() {
       resBeacons = SingletonFunctionController.apibeaconmap;
     });
-
+    print("apicalls testing 2");
     var patchData =
         await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
     Building.buildingData ??= Map();
@@ -3352,7 +3352,7 @@ double screenHeight=MediaQuery.of(context).size.height;
           double.parse(patchData.patchData!.coordinates![i].globalRef!.lat!),
           double.parse(patchData.patchData!.coordinates![i].globalRef!.lng!)));
     }
-
+    print("apicalls testing 3");
     var polylineData = await PolyLineApi()
         .fetchPolyData(id: buildingAllApi.selectedBuildingID);
     SingletonFunctionController.building.polyLineData = polylineData;
@@ -3374,7 +3374,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     SingletonFunctionController
             .building.floor[buildingAllApi.selectedBuildingID] =
         buildingAllApi.selectedBuildingID == "666848685496124d04fc6761" ? 5 : 0;
-
+    print("apicalls testing 4");
     var landmarkData = await landmarkApi()
         .fetchLandmarkData(id: buildingAllApi.selectedBuildingID);
     SingletonFunctionController.building.landmarkdata =
@@ -3446,7 +3446,7 @@ double screenHeight=MediaQuery.of(context).size.height;
 
     createARPatch(coordinates);
     createMarkers(landmarkData, 0, bid: buildingAllApi.selectedBuildingID);
-
+    print("apicalls testing 5");
     await Future.delayed(Duration(seconds: 2));
     speak("${LocaleData.searchingyourlocation.getString(context)}",
         _currentLocale);
@@ -3464,25 +3464,26 @@ double screenHeight=MediaQuery.of(context).size.height;
         buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] =
             LatLng(0.0, 0.0);
       }
+      print("apicalls testing 6");
     } catch (_) {}
-
+    print("apicalls testing 7");
     Future<void> allBuildingCalls = Future.wait(
         buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
       var key = entry.key;
 
       SingletonFunctionController.building.floor[key] = 0;
-
+      print("apicalls testing 1 for $key");
       try {
         var waypointData = await waypointapi()
             .fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
         Building.waypoint[key] = waypointData;
       } catch (_) {}
-
+      print("apicalls testing 2 for $key");
       if (key != buildingAllApi.getSelectedBuildingID()) {
         try {
           await DataVersionApi().fetchDataVersionApiData(key);
         } catch (e) {}
-
+        print("apicalls testing 3 for $key");
         var patchData = await patchAPI().fetchPatchData(id: key);
         Building.buildingData ??= Map();
 
@@ -3491,7 +3492,7 @@ double screenHeight=MediaQuery.of(context).size.height;
         createotherPatch(key,patchData);
         
         findCentroid(patchData.patchData!.coordinates!, key);
-
+        print("apicalls testing 4 for $key");
         var polylineData = await PolyLineApi()
             .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
         SingletonFunctionController.building.polylinedatamap[key] =
@@ -3507,7 +3508,7 @@ double screenHeight=MediaQuery.of(context).size.height;
         Building.numberOfFloorsDelhi[key] = currentBuildingFloor;
 
         createRooms(polylineData, 0);
-
+        print("apicalls testing 5 for $key");
         var otherLandmarkData = await landmarkApi().fetchLandmarkData(
             id: key, outdoor: key == buildingAllApi.outdoorID);
         var otherLandmarkdata =
@@ -3556,32 +3557,39 @@ double screenHeight=MediaQuery.of(context).size.height;
         createMarkers(otherLandmarkData, 0, bid: key);
         createotherARPatch(
             otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
+        print("apicalls testing 6 for $key");
       }
     }));
     
     if (SingletonFunctionController.timer != null) {
       await Future.wait([SingletonFunctionController.timer!, allBuildingCalls]);
     }
-
+    print("apicalls testing 8");
     if (widget.directLandID.length < 2) {
+      print("apicalls testing 9");
       localizeUser();
     } else {
+      print("apicalls testing 10");
       SingletonFunctionController.btadapter.stopScanning();
       //got here using a destination qr
       localizeUser(speakTTS: false);
       onLandmarkVenueClicked(widget.directLandID,
           DirectlyStartNavigation: false);
       SingletonFunctionController.building.destinationQr = true;
+      print("apicalls testing 11");
     }
 
+    print("apicalls testing 12");
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
-
+    print("apicalls testing 13");
     await Future.delayed(Duration(seconds: 3));
     if(mounted){
+      print("apicalls testing 14");
       setState(() {
         isLoading = false;
         isBlueToothLoading = false;
       });
+      print("apicalls testing 15");
     }
 
   }
@@ -3717,7 +3725,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     SingletonFunctionController.btadapter.stopScanning();
 
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
-    if (nearestBeacon != "") {
+    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
       buildingAllApi
           .setStoredString(Building.apibeaconmap[nearestBeacon]!.buildingID!);
       buildingAllApi.selectedID =
@@ -3850,7 +3858,7 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('patch'),
               points: polygonPoints,
               strokeWidth: 1,
-              strokeColor: Colors.black,
+              strokeColor: Color(0xffC0C0C0),
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
@@ -3930,7 +3938,7 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
               points: polygonPoints,
               strokeWidth: 1,
-              strokeColor: Colors.black,
+              strokeColor: Color(0xffC0C0C0),
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
@@ -4183,7 +4191,7 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('patch'),
               points: points,
               strokeWidth: 1,
-              strokeColor: Colors.black,
+              strokeColor: Color(0xffC0C0C0),
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
@@ -4221,7 +4229,7 @@ double screenHeight=MediaQuery.of(context).size.height;
               polygonId: PolygonId('otherpatch $bid'),
               points: points,
               strokeWidth: 1,
-              strokeColor: Colors.black,
+              strokeColor: Color(0xffC0C0C0),
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
@@ -4665,7 +4673,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                         polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
                         '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                        : Colors.black,
+                        : Color(0xffC0C0C0),
                     width: 1,
                     onTap: () {}));
               }
@@ -4685,7 +4693,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Color(0xffDDD5DB),
+                      strokeColor: Color(0xffA38F9F),
                       fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
                       onTap: () {
@@ -4747,7 +4755,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Color(0xffF2C0C0),
+                      strokeColor: Color(0xffE99696),
                       fillColor: Color(0xffFBEAEA),
                       consumeTapEvents: true,
                       onTap: () {
@@ -4808,8 +4816,8 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Color(0xffCCCCCC),
-                      fillColor: Color(0xffE6E6E6),
+                      strokeColor: Color(0xffA38F9F),
+                      fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
                       onTap: () {
                         _googleMapController.animateCamera(
@@ -4871,8 +4879,8 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Color(0xffD6FCCF),
-                      fillColor: Color(0xffEBFEE7),
+                      strokeColor: Color(0xffADFA9E),
+                      fillColor: Color(0xffE7FEE9),
                       onTap: () {
 
                       }));
@@ -4888,9 +4896,9 @@ double screenHeight=MediaQuery.of(context).size.height;
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-                      strokeColor: Colors.black,
+                      strokeColor: Color(0xffB5CCE3),
                       consumeTapEvents: true,
-                      fillColor: Color(0xffB5CCE3),
+                      fillColor: Color(0xffDAE6F1),
                       onTap: () {
                         _googleMapController.animateCamera(
                           CameraUpdate.newLatLngZoom(
@@ -4943,7 +4951,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
-                      strokeColor: Color(0xffB6DDFB),
+                      strokeColor: Color(0xff6EBCF7),
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
                         _googleMapController.animateCamera(
@@ -4997,7 +5005,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
-                      strokeColor: Color(0xffB6DDFB),
+                      strokeColor: Color(0xff6EBCF7),
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
                         _googleMapController.animateCamera(
@@ -5058,7 +5066,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                           polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffFF4500),
+                          : Color(0xffF21D0D),
                       onTap: () {}));
                 }
               } else if (polyArray.cubicleName!
@@ -5073,12 +5081,12 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Colors.black,
+                      strokeColor: Color(0xff6EBCF7),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xff00FFFF),
+                          : Color(0xffE7F4FE),
                       onTap: () {}));
                 }
               } else if (polyArray.cubicleName!
@@ -5093,12 +5101,12 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Colors.black,
+                      strokeColor: Color(0xffC0C0C0),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xffCCCCCC),
+                          : Color(0xffffffff),
                       onTap: () {}));
                 }
               } else if (polyArray.cubicleName == "Restricted Area") {
@@ -5111,12 +5119,12 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Colors.black,
+                      strokeColor: Color(0xffCCCCCC),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xff800000),
+                          : Color(0xffE6E6E6),
                       onTap: () {}));
                 }
               } else if (polyArray.cubicleName == "Non Walkable Area") {
@@ -5129,12 +5137,12 @@ double screenHeight=MediaQuery.of(context).size.height;
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
 
-                      strokeColor: Colors.black,
+                      strokeColor: Color(0xffcccccc),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                          : Color(0xff333333),
+                          : Color(0xffE6E6E6),
                       onTap: () {}));
                 }
               } else {
@@ -5145,13 +5153,13 @@ double screenHeight=MediaQuery.of(context).size.height;
                         "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
                     points: coordinates,
                     strokeWidth: 1,
-                    strokeColor: Colors.black,
+                    strokeColor: Color(0xffD3D3D3),
                     onTap: () {},
                     fillColor: polyArray.cubicleColor != null &&
                         polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
                         '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                        : Colors.black.withOpacity(0.2),
+                        : Colors.white,
                   ));
                 }
               }
@@ -5164,12 +5172,12 @@ double screenHeight=MediaQuery.of(context).size.height;
                     points: coordinates,
                     strokeWidth: 1,
                     // Modify the color and opacity based on the selectedRoomId
-                    strokeColor: Colors.black,
+                    strokeColor: Color(0xffD3D3D3),
                     fillColor: polyArray.cubicleColor != null &&
                         polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
                         '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                        : Color(0xffCCCCCC),
+                        : Colors.white,
                     consumeTapEvents: true,
                     onTap: () {}));
               }
@@ -5181,7 +5189,7 @@ double screenHeight=MediaQuery.of(context).size.height;
                       polyArray.cubicleColor != "undefined"
                       ? Color(int.parse(
                       '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
-                      : Colors.black,
+                      : Color(0xffE6E6E6),
                   width: 1,
                   onTap: () {}));
             }
@@ -5204,17 +5212,8 @@ double screenHeight=MediaQuery.of(context).size.height;
   }
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(
-      String text, String imagePath,
-      {Size imageSize = const Size(50, 50)}) async {
-    // Load the base marker image
-    final ByteData baseImageBytes = await rootBundle.load(imagePath);
-    final ui.Codec markerImageCodec = await ui.instantiateImageCodec(
-        baseImageBytes.buffer.asUint8List(),
-        targetWidth: imageSize.width.toInt(),
-        targetHeight: imageSize.height.toInt());
-    final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
-    final ui.Image markerImage = markerImageFrame.image;
-
+      String text, String? imagePath,
+      {Size imageSize = const Size(50, 50), Color? color}) async {
     // Set the text style and layout
     final TextPainter textPainter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -5222,8 +5221,9 @@ double screenHeight=MediaQuery.of(context).size.height;
     textPainter.text = TextSpan(
       text: text,
       style: TextStyle(
+        fontWeight: FontWeight.w600,
         fontSize: 30.0, // Increased font size
-        color: Colors.black,
+        color: color??Color(0xff000000),
       ),
     );
     textPainter.layout(
@@ -5231,39 +5231,52 @@ double screenHeight=MediaQuery.of(context).size.height;
       maxWidth: double.infinity,
     );
 
-    // Calculate the overall canvas size
+    // Calculate the text size
     final double textWidth = textPainter.width;
     final double textHeight = textPainter.height;
-    final double canvasWidth =
-        textWidth > imageSize.width ? textWidth : imageSize.width;
-    final double canvasHeight =
-        textHeight + imageSize.height + 20.0; // Increased padding
+
+    // Variables for canvas size, depending on whether the image is used
+    double canvasWidth = textWidth > imageSize.width ? textWidth : imageSize.width;
+    double canvasHeight = textHeight + (imagePath != null ? imageSize.height + 20.0 : 0.0); // Increased padding if image is present
 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
-    // Draw the text centered above the marker image
+    // Draw the text centered on the canvas
     final double textX = (canvasWidth - textWidth) / 2;
     final double textY = 0.0;
     textPainter.paint(canvas, Offset(textX, textY));
 
-    // Draw the base marker image below the text
-    final double imageX = (canvasWidth - imageSize.width) / 2;
-    final double imageY = textHeight + 10.0; // Padding between text and image
-    canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
+    // If an imagePath is provided, draw the image below the text
+    if (imagePath != null) {
+      // Load the base marker image
+      final ByteData baseImageBytes = await rootBundle.load(imagePath);
+      final ui.Codec markerImageCodec = await ui.instantiateImageCodec(
+          baseImageBytes.buffer.asUint8List(),
+          targetWidth: imageSize.width.toInt(),
+          targetHeight: imageSize.height.toInt());
+      final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+      final ui.Image markerImage = markerImageFrame.image;
+
+      // Draw the base marker image below the text
+      final double imageX = (canvasWidth - imageSize.width) / 2;
+      final double imageY = textHeight + 10.0; // Padding between text and image
+      canvas.drawImage(markerImage, Offset(imageX, imageY), Paint());
+    }
 
     // Generate the final image
     final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-          canvasWidth.toInt(),
-          canvasHeight.toInt(),
-        );
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
 
     final ByteData? byteData =
-        await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List? pngBytes = byteData?.buffer.asUint8List();
 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
+
 
   void createMarkers(land _landData, int floor, {String? bid}) async {
     _markers.clear();
@@ -5278,6 +5291,275 @@ double screenHeight=MediaQuery.of(context).size.height;
             landmarks[i].buildingID ==
                 (bid ?? buildingAllApi.selectedBuildingID)) {
           if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Cafeteria" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          BitmapDescriptor textMarker;
+          if(landmarks[i].priority! >1){
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
+          }else{
+            final Uint8List iconMarker =
+            await getImagesFromMarker('assets/cutlery.png', 85);
+            textMarker = BitmapDescriptor.fromBytes(iconMarker);
+          }
+
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController.building
+                  .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          Markers.add(Marker(
+              markerId: MarkerId(
+                  "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+              position: LatLng(value[0], value[1]),
+              icon: textMarker,
+              anchor: Offset(0.5, 1.0),
+              visible: false,
+              onTap: () {},
+              infoWindow: InfoWindow(
+                  title: landmarks[i].name,
+                  // snippet: '${landmarks[i].properties!.polyId}',
+                  // Replace with additional information
+                  onTap: () {})));
+        }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Point of Interest" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+            String markerText;
+            markerText = landmarks[i].name??"";
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText,null,imageSize: const Size(85, 85));
+
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Counter" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+            String markerText;
+            markerText = landmarks[i].name??"";
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText,null,imageSize: const Size(85, 85));
+
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Point of Interest" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+              String markerText;
+              markerText = landmarks[i].name??"";
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText,null,imageSize: const Size(85, 85));
+
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "ATM" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/ATM.png',imageSize: const Size(100, 100),color: Color(0xffd32f2f));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/ATM.png', 100);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Consultation Room" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/Consultation Room.png',imageSize: const Size(85, 85),color: Color(0xff544551));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/Consultation Room.png', 85);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
+              landmarks[i].element!.subType == "Office" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
+            //   ImageConfiguration(size: Size(44, 44)),
+            //   getImagesFromMarker('assets/location_on.png',50),
+            // );
+
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/Office.png',imageSize: const Size(85, 85),color: Color(0xff544551));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/Office.png', 85);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
+
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType != "main entry" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -5285,34 +5567,32 @@ double screenHeight=MediaQuery.of(context).size.height;
             //   ImageConfiguration(size: Size(44, 44)),
             //   getImagesFromMarker('assets/location_on.png',50),
             // );
-            final Uint8List iconMarker =
-                await getImagesFromMarker('assets/pin.png', 50);
+
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/Generic Marker.png',imageSize: const Size(85, 85));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/Generic Marker.png', 85);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
+
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-            //_markerLocations.add(LatLng(value[0],value[1]));
-            BitmapDescriptor textMarker;
-            String markerText;
-            // String splitOption;
-            // if(landmarks[i].name!.contains('-')){
-            //   splitOption = '-';
-            // }else if(landmarks[i].name!.contains(' ')){
-            //   splitOption = ' ';
-            // }
-            List<String> parts = landmarks[i].name!.split('-');
-
-            markerText = parts.isNotEmpty ? parts[0].trim() : '';
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText, 'assets/pin.png');
 
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
-                anchor: Offset(0.5, 0.5),
+                anchor: Offset(0.5, 1.0),
                 visible: false,
                 onTap: () {},
                 infoWindow: InfoWindow(
@@ -11313,6 +11593,7 @@ bool onStart=false;
         setState(() {
           Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
+
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(false, marker);
               updatedMarkers.add(_marker);
@@ -11352,29 +11633,7 @@ bool onStart=false;
         setState(() {
           Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
-            if (marker.markerId.value.contains("Room")) {
-              Marker _marker = customMarker.visibility(zoom > 20.5, marker);
-              updatedMarkers.add(_marker);
-            }
-            if (marker.markerId.value.contains("Rest")) {
-              Marker _marker = customMarker.visibility(zoom > 19, marker);
-              updatedMarkers.add(_marker);
-            }
-            if (marker.markerId.value.contains("Entry")) {
-              Marker _marker = customMarker.visibility(
-                  (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
-              updatedMarkers.add(_marker);
-            }
-            if (marker.markerId.value.contains("Building")) {
-              Marker _marker = customMarker.visibility(zoom < 16.0, marker);
-              updatedMarkers.add(_marker);
-            }
-            if (marker.markerId.value.contains("Lift")) {
-              Marker _marker = customMarker.visibility(zoom > 19, marker);
-              updatedMarkers.add(_marker);
-            }
-            if (SingletonFunctionController.building.ignoredMarker
-                .contains(words[1])) {
+            if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(true, marker);
 
@@ -11384,6 +11643,25 @@ bool onStart=false;
                 Marker _marker = customMarker.visibility(false, marker);
                 updatedMarkers.add(_marker);
               }
+            }else if (marker.markerId.value.contains("toppriority")) {
+            Marker _marker = customMarker.visibility(zoom > 19, marker);
+            updatedMarkers.add(_marker);
+            }else if (marker.markerId.value.contains("Room")) {
+              Marker _marker = customMarker.visibility(zoom > 20.5, marker);
+              updatedMarkers.add(_marker);
+            }else if (marker.markerId.value.contains("Rest")) {
+              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              updatedMarkers.add(_marker);
+            }else if (marker.markerId.value.contains("Entry")) {
+              Marker _marker = customMarker.visibility(
+                  (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
+              updatedMarkers.add(_marker);
+            }else if (marker.markerId.value.contains("Building")) {
+              Marker _marker = customMarker.visibility(zoom < 16.0, marker);
+              updatedMarkers.add(_marker);
+            }else if (marker.markerId.value.contains("Lift")) {
+              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              updatedMarkers.add(_marker);
             }
           });
           Markers = updatedMarkers;

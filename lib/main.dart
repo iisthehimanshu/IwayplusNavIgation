@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/slackApi.dart';
@@ -129,6 +130,13 @@ Future<void> main() async {
       });
     }
   });
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  WakelockPlus.enable();
 
   // FlutterError.onError = (FlutterErrorDetails details) {
   //   // Log the error or send it to a monitoring service

@@ -685,6 +685,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Future<void> zoomWhileWait(
       Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
+    print("allbuilding id ${allBuildingID}");
     if (allBuildingID.length > 1) {
       while (!SingletonFunctionController.building.destinationQr &&
           !user.initialallyLocalised &&
@@ -1146,6 +1147,7 @@ double screenHeight=MediaQuery.of(context).size.height;
             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
         print("insideee this");
+        print(onStart);
 
         mapState.target = LatLng(lvalue[0], lvalue[1]);
 
@@ -1266,23 +1268,17 @@ double screenHeight=MediaQuery.of(context).size.height;
   late AnimationController _controller;
   late Animation<double> _animation;
   // land userSetLandmarkMap = land().landmarksMap;
-  Future<Landmarks?> getglobalcoords() async {
-    Landmarks? temp;
-    double? minDistance;
-    await SingletonFunctionController.building.landmarkdata!.then((value) {
-      value.landmarks?.forEach((value) {
-        if (value.buildingID == '65d9cacfdb333f8945861f0f') {
-          if (value.coordinateX != null && value.coordinateY != null) {
-            List<double> latlngvalue = tools.localtoglobal(
-                value.coordinateX!,
-                value.coordinateY!,
-                SingletonFunctionController
-                    .building.patchData[value.buildingID]);
-            double dist = tools.calculateAerialDist(latlngvalue[0],
-                latlngvalue[1], UserState.geoLat, UserState.geoLng);
-            if (dist <= 15) {
-              if (value.properties!.polyId != null &&
-                  (value.name != null && value.name != "")) {
+  Future<Landmarks?> getglobalcoords()async{
+Landmarks? temp;
+double? minDistance;
+   await SingletonFunctionController.building.landmarkdata!.then((value) {
+      value.landmarks?.forEach((value){
+        if(value.buildingID==buildingAllApi.outdoorID){
+          if(value.coordinateX!=null && value.coordinateY!=null){
+            List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
+              double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
+            if (dist <=25) {
+              if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
                 // If no closest landmark yet or if this one is closer, update
                 if (minDistance == null || dist < minDistance!) {
                   minDistance = dist;
@@ -3187,6 +3183,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
     setState(() {
+      onStart=false;
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),
@@ -7069,6 +7066,10 @@ double screenHeight=MediaQuery.of(context).size.height;
         time = time.ceil().toDouble();
         distance = distance * 0.3048;
         distance = double.parse(distance.toStringAsFixed(1));
+setState(() {
+  startingNavigation=true;
+});
+
         if (PathState.destinationName ==
             "${LocaleData.yourcurrentloc.getString(context)}") {
           speak(
@@ -8752,6 +8753,10 @@ double screenHeight=MediaQuery.of(context).size.height;
                                                   fitPolygonInScreen(
                                                       patch.first);
                                                   exitNavigation();
+                                                  setState(() {
+                                                    onStart=false;
+                                                    startingNavigation=false;
+                                                  });
                                                 },
                                                 icon: Semantics(
                                                   label: "Close Navigation",
@@ -8805,278 +8810,283 @@ double screenHeight=MediaQuery.of(context).size.height;
                                                   ),
                                                   child: TextButton(
                                                     onPressed: () async {
-                                                      tools.setBuildingAngle(
-                                                          SingletonFunctionController
-                                                              .building
-                                                              .patchData[PathState
-                                                                  .sourceBid]!
-                                                              .patchData!
-                                                              .buildingAngle!);
-                                                      if (PathState.sourceX ==
-                                                              PathState
-                                                                  .destinationX &&
-                                                          PathState.sourceY ==
-                                                              PathState
-                                                                  .destinationY) {
-                                                        //HelperClass.showToast("Source and Destination can not be same");
-                                                        setState(() {
-                                                          _isRoutePanelOpen =
-                                                              false;
-                                                        });
-                                                        closeNavigation();
-                                                        return;
-                                                      }
-                                                      setState(() {
-                                                        circles.clear();
-                                                        _markers.clear();
-                                                        markerSldShown = false;
 
-                                                      });
-                                                      user.onConnection = false;
-                                                      PathState.didPathStart =
-                                                          true;
 
-                                                      UserState.cols =
-                                                          SingletonFunctionController
-                                                                  .building
-                                                                  .floorDimenssion[
-                                                              PathState
-                                                                  .sourceBid]![PathState
-                                                              .sourceFloor]![0];
-                                                      UserState
-                                                          .rows = SingletonFunctionController
-                                                              .building
-                                                              .floorDimenssion[
-                                                          PathState
-                                                              .destinationBid]![PathState
-                                                          .destinationFloor]![1];
-                                                      UserState.lngCode =
-                                                          _currentLocale;
-                                                      UserState.reroute =
-                                                          reroute;
-                                                      UserState
-                                                              .closeNavigation =
-                                                          closeNavigation;
-                                                      UserState.AlignMapToPath =
-                                                          alignMapToPath;
-                                                      UserState.startOnPath =
-                                                          startOnPath;
-                                                      UserState.speak = speak;
-                                                      UserState.paintMarker =
-                                                          paintMarker;
-                                                      UserState.createCircle =
-                                                          updateCircle;
-
-                                                      //detected=false;
-                                                      //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                                                      wsocket.message["path"]
-                                                              ["source"] =
-                                                          PathState.sourceName;
-                                                      wsocket.message["path"]
-                                                              ["destination"] =
-                                                          PathState
-                                                              .destinationName;
-                                                      // user.ListofPaths = PathState.listofPaths;
-                                                      // user.patchData = SingletonFunctionController.building.patchData;
-                                                      // user.buildingNumber = PathState.listofPaths.length-1;
-                                                      buildingAllApi
-                                                              .selectedID =
-                                                          PathState.sourceBid;
-                                                      buildingAllApi
-                                                              .selectedBuildingID =
-                                                          PathState.sourceBid;
-                                                      UserState.cols =
-                                                          SingletonFunctionController
-                                                                  .building
-                                                                  .floorDimenssion[
-                                                              PathState
-                                                                  .sourceBid]![PathState
-                                                              .sourceFloor]![0];
-                                                      UserState.rows =
-                                                          SingletonFunctionController
-                                                                  .building
-                                                                  .floorDimenssion[
-                                                              PathState
-                                                                  .sourceBid]![PathState
-                                                              .sourceFloor]![1];
-                                                      user.Bid =
-                                                          PathState.sourceBid;
-                                                      user.coordX =
-                                                          PathState.sourceX;
-                                                      user.coordY =
-                                                          PathState.sourceY;
-                                                      user.temporaryExit =
-                                                          false;
-                                                      UserState.reroute =
-                                                          reroute;
-                                                      UserState
-                                                              .closeNavigation =
-                                                          closeNavigation;
-                                                      UserState.AlignMapToPath =
-                                                          alignMapToPath;
-                                                      UserState.startOnPath =
-                                                          startOnPath;
-                                                      UserState.speak = speak;
-                                                      UserState.paintMarker =
-                                                          paintMarker;
-                                                      UserState.createCircle =
-                                                          updateCircle;
-                                                      UserState.changeBuilding =
-                                                          changeBuilding;
-                                                      //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                                                      user.floor =
-                                                          PathState.sourceFloor;
-                                                      user.pathobj = PathState;
-                                                      user.path = PathState
-                                                          .singleListPath;
-                                                      user.isnavigating = true;
-                                                      user.Cellpath = PathState
-                                                          .singleCellListPath;
-                                                      PathState
-                                                          .singleCellListPath
-                                                          .forEach(
-                                                              (element) {});
-                                                      user
-                                                          .moveToStartofPath()
-                                                          .then((value) async {
-                                                        setState(() {
-                                                          markers.clear();
-                                                          List<double> val = tools.localtoglobal(
-                                                              user.showcoordX
-                                                                  .toInt(),
-                                                              user.showcoordY
-                                                                  .toInt(),
-                                                              SingletonFunctionController
-                                                                      .building
-                                                                      .patchData[
-                                                                  PathState
-                                                                      .sourceBid]);
-
-                                                          markers.putIfAbsent(
-                                                              user.Bid,
-                                                              () => []);
-                                                          markers[user.Bid]
-                                                              ?.add(Marker(
-                                                            markerId: MarkerId(
-                                                                "UserLocation"),
-                                                            position: LatLng(
-                                                                val[0], val[1]),
-                                                            icon:
-                                                                BitmapDescriptor
-                                                                    .fromBytes(
-                                                                        userloc),
-                                                            anchor: Offset(
-                                                                0.5, 0.829),
-                                                          ));
-
-                                                          val = tools.localtoglobal(
-                                                              user.coordX
-                                                                  .toInt(),
-                                                              user.coordY
-                                                                  .toInt(),
-                                                              SingletonFunctionController
-                                                                      .building
-                                                                      .patchData[
-                                                                  PathState
-                                                                      .sourceBid]);
-
-                                                          markers[user.Bid]
-                                                              ?.add(Marker(
-                                                            markerId: MarkerId(
-                                                                "debug"),
-                                                            position: LatLng(
-                                                                val[0], val[1]),
-                                                            icon: BitmapDescriptor
-                                                                .fromBytes(
-                                                                    userlocdebug),
-                                                            anchor: Offset(
-                                                                0.5, 0.829),
-                                                          ));
-                                                          // circles.add(
-                                                          //   Circle(
-                                                          //     circleId: CircleId("circle"),
-                                                          //     center: LatLng(user.lat,user.lng),
-                                                          //     radius: _animation.value,
-                                                          //     strokeWidth: 1,
-                                                          //     strokeColor: Colors.blue,
-                                                          //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                                          //   ),
-                                                          // );
-                                                        });
-                                                        alignMapToPath([
-                                                          user.lat,
-                                                          user.lng
-                                                        ], [
-                                                          PathState
-                                                              .singleCellListPath[
-                                                                  user.pathobj
-                                                                          .index +
-                                                                      1]
-                                                              .lat,
-                                                          PathState
-                                                              .singleCellListPath[
-                                                                  user.pathobj
-                                                                          .index +
-                                                                      1]
-                                                              .lng
-                                                        ]);
-                                                      });
-                                                      _isRoutePanelOpen = false;
-
-                                                      SingletonFunctionController
-                                                              .building
-                                                              .selectedLandmarkID =
-                                                          null;
-
-                                                      _isnavigationPannelOpen =
-                                                          true;
-
-                                                      semanticShouldBeExcluded =
-                                                          false;
-
-                                                      StartPDR();
-
-                                                      if (SingletonFunctionController
-                                                                  .building
-                                                                  .floor[
-                                                              PathState
-                                                                  .sourceBid] !=
-                                                          PathState
-                                                              .sourceFloor) {
-                                                        SingletonFunctionController
-                                                                    .building.floor[
-                                                                PathState
-                                                                    .sourceBid] =
-                                                            PathState
-                                                                .sourceFloor;
-                                                        createRooms(
+                                                      if(startingNavigation){
+                                                        tools.setBuildingAngle(
                                                             SingletonFunctionController
-                                                                    .building
-                                                                    .polylinedatamap[
-                                                                PathState
-                                                                    .sourceBid]!,
+                                                                .building
+                                                                .patchData[PathState
+                                                                .sourceBid]!
+                                                                .patchData!
+                                                                .buildingAngle!);
+                                                        if (PathState.sourceX ==
                                                             PathState
-                                                                .sourceFloor);
+                                                                .destinationX &&
+                                                            PathState.sourceY ==
+                                                                PathState
+                                                                    .destinationY) {
+                                                          //HelperClass.showToast("Source and Destination can not be same");
+                                                          setState(() {
+                                                            _isRoutePanelOpen =
+                                                            false;
+                                                          });
+                                                          closeNavigation();
+                                                          return;
+                                                        }
+                                                        setState(() {
+                                                          circles.clear();
+                                                          _markers.clear();
+                                                          markerSldShown = false;
+
+                                                        });
+                                                        user.onConnection = false;
+                                                        PathState.didPathStart =
+                                                        true;
+
+                                                        UserState.cols =
                                                         SingletonFunctionController
                                                             .building
-                                                            .landmarkdata!
-                                                            .then((value) {
-                                                          createMarkers(
-                                                              value,
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![0];
+                                                        UserState
+                                                            .rows = SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .destinationBid]![PathState
+                                                            .destinationFloor]![1];
+                                                        UserState.lngCode =
+                                                            _currentLocale;
+                                                        UserState.reroute =
+                                                            reroute;
+                                                        UserState
+                                                            .closeNavigation =
+                                                            closeNavigation;
+                                                        UserState.AlignMapToPath =
+                                                            alignMapToPath;
+                                                        UserState.startOnPath =
+                                                            startOnPath;
+                                                        UserState.speak = speak;
+                                                        UserState.paintMarker =
+                                                            paintMarker;
+                                                        UserState.createCircle =
+                                                            updateCircle;
+
+                                                        //detected=false;
+                                                        //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                                                        wsocket.message["path"]
+                                                        ["source"] =
+                                                            PathState.sourceName;
+                                                        wsocket.message["path"]
+                                                        ["destination"] =
+                                                            PathState
+                                                                .destinationName;
+                                                        // user.ListofPaths = PathState.listofPaths;
+                                                        // user.patchData = SingletonFunctionController.building.patchData;
+                                                        // user.buildingNumber = PathState.listofPaths.length-1;
+                                                        buildingAllApi
+                                                            .selectedID =
+                                                            PathState.sourceBid;
+                                                        buildingAllApi
+                                                            .selectedBuildingID =
+                                                            PathState.sourceBid;
+                                                        UserState.cols =
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![0];
+                                                        UserState.rows =
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![1];
+                                                        user.Bid =
+                                                            PathState.sourceBid;
+                                                        user.coordX =
+                                                            PathState.sourceX;
+                                                        user.coordY =
+                                                            PathState.sourceY;
+                                                        user.temporaryExit =
+                                                        false;
+                                                        UserState.reroute =
+                                                            reroute;
+                                                        UserState
+                                                            .closeNavigation =
+                                                            closeNavigation;
+                                                        UserState.AlignMapToPath =
+                                                            alignMapToPath;
+                                                        UserState.startOnPath =
+                                                            startOnPath;
+                                                        UserState.speak = speak;
+                                                        UserState.paintMarker =
+                                                            paintMarker;
+                                                        UserState.createCircle =
+                                                            updateCircle;
+                                                        UserState.changeBuilding =
+                                                            changeBuilding;
+                                                        //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                                                        user.floor =
+                                                            PathState.sourceFloor;
+                                                        user.pathobj = PathState;
+                                                        user.path = PathState
+                                                            .singleListPath;
+                                                        user.isnavigating = true;
+                                                        user.Cellpath = PathState
+                                                            .singleCellListPath;
+                                                        PathState
+                                                            .singleCellListPath
+                                                            .forEach(
+                                                                (element) {});
+                                                        user
+                                                            .moveToStartofPath()
+                                                            .then((value) async {
+                                                          setState(() {
+                                                            markers.clear();
+                                                            List<double> val = tools.localtoglobal(
+                                                                user.showcoordX
+                                                                    .toInt(),
+                                                                user.showcoordY
+                                                                    .toInt(),
+                                                                SingletonFunctionController
+                                                                    .building
+                                                                    .patchData[
+                                                                PathState
+                                                                    .sourceBid]);
+
+                                                            markers.putIfAbsent(
+                                                                user.Bid,
+                                                                    () => []);
+                                                            markers[user.Bid]
+                                                                ?.add(Marker(
+                                                              markerId: MarkerId(
+                                                                  "UserLocation"),
+                                                              position: LatLng(
+                                                                  val[0], val[1]),
+                                                              icon:
+                                                              BitmapDescriptor
+                                                                  .fromBytes(
+                                                                  userloc),
+                                                              anchor: Offset(
+                                                                  0.5, 0.829),
+                                                            ));
+
+                                                            val = tools.localtoglobal(
+                                                                user.coordX
+                                                                    .toInt(),
+                                                                user.coordY
+                                                                    .toInt(),
+                                                                SingletonFunctionController
+                                                                    .building
+                                                                    .patchData[
+                                                                PathState
+                                                                    .sourceBid]);
+
+                                                            markers[user.Bid]
+                                                                ?.add(Marker(
+                                                              markerId: MarkerId(
+                                                                  "debug"),
+                                                              position: LatLng(
+                                                                  val[0], val[1]),
+                                                              icon: BitmapDescriptor
+                                                                  .fromBytes(
+                                                                  userlocdebug),
+                                                              anchor: Offset(
+                                                                  0.5, 0.829),
+                                                            ));
+                                                            // circles.add(
+                                                            //   Circle(
+                                                            //     circleId: CircleId("circle"),
+                                                            //     center: LatLng(user.lat,user.lng),
+                                                            //     radius: _animation.value,
+                                                            //     strokeWidth: 1,
+                                                            //     strokeColor: Colors.blue,
+                                                            //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                            //   ),
+                                                            // );
+                                                          });
+                                                          alignMapToPath([
+                                                            user.lat,
+                                                            user.lng
+                                                          ], [
+                                                            PathState
+                                                                .singleCellListPath[
+                                                            user.pathobj
+                                                                .index +
+                                                                1]
+                                                                .lat,
+                                                            PathState
+                                                                .singleCellListPath[
+                                                            user.pathobj
+                                                                .index +
+                                                                1]
+                                                                .lng
+                                                          ]);
+                                                        });
+                                                        _isRoutePanelOpen = false;
+
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .selectedLandmarkID =
+                                                        null;
+
+                                                        _isnavigationPannelOpen =
+                                                        true;
+
+                                                        semanticShouldBeExcluded =
+                                                        false;
+
+                                                        StartPDR();
+
+                                                        if (SingletonFunctionController
+                                                            .building
+                                                            .floor[
+                                                        PathState
+                                                            .sourceBid] !=
+                                                            PathState
+                                                                .sourceFloor) {
+                                                          SingletonFunctionController
+                                                              .building.floor[
+                                                          PathState
+                                                              .sourceBid] =
                                                               PathState
-                                                                  .sourceFloor,
-                                                              bid: PathState
-                                                                  .sourceBid);
+                                                                  .sourceFloor;
+                                                          createRooms(
+                                                              SingletonFunctionController
+                                                                  .building
+                                                                  .polylinedatamap[
+                                                              PathState
+                                                                  .sourceBid]!,
+                                                              PathState
+                                                                  .sourceFloor);
+                                                          SingletonFunctionController
+                                                              .building
+                                                              .landmarkdata!
+                                                              .then((value) {
+                                                            createMarkers(
+                                                                value,
+                                                                PathState
+                                                                    .sourceFloor,
+                                                                bid: PathState
+                                                                    .sourceBid);
+                                                          });
+                                                        }
+
+                                                        Future.delayed(Duration(seconds: 2)).then((onValue){
+                                                          setState(() {
+                                                            onStart=true;
+                                                          });
                                                         });
                                                       }
 
-                                                      Future.delayed(Duration(seconds: 2)).then((onValue){
-                                                        setState(() {
-                                                          onStart=true;
-                                                        });
-                                                      });
                                                     },
-                                                    child: !startingNavigation
+                                                    child: startingNavigation
                                                         ? Row(
                                                             mainAxisSize:
                                                                 MainAxisSize
@@ -9660,6 +9670,7 @@ double screenHeight=MediaQuery.of(context).size.height;
   }
   void alignMapToPath(List<double> A, List<double> B) async {
 print("enteredddd");
+print(onStart);
 double screenHeight=MediaQuery.of(context).size.height;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(
@@ -9679,7 +9690,7 @@ double screenHeight=MediaQuery.of(context).size.height;
     setState(() {
       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: newCameraTarget,
+            target: (onStart==false)?mapState.target:newCameraTarget,
             zoom: mapState.zoom,
             bearing: mapState.bearing!,
             tilt: mapState.tilt),
@@ -9939,6 +9950,7 @@ bool onStart=false;
                                     setState(() {
                                       StopPDR();
                                       onStart=false;
+                                      startingNavigation=true;
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
                                       PathState.sourceFloor = user.floor;
@@ -12376,8 +12388,8 @@ bool onStart=false;
                     padding:
                         EdgeInsets.only(left: 20), // <--- padding added here
                     initialCameraPosition: _initialCameraPosition,
-                    myLocationButtonEnabled: true,
-                    myLocationEnabled: true,
+                    // myLocationButtonEnabled: true,
+                    // myLocationEnabled: true,
                     zoomControlsEnabled: false,
                     zoomGesturesEnabled: true,
                     mapToolbarEnabled: false,

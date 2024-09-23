@@ -5372,8 +5372,9 @@ if(SingletonFunctionController.timer!=null){
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
         snapshot.data!.landmarksMap == null ||
-        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID] == null) {
-
+        snapshot.data!.landmarksMap![
+        SingletonFunctionController.building.selectedLandmarkID] ==
+            null) {
       //
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
@@ -5384,15 +5385,74 @@ if(SingletonFunctionController.timer!=null){
       return Container();
     }
 
-
-
     if (user.initialallyLocalised) {
-      double val1 = double.parse(snapshot.data!
-          .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.latitude!);
-      double val2 = double.parse(snapshot.data!
-          .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.longitude!);
+      double val1 = double.parse(snapshot
+          .data!
+          .landmarksMap![
+      SingletonFunctionController.building.selectedLandmarkID]!
+          .properties!
+          .latitude!);
+      double val2 = double.parse(snapshot
+          .data!
+          .landmarksMap![
+      SingletonFunctionController.building.selectedLandmarkID]!
+          .properties!
+          .longitude!);
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
     }
+
+    bool microService = snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
+        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
+        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null;
+
+    bool startTime = snapshot
+        .data!
+        .landmarksMap![
+    SingletonFunctionController
+        .building.selectedLandmarkID]!
+        .properties!
+        .startTime !=
+        null;
+
+    bool contactDetail = ((snapshot
+        .data!
+        .landmarksMap![SingletonFunctionController
+        .building.selectedLandmarkID]!
+        .properties!
+        .contactNo !=
+        null && snapshot
+        .data!
+        .landmarksMap![SingletonFunctionController
+        .building.selectedLandmarkID]!
+        .properties!
+        .contactNo !=
+        "") || (snapshot
+        .data!
+        .landmarksMap![SingletonFunctionController
+        .building.selectedLandmarkID]!
+        .properties!
+        .email !=
+        "" &&
+        snapshot
+            .data!
+            .landmarksMap![SingletonFunctionController
+            .building.selectedLandmarkID]!
+            .properties!
+            .email !=
+            null) || (snapshot
+        .data!
+        .landmarksMap![SingletonFunctionController
+        .building.selectedLandmarkID]!
+        .properties!
+        .url !=
+        "" &&
+        snapshot
+            .data!
+            .landmarksMap![SingletonFunctionController
+            .building.selectedLandmarkID]!
+            .properties!
+            .url !=
+            null));
 
     return Stack(
       children: [
@@ -5448,21 +5508,25 @@ if(SingletonFunctionController.timer!=null){
                   Expanded(
                     child: Container(
                         child: Text(
-                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
-                              .name ??
                           snapshot
                               .data!
-                              .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
-                              .element!
-                              .subType!,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8e8d8d),
-                        height: 25 / 16,
-                      ),
-                    )),
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .name ??
+                              snapshot
+                                  .data!
+                                  .landmarksMap![SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .element!
+                                  .subType!,
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff8e8d8d),
+                            height: 25 / 16,
+                          ),
+                        )),
                   ),
                   Container(
                     height: 48,
@@ -5499,8 +5563,15 @@ if(SingletonFunctionController.timer!=null){
               color: Colors.grey,
             ),
           ],
-          minHeight: 150,
-          maxHeight: screenHeight,
+          minHeight:  startTime? 220:185,
+          maxHeight: contactDetail&&microService?0.73:(contactDetail
+              ? (screenHeight * 0.45)
+              : (microService
+              ? (screenHeight * 0.28)
+              : (startTime
+              ? 220
+              : 185)))
+          ,
           snapPoint: 0.6,
           panel: () {
             _isRoutePanelOpen = false;
@@ -5521,7 +5592,7 @@ if(SingletonFunctionController.timer!=null){
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Row(
+                      contactDetail?Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
@@ -5534,7 +5605,7 @@ if(SingletonFunctionController.timer!=null){
                             ),
                           ),
                         ],
-                      ),
+                      ):Container(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -5543,28 +5614,33 @@ if(SingletonFunctionController.timer!=null){
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: EdgeInsets.only(left: 17, top: 12),
+                                padding: EdgeInsets.only(
+                                    left: 17, top: 12, bottom: 4),
                                 child: Focus(
                                   autofocus: true,
                                   child: Semantics(
                                     child: Text(
                                       snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .name ??
+                                          .data!
+                                          .landmarksMap![
+                                      SingletonFunctionController
+                                          .building
+                                          .selectedLandmarkID]!
+                                          .name ??
                                           snapshot
                                               .data!
                                               .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
+                                          SingletonFunctionController
+                                              .building
+                                              .selectedLandmarkID]!
                                               .element!
                                               .subType!,
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
-                                        fontSize: 18,
+                                        fontSize: 22,
                                         fontWeight: FontWeight.w500,
-                                        color: Color(0xff292929),
-                                        height: 25 / 18,
+                                        color: Color(0xff000000),
+                                        height: 28 / 22,
                                       ),
                                       textAlign: TextAlign.left,
                                     ),
@@ -5572,239 +5648,127 @@ if(SingletonFunctionController.timer!=null){
                                 ),
                               ),
                               Container(
-                                padding: EdgeInsets.only(
-                                  left: 17,
-                                ),
+                                padding: EdgeInsets.only(left: 17, bottom: 4),
                                 child: Text(
-                                  "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName!}",
+                                  "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName!},",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
-                                    color: Color(0xff8d8c8c),
-                                    height: 25 / 16,
+                                    color: Color(0xff777777),
+                                    height: 24 / 16,
                                   ),
                                   textAlign: TextAlign.left,
                                 ),
                               ),
-
-                              (user.initialallyLocalised &&
-                                      user.floor ==
-                                          snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .floor!)
-                                  ? Container(
-                                      padding: EdgeInsets.only(
-                                        left: 17,
-                                      ),
-                                      child: Text(
-                                        "${aerialDist.toStringAsFixed(2)} m",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff8d8c8c),
-                                          height: 25 / 16,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    )
-                                  : SizedBox(),
-                              // Row(
-                              //   mainAxisAlignment: MainAxisAlignment.start,
-                              //   children: [
-                              //     Text(
-                              //       "1 min ",
-                              //       style: const TextStyle(
-                              //         color: Color(0xffDC6A01),
-                              //         fontFamily: "Roboto",
-                              //         fontSize: 16,
-                              //         fontWeight: FontWeight.w400,
-                              //         height: 25 / 16,
-                              //       ),
-                              //       textAlign: TextAlign.left,
-                              //     ),
-                              //     Text(
-                              //       "(60 m)",
-                              //       style: const TextStyle(
-                              //         fontFamily: "Roboto",
-                              //         fontSize: 16,
-                              //         fontWeight: FontWeight.w400,
-                              //         height: 25 / 16,
-                              //       ),
-                              //       textAlign: TextAlign.left,
-                              //     )
-                              //   ],
-                              // ),
-                              SizedBox(
-                                height: 8,
-                              ),
                               Container(
-                                margin: EdgeInsets.only(
-                                  left: 17,
-                                ),
-                                width: 114,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Color(0xff24B9B0),
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                                child: TextButton(
-                                  onPressed: () async {
-                                    _polygon.clear();
-                                    // circles.clear();
-                                    Markers.clear();
-
-
-                                    if (user.coordY != 0 && user.coordX != 0) {
-                                      PathState.sourceX = user.coordX;
-                                      PathState.sourceY = user.coordY;
-                                      PathState.sourceFloor = user.floor;
-                                      PathState.sourcePolyID = user.key;
-
-                                      PathState.sourceName =
-                                          "Your current location";
-                                      PathState.destinationPolyID =
-                                          SingletonFunctionController.building.selectedLandmarkID!;
-                                      PathState.destinationName = snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .name ??
-                                          snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .element!
-                                              .subType!;
-                                      PathState.destinationFloor = snapshot
-                                          .data!
-                                          .landmarksMap![
-                                              SingletonFunctionController.building.selectedLandmarkID]!
-                                          .floor!;
-                                      PathState.sourceBid = user.Bid;
-
-                                      PathState.destinationBid = snapshot
-                                          .data!
-                                          .landmarksMap![
-                                              SingletonFunctionController.building.selectedLandmarkID]!
-                                          .buildingID!;
-
-                                      setState(() {
-                                        calculatingPath = true;
-                                      });
-                                      bool calibrate=isCalibrationNeeded(magneticValues);
-                                      print("calibrate1");
-                                      print(calibrate);
-                                      if(calibrate==true){
-                                        setState(() {
-                                          accuracy=true;
-                                        });
-                                        speak("low accuracy found.Please calibrate your device",_currentLocale);
-                                        showLowAccuracyDialog();
-                                        magneticValues.clear();
-                                        listenToMagnetometer();
-                                       _timerCompass= Timer.periodic(Duration(seconds: 1), (timer) {
-                                          calibrate=isCalibrationNeeded(magneticValues);
-                                          print("calibrate2");
-                                          print(calibrate);
-                                          if(calibrate==false){
-                                            setState(() {
-                                              accuracy=false;
-                                            });
-                                            magneticValues.clear();
-                                            _timerCompass?.cancel();
-                                          }else{
-
-                                            listenToMagnetometeronCalibration();
-                                            _timerCompass?.cancel();
-                                          }
-                                        });
-
-
-
-                                      }
-
-
-
-
-
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        calculateroute(
-                                                snapshot.data!.landmarksMap!)
-                                            .then((value) {
-
-                                            calculatingPath = false;
-
-                                          _isLandmarkPanelOpen = false;
-                                          _isRoutePanelOpen = true;
-                                        });
-                                      });
-                                    } else {
-                                      PathState.sourceName =
-                                          "Choose Starting Point";
-                                      PathState.destinationPolyID =
-                                          SingletonFunctionController.building.selectedLandmarkID!;
-                                      PathState.destinationName = snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .name ??
-                                          snapshot
-                                              .data!
-                                              .landmarksMap![
-                                                  SingletonFunctionController.building.selectedLandmarkID]!
-                                              .element!
-                                              .subType!;
-                                      PathState.destinationFloor = snapshot
-                                          .data!
-                                          .landmarksMap![
-                                              SingletonFunctionController.building.selectedLandmarkID]!
-                                          .floor!;
-                                      SingletonFunctionController.building.selectedLandmarkID = "";
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SourceAndDestinationPage(
-                                                    DestinationID: PathState
-                                                        .destinationPolyID,
-                                                    user: user,
-                                                  ))).then((value) {
-                                        if (value != null) {
-                                          fromSourceAndDestinationPage(value);
-                                        }
-                                      });
-                                    }
-                                  },
-                                  child: (!calculatingPath)
-                                      ? Row(
-                                          //  mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.directions,
-                                              color: Colors.black,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              "${LocaleData.direction.getString(context)}",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                            )
-                                          ],
-                                        )
-                                      : Container(
-                                          height: 24,
-                                          width: 24,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                padding: EdgeInsets.only(left: 17, bottom: 4),
+                                child: Text(
+                                  "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName!}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff777777),
+                                    height: 20 / 14,
+                                  ),
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
+                              snapshot
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .startTime !=
+                                  null
+                                  ? Container(
+                                padding:
+                                EdgeInsets.only(left: 17, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.startTime!} AM- ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.endTime!} PM  ",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff777777),
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                    tools.isNowBetween(
+                                        snapshot
+                                            .data!
+                                            .landmarksMap![
+                                        SingletonFunctionController
+                                            .building
+                                            .selectedLandmarkID]!
+                                            .properties!
+                                            .startTime!,
+                                        snapshot
+                                            .data!
+                                            .landmarksMap![
+                                        SingletonFunctionController
+                                            .building
+                                            .selectedLandmarkID]!
+                                            .properties!
+                                            .endTime!)
+                                        ? Text(
+                                      "Open Now",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4CAF50),
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )
+                                        : Text(
+                                      "Closed",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.redAccent,
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  : Container(),
+
+                              // (user.initialallyLocalised &&
+                              //         user.floor ==
+                              //             snapshot
+                              //                 .data!
+                              //                 .landmarksMap![
+                              //                     SingletonFunctionController
+                              //                         .building
+                              //                         .selectedLandmarkID]!
+                              //                 .floor!)
+                              //     ? Container(
+                              //         padding: EdgeInsets.only(
+                              //           left: 17,
+                              //         ),
+                              //         child: Text(
+                              //           "${aerialDist.toStringAsFixed(2)} m",
+                              //           style: const TextStyle(
+                              //             fontFamily: "Roboto",
+                              //             fontSize: 10,
+                              //             fontWeight: FontWeight.w400,
+                              //             color: Color(0xff8d8c8c),
+                              //             height: 25 / 16,
+                              //           ),
+                              //           textAlign: TextAlign.left,
+                              //         ),
+                              //       )
+                              //     : SizedBox(),
                             ],
                           ),
                           Container(
@@ -5819,118 +5783,235 @@ if(SingletonFunctionController.timer!=null){
                                       child: Icon(Icons.share))))
                         ],
                       ),
-                      Container(
-                        margin: EdgeInsets.only(top: 20),
-                        height: 1,
-                        width: screenWidth,
-                        color: Color(0xffebebeb),
+                      SizedBox(
+                        height: 16,
                       ),
-                      Semantics(
-                        label: "Information",
+                      contactDetail?Semantics(
+                        label: "Contact Details",
                         excludeSemantics: true,
                         child: Container(
                           margin: EdgeInsets.only(left: 17, top: 20),
                           child: Text(
-                            "Information",
+                            "Contact Details",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff282828),
-                              height: 24 / 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff000000),
+                              height: 21 / 18,
                             ),
                             textAlign: TextAlign.left,
                           ),
                         ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  width: 1.0, color: Color(0xffebebeb))),
+                      ):Container(),
+                      snapshot
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .contactNo !=
+                          null
+                          ? InkWell(
+                        onTap:(){
+                          HelperClass.makePhoneCall(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(left: 16, right: 16),
+                          padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(right: 12),
+                                  width: 24,
+                                  height: 24,
+                                  child: Semantics(
+                                    excludeSemantics: true,
+                                    child:
+                                    SvgPicture.asset("assets/call.svg"),
+                                  )),
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Phone",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff777777),
+                                      height: 16 / 12,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    width: screenWidth - 100,
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff055aa5),
+                                          height: 24 / 16,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
+                      )
+                          : Container(),
+                      snapshot
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .email !=
+                          "" &&
+                          snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .email !=
+                              null
+                          ? InkWell(
+                        onTap:(){
+                          HelperClass.sendMailto(email:snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!);
+                        }             ,child: Container(
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                                margin: EdgeInsets.only(right: 16),
-                                width: 32,
-                                height: 32,
-                                child: Semantics(
-                                  excludeSemantics: true,
-                                  child: Icon(
-                                    Icons.location_on_outlined,
-                                    color: Color(0xff24B9B0),
-                                    size: 24,
-                                  ),
-                                )),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
+                                margin: EdgeInsets.only(right: 12),
+                                width: 24,
+                                height: 24,
+                                child:
+                                SvgPicture.asset("assets/email.svg")),
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Email",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff777777),
+                                    height: 16 / 12,
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name ?? snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.element!.subType}, Floor ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor!}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName!}",
-                                    ),
-                                  ],
+                                  textAlign: TextAlign.left,
                                 ),
-                              ),
+                                SizedBox(
+                                  height: 4,
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff055aa5),
+                                        height: 24 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                          "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo != null
-                          ? Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    width: 1.0,
-                                    color: Color(0xffebebeb),
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                      )
+                          : Container(),
+                      snapshot
+                          .data!
+                          .landmarksMap![SingletonFunctionController
+                          .building.selectedLandmarkID]!
+                          .properties!
+                          .url !=
+                          "" &&
+                          snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .url !=
+                              null
+                          ? InkWell(
+                        onTap: (){
+                          HelperClass.launchURL(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(left: 16, right: 16),
+                          padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(right: 12),
+                                  width: 24,
+                                  height: 24,
+                                  child: SvgPicture.asset(
+                                      "assets/website.svg")),
+                              Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 16),
-                                    width: 32,
-                                    height: 32,
-                                    child: Icon(
-                                      Icons.call,
-                                      color: Color(0xff24B9B0),
-                                      size: 24,
+                                  Text(
+                                    "Website",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff777777),
+                                      height: 16 / 12,
                                     ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
                                   ),
                                   Container(
                                     width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
                                     child: RichText(
                                       text: TextSpan(
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 16,
                                           fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
+                                          color: Color(0xff055aa5),
+                                          height: 24 / 16,
                                         ),
                                         children: [
                                           TextSpan(
                                             text:
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!}",
                                           ),
                                         ],
                                       ),
@@ -5938,67 +6019,12 @@ if(SingletonFunctionController.timer!=null){
                                   ),
                                 ],
                               ),
-                            )
+                            ],
+                          ),
+                        ),
+                      )
                           : Container(),
-                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
-                                      .properties!.email !=
-                                  "" &&
-                              snapshot
-                                      .data!
-                                      .landmarksMap![
-                                          SingletonFunctionController.building.selectedLandmarkID]!
-                                      .properties!
-                                      .email !=
-                                  null
-                          ? Container(
-                              margin: EdgeInsets.only(left: 16, right: 16),
-                              padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        width: 1.0, color: Color(0xffebebeb))),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      margin: EdgeInsets.only(right: 16),
-                                      width: 32,
-                                      height: 32,
-                                      child: Icon(
-                                        Icons.mail_outline,
-                                        color: Color(0xff24B9B0),
-                                        size: 24,
-                                      )),
-                                  Container(
-                                    width: screenWidth - 100,
-                                    margin: EdgeInsets.only(top: 8),
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4a4545),
-                                          height: 25 / 16,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(),
-                      snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
-                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
-                          snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null ?
-                      Container(
+                      microService? Container(
                         margin: EdgeInsets.only(left: 16, right: 16),
                         padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
                         decoration: BoxDecoration(
@@ -6018,27 +6044,83 @@ if(SingletonFunctionController.timer!=null){
                                   color: Color(0xff24B9B0),
                                   size: 24,
                                 )),
-                            Container(
-                              width: screenWidth - 100,
-                              margin: EdgeInsets.only(top: 8),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff4a4545),
-                                    height: 25 / 16,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                      "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles}"
-                                          " toilet cubicles on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                            Column(
+                              children: [
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
+
+                                            "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
+                                                UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
+                                                    : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
+                                            }. ":""
+
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != "null"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}. ":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: screenWidth - 100,
+                                  margin: EdgeInsets.only(top: 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff4a4545),
+                                        height: 25 / 16,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text:
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
+                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -6050,6 +6132,182 @@ if(SingletonFunctionController.timer!=null){
             }
           }(),
         ),
+        Positioned(
+          bottom: 0,
+          child: Container(
+              height: 80,
+              width: screenWidth,
+              decoration: BoxDecoration(
+                color: Colors.white, // Set the background color
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1), // Shadow color
+                    offset: Offset(0, -3), // Shadow offset (top shadow)
+                    blurRadius: 6, // Blur radius
+                    spreadRadius: 1, // Spread radius
+                  ),
+                ],
+              ),
+              child: Center(
+                // Center the button vertically
+                child: SizedBox(
+                  height: 40, // Set the desired height for the TextButton
+                  width: screenWidth - 32, // Set the width as needed
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Color(0xff6CC8BF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(27.0),
+                      ),
+                    ),
+                    onPressed: () async {
+                      _polygon.clear();
+                      // circles.clear();
+                      Markers.clear();
+
+                      if (user.coordY != 0 && user.coordX != 0) {
+                        PathState.sourceX = user.coordX;
+                        PathState.sourceY = user.coordY;
+                        PathState.sourceFloor = user.floor;
+                        PathState.sourcePolyID = user.key;
+
+                        PathState.sourceName = "Your current location";
+                        PathState.destinationPolyID =
+                        SingletonFunctionController
+                            .building.selectedLandmarkID!;
+                        PathState.destinationName = snapshot
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .name ??
+                            snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .element!
+                                .subType!;
+                        PathState.destinationFloor = snapshot
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .floor!;
+                        PathState.sourceBid = user.Bid;
+
+                        PathState.destinationBid = snapshot
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .buildingID!;
+
+                        setState(() {
+                          calculatingPath = true;
+                        });
+                        bool calibrate = isCalibrationNeeded(magneticValues);
+                        print("calibrate1");
+                        print(calibrate);
+                        if (calibrate == true) {
+                          setState(() {
+                            accuracy = true;
+                          });
+                          speak(
+                              "low accuracy found.Please calibrate your device",
+                              _currentLocale);
+                          showLowAccuracyDialog();
+                          magneticValues.clear();
+                          listenToMagnetometer();
+                          _timerCompass =
+                              Timer.periodic(Duration(seconds: 1), (timer) {
+                                calibrate = isCalibrationNeeded(magneticValues);
+                                print("calibrate2");
+                                print(calibrate);
+                                if (calibrate == false) {
+                                  setState(() {
+                                    accuracy = false;
+                                  });
+                                  magneticValues.clear();
+                                  _timerCompass?.cancel();
+                                } else {
+                                  listenToMagnetometeronCalibration();
+                                  _timerCompass?.cancel();
+                                }
+                              });
+                        }
+
+                        Future.delayed(Duration(seconds: 1), () {
+                          calculateroute(snapshot.data!.landmarksMap!)
+                              .then((value) {
+                            calculatingPath = false;
+
+                            _isLandmarkPanelOpen = false;
+                            _isRoutePanelOpen = true;
+                          });
+                        });
+                      } else {
+                        PathState.sourceName = "Choose Starting Point";
+                        PathState.destinationPolyID =
+                        SingletonFunctionController
+                            .building.selectedLandmarkID!;
+                        PathState.destinationName = snapshot
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .name ??
+                            snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .element!
+                                .subType!;
+                        PathState.destinationFloor = snapshot
+                            .data!
+                            .landmarksMap![SingletonFunctionController
+                            .building.selectedLandmarkID]!
+                            .floor!;
+                        SingletonFunctionController
+                            .building.selectedLandmarkID = "";
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SourceAndDestinationPage(
+                                  DestinationID:
+                                  PathState.destinationPolyID,
+                                  user: user,
+                                ))).then((value) {
+                          if (value != null) {
+                            fromSourceAndDestinationPage(value);
+                          }
+                        });
+                      }
+                    },
+                    child: (!calculatingPath)
+                        ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.directions,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "${LocaleData.direction.getString(context)}",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
+                    )
+                        : Container(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              )),
+        )
       ],
     );
   }

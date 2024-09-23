@@ -10,13 +10,44 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-
+import 'package:url_launcher/url_launcher.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
+
+  static Future<void> launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  static Future<void> sendMailto({
+    String email = "mail@example.com",
+  }) async {
+    final String emailSubject = "Feedbacks";
+    final Uri parsedMailto = Uri.parse(
+        "mailto:<$email>?subject=$emailSubject");
+
+    if (!await launchUrl(
+      parsedMailto,
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw "error";
+    }
+  }
+
+  static Future<void> makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launch(launchUri.toString());
+  }
 
 
   static String truncateString(String input, int maxLength) {

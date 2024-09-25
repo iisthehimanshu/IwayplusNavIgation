@@ -63,6 +63,7 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<key>UISupportedInterfaceOrientations</key>
 	<array>
         <string>UIInterfaceOrientationPortrait</string>
     </array>

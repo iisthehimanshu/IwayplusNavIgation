@@ -63,9 +63,10 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
-	<array>
+	<key>UISupportedInterfaceOrientations</key>
+     <array>
         <string>UIInterfaceOrientationPortrait</string>
-    </array>
+     </array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

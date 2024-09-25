@@ -54,10 +54,13 @@ class DataVersionApi {
         print('DATA ALREADY PRESENT');
         final databaseData = DataVersion.fromJson(DataBox.get(apiData.versionData!.buildingID)!.responseBody);
         if(apiData.versionData!.buildingDataVersion != databaseData.versionData!.buildingDataVersion){
+          print("match ${apiData.versionData!.buildingID!} and $id");
           VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = true;
           shouldBeInjected = true;
           print("Building Version Change = true ${apiData.versionData!.buildingDataVersion} ${databaseData.versionData!.buildingDataVersion}");
         }else{
+          print("match ${apiData.versionData!.buildingID!} and $id");
+
           VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
           print("Building Version Change = false");
         }
@@ -67,6 +70,8 @@ class DataVersionApi {
           shouldBeInjected = true;
           print("Patch Version Change = true ${apiData.versionData!.patchDataVersion} ${databaseData.versionData!.patchDataVersion}");
         }else{
+          print("match ${apiData.versionData!.buildingID!} and $id");
+
           VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!.buildingID!] = false;
           print("Patch Version Change = false");
         }
@@ -76,6 +81,8 @@ class DataVersionApi {
           shouldBeInjected = true;
           print("Landmark Version Change = true ${apiData.versionData!.landmarksDataVersion} ${databaseData.versionData!.landmarksDataVersion}");
         }else{
+          print("match ${apiData.versionData!.buildingID!} and $id");
+
           VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!.buildingID!] = false;
           print("Landmark Version Change = false");
 
@@ -86,6 +93,8 @@ class DataVersionApi {
           shouldBeInjected = true;
           print("Polyline Version Change = true ${apiData.versionData!.polylineDataVersion} ${databaseData.versionData!.polylineDataVersion}");
         }else{
+          print("match ${apiData.versionData!.buildingID!} and $id");
+
           VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] = false;
           print(VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] );
           print(apiData.versionData!.buildingID!);

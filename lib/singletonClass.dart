@@ -10,6 +10,7 @@ import 'API/beaconapi.dart';
 import 'API/buildingAllApi.dart';
 
 import 'APIMODELS/beaconData.dart';
+import 'VersioInfo.dart';
 import 'bluetooth_scanning.dart';
 
 class SingletonFunctionController {
@@ -28,7 +29,11 @@ class SingletonFunctionController {
     // Mark the function as running and create a new Completer
     _isRunning = true;
     _completer = Completer<void>();
+    
 
+    var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
+    building.beacondata = beaconData;
+    print("building.beacondata.length");
     try {
       // Perform your task here
       print("Function is running...");

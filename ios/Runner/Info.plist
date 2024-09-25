@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Iwayplusnavigation</string>
+	<string>iwayplusnavigation</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -63,6 +63,7 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<key>UISupportedInterfaceOrientations</key>
 	<array>
         <string>UIInterfaceOrientationPortrait</string>
     </array>

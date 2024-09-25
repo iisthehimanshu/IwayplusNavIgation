@@ -4481,8 +4481,8 @@ double? minDistance;
     }
   }
 
-  void setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
-      {List<LatLng>? selectedroomMarker2 = null}) {
+  Future<void> setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
+      {List<LatLng>? selectedroomMarker2 = null}) async {
     double minLat = double.infinity;
     double minLng = double.infinity;
     double maxLat = double.negativeInfinity;
@@ -4498,18 +4498,35 @@ double? minDistance;
         maxLat = math.max(maxLat, lat);
         maxLng = math.max(maxLng, lng);
       }
-
+      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+      LatLng center = LatLng(
+        (minLat + maxLat) / 2,
+        (minLng + maxLng) / 2,
+      );
       LatLngBounds bounds = LatLngBounds(
         southwest: LatLng(minLat, minLng),
         northeast: LatLng(maxLat, maxLng),
       );
 
-      _googleMapController.animateCamera(
+      await _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          200.0, // padding to adjust the bounding box on the screen
+          60.0, // padding to adjust the bounding box on the screen
         ),
       );
+      await Future.delayed(Duration(milliseconds: 100));
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: await _googleMapController.getZoomLevel(),
+            bearing: bearing,
+          ),
+        ),
+      );
+
+
     } else {
       for (LatLng marker in selectedroomMarker1) {
         double lat = marker.latitude;
@@ -4530,17 +4547,34 @@ double? minDistance;
         maxLng = math.max(maxLng, lng);
       }
 
+      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+      LatLng center = LatLng(
+        (minLat + maxLat) / 2,
+        (minLng + maxLng) / 2,
+      );
+
       LatLngBounds bounds = LatLngBounds(
         southwest: LatLng(minLat, minLng),
         northeast: LatLng(maxLat, maxLng),
       );
 
-      _googleMapController.animateCamera(
+      await _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          200.0, // padding to adjust the bounding box on the screen
+          60.0, // padding to adjust the bounding box on the screen
         ),
       );
+      await Future.delayed(Duration(milliseconds: 100));
+       _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: await _googleMapController.getZoomLevel(),
+            bearing: bearing,
+          ),
+        ),
+      );
+
     }
   }
 
@@ -6737,14 +6771,14 @@ double? minDistance;
               width: screenWidth,
               decoration: BoxDecoration(
                 color: Colors.white, // Set the background color
-                boxShadow: [
+                boxShadow: (contactDetail || microService)?[
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1), // Shadow color
                     offset: Offset(0, -3), // Shadow offset (top shadow)
                     blurRadius: 6, // Blur radius
                     spreadRadius: 1, // Spread radius
-                  ),
-                ],
+                  )
+                ]:null,
               ),
               child: Center(
                 // Center the button vertically
@@ -7064,7 +7098,7 @@ double? minDistance;
             LatLng(dataCurrent["svalue"][0], dataCurrent["svalue"][1]),
             LatLng(dataNext["dvalue"][0], dataNext["dvalue"][1])
           ],
-          color: Colors.red,
+          color: Colors.blueAccent,
           width: 8,
         ));
       }
@@ -7729,10 +7763,14 @@ setState(() {
           path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
     }
 
-    List<int> turns = tools.getTurnpoints(path, numCols);
-    getPoints.add([sourceX % numCols, sourceY ~/ numCols]);
-    turns.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
-    getPoints.add([destinationX, destinationY]);
+    if(bid == buildingAllApi.outdoorID){
+      path.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
+    }else{
+      List<int> turns = tools.getTurnpoints(path, numCols);
+      getPoints.add([sourceX % numCols, sourceY ~/ numCols]);
+      turns.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
+      getPoints.add([destinationX, destinationY]);
+    }
 
     Set<Marker> innerMarker = Set();
 
@@ -9832,10 +9870,6 @@ bool onStart=false;
           //
 
           //
-          print("condition check");
-          print(user.Bid);
-          print(buildingAllApi.outdoorID);
-          if (user.Bid != buildingAllApi.outdoorID) {
             for (int i = 0; i < getPoints.length; i++) {
               //
               //
@@ -9868,7 +9902,6 @@ bool onStart=false;
                 break;
               }
             }
-          }
         }
       }
     } catch (e) {}

@@ -4,13 +4,13 @@ class outdoormodel {
 
   outdoormodel({this.status, this.data});
 
-  outdoormodel.fromJson(Map<String, dynamic> json) {
+  outdoormodel.fromJson(Map<dynamic, dynamic> json) {
     status = json['status'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['status'] = this.status;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
@@ -39,7 +39,7 @@ class Data {
         this.floor,
         this.visibility});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     campusId = json['campusId'];
     buildingIds = json['buildingIds'].cast<String>();
@@ -50,8 +50,8 @@ class Data {
     visibility = json['visibility'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['campusId'] = this.campusId;
     data['buildingIds'] = this.buildingIds;

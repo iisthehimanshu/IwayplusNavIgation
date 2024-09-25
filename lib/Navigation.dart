@@ -6737,14 +6737,14 @@ double? minDistance;
               width: screenWidth,
               decoration: BoxDecoration(
                 color: Colors.white, // Set the background color
-                boxShadow: [
+                boxShadow: (contactDetail || microService)?[
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1), // Shadow color
                     offset: Offset(0, -3), // Shadow offset (top shadow)
                     blurRadius: 6, // Blur radius
                     spreadRadius: 1, // Spread radius
-                  ),
-                ],
+                  )
+                ]:null,
               ),
               child: Center(
                 // Center the button vertically
@@ -7064,7 +7064,7 @@ double? minDistance;
             LatLng(dataCurrent["svalue"][0], dataCurrent["svalue"][1]),
             LatLng(dataNext["dvalue"][0], dataNext["dvalue"][1])
           ],
-          color: Colors.red,
+          color: Colors.blueAccent,
           width: 8,
         ));
       }
@@ -7729,10 +7729,14 @@ setState(() {
           path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
     }
 
-    List<int> turns = tools.getTurnpoints(path, numCols);
-    getPoints.add([sourceX % numCols, sourceY ~/ numCols]);
-    turns.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
-    getPoints.add([destinationX, destinationY]);
+    if(bid == buildingAllApi.outdoorID){
+      path.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
+    }else{
+      List<int> turns = tools.getTurnpoints(path, numCols);
+      getPoints.add([sourceX % numCols, sourceY ~/ numCols]);
+      turns.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
+      getPoints.add([destinationX, destinationY]);
+    }
 
     Set<Marker> innerMarker = Set();
 
@@ -9832,10 +9836,6 @@ bool onStart=false;
           //
 
           //
-          print("condition check");
-          print(user.Bid);
-          print(buildingAllApi.outdoorID);
-          if (user.Bid != buildingAllApi.outdoorID) {
             for (int i = 0; i < getPoints.length; i++) {
               //
               //
@@ -9868,7 +9868,6 @@ bool onStart=false;
                 break;
               }
             }
-          }
         }
       }
     } catch (e) {}

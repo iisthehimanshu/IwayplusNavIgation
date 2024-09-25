@@ -686,6 +686,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Future<void> zoomWhileWait(
       Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
     print("allbuilding id ${allBuildingID}");
+
     if (allBuildingID.length > 1) {
       while (!SingletonFunctionController.building.destinationQr &&
           !user.initialallyLocalised &&
@@ -1138,6 +1139,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   void renderHere() async {
 double screenHeight=MediaQuery.of(context).size.height;
+double pixelRatio = MediaQuery.of(context).devicePixelRatio;
       if (markers.length > 0) {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
@@ -1155,7 +1157,13 @@ double screenHeight=MediaQuery.of(context).size.height;
         ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
 
         // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-        int newY = screenCenter.y  - (screenHeight*0.58).toInt();  // Adjust 300 as needed for how far you want the user at the bottom
+        int newY=0;
+        if(Platform.isAndroid){
+          newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
+        }else{
+          newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
+        }
+        // Adjust 300 as needed for how far you want the user at the bottom
 
         // Convert the new screen coordinate back to LatLng
         LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
@@ -9747,6 +9755,7 @@ setState(() {
 print("enteredddd");
 print(onStart);
 double screenHeight=MediaQuery.of(context).size.height;
+double pixelRatio=MediaQuery.of(context).devicePixelRatio;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
@@ -9758,7 +9767,12 @@ double screenHeight=MediaQuery.of(context).size.height;
 
     // Adjust the y-coordinate to shift the camera upwards (moving the target down)
     int newX = screenCenter.x-10;
-    int newY=screenCenter.y-(screenHeight*0.58).toInt();// Adjust 300 as needed for how far you want the user at the bottom
+int newY=0;
+if(Platform.isAndroid){
+  newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
+}else{
+  newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
+}// Adjust 300 as needed for how far you want the user at the bottom
 
     // Convert the new screen coordinate back to LatLng
     LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));

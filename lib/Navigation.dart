@@ -4073,7 +4073,7 @@ double? minDistance;
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      print("ARCoordinateskeys ${key}");
+      //print("ARCoordinateskeys ${key}");
 
       if(key != buildingAllApi.outdoorID) {
         if (PathState.sourceBid != "" && PathState.destinationBid == "") {

@@ -18,13 +18,13 @@ class outBuilding {
 
     final OutBuildingBox = OutDoorModeBOX.getData();
 
-    // for(var id in ids){
-    //   if(OutBuildingBox.containsKey(id)){
-    //     print("OUTBUILDING DATA FORM DATABASE");
-    //     Map<String, dynamic> responseBody = OutBuildingBox.get(id)!.responseBody;
-    //     return outdoormodel.fromJson(responseBody);
-    //   }
-    // }
+    for(var id in ids){
+      if(OutBuildingBox.containsKey(id)){
+        print("OUTBUILDING DATA FORM DATABASE");
+        Map<String, dynamic> responseBody = OutBuildingBox.get(id)!.responseBody;
+        return outdoormodel.fromJson(responseBody);
+      }
+    }
 
     final Map<String, dynamic> data = {
       "buildingIds": ids
@@ -65,17 +65,17 @@ class outBuilding {
           'x-access-token': accessToken
         },
       );
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         Map<String, dynamic> responseBody = json.decode(response.body);
         final outBuildingData = OutDoorModel(responseBody: responseBody);
-        print("OUTBUILDING DATA FORM API AFTER 403");
+        print("OUTBUILDING DATA FORM API");
 
-        for (var element in ids) {
-          OutBuildingBox.put(element, outBuildingData);
-          outBuildingData.save();
-        }
+
+        OutBuildingBox.put(ids[0], outBuildingData);
+        outBuildingData.save();
 
         return outdoormodel.fromJson(responseBody);
+
       }else{
         print('OUTBUILDING DATA EMPTY FROM API AFTER 403');
         outdoormodel outBuild = outdoormodel();

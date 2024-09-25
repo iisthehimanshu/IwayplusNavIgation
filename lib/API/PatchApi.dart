@@ -32,9 +32,10 @@ class patchAPI {
     accessToken = signInBox.get("accessToken");
 
     final PatchBox = PatchAPIModelBox.getData();
+    print("Patch getting for $id");
     if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("PATCH API DATA FROM DATABASE");
-      print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
+      print(PatchBox.get(id?? buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return patchDataModel.fromJson(responseBody);
     }

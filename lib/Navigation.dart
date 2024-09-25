@@ -3339,6 +3339,7 @@ double? minDistance;
       resBeacons = SingletonFunctionController.apibeaconmap;
     });
     print("apicalls testing 2");
+
     var patchData =
         await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
     Building.buildingData ??= Map();
@@ -12297,6 +12298,7 @@ bool onStart=false;
   void dispose() {
     disposed = true;
     flutterTts.stop();
+    SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();
     magneticValues.clear();

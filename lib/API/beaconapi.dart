@@ -26,7 +26,12 @@ class beaconapi {
     print(baseUrl);
     accessToken = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
-    if(BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false){
+
+    print("beaconapi $id");
+    print(BeaconBox.containsKey(id));
+    print(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id));
+    // print(VersionInfo.buildingLandmarkDataVersionUpdate[id]!);
+    if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);

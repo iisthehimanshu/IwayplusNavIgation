@@ -38,6 +38,7 @@ import 'BuildingInfoScreen.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'DATABASE/BOXES/OutDoorModelBOX.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'FIREBASE NOTIFICATION API/FCMServer.dart';
@@ -306,6 +307,7 @@ UserState.geoLng=userLoc!.longitude;
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
                 final WayPointBox = WayPointModeBOX.getData();
+                final OutBuildingBox = OutDoorModeBOX.getData();
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
@@ -313,7 +315,8 @@ UserState.geoLng=userLoc!.longitude;
                 PatchBox.clear();
                 PolyLineBox.clear();
                 WayPointBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length}");
+                OutBuildingBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
 
               },
             ),

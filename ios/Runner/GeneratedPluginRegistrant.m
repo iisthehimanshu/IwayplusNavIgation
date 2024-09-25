@@ -102,12 +102,6 @@
 @import google_maps_flutter_ios;
 #endif
 
-#if __has_include(<libphonenumber_plugin/FLTLibphonenumberPlugin.h>)
-#import <libphonenumber_plugin/FLTLibphonenumberPlugin.h>
-#else
-@import libphonenumber_plugin;
-#endif
-
 #if __has_include(<package_info_plus/FPPPackageInfoPlusPlugin.h>)
 #import <package_info_plus/FPPPackageInfoPlusPlugin.h>
 #else
@@ -199,7 +193,6 @@
   [FluttertoastPlugin registerWithRegistrar:[registry registrarForPlugin:@"FluttertoastPlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [FLTGoogleMapsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleMapsPlugin"]];
-  [FLTLibphonenumberPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTLibphonenumberPlugin"]];
   [FPPPackageInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPPackageInfoPlusPlugin"]];
   [PathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"PathProviderPlugin"]];
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];

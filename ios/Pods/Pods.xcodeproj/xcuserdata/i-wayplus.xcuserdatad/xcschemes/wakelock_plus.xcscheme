@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C942A9CCE5CF382E8053D9757DA6249D"
-               BuildableName = "PhoneNumberKit.framework"
-               BlueprintName = "PhoneNumberKit"
+               BlueprintIdentifier = "40E70FDA48D5C02EE32CA0F3F53EB178"
+               BuildableName = "wakelock_plus.framework"
+               BlueprintName = "wakelock_plus"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

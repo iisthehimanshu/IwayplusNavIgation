@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "815875E17A65C5BB5A54576024F13905"
-               BuildableName = "PhoneNumberKitPrivacy.bundle"
-               BlueprintName = "PhoneNumberKit-PhoneNumberKitPrivacy"
+               BlueprintIdentifier = "1001C16510D946B47CFF8B19DBC0B787"
+               BuildableName = "FirebaseCore_Privacy.bundle"
+               BlueprintName = "FirebaseCore-FirebaseCore_Privacy"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

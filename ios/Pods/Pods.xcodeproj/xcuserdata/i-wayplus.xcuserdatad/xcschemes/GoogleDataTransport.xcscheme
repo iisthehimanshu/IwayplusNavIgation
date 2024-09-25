@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E2980A3574000E729E05E4B3B098F06D"
-               BuildableName = "libphonenumber_plugin.framework"
-               BlueprintName = "libphonenumber_plugin"
+               BlueprintIdentifier = "5C0371EE948D0357B8EE0E34ABB44BF0"
+               BuildableName = "GoogleDataTransport.framework"
+               BlueprintName = "GoogleDataTransport"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

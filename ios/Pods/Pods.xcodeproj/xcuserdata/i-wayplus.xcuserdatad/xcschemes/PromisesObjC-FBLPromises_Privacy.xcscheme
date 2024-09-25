@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "74373FFB1ED73C7A6F8F21C8476597BA"
-               BuildableName = "location.framework"
-               BlueprintName = "location"
+               BlueprintIdentifier = "1BFBEDBF7E03729D43C96530EE190825"
+               BuildableName = "FBLPromises_Privacy.bundle"
+               BlueprintName = "PromisesObjC-FBLPromises_Privacy"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

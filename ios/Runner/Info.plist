@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Iwayplusnavigation</string>
+	<string>iwayplusnavigation</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -64,7 +64,7 @@
 		<string>fetch</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
-     <array>
+	<array>
         <string>UIInterfaceOrientationPortrait</string>
      </array>
 	<key>UILaunchStoryboardName</key>

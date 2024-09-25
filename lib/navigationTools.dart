@@ -510,6 +510,25 @@ class tools {
     return bearingDegrees;
   }
 
+  static double calculateBearing_fromLatLng(LatLng pointA, LatLng pointB) {
+    double lat1 = toRadians(pointA.latitude); //user
+    double lon1 = toRadians(pointA.longitude); //user
+    double lat2 = toRadians(pointB.latitude); //path next point
+    double lon2 = toRadians(pointB.longitude); //path next point
+
+    double dLon = lon2 - lon1;
+
+    double x = sin(dLon) * cos(lat2);
+    double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+
+    double bearingRadians = atan2(x, y);
+    double bearingDegrees = bearingRadians * 180.0 / pi;
+    // Normalize the bearing to be within the range 0° to 360°
+    bearingDegrees = (bearingDegrees + 360) % 360;
+
+    return bearingDegrees;
+  }
+
   static List<double> moveLatLng(List<double> startPoint, double angleInDegrees, double distanceInFeet) {
     // Convert distance from feet to meters (1 foot = 0.3048 meters)
     double distanceInMeters = distanceInFeet * 0.3048;

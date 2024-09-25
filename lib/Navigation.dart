@@ -4481,8 +4481,8 @@ double? minDistance;
     }
   }
 
-  void setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
-      {List<LatLng>? selectedroomMarker2 = null}) {
+  Future<void> setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
+      {List<LatLng>? selectedroomMarker2 = null}) async {
     double minLat = double.infinity;
     double minLng = double.infinity;
     double maxLat = double.negativeInfinity;
@@ -4498,18 +4498,35 @@ double? minDistance;
         maxLat = math.max(maxLat, lat);
         maxLng = math.max(maxLng, lng);
       }
-
+      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+      LatLng center = LatLng(
+        (minLat + maxLat) / 2,
+        (minLng + maxLng) / 2,
+      );
       LatLngBounds bounds = LatLngBounds(
         southwest: LatLng(minLat, minLng),
         northeast: LatLng(maxLat, maxLng),
       );
 
-      _googleMapController.animateCamera(
+      await _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          200.0, // padding to adjust the bounding box on the screen
+          60.0, // padding to adjust the bounding box on the screen
         ),
       );
+      await Future.delayed(Duration(milliseconds: 100));
+
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: await _googleMapController.getZoomLevel(),
+            bearing: bearing,
+          ),
+        ),
+      );
+
+
     } else {
       for (LatLng marker in selectedroomMarker1) {
         double lat = marker.latitude;
@@ -4530,17 +4547,34 @@ double? minDistance;
         maxLng = math.max(maxLng, lng);
       }
 
+      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+      LatLng center = LatLng(
+        (minLat + maxLat) / 2,
+        (minLng + maxLng) / 2,
+      );
+
       LatLngBounds bounds = LatLngBounds(
         southwest: LatLng(minLat, minLng),
         northeast: LatLng(maxLat, maxLng),
       );
 
-      _googleMapController.animateCamera(
+      await _googleMapController.animateCamera(
         CameraUpdate.newLatLngBounds(
           bounds,
-          200.0, // padding to adjust the bounding box on the screen
+          60.0, // padding to adjust the bounding box on the screen
         ),
       );
+      await Future.delayed(Duration(milliseconds: 100));
+       _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: center,
+            zoom: await _googleMapController.getZoomLevel(),
+            bearing: bearing,
+          ),
+        ),
+      );
+
     }
   }
 

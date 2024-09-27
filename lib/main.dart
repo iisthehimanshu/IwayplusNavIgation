@@ -14,6 +14,7 @@ import 'package:iwaymaps/API/slackApi.dart';
 import 'package:iwaymaps/BuildingInfoScreen.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:iwaymaps/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
@@ -78,6 +79,8 @@ Future<void> main() async {
   await Hive.openBox<WayPointModel>('WayPointModelFile');
   Hive.registerAdapter(DataVersionLocalModelAdapter());
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
+  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
 

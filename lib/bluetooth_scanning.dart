@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
@@ -189,7 +190,7 @@ class BLueToothClass {
         int Rssi = result.rssi;
         // print(result);
         // print("mac $MacId   rssi $Rssi");
-
+        wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 
@@ -207,17 +208,14 @@ class BLueToothClass {
 
   }
 
-
-
-
-
-
   void stopScanning() async{
+    emptyBin();
     await FlutterBluePlus.stopScan();
-    _scanResultsSubscription.cancel();
+    if(Platform.isIOS){
+      _scanResultsSubscription.cancel();
+    }
     _scanResults.clear();
     _systemDevices.clear();
-    emptyBin();
     priorityQueue.clear();
   }
 

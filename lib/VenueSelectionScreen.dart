@@ -44,6 +44,7 @@ import 'FIREBASE NOTIFICATION API/FCMServer.dart';
 import 'FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'HomeNestedSearch.dart';
 import 'Navigation.dart';
+import 'NotificationScreen.dart';
 
 
 class VenueSelectionScreen extends StatefulWidget{
@@ -320,6 +321,18 @@ UserState.geoLng=userLoc!.longitude;
           ),
 
           actions: [
+            IconButton(
+              icon: Icon(Icons.notifications_none_outlined),
+              color: Color(0xff18181b),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NotificationScreen(),
+                  ),
+                );
+              },
+            ),
             Container(
                 margin: EdgeInsets.only(right: 20),
                 // decoration: BoxDecoration(
@@ -336,7 +349,8 @@ UserState.geoLng=userLoc!.longitude;
                   onPressed: () {
                     showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
                   },
-                ))
+                )),
+
           ],
           backgroundColor: Colors.transparent, // Set the background color to transparent
           elevation: 0,

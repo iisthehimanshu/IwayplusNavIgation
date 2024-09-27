@@ -1081,12 +1081,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     } else {
       markers.putIfAbsent(user.Bid, () => []);
       markers[user.Bid]?.add(Marker(
@@ -1095,12 +1097,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     }
   }
 
@@ -1137,125 +1141,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   //   });
   // }
 
-//   void renderHere() async {
-// double screenHeight=MediaQuery.of(context).size.height;
-// double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-//       if (markers.length > 0) {
-//         List<double> lvalue = tools.localtoglobal(
-//             user.showcoordX.toInt(),
-//             user.showcoordY.toInt(),
-//             SingletonFunctionController.building.patchData[user.Bid]);
-//         markers[user.Bid]?[0] = customMarker.move(
-//             LatLng(user.lat, user.lng), markers[user.Bid]![0]);
-//
-//         print("insideee this");
-//         print(onStart);
-//
-//         mapState.target = LatLng(lvalue[0], lvalue[1]);
-//
-//         // Calculate the pixel position of the current center of the map
-//         ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
-//
-//         // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-//         int newY=0;
-//         if(Platform.isAndroid){
-//           newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-//         }else{
-//           newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-//         }
-//
-//         print("newYYYYY $newY");
-//         // Adjust 300 as needed for how far you want the user at the bottom
-//
-//         // Convert the new screen coordinate back to LatLng
-//         LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
-//         setState(() {
-//         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-//           CameraPosition(
-//             target:(UserState.isTurn || onStart==false)?mapState.target:newCameraTarget,
-//             zoom: mapState.zoom,
-//             bearing: mapState.bearing!??0,
-//             tilt: mapState.tilt,
-//           ),
-//         ));
-//       });
-//
-//         List<double> ldvalue = tools.localtoglobal(
-//             user.coordX.toInt(), user.coordY.toInt(),
-//             SingletonFunctionController.building.patchData[user.Bid]);
-//         markers[user.Bid]?[1] = customMarker.move(
-//             LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-//       }
-//
-//   }
-
-  bool isFirstTime = true;  // Flag to check if it's the first time rendering
-
   void renderHere() async {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+double screenHeight=MediaQuery.of(context).size.height;
+double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(
+            user.showcoordX.toInt(),
+            user.showcoordY.toInt(),
+            SingletonFunctionController.building.patchData[user.Bid]);
+        markers[user.Bid]?[0] = customMarker.move(
+            LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
-    if (markers.length > 0) {
-      // Convert local coordinates to global
-      List<double> lvalue = tools.localtoglobal(
-          user.showcoordX.toInt(),
-          user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]
-      );
+        print("insideee this");
+        print(onStart);
 
-      // Move the marker to the user's position
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(user.lat, user.lng), markers[user.Bid]![0]
-      );
+        mapState.target = LatLng(lvalue[0], lvalue[1]);
 
-      // Calculate the map's current target position
-      mapState.target = LatLng(lvalue[0], lvalue[1]);
+        // Calculate the pixel position of the current center of the map
+        ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
 
-      // Get the current screen coordinates of the map center
-      ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+        // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+        int newY=0;
+        if(Platform.isAndroid){
+          newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
+        }else{
+          newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
+        }
+        // Adjust 300 as needed for how far you want the user at the bottom
 
-      // Adjust y-coordinate for pointer to stay at the bottom center
-      int newY = 0;
-      if (Platform.isAndroid) {
-        newY = screenCenter.y - ((screenHeight * 0.58)).toInt();
-      } else {
-        newY = screenCenter.y - ((screenHeight * 0.08) * pixelRatio).toInt();
-      }
-
-      // Apply additional offset only the first time
-      if (isFirstTime) {
-        newY += 500;  // Add your extra offset as needed
-        isFirstTime = false;  // Set the flag to false after the first calculation
-      }
-
-      // Calculate the new target for smooth camera animation
-      LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
-
-      setState(() {
+        // Convert the new screen coordinate back to LatLng
+        LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
+        setState(() {
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: newCameraTarget,  // Use the calculated bottom-centered target
+            target:(UserState.isTurn || onStart==false)?mapState.target:newCameraTarget,
             zoom: mapState.zoom,
-            bearing: mapState.bearing ?? 0,
+            bearing: mapState.bearing!??0,
             tilt: mapState.tilt,
           ),
         ));
       });
 
-      // Update the marker at the destination as well
-      List<double> ldvalue = tools.localtoglobal(
-          user.coordX.toInt(),
-          user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]
-      );
-      markers[user.Bid]?[1] = customMarker.move(
-          LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]
-      );
-    }
+        List<double> ldvalue = tools.localtoglobal(
+            user.coordX.toInt(), user.coordY.toInt(),
+            SingletonFunctionController.building.patchData[user.Bid]);
+        markers[user.Bid]?[1] = customMarker.move(
+            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+      }
+
   }
-
-
-
 
   void onStepCount() {
     setState(() {
@@ -1686,12 +1620,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: LatLng(user.lat, user.lng),
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
       // }
 
       SingletonFunctionController.building.floor[userSetLocation.buildingID!] =
@@ -2001,12 +1937,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -2026,12 +1964,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2331,12 +2271,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -2356,12 +2298,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2664,12 +2608,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
             circles.add(
               Circle(
                 circleId: CircleId("circle"),
@@ -2690,12 +2636,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
           }
 
           if (widget.directLandID.length < 2) {
@@ -3130,12 +3078,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: userlocation,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     });
   }
 
@@ -3646,6 +3596,7 @@ double? minDistance;
       localizeUser();
     } else {
       print("apicalls testing 10");
+      SingletonFunctionController.btadapter.stopScanning();
       //got here using a destination qr
       localizeUser(speakTTS: false);
       onLandmarkVenueClicked(widget.directLandID,
@@ -8830,106 +8781,95 @@ setState(() {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(left:8.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Semantics(
-                                                excludeSemantics: true,
-                                                child: Text(
-                                                  "${time.toInt()} min",
-                                                  style: const TextStyle(
-                                                    color: Color(0xff000000),
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w500,
-                                                    height: 24 / 18,
-                                                  ),
-                                                  textAlign: TextAlign.left,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Semantics(
+                                              excludeSemantics: true,
+                                              child: Text(
+                                                "${time.toInt()} min Walk ",
+                                                style: const TextStyle(
+                                                  color: Color(0xffDC6A01),
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500,
+                                                  height: 24 / 18,
                                                 ),
+                                                textAlign: TextAlign.left,
                                               ),
-                                              // Add VerticalDivider here
-                                              VerticalDivider(
-                                                width: 10, // adjust the width to your preference
-                                                thickness: 20, // thickness of the divider line
-                                                color: Colors.yellow, // color of the divider line
-                                              ),
-                                              Semantics(
-                                                excludeSemantics: true,
-                                                child: Text(
-                                                  "${distance.toInt()} m",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w500,
-                                                    height: 24 / 18,
-                                                  ),
-                                                  textAlign: TextAlign.left,
+                                            ),
+                                            Semantics(
+                                              excludeSemantics: true,
+                                              child: Text(
+                                                "(${distance} m)",
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500,
+                                                  height: 24 / 18,
                                                 ),
+                                                textAlign: TextAlign.left,
                                               ),
-                                              Spacer(),
-                                              Row(
-                                                children: [
-                                                  IconButton(onPressed: (){}, icon: Icon(Icons.share,size: 20,)),
+                                            ),
+                                            Spacer(),
+                                            IconButton(
+                                                onPressed: () {
+                                                  showMarkers();
+                                                  setState(() {
+                                                    _isBuildingPannelOpen =
+                                                        true;
+                                                    _isRoutePanelOpen = false;
+                                                  });
+                                                  widget.directLandID = "";
+                                                  selectedroomMarker.clear();
+                                                  pathMarkers.clear();
 
+                                                  SingletonFunctionController
+                                                          .building
+                                                          .selectedLandmarkID =
+                                                      null;
 
-                                                  IconButton(
-                                                    onPressed: () {
-                                                      showMarkers();
-                                                      setState(() {
-                                                        _isBuildingPannelOpen = true;
-                                                        _isRoutePanelOpen = false;
-                                                      });
-                                                      widget.directLandID = "";
-                                                      selectedroomMarker.clear();
-                                                      pathMarkers.clear();
-
-                                                      SingletonFunctionController.building.selectedLandmarkID = null;
-
-                                                      PathState = pathState.withValues(
-                                                        -1,
-                                                        -1,
-                                                        -1,
-                                                        -1,
-                                                        -1,
-                                                        -1,
-                                                        null,
-                                                        0,
-                                                      );
-                                                      PathState.path.clear();
-                                                      PathState.sourcePolyID = "";
-                                                      PathState.destinationPolyID = "";
-                                                      PathState.sourceBid = "";
-                                                      PathState.destinationBid = "";
-                                                      singleroute.clear();
-                                                      // realWorldPath.clear();
-                                                      PathState.directions = [];
-                                                      interBuildingPath.clear();
-                                                      // if (user.isnavigating == false) {
-                                                      clearPathVariables();
-                                                      // }
-                                                      fitPolygonInScreen(patch.first);
-                                                      exitNavigation();
-                                                      setState(() {
-                                                        onStart = false;
-                                                        startingNavigation = false;
-                                                      });
-                                                    },
-                                                    icon: Semantics(
-                                                      label: "Close Navigation",
-                                                      child: Icon(
-                                                        Icons.close,
-                                                        size: 25,
-                                                      ),
-                                                    ),
+                                                  PathState =
+                                                      pathState.withValues(
+                                                          -1,
+                                                          -1,
+                                                          -1,
+                                                          -1,
+                                                          -1,
+                                                          -1,
+                                                          null,
+                                                          0);
+                                                  PathState.path.clear();
+                                                  PathState.sourcePolyID = "";
+                                                  PathState.destinationPolyID =
+                                                      "";
+                                                  PathState.sourceBid = "";
+                                                  PathState.destinationBid = "";
+                                                  singleroute.clear();
+                                                  //realWorldPath.clear();
+                                                  PathState.directions = [];
+                                                  interBuildingPath.clear();
+                                                  //  if(user.isnavigating==false){
+                                                  clearPathVariables();
+                                                  //}
+                                                  fitPolygonInScreen(
+                                                      patch.first);
+                                                  exitNavigation();
+                                                  setState(() {
+                                                    onStart=false;
+                                                    startingNavigation=false;
+                                                  });
+                                                },
+                                                icon: Semantics(
+                                                  label: "Close Navigation",
+                                                  child: Icon(
+                                                    Icons.cancel_outlined,
+                                                    size: 25,
                                                   ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
+                                                ))
+                                          ],
                                         ),
-
                                         // Text(
                                         //   "via",
                                         //   style: const TextStyle(
@@ -8955,449 +8895,403 @@ setState(() {
                                         SizedBox(
                                           height: 8,
                                         ),
-                                       const Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
+                                        Row(
                                           children: [
-                                            // Walking Person Icon with Text 'G'
-                                            Row(
-                                              children: [
-                                                Icon(Icons.directions_walk, size: 25), // Person Walking Icon
-                                               // Spacing between icon and text
-                                                Padding(
-                                                  padding: EdgeInsets.only(top:10.0),
-                                                  child: Text('G', style: TextStyle(fontSize: 16)),
-                                                ), // Text beside icon
-                                              ],
+                                            Focus(
+                                              autofocus: true,
+                                              child: Semantics(
+                                                sortKey:
+                                                    const OrdinalSortKey(0),
+                                                child: Container(
+                                                  width: 108,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xff24B9B0),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4.0),
+                                                  ),
+                                                  child: TextButton(
+                                                    onPressed: () async {
+
+
+                                                      if(startingNavigation){
+                                                        tools.setBuildingAngle(
+                                                            SingletonFunctionController
+                                                                .building
+                                                                .patchData[PathState
+                                                                .sourceBid]!
+                                                                .patchData!
+                                                                .buildingAngle!);
+                                                        if (PathState.sourceX ==
+                                                            PathState
+                                                                .destinationX &&
+                                                            PathState.sourceY ==
+                                                                PathState
+                                                                    .destinationY) {
+                                                          //HelperClass.showToast("Source and Destination can not be same");
+                                                          setState(() {
+                                                            _isRoutePanelOpen =
+                                                            false;
+                                                          });
+                                                          closeNavigation();
+                                                          return;
+                                                        }
+                                                        setState(() {
+                                                          circles.clear();
+                                                          _markers.clear();
+                                                          markerSldShown = false;
+
+                                                        });
+                                                        user.onConnection = false;
+                                                        PathState.didPathStart =
+                                                        true;
+
+                                                        UserState.cols =
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![0];
+                                                        UserState
+                                                            .rows = SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .destinationBid]![PathState
+                                                            .destinationFloor]![1];
+                                                        UserState.lngCode =
+                                                            _currentLocale;
+                                                        UserState.reroute =
+                                                            reroute;
+                                                        UserState
+                                                            .closeNavigation =
+                                                            closeNavigation;
+                                                        UserState.AlignMapToPath =
+                                                            alignMapToPath;
+                                                        UserState.startOnPath =
+                                                            startOnPath;
+                                                        UserState.speak = speak;
+                                                        UserState.paintMarker =
+                                                            paintMarker;
+                                                        UserState.createCircle =
+                                                            updateCircle;
+
+                                                        //detected=false;
+                                                        //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                                                        wsocket.message["path"]
+                                                        ["source"] =
+                                                            PathState.sourceName;
+                                                        wsocket.message["path"]
+                                                        ["destination"] =
+                                                            PathState
+                                                                .destinationName;
+                                                        // user.ListofPaths = PathState.listofPaths;
+                                                        // user.patchData = SingletonFunctionController.building.patchData;
+                                                        // user.buildingNumber = PathState.listofPaths.length-1;
+                                                        buildingAllApi
+                                                            .selectedID =
+                                                            PathState.sourceBid;
+                                                        buildingAllApi
+                                                            .selectedBuildingID =
+                                                            PathState.sourceBid;
+                                                        UserState.cols =
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![0];
+                                                        UserState.rows =
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .floorDimenssion[
+                                                        PathState
+                                                            .sourceBid]![PathState
+                                                            .sourceFloor]![1];
+                                                        user.Bid =
+                                                            PathState.sourceBid;
+                                                        user.coordX =
+                                                            PathState.sourceX;
+                                                        user.coordY =
+                                                            PathState.sourceY;
+                                                        user.temporaryExit =
+                                                        false;
+                                                        UserState.reroute =
+                                                            reroute;
+                                                        UserState
+                                                            .closeNavigation =
+                                                            closeNavigation;
+                                                        UserState.AlignMapToPath =
+                                                            alignMapToPath;
+                                                        UserState.startOnPath =
+                                                            startOnPath;
+                                                        UserState.speak = speak;
+                                                        UserState.paintMarker =
+                                                            paintMarker;
+                                                        UserState.createCircle =
+                                                            updateCircle;
+                                                        UserState.changeBuilding =
+                                                            changeBuilding;
+                                                        //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                                                        user.floor =
+                                                            PathState.sourceFloor;
+                                                        user.pathobj = PathState;
+                                                        user.path = PathState
+                                                            .singleListPath;
+                                                        user.isnavigating = true;
+                                                        user.Cellpath = PathState
+                                                            .singleCellListPath;
+                                                        PathState
+                                                            .singleCellListPath
+                                                            .forEach(
+                                                                (element) {});
+                                                        user
+                                                            .moveToStartofPath()
+                                                            .then((value) async {
+                                                          setState(() {
+                                                            markers.clear();
+                                                            List<double> val = tools.localtoglobal(
+                                                                user.showcoordX
+                                                                    .toInt(),
+                                                                user.showcoordY
+                                                                    .toInt(),
+                                                                SingletonFunctionController
+                                                                    .building
+                                                                    .patchData[
+                                                                PathState
+                                                                    .sourceBid]);
+
+                                                            markers.putIfAbsent(
+                                                                user.Bid,
+                                                                    () => []);
+                                                            markers[user.Bid]
+                                                                ?.add(Marker(
+                                                              markerId: MarkerId(
+                                                                  "UserLocation"),
+                                                              position: LatLng(
+                                                                  val[0], val[1]),
+                                                              icon:
+                                                              BitmapDescriptor
+                                                                  .fromBytes(
+                                                                  userloc),
+                                                              anchor: Offset(
+                                                                  0.5, 0.829),
+                                                            ));
+
+                                                            val = tools.localtoglobal(
+                                                                user.coordX
+                                                                    .toInt(),
+                                                                user.coordY
+                                                                    .toInt(),
+                                                                SingletonFunctionController
+                                                                    .building
+                                                                    .patchData[
+                                                                PathState
+                                                                    .sourceBid]);
+
+
+                                                            if (kDebugMode) {
+                                                              markers[user.Bid]
+                                                                  ?.add(Marker(
+                                                                markerId: MarkerId(
+                                                                    "debug"),
+                                                                position: LatLng(
+                                                                    val[0],
+                                                                    val[1]),
+                                                                icon: BitmapDescriptor
+                                                                    .fromBytes(
+                                                                    userlocdebug),
+                                                                anchor: Offset(
+                                                                    0.5, 0.829),
+                                                              ));
+                                                            }
+                                                            // circles.add(
+                                                            //   Circle(
+                                                            //     circleId: CircleId("circle"),
+                                                            //     center: LatLng(user.lat,user.lng),
+                                                            //     radius: _animation.value,
+                                                            //     strokeWidth: 1,
+                                                            //     strokeColor: Colors.blue,
+                                                            //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                            //   ),
+                                                            // );
+                                                          });
+                                                          alignMapToPath([
+                                                            user.lat,
+                                                            user.lng
+                                                          ], [
+                                                            PathState
+                                                                .singleCellListPath[
+                                                            user.pathobj
+                                                                .index +
+                                                                1]
+                                                                .lat,
+                                                            PathState
+                                                                .singleCellListPath[
+                                                            user.pathobj
+                                                                .index +
+                                                                1]
+                                                                .lng
+                                                          ]);
+                                                        });
+                                                        _isRoutePanelOpen = false;
+
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .selectedLandmarkID =
+                                                        null;
+
+                                                        _isnavigationPannelOpen =
+                                                        true;
+
+                                                        semanticShouldBeExcluded =
+                                                        false;
+
+                                                        StartPDR();
+
+                                                        if (SingletonFunctionController
+                                                            .building
+                                                            .floor[
+                                                        PathState
+                                                            .sourceBid] !=
+                                                            PathState
+                                                                .sourceFloor) {
+                                                          SingletonFunctionController
+                                                              .building.floor[
+                                                          PathState
+                                                              .sourceBid] =
+                                                              PathState
+                                                                  .sourceFloor;
+                                                          createRooms(
+                                                              SingletonFunctionController
+                                                                  .building
+                                                                  .polylinedatamap[
+                                                              PathState
+                                                                  .sourceBid]!,
+                                                              PathState
+                                                                  .sourceFloor);
+                                                          SingletonFunctionController
+                                                              .building
+                                                              .landmarkdata!
+                                                              .then((value) {
+                                                            createMarkers(
+                                                                value,
+                                                                PathState
+                                                                    .sourceFloor,
+                                                                bid: PathState
+                                                                    .sourceBid);
+                                                          });
+                                                        }
+
+                                                        Future.delayed(Duration(seconds: 2)).then((onValue){
+                                                          setState(() {
+                                                            onStart=true;
+                                                          });
+                                                        });
+                                                      }
+
+                                                    },
+                                                    child: startingNavigation
+                                                        ? Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .assistant_navigation,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 8),
+                                                              Text(
+                                                                '${LocaleData.start.getString(context)}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        : Container(
+                                                            width: 24,
+                                                            height: 24,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              color:
+                                                                  Colors.white,
+                                                            )),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                            SizedBox(width: 4), // Spacing between icons
-                                            // Arrow Icon
-                                            Row(
-                                              children: [
-                                                Icon(Icons.arrow_forward_ios_rounded, size: 16,color: Color(0xff8C8C8C),), // Arrow Icon
-                                              ],
-                                            ),
-                                            SizedBox(width: 4), // Spacing between icons
-                                            // Lift Icon
-                                            Row(
-                                              children: [
-                                                Icon(Icons.elevator, size: 30,color:Color(0xFFFB6B00)), // Lift Icon
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.arrow_forward_ios_rounded, size: 16,color: Color(0xff8C8C8C)), // Arrow Icon
-                                              ],
-                                            ),
-                                            SizedBox(width: 4), // Spacing between icons
-                                            // Walking Person Icon with Text 'F5'
-                                            Row(
-                                              children: [
-                                                Icon(Icons.directions_walk, size: 25), // Person Walking Icon
-                                                // Spacing between icon and text
-                                                Padding(
-                                                  padding: EdgeInsets.only(top:10.0),
-                                                  child: Text('F5', style: TextStyle(fontSize: 16)),
-                                                ), // Text beside icon
-                                              ],
+                                            Container(
+                                              width: 98,
+                                              height: 40,
+                                              margin: EdgeInsets.only(left: 12),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(4.0),
+                                                border: Border.all(
+                                                    color: Colors.black),
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () {
+                                                  if (_routeDetailPannelController
+                                                      .isPanelOpen) {
+                                                    _routeDetailPannelController
+                                                        .close();
+                                                  } else {
+                                                    _routeDetailPannelController
+                                                        .open();
+                                                  }
+                                                },
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      _routeDetailPannelController
+                                                              .isAttached
+                                                          ? _routeDetailPannelController
+                                                                  .isPanelClosed
+                                                              ? Icons
+                                                                  .short_text_outlined
+                                                              : Icons.map_sharp
+                                                          : Icons
+                                                              .short_text_outlined,
+                                                      color: Colors.black,
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    Semantics(
+                                                      sortKey:
+                                                          const OrdinalSortKey(
+                                                              2),
+                                                      onDidGainAccessibilityFocus:
+                                                          openRoutePannel,
+                                                      child: Text(
+                                                        _routeDetailPannelController
+                                                                .isAttached
+                                                            ? _routeDetailPannelController
+                                                                    .isPanelClosed
+                                                                ? "${LocaleData.steps.getString(context)}"
+                                                                : "${LocaleData.maps.getString(context)}"
+                                                            : "${LocaleData.steps.getString(context)}",
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           ],
                                         ),
-
-
-                                        // Row(
-                                        //   children: [
-                                        //     Focus(
-                                        //       autofocus: true,
-                                        //       child: Semantics(
-                                        //         sortKey:
-                                        //             const OrdinalSortKey(0),
-                                        //         child: Container(
-                                        //           width: 108,
-                                        //           height: 40,
-                                        //           decoration: BoxDecoration(
-                                        //             color: Color(0xff24B9B0),
-                                        //             borderRadius:
-                                        //                 BorderRadius.circular(
-                                        //                     4.0),
-                                        //           ),
-                                        //           child: TextButton(
-                                        //             onPressed: () async {
-                                        //
-                                        //
-                                        //               if(startingNavigation){
-                                        //
-                                        //                 tools.setBuildingAngle(
-                                        //                     SingletonFunctionController
-                                        //                         .building
-                                        //                         .patchData[PathState
-                                        //                         .sourceBid]!
-                                        //                         .patchData!
-                                        //                         .buildingAngle!);
-                                        //                 if (PathState.sourceX ==
-                                        //                     PathState
-                                        //                         .destinationX &&
-                                        //                     PathState.sourceY ==
-                                        //                         PathState
-                                        //                             .destinationY) {
-                                        //                   //HelperClass.showToast("Source and Destination can not be same");
-                                        //                   setState(() {
-                                        //                     _isRoutePanelOpen =
-                                        //                     false;
-                                        //                   });
-                                        //                   closeNavigation();
-                                        //                   return;
-                                        //                 }
-                                        //                 setState(() {
-                                        //                   circles.clear();
-                                        //                   _markers.clear();
-                                        //                   markerSldShown = false;
-                                        //
-                                        //                 });
-                                        //                 user.onConnection = false;
-                                        //                 PathState.didPathStart =
-                                        //                 true;
-                                        //
-                                        //                 UserState.cols =
-                                        //                 SingletonFunctionController
-                                        //                     .building
-                                        //                     .floorDimenssion[
-                                        //                 PathState
-                                        //                     .sourceBid]![PathState
-                                        //                     .sourceFloor]![0];
-                                        //                 UserState
-                                        //                     .rows = SingletonFunctionController
-                                        //                     .building
-                                        //                     .floorDimenssion[
-                                        //                 PathState
-                                        //                     .destinationBid]![PathState
-                                        //                     .destinationFloor]![1];
-                                        //                 UserState.lngCode =
-                                        //                     _currentLocale;
-                                        //                 UserState.reroute =
-                                        //                     reroute;
-                                        //                 UserState
-                                        //                     .closeNavigation =
-                                        //                     closeNavigation;
-                                        //                 UserState.AlignMapToPath =
-                                        //                     alignMapToPath;
-                                        //                 UserState.startOnPath =
-                                        //                     startOnPath;
-                                        //                 UserState.speak = speak;
-                                        //                 UserState.paintMarker =
-                                        //                     paintMarker;
-                                        //                 UserState.createCircle =
-                                        //                     updateCircle;
-                                        //
-                                        //                 //detected=false;
-                                        //                 //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                                        //                 wsocket.message["path"]
-                                        //                 ["source"] =
-                                        //                     PathState.sourceName;
-                                        //                 wsocket.message["path"]
-                                        //                 ["destination"] =
-                                        //                     PathState
-                                        //                         .destinationName;
-                                        //                 // user.ListofPaths = PathState.listofPaths;
-                                        //                 // user.patchData = SingletonFunctionController.building.patchData;
-                                        //                 // user.buildingNumber = PathState.listofPaths.length-1;
-                                        //                 buildingAllApi
-                                        //                     .selectedID =
-                                        //                     PathState.sourceBid;
-                                        //                 buildingAllApi
-                                        //                     .selectedBuildingID =
-                                        //                     PathState.sourceBid;
-                                        //                 UserState.cols =
-                                        //                 SingletonFunctionController
-                                        //                     .building
-                                        //                     .floorDimenssion[
-                                        //                 PathState
-                                        //                     .sourceBid]![PathState
-                                        //                     .sourceFloor]![0];
-                                        //                 UserState.rows =
-                                        //                 SingletonFunctionController
-                                        //                     .building
-                                        //                     .floorDimenssion[
-                                        //                 PathState
-                                        //                     .sourceBid]![PathState
-                                        //                     .sourceFloor]![1];
-                                        //                 user.Bid =
-                                        //                     PathState.sourceBid;
-                                        //                 user.coordX =
-                                        //                     PathState.sourceX;
-                                        //                 user.coordY =
-                                        //                     PathState.sourceY;
-                                        //                 user.temporaryExit =
-                                        //                 false;
-                                        //                 UserState.reroute =
-                                        //                     reroute;
-                                        //                 UserState
-                                        //                     .closeNavigation =
-                                        //                     closeNavigation;
-                                        //                 UserState.AlignMapToPath =
-                                        //                     alignMapToPath;
-                                        //                 UserState.startOnPath =
-                                        //                     startOnPath;
-                                        //                 UserState.speak = speak;
-                                        //                 UserState.paintMarker =
-                                        //                     paintMarker;
-                                        //                 UserState.createCircle =
-                                        //                     updateCircle;
-                                        //                 UserState.changeBuilding =
-                                        //                     changeBuilding;
-                                        //                 //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                                        //                 user.floor =
-                                        //                     PathState.sourceFloor;
-                                        //                 user.pathobj = PathState;
-                                        //                 user.path = PathState
-                                        //                     .singleListPath;
-                                        //                 user.isnavigating = true;
-                                        //                 user.Cellpath = PathState
-                                        //                     .singleCellListPath;
-                                        //                 PathState
-                                        //                     .singleCellListPath
-                                        //                     .forEach(
-                                        //                         (element) {});
-                                        //                 user
-                                        //                     .moveToStartofPath()
-                                        //                     .then((value) async {
-                                        //                   setState(() {
-                                        //                     markers.clear();
-                                        //                     List<double> val = tools.localtoglobal(
-                                        //                         user.showcoordX
-                                        //                             .toInt(),
-                                        //                         user.showcoordY
-                                        //                             .toInt(),
-                                        //                         SingletonFunctionController
-                                        //                             .building
-                                        //                             .patchData[
-                                        //                         PathState
-                                        //                             .sourceBid]);
-                                        //
-                                        //                     markers.putIfAbsent(
-                                        //                         user.Bid,
-                                        //                             () => []);
-                                        //                     markers[user.Bid]
-                                        //                         ?.add(Marker(
-                                        //                       markerId: MarkerId(
-                                        //                           "UserLocation"),
-                                        //                       position: LatLng(
-                                        //                           val[0], val[1]),
-                                        //                       icon:
-                                        //                       BitmapDescriptor
-                                        //                           .fromBytes(
-                                        //                           userloc),
-                                        //                       anchor: Offset(
-                                        //                           0.5, 0.829),
-                                        //                     ));
-                                        //
-                                        //                     val = tools.localtoglobal(
-                                        //                         user.coordX
-                                        //                             .toInt(),
-                                        //                         user.coordY
-                                        //                             .toInt(),
-                                        //                         SingletonFunctionController
-                                        //                             .building
-                                        //                             .patchData[
-                                        //                         PathState
-                                        //                             .sourceBid]);
-                                        //
-                                        //                     markers[user.Bid]
-                                        //                         ?.add(Marker(
-                                        //                       markerId: MarkerId(
-                                        //                           "debug"),
-                                        //                       position: LatLng(
-                                        //                           val[0], val[1]),
-                                        //                       icon: BitmapDescriptor
-                                        //                           .fromBytes(
-                                        //                           userlocdebug),
-                                        //                       anchor: Offset(
-                                        //                           0.5, 0.829),
-                                        //                     ));
-                                        //                     // circles.add(
-                                        //                     //   Circle(
-                                        //                     //     circleId: CircleId("circle"),
-                                        //                     //     center: LatLng(user.lat,user.lng),
-                                        //                     //     radius: _animation.value,
-                                        //                     //     strokeWidth: 1,
-                                        //                     //     strokeColor: Colors.blue,
-                                        //                     //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                        //                     //   ),
-                                        //                     // );
-                                        //                   });
-                                        //                   alignMapToPath([
-                                        //                     user.lat,
-                                        //                     user.lng
-                                        //                   ], [
-                                        //                     PathState
-                                        //                         .singleCellListPath[
-                                        //                     user.pathobj
-                                        //                         .index +
-                                        //                         1]
-                                        //                         .lat,
-                                        //                     PathState
-                                        //                         .singleCellListPath[
-                                        //                     user.pathobj
-                                        //                         .index +
-                                        //                         1]
-                                        //                         .lng
-                                        //                   ]);
-                                        //                 });
-                                        //                 _isRoutePanelOpen = false;
-                                        //
-                                        //                 SingletonFunctionController
-                                        //                     .building
-                                        //                     .selectedLandmarkID =
-                                        //                 null;
-                                        //
-                                        //                 _isnavigationPannelOpen =
-                                        //                 true;
-                                        //
-                                        //                 semanticShouldBeExcluded =
-                                        //                 false;
-                                        //
-                                        //                 StartPDR();
-                                        //
-                                        //                 if (SingletonFunctionController
-                                        //                     .building
-                                        //                     .floor[
-                                        //                 PathState
-                                        //                     .sourceBid] !=
-                                        //                     PathState
-                                        //                         .sourceFloor) {
-                                        //                   SingletonFunctionController
-                                        //                       .building.floor[
-                                        //                   PathState
-                                        //                       .sourceBid] =
-                                        //                       PathState
-                                        //                           .sourceFloor;
-                                        //                   createRooms(
-                                        //                       SingletonFunctionController
-                                        //                           .building
-                                        //                           .polylinedatamap[
-                                        //                       PathState
-                                        //                           .sourceBid]!,
-                                        //                       PathState
-                                        //                           .sourceFloor);
-                                        //                   SingletonFunctionController
-                                        //                       .building
-                                        //                       .landmarkdata!
-                                        //                       .then((value) {
-                                        //                     createMarkers(
-                                        //                         value,
-                                        //                         PathState
-                                        //                             .sourceFloor,
-                                        //                         bid: PathState
-                                        //                             .sourceBid);
-                                        //                   });
-                                        //                 }
-                                        //
-                                        //                 Future.delayed(Duration(seconds: 2)).then((onValue){
-                                        //                   setState(() {
-                                        //                     onStart=true;
-                                        //                   });
-                                        //                 });
-                                        //               }
-                                        //
-                                        //             },
-                                        //             child: startingNavigation
-                                        //                 ? Row(
-                                        //                     mainAxisSize:
-                                        //                         MainAxisSize
-                                        //                             .min,
-                                        //                     children: [
-                                        //                       Icon(
-                                        //                         Icons
-                                        //                             .assistant_navigation,
-                                        //                         color: Colors
-                                        //                             .black,
-                                        //                       ),
-                                        //                       SizedBox(
-                                        //                           width: 8),
-                                        //                       Text(
-                                        //                         '${LocaleData.start.getString(context)}',
-                                        //                         style:
-                                        //                             TextStyle(
-                                        //                           color: Colors
-                                        //                               .black,
-                                        //                         ),
-                                        //                       ),
-                                        //                     ],
-                                        //                   )
-                                        //                 : Container(
-                                        //                     width: 24,
-                                        //                     height: 24,
-                                        //                     child:
-                                        //                         CircularProgressIndicator(
-                                        //                       color:
-                                        //                           Colors.white,
-                                        //                     )),
-                                        //           ),
-                                        //         ),
-                                        //       ),
-                                        //     ),
-                                        //     Container(
-                                        //       width: 98,
-                                        //       height: 40,
-                                        //       margin: EdgeInsets.only(left: 12),
-                                        //       decoration: BoxDecoration(
-                                        //         borderRadius:
-                                        //             BorderRadius.circular(4.0),
-                                        //         border: Border.all(
-                                        //             color: Colors.black),
-                                        //       ),
-                                        //       child: TextButton(
-                                        //         onPressed: () {
-                                        //           if (_routeDetailPannelController
-                                        //               .isPanelOpen) {
-                                        //             _routeDetailPannelController
-                                        //                 .close();
-                                        //           } else {
-                                        //             _routeDetailPannelController
-                                        //                 .open();
-                                        //           }
-                                        //         },
-                                        //         child: Row(
-                                        //           mainAxisSize:
-                                        //               MainAxisSize.min,
-                                        //           children: [
-                                        //             Icon(
-                                        //               _routeDetailPannelController
-                                        //                       .isAttached
-                                        //                   ? _routeDetailPannelController
-                                        //                           .isPanelClosed
-                                        //                       ? Icons
-                                        //                           .short_text_outlined
-                                        //                       : Icons.map_sharp
-                                        //                   : Icons
-                                        //                       .short_text_outlined,
-                                        //               color: Colors.black,
-                                        //             ),
-                                        //             SizedBox(width: 8),
-                                        //             Semantics(
-                                        //               sortKey:
-                                        //                   const OrdinalSortKey(
-                                        //                       2),
-                                        //               onDidGainAccessibilityFocus:
-                                        //                   openRoutePannel,
-                                        //               child: Text(
-                                        //                 _routeDetailPannelController
-                                        //                         .isAttached
-                                        //                     ? _routeDetailPannelController
-                                        //                             .isPanelClosed
-                                        //                         ? "${LocaleData.steps.getString(context)}"
-                                        //                         : "${LocaleData.maps.getString(context)}"
-                                        //                     : "${LocaleData.steps.getString(context)}",
-                                        //                 style: TextStyle(
-                                        //                   color: Colors.black,
-                                        //                 ),
-                                        //               ),
-                                        //             ),
-                                        //           ],
-                                        //         ),
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
                                       ],
                                     ),
                                   ),
@@ -12817,15 +12711,8 @@ bool onStart=false;
 
                                   user.move(context).then((value) {
                                     print("renderedddd here");
-                                    if(UserState.isTurn){
-                                      setState(() {
-                                        isFirstTime=true;
-                                      });
-                                    }
-
                                     renderHere();
-                                    });
-
+                                  });
 
                                 } else {
                                   if (user.isnavigating) {

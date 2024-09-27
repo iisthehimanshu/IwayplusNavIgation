@@ -1081,12 +1081,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     } else {
       markers.putIfAbsent(user.Bid, () => []);
       markers[user.Bid]?.add(Marker(
@@ -1095,12 +1097,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     }
   }
 
@@ -1616,12 +1620,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: LatLng(user.lat, user.lng),
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
       // }
 
       SingletonFunctionController.building.floor[userSetLocation.buildingID!] =
@@ -1931,12 +1937,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -1956,12 +1964,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2261,12 +2271,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -2286,12 +2298,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2594,12 +2608,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
             circles.add(
               Circle(
                 circleId: CircleId("circle"),
@@ -2620,12 +2636,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
           }
 
           if (widget.directLandID.length < 2) {
@@ -3060,12 +3078,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: userlocation,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     });
   }
 
@@ -9071,18 +9091,22 @@ setState(() {
                                                                 PathState
                                                                     .sourceBid]);
 
-                                                            markers[user.Bid]
-                                                                ?.add(Marker(
-                                                              markerId: MarkerId(
-                                                                  "debug"),
-                                                              position: LatLng(
-                                                                  val[0], val[1]),
-                                                              icon: BitmapDescriptor
-                                                                  .fromBytes(
-                                                                  userlocdebug),
-                                                              anchor: Offset(
-                                                                  0.5, 0.829),
-                                                            ));
+
+                                                            if (kDebugMode) {
+                                                              markers[user.Bid]
+                                                                  ?.add(Marker(
+                                                                markerId: MarkerId(
+                                                                    "debug"),
+                                                                position: LatLng(
+                                                                    val[0],
+                                                                    val[1]),
+                                                                icon: BitmapDescriptor
+                                                                    .fromBytes(
+                                                                    userlocdebug),
+                                                                anchor: Offset(
+                                                                    0.5, 0.829),
+                                                              ));
+                                                            }
                                                             // circles.add(
                                                             //   Circle(
                                                             //     circleId: CircleId("circle"),

@@ -480,8 +480,7 @@ UserState.geoLng=userLoc!.longitude;
                                 // For example, you can navigate to a new screen or perform some action
                                 // print("Tapped on item at index $index");
                                 buildingAllApi.setStoredVenue(currentData.venueName!);
-                                print("await HelperClass.getGeoFenced");
-                                print(await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!));
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

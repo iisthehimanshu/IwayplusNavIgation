@@ -164,7 +164,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-  wsocket soc = wsocket();
+  wsocket soc = wsocket('com.iwaypus.navigation');
   NotificationSocket notificationSocket = NotificationSocket();
   late AppLinks _appLinks;
 

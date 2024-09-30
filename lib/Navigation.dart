@@ -7198,11 +7198,13 @@ double? minDistance;
       String dBid = PathState.sourceBid;
       List<double> svalue = [];
       List<double> dvalue = [];
+      List<direction?> lifts = [];
       for (var res in result) {
         Map<String, dynamic> data = await res;
         List<int> path = await data["path"];
         PathState.singleListPath.insertAll(0, path);
         PathState.singleCellListPath.insertAll(0, data["CellPath"]);
+        lifts.add(data["lift"]);
         print(
             "PathState.singleCellListPath ${PathState.singleCellListPath.length}");
         if (data["CellPath"].last.floor == PathState.sourceFloor) {
@@ -7216,7 +7218,7 @@ double? minDistance;
           d[0], d[1], SingletonFunctionController.building.patchData[dBid]);
       setCameraPositionusingCoords(
           [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
-      createMarkersAndDirections(PathState.singleCellListPath);
+      createMarkersAndDirections(PathState.singleCellListPath,lifts);
 
       double time = 0;
       double distance = 0;
@@ -7347,7 +7349,8 @@ setState(() {
             PathState.destinationY,
             PathState.destinationFloor,
             bid: PathState.destinationBid,
-            liftName: commonlifts[0].name));
+            liftName: commonlifts[0].name,
+        nextFloor:PathState.sourceFloor ));
 
         fetchrouteFutures.add(() => fetchroute(
             PathState.sourceX,
@@ -7356,7 +7359,8 @@ setState(() {
             commonlifts[0].y1!,
             PathState.sourceFloor,
             bid: PathState.destinationBid,
-            liftName: commonlifts[0].name));
+            liftName: commonlifts[0].name,
+        nextFloor: PathState.destinationFloor,));
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -7427,7 +7431,8 @@ setState(() {
                 buildingEntry!.coordinateY!,
                 buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false));
+                renderDestination: false,
+            nextFloor: PathState.sourceFloor));
             fetchrouteFutures.add(() => fetchroute(
                   PathState.sourceX,
                   PathState.sourceY,
@@ -7435,6 +7440,7 @@ setState(() {
                   commonlifts[0].y1!,
                   PathState.sourceFloor,
                   bid: PathState.sourceBid,
+              nextFloor: buildingEntry!.floor!
                 ));
 
             PathState.connections[PathState.sourceBid] = {
@@ -7481,6 +7487,7 @@ setState(() {
                   PathState.sourceY,
                   PathState.sourceFloor,
                   bid: PathState.sourceBid,
+              nextFloor: buildingEntry!.floor!,
                 ));
 
             fetchrouteFutures.add(() => fetchroute(
@@ -7490,7 +7497,8 @@ setState(() {
                 commonlifts[0].y2!,
                 buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false));
+                renderDestination: false,
+            nextFloor: PathState.sourceFloor));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
@@ -7570,7 +7578,8 @@ setState(() {
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: PathState.destinationBid));
+              bid: PathState.destinationBid,
+          nextFloor: destinationEntry.floor!));
           fetchrouteFutures.add(() => fetchroute(
               destinationEntry.coordinateX!,
               destinationEntry.coordinateY!,
@@ -7578,7 +7587,8 @@ setState(() {
               commonlifts[0].y1!,
               destinationEntry.floor!,
               bid: PathState.destinationBid,
-              renderSource: false));
+              renderSource: false,
+          nextFloor: PathState.destinationFloor,));
 
           PathState.connections[PathState.destinationBid] = {
             destinationEntry.floor!: calculateindex(
@@ -7659,7 +7669,8 @@ setState(() {
               sourceEntry.coordinateY!,
               sourceEntry.floor!,
               bid: PathState.sourceBid,
-              renderDestination: false));
+              renderDestination: false,
+          nextFloor:PathState.sourceFloor));
           fetchrouteFutures.add(() => fetchroute(
                 PathState.sourceX,
                 PathState.sourceY,
@@ -7667,6 +7678,7 @@ setState(() {
                 commonlifts[0].y1!,
                 PathState.sourceFloor,
                 bid: PathState.sourceBid,
+            nextFloor: sourceEntry.floor!,
               ));
 
           PathState.connections[PathState.sourceBid] = {
@@ -7794,6 +7806,7 @@ setState(() {
   Future<Map<String, dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
+        int? nextFloor,
       String? liftName,
       bool renderSource = true,
       bool renderDestination = true}) async {
@@ -7808,7 +7821,7 @@ setState(() {
     PathState.numCols ??= {};
     PathState.numCols![bid!] = PathState.numCols![bid] ?? {};
     PathState.numCols![bid]![floor] = numCols;
-
+    direction? liftDirection;
     List<int> path = [];
 
     try {
@@ -7990,30 +8003,39 @@ setState(() {
           await getImagesFromMarker('assets/tealtorch.png', 35);
 
       if (liftName != null) {
-        innerMarker.add(Marker(
+
+        liftDirection = direction(
+            -1,
+            "Take ${liftName} and Go to ${nextFloor} Floor",
+            null,
+            null,
+            Cellpath.first.floor.toDouble(),
+            null,
+            null,
+            Cellpath.first.floor,
+            Cellpath.first.bid ?? "");
+
+        try{innerMarker.add(Marker(
           markerId: MarkerId("lift${bid}"),
           position: sourceX == PathState.sourceX
               ? LatLng(dvalue[0], dvalue[1])
               : LatLng(svalue[0], svalue[1]),
           icon: await CustomMarker(
-                  text:
-                      "To Floor ${sourceX == PathState.sourceX ? PathState.destinationFloor : PathState.sourceFloor}",
-                  dirIcon: (sourceX == PathState.sourceX)
-                      ? Icons.elevator_outlined
-                      : Icons.elevator_outlined)
+              text:
+              "To Floor ${nextFloor ?? floor}",
+              dirIcon: (sourceX == PathState.sourceX)
+                  ? Icons.elevator_outlined
+                  : Icons.elevator_outlined)
               .toBitmapDescriptor(
-                  logicalSize: const Size(150, 150),
-                  imageSize: const Size(300, 400)),
+              logicalSize: const Size(150, 150),
+              imageSize: const Size(300, 400)),
           anchor: Offset(0.0, 1.0),
           onTap: () {
             if (!user.isnavigating) {
               _polygon.clear();
               circles.clear();
               SingletonFunctionController
-                      .building.floor[buildingAllApi.getStoredString()] =
-                  PathState.sourceFloor == floor
-                      ? PathState.destinationFloor
-                      : PathState.sourceFloor;
+                  .building.floor[buildingAllApi.getStoredString()] = nextFloor ?? floor;
               createRooms(
                 SingletonFunctionController.building
                     .polylinedatamap[buildingAllApi.getStoredString()]!,
@@ -8029,7 +8051,9 @@ setState(() {
               });
             }
           },
-        ));
+        ));}catch(e){
+
+        }
       }
 
       setState(() {
@@ -8063,11 +8087,12 @@ setState(() {
       "CellPath": Cellpath,
       "liftName": liftName,
       "svalue": svalue,
-      "dvalue": dvalue
+      "dvalue": dvalue,
+      "lift": liftDirection
     };
   }
 
-  Future<void> createMarkersAndDirections(List<Cell> path,
+  Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
       {String? liftName}) async {
     await SingletonFunctionController.building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks =
@@ -8096,7 +8121,7 @@ setState(() {
               path.first.floor,
               path.first.bid ?? ""));
         }
-        directions.addAll(tools.getDirections(path, value, PathState, context));
+        directions.addAll(tools.getDirections(path, value, PathState, lifts, context));
         // directions.forEach((element) {
         //
         // });

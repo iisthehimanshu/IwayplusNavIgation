@@ -24,6 +24,8 @@
     </queries>
 
     <application
+        android:enableOnBackInvokedCallback="true"
+
         android:label="Iwayplus"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">

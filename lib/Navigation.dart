@@ -1081,12 +1081,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     } else {
       markers.putIfAbsent(user.Bid, () => []);
       markers[user.Bid]?.add(Marker(
@@ -1095,12 +1097,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: Location,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: Location,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     }
   }
 
@@ -1170,7 +1174,7 @@ double pixelRatio = MediaQuery.of(context).devicePixelRatio;
         setState(() {
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-            target:(UserState.isTurn || onStart==false)?mapState.target:newCameraTarget,
+            target:(UserState.isTurn || onStart==false)?mapState.target:mapState.target,
             zoom: mapState.zoom,
             bearing: mapState.bearing!??0,
             tilt: mapState.tilt,
@@ -1616,12 +1620,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: LatLng(user.lat, user.lng),
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
       // }
 
       SingletonFunctionController.building.floor[userSetLocation.buildingID!] =
@@ -1931,12 +1937,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -1956,12 +1964,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2261,12 +2271,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
           circles.add(
             Circle(
               circleId: CircleId("circle"),
@@ -2286,12 +2298,14 @@ double? minDistance;
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
+          if (kDebugMode) {
+            markers[user.Bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
         }
 
         SingletonFunctionController.building
@@ -2594,12 +2608,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
             circles.add(
               Circle(
                 circleId: CircleId("circle"),
@@ -2620,12 +2636,14 @@ double? minDistance;
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
+            if (kDebugMode) {
+              markers[user.Bid]?.add(Marker(
+                markerId: MarkerId("debug"),
+                position: LatLng(user.lat, user.lng),
+                icon: BitmapDescriptor.fromBytes(userlocdebug),
+                anchor: Offset(0.5, 0.829),
+              ));
+            }
           }
 
           if (widget.directLandID.length < 2) {
@@ -3060,12 +3078,14 @@ double? minDistance;
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      markers[user.Bid]?.add(Marker(
-        markerId: MarkerId("debug"),
-        position: userlocation,
-        icon: BitmapDescriptor.fromBytes(userlocdebug),
-        anchor: Offset(0.5, 0.829),
-      ));
+      if (kDebugMode) {
+        markers[user.Bid]?.add(Marker(
+          markerId: MarkerId("debug"),
+          position: userlocation,
+          icon: BitmapDescriptor.fromBytes(userlocdebug),
+          anchor: Offset(0.5, 0.829),
+        ));
+      }
     });
   }
 
@@ -3577,7 +3597,6 @@ double? minDistance;
       localizeUser();
     } else {
       print("apicalls testing 10");
-      SingletonFunctionController.btadapter.stopScanning();
       //got here using a destination qr
       localizeUser(speakTTS: false);
       onLandmarkVenueClicked(widget.directLandID,
@@ -4492,98 +4511,160 @@ double? minDistance;
 
   Future<void> setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
       {List<LatLng>? selectedroomMarker2 = null}) async {
-    double minLat = double.infinity;
-    double minLng = double.infinity;
-    double maxLat = double.negativeInfinity;
-    double maxLng = double.negativeInfinity;
+    if(Platform.isAndroid){
+      double minLat = double.infinity;
+      double minLng = double.infinity;
+      double maxLat = double.negativeInfinity;
+      double maxLng = double.negativeInfinity;
 
-    if (selectedroomMarker2 == null) {
-      for (LatLng marker in selectedroomMarker1) {
-        double lat = marker.latitude;
-        double lng = marker.longitude;
+      if (selectedroomMarker2 == null) {
+        for (LatLng marker in selectedroomMarker1) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
 
-        minLat = math.min(minLat, lat);
-        minLng = math.min(minLng, lng);
-        maxLat = math.max(maxLat, lat);
-        maxLng = math.max(maxLng, lng);
-      }
-      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
-      LatLng center = LatLng(
-        (minLat + maxLat) / 2,
-        (minLng + maxLng) / 2,
-      );
-      LatLngBounds bounds = LatLngBounds(
-        southwest: LatLng(minLat, minLng),
-        northeast: LatLng(maxLat, maxLng),
-      );
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
 
-      await _googleMapController.animateCamera(
-        CameraUpdate.newLatLngBounds(
-          bounds,
-          60.0, // padding to adjust the bounding box on the screen
-        ),
-      );
-      await Future.delayed(Duration(milliseconds: 100));
+        LatLngBounds bounds = LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        );
 
-      _googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: center,
-            zoom: await _googleMapController.getZoomLevel(),
-            bearing: bearing,
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            bounds,
+            200.0, // padding to adjust the bounding box on the screen
           ),
-        ),
-      );
+        );
+      } else {
+        for (LatLng marker in selectedroomMarker1) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
 
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
+        for (LatLng marker in selectedroomMarker2) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
 
-    } else {
-      for (LatLng marker in selectedroomMarker1) {
-        double lat = marker.latitude;
-        double lng = marker.longitude;
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
 
-        minLat = math.min(minLat, lat);
-        minLng = math.min(minLng, lng);
-        maxLat = math.max(maxLat, lat);
-        maxLng = math.max(maxLng, lng);
-      }
-      for (LatLng marker in selectedroomMarker2) {
-        double lat = marker.latitude;
-        double lng = marker.longitude;
+        LatLngBounds bounds = LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        );
 
-        minLat = math.min(minLat, lat);
-        minLng = math.min(minLng, lng);
-        maxLat = math.max(maxLat, lat);
-        maxLng = math.max(maxLng, lng);
-      }
-
-      double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
-      LatLng center = LatLng(
-        (minLat + maxLat) / 2,
-        (minLng + maxLng) / 2,
-      );
-
-      LatLngBounds bounds = LatLngBounds(
-        southwest: LatLng(minLat, minLng),
-        northeast: LatLng(maxLat, maxLng),
-      );
-
-      await _googleMapController.animateCamera(
-        CameraUpdate.newLatLngBounds(
-          bounds,
-          60.0, // padding to adjust the bounding box on the screen
-        ),
-      );
-      await Future.delayed(Duration(milliseconds: 100));
-       _googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: center,
-            zoom: await _googleMapController.getZoomLevel(),
-            bearing: bearing,
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            bounds,
+            200.0, // padding to adjust the bounding box on the screen
           ),
-        ),
-      );
+        );
+      }
+    }else{
+      double minLat = double.infinity;
+      double minLng = double.infinity;
+      double maxLat = double.negativeInfinity;
+      double maxLng = double.negativeInfinity;
 
+      if (selectedroomMarker2 == null) {
+        for (LatLng marker in selectedroomMarker1) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
+
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
+        double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+        LatLng center = LatLng(
+          (minLat + maxLat) / 2,
+          (minLng + maxLng) / 2,
+        );
+        LatLngBounds bounds = LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        );
+
+        await _googleMapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            bounds,
+            60.0, // padding to adjust the bounding box on the screen
+          ),
+        );
+        await Future.delayed(Duration(milliseconds: 100));
+
+        _googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: center,
+              zoom: await _googleMapController.getZoomLevel(),
+              bearing: bearing,
+            ),
+          ),
+        );
+
+
+      } else {
+        for (LatLng marker in selectedroomMarker1) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
+
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
+        for (LatLng marker in selectedroomMarker2) {
+          double lat = marker.latitude;
+          double lng = marker.longitude;
+
+          minLat = math.min(minLat, lat);
+          minLng = math.min(minLng, lng);
+          maxLat = math.max(maxLat, lat);
+          maxLng = math.max(maxLng, lng);
+        }
+
+        double bearing = tools.calculateBearing_fromLatLng(selectedroomMarker1.first, selectedroomMarker1.last);
+        LatLng center = LatLng(
+          (minLat + maxLat) / 2,
+          (minLng + maxLng) / 2,
+        );
+
+        LatLngBounds bounds = LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        );
+
+        await _googleMapController.animateCamera(
+          CameraUpdate.newLatLngBounds(
+            bounds,
+            60.0, // padding to adjust the bounding box on the screen
+          ),
+        );
+        await Future.delayed(Duration(milliseconds: 100));
+        _googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: center,
+              zoom: await _googleMapController.getZoomLevel(),
+              bearing: bearing,
+            ),
+          ),
+        );
+
+      }
     }
   }
 
@@ -9072,18 +9153,22 @@ setState(() {
                                                                 PathState
                                                                     .sourceBid]);
 
-                                                            markers[user.Bid]
-                                                                ?.add(Marker(
-                                                              markerId: MarkerId(
-                                                                  "debug"),
-                                                              position: LatLng(
-                                                                  val[0], val[1]),
-                                                              icon: BitmapDescriptor
-                                                                  .fromBytes(
-                                                                  userlocdebug),
-                                                              anchor: Offset(
-                                                                  0.5, 0.829),
-                                                            ));
+
+                                                            if (kDebugMode) {
+                                                              markers[user.Bid]
+                                                                  ?.add(Marker(
+                                                                markerId: MarkerId(
+                                                                    "debug"),
+                                                                position: LatLng(
+                                                                    val[0],
+                                                                    val[1]),
+                                                                icon: BitmapDescriptor
+                                                                    .fromBytes(
+                                                                    userlocdebug),
+                                                                anchor: Offset(
+                                                                    0.5, 0.829),
+                                                              ));
+                                                            }
                                                             // circles.add(
                                                             //   Circle(
                                                             //     circleId: CircleId("circle"),
@@ -9780,7 +9865,7 @@ if(Platform.isAndroid){
     setState(() {
       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: (onStart==false)?mapState.target:newCameraTarget,
+            target: (onStart==false)?mapState.target:mapState.target,
             zoom: mapState.zoom,
             bearing: mapState.bearing!,
             tilt: mapState.tilt),

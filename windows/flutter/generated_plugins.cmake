@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  connectivity_plus
   firebase_core
   flutter_localization
   flutter_tts

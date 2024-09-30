@@ -4,13 +4,14 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 class wsocket{
+  static String appID='';
   static final channel = io.io('https://dev.iwayplus.in', <String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
 //message ["userId"]=123456;
   static Map message = {
-
+    'appId':appID,
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -50,7 +51,8 @@ class wsocket{
   };
 
 
-  wsocket(){
+  wsocket(String appid){
+appID=appid;
     channel.connect();
 
   }

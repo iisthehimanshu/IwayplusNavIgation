@@ -19,13 +19,16 @@ class LocalNotificationAPI{
 
 
   Future<List<NotificationsInLocalNotificationModule>> getNotifications()async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
+    ConnectivityResult connectivityResult = await (Connectivity().checkConnectivity());
     bool deviceConnected = false;
-    if(connectivityResult.contains(ConnectivityResult.mobile)){
-      deviceConnected = true;
-    }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
-      deviceConnected = true;
-    }
+    print("connectivity result");
+    print(connectivityResult.name);
+
+    // if(connectivityResult.contains(ConnectivityResult.mobile)){
+    //   deviceConnected = true;
+    // }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
+    //   deviceConnected = true;
+    // }
 
     if(!deviceConnected && NotifiBox.containsKey("com.iwayplus.navigation")){
       print("LocalNotificationAPI DATA FROM DATABASE");

@@ -18,21 +18,16 @@ class LocalNotificationAPI{
   final NotifiBox = LocalNotificationAPIDatabaseModelBOX.getData();
 
 
-
-
   Future<List<NotificationsInLocalNotificationModule>> getNotifications()async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     bool deviceConnected = false;
-    print("connectivityResult");
     if(connectivityResult.contains(ConnectivityResult.mobile)){
       deviceConnected = true;
     }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
       deviceConnected = true;
     }
 
-
-
-    if(!deviceConnected){
+    if(!deviceConnected && NotifiBox.containsKey("com.iwayplus.navigation")){
       print("LocalNotificationAPI DATA FROM DATABASE");
       Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.navigation")!.responseBody;
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);

@@ -1382,7 +1382,6 @@ double? minDistance;
           _magnetometerSubscription.cancel();
           accuracyNotifier.value = false;
         });
-
         //showLowAccuracyDialog();
         _timerCompass?.cancel();
       }
@@ -2422,7 +2421,8 @@ double? minDistance;
           ),
         );
       }
-    } else {
+    }
+    else {
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
 
       if (SingletonFunctionController.apibeaconmap[nearestBeacon] != null) {
@@ -2768,6 +2768,14 @@ double? minDistance;
             ),
           );
         }
+
+        if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
+          UserState.lowCompassAccuracy=true;
+          speak(
+              "low accuracy found.Please calibrate your device",
+              _currentLocale);
+          showLowAccuracyDialog();
+        }
       } else {
         if (speakTTS) {
           speak("${LocaleData.unabletofindyourlocation.getString(context)}",
@@ -2776,6 +2784,8 @@ double? minDistance;
           SingletonFunctionController.building.qrOpened = true;
         }
       }
+
+
     }
   }
 
@@ -6925,36 +6935,36 @@ double? minDistance;
                         setState(() {
                           calculatingPath = true;
                         });
-                        bool calibrate = isCalibrationNeeded(magneticValues);
-                        print("calibrate1");
-                        print(calibrate);
-                        if (calibrate == true) {
-                          setState(() {
-                            accuracy = true;
-                          });
-                          speak(
-                              "low accuracy found.Please calibrate your device",
-                              _currentLocale);
-                          showLowAccuracyDialog();
-                          magneticValues.clear();
-                          listenToMagnetometer();
-                          _timerCompass =
-                              Timer.periodic(Duration(seconds: 1), (timer) {
-                                calibrate = isCalibrationNeeded(magneticValues);
-                                print("calibrate2");
-                                print(calibrate);
-                                if (calibrate == false) {
-                                  setState(() {
-                                    accuracy = false;
-                                  });
-                                  magneticValues.clear();
-                                  _timerCompass?.cancel();
-                                } else {
-                                  listenToMagnetometeronCalibration();
-                                  _timerCompass?.cancel();
-                                }
-                              });
-                        }
+                        // bool calibrate = isCalibrationNeeded(magneticValues);
+                        // print("calibrate1");
+                        // print(calibrate);
+                        // if (calibrate == true) {
+                        //   setState(() {
+                        //     accuracy = true;
+                        //   });
+                        //   speak(
+                        //       "low accuracy found.Please calibrate your device",
+                        //       _currentLocale);
+                        //   showLowAccuracyDialog();
+                        //   magneticValues.clear();
+                        //   listenToMagnetometer();
+                        //   _timerCompass =
+                        //       Timer.periodic(Duration(seconds: 1), (timer) {
+                        //         calibrate = isCalibrationNeeded(magneticValues);
+                        //         print("calibrate2");
+                        //         print(calibrate);
+                        //         if (calibrate == false) {
+                        //           setState(() {
+                        //             accuracy = false;
+                        //           });
+                        //           magneticValues.clear();
+                        //           _timerCompass?.cancel();
+                        //         } else {
+                        //           listenToMagnetometeronCalibration();
+                        //           _timerCompass?.cancel();
+                        //         }
+                        //       });
+                        // }
 
                         Future.delayed(Duration(seconds: 1), () {
                           calculateroute(snapshot.data!.landmarksMap!)
@@ -9522,6 +9532,30 @@ setState(() {
                         ),
                       )),
           ),
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(width: screenWidth,height: 90,color: Colors.white,child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        child: Text('Map'),
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        child: Text('Start'),
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+              ),))
         ],
       ),
     );

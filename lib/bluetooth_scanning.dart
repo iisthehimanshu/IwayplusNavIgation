@@ -79,7 +79,7 @@ class BLueToothClass {
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-      // print("himanshu 4");
+      // print("himanshu 4 $apibeaconmap");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
         //  print("himanshu 5 ${result}");
@@ -88,7 +88,7 @@ class BLueToothClass {
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
-            print("mac1 $MacId    rssi $Rssi");
+            //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes

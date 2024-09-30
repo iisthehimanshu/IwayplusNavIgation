@@ -2768,14 +2768,15 @@ double? minDistance;
             ),
           );
         }
-
-        if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
-          UserState.lowCompassAccuracy=true;
-          speak(
-              "low accuracy found.Please calibrate your device",
-              _currentLocale);
-          showLowAccuracyDialog();
-        }
+        Future.delayed(Duration(milliseconds: 3000)).then((value){
+          if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
+            UserState.lowCompassAccuracy=true;
+            speak(
+                "low accuracy found.Please calibrate your device",
+                _currentLocale);
+            showLowAccuracyDialog();
+          }
+        });
       } else {
         if (speakTTS) {
           speak("${LocaleData.unabletofindyourlocation.getString(context)}",
@@ -9532,30 +9533,6 @@ setState(() {
                         ),
                       )),
           ),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(width: screenWidth,height: 90,color: Colors.white,child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        child: Text('Map'),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        child: Text('Start'),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                      ),
-                    ),
-                  ],
-                ),
-              ),))
         ],
       ),
     );

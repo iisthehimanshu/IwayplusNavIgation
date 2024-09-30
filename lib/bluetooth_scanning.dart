@@ -82,7 +82,7 @@ class BLueToothClass {
       // print("himanshu 4");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
-          print("himanshu 5 ${result}");
+        //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;

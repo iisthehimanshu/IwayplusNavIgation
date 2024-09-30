@@ -31,6 +31,7 @@ class UserState {
   int showcoordX;
   int showcoordY;
   static bool isTurn=false;
+  static bool lowCompassAccuracy=false;
   pathState pathobj = pathState();
   List<int> path = [];
   List<Cell> Cellpath = [];

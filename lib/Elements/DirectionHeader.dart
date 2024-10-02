@@ -316,22 +316,48 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         
         
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
-          
+
 
           //widget.user.pathobj.destinationFloor
           if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor!=widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
-            widget.user.onConnection = false;
-            
-            widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-            UserState.createCircle(widget.user.lat,widget.user.lng);
-            speak(
-                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
-                _currentLocale
-            );
-            DirectionIndex = nextTurnIndex;
-            //need to render on beacon for aiims jammu
-            widget.paint(nearestBeacon,render: false);
-            return true;
+            List<int> beaconcoord = [
+              Building.apibeaconmap[nearestBeacon]!.coordinateX!,
+              Building.apibeaconmap[nearestBeacon]!.coordinateY!
+            ];
+            int distanceFromPath = 100000000;
+            widget.user.Cellpath.forEach((node) {
+              if(node.floor == Building.apibeaconmap[nearestBeacon]!.floor || node.bid == Building.apibeaconmap[nearestBeacon]!.buildingID){
+                List<int> pathcoord = [node.x,node.y];
+                double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+                if (d1 < distanceFromPath) {
+                  distanceFromPath = d1.toInt();
+                }
+              }
+            });
+
+            if (distanceFromPath > 10) {
+              print("calling expected function22");
+              _timer.cancel();
+              widget.repaint(nearestBeacon);
+              widget.reroute;
+              DirectionIndex = 1;
+              nextTurnIndex = 1;
+              return false; //away from path
+            }else{
+              widget.user.onConnection = false;
+
+              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+              UserState.createCircle(widget.user.lat,widget.user.lng);
+              speak(
+                  "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                  _currentLocale
+              );
+              DirectionIndex = nextTurnIndex;
+              //need to render on beacon for aiims jammu
+              print("calling expected function");
+              widget.paint(nearestBeacon,render: false);
+              return true;
+            }
           }
 
           // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
@@ -361,24 +387,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             int? indexOnPath = null;
             int numCols = widget.user.pathobj.numCols![widget.user
                 .Bid]![widget.user.floor]!;
-            widget.user.path.forEach((node) {
-              List<int> pathcoord = [node % numCols, node ~/ numCols];
+            widget.user.Cellpath.forEach((node) {
+              List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
               if (d1 < distanceFromPath) {
                 distanceFromPath = d1.toInt();
                 //
                 //
-                indexOnPath = widget.user.path.indexOf(node);
+                indexOnPath = widget.user.path.indexOf(node.node);
                 //
               }
             });
 
             if (distanceFromPath > 10) {
-              
+              print("calling expected function22");
               _timer.cancel();
               widget.repaint(nearestBeacon);
               widget.reroute;
               DirectionIndex = 1;
+              nextTurnIndex = 1;
               return false; //away from path
             } else {
               double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
@@ -459,6 +486,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
         //
         if(highestweight>1.2){
+          print("calling expected function 3");
           _timer.cancel();
           widget.repaint(nearestBeacon);
           widget.reroute;
@@ -789,7 +817,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       return Icon(
         Icons.elevator,
         color: Color(0xff01544f),
-        size: 23,
+        size: 32,
       );
     }else if(direction.toLowerCase().contains("stair")){
       return Icon(
@@ -1069,21 +1097,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   ),
           // ),
 
-          // Container(
-          //   width: 300,
-          //   height: 100,
-          //   child: SingleChildScrollView(
-          //     scrollDirection: Axis.horizontal,
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //
-          //         Text(sumMap.toString()),
-          //
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Container(
+            width: 300,
+            height: 100,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  Text(sumMap.toString()),
+
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -1043,13 +1043,21 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<Cell> path,Map<int,Landmarks> associateTurnWithLandmark,pathState PathState,context) {
+  static List<direction> getDirections(List<Cell> path,Map<int,Landmarks> associateTurnWithLandmark,pathState PathState,List<direction?> lifts, context) {
+    print("liftdirection checker in tools $lifts");
     List<Cell> turns = tools.getTurnpoints_inCell(path);
     turns.insert(0, path[0]);
     turns.add(path.last);
     double Nextdistance = tools.calculateDistance([turns[0].x,turns[0].y], [turns[1].x,turns[1].y]);
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
     for(int i = 1 ; i<turns.length-1 ; i++){
+      if(turns[i].bid != turns[i-1].bid || turns[i].floor != turns[i-1].floor){
+        if(lifts.last != null){
+          Directions.insert(Directions.length-1, lifts.removeLast()!);
+        }else{
+          lifts.removeLast();
+        }
+      }
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);

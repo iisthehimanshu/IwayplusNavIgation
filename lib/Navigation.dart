@@ -9532,30 +9532,30 @@ setState(() {
                         ),
                       )),
           ),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(width: screenWidth,height: 90,color: Colors.white,child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        child: Text('Map'),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        child: Text('Start'),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                      ),
-                    ),
-                  ],
-                ),
-              ),))
+          // Align(
+          //     alignment: Alignment.bottomCenter,
+          //     child: Container(width: screenWidth,height: 90,color: Colors.white,child: Padding(
+          //       padding: const EdgeInsets.all(16.0),
+          //       child: Row(
+          //         children: [
+          //           Expanded(
+          //             child: ElevatedButton(
+          //               child: Text('Map'),
+          //               onPressed: () {},
+          //               style: ElevatedButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white),
+          //             ),
+          //           ),
+          //           SizedBox(width: 16),
+          //           Expanded(
+          //             child: ElevatedButton(
+          //               child: Text('Start'),
+          //               onPressed: () {},
+          //               style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //     ),))
         ],
       ),
     );
@@ -10023,25 +10023,22 @@ bool onStart=false;
 
           List<int> c = [node % col, node ~/ col];
           int val = tools.calculateAngleSecond(a, b, c).toInt();
-          //
 
-          //
-          //
+          try {
+            if (user.Bid == buildingAllApi.outdoorID) {
+              double a = user.theta<0?user.theta+360:user.theta;
+              val = (tools.calculateBearing_fromLatLng(
+                  LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
+                  LatLng(user.Cellpath[index + 1].lat,
+                      user.Cellpath[index + 1].lng)) - a).toInt().abs();
+              if(val<10 || val>-10){
+                val = 0;
+              }
+            }
+          }catch(_){}
 
-          //
             for (int i = 0; i < getPoints.length; i++) {
-              //
-              //
-              //
-              //
-              //
-
-              //
-
-              //
               if (isPdrStop && val == 0) {
-                //
-
                 Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                       StartPDR(),
                     });
@@ -12441,6 +12438,8 @@ bool onStart=false;
   @override
   void dispose() {
     disposed = true;
+    UserState.geoLat=0.0;
+    UserState.geoLng=0.0;
     flutterTts.stop();
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();

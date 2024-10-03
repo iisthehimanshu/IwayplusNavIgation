@@ -245,7 +245,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     btadapter.emptyBin();
     btadapter.priorityQueue.clear();
-    // btadapter.stopScanning();
+    btadapter.stopScanning();
      btadapter.startScanning(Building.apibeaconmap);
 
     // sortedsumMap.entries.forEach((element) {
@@ -1097,21 +1097,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   ),
           // ),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  Text(sumMap.toString()),
-
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //
+          //         Text(sumMap.toString()),
+          //
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

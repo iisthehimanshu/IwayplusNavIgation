@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/pathState.dart';
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
@@ -1706,6 +1707,12 @@ class tools {
 
 
     for(int i=1;i<pathNodes.length-1;i++){
+
+
+      if(pathNodes[i].bid == buildingAllApi.outdoorID){
+        res.add(pathNodes[i]);
+        continue;
+      }
 
 
 

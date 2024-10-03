@@ -295,7 +295,7 @@ if(userLoc!=null){
             ),
           ),
           centerTitle: true,
-          leading: ExcludeSemantics(
+          leading: Semantics(
             child: EasterEggTrigger(
               child: Container(
                 alignment: Alignment.centerRight,

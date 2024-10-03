@@ -245,7 +245,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     btadapter.emptyBin();
     btadapter.priorityQueue.clear();
-    // btadapter.stopScanning();
+    btadapter.stopScanning();
      btadapter.startScanning(Building.apibeaconmap);
 
     // sortedsumMap.entries.forEach((element) {

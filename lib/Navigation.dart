@@ -611,10 +611,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     )..repeat(reverse: true);
 
     // Create the animation
-    _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
-      ..addListener(() {
-        _updateCircle(user.lat, user.lng);
-      });
+    // _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+    //   ..addListener(() {
+    //     _updateCircle(user.lat, user.lng);
+    //   });
 
     SingletonFunctionController.building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
@@ -1286,7 +1286,8 @@ double? minDistance;
    await SingletonFunctionController.building.landmarkdata!.then((value) {
       value.landmarks?.forEach((value){
         if(value.buildingID==buildingAllApi.outdoorID){
-          if(value.coordinateX!=null && value.coordinateY!=null){
+          if(value.coordinateX!=null && value.coordinateY!=null && !value.wasPolyIdNull!){
+
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
               double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
             if (dist <=25) {
@@ -1952,6 +1953,7 @@ double? minDistance;
               strokeWidth: 1,
               strokeColor: Colors.blue,
               fillColor: Colors.lightBlue.withOpacity(0.2),
+              zIndex: 1
             ),
           );
         } else {
@@ -2087,7 +2089,8 @@ double? minDistance;
           ),
         );
       }
-    } else if ((nearestBeacon == null || nearestBeacon.isEmpty) &&
+    }
+    else if ((nearestBeacon == null || nearestBeacon.isEmpty) &&
         latlngLandmark != null &&
         polyID == null) {
       Landmarks userSetLocation = latlngLandmark;
@@ -2286,6 +2289,7 @@ double? minDistance;
               strokeWidth: 1,
               strokeColor: Colors.blue,
               fillColor: Colors.lightBlue.withOpacity(0.2),
+              zIndex: 1
             ),
           );
         } else {
@@ -2597,6 +2601,17 @@ double? minDistance;
         user.key =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
         user.initialallyLocalised = true;
+        _controller = AnimationController(
+          vsync: this,
+          duration: const Duration(seconds: 3),
+        )..repeat(reverse: true);
+
+        // Create the animation
+        print("calledddd");
+        _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+          ..addListener(() {
+            _updateCircle(user.lat, user.lng);
+          });
         setState(() {
           markers.clear();
           //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
@@ -2624,6 +2639,7 @@ double? minDistance;
                 strokeWidth: 1,
                 strokeColor: Colors.blue,
                 fillColor: Colors.lightBlue.withOpacity(0.2),
+                zIndex: 5
               ),
             );
           } else {
@@ -2768,7 +2784,7 @@ double? minDistance;
             ),
           );
         }
-
+      Future.delayed(Duration(seconds: 3)).then((value){
         if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
           UserState.lowCompassAccuracy=true;
           speak(
@@ -2776,6 +2792,8 @@ double? minDistance;
               _currentLocale);
           showLowAccuracyDialog();
         }
+      });
+
       } else {
         if (speakTTS) {
           speak("${LocaleData.unabletofindyourlocation.getString(context)}",
@@ -3656,6 +3674,7 @@ double? minDistance;
       strokeWidth: 1,
       strokeColor: Colors.blue,
       fillColor: Colors.lightBlue.withOpacity(0.2),
+      zIndex: 5
     );
     if (mounted) {
       setState(() {
@@ -3726,7 +3745,6 @@ double? minDistance;
     double highestweight = 0;
     String nearestBeacon = "";
 
-    if (await FlutterBluePlus.isOn) {
       for (int i = 0;
           i < SingletonFunctionController.btadapter.BIN.length;
           i++) {
@@ -3743,7 +3761,7 @@ double? minDistance;
           break;
         }
       }
-    }
+
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
@@ -3770,9 +3788,9 @@ double? minDistance;
           Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
     paintUser(nearestBeacon, speakTTS: speakTTS);
-    Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-          _controller.stop(),
-        });
+    // Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+    //       _controller.stop(),
+    //     });
 
     //emptying the bin manually
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
@@ -3900,6 +3918,7 @@ double? minDistance;
               consumeTapEvents: true,
               zIndex: -1),
         );
+        cachedPolygon.clear();
       });
 
       try {
@@ -3980,6 +3999,7 @@ double? minDistance;
               consumeTapEvents: true,
               zIndex: -1),
         );
+        cachedPolygon.clear();
       });
     }
   }
@@ -4079,6 +4099,7 @@ double? minDistance;
 
               ),
             );
+            cachedPolygon.clear();
           });
         }
         Building.allBuildingID.forEach((Key,Value) async {
@@ -4176,6 +4197,7 @@ double? minDistance;
             zIndex: 5,
           ),
         );
+        cachedPolygon.clear();
       });
     }
   }
@@ -4233,6 +4255,7 @@ double? minDistance;
               consumeTapEvents: true,
               zIndex: -1),
         );
+        cachedPolygon.clear();
       });
     }
   }
@@ -4271,6 +4294,7 @@ double? minDistance;
               consumeTapEvents: true,
               zIndex: -1),
         );
+        cachedPolygon.clear();
       });
     }
   }
@@ -4289,8 +4313,10 @@ double? minDistance;
           : Colors.lightBlueAccent.withOpacity(0.4),
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
-    )); // Clear existing markers
+    ));
 
+    // Clear existing markers
+cachedPolygon.clear();
     List<geo.LatLng> points = [];
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
@@ -5329,6 +5355,7 @@ double? minDistance;
         }
       }
     });
+    cachedPolygon.clear();
     return;
   }
 
@@ -6221,6 +6248,7 @@ double? minDistance;
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
+                          cachedPolygon.clear();
                           //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
@@ -6268,6 +6296,7 @@ double? minDistance;
                         onPressed: () {
                           _polygon.clear();
                           //  circles.clear();
+                          cachedPolygon.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -6896,6 +6925,7 @@ double? minDistance;
                     onPressed: () async {
                       _polygon.clear();
                       // circles.clear();
+                      cachedPolygon.clear();
                       Markers.clear();
 
                       if (user.coordY != 0 && user.coordX != 0) {
@@ -8043,6 +8073,7 @@ setState(() {
           onTap: () {
             if (!user.isnavigating) {
               _polygon.clear();
+              cachedPolygon.clear();
               circles.clear();
               SingletonFunctionController
                   .building.floor[buildingAllApi.getStoredString()] = nextFloor ?? floor;
@@ -8534,6 +8565,9 @@ setState(() {
                                 ),
                               ),
                               onTap: () {
+                                // setState(() {
+                                //   startingNavigation=false;
+                                // });
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -8573,6 +8607,9 @@ setState(() {
                                 ),
                               ),
                               onTap: () {
+                                // setState(() {
+                                //   startingNavigation=false;
+                                // });
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -11790,12 +11827,21 @@ bool onStart=false;
     return combinedMarkers;
   }
 
+  Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
-    Set<Polygon> polygons = Set();
-    closedpolygons.forEach((key, value) {
-      polygons = polygons.union(value);
-    });
-    return polygons;
+    if(cachedPolygon.isEmpty){
+      Set<Polygon> polygons = Set();
+      closedpolygons.forEach((key, value) {
+        polygons = polygons.union(value);
+      });
+      polygons.union(otherpatch);
+      polygons.union(_polygon);
+      polygons.union(blurPatch);
+      polygons.union(patch);
+      cachedPolygon = polygons;
+      return polygons;
+    }
+    return cachedPolygon;
   }
 
   Set<gmap.Polyline> getCombinedPolylines() {
@@ -12081,6 +12127,7 @@ bool onStart=false;
           strokeColor: Colors.blue,
           strokeWidth: 2,
         ));
+        cachedPolygon.clear();
       } catch (e) {}
 
       _googleMapController.animateCamera(
@@ -12610,114 +12657,111 @@ bool onStart=false;
                 ? Semantics(excludeSemantics: true, child: ExploreModePannel())
                 : Semantics(excludeSemantics: true, child: Container()),
             Stack(children: [
-              Semantics(
-                excludeSemantics: true,
-                child: Container(
-                  child: GoogleMap(
-                    padding:
-                        EdgeInsets.only(left: 20), // <--- padding added here
-                    initialCameraPosition: _initialCameraPosition,
-                    // myLocationButtonEnabled: true,
-                    // myLocationEnabled: true,
-                    zoomControlsEnabled: false,
-                    zoomGesturesEnabled: true,
-                    mapToolbarEnabled: false,
-                    // circles: _userLocation != null && _accuracy != null
-                    //     ? {
-                    //   Circle(
-                    //     circleId: CircleId('accuracyCircle'),
-                    //     center: _userLocation!,
-                    //     radius: _accuracy!,  // Draw accuracy circle
-                    //     strokeColor: Colors.blueAccent,
-                    //     fillColor: Colors.blueAccent.withOpacity(0.2),
-                    //     strokeWidth: 1,
-                    //   )
-                    // }
-                    //     : {},
+              Container(
+                child: GoogleMap(
+                  padding:
+                      EdgeInsets.only(left: 20), // <--- padding added here
+                  initialCameraPosition: _initialCameraPosition,
+                  // myLocationButtonEnabled: true,
+                  // myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  mapToolbarEnabled: false,
+                  // circles: _userLocation != null && _accuracy != null
+                  //     ? {
+                  //   Circle(
+                  //     circleId: CircleId('accuracyCircle'),
+                  //     center: _userLocation!,
+                  //     radius: _accuracy!,  // Draw accuracy circle
+                  //     strokeColor: Colors.blueAccent,
+                  //     fillColor: Colors.blueAccent.withOpacity(0.2),
+                  //     strokeWidth: 1,
+                  //   )
+                  // }
+                  //     : {},
 
-                    polygons: patch
-                        .union(getCombinedPolygons())
-                        .union(otherpatch)
-                        .union(_polygon)
-                        .union(blurPatch),
-                    polylines: getCombinedPolylines(),
-                    markers: getCombinedMarkers()
-                        .union(_markers)
-                        .union(focusturnArrow)
-                        .union(Markers)
-                        .union(restBuildingMarker),
-                    onTap: (x) {
-                      mapState.interaction = true;
-                    },
-                    mapType: MapType.normal,
-                    buildingsEnabled: false,
-                    compassEnabled: true,
-                    rotateGesturesEnabled: true,
-                    minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                    onMapCreated: (controller) {
-                      controller.setMapStyle(maptheme);
-                      _googleMapController = controller;
-                      zoomWhileWait(buildingAllApi.allBuildingID, controller);
+                  polygons: patch
+                      .union(getCombinedPolygons())
+                      .union(otherpatch)
+                      .union(_polygon)
+                      .union(blurPatch),
+                  polylines: getCombinedPolylines(),
+                  markers: getCombinedMarkers()
+                      .union(_markers)
+                      .union(focusturnArrow)
+                      .union(Markers)
+                      .union(restBuildingMarker),
+                  onTap: (x) {
+                    mapState.interaction = true;
+                  },
+                  mapType: MapType.normal,
+                  buildingsEnabled: false,
+                  compassEnabled: true,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller) {
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    zoomWhileWait(buildingAllApi.allBuildingID, controller);
 
-                      _initMarkers();
-                    },
-                    onCameraMove: (CameraPosition cameraPosition) {
+                    _initMarkers();
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
 
-                      if(cameraPosition.zoom>15.5){
-                        focusBuildingChecker(cameraPosition);
-                      }else{
-                        renderCampusPatchTransition(buildingAllApi.outdoorID);
-                      }
+                    if(cameraPosition.zoom>15.5){
+                      focusBuildingChecker(cameraPosition);
+                    }else{
+                      renderCampusPatchTransition(buildingAllApi.outdoorID);
+                    }
 
 
-                      if (cameraPosition.target.latitude.toStringAsFixed(5) !=
-                          mapState.target.latitude.toStringAsFixed(5)) {
-                        mapState.aligned = false;
-                      } else {
-                        mapState.aligned = true;
-                      }
-                      mapState.interaction = true;
-                      mapbearing = cameraPosition.bearing;
-                      if (!mapState.interaction) {
-                        mapState.zoom = cameraPosition.zoom;
-                      }
-                      if (true) {
-                        _updateMarkers(cameraPosition.zoom);
-                        //_updateBuilding(cameraPosition.zoom);
-                      }
-                      // _updateMarkers(cameraPosition.zoom);
-                      if (cameraPosition.zoom < 17) {
+                    if (cameraPosition.target.latitude.toStringAsFixed(5) !=
+                        mapState.target.latitude.toStringAsFixed(5)) {
+                      mapState.aligned = false;
+                    } else {
+                      mapState.aligned = true;
+                    }
+                    mapState.interaction = true;
+                    mapbearing = cameraPosition.bearing;
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    if (true) {
+                      _updateMarkers(cameraPosition.zoom);
+                      //_updateBuilding(cameraPosition.zoom);
+                    }
+                    // _updateMarkers(cameraPosition.zoom);
+                    if (cameraPosition.zoom < 17) {
+                      _markers.clear();
+                      markerSldShown = false;
+                    } else {
+                      if (user.isnavigating) {
                         _markers.clear();
                         markerSldShown = false;
                       } else {
-                        if (user.isnavigating) {
-                          _markers.clear();
-                          markerSldShown = false;
-                        } else {
-                          markerSldShown = true;
-                        }
+                        markerSldShown = true;
                       }
-                      if (markerSldShown) {
-                       _updateMarkers11(cameraPosition.zoom);
-                      } else {
+                    }
+                    if (markerSldShown) {
+                     _updateMarkers11(cameraPosition.zoom);
+                    } else {
 
-                      }
+                    }
 
-                      // _updateEntryMarkers11(cameraPosition.zoom);
-                      //_markerLocations.clear();
-                      //
-                    },
-                    onCameraIdle: () {
-                      if (!mapState.interaction) {
-                        mapState.interaction2 = true;
-                      }
-                    },
-                    onCameraMoveStarted: () {
-                      user.building = SingletonFunctionController.building;
-                      mapState.interaction2 = false;
-                    },
-                    circles: circles,
-                  ),
+                    // _updateEntryMarkers11(cameraPosition.zoom);
+                    //_markerLocations.clear();
+                    //
+                  },
+                  onCameraIdle: () {
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    user.building = SingletonFunctionController.building;
+                    mapState.interaction2 = false;
+                  },
+                  circles: circles,
                 ),
               ),
               Positioned(
@@ -12942,6 +12986,7 @@ bool onStart=false;
                                         : Color(0xff24b9b0),
                                     onTap: () {
                                       _polygon.clear();
+                                      cachedPolygon.clear();
                                       circles.clear();
 
                                       _markers.clear();
@@ -13310,7 +13355,7 @@ bool onStart=false;
                       ],
                     ),
                   )
-                : Container()
+                : Container(),
           ],
         ),
       ),

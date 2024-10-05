@@ -1285,11 +1285,13 @@ Landmarks? temp;
 double? minDistance;
    await SingletonFunctionController.building.landmarkdata!.then((value) {
       value.landmarks?.forEach((value){
-        if(value.buildingID==buildingAllApi.outdoorID){
-          if(value.coordinateX!=null && value.coordinateY!=null && !value.wasPolyIdNull!){
+        if(value.buildingID=="66a294a17ffba8d535e50305"){
+          if(value.coordinateX!=null && value.coordinateY!=null){
 
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
-              double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
+              // double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
+              double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],28.425628005527322,77.03121900558473);
+              print("distance between the landmarks ${dist}");
             if (dist <=25) {
               if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
                 // If no closest landmark yet or if this one is closer, update

@@ -329,7 +329,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                 onTap: (){
 
                                   print("current position");
-                                  print(widget.currentLatLng!.latitude);
+                                  print("${widget.currentLatLng!.latitude},${widget.currentLatLng!.longitude}");
                                   print(28.544277333724025);
                                  if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
                                     wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;

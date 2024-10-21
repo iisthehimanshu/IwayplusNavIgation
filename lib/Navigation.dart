@@ -8,8 +8,8 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
-import 'package:iwaymaps/singletonClass.dart';
-import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
+import '/singletonClass.dart';
+import '/websocket/NotifIcationSocket.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -22,20 +22,20 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
-import 'package:iwaymaps/API/RatingsaveAPI.dart';
-import 'package:iwaymaps/API/waypoint.dart';
-import 'package:iwaymaps/DebugToggle.dart';
-import 'package:iwaymaps/Elements/DirectionHeader.dart';
-import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Elements/UserCredential.dart';
-import 'package:iwaymaps/VenueSelectionScreen.dart';
-import 'package:iwaymaps/dijkastra.dart';
-import 'package:iwaymaps/fetchrouteParams.dart';
-import 'package:iwaymaps/realWorldModel.dart';
-import 'package:iwaymaps/wayPointPath.dart';
-import 'package:iwaymaps/waypoint.dart';
-import 'package:iwaymaps/websocket/UserLog.dart';
+import '/API/RatingsaveAPI.dart';
+import '/API/waypoint.dart';
+import '/DebugToggle.dart';
+import '/Elements/DirectionHeader.dart';
+import '/Elements/ExploreModeWidget.dart';
+import '/Elements/HelperClass.dart';
+import '/Elements/UserCredential.dart';
+import '/VenueSelectionScreen.dart';
+import '/dijkastra.dart';
+import '/fetchrouteParams.dart';
+import '/realWorldModel.dart';
+import '/wayPointPath.dart';
+import '/waypoint.dart';
+import '/websocket/UserLog.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'API/slackApi.dart';
@@ -54,7 +54,6 @@ import 'VersioInfo.dart';
 import 'centeroid.dart';
 import 'directionClass.dart';
 import 'localizedData.dart';
-import 'package:turf/turf.dart' as turf;
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
@@ -73,20 +72,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/API/PolyLineApi.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/APIMODELS/buildingAll.dart';
-import 'package:iwaymaps/APIMODELS/landmark.dart';
-import 'package:iwaymaps/Elements/HomepageLandmarkClickedSearchBar.dart';
-import 'package:iwaymaps/Elements/buildingCard.dart';
-import 'package:iwaymaps/Elements/directionInstruction.dart';
-import 'package:iwaymaps/PolylineTestClass.dart';
-import 'package:iwaymaps/UserState.dart';
-import 'package:iwaymaps/buildingState.dart';
-import 'package:iwaymaps/navigationTools.dart';
-import 'package:iwaymaps/path.dart';
-import 'package:iwaymaps/pathState.dart';
-import 'package:iwaymaps/pathState.dart';
+import '/API/PolyLineApi.dart';
+import '/API/buildingAllApi.dart';
+import '/APIMODELS/buildingAll.dart';
+import '/APIMODELS/landmark.dart';
+import '/Elements/HomepageLandmarkClickedSearchBar.dart';
+import '/Elements/buildingCard.dart';
+import '/Elements/directionInstruction.dart';
+import '/PolylineTestClass.dart';
+import '/UserState.dart';
+import '/buildingState.dart';
+import '/navigationTools.dart';
+import '/path.dart';
+import '/pathState.dart';
+import '/pathState.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -430,12 +429,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
         //
         final BitmapDescriptor markerImage =
-            await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
+        await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
         //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
 
         if (values == 'Lift') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapLift.png', 85);
+          await getImagesFromMarker('assets/MapLift.png', 85);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -447,7 +446,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Entry') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapEntry.png', 85);
+          await getImagesFromMarker('assets/MapEntry.png', 85);
           try {
             markers.add(
               MapMarker(
@@ -461,7 +460,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           } catch (e) {}
         } else if (values == 'Pharmacy') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/hospital.png', 85);
+          await getImagesFromMarker('assets/hospital.png', 85);
           markers.add(
             MapMarker(
                 id: keys.toString() + buildingValue,
@@ -472,7 +471,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Kitchen') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/cutlery.png', 85);
+          await getImagesFromMarker('assets/cutlery.png', 85);
           markers.add(
             MapMarker(
                 id: keys.toString() + buildingValue,
@@ -483,7 +482,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Female') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapFemaleWashroom.png', 95);
+          await getImagesFromMarker('assets/MapFemaleWashroom.png', 95);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -495,7 +494,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else if (values == 'Male') {
           Uint8List iconMarker =
-              await getImagesFromMarker('assets/MapMaleWashroom.png', 95);
+          await getImagesFromMarker('assets/MapMaleWashroom.png', 95);
           markers.add(
             MapMarker(
               id: keys.toString() + buildingValue,
@@ -573,9 +572,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
     final Uint8List bytes =
-        (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-            .buffer
-            .asUint8List();
+    (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
     return bytes;
   }
 
@@ -611,10 +610,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     )..repeat(reverse: true);
 
     // Create the animation
-    // _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
-    //   ..addListener(() {
-    //     _updateCircle(user.lat, user.lng);
-    //   });
+    _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+      ..addListener(() {
+        _updateCircle(user.lat, user.lng);
+      });
 
     SingletonFunctionController.building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
@@ -645,19 +644,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-            (UserAccelerometerEvent event) {
-          final now = DateTime.now();
-          // setState(() {
-          //   _userAccelerometerEvent = event;
-          //   if (_userAccelerometerUpdateTime != null) {
-          //     final interval = now.difference(_userAccelerometerUpdateTime!);
-          //     if (interval > _ignoreDuration) {
-          //       _userAccelerometerLastInterval = interval.inMilliseconds;
-          //     }
-          //   }
-          // });
-          _userAccelerometerUpdateTime = now;
-        }, onError: (e) {
+                (UserAccelerometerEvent event) {
+              final now = DateTime.now();
+              // setState(() {
+              //   _userAccelerometerEvent = event;
+              //   if (_userAccelerometerUpdateTime != null) {
+              //     final interval = now.difference(_userAccelerometerUpdateTime!);
+              //     if (interval > _ignoreDuration) {
+              //       _userAccelerometerLastInterval = interval.inMilliseconds;
+              //     }
+              //   }
+              // });
+              _userAccelerometerUpdateTime = now;
+            }, onError: (e) {
           showDialog(
               context: context,
               builder: (context) {
@@ -774,7 +773,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     accelerometerEvents.listen((AccelerometerEvent event) {
       double magnitude =
-          sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       setState(() {
         accelerationMagnitudes.add(magnitude);
       });
@@ -802,8 +801,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       double mean = accelerationMagnitudes.reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double variance = accelerationMagnitudes
-              .map((x) => (x - mean) * (x - mean))
-              .reduce((a, b) => a + b) /
+          .map((x) => (x - mean) * (x - mean))
+          .reduce((a, b) => a + b) /
           accelerationMagnitudes.length;
       double standardDeviation = sqrt(variance);
       // Adjust multiplier as needed for sensitivity
@@ -1014,7 +1013,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
-      (AccelerometerEvent event) {
+          (AccelerometerEvent event) {
         if (pdr == null) {
           return; // Exit the event listener if subscription is canceled
         }
@@ -1142,36 +1141,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   // }
 
   void renderHere() async {
-double screenHeight=MediaQuery.of(context).size.height;
-double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-      if (markers.length > 0) {
-        List<double> lvalue = tools.localtoglobal(
-            user.showcoordX.toInt(),
-            user.showcoordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[0] = customMarker.move(
-            LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+    double screenHeight=MediaQuery.of(context).size.height;
+    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    if (markers.length > 0) {
+      List<double> lvalue = tools.localtoglobal(
+          user.showcoordX.toInt(),
+          user.showcoordY.toInt(),
+          SingletonFunctionController.building.patchData[user.Bid]);
+      markers[user.Bid]?[0] = customMarker.move(
+          LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
-        print("insideee this");
-        print(onStart);
+      print("insideee this");
+      print(onStart);
 
-        mapState.target = LatLng(lvalue[0], lvalue[1]);
+      mapState.target = LatLng(lvalue[0], lvalue[1]);
 
-        // Calculate the pixel position of the current center of the map
-        ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      // Calculate the pixel position of the current center of the map
+      ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
 
-        // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-        int newY=0;
-        if(Platform.isAndroid){
-          newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-        }else{
-          newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-        }
-        // Adjust 300 as needed for how far you want the user at the bottom
+      // Adjust the y-coordinate to shift the camera upwards (moving the target down)
+      int newY=0;
+      if(Platform.isAndroid){
+        newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
+      }else{
+        newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
+      }
+      // Adjust 300 as needed for how far you want the user at the bottom
 
-        // Convert the new screen coordinate back to LatLng
-        LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
-        setState(() {
+      // Convert the new screen coordinate back to LatLng
+      LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
+      setState(() {
         _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
             target:(UserState.isTurn || onStart==false)?mapState.target:mapState.target,
@@ -1182,12 +1181,12 @@ double pixelRatio = MediaQuery.of(context).devicePixelRatio;
         ));
       });
 
-        List<double> ldvalue = tools.localtoglobal(
-            user.coordX.toInt(), user.coordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[1] = customMarker.move(
-            LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-      }
+      List<double> ldvalue = tools.localtoglobal(
+          user.coordX.toInt(), user.coordY.toInt(),
+          SingletonFunctionController.building.patchData[user.Bid]);
+      markers[user.Bid]?[1] = customMarker.move(
+          LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+    }
 
   }
 
@@ -1246,7 +1245,7 @@ double pixelRatio = MediaQuery.of(context).devicePixelRatio;
       //
       //
       String finalvalue =
-          tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      tools.angleToClocksForNearestLandmarkToBeacon(value, context);
       //
       finalDirections.add(finalvalue);
     }
@@ -1281,17 +1280,14 @@ double pixelRatio = MediaQuery.of(context).devicePixelRatio;
   late Animation<double> _animation;
   // land userSetLandmarkMap = land().landmarksMap;
   Future<Landmarks?> getglobalcoords()async{
-Landmarks? temp;
-double? minDistance;
-   await SingletonFunctionController.building.landmarkdata!.then((value) {
+    Landmarks? temp;
+    double? minDistance;
+    await SingletonFunctionController.building.landmarkdata!.then((value) {
       value.landmarks?.forEach((value){
-        if(value.buildingID=="66a294a17ffba8d535e50305"){
-          if(value.coordinateX!=null && value.coordinateY!=null){
-
+        if(value.buildingID==buildingAllApi.outdoorID){
+          if(value.coordinateX!=null && value.coordinateY!=null && !value.wasPolyIdNull!){
             List<double> latlngvalue=tools.localtoglobal(value.coordinateX!, value.coordinateY!, SingletonFunctionController.building.patchData[value.buildingID]);
-              // double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
-              double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],28.425628005527322,77.03121900558473);
-              print("distance between the landmarks ${dist}");
+            double dist=tools.calculateAerialDist(latlngvalue[0],latlngvalue[1],UserState.geoLat,UserState.geoLng);
             if (dist <=25) {
               if (value.properties!.polyId != null && (value.name!=null && value.name!="")) {
                 // If no closest landmark yet or if this one is closer, update
@@ -1370,34 +1366,34 @@ double? minDistance;
     print("insideee");
     _magnetometerSubscription =
         magnetometerEvents.listen((MagnetometerEvent event) {
-      double x = event.x;
-      double y = event.y;
-      double z = event.z;
+          double x = event.x;
+          double y = event.y;
+          double z = event.z;
 
-      // Calculate magnetic field strength
-      double magneticFieldStrength = calculateMagneticFieldStrength(x, y, z);
+          // Calculate magnetic field strength
+          double magneticFieldStrength = calculateMagneticFieldStrength(x, y, z);
 
-      if (magneticFieldStrength < lowerThreshold ||
-          magneticFieldStrength > upperThreshold) {
-        accuracyNotifier.value = true;
-      } else {
-        Future.delayed(Duration(seconds: 3)).then((onValue){
-          _magnetometerSubscription.cancel();
-          accuracyNotifier.value = false;
+          if (magneticFieldStrength < lowerThreshold ||
+              magneticFieldStrength > upperThreshold) {
+            accuracyNotifier.value = true;
+          } else {
+            Future.delayed(Duration(seconds: 3)).then((onValue){
+              _magnetometerSubscription.cancel();
+              accuracyNotifier.value = false;
+            });
+            //showLowAccuracyDialog();
+            _timerCompass?.cancel();
+          }
+
+          // if(accuracy==false){
+          //   print("entereddd");
+          //   _magnetometerSubscription.cancel();
+          //   _timerCompass?.cancel();
+          //   showLowAccuracyDialog();
+          // }
+
+          // print('Magnetic Field Strength: $magneticFieldStrength µT');
         });
-        //showLowAccuracyDialog();
-        _timerCompass?.cancel();
-      }
-
-      // if(accuracy==false){
-      //   print("entereddd");
-      //   _magnetometerSubscription.cancel();
-      //   _timerCompass?.cancel();
-      //   showLowAccuracyDialog();
-      // }
-
-      // print('Magnetic Field Strength: $magneticFieldStrength µT');
-    });
   }
 
   void findNearbyLandmarkUsingGPS() async {
@@ -1552,9 +1548,9 @@ double? minDistance;
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
     UserState.cols = SingletonFunctionController.building.floorDimenssion[
-        userSetLocation.buildingID]![userSetLocation.floor]![0];
+    userSetLocation.buildingID]![userSetLocation.floor]![0];
     UserState.rows = SingletonFunctionController.building.floorDimenssion[
-        userSetLocation.buildingID]![userSetLocation.floor]![1];
+    userSetLocation.buildingID]![userSetLocation.floor]![1];
     UserState.lngCode = _currentLocale;
     UserState.reroute = reroute;
     UserState.closeNavigation = closeNavigation;
@@ -1633,7 +1629,7 @@ double? minDistance;
       // }
 
       SingletonFunctionController.building.floor[userSetLocation.buildingID!] =
-          userSetLocation.floor!;
+      userSetLocation.floor!;
       if (widget.directLandID.length < 2) {
         createRooms(SingletonFunctionController.building.polyLineData!,
             userSetLocation.floor!);
@@ -1896,9 +1892,9 @@ double? minDistance;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       UserState.cols = SingletonFunctionController.building.floorDimenssion[
-          userSetLocation.buildingID]![userSetLocation.floor]![0];
+      userSetLocation.buildingID]![userSetLocation.floor]![0];
       UserState.rows = SingletonFunctionController.building.floorDimenssion[
-          userSetLocation.buildingID]![userSetLocation.floor]![1];
+      userSetLocation.buildingID]![userSetLocation.floor]![1];
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
@@ -1949,13 +1945,13 @@ double? minDistance;
           }
           circles.add(
             Circle(
-              circleId: CircleId("circle"),
-              center: LatLng(user.lat, user.lng),
-              radius: _animation.value,
-              strokeWidth: 1,
-              strokeColor: Colors.blue,
-              fillColor: Colors.lightBlue.withOpacity(0.2),
-              zIndex: 1
+                circleId: CircleId("circle"),
+                center: LatLng(user.lat, user.lng),
+                radius: _animation.value,
+                strokeWidth: 1,
+                strokeColor: Colors.blue,
+                fillColor: Colors.lightBlue.withOpacity(0.2),
+                zIndex: 2
             ),
           );
         } else {
@@ -2092,6 +2088,7 @@ double? minDistance;
         );
       }
     }
+
     else if ((nearestBeacon == null || nearestBeacon.isEmpty) &&
         latlngLandmark != null &&
         polyID == null) {
@@ -2232,9 +2229,9 @@ double? minDistance;
       user.showcoordX = user.coordX;
       user.showcoordY = user.coordY;
       UserState.cols = SingletonFunctionController.building.floorDimenssion[
-          userSetLocation.buildingID]![userSetLocation.floor]![0];
+      userSetLocation.buildingID]![userSetLocation.floor]![0];
       UserState.rows = SingletonFunctionController.building.floorDimenssion[
-          userSetLocation.buildingID]![userSetLocation.floor]![1];
+      userSetLocation.buildingID]![userSetLocation.floor]![1];
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
@@ -2285,13 +2282,13 @@ double? minDistance;
           }
           circles.add(
             Circle(
-              circleId: CircleId("circle"),
-              center: LatLng(user.lat, user.lng),
-              radius: _animation.value,
-              strokeWidth: 1,
-              strokeColor: Colors.blue,
-              fillColor: Colors.lightBlue.withOpacity(0.2),
-              zIndex: 1
+                circleId: CircleId("circle"),
+                center: LatLng(user.lat, user.lng),
+                radius: _animation.value,
+                strokeWidth: 1,
+                strokeColor: Colors.blue,
+                fillColor: Colors.lightBlue.withOpacity(0.2),
+                zIndex: 2
             ),
           );
         } else {
@@ -2437,7 +2434,7 @@ double? minDistance;
         tools.setBuildingAngle(SingletonFunctionController
             .building
             .patchData[SingletonFunctionController
-                .apibeaconmap[nearestBeacon]!.buildingID]!
+            .apibeaconmap[nearestBeacon]!.buildingID]!
             .patchData!
             .buildingAngle!);
 
@@ -2477,7 +2474,7 @@ double? minDistance;
               SingletonFunctionController
                   .building
                   .polylinedatamap[SingletonFunctionController
-                      .apibeaconmap[nearestBeacon]!.buildingID!]!
+                  .apibeaconmap[nearestBeacon]!.buildingID!]!
                   .polyline!
                   .floors!);
           List<PolyArray> currFloorLifts = findLift(
@@ -2486,7 +2483,7 @@ double? minDistance;
               SingletonFunctionController
                   .building
                   .polylinedatamap[SingletonFunctionController
-                      .apibeaconmap[nearestBeacon]!.buildingID!]!
+                  .apibeaconmap[nearestBeacon]!.buildingID!]!
                   .polyline!
                   .floors!);
 
@@ -2503,8 +2500,8 @@ double? minDistance;
               SingletonFunctionController
                   .apibeaconmap[nearestBeacon]!.coordinateY!,
               SingletonFunctionController.building.patchData[
-                  SingletonFunctionController
-                      .apibeaconmap[nearestBeacon]!.buildingID!]);
+              SingletonFunctionController
+                  .apibeaconmap[nearestBeacon]!.buildingID!]);
         } else {
           UserState.xdiff = 0;
           UserState.ydiff = 0;
@@ -2514,8 +2511,8 @@ double? minDistance;
               SingletonFunctionController
                   .apibeaconmap[nearestBeacon]!.coordinateY!,
               SingletonFunctionController.building.patchData[
-                  SingletonFunctionController
-                      .apibeaconmap[nearestBeacon]!.buildingID!]);
+              SingletonFunctionController
+                  .apibeaconmap[nearestBeacon]!.buildingID!]);
         }
 
         mapState.target = LatLng(values[0], values[1]);
@@ -2538,8 +2535,8 @@ double? minDistance;
             user.coordX,
             user.coordY,
             SingletonFunctionController.building.patchData[
-                SingletonFunctionController
-                    .apibeaconmap[nearestBeacon]!.buildingID]);
+            SingletonFunctionController
+                .apibeaconmap[nearestBeacon]!.buildingID]);
         user.lat = ls[0];
         user.lng = ls[1];
 
@@ -2575,13 +2572,13 @@ double? minDistance;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         UserState.cols = SingletonFunctionController.building.floorDimenssion[
-                SingletonFunctionController
-                    .apibeaconmap[nearestBeacon]!.buildingID]![
-            SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![0];
+        SingletonFunctionController
+            .apibeaconmap[nearestBeacon]!.buildingID]![
+        SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![0];
         UserState.rows = SingletonFunctionController.building.floorDimenssion[
-                SingletonFunctionController
-                    .apibeaconmap[nearestBeacon]!.buildingID]![
-            SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![1];
+        SingletonFunctionController
+            .apibeaconmap[nearestBeacon]!.buildingID]![
+        SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor]![1];
         UserState.lngCode = _currentLocale;
         UserState.reroute = reroute;
         UserState.closeNavigation = closeNavigation;
@@ -2599,21 +2596,10 @@ double? minDistance;
           user.coordY + transitionValue[1]
         ];
         user.floor =
-            SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
+        SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
         user.key =
-            SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
+        SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
         user.initialallyLocalised = true;
-        _controller = AnimationController(
-          vsync: this,
-          duration: const Duration(seconds: 3),
-        )..repeat(reverse: true);
-
-        // Create the animation
-        print("calledddd");
-        _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
-          ..addListener(() {
-            _updateCircle(user.lat, user.lng);
-          });
         setState(() {
           markers.clear();
           //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
@@ -2635,13 +2621,13 @@ double? minDistance;
             }
             circles.add(
               Circle(
-                circleId: CircleId("circle"),
-                center: LatLng(user.lat, user.lng),
-                radius: _animation.value,
-                strokeWidth: 1,
-                strokeColor: Colors.blue,
-                fillColor: Colors.lightBlue.withOpacity(0.2),
-                zIndex: 5
+                  circleId: CircleId("circle"),
+                  center: LatLng(user.lat, user.lng),
+                  radius: _animation.value,
+                  strokeWidth: 1,
+                  strokeColor: Colors.blue,
+                  fillColor: Colors.lightBlue.withOpacity(0.2),
+                  zIndex: 2
               ),
             );
           } else {
@@ -2667,9 +2653,9 @@ double? minDistance;
           if (widget.directLandID.length < 2) {
             circles.clear();
             SingletonFunctionController.building.floor[
-                    SingletonFunctionController
-                        .apibeaconmap[nearestBeacon]!.buildingID!] =
-                SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
+            SingletonFunctionController
+                .apibeaconmap[nearestBeacon]!.buildingID!] =
+            SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
             createRooms(
                 SingletonFunctionController.building.polylinedatamap[user.Bid]!,
                 SingletonFunctionController
@@ -2786,7 +2772,6 @@ double? minDistance;
             ),
           );
         }
-
         Future.delayed(Duration(milliseconds: 3000)).then((value){
           if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
             UserState.lowCompassAccuracy=true;
@@ -2796,7 +2781,6 @@ double? minDistance;
             showLowAccuracyDialog();
           }
         });
-
       } else {
         if (speakTTS) {
           speak("${LocaleData.unabletofindyourlocation.getString(context)}",
@@ -2977,7 +2961,7 @@ double? minDistance;
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       child:
-                          Text('Skip', style: TextStyle(color: Colors.black)),
+                      Text('Skip', style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -3002,49 +2986,49 @@ double? minDistance;
       builder: (BuildContext context) {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter setStateDialog) {
-          return AlertDialog(
-            title: Text("Low Compass Accuracy"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset('assets/calibrate.gif'),
-                // Use ValueListenableBuilder to listen to accuracyNotifier changes
-                ValueListenableBuilder<bool>(
-                  valueListenable: accuracyNotifier,
-                  builder: (context, accuracy, child) {
-                    return RichText(
-                      text: TextSpan(
-                        text: "Compass accuracy:",
-                        style: TextStyle(color: Colors.black),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: '${accuracy == true ? "Low" : "High"}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color:
+              return AlertDialog(
+                title: Text("Low Compass Accuracy"),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/calibrate.gif'),
+                    // Use ValueListenableBuilder to listen to accuracyNotifier changes
+                    ValueListenableBuilder<bool>(
+                      valueListenable: accuracyNotifier,
+                      builder: (context, accuracy, child) {
+                        return RichText(
+                          text: TextSpan(
+                            text: "Compass accuracy:",
+                            style: TextStyle(color: Colors.black),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: '${accuracy == true ? "Low" : "High"}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
                                   accuracy == true ? Colors.red : Colors.green,
-                            ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: Text("OK"),
-                onPressed: () {
-                  setState(() {
-                    magneticValues.clear();
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
+                actions: [
+                  TextButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      setState(() {
+                        magneticValues.clear();
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            });
       },
     );
   }
@@ -3188,8 +3172,8 @@ double? minDistance;
               _isnavigationPannelOpen = true;
               _isreroutePannelOpen = false;
               int numCols = SingletonFunctionController
-                      .building.floorDimenssion[PathState.sourceBid]![
-                  PathState.sourceFloor]![0]; //floor length
+                  .building.floorDimenssion[PathState.sourceBid]![
+              PathState.sourceFloor]![0]; //floor length
               double angle = tools.calculateAngleBWUserandPath(
                   user, PathState.path[PathState.sourceFloor]![1], numCols);
               if (angle != 0) {
@@ -3261,7 +3245,7 @@ double? minDistance;
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-        await Permission.bluetoothScan.request();
+    await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
@@ -3298,9 +3282,9 @@ double? minDistance;
   Future<void> _cation() async {
     Position position =
 
-        //Position(longitude: 77.10259, latitude:  28.947595, timestamp: DateTime.now(), accuracy: 10, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    //Position(longitude: 77.10259, latitude:  28.947595, timestamp: DateTime.now(), accuracy: 10, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
 
-        await Geolocator.getCurrentPosition(
+    await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
@@ -3349,8 +3333,8 @@ double? minDistance;
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
     try{
-    await DataVersionApi()
-        .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+      await DataVersionApi()
+          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     }catch(e){
       print(" APICALLS DataVersionApi API TRY-CATCH");
     }
@@ -3382,7 +3366,7 @@ double? minDistance;
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
     (SingletonFunctionController.btadapter.isScanningOn() == false &&
-            isBinEmpty() == true)
+        isBinEmpty() == true)
         ? controller.executeFunction(buildingAllApi.allBuildingID)
         : null;
 
@@ -3392,7 +3376,7 @@ double? minDistance;
     print("apicalls testing 2");
 
     var patchData =
-        await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
+    await patchAPI().fetchPatchData(id: buildingAllApi.selectedBuildingID);
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] =
         patchData.patchData!.buildingName;
@@ -3415,13 +3399,13 @@ double? minDistance;
         .fetchPolyData(id: buildingAllApi.selectedBuildingID);
     SingletonFunctionController.building.polyLineData = polylineData;
     SingletonFunctionController
-            .building.numberOfFloors[buildingAllApi.selectedBuildingID] =
+        .building.numberOfFloors[buildingAllApi.selectedBuildingID] =
         polylineData.polyline!.floors!.length;
     SingletonFunctionController.building
         .polylinedatamap[buildingAllApi.selectedBuildingID] = polylineData;
 
     List<int> currentBuildingFloor =
-        polylineData.polyline!.floors!.map((element) {
+    polylineData.polyline!.floors!.map((element) {
       return tools.alphabeticalToNumerical(element.floor!);
     }).toList();
 
@@ -3430,8 +3414,8 @@ double? minDistance;
     createRooms(polylineData, 0);
 
     SingletonFunctionController
-            .building.floor[buildingAllApi.selectedBuildingID] =
-        buildingAllApi.selectedBuildingID == "666848685496124d04fc6761" ? 5 : 0;
+        .building.floor[buildingAllApi.selectedBuildingID] =
+    buildingAllApi.selectedBuildingID == "666848685496124d04fc6761" ? 5 : 0;
     print("apicalls testing 4");
     var landmarkData = await landmarkApi()
         .fetchLandmarkData(id: buildingAllApi.selectedBuildingID);
@@ -3461,10 +3445,10 @@ double? minDistance;
         print(nonWalkableGrids);
         print(matches);
         var allIntegers =
-            matches.map((match) => int.parse(match.group(0)!)).toList();
+        matches.map((match) => int.parse(match.group(0)!)).toList();
 
         var currentNonWalkable = SingletonFunctionController
-                .building.nonWalkable[landmark.buildingID!] ??
+            .building.nonWalkable[landmark.buildingID!] ??
             {};
         currentNonWalkable[landmark.floor!] = allIntegers;
 
@@ -3475,7 +3459,7 @@ double? minDistance;
         localizedData.nonWalkable = currentNonWalkable;
 
         var currentFloorDimensions = SingletonFunctionController
-                .building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
+            .building.floorDimenssion[buildingAllApi.selectedBuildingID] ??
             {};
         currentFloorDimensions[landmark.floor!] = [
           landmark.properties!.floorLength!,
@@ -3483,20 +3467,20 @@ double? minDistance;
         ];
 
         SingletonFunctionController
-                .building.floorDimenssion[buildingAllApi.selectedBuildingID] =
+            .building.floorDimenssion[buildingAllApi.selectedBuildingID] =
             currentFloorDimensions;
         localizedData.currentfloorDimenssion = currentFloorDimensions;
       }
     }
     if (SingletonFunctionController
-            .building.floorDimenssion[buildingAllApi.selectedBuildingID] ==
+        .building.floorDimenssion[buildingAllApi.selectedBuildingID] ==
         null) {
       sendErrorToSlack(
           "Floor data is null for ${buildingAllApi.selectedBuildingID}", null);
     }
 
     if (SingletonFunctionController.building.ARCoordinates
-            .containsKey(buildingAllApi.selectedBuildingID) &&
+        .containsKey(buildingAllApi.selectedBuildingID) &&
         coordinates.isNotEmpty) {
       SingletonFunctionController.building
           .ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
@@ -3513,10 +3497,8 @@ double? minDistance;
       isBlueToothLoading = true;
     });
 
-    List<String> ids = buildingAllApi.getStoredAllBuildingID().keys.toList();
-
     try {
-      var outBuildingData = await outBuilding().outbuilding(ids);
+      var outBuildingData = await outBuilding().outbuilding(buildingAllApi.getStoredAllBuildingID().keys.toList());
       if (outBuildingData != null) {
         buildingAllApi.outdoorID = outBuildingData.data!.campusId!;
         buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] =
@@ -3527,98 +3509,98 @@ double? minDistance;
     print("apicalls testing 7");
     Future<void> allBuildingCalls = Future.wait(
         buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
-      var key = entry.key;
+          var key = entry.key;
 
-      SingletonFunctionController.building.floor[key] = 0;
-      print("apicalls testing 1 for $key");
-      try {
-        var waypointData = await waypointapi()
-            .fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-        Building.waypoint[key] = waypointData;
-      } catch (_) {}
-      print("apicalls testing 2 for $key");
-      if (key != buildingAllApi.getSelectedBuildingID()) {
-        try {
-          await DataVersionApi().fetchDataVersionApiData(key);
-        } catch (e) {}
-        print("apicalls testing 3 for $key");
-        var patchData = await patchAPI().fetchPatchData(id: key);
-        Building.buildingData ??= Map();
+          SingletonFunctionController.building.floor[key] = 0;
+          print("apicalls testing 1 for $key");
+          try {
+            var waypointData = await waypointapi()
+                .fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+            Building.waypoint[key] = waypointData;
+          } catch (_) {}
+          print("apicalls testing 2 for $key");
+          if (key != buildingAllApi.getSelectedBuildingID()) {
+            try {
+              await DataVersionApi().fetchDataVersionApiData(key);
+            } catch (e) {}
+            print("apicalls testing 3 for $key");
+            var patchData = await patchAPI().fetchPatchData(id: key);
+            Building.buildingData ??= Map();
 
-        Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
-        SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
-        createotherPatch(key,patchData);
-        
-        findCentroid(patchData.patchData!.coordinates!, key);
-        print("apicalls testing 4 for $key");
-        var polylineData = await PolyLineApi()
-            .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
-        SingletonFunctionController.building.polylinedatamap[key] =
-            polylineData;
-        SingletonFunctionController.building.numberOfFloors[key] =
-            polylineData.polyline!.floors!.length;
+            Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
+            SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
+            createotherPatch(key,patchData);
 
-        List<int> currentBuildingFloor =
+            findCentroid(patchData.patchData!.coordinates!, key);
+            print("apicalls testing 4 for $key");
+            var polylineData = await PolyLineApi()
+                .fetchPolyData(id: key, outdoor: key == buildingAllApi.outdoorID);
+            SingletonFunctionController.building.polylinedatamap[key] =
+                polylineData;
+            SingletonFunctionController.building.numberOfFloors[key] =
+                polylineData.polyline!.floors!.length;
+
+            List<int> currentBuildingFloor =
             polylineData.polyline!.floors!.map((element) {
-          return tools.alphabeticalToNumerical(element.floor!);
-        }).toList();
+              return tools.alphabeticalToNumerical(element.floor!);
+            }).toList();
 
-        Building.numberOfFloorsDelhi[key] = currentBuildingFloor;
+            Building.numberOfFloorsDelhi[key] = currentBuildingFloor;
 
-        createRooms(polylineData, 0);
-        print("apicalls testing 5 for $key");
-        var otherLandmarkData = await landmarkApi().fetchLandmarkData(
-            id: key, outdoor: key == buildingAllApi.outdoorID);
-        var otherLandmarkdata =
+            createRooms(polylineData, 0);
+            print("apicalls testing 5 for $key");
+            var otherLandmarkData = await landmarkApi().fetchLandmarkData(
+                id: key, outdoor: key == buildingAllApi.outdoorID);
+            var otherLandmarkdata =
             await SingletonFunctionController.building.landmarkdata;
-        otherLandmarkdata?.mergeLandmarks(otherLandmarkData.landmarks);
+            otherLandmarkdata?.mergeLandmarks(otherLandmarkData.landmarks);
 
-        var otherCoordinates = <int, LatLng>{};
-        for (var landmark in otherLandmarkData.landmarks!) {
-          if (landmark.element!.subType == "AR" &&
-              landmark.properties!.arName ==
-                  "P${int.parse(landmark.properties!.arValue!)}") {
-            otherCoordinates[int.parse(landmark.properties!.arValue!)] = LatLng(
-                double.parse(landmark.properties!.latitude!),
-                double.parse(landmark.properties!.longitude!));
-          }
+            var otherCoordinates = <int, LatLng>{};
+            for (var landmark in otherLandmarkData.landmarks!) {
+              if (landmark.element!.subType == "AR" &&
+                  landmark.properties!.arName ==
+                      "P${int.parse(landmark.properties!.arValue!)}") {
+                otherCoordinates[int.parse(landmark.properties!.arValue!)] = LatLng(
+                    double.parse(landmark.properties!.latitude!),
+                    double.parse(landmark.properties!.longitude!));
+              }
 
-          if (landmark.element!.type == "Floor") {
-            var nonWalkableGrids =
+              if (landmark.element!.type == "Floor") {
+                var nonWalkableGrids =
                 landmark.properties!.nonWalkableGrids!.join(',');
-            var regExp = RegExp(r'\d+');
-            var matches = regExp.allMatches(nonWalkableGrids);
-            var allIntegers =
+                var regExp = RegExp(r'\d+');
+                var matches = regExp.allMatches(nonWalkableGrids);
+                var allIntegers =
                 matches.map((match) => int.parse(match.group(0)!)).toList();
 
-            var currentNonWalkable =
-                SingletonFunctionController.building.nonWalkable[key] ?? {};
-            currentNonWalkable[landmark.floor!] = allIntegers;
+                var currentNonWalkable =
+                    SingletonFunctionController.building.nonWalkable[key] ?? {};
+                currentNonWalkable[landmark.floor!] = allIntegers;
 
-            SingletonFunctionController.building.nonWalkable[key] =
-                currentNonWalkable;
+                SingletonFunctionController.building.nonWalkable[key] =
+                    currentNonWalkable;
 
-            var currentFloorDimensions =
-                SingletonFunctionController.building.floorDimenssion[key] ?? {};
-            currentFloorDimensions[landmark.floor!] = [
-              landmark.properties!.floorLength!,
-              landmark.properties!.floorBreadth!
-            ];
+                var currentFloorDimensions =
+                    SingletonFunctionController.building.floorDimenssion[key] ?? {};
+                currentFloorDimensions[landmark.floor!] = [
+                  landmark.properties!.floorLength!,
+                  landmark.properties!.floorBreadth!
+                ];
 
-            SingletonFunctionController.building.floorDimenssion[key] =
-                currentFloorDimensions;
+                SingletonFunctionController.building.floorDimenssion[key] =
+                    currentFloorDimensions;
+              }
+            }
+            if (SingletonFunctionController.building.floorDimenssion[key] == null) {
+              sendErrorToSlack("Floor data is null for ${key}", null);
+            }
+            createMarkers(otherLandmarkData, 0, bid: key);
+            createotherARPatch(
+                otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
+            print("apicalls testing 6 for $key");
           }
-        }
-        if (SingletonFunctionController.building.floorDimenssion[key] == null) {
-          sendErrorToSlack("Floor data is null for ${key}", null);
-        }
-        createMarkers(otherLandmarkData, 0, bid: key);
-        createotherARPatch(
-            otherCoordinates, otherLandmarkData.landmarks![0].buildingID!);
-        print("apicalls testing 6 for $key");
-      }
-    }));
-    
+        }));
+
     if (SingletonFunctionController.timer != null) {
       await Future.wait([SingletonFunctionController.timer!, allBuildingCalls]);
     }
@@ -3671,13 +3653,13 @@ double? minDistance;
     // Create a new Tween with the provided begin and end values
     // Optionally update UI or logic with animation value
     final Circle updatedCircle = Circle(
-      circleId: CircleId("circle"),
-      center: LatLng(lat, lng),
-      radius: _animation.value,
-      strokeWidth: 1,
-      strokeColor: Colors.blue,
-      fillColor: Colors.lightBlue.withOpacity(0.2),
-      zIndex: 5
+        circleId: CircleId("circle"),
+        center: LatLng(lat, lng),
+        radius: _animation.value,
+        strokeWidth: 1,
+        strokeColor: Colors.blue,
+        fillColor: Colors.lightBlue.withOpacity(0.2),
+        zIndex: 2
     );
     if (mounted) {
       setState(() {
@@ -3694,12 +3676,13 @@ double? minDistance;
       ..addListener(() {
         // Optionally update UI or logic with animation value
         final Circle updatedCircle = Circle(
-          circleId: CircleId("circle"),
-          center: LatLng(lat, lng),
-          radius: _animation.value,
-          strokeWidth: 1,
-          strokeColor: Colors.blue,
-          fillColor: Colors.lightBlue.withOpacity(0.2),
+            circleId: CircleId("circle"),
+            center: LatLng(lat, lng),
+            radius: _animation.value,
+            strokeWidth: 1,
+            strokeColor: Colors.blue,
+            fillColor: Colors.lightBlue.withOpacity(0.2),
+            zIndex: 2
         );
 
         setState(() {
@@ -3747,24 +3730,23 @@ double? minDistance;
   Future<void> localizeUser({bool speakTTS = true}) async {
     double highestweight = 0;
     String nearestBeacon = "";
-
-      for (int i = 0;
-          i < SingletonFunctionController.btadapter.BIN.length;
-          i++) {
-        if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-          SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-            if (value < 0) {
-              value = value * -1;
-            }
-            if (value > highestweight) {
-              highestweight = value;
-              nearestBeacon = key;
-            }
-          });
-          break;
-        }
+    print("binresult ${SingletonFunctionController.btadapter.BIN}");
+    for (int i = 0;
+    i < SingletonFunctionController.btadapter.BIN.length;
+    i++) {
+      if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+        SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+          if (value < 0) {
+            value = value * -1;
+          }
+          if (value > highestweight) {
+            highestweight = value;
+            nearestBeacon = key;
+          }
+        });
+        break;
       }
-
+    }
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
@@ -3786,14 +3768,14 @@ double? minDistance;
       buildingAllApi
           .setStoredString(Building.apibeaconmap[nearestBeacon]!.buildingID!);
       buildingAllApi.selectedID =
-          Building.apibeaconmap[nearestBeacon]!.buildingID!;
+      Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
-          Building.apibeaconmap[nearestBeacon]!.buildingID!;
+      Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
     paintUser(nearestBeacon, speakTTS: speakTTS);
-    // Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-    //       _controller.stop(),
-    //     });
+    Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+      _controller.stop(),
+    });
 
     //emptying the bin manually
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
@@ -3804,6 +3786,7 @@ double? minDistance;
         });
       }
     }
+    SingletonFunctionController.btadapter.BIN.clear();
   }
 
   String nearbeacon = 'null';
@@ -3886,23 +3869,23 @@ double? minDistance;
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap));
         polygonPoints.add(LatLng(
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
 
@@ -3947,6 +3930,7 @@ double? minDistance;
   }
 
   void createotherPatch(String key, patchDataModel value) async {
+
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -3968,24 +3952,24 @@ double? minDistance;
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap));
 
         polygonPoints.add(LatLng(
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lat!) -
+                        value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                            value.patchData!.coordinates![i].globalRef!.lng!) -
+                        value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       SingletonFunctionController.building.ARCoordinates[key] = coordinates;
@@ -4042,7 +4026,7 @@ double? minDistance;
     final double textWidth = textPainter.width;
     final double textHeight = textPainter.height;
     final double canvasWidth =
-        textWidth > imageSize.width ? textWidth : imageSize.width;
+    textWidth > imageSize.width ? textWidth : imageSize.width;
     final double canvasHeight =
         textHeight + imageSize.height + 20.0; // Increased padding
 
@@ -4061,79 +4045,82 @@ double? minDistance;
 
     // Generate the final image
     final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-          canvasWidth.toInt(),
-          canvasHeight.toInt(),
-        );
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
 
     final ByteData? byteData =
-        await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List? pngBytes = byteData?.buffer.asUint8List();
 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
 
-  renderCampusPatchTransition(String outDoorID){
-    blurPatch.clear();
-    restBuildingMarker.clear();
-    Map<int, LatLng> currentCoordinated = {};
+  renderCampusPatchTransition(List<String> IDS, {String? outdoorID}){
+    print("renderCampusPatchTransition");
+    if(blurPatch.length != IDS.length-(outdoorID == null?0:1)){
+      blurPatch.clear();
+      restBuildingMarker.clear();
+      Map<int, LatLng> currentCoordinated = {};
 
-    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      if(key == outDoorID){
-        currentCoordinated = innerMap;
-        if (currentCoordinated.isNotEmpty) {
-          List<LatLng> points = [];
-          List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-          entryList.sort((a, b) => a.key.compareTo(b.key));
-          LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
-          sortedCoordinates.forEach((key, value) {
-            points.add(value);
-          });
-          setState(() {
-            blurPatch.add(
-              Polygon(
-                polygonId: PolygonId('patch${points}'),
-                points: points,
-                strokeWidth: 1,
-                strokeColor: Colors.black,
-                fillColor: Color(0xffE5F9FF),
-                geodesic: false,
-                consumeTapEvents: true,
-                zIndex: 5,
-
-              ),
-            );
-            cachedPolygon.clear();
-          });
-        }
-        Building.allBuildingID.forEach((Key,Value) async {
-          if(Key == outDoorID ) {
-
-
-            String? showBuildingName ="";
-            Building.buildingData?.forEach((currKey,currValue){
-              if(currKey == Key){
-                showBuildingName = currValue;
-              }
+      SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
+        if(IDS.contains(key) && key != outdoorID){
+          currentCoordinated = innerMap;
+          if (currentCoordinated.isNotEmpty) {
+            List<LatLng> points = [];
+            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
+            entryList.sort((a, b) => a.key.compareTo(b.key));
+            LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
+            sortedCoordinates.forEach((key, value) {
+              points.add(value);
             });
-            restBuildingMarker.add(
-              Marker(
-                markerId: MarkerId(Key + Value.toString()),
-                position: Value,
-                icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
-                    showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
-              ),
-            );
-          }
-        });
+            setState(() {
+              blurPatch.add(
+                Polygon(
+                  polygonId: PolygonId('patch${points}'),
+                  points: points,
+                  strokeWidth: 1,
+                  strokeColor: Colors.black,
+                  fillColor: Color(0xffE5F9FF),
+                  geodesic: false,
+                  consumeTapEvents: true,
+                  zIndex: 5,
 
-      }
-    });
+                ),
+              );
+              cachedPolygon.clear();
+            });
+          }
+          Building.allBuildingID.forEach((Key,Value) async {
+            if(IDS.contains(Key) && Key != outdoorID) {
+              print("for key $Key while IDS is $IDS");
+              String? showBuildingName ="";
+              Building.buildingData?.forEach((currKey,currValue){
+                if(currKey == Key){
+                  showBuildingName = currValue;
+                }
+              });
+              restBuildingMarker.add(
+                Marker(
+                  markerId: MarkerId(Key + Value.toString()),
+                  position: Value,
+                  icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
+                      showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
+                ),
+              );
+            }
+          });
+
+        }
+      });
+    }
   }
 
   Set<Marker> restBuildingMarker = Set();
   void patchTransition(String skipID){
     Map<int, LatLng> currentCoordinated = {};
     blurPatch.clear();
+    cachedPolygon.clear();
     SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
       //print("ARCoordinateskeys ${key}");
 
@@ -4176,33 +4163,33 @@ double? minDistance;
 
 
   void patchGeneration(Map<int, LatLng> currentCoordinated){
-    print("patchGeneration");
-    if (currentCoordinated.isNotEmpty) {
-      List<LatLng> points = [];
-      List<MapEntry<int, LatLng>> entryList =
-          currentCoordinated.entries.toList();
-      entryList.sort((a, b) => a.key.compareTo(b.key));
-      LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
-      sortedCoordinates.forEach((key, value) {
-        points.add(value);
-      });
-      setState(() {
-        blurPatch.add(
-          Polygon(
-            polygonId: PolygonId('patch${points}'),
-            points: points,
-            strokeWidth: 1,
-            strokeColor: Colors.black,
-            fillColor: Color(0xffE5F9FF),
-            geodesic: false,
-            consumeTapEvents: true,
-            zIndex: 5,
-          ),
-        );
-        cachedPolygon.clear();
-      });
-    }
+    // print("patchGeneration");
+    // if (currentCoordinated.isNotEmpty) {
+    //   List<LatLng> points = [];
+    //   List<MapEntry<int, LatLng>> entryList =
+    //       currentCoordinated.entries.toList();
+    //   entryList.sort((a, b) => a.key.compareTo(b.key));
+    //   LinkedHashMap<int, LatLng> sortedCoordinates =
+    //       LinkedHashMap.fromEntries(entryList);
+    //   sortedCoordinates.forEach((key, value) {
+    //     points.add(value);
+    //   });
+    //   setState(() {
+    //     blurPatch.add(
+    //       Polygon(
+    //         polygonId: PolygonId('patch${points}'),
+    //         points: points,
+    //         strokeWidth: 1,
+    //         strokeColor: Colors.black,
+    //         fillColor: Color(0xffE5F9FF),
+    //         geodesic: false,
+    //         consumeTapEvents: true,
+    //         zIndex: 5,
+    //       ),
+    //     );
+    //     cachedPolygon.clear();
+    //   });
+    // }
   }
 
 
@@ -4239,7 +4226,7 @@ double? minDistance;
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -4256,7 +4243,7 @@ double? minDistance;
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex: -1),
+              zIndex: 2),
         );
         cachedPolygon.clear();
       });
@@ -4273,7 +4260,7 @@ double? minDistance;
 
       // Create a new LinkedHashMap from the sorted list
       LinkedHashMap<int, LatLng> sortedCoordinates =
-          LinkedHashMap.fromEntries(entryList);
+      LinkedHashMap.fromEntries(entryList);
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
@@ -4317,15 +4304,14 @@ double? minDistance;
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
+    cachedPolygon.clear();// Clear existing markers
 
-    // Clear existing markers
-cachedPolygon.clear();
     List<geo.LatLng> points = [];
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
     Uint8List iconMarker =
-        await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
+    await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
@@ -5489,42 +5475,42 @@ cachedPolygon.clear();
                     // Replace with additional information
                     onTap: () {})));
           }else if (landmarks[i].element!.type == "Rooms" &&
-            landmarks[i].element!.subType == "Cafeteria" &&
-            landmarks[i].coordinateX != null &&
-            !landmarks[i].wasPolyIdNull!) {
-          BitmapDescriptor textMarker;
-          if(landmarks[i].priority! >1){
-            String markerText;
-            List<String> parts = landmarks[i].name!.split('-');
-            markerText = parts.isNotEmpty ? parts[0].trim() : '';
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
-          }else{
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/cutlery.png', 85);
-            textMarker = BitmapDescriptor.fromBytes(iconMarker);
-          }
+              landmarks[i].element!.subType == "Cafeteria" &&
+              landmarks[i].coordinateX != null &&
+              !landmarks[i].wasPolyIdNull!) {
+            BitmapDescriptor textMarker;
+            if(landmarks[i].priority! >1){
+              String markerText;
+              List<String> parts = landmarks[i].name!.split('-');
+              markerText = parts.isNotEmpty ? parts[0].trim() : '';
+              textMarker = await bitmapDescriptorFromTextAndImage(
+                  markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
+            }else{
+              final Uint8List iconMarker =
+              await getImagesFromMarker('assets/cutlery.png', 85);
+              textMarker = BitmapDescriptor.fromBytes(iconMarker);
+            }
 
-          List<double> value = tools.localtoglobal(
-              landmarks[i].coordinateX!,
-              landmarks[i].coordinateY!,
-              SingletonFunctionController.building
-                  .patchData[bid ?? buildingAllApi.getStoredString()]);
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
 
-          Markers.add(Marker(
-              markerId: MarkerId(
-                  "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-              position: LatLng(value[0], value[1]),
-              icon: textMarker,
-              anchor: Offset(0.5, 1.0),
-              visible: false,
-              onTap: () {},
-              infoWindow: InfoWindow(
-                  title: landmarks[i].name,
-                  // snippet: '${landmarks[i].properties!.polyId}',
-                  // Replace with additional information
-                  onTap: () {})));
-        }else if (landmarks[i].element!.type == "Rooms" &&
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Point of Interest" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -5606,10 +5592,10 @@ cachedPolygon.clear();
             // );
 
             BitmapDescriptor textMarker;
-              String markerText;
-              markerText = landmarks[i].name??"";
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText,null,imageSize: const Size(85, 85));
+            String markerText;
+            markerText = landmarks[i].name??"";
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText,null,imageSize: const Size(85, 85));
 
 
             List<double> value = tools.localtoglobal(
@@ -5802,7 +5788,7 @@ cachedPolygon.clear();
               landmarks[i].element!.subType == "room door" &&
               landmarks[i].doorX != null) {
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/dooricon.png', 45);
+            await getImagesFromMarker('assets/dooricon.png', 45);
             setState(() {
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
@@ -5821,10 +5807,10 @@ cachedPolygon.clear();
                     // Replace with additional information
                     onTap: () {
                       if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
+                          .building.selectedLandmarkID !=
                           landmarks[i].properties!.polyId) {
                         SingletonFunctionController
-                                .building.selectedLandmarkID =
+                            .building.selectedLandmarkID =
                             landmarks[i].properties!.polyId;
                         _isRoutePanelOpen = false;
                         singleroute.clear();
@@ -5839,7 +5825,7 @@ cachedPolygon.clear();
               landmarks[i].element!.type == ("FloorConnection") &&
               landmarks[i].element!.subType == "lift") {
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/entry.png', 75);
+            await getImagesFromMarker('assets/entry.png', 75);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -5856,9 +5842,9 @@ cachedPolygon.clear();
                   landmarks[i].buildingID!));
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
+              landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID!;
+              landmarks[i].buildingID!;
             });
           } else if (landmarks[i].name != null &&
               landmarks[i].name!.toLowerCase().contains("pharmacy")) {
@@ -5876,9 +5862,9 @@ cachedPolygon.clear();
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
+              landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID!;
+              landmarks[i].buildingID!;
             });
           }
           // else if (landmarks[i].name != null &&
@@ -5896,7 +5882,7 @@ cachedPolygon.clear();
           else if (landmarks[i].properties!.washroomType != null &&
               landmarks[i].properties!.washroomType == "Male") {
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/6.png', 65);
+            await getImagesFromMarker('assets/6.png', 65);
             setState(() {
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
@@ -5911,9 +5897,9 @@ cachedPolygon.clear();
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
+              landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID!;
+              landmarks[i].buildingID!;
 
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
@@ -5940,7 +5926,7 @@ cachedPolygon.clear();
           } else if (landmarks[i].properties!.washroomType != null &&
               landmarks[i].properties!.washroomType == "Female") {
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/4.png', 65);
+            await getImagesFromMarker('assets/4.png', 65);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -5956,9 +5942,9 @@ cachedPolygon.clear();
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
+              landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID!;
+              landmarks[i].buildingID!;
 
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
@@ -5985,7 +5971,7 @@ cachedPolygon.clear();
           } else if (landmarks[i].element!.subType != null &&
               landmarks[i].element!.subType == "main entry") {
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/1.png', 90);
+            await getImagesFromMarker('assets/1.png', 90);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -6003,13 +5989,13 @@ cachedPolygon.clear();
                   landmarks[i].buildingID!));
 
               _markerLocationsMap[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID == buildingAllApi.outdoorID
-                      ? "Campus Entry"
-                      : 'Entry';
+              landmarks[i].buildingID == buildingAllApi.outdoorID
+                  ? "Campus Entry"
+                  : 'Entry';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-                  landmarks[i].name!;
+              landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-                  landmarks[i].buildingID!;
+              landmarks[i].buildingID!;
 
               // _markers!.add(Marker(
               //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
@@ -6058,7 +6044,7 @@ cachedPolygon.clear();
             //   getImagesFromMarker('assets/location_on.png',50),
             // );
             final Uint8List iconMarker =
-                await getImagesFromMarker('assets/pin.png', 50);
+            await getImagesFromMarker('assets/pin.png', 50);
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
@@ -6123,7 +6109,7 @@ cachedPolygon.clear();
   bool calculatingPath = false;
   double aerialDist = 0.0;
   Timer? _timerCompass;
-    Widget landmarkdetailpannel(
+  Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
     pathMarkers.clear();
     // if(user.isnavigating==false){
@@ -6298,8 +6284,8 @@ cachedPolygon.clear();
                       child: IconButton(
                         onPressed: () {
                           _polygon.clear();
-                          //  circles.clear();
                           cachedPolygon.clear();
+                          //  circles.clear();
                           showMarkers();
                           toggleLandmarkPanel();
                           _isBuildingPannelOpen = true;
@@ -6540,7 +6526,7 @@ cachedPolygon.clear();
                               child: IconButton(
                                   onPressed: () {
                                     HelperClass.shareContent(
-                                        "https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
+                                        "https://dev.iwayplus.in/#/iway-apps/ashoka.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=ashoka-navigation/id6505062168&playStore=com.iwayplus.accessibleashoka");
                                   },
                                   icon: Semantics(
                                       label: "Share route information",
@@ -6927,8 +6913,8 @@ cachedPolygon.clear();
                     ),
                     onPressed: () async {
                       _polygon.clear();
-                      // circles.clear();
                       cachedPolygon.clear();
+                      // circles.clear();
                       Markers.clear();
 
                       if (user.coordY != 0 && user.coordX != 0) {
@@ -7180,8 +7166,8 @@ cachedPolygon.clear();
   Future<Landmarks?> findCampusEntry(land land, Landmarks entry) async {
     try {
       return await land.landmarks!.firstWhere(
-        (element) =>
-            element.name == entry.name &&
+            (element) =>
+        element.name == entry.name &&
             element.buildingID == buildingAllApi.outdoorID,
         orElse: () => throw Exception('No matching landmark found'),
       );
@@ -7272,9 +7258,9 @@ cachedPolygon.clear();
         time = time.ceil().toDouble();
         distance = distance * 0.3048;
         distance = double.parse(distance.toStringAsFixed(1));
-setState(() {
-  startingNavigation=true;
-});
+        setState(() {
+          startingNavigation=true;
+        });
 
         if (PathState.destinationName ==
             "${LocaleData.yourcurrentloc.getString(context)}") {
@@ -7326,7 +7312,7 @@ setState(() {
           landmarksMap[PathState.sourcePolyID]!.lifts!.isEmpty) {
         landmarksMap[PathState.sourcePolyID]!.lifts = tools
             .localizefindNearbyLandmarkSecond(user, landmarksMap,
-                increaserange: true)!
+            increaserange: true)!
             .lifts;
       }
     } catch (e) {}
@@ -7343,14 +7329,14 @@ setState(() {
     Markers.clear();
 
     PathState.destinationX =
-        landmarksMap[PathState.destinationPolyID]!.coordinateX!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
     PathState.destinationY =
-        landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
     if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
       PathState.destinationX =
-          landmarksMap[PathState.destinationPolyID]!.doorX!;
+      landmarksMap[PathState.destinationPolyID]!.doorX!;
       PathState.destinationY =
-          landmarksMap[PathState.destinationPolyID]!.doorY!;
+      landmarksMap[PathState.destinationPolyID]!.doorY!;
     }
     if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
@@ -7393,29 +7379,29 @@ setState(() {
             PathState.destinationFloor,
             bid: PathState.destinationBid,
             liftName: commonlifts[0].name,
-        nextFloor:PathState.sourceFloor ));
+            nextFloor:PathState.sourceFloor ));
 
         fetchrouteFutures.add(() => fetchroute(
-            PathState.sourceX,
-            PathState.sourceY,
-            commonlifts[0].x1!,
-            commonlifts[0].y1!,
-            PathState.sourceFloor,
-            bid: PathState.destinationBid,
-            liftName: commonlifts[0].name,
-        nextFloor: PathState.destinationFloor,));
+          PathState.sourceX,
+          PathState.sourceY,
+          commonlifts[0].x1!,
+          commonlifts[0].y1!,
+          PathState.sourceFloor,
+          bid: PathState.destinationBid,
+          liftName: commonlifts[0].name,
+          nextFloor: PathState.destinationFloor,));
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
               commonlifts[0].x1!,
               commonlifts[0].y1!,
               SingletonFunctionController.building.floorDimenssion[
-                  PathState.destinationBid]![PathState.sourceFloor]![0]),
+              PathState.destinationBid]![PathState.sourceFloor]![0]),
           PathState.destinationFloor: calculateindex(
               commonlifts[0].x2!,
               commonlifts[0].y2!,
               SingletonFunctionController.building.floorDimenssion[
-                  PathState.destinationBid]![PathState.destinationFloor]![0])
+              PathState.destinationBid]![PathState.destinationFloor]![0])
         };
       }
       runPaths(fetchrouteFutures);
@@ -7432,9 +7418,12 @@ setState(() {
               PathState.destinationPolyID,
               PathState.sourcePolyID,
               land.landmarks!);
+          print("pathcchec 1 ${buildingEntry.name}");
         }
 
         Landmarks? CampusEntry = await findCampusEntry(land, buildingEntry);
+        print("pathcchec 2 ${CampusEntry!.name}");
+
 
         if (PathState.destinationBid == buildingAllApi.outdoorID) {
           fetchrouteFutures.add(() => fetchroute(
@@ -7475,43 +7464,43 @@ setState(() {
                 buildingEntry!.floor!,
                 bid: PathState.sourceBid,
                 renderDestination: false,
-            nextFloor: PathState.sourceFloor));
+                nextFloor: PathState.sourceFloor));
             fetchrouteFutures.add(() => fetchroute(
-                  PathState.sourceX,
-                  PathState.sourceY,
-                  commonlifts[0].x1!,
-                  commonlifts[0].y1!,
-                  PathState.sourceFloor,
-                  bid: PathState.sourceBid,
-              nextFloor: buildingEntry!.floor!
-                ));
+                PathState.sourceX,
+                PathState.sourceY,
+                commonlifts[0].x1!,
+                commonlifts[0].y1!,
+                PathState.sourceFloor,
+                bid: PathState.sourceBid,
+                nextFloor: buildingEntry!.floor!
+            ));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
                   commonlifts[0].x1!,
                   commonlifts[0].y1!,
                   SingletonFunctionController.building.floorDimenssion[
-                      PathState.sourceBid]![PathState.sourceFloor]![0]),
+                  PathState.sourceBid]![PathState.sourceFloor]![0]),
               buildingEntry!.floor!: calculateindex(
                   commonlifts[0].x2!,
                   commonlifts[0].y2!,
                   SingletonFunctionController.building.floorDimenssion[
-                      PathState.sourceBid]![buildingEntry!.floor!]![0])
+                  PathState.sourceBid]![buildingEntry!.floor!]![0])
             };
           }
         } else {
-          if (PathState.sourceFloor == buildingEntry!.floor) {
+          if (PathState.destinationFloor == buildingEntry!.floor) {
             fetchrouteFutures.add(() => fetchroute(
-                buildingEntry!.coordinateX!,
-                buildingEntry!.coordinateY!,
-                PathState.sourceX,
-                PathState.sourceY,
-                PathState.sourceFloor,
-                bid: buildingEntry.buildingID,
-                renderDestination: false));
-          } else if (PathState.sourceFloor != buildingEntry!.floor) {
+              buildingEntry!.coordinateX!,
+              buildingEntry!.coordinateY!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: buildingEntry.buildingID,
+            ));
+          } else if (PathState.destinationFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
-                landmarksMap[PathState.sourcePolyID]!,
+                landmarksMap[PathState.destinationPolyID]!,
                 buildingEntry!,
                 accessibleby);
             if (commonlifts.isEmpty) {
@@ -7524,14 +7513,14 @@ setState(() {
             }
 
             fetchrouteFutures.add(() => fetchroute(
-                  commonlifts[0].x1!,
-                  commonlifts[0].y1!,
-                  PathState.sourceX,
-                  PathState.sourceY,
-                  PathState.sourceFloor,
-                  bid: PathState.sourceBid,
+              commonlifts[0].x1!,
+              commonlifts[0].y1!,
+              PathState.destinationX,
+              PathState.destinationY,
+              PathState.destinationFloor,
+              bid: PathState.destinationBid,
               nextFloor: buildingEntry!.floor!,
-                ));
+            ));
 
             fetchrouteFutures.add(() => fetchroute(
                 buildingEntry!.coordinateX!,
@@ -7539,30 +7528,30 @@ setState(() {
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
                 buildingEntry!.floor!,
-                bid: PathState.sourceBid,
+                bid: PathState.destinationBid,
                 renderDestination: false,
-            nextFloor: PathState.sourceFloor));
+                nextFloor: PathState.destinationFloor));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
                   commonlifts[0].x1!,
                   commonlifts[0].y1!,
                   SingletonFunctionController.building.floorDimenssion[
-                      PathState.sourceBid]![PathState.sourceFloor]![0]),
+                  PathState.sourceBid]![PathState.sourceFloor]![0]),
               buildingEntry!.floor!: calculateindex(
                   commonlifts[0].x2!,
                   commonlifts[0].y2!,
                   SingletonFunctionController.building.floorDimenssion[
-                      PathState.sourceBid]![buildingEntry!.floor!]![0])
+                  PathState.sourceBid]![buildingEntry!.floor!]![0])
             };
           }
           fetchrouteFutures.add(() => fetchroute(
-              PathState.destinationX,
-              PathState.destinationY,
+              PathState.sourceX,
+              PathState.sourceY,
               CampusEntry!.coordinateX!,
               CampusEntry!.coordinateY!,
-              PathState.destinationFloor,
-              bid: CampusEntry.buildingID));
+              PathState.sourceFloor,
+              bid: CampusEntry.buildingID,renderDestination: false));
         }
         runPaths(fetchrouteFutures);
       });
@@ -7582,7 +7571,7 @@ setState(() {
 
         /// destinationEntryINCAMPUS
         Landmarks? CampusDestinationEntry =
-            await findCampusEntry(land, destinationEntry);
+        await findCampusEntry(land, destinationEntry);
 
         /// sourceEntryINCAMPUS
         Landmarks? CampusSourceEntry = await findCampusEntry(land, sourceEntry);
@@ -7622,28 +7611,28 @@ setState(() {
               PathState.destinationY,
               PathState.destinationFloor,
               bid: PathState.destinationBid,
-          nextFloor: destinationEntry.floor!));
+              nextFloor: destinationEntry.floor!));
           fetchrouteFutures.add(() => fetchroute(
-              destinationEntry.coordinateX!,
-              destinationEntry.coordinateY!,
-              commonlifts[0].x1!,
-              commonlifts[0].y1!,
-              destinationEntry.floor!,
-              bid: PathState.destinationBid,
-              renderSource: false,
-          nextFloor: PathState.destinationFloor,));
+            destinationEntry.coordinateX!,
+            destinationEntry.coordinateY!,
+            commonlifts[0].x1!,
+            commonlifts[0].y1!,
+            destinationEntry.floor!,
+            bid: PathState.destinationBid,
+            renderSource: false,
+            nextFloor: PathState.destinationFloor,));
 
           PathState.connections[PathState.destinationBid] = {
             destinationEntry.floor!: calculateindex(
                 commonlifts[0].x1!,
                 commonlifts[0].y1!,
                 SingletonFunctionController.building.floorDimenssion[
-                    PathState.destinationBid]![destinationEntry.floor!]![0]),
+                PathState.destinationBid]![destinationEntry.floor!]![0]),
             PathState.destinationFloor: calculateindex(
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
                 SingletonFunctionController.building.floorDimenssion[
-                    PathState.destinationBid]![PathState.destinationFloor]![0])
+                PathState.destinationBid]![PathState.destinationFloor]![0])
           };
         }
         Landmarks source = landmarksMap[PathState.sourcePolyID]!;
@@ -7713,28 +7702,28 @@ setState(() {
               sourceEntry.floor!,
               bid: PathState.sourceBid,
               renderDestination: false,
-          nextFloor:PathState.sourceFloor));
+              nextFloor:PathState.sourceFloor));
           fetchrouteFutures.add(() => fetchroute(
-                PathState.sourceX,
-                PathState.sourceY,
-                commonlifts[0].x1!,
-                commonlifts[0].y1!,
-                PathState.sourceFloor,
-                bid: PathState.sourceBid,
+            PathState.sourceX,
+            PathState.sourceY,
+            commonlifts[0].x1!,
+            commonlifts[0].y1!,
+            PathState.sourceFloor,
+            bid: PathState.sourceBid,
             nextFloor: sourceEntry.floor!,
-              ));
+          ));
 
           PathState.connections[PathState.sourceBid] = {
             PathState.sourceFloor: calculateindex(
                 commonlifts[0].x1!,
                 commonlifts[0].y1!,
                 SingletonFunctionController.building.floorDimenssion[
-                    PathState.sourceBid]![PathState.sourceFloor]![0]),
+                PathState.sourceBid]![PathState.sourceFloor]![0]),
             sourceEntry.floor!: calculateindex(
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
                 SingletonFunctionController.building.floorDimenssion[
-                    PathState.sourceBid]![sourceEntry.floor!]![0])
+                PathState.sourceBid]![sourceEntry.floor!]![0])
           };
         }
         runPaths(fetchrouteFutures);
@@ -7782,7 +7771,7 @@ setState(() {
     PathState.realWorldCoordinates.clear();
     PathState.realWorldCoordinates.add(sourceEntryCoordinates);
     final Uint8List realWorldPathMarker =
-        await getImagesFromMarker('assets/rw.png', 30);
+    await getImagesFromMarker('assets/rw.png', 30);
 
     if (buildData != null) {
       //uncomment here
@@ -7850,11 +7839,12 @@ setState(() {
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
         int? nextFloor,
-      String? liftName,
-      bool renderSource = true,
-      bool renderDestination = true}) async {
+        String? liftName,
+        bool renderSource = true,
+        bool renderDestination = true}) async {
     print(
         "checks for campus $bid ${SingletonFunctionController.building.floorDimenssion[bid]}");
+    print("pathcchec fetchingroute between $sourceX, $sourceY   $destinationX, $destinationY  $bid ");
     int numRows = SingletonFunctionController
         .building.floorDimenssion[bid]![floor]![1]; //floor breadth
     int numCols = SingletonFunctionController
@@ -7991,7 +7981,7 @@ setState(() {
           }
           if (singleroute[bid]![floor] != null) {
             gmap.Polyline oldPolyline = singleroute[bid]![floor]!.firstWhere(
-              (polyline) => polyline.polylineId.value == bid,
+                  (polyline) => polyline.polylineId.value == bid,
             );
             gmap.Polyline updatedPolyline = gmap.Polyline(
               polylineId: oldPolyline.polylineId,
@@ -8043,7 +8033,7 @@ setState(() {
       }
 
       final Uint8List tealtorch =
-          await getImagesFromMarker('assets/tealtorch.png', 35);
+      await getImagesFromMarker('assets/tealtorch.png', 35);
 
       if (liftName != null) {
 
@@ -8140,14 +8130,14 @@ setState(() {
       {String? liftName}) async {
     await SingletonFunctionController.building.landmarkdata!.then((value) {
       List<Landmarks> nearbyLandmarks =
-          tools.findNearbyLandmark(path, value.landmarksMap!, 5);
+      tools.findNearbyLandmark(path, value.landmarksMap!, 5);
       pathState.nearbyLandmarks = nearbyLandmarks;
       tools
           .associateTurnWithLandmark(path, nearbyLandmarks)
           .then((value) async {
         PathState.associateTurnWithLandmark = value;
         PathState.associateTurnWithLandmark.removeWhere((key, value) =>
-            value.properties!.polyId == PathState.destinationPolyID);
+        value.properties!.polyId == PathState.destinationPolyID);
         // PathState.associateTurnWithLandmark.forEach((key, value) {
         //
         // });
@@ -8244,7 +8234,7 @@ setState(() {
     List<int> floorNumbers = List.generate(
         SingletonFunctionController
             .building.numberOfFloors[buildingAllApi.getStoredString()]!,
-        (index) => index);
+            (index) => index);
 
     return Semantics(
       excludeSemantics: excludeFloorSemanticWork,
@@ -8256,7 +8246,7 @@ setState(() {
           width: 100, // Allow the container to take full width
           child: ListView.builder(
             shrinkWrap:
-                true, // Ensures the ListView takes the height of its children
+            true, // Ensures the ListView takes the height of its children
             itemCount: SingletonFunctionController
                 .building.numberOfFloors[buildingAllApi.getStoredString()]!,
             itemBuilder: (BuildContext context, int index) {
@@ -8269,13 +8259,13 @@ setState(() {
                     label: "Floor ${index}",
                     child: InkWell(
                       borderRadius:
-                          BorderRadius.circular(50), // Circular tap effect
+                      BorderRadius.circular(50), // Circular tap effect
                       onTap: () {
                         SingletonFunctionController.building
                             .floor[buildingAllApi.getStoredString()] = index;
                         createRooms(
                           SingletonFunctionController.building.polylinedatamap[
-                              buildingAllApi.getStoredString()]!,
+                          buildingAllApi.getStoredString()]!,
                           SingletonFunctionController.building
                               .floor[buildingAllApi.getStoredString()]!,
                         );
@@ -8376,7 +8366,7 @@ setState(() {
               directionWidgets.add(directionInstruction(
                   direction: "${PathState.directions[i].turnDirection!}",
                   distance:
-                      "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",
+                  "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",
                   context: context));
             } else {
               directionWidgets.add(directionInstruction(
@@ -8384,9 +8374,9 @@ setState(() {
                     ? '${LocaleData.gostraight.getString(context)}'
                     : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty4(PathState.directions[i].turnDirection!, context)}, ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}",
                 distance:
-                    (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
-                        .ceil()
-                        .toString(),
+                (PathState.directions[i].distanceToNextTurn ?? 0 * 0.3048)
+                    .ceil()
+                    .toString(),
                 context: context,
               ));
             }
@@ -8435,7 +8425,7 @@ setState(() {
         children: [
           Container(
             height:
-                PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
+            PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
             width: screenWidth,
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
@@ -8489,12 +8479,12 @@ setState(() {
                               }
                               setState(() {
                                 Marker? temp = selectedroomMarker[
-                                        buildingAllApi.getStoredString()]
+                                buildingAllApi.getStoredString()]
                                     ?.first;
 
                                 selectedroomMarker.clear();
                                 selectedroomMarker[
-                                        buildingAllApi.getStoredString()]
+                                buildingAllApi.getStoredString()]
                                     ?.add(temp!);
                                 pathMarkers.clear();
                               });
@@ -8555,7 +8545,7 @@ setState(() {
                                   border: Border.all(color: Color(0xffE2E2E2)),
                                 ),
                                 padding:
-                                    EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
                                 child: Text(
                                   PathState.sourceName,
                                   style: const TextStyle(
@@ -8568,9 +8558,9 @@ setState(() {
                                 ),
                               ),
                               onTap: () {
-                                // setState(() {
-                                //   startingNavigation=false;
-                                // });
+                                setState(() {
+                                  startingNavigation = false;
+                                });
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -8594,7 +8584,7 @@ setState(() {
                                   border: Border.all(color: Color(0xffE2E2E2)),
                                 ),
                                 padding:
-                                    EdgeInsets.only(left: 8, top: 7, bottom: 8),
+                                EdgeInsets.only(left: 8, top: 7, bottom: 8),
                                 child: Semantics(
                                   onDidGainAccessibilityFocus: closeRoutePannel,
                                   child: Text(
@@ -8610,9 +8600,9 @@ setState(() {
                                 ),
                               ),
                               onTap: () {
-                                // setState(() {
-                                //   startingNavigation=false;
-                                // });
+                                setState(() {
+                                  startingNavigation = false;
+                                });
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -8660,184 +8650,184 @@ setState(() {
                   ),
                   PathState.sourceFloor != PathState.destinationFloor
                       ? Container(
-                          margin: EdgeInsets.only(top: 8, left: 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 112,
-                                margin: EdgeInsets.only(left: 8),
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      PathState.accessiblePath = "Stairs";
-                                      PathState.clearforaccessiblepath();
-                                      SingletonFunctionController
-                                          .building.landmarkdata!
-                                          .then((value) {
-                                        try {
-                                          calculateroute(value.landmarksMap!,
-                                              accessibleby: "Stairs");
-                                        } catch (e) {}
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.greenAccent,
-                                        backgroundColor:
-                                            PathState.accessiblePath == "Stairs"
-                                                ? Color(0xff24B9B0)
-                                                : Colors.white,
-                                        elevation:
-                                            0 // Set the text color to black
-                                        ),
-                                    child: Center(
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.stairs,
-                                            color: PathState.accessiblePath ==
-                                                    "Stairs"
-                                                ? Colors.white
-                                                : Color(0xff24B9B0),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(left: 3),
-                                            child: Text(
-                                              "Stairs",
-                                              style: TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color:
-                                                    PathState.accessiblePath ==
-                                                            "Stairs"
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                height: 20 / 14,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
+                    margin: EdgeInsets.only(top: 8, left: 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 112,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "Stairs";
+                                PathState.clearforaccessiblepath();
+                                SingletonFunctionController
+                                    .building.landmarkdata!
+                                    .then((value) {
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "Stairs");
+                                  } catch (e) {}
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.greenAccent,
+                                  backgroundColor:
+                                  PathState.accessiblePath == "Stairs"
+                                      ? Color(0xff24B9B0)
+                                      : Colors.white,
+                                  elevation:
+                                  0 // Set the text color to black
                               ),
-                              Container(
-                                width: 110,
-                                margin: EdgeInsets.only(left: 8),
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      PathState.accessiblePath = "Lifts";
-                                      PathState.clearforaccessiblepath();
-                                      SingletonFunctionController
-                                          .building.landmarkdata!
-                                          .then((value) {
-                                        try {
-                                          calculateroute(value.landmarksMap!,
-                                              accessibleby: "Lifts");
-                                        } catch (e) {}
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.greenAccent,
-                                        backgroundColor:
-                                            PathState.accessiblePath == "Lifts"
-                                                ? Color(0xff24B9B0)
-                                                : Colors.white,
-                                        elevation:
-                                            0 // Set the text color to black
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.stairs,
+                                      color: PathState.accessiblePath ==
+                                          "Stairs"
+                                          ? Colors.white
+                                          : Color(0xff24B9B0),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Stairs",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                          PathState.accessiblePath ==
+                                              "Stairs"
+                                              ? Colors.white
+                                              : Colors.black,
+                                          height: 20 / 14,
                                         ),
-                                    child: Center(
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.elevator,
-                                            color: PathState.accessiblePath ==
-                                                    "Lifts"
-                                                ? Colors.white
-                                                : Color(0xff24B9B0),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(left: 3),
-                                            child: Text(
-                                              "Lifts",
-                                              style: TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color:
-                                                    PathState.accessiblePath ==
-                                                            "Lifts"
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                height: 20 / 14,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ],
+                                        textAlign: TextAlign.center,
                                       ),
-                                    )),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Container(
+                          width: 110,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "Lifts";
+                                PathState.clearforaccessiblepath();
+                                SingletonFunctionController
+                                    .building.landmarkdata!
+                                    .then((value) {
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "Lifts");
+                                  } catch (e) {}
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.greenAccent,
+                                  backgroundColor:
+                                  PathState.accessiblePath == "Lifts"
+                                      ? Color(0xff24B9B0)
+                                      : Colors.white,
+                                  elevation:
+                                  0 // Set the text color to black
                               ),
-                              Container(
-                                width: 112,
-                                margin: EdgeInsets.only(left: 8),
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      PathState.accessiblePath = "ramp";
-                                      PathState.clearforaccessiblepath();
-                                      SingletonFunctionController
-                                          .building.landmarkdata!
-                                          .then((value) {
-                                        try {
-                                          calculateroute(value.landmarksMap!,
-                                              accessibleby: "ramp");
-                                        } catch (e) {}
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.greenAccent,
-                                        backgroundColor:
-                                            PathState.accessiblePath == "ramp"
-                                                ? Color(0xff24B9B0)
-                                                : Colors.white,
-                                        elevation:
-                                            0 // Set the text color to black
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.elevator,
+                                      color: PathState.accessiblePath ==
+                                          "Lifts"
+                                          ? Colors.white
+                                          : Color(0xff24B9B0),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Lifts",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                          PathState.accessiblePath ==
+                                              "Lifts"
+                                              ? Colors.white
+                                              : Colors.black,
+                                          height: 20 / 14,
                                         ),
-                                    child: Center(
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.stairs_rounded,
-                                            color: PathState.accessiblePath ==
-                                                    "ramp"
-                                                ? Colors.white
-                                                : Color(0xff24B9B0),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(left: 3),
-                                            child: Text(
-                                              "Ramp",
-                                              style: TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color:
-                                                    PathState.accessiblePath ==
-                                                            "ramp"
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                height: 20 / 14,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ],
+                                        textAlign: TextAlign.center,
                                       ),
-                                    )),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Container(
+                          width: 112,
+                          margin: EdgeInsets.only(left: 8),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                PathState.accessiblePath = "ramp";
+                                PathState.clearforaccessiblepath();
+                                SingletonFunctionController
+                                    .building.landmarkdata!
+                                    .then((value) {
+                                  try {
+                                    calculateroute(value.landmarksMap!,
+                                        accessibleby: "ramp");
+                                  } catch (e) {}
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.greenAccent,
+                                  backgroundColor:
+                                  PathState.accessiblePath == "ramp"
+                                      ? Color(0xff24B9B0)
+                                      : Colors.white,
+                                  elevation:
+                                  0 // Set the text color to black
                               ),
-                            ],
-                          ),
-                        )
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.stairs_rounded,
+                                      color: PathState.accessiblePath ==
+                                          "ramp"
+                                          ? Colors.white
+                                          : Color(0xff24B9B0),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 3),
+                                      child: Text(
+                                        "Ramp",
+                                        style: TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color:
+                                          PathState.accessiblePath ==
+                                              "ramp"
+                                              ? Colors.white
+                                              : Colors.black,
+                                          height: 20 / 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),
+                  )
                       : Container(),
                 ],
               ),
@@ -8858,719 +8848,719 @@ setState(() {
                 maxHeight: screenHeight * 0.8,
                 panel: PathState.noPathFound
                     ? Container(
-                        margin: EdgeInsets.only(top: 36),
-                        child: Column(
-                          children: [
-                            Image.asset("assets/error.png"),
-                            Text(
-                              "Can't find a way there",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff3f3f46),
-                                height: 40 / 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            )
-                          ],
+                  margin: EdgeInsets.only(top: 36),
+                  child: Column(
+                    children: [
+                      Image.asset("assets/error.png"),
+                      Text(
+                        "Can't find a way there",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff3f3f46),
+                          height: 40 / 14,
                         ),
+                        textAlign: TextAlign.center,
                       )
+                    ],
+                  ),
+                )
                     : Semantics(
-                        sortKey: const OrdinalSortKey(0),
+                  sortKey: const OrdinalSortKey(0),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(16.0)),
+                          color: Colors.white,
+                        ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(16.0)),
-                                color: Colors.white,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
+                            Semantics(
+                              excludeSemantics: true,
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
                                 children: [
-                                  Semantics(
-                                    excludeSemantics: true,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 38,
-                                          height: 6,
-                                          margin: EdgeInsets.only(top: 8),
-                                          decoration: BoxDecoration(
-                                            color: Color(0xffd9d9d9),
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                          ),
-                                        ),
-                                      ],
+                                  Container(
+                                    width: 38,
+                                    height: 6,
+                                    margin: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffd9d9d9),
+                                      borderRadius:
+                                      BorderRadius.circular(5.0),
                                     ),
                                   ),
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 20),
-                                    padding: EdgeInsets.only(left: 17, top: 12),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Semantics(
-                                              excludeSemantics: true,
-                                              child: Text(
-                                                "${time.toInt()} min Walk ",
-                                                style: const TextStyle(
-                                                  color: Color(0xffDC6A01),
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w500,
-                                                  height: 24 / 18,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Semantics(
-                                              excludeSemantics: true,
-                                              child: Text(
-                                                "(${distance} m)",
-                                                style: const TextStyle(
-                                                  fontFamily: "Roboto",
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w500,
-                                                  height: 24 / 18,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Spacer(),
-                                            IconButton(
-                                                onPressed: () {
-                                                  showMarkers();
-                                                  setState(() {
-                                                    _isBuildingPannelOpen =
-                                                        true;
-                                                    _isRoutePanelOpen = false;
-                                                  });
-                                                  widget.directLandID = "";
-                                                  selectedroomMarker.clear();
-                                                  pathMarkers.clear();
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 20),
+                              padding: EdgeInsets.only(left: 17, top: 12),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.start,
+                                    children: [
+                                      Semantics(
+                                        excludeSemantics: true,
+                                        child: Text(
+                                          "${time.toInt()} min Walk ",
+                                          style: const TextStyle(
+                                            color: Color(0xffDC6A01),
+                                            fontFamily: "Roboto",
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            height: 24 / 18,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                      Semantics(
+                                        excludeSemantics: true,
+                                        child: Text(
+                                          "(${distance} m)",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            height: 24 / 18,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      IconButton(
+                                          onPressed: () {
+                                            showMarkers();
+                                            setState(() {
+                                              _isBuildingPannelOpen =
+                                              true;
+                                              _isRoutePanelOpen = false;
+                                            });
+                                            widget.directLandID = "";
+                                            selectedroomMarker.clear();
+                                            pathMarkers.clear();
 
-                                                  SingletonFunctionController
+                                            SingletonFunctionController
+                                                .building
+                                                .selectedLandmarkID =
+                                            null;
+
+                                            PathState =
+                                                pathState.withValues(
+                                                    -1,
+                                                    -1,
+                                                    -1,
+                                                    -1,
+                                                    -1,
+                                                    -1,
+                                                    null,
+                                                    0);
+                                            PathState.path.clear();
+                                            PathState.sourcePolyID = "";
+                                            PathState.destinationPolyID =
+                                            "";
+                                            PathState.sourceBid = "";
+                                            PathState.destinationBid = "";
+                                            singleroute.clear();
+                                            //realWorldPath.clear();
+                                            PathState.directions = [];
+                                            interBuildingPath.clear();
+                                            //  if(user.isnavigating==false){
+                                            clearPathVariables();
+                                            //}
+                                            fitPolygonInScreen(
+                                                patch.first);
+                                            exitNavigation();
+                                            setState(() {
+                                              onStart=false;
+                                              startingNavigation=false;
+                                            });
+                                          },
+                                          icon: Semantics(
+                                            label: "Close Navigation",
+                                            child: Icon(
+                                              Icons.cancel_outlined,
+                                              size: 25,
+                                            ),
+                                          ))
+                                    ],
+                                  ),
+                                  // Text(
+                                  //   "via",
+                                  //   style: const TextStyle(
+                                  //     fontFamily: "Roboto",
+                                  //     fontSize: 16,
+                                  //     fontWeight: FontWeight.w400,
+                                  //     color: Color(0xff4a4545),
+                                  //     height: 25 / 16,
+                                  //   ),
+                                  //   textAlign: TextAlign.left,
+                                  // ),
+                                  // Text(
+                                  //   "ETA- ${newTime.hour}:${newTime.minute}",
+                                  //   style: const TextStyle(
+                                  //     fontFamily: "Roboto",
+                                  //     fontSize: 14,
+                                  //     fontWeight: FontWeight.w400,
+                                  //     color: Color(0xff8d8c8c),
+                                  //     height: 20 / 14,
+                                  //   ),
+                                  //   textAlign: TextAlign.left,
+                                  // ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Focus(
+                                        autofocus: true,
+                                        child: Semantics(
+                                          sortKey:
+                                          const OrdinalSortKey(0),
+                                          child: Container(
+                                            width: 108,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xff24B9B0),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                  4.0),
+                                            ),
+                                            child: TextButton(
+                                              onPressed: () async {
+
+
+                                                if(startingNavigation){
+                                                  tools.setBuildingAngle(
+                                                      SingletonFunctionController
                                                           .building
-                                                          .selectedLandmarkID =
-                                                      null;
-
-                                                  PathState =
-                                                      pathState.withValues(
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          null,
-                                                          0);
-                                                  PathState.path.clear();
-                                                  PathState.sourcePolyID = "";
-                                                  PathState.destinationPolyID =
-                                                      "";
-                                                  PathState.sourceBid = "";
-                                                  PathState.destinationBid = "";
-                                                  singleroute.clear();
-                                                  //realWorldPath.clear();
-                                                  PathState.directions = [];
-                                                  interBuildingPath.clear();
-                                                  //  if(user.isnavigating==false){
-                                                  clearPathVariables();
-                                                  //}
-                                                  fitPolygonInScreen(
-                                                      patch.first);
-                                                  exitNavigation();
-                                                  setState(() {
-                                                    onStart=false;
-                                                    startingNavigation=false;
-                                                  });
-                                                },
-                                                icon: Semantics(
-                                                  label: "Close Navigation",
-                                                  child: Icon(
-                                                    Icons.cancel_outlined,
-                                                    size: 25,
-                                                  ),
-                                                ))
-                                          ],
-                                        ),
-                                        // Text(
-                                        //   "via",
-                                        //   style: const TextStyle(
-                                        //     fontFamily: "Roboto",
-                                        //     fontSize: 16,
-                                        //     fontWeight: FontWeight.w400,
-                                        //     color: Color(0xff4a4545),
-                                        //     height: 25 / 16,
-                                        //   ),
-                                        //   textAlign: TextAlign.left,
-                                        // ),
-                                        // Text(
-                                        //   "ETA- ${newTime.hour}:${newTime.minute}",
-                                        //   style: const TextStyle(
-                                        //     fontFamily: "Roboto",
-                                        //     fontSize: 14,
-                                        //     fontWeight: FontWeight.w400,
-                                        //     color: Color(0xff8d8c8c),
-                                        //     height: 20 / 14,
-                                        //   ),
-                                        //   textAlign: TextAlign.left,
-                                        // ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Focus(
-                                              autofocus: true,
-                                              child: Semantics(
-                                                sortKey:
-                                                    const OrdinalSortKey(0),
-                                                child: Container(
-                                                  width: 108,
-                                                  height: 40,
-                                                  decoration: BoxDecoration(
-                                                    color: Color(0xff24B9B0),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4.0),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () async {
-
-
-                                                      if(startingNavigation){
-                                                        tools.setBuildingAngle(
-                                                            SingletonFunctionController
-                                                                .building
-                                                                .patchData[PathState
-                                                                .sourceBid]!
-                                                                .patchData!
-                                                                .buildingAngle!);
-                                                        if (PathState.sourceX ==
-                                                            PathState
-                                                                .destinationX &&
-                                                            PathState.sourceY ==
-                                                                PathState
-                                                                    .destinationY) {
-                                                          //HelperClass.showToast("Source and Destination can not be same");
-                                                          setState(() {
-                                                            _isRoutePanelOpen =
-                                                            false;
-                                                          });
-                                                          closeNavigation();
-                                                          return;
-                                                        }
-                                                        setState(() {
-                                                          circles.clear();
-                                                          _markers.clear();
-                                                          markerSldShown = false;
-
-                                                        });
-                                                        user.onConnection = false;
-                                                        PathState.didPathStart =
-                                                        true;
-
-                                                        UserState.cols =
-                                                        SingletonFunctionController
-                                                            .building
-                                                            .floorDimenssion[
-                                                        PathState
-                                                            .sourceBid]![PathState
-                                                            .sourceFloor]![0];
-                                                        UserState
-                                                            .rows = SingletonFunctionController
-                                                            .building
-                                                            .floorDimenssion[
-                                                        PathState
-                                                            .destinationBid]![PathState
-                                                            .destinationFloor]![1];
-                                                        UserState.lngCode =
-                                                            _currentLocale;
-                                                        UserState.reroute =
-                                                            reroute;
-                                                        UserState
-                                                            .closeNavigation =
-                                                            closeNavigation;
-                                                        UserState.AlignMapToPath =
-                                                            alignMapToPath;
-                                                        UserState.startOnPath =
-                                                            startOnPath;
-                                                        UserState.speak = speak;
-                                                        UserState.paintMarker =
-                                                            paintMarker;
-                                                        UserState.createCircle =
-                                                            updateCircle;
-
-                                                        //detected=false;
-                                                        //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                                                        wsocket.message["path"]
-                                                        ["source"] =
-                                                            PathState.sourceName;
-                                                        wsocket.message["path"]
-                                                        ["destination"] =
-                                                            PathState
-                                                                .destinationName;
-                                                        // user.ListofPaths = PathState.listofPaths;
-                                                        // user.patchData = SingletonFunctionController.building.patchData;
-                                                        // user.buildingNumber = PathState.listofPaths.length-1;
-                                                        buildingAllApi
-                                                            .selectedID =
-                                                            PathState.sourceBid;
-                                                        buildingAllApi
-                                                            .selectedBuildingID =
-                                                            PathState.sourceBid;
-                                                        UserState.cols =
-                                                        SingletonFunctionController
-                                                            .building
-                                                            .floorDimenssion[
-                                                        PathState
-                                                            .sourceBid]![PathState
-                                                            .sourceFloor]![0];
-                                                        UserState.rows =
-                                                        SingletonFunctionController
-                                                            .building
-                                                            .floorDimenssion[
-                                                        PathState
-                                                            .sourceBid]![PathState
-                                                            .sourceFloor]![1];
-                                                        user.Bid =
-                                                            PathState.sourceBid;
-                                                        user.coordX =
-                                                            PathState.sourceX;
-                                                        user.coordY =
-                                                            PathState.sourceY;
-                                                        user.temporaryExit =
-                                                        false;
-                                                        UserState.reroute =
-                                                            reroute;
-                                                        UserState
-                                                            .closeNavigation =
-                                                            closeNavigation;
-                                                        UserState.AlignMapToPath =
-                                                            alignMapToPath;
-                                                        UserState.startOnPath =
-                                                            startOnPath;
-                                                        UserState.speak = speak;
-                                                        UserState.paintMarker =
-                                                            paintMarker;
-                                                        UserState.createCircle =
-                                                            updateCircle;
-                                                        UserState.changeBuilding =
-                                                            changeBuilding;
-                                                        //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                                                        user.floor =
-                                                            PathState.sourceFloor;
-                                                        user.pathobj = PathState;
-                                                        user.path = PathState
-                                                            .singleListPath;
-                                                        user.isnavigating = true;
-                                                        user.Cellpath = PathState
-                                                            .singleCellListPath;
-                                                        PathState
-                                                            .singleCellListPath
-                                                            .forEach(
-                                                                (element) {});
-                                                        user
-                                                            .moveToStartofPath()
-                                                            .then((value) async {
-                                                          setState(() {
-                                                            markers.clear();
-                                                            List<double> val = tools.localtoglobal(
-                                                                user.showcoordX
-                                                                    .toInt(),
-                                                                user.showcoordY
-                                                                    .toInt(),
-                                                                SingletonFunctionController
-                                                                    .building
-                                                                    .patchData[
-                                                                PathState
-                                                                    .sourceBid]);
-
-                                                            markers.putIfAbsent(
-                                                                user.Bid,
-                                                                    () => []);
-                                                            markers[user.Bid]
-                                                                ?.add(Marker(
-                                                              markerId: MarkerId(
-                                                                  "UserLocation"),
-                                                              position: LatLng(
-                                                                  val[0], val[1]),
-                                                              icon:
-                                                              BitmapDescriptor
-                                                                  .fromBytes(
-                                                                  userloc),
-                                                              anchor: Offset(
-                                                                  0.5, 0.829),
-                                                            ));
-
-                                                            val = tools.localtoglobal(
-                                                                user.coordX
-                                                                    .toInt(),
-                                                                user.coordY
-                                                                    .toInt(),
-                                                                SingletonFunctionController
-                                                                    .building
-                                                                    .patchData[
-                                                                PathState
-                                                                    .sourceBid]);
-
-
-                                                            if (kDebugMode) {
-                                                              markers[user.Bid]
-                                                                  ?.add(Marker(
-                                                                markerId: MarkerId(
-                                                                    "debug"),
-                                                                position: LatLng(
-                                                                    val[0],
-                                                                    val[1]),
-                                                                icon: BitmapDescriptor
-                                                                    .fromBytes(
-                                                                    userlocdebug),
-                                                                anchor: Offset(
-                                                                    0.5, 0.829),
-                                                              ));
-                                                            }
-                                                            // circles.add(
-                                                            //   Circle(
-                                                            //     circleId: CircleId("circle"),
-                                                            //     center: LatLng(user.lat,user.lng),
-                                                            //     radius: _animation.value,
-                                                            //     strokeWidth: 1,
-                                                            //     strokeColor: Colors.blue,
-                                                            //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                                            //   ),
-                                                            // );
-                                                          });
-                                                          alignMapToPath([
-                                                            user.lat,
-                                                            user.lng
-                                                          ], [
-                                                            PathState
-                                                                .singleCellListPath[
-                                                            user.pathobj
-                                                                .index +
-                                                                1]
-                                                                .lat,
-                                                            PathState
-                                                                .singleCellListPath[
-                                                            user.pathobj
-                                                                .index +
-                                                                1]
-                                                                .lng
-                                                          ]);
-                                                        });
-                                                        _isRoutePanelOpen = false;
-
-                                                        SingletonFunctionController
-                                                            .building
-                                                            .selectedLandmarkID =
-                                                        null;
-
-                                                        _isnavigationPannelOpen =
-                                                        true;
-
-                                                        semanticShouldBeExcluded =
-                                                        false;
-
-                                                        StartPDR();
-
-                                                        if (SingletonFunctionController
-                                                            .building
-                                                            .floor[
-                                                        PathState
-                                                            .sourceBid] !=
-                                                            PathState
-                                                                .sourceFloor) {
-                                                          SingletonFunctionController
-                                                              .building.floor[
+                                                          .patchData[PathState
+                                                          .sourceBid]!
+                                                          .patchData!
+                                                          .buildingAngle!);
+                                                  if (PathState.sourceX ==
+                                                      PathState
+                                                          .destinationX &&
+                                                      PathState.sourceY ==
                                                           PathState
-                                                              .sourceBid] =
-                                                              PathState
-                                                                  .sourceFloor;
-                                                          createRooms(
-                                                              SingletonFunctionController
-                                                                  .building
-                                                                  .polylinedatamap[
-                                                              PathState
-                                                                  .sourceBid]!,
-                                                              PathState
-                                                                  .sourceFloor);
+                                                              .destinationY) {
+                                                    //HelperClass.showToast("Source and Destination can not be same");
+                                                    setState(() {
+                                                      _isRoutePanelOpen =
+                                                      false;
+                                                    });
+                                                    closeNavigation();
+                                                    return;
+                                                  }
+                                                  setState(() {
+                                                    circles.clear();
+                                                    _markers.clear();
+                                                    markerSldShown = false;
+
+                                                  });
+                                                  user.onConnection = false;
+                                                  PathState.didPathStart =
+                                                  true;
+
+                                                  UserState.cols =
+                                                  SingletonFunctionController
+                                                      .building
+                                                      .floorDimenssion[
+                                                  PathState
+                                                      .sourceBid]![PathState
+                                                      .sourceFloor]![0];
+                                                  UserState
+                                                      .rows = SingletonFunctionController
+                                                      .building
+                                                      .floorDimenssion[
+                                                  PathState
+                                                      .destinationBid]![PathState
+                                                      .destinationFloor]![1];
+                                                  UserState.lngCode =
+                                                      _currentLocale;
+                                                  UserState.reroute =
+                                                      reroute;
+                                                  UserState
+                                                      .closeNavigation =
+                                                      closeNavigation;
+                                                  UserState.AlignMapToPath =
+                                                      alignMapToPath;
+                                                  UserState.startOnPath =
+                                                      startOnPath;
+                                                  UserState.speak = speak;
+                                                  UserState.paintMarker =
+                                                      paintMarker;
+                                                  UserState.createCircle =
+                                                      updateCircle;
+
+                                                  //detected=false;
+                                                  //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                                                  wsocket.message["path"]
+                                                  ["source"] =
+                                                      PathState.sourceName;
+                                                  wsocket.message["path"]
+                                                  ["destination"] =
+                                                      PathState
+                                                          .destinationName;
+                                                  // user.ListofPaths = PathState.listofPaths;
+                                                  // user.patchData = SingletonFunctionController.building.patchData;
+                                                  // user.buildingNumber = PathState.listofPaths.length-1;
+                                                  buildingAllApi
+                                                      .selectedID =
+                                                      PathState.sourceBid;
+                                                  buildingAllApi
+                                                      .selectedBuildingID =
+                                                      PathState.sourceBid;
+                                                  UserState.cols =
+                                                  SingletonFunctionController
+                                                      .building
+                                                      .floorDimenssion[
+                                                  PathState
+                                                      .sourceBid]![PathState
+                                                      .sourceFloor]![0];
+                                                  UserState.rows =
+                                                  SingletonFunctionController
+                                                      .building
+                                                      .floorDimenssion[
+                                                  PathState
+                                                      .sourceBid]![PathState
+                                                      .sourceFloor]![1];
+                                                  user.Bid =
+                                                      PathState.sourceBid;
+                                                  user.coordX =
+                                                      PathState.sourceX;
+                                                  user.coordY =
+                                                      PathState.sourceY;
+                                                  user.temporaryExit =
+                                                  false;
+                                                  UserState.reroute =
+                                                      reroute;
+                                                  UserState
+                                                      .closeNavigation =
+                                                      closeNavigation;
+                                                  UserState.AlignMapToPath =
+                                                      alignMapToPath;
+                                                  UserState.startOnPath =
+                                                      startOnPath;
+                                                  UserState.speak = speak;
+                                                  UserState.paintMarker =
+                                                      paintMarker;
+                                                  UserState.createCircle =
+                                                      updateCircle;
+                                                  UserState.changeBuilding =
+                                                      changeBuilding;
+                                                  //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                                                  user.floor =
+                                                      PathState.sourceFloor;
+                                                  user.pathobj = PathState;
+                                                  user.path = PathState
+                                                      .singleListPath;
+                                                  user.isnavigating = true;
+                                                  user.Cellpath = PathState
+                                                      .singleCellListPath;
+                                                  PathState
+                                                      .singleCellListPath
+                                                      .forEach(
+                                                          (element) {});
+                                                  user
+                                                      .moveToStartofPath()
+                                                      .then((value) async {
+                                                    setState(() {
+                                                      markers.clear();
+                                                      List<double> val = tools.localtoglobal(
+                                                          user.showcoordX
+                                                              .toInt(),
+                                                          user.showcoordY
+                                                              .toInt(),
                                                           SingletonFunctionController
                                                               .building
-                                                              .landmarkdata!
-                                                              .then((value) {
-                                                            createMarkers(
-                                                                value,
-                                                                PathState
-                                                                    .sourceFloor,
-                                                                bid: PathState
-                                                                    .sourceBid);
-                                                          });
-                                                        }
+                                                              .patchData[
+                                                          PathState
+                                                              .sourceBid]);
 
-                                                        Future.delayed(Duration(seconds: 2)).then((onValue){
-                                                          setState(() {
-                                                            onStart=true;
-                                                          });
-                                                        });
+                                                      markers.putIfAbsent(
+                                                          user.Bid,
+                                                              () => []);
+                                                      markers[user.Bid]
+                                                          ?.add(Marker(
+                                                        markerId: MarkerId(
+                                                            "UserLocation"),
+                                                        position: LatLng(
+                                                            val[0], val[1]),
+                                                        icon:
+                                                        BitmapDescriptor
+                                                            .fromBytes(
+                                                            userloc),
+                                                        anchor: Offset(
+                                                            0.5, 0.829),
+                                                      ));
+
+                                                      val = tools.localtoglobal(
+                                                          user.coordX
+                                                              .toInt(),
+                                                          user.coordY
+                                                              .toInt(),
+                                                          SingletonFunctionController
+                                                              .building
+                                                              .patchData[
+                                                          PathState
+                                                              .sourceBid]);
+
+
+                                                      if (kDebugMode) {
+                                                        markers[user.Bid]
+                                                            ?.add(Marker(
+                                                          markerId: MarkerId(
+                                                              "debug"),
+                                                          position: LatLng(
+                                                              val[0],
+                                                              val[1]),
+                                                          icon: BitmapDescriptor
+                                                              .fromBytes(
+                                                              userlocdebug),
+                                                          anchor: Offset(
+                                                              0.5, 0.829),
+                                                        ));
                                                       }
+                                                      // circles.add(
+                                                      //   Circle(
+                                                      //     circleId: CircleId("circle"),
+                                                      //     center: LatLng(user.lat,user.lng),
+                                                      //     radius: _animation.value,
+                                                      //     strokeWidth: 1,
+                                                      //     strokeColor: Colors.blue,
+                                                      //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                      //   ),
+                                                      // );
+                                                    });
+                                                    alignMapToPath([
+                                                      user.lat,
+                                                      user.lng
+                                                    ], [
+                                                      PathState
+                                                          .singleCellListPath[
+                                                      user.pathobj
+                                                          .index +
+                                                          1]
+                                                          .lat,
+                                                      PathState
+                                                          .singleCellListPath[
+                                                      user.pathobj
+                                                          .index +
+                                                          1]
+                                                          .lng
+                                                    ]);
+                                                  });
+                                                  _isRoutePanelOpen = false;
 
-                                                    },
-                                                    child: startingNavigation
-                                                        ? Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .assistant_navigation,
-                                                                color: Colors
-                                                                    .black,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 8),
-                                                              Text(
-                                                                '${LocaleData.start.getString(context)}',
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Colors
-                                                                      .black,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        : Container(
-                                                            width: 24,
-                                                            height: 24,
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              color:
-                                                                  Colors.white,
-                                                            )),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 98,
-                                              height: 40,
-                                              margin: EdgeInsets.only(left: 12),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(4.0),
-                                                border: Border.all(
-                                                    color: Colors.black),
-                                              ),
-                                              child: TextButton(
-                                                onPressed: () {
-                                                  if (_routeDetailPannelController
-                                                      .isPanelOpen) {
-                                                    _routeDetailPannelController
-                                                        .close();
-                                                  } else {
-                                                    _routeDetailPannelController
-                                                        .open();
+                                                  SingletonFunctionController
+                                                      .building
+                                                      .selectedLandmarkID =
+                                                  null;
+
+                                                  _isnavigationPannelOpen =
+                                                  true;
+
+                                                  semanticShouldBeExcluded =
+                                                  false;
+
+                                                  StartPDR();
+
+                                                  if (SingletonFunctionController
+                                                      .building
+                                                      .floor[
+                                                  PathState
+                                                      .sourceBid] !=
+                                                      PathState
+                                                          .sourceFloor) {
+                                                    SingletonFunctionController
+                                                        .building.floor[
+                                                    PathState
+                                                        .sourceBid] =
+                                                        PathState
+                                                            .sourceFloor;
+                                                    createRooms(
+                                                        SingletonFunctionController
+                                                            .building
+                                                            .polylinedatamap[
+                                                        PathState
+                                                            .sourceBid]!,
+                                                        PathState
+                                                            .sourceFloor);
+                                                    SingletonFunctionController
+                                                        .building
+                                                        .landmarkdata!
+                                                        .then((value) {
+                                                      createMarkers(
+                                                          value,
+                                                          PathState
+                                                              .sourceFloor,
+                                                          bid: PathState
+                                                              .sourceBid);
+                                                    });
                                                   }
-                                                },
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Icon(
-                                                      _routeDetailPannelController
-                                                              .isAttached
-                                                          ? _routeDetailPannelController
-                                                                  .isPanelClosed
-                                                              ? Icons
-                                                                  .short_text_outlined
-                                                              : Icons.map_sharp
-                                                          : Icons
-                                                              .short_text_outlined,
-                                                      color: Colors.black,
+
+                                                  Future.delayed(Duration(seconds: 2)).then((onValue){
+                                                    setState(() {
+                                                      onStart=true;
+                                                    });
+                                                  });
+                                                }
+
+                                              },
+                                              child: startingNavigation
+                                                  ? Row(
+                                                mainAxisSize:
+                                                MainAxisSize
+                                                    .min,
+                                                children: [
+                                                  Icon(
+                                                    Icons
+                                                        .assistant_navigation,
+                                                    color: Colors
+                                                        .black,
+                                                  ),
+                                                  SizedBox(
+                                                      width: 8),
+                                                  Text(
+                                                    '${LocaleData.start.getString(context)}',
+                                                    style:
+                                                    TextStyle(
+                                                      color: Colors
+                                                          .black,
                                                     ),
-                                                    SizedBox(width: 8),
-                                                    Semantics(
-                                                      sortKey:
-                                                          const OrdinalSortKey(
-                                                              2),
-                                                      onDidGainAccessibilityFocus:
-                                                          openRoutePannel,
-                                                      child: Text(
-                                                        _routeDetailPannelController
-                                                                .isAttached
-                                                            ? _routeDetailPannelController
-                                                                    .isPanelClosed
-                                                                ? "${LocaleData.steps.getString(context)}"
-                                                                : "${LocaleData.maps.getString(context)}"
-                                                            : "${LocaleData.steps.getString(context)}",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        left: 17, top: 12, right: 17),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          child: Semantics(
-                                            excludeSemantics: true,
-                                            child: Text(
-                                              "Steps",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                                color: Color(0xff000000),
-                                                height: 24 / 18,
-                                              ),
-                                              textAlign: TextAlign.left,
+                                                  ),
+                                                ],
+                                              )
+                                                  : Container(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child:
+                                                  CircularProgressIndicator(
+                                                    color:
+                                                    Colors.white,
+                                                  )),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 22,
+                                      ),
+                                      Container(
+                                        width: 98,
+                                        height: 40,
+                                        margin: EdgeInsets.only(left: 12),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(4.0),
+                                          border: Border.all(
+                                              color: Colors.black),
                                         ),
-                                        Container(
-                                          height: screenHeight - 300,
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              children: [
-                                                Semantics(
-                                                  excludeSemantics: false,
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Container(
-                                                        height: 25,
-                                                        margin: EdgeInsets.only(
-                                                            right: 8),
-                                                        child: SvgPicture.asset(
-                                                            "assets/StartpointVector.svg"),
-                                                      ),
-                                                      Semantics(
-                                                        label:
-                                                            "Steps preview,    You are heading from",
-                                                        child: Text(
-                                                          "${PathState.sourceName}",
-                                                          style:
-                                                              const TextStyle(
-                                                            fontFamily:
-                                                                "Roboto",
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            color: Color(
-                                                                0xff0e0d0d),
-                                                            height: 25 / 16,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.left,
-                                                        ),
-                                                      )
-                                                    ],
+                                        child: TextButton(
+                                          onPressed: () {
+                                            if (_routeDetailPannelController
+                                                .isPanelOpen) {
+                                              _routeDetailPannelController
+                                                  .close();
+                                            } else {
+                                              _routeDetailPannelController
+                                                  .open();
+                                            }
+                                          },
+                                          child: Row(
+                                            mainAxisSize:
+                                            MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                _routeDetailPannelController
+                                                    .isAttached
+                                                    ? _routeDetailPannelController
+                                                    .isPanelClosed
+                                                    ? Icons
+                                                    .short_text_outlined
+                                                    : Icons.map_sharp
+                                                    : Icons
+                                                    .short_text_outlined,
+                                                color: Colors.black,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Semantics(
+                                                sortKey:
+                                                const OrdinalSortKey(
+                                                    2),
+                                                onDidGainAccessibilityFocus:
+                                                openRoutePannel,
+                                                child: Text(
+                                                  _routeDetailPannelController
+                                                      .isAttached
+                                                      ? _routeDetailPannelController
+                                                      .isPanelClosed
+                                                      ? "${LocaleData.steps.getString(context)}"
+                                                      : "${LocaleData.maps.getString(context)}"
+                                                      : "${LocaleData.steps.getString(context)}",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  left: 17, top: 12, right: 17),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    child: Semantics(
+                                      excludeSemantics: true,
+                                      child: Text(
+                                        "Steps",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff000000),
+                                          height: 24 / 18,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 22,
+                                  ),
+                                  Container(
+                                    height: screenHeight - 300,
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          Semantics(
+                                            excludeSemantics: false,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment
+                                                  .center,
+                                              children: [
                                                 Container(
-                                                  width: screenHeight,
-                                                  height: 1,
-                                                  color: Color(0xffEBEBEB),
+                                                  height: 25,
+                                                  margin: EdgeInsets.only(
+                                                      right: 8),
+                                                  child: SvgPicture.asset(
+                                                      "assets/StartpointVector.svg"),
                                                 ),
-                                                Column(
-                                                  children: directionWidgets,
-                                                ),
-                                                SizedBox(
-                                                  height: 22,
-                                                ),
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      height: 25,
-                                                      margin: EdgeInsets.only(
-                                                          right: 8),
-                                                      child: Icon(
-                                                        Icons.pin_drop_sharp,
-                                                        size: 24,
-                                                      ),
+                                                Semantics(
+                                                  label:
+                                                  "Steps preview,    You are heading from",
+                                                  child: Text(
+                                                    "${PathState.sourceName}",
+                                                    style:
+                                                    const TextStyle(
+                                                      fontFamily:
+                                                      "Roboto",
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                      FontWeight.w400,
+                                                      color: Color(
+                                                          0xff0e0d0d),
+                                                      height: 25 / 16,
                                                     ),
-                                                    Semantics(
-                                                      label:
-                                                          "Your are heading towards ",
-                                                      child: Text(
-                                                        angle != null
-                                                            ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)}  ${LocaleData.getProperty(tools.angleToClocks3(angle, context), context)}"
-                                                            : PathState
-                                                                .destinationName,
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff0e0d0d),
-                                                          height: 25 / 16,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
-                                                Container(
-                                                  width: screenHeight,
-                                                  height: 1,
-                                                  color: Color(0xffEBEBEB),
-                                                ),
+                                                    textAlign:
+                                                    TextAlign.left,
+                                                  ),
+                                                )
                                               ],
                                             ),
                                           ),
-                                        )
-                                      ],
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                          Column(
+                                            children: directionWidgets,
+                                          ),
+                                          SizedBox(
+                                            height: 22,
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                height: 25,
+                                                margin: EdgeInsets.only(
+                                                    right: 8),
+                                                child: Icon(
+                                                  Icons.pin_drop_sharp,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                              Semantics(
+                                                label:
+                                                "Your are heading towards ",
+                                                child: Text(
+                                                  angle != null
+                                                      ? "${PathState.destinationName} ${LocaleData.willbe.getString(context)}  ${LocaleData.getProperty(tools.angleToClocks3(angle, context), context)}"
+                                                      : PathState
+                                                      .destinationName,
+                                                  style: const TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w400,
+                                                    color:
+                                                    Color(0xff0e0d0d),
+                                                    height: 25 / 16,
+                                                  ),
+                                                  textAlign:
+                                                  TextAlign.left,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Container(
+                                            width: screenHeight,
+                                            height: 1,
+                                            color: Color(0xffEBEBEB),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   )
                                 ],
                               ),
-                            ),
+                            )
                           ],
                         ),
-                      )),
+                      ),
+                    ],
+                  ),
+                )),
           ),
         ],
       ),
@@ -9640,120 +9630,120 @@ setState(() {
                   ],
                   panel: SingleChildScrollView(
                       child: Column(
-                    children: [
-                      Semantics(
-                        label:
+                        children: [
+                          Semantics(
+                            label:
                             "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN} ${BuildingName ?? ""}",
-                        excludeSemantics: true,
-                        child: Container(
-                          width: screenWidth,
-                          padding: EdgeInsets.fromLTRB(17, 32, 17, 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(24.0),
-                                topLeft: Radius.circular(24.0)),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.asset('assets/success1.png'),
+                            excludeSemantics: true,
+                            child: Container(
+                              width: screenWidth,
+                              padding: EdgeInsets.fromLTRB(17, 32, 17, 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(24.0),
+                                    topLeft: Radius.circular(24.0)),
                               ),
-                              SizedBox(
-                                height: 12,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset('assets/success1.png'),
+                                  ),
+                                  SizedBox(
+                                    height: 12,
+                                  ),
+                                  Text(
+                                    "You’ve Arrived",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff000000),
+                                      height: 25 / 16,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${destiN.isEmpty ? "Your Destination" : destiN}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xff000000),
+                                      height: 30 / 32,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${BuildingName ?? ""}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff000000),
+                                      height: 20 / 14,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  )
+                                ],
                               ),
-                              Text(
-                                "You’ve Arrived",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff000000),
-                                  height: 25 / 16,
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                              SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                "${destiN.isEmpty ? "Your Destination" : destiN}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xff000000),
-                                  height: 30 / 32,
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                              SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                "${BuildingName ?? ""}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff000000),
-                                  height: 20 / 14,
-                                ),
-                                textAlign: TextAlign.left,
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        indent: 24,
-                        endIndent: 24,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(18.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "How was your experience?",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xff000000),
-                                height: 24 / 18,
-                              ),
-                              textAlign: TextAlign.left,
                             ),
+                          ),
+                          Divider(
+                            indent: 24,
+                            endIndent: 24,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(18.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "How was your experience?",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xff000000),
+                                    height: 24 / 18,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
 
-                            SizedBox(height: 16),
+                                SizedBox(height: 16),
 
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(5, (index) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      _rating = index + 1;
-                                      if (_rating >= 4) {
-                                        //__feedbackControllerUp(0.3);
-                                        // _feedbackTextController.clear();
-                                      } else if (_rating <= 3) {
-                                        // __feedbackControllerUp(0.9);
-                                      } else if (_rating == 3 || _rating == 4) {
-                                        _feedbackTextController.clear();
-                                      }
+                                Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(5, (index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          _rating = index + 1;
+                                          if (_rating >= 4) {
+                                            //__feedbackControllerUp(0.3);
+                                            // _feedbackTextController.clear();
+                                          } else if (_rating <= 3) {
+                                            // __feedbackControllerUp(0.9);
+                                          } else if (_rating == 3 || _rating == 4) {
+                                            _feedbackTextController.clear();
+                                          }
 
-                                      setState(() {});
-                                    },
-                                    child: Padding(
-                                      padding:
+                                          setState(() {});
+                                        },
+                                        child: Padding(
+                                          padding:
                                           EdgeInsets.symmetric(horizontal: 10),
-                                      child: index < _rating
-                                          ? Semantics(
+                                          child: index < _rating
+                                              ? Semantics(
                                               label: index == _rating - 1
                                                   ? "Rated ${index + 1} star"
                                                   : "Rate ${index + 1} star",
@@ -9762,85 +9752,85 @@ setState(() {
                                                 width: 48.0,
                                                 height: 48.0,
                                               ))
-                                          : Semantics(
+                                              : Semantics(
                                               label: "Rate ${index + 1} star",
                                               child: SvgPicture.asset(
                                                 'assets/ratingStarBorder.svg',
                                                 width: 48.0,
                                                 height: 48.0,
                                               )),
-                                    ),
-                                  );
-                                }),
-                              ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                                // SizedBox(height: 20),
+                                // if (_rating > 0 && _rating < 4) ...[
+                                //   SizedBox(height: 16),
+                                //   Text(
+                                //     "Select the Issues ",
+                                //     style: const TextStyle(
+                                //       fontFamily: "Roboto",
+                                //       fontSize: 18,
+                                //       fontWeight: FontWeight.w700,
+                                //       color: Color(0xff000000),
+                                //     ),
+                                //     textAlign: TextAlign.left,
+                                //   ),
+                                //   SizedBox(height: 16),
+                                //   ChipFilterWidget(
+                                //
+                                //     options: ['Bad map route', 'Wrong turns', 'UI Issue', 'App speed','Search Function','Map Accuracy'],
+                                //     onSelected: (selectedOption) {
+                                //
+                                //       // Handle the selection here
+                                //       _feedbackTextController.text = selectedOption;
+                                //       _feedback = _feedbackTextController.text;
+                                //
+                                //       setState(() {
+                                //
+                                //       });
+                                //     },
+                                //
+                                //   ),
+                                //   SizedBox(height: 20),
+                                //   Text(
+                                //     "Add a Detailed Review",
+                                //     style: const TextStyle(
+                                //       fontFamily: "Roboto",
+                                //       fontSize: 18,
+                                //       fontWeight: FontWeight.w700,
+                                //       color: Color(0xff000000),
+                                //       height: 24/18,
+                                //     ),
+                                //     textAlign: TextAlign.left,
+                                //   ),
+                                //   SizedBox(height: 20),
+                                //   TextFormField(
+                                //       controller: _feedbackTextController,
+                                //       maxLines: 4,
+                                //       decoration: InputDecoration(
+                                //         hintText: 'Please share your thoughts...',
+                                //         border: OutlineInputBorder(
+                                //           borderRadius: BorderRadius.circular(12),
+                                //         ),
+                                //         filled: false,
+                                //         fillColor: Colors.white,
+                                //       ),
+                                //       onChanged: (value)  {
+                                //         _feedback = value;
+                                //
+                                //         setState(() {
+                                //
+                                //         });
+                                //       }
+                                //   ),
+                                // ],
+                              ],
                             ),
-                            // SizedBox(height: 20),
-                            // if (_rating > 0 && _rating < 4) ...[
-                            //   SizedBox(height: 16),
-                            //   Text(
-                            //     "Select the Issues ",
-                            //     style: const TextStyle(
-                            //       fontFamily: "Roboto",
-                            //       fontSize: 18,
-                            //       fontWeight: FontWeight.w700,
-                            //       color: Color(0xff000000),
-                            //     ),
-                            //     textAlign: TextAlign.left,
-                            //   ),
-                            //   SizedBox(height: 16),
-                            //   ChipFilterWidget(
-                            //
-                            //     options: ['Bad map route', 'Wrong turns', 'UI Issue', 'App speed','Search Function','Map Accuracy'],
-                            //     onSelected: (selectedOption) {
-                            //
-                            //       // Handle the selection here
-                            //       _feedbackTextController.text = selectedOption;
-                            //       _feedback = _feedbackTextController.text;
-                            //
-                            //       setState(() {
-                            //
-                            //       });
-                            //     },
-                            //
-                            //   ),
-                            //   SizedBox(height: 20),
-                            //   Text(
-                            //     "Add a Detailed Review",
-                            //     style: const TextStyle(
-                            //       fontFamily: "Roboto",
-                            //       fontSize: 18,
-                            //       fontWeight: FontWeight.w700,
-                            //       color: Color(0xff000000),
-                            //       height: 24/18,
-                            //     ),
-                            //     textAlign: TextAlign.left,
-                            //   ),
-                            //   SizedBox(height: 20),
-                            //   TextFormField(
-                            //       controller: _feedbackTextController,
-                            //       maxLines: 4,
-                            //       decoration: InputDecoration(
-                            //         hintText: 'Please share your thoughts...',
-                            //         border: OutlineInputBorder(
-                            //           borderRadius: BorderRadius.circular(12),
-                            //         ),
-                            //         filled: false,
-                            //         fillColor: Colors.white,
-                            //       ),
-                            //       onChanged: (value)  {
-                            //         _feedback = value;
-                            //
-                            //         setState(() {
-                            //
-                            //         });
-                            //       }
-                            //   ),
-                            // ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  )),
+                          ),
+                        ],
+                      )),
                 ),
                 SizedBox(
                   width: double.infinity,
@@ -9853,7 +9843,7 @@ setState(() {
                           UserCredentials().getuserName(),
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
-                          "com.iwayplus.navigation");
+                          "com.iwayplus.accessibleashoka");
 
                       if (_feedback.isNotEmpty) {}
                       showFeedback = false;
@@ -9909,14 +9899,14 @@ setState(() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
-      (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
     );
   }
   void alignMapToPath(List<double> A, List<double> B) async {
-print("enteredddd");
-print(onStart);
-double screenHeight=MediaQuery.of(context).size.height;
-double pixelRatio=MediaQuery.of(context).devicePixelRatio;
+    print("enteredddd");
+    print(onStart);
+    double screenHeight=MediaQuery.of(context).size.height;
+    double pixelRatio=MediaQuery.of(context).devicePixelRatio;
     mapState.tilt = 33.5;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
@@ -9928,12 +9918,12 @@ double pixelRatio=MediaQuery.of(context).devicePixelRatio;
 
     // Adjust the y-coordinate to shift the camera upwards (moving the target down)
     int newX = screenCenter.x-10;
-int newY=0;
-if(Platform.isAndroid){
-  newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-}else{
-  newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-}// Adjust 300 as needed for how far you want the user at the bottom
+    int newY=0;
+    if(Platform.isAndroid){
+      newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
+    }else{
+      newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
+    }// Adjust 300 as needed for how far you want the user at the bottom
 
     // Convert the new screen coordinate back to LatLng
     LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
@@ -9997,7 +9987,7 @@ if(Platform.isAndroid){
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-bool onStart=false;
+  bool onStart=false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -10033,9 +10023,11 @@ bool onStart=false;
           List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
 
           int index =
-              user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+          user.path.indexOf((user.showcoordY * col) + user.showcoordX);
 
           int node = user.path[index + 1];
+
+
 
           List<int> c = [node % col, node ~/ col];
           int val = tools.calculateAngleSecond(a, b, c).toInt();
@@ -10047,33 +10039,57 @@ bool onStart=false;
                   LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
                   LatLng(user.Cellpath[index + 1].lat,
                       user.Cellpath[index + 1].lng)) - a).toInt().abs();
-              if(val<10 || val>-10){
+              print("turn stopping check ${user.Cellpath[index].x}, ${user.Cellpath[index].y}      ${user.Cellpath[index+1].x}, ${user.Cellpath[index+1].y}   $val");
+
+              if(val<10 && val>-10){
                 val = 0;
               }
             }
-          }catch(_){}
+          }catch(_){
 
-            for (int i = 0; i < getPoints.length; i++) {
-              if (isPdrStop && val == 0) {
-                Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-                      StartPDR(),
-                    });
+          }
 
-                setState(() {
-                  isPdrStop = false;
-                });
+          print("val $val     ${tools.calculateBearing_fromLatLng(
+              LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
+              LatLng(user.Cellpath[index + 1].lat,
+                  user.Cellpath[index + 1].lng))}");
+          //
+          //
 
-                break;
-              }
-              if (getPoints[i][0] == user.showcoordX &&
-                  getPoints[i][1] == user.showcoordY) {
-                //
+          //
+          for (int i = 0; i < getPoints.length; i++) {
+            //
+            //
+            //
+            //
+            //
 
-                StopPDR();
-                getPoints.removeAt(i);
-                break;
-              }
+            //
+
+            //
+            if (isPdrStop && val == 0) {
+              //
+
+              Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+                print("pdr started"),
+                StartPDR(),
+              });
+
+              setState(() {
+                isPdrStop = false;
+              });
+
+              break;
             }
+            if (getPoints[i][0] == user.showcoordX &&
+                getPoints[i][1] == user.showcoordY) {
+              print("pdr stopped");
+
+              StopPDR();
+              getPoints.removeAt(i);
+              break;
+            }
+          }
         }
       }
     } catch (e) {}
@@ -10112,7 +10128,7 @@ bool onStart=false;
                               autofocus: true,
                               child: Semantics(
                                 onDidGainAccessibilityFocus:
-                                    noshouldStepOpenfunc,
+                                noshouldStepOpenfunc,
                                 child: Row(
                                   children: [
                                     SizedBox(
@@ -10120,7 +10136,7 @@ bool onStart=false;
                                     ),
                                     Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Semantics(
                                           excludeSemantics: false,
@@ -10134,7 +10150,7 @@ bool onStart=false;
                                                       fontFamily: "Roboto",
                                                       fontSize: 20,
                                                       fontWeight:
-                                                          FontWeight.w700,
+                                                      FontWeight.w700,
                                                       height: 26 / 20,
                                                       color: Color(0xffDC6A01)),
                                                   textAlign: TextAlign.left,
@@ -10200,7 +10216,7 @@ bool onStart=false;
                                       PathState.sourceLat = user.lat;
                                       PathState.sourceLng = user.lng;
                                       PathState.sourceName =
-                                          "Your current location";
+                                      "Your current location";
 
                                       user.temporaryExit = true;
                                       user.isnavigating = false;
@@ -10210,9 +10226,9 @@ bool onStart=false;
                                       if (pathMarkers[user.Bid] != null) {
                                         setCameraPosition(
                                             pathMarkers[user.Bid]![
-                                                SingletonFunctionController
-                                                    .building
-                                                    .floor[user.Bid]]!);
+                                            SingletonFunctionController
+                                                .building
+                                                .floor[user.Bid]]!);
                                       }
                                     });
                                   },
@@ -10450,13 +10466,13 @@ bool onStart=false;
     } else if (optionsTags != null && floorOptionsTags == null) {
       setState(() {
         filteredItems = LandmarkItems.where((item) =>
-            optionsTags.contains(item.element?.type) &&
+        optionsTags.contains(item.element?.type) &&
             floorOptionsTags.contains('Floor ${item.floor}')).toList();
       });
     } else {
       setState(() {
         filteredItems = LandmarkItems.where(
-            (item) => optionsTags.contains(item.element?.type)).toList();
+                (item) => optionsTags.contains(item.element?.type)).toList();
       });
     }
   }
@@ -10501,7 +10517,7 @@ bool onStart=false;
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -10526,1052 +10542,1052 @@ bool onStart=false;
               ),
             ],
             minHeight:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 155
-                    : 140,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 155
+                : 140,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 190 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 190 / screenHeight
+                : 175 / screenHeight,
             maxHeight: screenHeight * 0.9,
             panel: Semantics(
               child: Container(
                   child: !_isFilterOpen
                       ? Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 16),
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, bottom: 4),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${element.buildingName}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      height: 27 / 18,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  element.workingDays != null &&
+                                      element.workingDays!.length > 0
+                                      ? Row(
+                                    children: [
+                                      Text(
+                                        "Open ",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff4caf50),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        "  Closes ${element.workingDays![0].closingTime}",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight:
+                                          FontWeight.w400,
+                                          color: Color(0xff8d8c8c),
+                                          height: 25 / 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  )
+                                      : Container()
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: 16, right: 16, top: 8, bottom: 8),
+                              child: Row(
                                 children: [
                                   Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8),
+                                    width: 142,
+                                    height: 42,
                                     decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Color(0xff24B9B0),
+                                      borderRadius:
+                                      BorderRadius.circular(8.0),
+                                    ),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          SvgPicture.asset(
+                                              "assets/ExploreInside.svg"),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Explore Inside",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xffffffff),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Container(
+                                    width: 83,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                        color: Color(0xffffffff),
+                                        borderRadius:
+                                        BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                            color: Color(0xff000000))),
+                                    child: TextButton(
+                                      onPressed: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.call,
+                                            color: Color(0xff000000),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Call",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff000000),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Semantics(
+                                    label: "Share",
+                                    onDidGainAccessibilityFocus:
+                                    _slidePanelUp,
+                                    // onDidLoseAccessibilityFocus: _slidePanelDown,
+                                    child: Container(
+                                      width: 95,
+                                      height: 42,
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffffffff),
+                                          borderRadius:
+                                          BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                              color: Color(0xff000000))),
+                                      child: TextButton(
+                                        onPressed: () {},
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.share,
+                                              color: Color(0xff000000),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "Share",
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight:
+                                                FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 20 / 14,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16),
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, bottom: 4),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${element.buildingName}",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            height: 27 / 18,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        element.workingDays != null &&
-                                                element.workingDays!.length > 0
-                                            ? Row(
-                                                children: [
-                                                  Text(
-                                                    "Open ",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff4caf50),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  Text(
-                                                    "  Closes ${element.workingDays![0].closingTime}",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Color(0xff8d8c8c),
-                                                      height: 25 / 16,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
-                                              )
-                                            : Container()
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(
-                                        left: 16, right: 16, top: 8, bottom: 8),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 142,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xff24B9B0),
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SvgPicture.asset(
-                                                    "assets/ExploreInside.svg"),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Explore Inside",
+                            ),
+                            Semantics(
+                              label: "",
+                              child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Semantics(
+                                              header: true,
+                                              child: GestureDetector(
+                                                onTap: _slidePanelUp,
+                                                child: Text(
+                                                  "Services",
                                                   style: const TextStyle(
                                                     fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xffffffff),
-                                                    height: 20 / 14,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    color: Color(0xff000000),
+                                                    height: 23 / 16,
                                                   ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Container(
-                                          width: 83,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffffffff),
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                              border: Border.all(
-                                                  color: Color(0xff000000))),
-                                          child: TextButton(
-                                            onPressed: () {},
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.call,
-                                                  color: Color(0xff000000),
+                                                  textAlign: TextAlign.center,
                                                 ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  "Call",
-                                                  style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xff000000),
-                                                    height: 20 / 14,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                )
-                                              ],
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        Semantics(
-                                          label: "Share",
-                                          onDidGainAccessibilityFocus:
-                                              _slidePanelUp,
-                                          // onDidLoseAccessibilityFocus: _slidePanelDown,
-                                          child: Container(
-                                            width: 95,
-                                            height: 42,
-                                            decoration: BoxDecoration(
-                                                color: Color(0xffffffff),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                border: Border.all(
-                                                    color: Color(0xff000000))),
-                                            child: TextButton(
-                                              onPressed: () {},
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.share,
-                                                    color: Color(0xff000000),
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text(
-                                                    "Share",
+                                            Semantics(
+                                              label: 'Services',
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      //_isBuildingPannelOpen = !_isBuildingPannelOpen;
+                                                      _isFilterOpen =
+                                                      !_isFilterOpen;
+                                                    });
+                                                  },
+                                                  child: Text(
+                                                    "See All",
                                                     style: const TextStyle(
                                                       fontFamily: "Roboto",
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
+                                                      FontWeight.w500,
+                                                      color:
+                                                      Color(0xff4a4545),
                                                       height: 20 / 14,
                                                     ),
-                                                    textAlign: TextAlign.left,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                                                    textAlign:
+                                                    TextAlign.center,
+                                                  )),
+                                            )
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Semantics(
-                                    label: "",
-                                    child: Container(
-                                        child: Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 16, right: 16),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Semantics(
-                                                header: true,
-                                                child: GestureDetector(
-                                                  onTap: _slidePanelUp,
-                                                  child: Text(
-                                                    "Services",
-                                                    style: const TextStyle(
-                                                      fontFamily: "Roboto",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: Color(0xff000000),
-                                                      height: 23 / 16,
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 16),
+                                        child: Row(
+                                          children: [
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/washroomservice.svg"),
                                                     ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                              ),
-                                              Semantics(
-                                                label: 'Services',
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        //_isBuildingPannelOpen = !_isBuildingPannelOpen;
-                                                        _isFilterOpen =
-                                                            !_isFilterOpen;
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      "See All",
+                                                    Text(
+                                                      "Washroom",
                                                       style: const TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 14,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xff4a4545),
+                                                        Color(0xff4a4545),
                                                         height: 20 / 14,
                                                       ),
                                                       textAlign:
-                                                          TextAlign.center,
-                                                    )),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(left: 16),
-                                          child: Row(
-                                            children: [
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/washroomservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Washroom",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/foodservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Food",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                header: true,
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/accservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Accessibility",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 16,
-                                              ),
-                                              Semantics(
-                                                label: "",
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        width: 61,
-                                                        height: 56,
-                                                        padding:
-                                                            EdgeInsets.all(8),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            8)),
-                                                            border: Border.all(
-                                                                color: Color(
-                                                                    0xffB3B3B3))),
-                                                        child: SvgPicture.asset(
-                                                            "assets/exitservice.svg"),
-                                                      ),
-                                                      Text(
-                                                        "Exit",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color:
-                                                              Color(0xff4a4545),
-                                                          height: 20 / 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Semantics(
-                                          onDidLoseAccessibilityFocus:
-                                              _slidePanelDown,
-                                          child: Container(
-                                            margin: EdgeInsets.only(top: 20),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: _slidePanelDown,
-                                                  child: Container(
-                                                      margin: EdgeInsets.only(
-                                                          left: 17),
-                                                      child: Text(
-                                                        "Information",
-                                                        style: const TextStyle(
-                                                          fontFamily: "Roboto",
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Color(0xff000000),
-                                                          height: 23 / 16,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      )),
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      left: 16, right: 16),
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0, 11, 0, 10),
-                                                  decoration: BoxDecoration(
-                                                    border: Border(
-                                                        bottom: BorderSide(
-                                                            width: 1.0,
-                                                            color: Color(
-                                                                0xffebebeb))),
-                                                  ),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      SvgPicture.asset(
-                                                          "assets/Depth 3, Frame 0.svg"),
-                                                      SizedBox(
-                                                        width: 16,
-                                                      ),
-                                                      Container(
-                                                        width:
-                                                            screenWidth - 100,
-                                                        margin: EdgeInsets.only(
-                                                            top: 8),
-                                                        child: RichText(
-                                                          text: TextSpan(
-                                                            style:
-                                                                const TextStyle(
-                                                              fontFamily:
-                                                                  "Roboto",
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
                                                               color: Color(
-                                                                  0xff4a4545),
-                                                              height: 25 / 16,
-                                                            ),
-                                                            children: [
-                                                              TextSpan(
-                                                                text:
-                                                                    "${element.address}",
-                                                              ),
-                                                            ],
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/foodservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Food",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              header: true,
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/accservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Accessibility",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 16,
+                                            ),
+                                            Semantics(
+                                              label: "",
+                                              child: Container(
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 61,
+                                                      height: 56,
+                                                      padding:
+                                                      EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .all(Radius
+                                                              .circular(
+                                                              8)),
+                                                          border: Border.all(
+                                                              color: Color(
+                                                                  0xffB3B3B3))),
+                                                      child: SvgPicture.asset(
+                                                          "assets/exitservice.svg"),
+                                                    ),
+                                                    Text(
+                                                      "Exit",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                        FontWeight.w400,
+                                                        color:
+                                                        Color(0xff4a4545),
+                                                        height: 20 / 14,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.center,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Semantics(
+                                        onDidLoseAccessibilityFocus:
+                                        _slidePanelDown,
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 20),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: _slidePanelDown,
+                                                child: Container(
+                                                    margin: EdgeInsets.only(
+                                                        left: 17),
+                                                    child: Text(
+                                                      "Information",
+                                                      style: const TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                        FontWeight.w500,
+                                                        color:
+                                                        Color(0xff000000),
+                                                        height: 23 / 16,
+                                                      ),
+                                                      textAlign:
+                                                      TextAlign.left,
+                                                    )),
+                                              ),
+                                              Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16, right: 16),
+                                                padding: EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 0.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                      screenWidth - 100,
+                                                      margin: EdgeInsets.only(
+                                                          top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height: 25 / 16,
                                                           ),
+                                                          children: [
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.address}",
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                // Container(
-                                                //   margin:
-                                                //   EdgeInsets.only(left: 16, right: 16),
-                                                //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                                                //   decoration: BoxDecoration(
-                                                //     border: Border(
-                                                //         bottom: BorderSide(
-                                                //             width: 1.0,
-                                                //             color: Color(0xffebebeb))),
-                                                //   ),
-                                                //   child: Row(
-                                                //     crossAxisAlignment:
-                                                //     CrossAxisAlignment.center,
-                                                //     children: [
-                                                //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
-                                                //       SizedBox(width: 16,),
-                                                //       Container(
-                                                //         margin: EdgeInsets.only(top: 8),
-                                                //         child: RichText(
-                                                //           text: TextSpan(
-                                                //             style: const TextStyle(
-                                                //               fontFamily: "Roboto",
-                                                //               fontSize: 16,
-                                                //               fontWeight: FontWeight.w400,
-                                                //               color: Color(0xff4a4545),
-                                                //               height: 25 / 16,
-                                                //             ),
-                                                //             children: [
-                                                //               TextSpan(
-                                                //                 text:
-                                                //                 "6 Floors",
-                                                //               ),
-                                                //             ],
-                                                //           ),
-                                                //         ),
-                                                //       ),
-                                                //     ],
-                                                //   ),
-                                                // ),
-                                                element.phone != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                              ),
+                                              // Container(
+                                              //   margin:
+                                              //   EdgeInsets.only(left: 16, right: 16),
+                                              //   padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
+                                              //   decoration: BoxDecoration(
+                                              //     border: Border(
+                                              //         bottom: BorderSide(
+                                              //             width: 1.0,
+                                              //             color: Color(0xffebebeb))),
+                                              //   ),
+                                              //   child: Row(
+                                              //     crossAxisAlignment:
+                                              //     CrossAxisAlignment.center,
+                                              //     children: [
+                                              //       SvgPicture.asset("assets/Depth 3, Frame 1.svg"),
+                                              //       SizedBox(width: 16,),
+                                              //       Container(
+                                              //         margin: EdgeInsets.only(top: 8),
+                                              //         child: RichText(
+                                              //           text: TextSpan(
+                                              //             style: const TextStyle(
+                                              //               fontFamily: "Roboto",
+                                              //               fontSize: 16,
+                                              //               fontWeight: FontWeight.w400,
+                                              //               color: Color(0xff4a4545),
+                                              //               height: 25 / 16,
+                                              //             ),
+                                              //             children: [
+                                              //               TextSpan(
+                                              //                 text:
+                                              //                 "6 Floors",
+                                              //               ),
+                                              //             ],
+                                              //           ),
+                                              //         ),
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
+                                              element.phone != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-1.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-1.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.phone}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.phone}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.website != null
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.website != null
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-2.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Container(
+                                                      margin: EdgeInsets
+                                                          .only(top: 8),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          style:
+                                                          const TextStyle(
+                                                            fontFamily:
+                                                            "Roboto",
+                                                            fontSize:
+                                                            16,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w400,
+                                                            color: Color(
+                                                                0xff4a4545),
+                                                            height:
+                                                            25 / 16,
+                                                          ),
                                                           children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-2.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Container(
-                                                              margin: EdgeInsets
-                                                                  .only(top: 8),
-                                                              child: RichText(
-                                                                text: TextSpan(
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontFamily:
-                                                                        "Roboto",
-                                                                    fontSize:
-                                                                        16,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Color(
-                                                                        0xff4a4545),
-                                                                    height:
-                                                                        25 / 16,
-                                                                  ),
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text:
-                                                                          "${element.website}",
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                            TextSpan(
+                                                              text:
+                                                              "${element.website}",
                                                             ),
                                                           ],
                                                         ),
-                                                      )
-                                                    : Container(),
-                                                element.workingDays != null &&
-                                                        element.workingDays!
-                                                                .length >
-                                                            1
-                                                    ? Container(
-                                                        margin: EdgeInsets.only(
-                                                            left: 16,
-                                                            right: 16),
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0, 11, 0, 10),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                              bottom: BorderSide(
-                                                                  width: 1.0,
-                                                                  color: Color(
-                                                                      0xffebebeb))),
-                                                        ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            SvgPicture.asset(
-                                                                "assets/Depth 3, Frame 1-3.svg"),
-                                                            SizedBox(
-                                                              width: 16,
-                                                            ),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container(),
+                                              element.workingDays != null &&
+                                                  element.workingDays!
+                                                      .length >
+                                                      1
+                                                  ? Container(
+                                                margin: EdgeInsets.only(
+                                                    left: 16,
+                                                    right: 16),
+                                                padding:
+                                                EdgeInsets.fromLTRB(
+                                                    0, 11, 0, 10),
+                                                decoration:
+                                                BoxDecoration(
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          width: 1.0,
+                                                          color: Color(
+                                                              0xffebebeb))),
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                        "assets/Depth 3, Frame 1-3.svg"),
+                                                    SizedBox(
+                                                      width: 16,
+                                                    ),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .start,
+                                                      children: [
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
                                                               children: [
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  margin: EdgeInsets
-                                                                      .only(
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      RichText(
-                                                                    text:
-                                                                        TextSpan(
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontFamily:
-                                                                            "Roboto",
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight.w400,
-                                                                        color: Color(
-                                                                            0xff4a4545),
-                                                                        height:
-                                                                            25 /
-                                                                                16,
-                                                                      ),
-                                                                      children: [
-                                                                        TextSpan(
-                                                                          text:
-                                                                              "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].day} to ${element.workingDays![element.workingDays!.length - 1].day}",
                                                                 ),
                                                               ],
                                                             ),
-                                                          ],
+                                                          ),
                                                         ),
-                                                      )
-                                                    : Container()
-                                              ],
-                                            ),
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .only(
+                                                              top:
+                                                              8),
+                                                          child:
+                                                          RichText(
+                                                            text:
+                                                            TextSpan(
+                                                              style:
+                                                              const TextStyle(
+                                                                fontFamily:
+                                                                "Roboto",
+                                                                fontSize:
+                                                                16,
+                                                                fontWeight:
+                                                                FontWeight.w400,
+                                                                color: Color(
+                                                                    0xff4a4545),
+                                                                height:
+                                                                25 /
+                                                                    16,
+                                                              ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                  "${element.workingDays![0].openingTime} - ${element.workingDays![element.workingDays!.length - 1].closingTime}",
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Container()
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    )),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 38,
-                                    height: 6,
-                                    margin: EdgeInsets.only(top: 8, bottom: 8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffd9d9d9),
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: IconButton(
-                                      onPressed: () {
-                                        _isFilterOpen = !_isFilterOpen;
-                                      },
-                                      icon: SvgPicture.asset(
-                                        "assets/Navigation_closeIcon.svg",
-                                        height: 24,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 17, top: 8),
-                                    child: Text(
-                                      "Filters",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xff000000),
-                                        height: 26 / 20,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 14, top: 10),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        optionsTags.clear();
-                                        floorOptionsTags.clear();
-                                      },
-                                      child: Text(
-                                        "Clear All",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff24b9b0),
-                                          height: 20 / 14,
                                         ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                      )
+                                    ],
+                                  )),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                      : Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 6,
+                              margin: EdgeInsets.only(top: 8, bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xffd9d9d9),
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
-
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: IconButton(
+                                onPressed: () {
+                                  _isFilterOpen = !_isFilterOpen;
+                                },
+                                icon: SvgPicture.asset(
+                                  "assets/Navigation_closeIcon.svg",
+                                  height: 24,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 17, top: 8),
+                              child: Text(
+                                "Filters",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 26 / 20,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              margin: EdgeInsets.only(right: 14, top: 10),
+                              child: TextButton(
+                                onPressed: () {
+                                  optionsTags.clear();
+                                  floorOptionsTags.clear();
+                                },
                                 child: Text(
-                                  "Services",
+                                  "Clear All",
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
+                                    color: Color(0xff24b9b0),
+                                    height: 20 / 14,
                                   ),
-                                  textAlign: TextAlign.start,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
-                              //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
-                              // FutureBuilder<int>(
-                              //   future: getHiveBoxLength(),
-                              //   builder: (context, snapshot) {
-                              //     if (snapshot.connectionState != ConnectionState.waiting) {
-                              //       return Text('Error: ${snapshot.error}'); // or any loading indicator
-                              //     } else if (snapshot.hasError) {
-                              //       return Text('Error: ${snapshot.error}');
-                              //     } else {
-                              //       return Text('Length of Hive Box: ${snapshot.data}');
-                              //     }
-                              //   },
-                              // ),
-                              //---------------------------------------------------------------------------------------
+                            )
+                          ],
+                        ),
 
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length != 0) {
-                                      optionsTags = value.getAt(0);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: optionsTags,
-                                      onChanged: (val) {
-                                        value.put(0, val);
-                                        setState(() {
-                                          optionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: options,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                          selectedStyle: const C2ChipStyle(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(7),
-                                              ),
-                                              backgroundColor:
-                                                  Color(0XFFABF9F4)),
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(7),
-                                          ),
-                                          borderStyle: BorderStyle.solid),
-                                      wrapped: false,
-                                    );
-                                  },
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Services",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        //-----------------------------CHECK FILTER SELECTED DATABASE---------------------------
+                        // FutureBuilder<int>(
+                        //   future: getHiveBoxLength(),
+                        //   builder: (context, snapshot) {
+                        //     if (snapshot.connectionState != ConnectionState.waiting) {
+                        //       return Text('Error: ${snapshot.error}'); // or any loading indicator
+                        //     } else if (snapshot.hasError) {
+                        //       return Text('Error: ${snapshot.error}');
+                        //     } else {
+                        //       return Text('Length of Hive Box: ${snapshot.data}');
+                        //     }
+                        //   },
+                        // ),
+                        //---------------------------------------------------------------------------------------
+
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length != 0) {
+                                optionsTags = value.getAt(0);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: optionsTags,
+                                onChanged: (val) {
+                                  value.put(0, val);
+                                  setState(() {
+                                    optionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: options,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
                                 ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Choose Floor",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                child: ValueListenableBuilder(
-                                  valueListenable:
-                                      Hive.box('Filters').listenable(),
-                                  builder: (BuildContext context, value,
-                                      Widget? child) {
-                                    //List<dynamic> aa = []
-                                    if (value.length == 2) {
-                                      floorOptionsTags = value.getAt(1);
-                                    }
-                                    return ChipsChoice<String>.multiple(
-                                      value: floorOptionsTags,
-                                      onChanged: (val) {
-                                        value.put(1, val);
-                                        setState(() {
-                                          floorOptionsTags = val;
-                                          onTagsChanged();
-                                        });
-                                      },
-                                      choiceItems:
-                                          C2Choice.listFrom<String, String>(
-                                        source: floorOptions,
-                                        value: (i, v) => v,
-                                        label: (i, v) => v,
-                                        tooltip: (i, v) => v,
-                                      ),
-                                      choiceLeadingBuilder: (data, i) {
-                                        if (data.meta == null) return null;
-                                        return CircleAvatar(
-                                          maxRadius: 12,
-                                          backgroundImage: data.avatarImage,
-                                        );
-                                      },
-                                      choiceCheckmark: true,
-                                      choiceStyle: C2ChipStyle.filled(
-                                        selectedStyle: const C2ChipStyle(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(7),
-                                            ),
-                                            backgroundColor: Color(0XFFABF9F4)),
-                                        color: Colors.white,
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                    selectedStyle: const C2ChipStyle(
                                         borderRadius: BorderRadius.all(
                                           Radius.circular(7),
                                         ),
-                                      ),
-                                      wrapped: false,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 8, left: 16),
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  "Filter results ${filteredItems.length}",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff000000),
-                                    height: 23 / 16,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 12),
-                                height: screenHeight - 410,
-                                child: ListView.builder(
-                                  itemCount: filteredItems.length,
-                                  itemBuilder: (context, index) {
-                                    final item = filteredItems[index];
-                                    return NavigatonFilterCard(
-                                      LandmarkName: item.venueName!,
-                                      LandmarkDistance: "90 m",
-                                      LandmarkFloor: "Floor ${item.floor}",
-                                      LandmarksubName: item.buildingName!,
-                                    );
-                                  },
-                                ),
-                              )
-                            ],
+                                        backgroundColor:
+                                        Color(0XFFABF9F4)),
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(7),
+                                    ),
+                                    borderStyle: BorderStyle.solid),
+                                wrapped: false,
+                              );
+                            },
                           ),
-                        )),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Choose Floor",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                            Hive.box('Filters').listenable(),
+                            builder: (BuildContext context, value,
+                                Widget? child) {
+                              //List<dynamic> aa = []
+                              if (value.length == 2) {
+                                floorOptionsTags = value.getAt(1);
+                              }
+                              return ChipsChoice<String>.multiple(
+                                value: floorOptionsTags,
+                                onChanged: (val) {
+                                  value.put(1, val);
+                                  setState(() {
+                                    floorOptionsTags = val;
+                                    onTagsChanged();
+                                  });
+                                },
+                                choiceItems:
+                                C2Choice.listFrom<String, String>(
+                                  source: floorOptions,
+                                  value: (i, v) => v,
+                                  label: (i, v) => v,
+                                  tooltip: (i, v) => v,
+                                ),
+                                choiceLeadingBuilder: (data, i) {
+                                  if (data.meta == null) return null;
+                                  return CircleAvatar(
+                                    maxRadius: 12,
+                                    backgroundImage: data.avatarImage,
+                                  );
+                                },
+                                choiceCheckmark: true,
+                                choiceStyle: C2ChipStyle.filled(
+                                  selectedStyle: const C2ChipStyle(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(7),
+                                      ),
+                                      backgroundColor: Color(0XFFABF9F4)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(7),
+                                  ),
+                                ),
+                                wrapped: false,
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 8, left: 16),
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            "Filter results ${filteredItems.length}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                              height: 23 / 16,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 12),
+                          height: screenHeight - 410,
+                          child: ListView.builder(
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredItems[index];
+                              return NavigatonFilterCard(
+                                LandmarkName: item.venueName!,
+                                LandmarkDistance: "90 m",
+                                LandmarkFloor: "Floor ${item.floor}",
+                                LandmarksubName: item.buildingName!,
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
             )));
   }
 
@@ -11653,7 +11669,7 @@ bool onStart=false;
     if (BuildingAllBox.length > 0) {
       List<dynamic> responseBody = BuildingAllBox.getAt(0)!.responseBody;
       List<buildingAll> buildingList =
-          responseBody.map((data) => buildingAll.fromJson(data)).toList();
+      responseBody.map((data) => buildingAll.fromJson(data)).toList();
       buildingList.forEach((Element) {
         if (Element.sId == buildingAllApi.getStoredString()) {
           setState(() {
@@ -11672,7 +11688,7 @@ bool onStart=false;
         visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(
           label:
-              "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
+          "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
           excludeSemantics: true,
           child: SlidingUpPanel(
             controller: _panelController,
@@ -11685,9 +11701,9 @@ bool onStart=false;
             ],
             minHeight: 90,
             snapPoint:
-                element.workingDays != null && element.workingDays!.length > 0
-                    ? 220 / screenHeight
-                    : 175 / screenHeight,
+            element.workingDays != null && element.workingDays!.length > 0
+                ? 220 / screenHeight
+                : 175 / screenHeight,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -11787,7 +11803,7 @@ bool onStart=false;
           pathMarkers[key]![SingletonFunctionController.building.floor[key]] !=
               null) {
         combinedMarkers = combinedMarkers.union(pathMarkers[key]![
-            SingletonFunctionController.building.floor[key]]!);
+        SingletonFunctionController.building.floor[key]]!);
       }
       if ((!_isRoutePanelOpen || !_isnavigationPannelOpen) &&
           markers[key] != null &&
@@ -11802,12 +11818,12 @@ bool onStart=false;
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
       });
     }
-
     return combinedMarkers;
   }
 
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
+    print("patch $patch");
     if(cachedPolygon.isEmpty){
       Set<Polygon> polygons = Set();
       closedpolygons.forEach((key, value) {
@@ -11820,7 +11836,7 @@ bool onStart=false;
       cachedPolygon = polygons;
       return polygons;
     }
-    return cachedPolygon;
+    return cachedPolygon.union(otherpatch).union(blurPatch);
   }
 
   Set<gmap.Polyline> getCombinedPolylines() {
@@ -11842,7 +11858,7 @@ bool onStart=false;
           singleroute[key]![SingletonFunctionController.building.floor[key]] !=
               null) {
         poly = poly.union(singleroute[key]![
-            SingletonFunctionController.building.floor[key]]!);
+        SingletonFunctionController.building.floor[key]]!);
       }
     });
 
@@ -11907,8 +11923,8 @@ bool onStart=false;
                 updatedMarkers.add(_marker);
               }
             }else if (marker.markerId.value.contains("toppriority")) {
-            Marker _marker = customMarker.visibility(zoom > 19, marker);
-            updatedMarkers.add(_marker);
+              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              updatedMarkers.add(_marker);
             }else if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(zoom > 20.5, marker);
               updatedMarkers.add(_marker);
@@ -12085,10 +12101,10 @@ bool onStart=false;
             .polyline!
             .floors!
             .firstWhere((element) =>
-                element.floor == tools.numericalToAlphabetical(floor))
+        element.floor == tools.numericalToAlphabetical(floor))
             .polyArray!
             .firstWhere((element) =>
-                element.id == snapshot!.landmarksMap![ID]!.properties!.polyId)
+        element.id == snapshot!.landmarksMap![ID]!.properties!.polyId)
             .nodes;
         List<LatLng> corners = [];
         for (var element in nodes!) {
@@ -12117,7 +12133,7 @@ bool onStart=false;
       );
 
       if (SingletonFunctionController
-              .building.floor[snapshot!.landmarksMap![ID]!.buildingID] !=
+          .building.floor[snapshot!.landmarksMap![ID]!.buildingID] !=
           floor) {
         SingletonFunctionController
             .building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
@@ -12161,25 +12177,25 @@ bool onStart=false;
 
           PathState.sourceName = "Your current location";
           PathState.destinationPolyID =
-              SingletonFunctionController.building.selectedLandmarkID!;
+          SingletonFunctionController.building.selectedLandmarkID!;
           PathState.destinationName = snapshot!
-                  .landmarksMap![
-                      SingletonFunctionController.building.selectedLandmarkID]!
-                  .name ??
+              .landmarksMap![
+          SingletonFunctionController.building.selectedLandmarkID]!
+              .name ??
               snapshot!
                   .landmarksMap![
-                      SingletonFunctionController.building.selectedLandmarkID]!
+              SingletonFunctionController.building.selectedLandmarkID]!
                   .element!
                   .subType!;
           PathState.destinationFloor = snapshot!
               .landmarksMap![
-                  SingletonFunctionController.building.selectedLandmarkID]!
+          SingletonFunctionController.building.selectedLandmarkID]!
               .floor!;
           PathState.sourceBid = user.Bid;
 
           PathState.destinationBid = snapshot!
               .landmarksMap![
-                  SingletonFunctionController.building.selectedLandmarkID]!
+          SingletonFunctionController.building.selectedLandmarkID]!
               .buildingID!;
 
           setState(() {
@@ -12195,28 +12211,28 @@ bool onStart=false;
         } else {
           PathState.sourceName = "Choose Starting Point";
           PathState.destinationPolyID =
-              SingletonFunctionController.building.selectedLandmarkID!;
+          SingletonFunctionController.building.selectedLandmarkID!;
           PathState.destinationName = snapshot!
-                  .landmarksMap![
-                      SingletonFunctionController.building.selectedLandmarkID]!
-                  .name ??
+              .landmarksMap![
+          SingletonFunctionController.building.selectedLandmarkID]!
+              .name ??
               snapshot!
                   .landmarksMap![
-                      SingletonFunctionController.building.selectedLandmarkID]!
+              SingletonFunctionController.building.selectedLandmarkID]!
                   .element!
                   .subType!;
           PathState.destinationFloor = snapshot!
               .landmarksMap![
-                  SingletonFunctionController.building.selectedLandmarkID]!
+          SingletonFunctionController.building.selectedLandmarkID]!
               .floor!;
           SingletonFunctionController.building.selectedLandmarkID = "";
           Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => SourceAndDestinationPage(
-                        DestinationID: PathState.destinationPolyID,
-                        user: user,
-                      ))).then((value) {
+                    DestinationID: PathState.destinationPolyID,
+                    user: user,
+                  ))).then((value) {
             if (value != null) {
               fromSourceAndDestinationPage(value);
             }
@@ -12231,7 +12247,7 @@ bool onStart=false;
     markers.clear();
     SingletonFunctionController.building.landmarkdata!.then((land) {
       SingletonFunctionController.building.selectedLandmarkID =
-          land.landmarksMap![value[1]]!.properties!.polyId!;
+      land.landmarksMap![value[1]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
       if (land.landmarksMap![value[0]]!.doorX != null) {
@@ -12325,7 +12341,7 @@ bool onStart=false;
     if (turn.x != null && turn.y != null && turn.numCols != null) {
       int i = user.path.indexWhere((element) => element == turn.node);
       if (SingletonFunctionController
-              .building.floor[buildingAllApi.getStoredString()] !=
+          .building.floor[buildingAllApi.getStoredString()] !=
           turn.floor) {
         i++;
       } else {
@@ -12334,7 +12350,7 @@ bool onStart=false;
 
       //List<LatLng> coordinates = [];
       final Uint8List greytorch =
-          await getImagesFromMarker('assets/previewarrow.png', 75);
+      await getImagesFromMarker('assets/previewarrow.png', 75);
       // BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
       //   ImageConfiguration(size: Size(15, 15)),
       //   'assets/previewarrow.png',
@@ -12357,7 +12373,7 @@ bool onStart=false;
 
       if (turn.floor != null &&
           SingletonFunctionController
-                  .building.floor[buildingAllApi.getStoredString()] !=
+              .building.floor[buildingAllApi.getStoredString()] !=
               turn.floor) {
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()] = turn.floor!;
@@ -12429,6 +12445,8 @@ bool onStart=false;
   String closestBuildingId = "";
   String newBuildingID = "";
   void focusBuildingChecker(CameraPosition position) {
+    blurPatch.clear();
+    restBuildingMarker.clear();
     LatLng currentLatLng = position.target;
     // String closestBuildingId = "";
 
@@ -12449,7 +12467,7 @@ bool onStart=false;
       }
     });
     if (newBuildingID != closestBuildingId) {
-      patchTransition(closestBuildingId);
+      //patchTransition(closestBuildingId);
     }
     newBuildingID = closestBuildingId;
 
@@ -12533,7 +12551,7 @@ bool onStart=false;
     // Add the widget to the overlay for rendering off-screen
     OverlayState? overlayState = Overlay.of(context);
     OverlayEntry overlayEntry =
-        OverlayEntry(builder: (context) => offstageWidget);
+    OverlayEntry(builder: (context) => offstageWidget);
     overlayState.insert(overlayEntry);
 
     // Allow some time for the widget to render
@@ -12541,10 +12559,10 @@ bool onStart=false;
 
     // Capture the widget as an image
     final RenderRepaintBoundary boundary =
-        key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
     final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
     // Remove the widget from the overlay
@@ -12571,7 +12589,7 @@ bool onStart=false;
   Future<RenderRepaintBoundary> _capturePngFromWidget(
       BuildContext context, Widget widget, GlobalKey key) async {
     final RenderRepaintBoundary boundary =
-        key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    key.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
     return await Future.delayed(Duration(milliseconds: 20), () {
       return boundary;
@@ -12636,111 +12654,111 @@ bool onStart=false;
                 ? Semantics(excludeSemantics: true, child: ExploreModePannel())
                 : Semantics(excludeSemantics: true, child: Container()),
             Stack(children: [
-              Container(
-                child: GoogleMap(
-                  padding:
-                      EdgeInsets.only(left: 20), // <--- padding added here
-                  initialCameraPosition: _initialCameraPosition,
-                  // myLocationButtonEnabled: true,
-                  // myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: true,
-                  mapToolbarEnabled: false,
-                  // circles: _userLocation != null && _accuracy != null
-                  //     ? {
-                  //   Circle(
-                  //     circleId: CircleId('accuracyCircle'),
-                  //     center: _userLocation!,
-                  //     radius: _accuracy!,  // Draw accuracy circle
-                  //     strokeColor: Colors.blueAccent,
-                  //     fillColor: Colors.blueAccent.withOpacity(0.2),
-                  //     strokeWidth: 1,
-                  //   )
-                  // }
-                  //     : {},
+              Semantics(
+                excludeSemantics: true,
+                child: Container(
+                  child: GoogleMap(
+                    padding:
+                    EdgeInsets.only(left: 20), // <--- padding added here
+                    initialCameraPosition: _initialCameraPosition,
+                    // myLocationButtonEnabled: true,
+                    // myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+                    zoomGesturesEnabled: true,
+                    mapToolbarEnabled: false,
+                    // circles: _userLocation != null && _accuracy != null
+                    //     ? {
+                    //   Circle(
+                    //     circleId: CircleId('accuracyCircle'),
+                    //     center: _userLocation!,
+                    //     radius: _accuracy!,  // Draw accuracy circle
+                    //     strokeColor: Colors.blueAccent,
+                    //     fillColor: Colors.blueAccent.withOpacity(0.2),
+                    //     strokeWidth: 1,
+                    //   )
+                    // }
+                    //     : {},
 
-                  polygons: patch
-                      .union(getCombinedPolygons())
-                      .union(otherpatch)
-                      .union(_polygon)
-                      .union(blurPatch),
-                  polylines: getCombinedPolylines(),
-                  markers: getCombinedMarkers()
-                      .union(_markers)
-                      .union(focusturnArrow)
-                      .union(Markers)
-                      .union(restBuildingMarker),
-                  onTap: (x) {
-                    mapState.interaction = true;
-                  },
-                  mapType: MapType.normal,
-                  buildingsEnabled: false,
-                  compassEnabled: true,
-                  rotateGesturesEnabled: true,
-                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                  onMapCreated: (controller) {
-                    controller.setMapStyle(maptheme);
-                    _googleMapController = controller;
-                    zoomWhileWait(buildingAllApi.allBuildingID, controller);
+                    polygons: getCombinedPolygons(),
 
-                    _initMarkers();
-                  },
-                  onCameraMove: (CameraPosition cameraPosition) {
+                    polylines: getCombinedPolylines(),
+                    markers: getCombinedMarkers()
+                        .union(_markers)
+                        .union(focusturnArrow)
+                        .union(Markers)
+                        .union(restBuildingMarker),
+                    buildingsEnabled: false,
+                    compassEnabled: true,
+                    rotateGesturesEnabled: true,
+                    minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                    onMapCreated: (controller) {
+                      controller.setMapStyle(maptheme);
+                      _googleMapController = controller;
+                      zoomWhileWait(buildingAllApi.allBuildingID, controller);
 
-                    if(cameraPosition.zoom>15.5){
-                      focusBuildingChecker(cameraPosition);
-                    }else{
-                      renderCampusPatchTransition(buildingAllApi.outdoorID);
-                    }
+                      _initMarkers();
+                    },
+                    onCameraMove: (CameraPosition cameraPosition) {
+                      print(cameraPosition.zoom);
+                      if (cameraPosition.zoom > 16.8) {
+                        focusBuildingChecker(cameraPosition);
+                      } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                        renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                      } else {
+                        renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                      }
 
 
-                    if (cameraPosition.target.latitude.toStringAsFixed(5) !=
-                        mapState.target.latitude.toStringAsFixed(5)) {
-                      mapState.aligned = false;
-                    } else {
-                      mapState.aligned = true;
-                    }
-                    mapState.interaction = true;
-                    mapbearing = cameraPosition.bearing;
-                    if (!mapState.interaction) {
-                      mapState.zoom = cameraPosition.zoom;
-                    }
-                    if (true) {
-                      _updateMarkers(cameraPosition.zoom);
-                      //_updateBuilding(cameraPosition.zoom);
-                    }
-                    // _updateMarkers(cameraPosition.zoom);
-                    if (cameraPosition.zoom < 17) {
-                      _markers.clear();
-                      markerSldShown = false;
-                    } else {
-                      if (user.isnavigating) {
+
+
+                      if (cameraPosition.target.latitude.toStringAsFixed(5) !=
+                          mapState.target.latitude.toStringAsFixed(5)) {
+                        mapState.aligned = false;
+                      } else {
+                        mapState.aligned = true;
+                      }
+                      mapState.interaction = true;
+                      mapbearing = cameraPosition.bearing;
+                      if (!mapState.interaction) {
+                        mapState.zoom = cameraPosition.zoom;
+                      }
+                      if (true) {
+                        _updateMarkers(cameraPosition.zoom);
+                        //_updateBuilding(cameraPosition.zoom);
+                      }
+                      // _updateMarkers(cameraPosition.zoom);
+                      if (cameraPosition.zoom < 17) {
                         _markers.clear();
                         markerSldShown = false;
                       } else {
-                        markerSldShown = true;
+                        if (user.isnavigating) {
+                          _markers.clear();
+                          markerSldShown = false;
+                        } else {
+                          markerSldShown = true;
+                        }
                       }
-                    }
-                    if (markerSldShown) {
-                     _updateMarkers11(cameraPosition.zoom);
-                    } else {
+                      if (markerSldShown) {
+                        _updateMarkers11(cameraPosition.zoom);
+                      } else {
 
-                    }
+                      }
 
-                    // _updateEntryMarkers11(cameraPosition.zoom);
-                    //_markerLocations.clear();
-                    //
-                  },
-                  onCameraIdle: () {
-                    if (!mapState.interaction) {
-                      mapState.interaction2 = true;
-                    }
-                  },
-                  onCameraMoveStarted: () {
-                    user.building = SingletonFunctionController.building;
-                    mapState.interaction2 = false;
-                  },
-                  circles: circles,
+                      // _updateEntryMarkers11(cameraPosition.zoom);
+                      //_markerLocations.clear();
+                      //
+                    },
+                    onCameraIdle: () {
+                      if (!mapState.interaction) {
+                        mapState.interaction2 = true;
+                      }
+                    },
+                    onCameraMoveStarted: () {
+                      user.building = SingletonFunctionController.building;
+                      mapState.interaction2 = false;
+                    },
+                    circles: circles,
+                  ),
                 ),
               ),
               Positioned(
@@ -12756,17 +12774,17 @@ bool onStart=false;
 
             DebugToggle.PDRIcon
                 ? Positioned(
-                    top: 150,
-                    right: 50,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius: BorderRadius.circular(20),
-                        color: (isPdr) ? Colors.green : Colors.red,
-                      ),
-                      height: 20,
-                      width: 20,
-                    ))
+                top: 150,
+                right: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                    color: (isPdr) ? Colors.green : Colors.red,
+                  ),
+                  height: 20,
+                  width: 20,
+                ))
                 : Container(),
 
             Positioned(
@@ -12783,71 +12801,71 @@ bool onStart=false;
                     isSemanticEnabled
                         ? Container()
                         : SpeedDial(
-                            icon: _mainIcon,
-                            foregroundColor: _mainColor,
-                            backgroundColor: Colors.white,
-                            visible: true,
-                            curve: Curves.bounceInOut,
-                            children: [
-                              SpeedDialChild(
-                                child: Icon(Icons.volume_up_outlined,
-                                    color: Colors.white),
-                                backgroundColor: Colors.green,
-                                onTap: () => {
-                                  setState(() {
-                                    _mainIcon = Icons.volume_up_outlined;
-                                    _mainColor = Colors.green;
-                                  }),
-                                  UserState.ttsAllStop = false,
-                                  UserState.ttsOnlyTurns = false,
-                                },
-                              ),
-                              SpeedDialChild(
-                                child: Icon(Icons.volume_down_outlined,
-                                    color: Colors.black),
-                                backgroundColor: Colors.blueAccent,
-                                onTap: () => {
-                                  setState(() {
-                                    _mainIcon = Icons.volume_down_outlined;
-                                    _mainColor = Colors.blueAccent;
-                                  }),
-                                  UserState.ttsOnlyTurns = true,
-                                  UserState.ttsAllStop = false,
-                                },
-                              ),
-                              SpeedDialChild(
-                                child: Icon(Icons.volume_off_outlined,
-                                    color: Colors.white),
-                                backgroundColor: Colors.red,
-                                onTap: () => {
-                                  setState(() {
-                                    _mainIcon = Icons.volume_off_outlined;
-                                    _mainColor = Colors.red;
-                                  }),
-                                  UserState.ttsAllStop = true,
-                                  UserState.ttsOnlyTurns = false,
-                                },
-                              ),
-                            ],
-                          ),
+                      icon: _mainIcon,
+                      foregroundColor: _mainColor,
+                      backgroundColor: Colors.white,
+                      visible: true,
+                      curve: Curves.bounceInOut,
+                      children: [
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_up_outlined,
+                              color: Colors.white),
+                          backgroundColor: Colors.green,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon = Icons.volume_up_outlined;
+                              _mainColor = Colors.green;
+                            }),
+                            UserState.ttsAllStop = false,
+                            UserState.ttsOnlyTurns = false,
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_down_outlined,
+                              color: Colors.black),
+                          backgroundColor: Colors.blueAccent,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon = Icons.volume_down_outlined;
+                              _mainColor = Colors.blueAccent;
+                            }),
+                            UserState.ttsOnlyTurns = true,
+                            UserState.ttsAllStop = false,
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_off_outlined,
+                              color: Colors.white),
+                          backgroundColor: Colors.red,
+                          onTap: () => {
+                            setState(() {
+                              _mainIcon = Icons.volume_off_outlined;
+                              _mainColor = Colors.red;
+                            }),
+                            UserState.ttsAllStop = true,
+                            UserState.ttsOnlyTurns = false,
+                          },
+                        ),
+                      ],
+                    ),
                     Visibility(
                       visible: DebugToggle.StepButton,
                       child: Container(
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(24))),
+                              BorderRadius.all(Radius.circular(24))),
                           child: IconButton(
                               onPressed: () {
                                 //StartPDR();
                                 bool isvalid = MotionModel.isValidStep(
                                     user,
                                     SingletonFunctionController
-                                            .building.floorDimenssion[
-                                        user.Bid]![user.floor]![0],
+                                        .building.floorDimenssion[
+                                    user.Bid]![user.floor]![0],
                                     SingletonFunctionController
-                                            .building.floorDimenssion[
-                                        user.Bid]![user.floor]![1],
+                                        .building.floorDimenssion[
+                                    user.Bid]![user.floor]![1],
                                     SingletonFunctionController.building
                                         .nonWalkable[user.Bid]![user.floor]!,
                                     reroute);
@@ -12882,131 +12900,131 @@ bool onStart=false;
 
                     DebugToggle.Slider
                         ? Slider(
-                            value: user.theta,
-                            min: -180,
-                            max: 180,
-                            onChanged: (newvalue) {
-                              double? compassHeading = newvalue;
-                              setState(() {
-                                user.theta = compassHeading!;
-                                if (mapState.interaction2) {
-                                  mapState.bearing = compassHeading!;
-                                  _googleMapController.moveCamera(
-                                    CameraUpdate.newCameraPosition(
-                                      CameraPosition(
-                                        target: mapState.target,
-                                        zoom: mapState.zoom,
-                                        bearing: mapState.bearing!,
-                                      ),
-                                    ),
-                                    //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                                  );
-                                } else {
-                                  if (markers.length > 0)
-                                    markers[user.Bid]?[0] = customMarker.rotate(
-                                        compassHeading! - mapbearing,
-                                        markers[user.Bid]![0]);
-                                }
-                              });
-                            })
+                        value: user.theta,
+                        min: -180,
+                        max: 180,
+                        onChanged: (newvalue) {
+                          double? compassHeading = newvalue;
+                          setState(() {
+                            user.theta = compassHeading!;
+                            if (mapState.interaction2) {
+                              mapState.bearing = compassHeading!;
+                              _googleMapController.moveCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                    target: mapState.target,
+                                    zoom: mapState.zoom,
+                                    bearing: mapState.bearing!,
+                                  ),
+                                ),
+                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              );
+                            } else {
+                              if (markers.length > 0)
+                                markers[user.Bid]?[0] = customMarker.rotate(
+                                    compassHeading! - mapbearing,
+                                    markers[user.Bid]![0]);
+                            }
+                          });
+                        })
                         : Container(),
                     !isSemanticEnabled
                         ? Semantics(
-                            label: "Change floor",
-                            child: SpeedDial(
-                              child: Text(
-                                SingletonFunctionController.building.floor == 0
-                                    ? 'G'
-                                    : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff24b9b0),
-                                  height: 19 / 16,
+                      label: "Change floor",
+                      child: SpeedDial(
+                        child: Text(
+                          SingletonFunctionController.building.floor == 0
+                              ? 'G'
+                              : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff24b9b0),
+                            height: 19 / 16,
+                          ),
+                        ),
+                        activeIcon: Icons.close,
+                        backgroundColor: Colors.white,
+                        children: List.generate(
+                          (Building.numberOfFloorsDelhi[
+                          buildingAllApi.getStoredString()] ??
+                              [0])
+                              .length,
+                              (int i) {
+                            //
+                            List<int> floorList = Building
+                                .numberOfFloorsDelhi[
+                            buildingAllApi.getStoredString()] ??
+                                [0];
+                            List<int> revfloorList = floorList;
+                            revfloorList.sort();
+                            // SingletonFunctionController.building.numberOfFloors[buildingAllApi
+                            //     .getStoredString()];
+                            //
+                            //
+                            return SpeedDialChild(
+                              child: Semantics(
+                                label: "${revfloorList[i]}",
+                                child: Text(
+                                  revfloorList[i] == 0
+                                      ? 'G'
+                                      : '${revfloorList[i]}',
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 19 / 16,
+                                  ),
                                 ),
                               ),
-                              activeIcon: Icons.close,
-                              backgroundColor: Colors.white,
-                              children: List.generate(
-                                (Building.numberOfFloorsDelhi[
-                                            buildingAllApi.getStoredString()] ??
-                                        [0])
-                                    .length,
-                                (int i) {
-                                  //
-                                  List<int> floorList = Building
-                                              .numberOfFloorsDelhi[
-                                          buildingAllApi.getStoredString()] ??
-                                      [0];
-                                  List<int> revfloorList = floorList;
-                                  revfloorList.sort();
-                                  // SingletonFunctionController.building.numberOfFloors[buildingAllApi
-                                  //     .getStoredString()];
-                                  //
-                                  //
-                                  return SpeedDialChild(
-                                    child: Semantics(
-                                      label: "${revfloorList[i]}",
-                                      child: Text(
-                                        revfloorList[i] == 0
-                                            ? 'G'
-                                            : '${revfloorList[i]}',
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          height: 19 / 16,
-                                        ),
-                                      ),
-                                    ),
-                                    backgroundColor: pathMarkers[i] == null
-                                        ? Colors.white
-                                        : Color(0xff24b9b0),
-                                    onTap: () {
-                                      _polygon.clear();
-                                      cachedPolygon.clear();
-                                      circles.clear();
+                              backgroundColor: pathMarkers[i] == null
+                                  ? Colors.white
+                                  : Color(0xff24b9b0),
+                              onTap: () {
+                                _polygon.clear();
+                                cachedPolygon.clear();
+                                circles.clear();
 
-                                      _markers.clear();
-                                      _markerLocationsMap.clear();
-                                      _markerLocationsMapLanName.clear();
+                                _markers.clear();
+                                _markerLocationsMap.clear();
+                                _markerLocationsMapLanName.clear();
 
+                                SingletonFunctionController
+                                    .building.floor[
+                                buildingAllApi
+                                    .getStoredString()] =
+                                revfloorList[i];
+                                createRooms(
+                                  SingletonFunctionController
+                                      .building.polylinedatamap[
+                                  buildingAllApi.getStoredString()]!,
+                                  SingletonFunctionController
+                                      .building.floor[
+                                  buildingAllApi.getStoredString()]!,
+                                );
+                                if (pathMarkers[i] != null) {
+                                  //setCameraPosition(pathMarkers[i]!);
+                                }
+                                // Markers.clear();
+                                SingletonFunctionController
+                                    .building.landmarkdata!
+                                    .then((value) {
+                                  createMarkers(
+                                      value,
                                       SingletonFunctionController
-                                                  .building.floor[
-                                              buildingAllApi
-                                                  .getStoredString()] =
-                                          revfloorList[i];
-                                      createRooms(
-                                        SingletonFunctionController
-                                                .building.polylinedatamap[
-                                            buildingAllApi.getStoredString()]!,
-                                        SingletonFunctionController
-                                                .building.floor[
-                                            buildingAllApi.getStoredString()]!,
-                                      );
-                                      if (pathMarkers[i] != null) {
-                                        //setCameraPosition(pathMarkers[i]!);
-                                      }
-                                      // Markers.clear();
-                                      SingletonFunctionController
-                                          .building.landmarkdata!
-                                          .then((value) {
-                                        createMarkers(
-                                            value,
-                                            SingletonFunctionController
-                                                    .building.floor[
-                                                buildingAllApi
-                                                    .getStoredString()]!,
-                                            bid: buildingAllApi
-                                                .getStoredString());
-                                      });
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          )
+                                          .building.floor[
+                                      buildingAllApi
+                                          .getStoredString()]!,
+                                      bid: buildingAllApi
+                                          .getStoredString());
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    )
                         : nofloorColumn(),
                     SizedBox(height: 28.0), // Adjust the height as needed
 
@@ -13031,19 +13049,19 @@ bool onStart=false;
                       child: FloatingActionButton(
                         onPressed: () async {
                           //  _getUserLocation();
-
+                          SingletonFunctionController.btadapter.emptyBin();
                           if (!user.isnavigating && !isLocalized) {
-                            SingletonFunctionController.btadapter.emptyBin();
+
                             SingletonFunctionController.btadapter
                                 .stopScanning();
                             if (Platform.isAndroid) {
                               SingletonFunctionController.btadapter
                                   .startScanning(
-                                      SingletonFunctionController.apibeaconmap);
+                                  SingletonFunctionController.apibeaconmap);
                             } else {
                               SingletonFunctionController.btadapter
                                   .startScanningIOS(
-                                      SingletonFunctionController.apibeaconmap);
+                                  SingletonFunctionController.apibeaconmap);
                             }
                             setState(() {
                               isLocalized = true;
@@ -13054,10 +13072,10 @@ bool onStart=false;
                             _timer = Timer.periodic(
                                 Duration(milliseconds: 5000), (timer) {
                               localizeUser().then((value) => {
-                                    setState(() {
-                                      isLocalized = false;
-                                    })
-                                  });
+                                setState(() {
+                                  isLocalized = false;
+                                })
+                              });
 
                               _timer.cancel();
                             });
@@ -13068,97 +13086,97 @@ bool onStart=false;
                         },
                         child: Semantics(
                           label:
-                              !user.isnavigating ? "Localize" : "Recenter Map",
+                          !user.isnavigating ? "Localize" : "Recenter Map",
                           onDidGainAccessibilityFocus:
-                              close_isnavigationPannelOpen,
+                          close_isnavigationPannelOpen,
                           child: (isLocalized)
                               ? lott.Lottie.asset(
-                                  'assets/localized.json', // Path to your Lottie animation
-                                  width: 70,
-                                  height: 70,
-                                )
+                            'assets/localized.json', // Path to your Lottie animation
+                            width: 70,
+                            height: 70,
+                          )
                               : Icon(
-                                  (!user.isnavigating)
-                                      ? Icons.my_location_sharp
-                                      : (mapState.aligned
-                                          ? CupertinoIcons.location_north_fill
-                                          : CupertinoIcons.location_north),
-                                  color: (!user.isnavigating)
-                                      ? Colors.black
-                                      : Colors.blue),
+                              (!user.isnavigating)
+                                  ? Icons.my_location_sharp
+                                  : (mapState.aligned
+                                  ? CupertinoIcons.location_north_fill
+                                  : CupertinoIcons.location_north),
+                              color: (!user.isnavigating)
+                                  ? Colors.black
+                                  : Colors.blue),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(26.0), // Change radius here
+                          BorderRadius.circular(26.0), // Change radius here
                         ),
                         backgroundColor:
-                            Colors.white, // Set the background color of the FAB
+                        Colors.white, // Set the background color of the FAB
                       ),
                     ),
                     SizedBox(height: 28.0),
                     !user.isnavigating &&
-                            (!_isLandmarkPanelOpen &&
-                                !_isRoutePanelOpen &&
-                                _isBuildingPannelOpen &&
-                                !_isnavigationPannelOpen && user.initialallyLocalised)
+                        (!_isLandmarkPanelOpen &&
+                            !_isRoutePanelOpen &&
+                            _isBuildingPannelOpen &&
+                            !_isnavigationPannelOpen && user.initialallyLocalised)
                         ? FloatingActionButton(
-                            onPressed: () async {
-                              if (user.initialallyLocalised) {
-                                setState(() {
-                                  if (isLiveLocalizing) {
-                                    isLiveLocalizing = false;
-                                    HelperClass.showToast(
-                                        "Explore mode is disabled");
-                                    _exploreModeTimer!.cancel();
-                                    _isExploreModePannelOpen = false;
-                                    _isBuildingPannelOpen = true;
-                                    lastBeaconValue = "";
-                                  } else {
-                                    speak(
-                                        "${LocaleData.exploremodenabled.getString(context)}",
-                                        _currentLocale);
-                                    isLiveLocalizing = true;
-                                    HelperClass.showToast(
-                                        "Explore mode enabled");
-                                    _exploreModeTimer = Timer.periodic(
-                                        Duration(milliseconds: 5000),
-                                        (timer) async {
-                                      if (Platform.isAndroid) {
-                                        SingletonFunctionController.btadapter
-                                            .startScanning(
-                                                SingletonFunctionController
-                                                    .apibeaconmap);
-                                      } else {
-                                        SingletonFunctionController.btadapter
-                                            .startScanningIOS(
-                                                SingletonFunctionController
-                                                    .apibeaconmap);
-                                      }
-                                      Future.delayed(
-                                              Duration(milliseconds: 2000))
-                                          .then((value) => {
-                                                realTimeReLocalizeUser(
-                                                    resBeacons)
-                                                // listenToBin()
-                                              });
+                      onPressed: () async {
+                        if (user.initialallyLocalised) {
+                          setState(() {
+                            if (isLiveLocalizing) {
+                              isLiveLocalizing = false;
+                              HelperClass.showToast(
+                                  "Explore mode is disabled");
+                              _exploreModeTimer!.cancel();
+                              _isExploreModePannelOpen = false;
+                              _isBuildingPannelOpen = true;
+                              lastBeaconValue = "";
+                            } else {
+                              speak(
+                                  "${LocaleData.exploremodenabled.getString(context)}",
+                                  _currentLocale);
+                              isLiveLocalizing = true;
+                              HelperClass.showToast(
+                                  "Explore mode enabled");
+                              _exploreModeTimer = Timer.periodic(
+                                  Duration(milliseconds: 5000),
+                                      (timer) async {
+                                    if (Platform.isAndroid) {
+                                      SingletonFunctionController.btadapter
+                                          .startScanning(
+                                          SingletonFunctionController
+                                              .apibeaconmap);
+                                    } else {
+                                      SingletonFunctionController.btadapter
+                                          .startScanningIOS(
+                                          SingletonFunctionController
+                                              .apibeaconmap);
+                                    }
+                                    Future.delayed(
+                                        Duration(milliseconds: 2000))
+                                        .then((value) => {
+                                      realTimeReLocalizeUser(
+                                          resBeacons)
+                                      // listenToBin()
                                     });
-                                    _isBuildingPannelOpen = false;
-                                    _isExploreModePannelOpen = true;
-                                  }
-                                });
-                              }
-                            },
-                            child: Semantics(
-                              label: "Explore mode",
-                              child: SvgPicture.asset(
-                                "assets/Navigation_RTLIcon.svg",
-                                // color:
-                                // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                              ),
-                            ),
-                            backgroundColor: Color(
-                                0xff24B9B0), // Set the background color of the FAB
-                          )
+                                  });
+                              _isBuildingPannelOpen = false;
+                              _isExploreModePannelOpen = true;
+                            }
+                          });
+                        }
+                      },
+                      child: Semantics(
+                        label: "Explore mode",
+                        child: SvgPicture.asset(
+                          "assets/Navigation_RTLIcon.svg",
+                          // color:
+                          // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                        ),
+                      ),
+                      backgroundColor: Color(
+                          0xff24B9B0), // Set the background color of the FAB
+                    )
                         : Container(), // Adjust the height as needed// Adjust the height as needed
                     // FloatingActionButton(
                     //   onPressed: () async {
@@ -13208,23 +13226,23 @@ bool onStart=false;
                 left: 16,
                 right: 16,
                 child: _isLandmarkPanelOpen ||
-                        _isRoutePanelOpen ||
-                        _isnavigationPannelOpen
+                    _isRoutePanelOpen ||
+                    _isnavigationPannelOpen
                     ? Semantics(excludeSemantics: true, child: Container())
                     : FocusScope(
-                        autofocus: true,
-                        child: Focus(
-                          child: Semantics(
-                            sortKey: const OrdinalSortKey(0), // header: true,
-                            child: HomepageSearch(
-                              onVenueClicked: onLandmarkVenueClicked,
-                              fromSourceAndDestinationPage:
-                                  fromSourceAndDestinationPage,
-                              user: user,
-                            ),
-                          ),
-                        ),
-                      )),
+                  autofocus: true,
+                  child: Focus(
+                    child: Semantics(
+                      sortKey: const OrdinalSortKey(0), // header: true,
+                      child: HomepageSearch(
+                        onVenueClicked: onLandmarkVenueClicked,
+                        fromSourceAndDestinationPage:
+                        fromSourceAndDestinationPage,
+                        user: user,
+                      ),
+                    ),
+                  ),
+                )),
             FutureBuilder(
               future: SingletonFunctionController.building.landmarkdata,
               builder: (context, snapshot) {
@@ -13309,32 +13327,32 @@ bool onStart=false;
             //       .white, // Set the background color of the FAB
             // ),
             (!SingletonFunctionController.building.destinationQr &&
-                    !user.initialallyLocalised &&
-                    !SingletonFunctionController.building.qrOpened)
+                !user.initialallyLocalised &&
+                !SingletonFunctionController.building.qrOpened)
                 ? Container(
-                    height: screenHeight,
-                    width: screenWidth,
-                    color: Colors.white.withOpacity(0.8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        lott.Lottie.asset(
-                          'assets/loding_animation.json', // Path to your Lottie animation
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 56, right: 56),
-                          child: LinearProgressIndicator(
-                            value: _progressValue,
-                            backgroundColor: Colors.grey,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.red),
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        )
-                      ],
+              height: screenHeight,
+              width: screenWidth,
+              color: Colors.white.withOpacity(0.8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  lott.Lottie.asset(
+                    'assets/loding_animation.json', // Path to your Lottie animation
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 56, right: 56),
+                    child: LinearProgressIndicator(
+                      value: _progressValue,
+                      backgroundColor: Colors.grey,
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.red),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   )
-                : Container(),
+                ],
+              ),
+            )
+                : Container()
           ],
         ),
       ),
@@ -13453,7 +13471,7 @@ bool onStart=false;
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
       ..sort(
-          (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }

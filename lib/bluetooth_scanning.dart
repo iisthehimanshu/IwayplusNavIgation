@@ -266,6 +266,11 @@ class BLueToothClass {
       binnumber = 6;
     }
 
+
+    if(BIN[binnumber]==null){
+      startbin();
+    }
+
     if (BIN[binnumber]!.containsKey(MacId)) {
       BIN[binnumber]![MacId] = BIN[binnumber]![MacId]! + weight[binnumber]!;
     } else {

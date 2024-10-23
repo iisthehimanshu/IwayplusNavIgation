@@ -11823,7 +11823,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
-    print("patch $patch");
     if(cachedPolygon.isEmpty){
       Set<Polygon> polygons = Set();
       closedpolygons.forEach((key, value) {
@@ -11834,6 +11833,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       polygons.union(blurPatch);
       polygons.union(patch);
       cachedPolygon = polygons;
+      print(polygons);
       return polygons;
     }
     return cachedPolygon.union(otherpatch).union(blurPatch);

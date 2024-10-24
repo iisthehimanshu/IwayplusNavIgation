@@ -46,6 +46,7 @@ import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'Elements/AccessiblePathButton.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'Elements/locales.dart';
 import 'MainScreen.dart';
@@ -3106,7 +3107,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
   }
 
-  void autoreroute() {
+  void autoreroute({String? acc}) {
     Future.delayed(Duration(milliseconds: 100)).then((value) {
       fitPolygonInScreen(patch.first);
     });
@@ -3139,7 +3140,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // }
 
         SingletonFunctionController.building.landmarkdata!.then((value) async {
-          await calculateroute(value.landmarksMap!).then((value) {
+          await calculateroute(value.landmarksMap!,accessibleby: acc??PathState.accessiblePath).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
               user.path = [
@@ -3217,7 +3218,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
   }
 
-  void reroute() {
+  void reroute({String? acc}) {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -3241,8 +3242,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     FlutterBeep.beep();
     speak("${LocaleData.reroute.getString(context)}", _currentLocale);
-
-    autoreroute();
+    if(acc != null){
+      PathState.accessiblePath = acc;
+      PathState.clearforaccessiblepath();
+    }
+    autoreroute(acc: acc);
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -6152,9 +6156,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
     }
 
-    bool microService = snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
-        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
-        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null;
+    bool microService = false;
 
     bool startTime = snapshot
         .data!
@@ -6777,108 +6779,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         ),
                       )
                           : Container(),
-                      microService? Container(
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  width: 1.0, color: Color(0xffebebeb))),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                                margin: EdgeInsets.only(right: 16),
-                                width: 32,
-                                height: 32,
-                                child: Icon(
-                                  Icons.accessible,
-                                  color: Color(0xff24B9B0),
-                                  size: 24,
-                                )),
-                            Column(
-                              children: [
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
-
-                                            "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
-                                                UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
-                                                    : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
-                                            }. ":""
-
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != "null"?
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}. ":""
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                          : Container(),
                     ],
                   ),
                 );
@@ -7110,9 +7010,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
         }
       }
-    } else if (accessibleby == "ramp") {
-      for (var ramp1 in landmark1.others!) {
-        for (var ramp2 in landmark2.others!) {
+    } else if (accessibleby == "Ramps") {
+      for (var ramp1 in landmark1.ramps!) {
+        for (var ramp2 in landmark2.ramps!) {
           if (ramp1.name == ramp2.name) {
             // Create a new Lifts object with x and y values from both input lists
 
@@ -7124,6 +7024,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 y2: ramp2.y,
                 d1: ramp1.distance,
                 d2: ramp2.distance));
+            break;
+          }
+        }
+      }
+    } else if (accessibleby == "Escalators") {
+      for (var escalator1 in landmark1.escalators!) {
+        for (var escalator2 in landmark2.escalators!) {
+          if (escalator1.name == escalator2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+
+            commonLifts.add(CommonConnection(
+                name: escalator1.name,
+                x1: escalator1.x,
+                y1: escalator1.y,
+                x2: escalator2.x,
+                y2: escalator2.y,
+                d1: escalator1.distance,
+                d2: escalator2.distance));
             break;
           }
         }
@@ -8430,11 +8348,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             height:
             PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
             width: screenWidth,
+            margin: EdgeInsets.only(left:8, right:8),
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10.0),
-                bottomRight: Radius.circular(10.0),
+                bottomLeft: Radius.circular(16.0),
+                bottomRight: Radius.circular(16.0),
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
               ),
               boxShadow: [
                 BoxShadow(
@@ -8449,6 +8370,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             child: Semantics(
               child: Column(
                 children: [
+                  SizedBox(height: 7,),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -8654,181 +8576,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   PathState.sourceFloor != PathState.destinationFloor
                       ? Container(
                     margin: EdgeInsets.only(top: 8, left: 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 112,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "Stairs";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "Stairs");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "Stairs"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.stairs,
-                                      color: PathState.accessiblePath ==
-                                          "Stairs"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Stairs",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "Stairs"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                        Container(
-                          width: 110,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "Lifts";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "Lifts");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "Lifts"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.elevator,
-                                      color: PathState.accessiblePath ==
-                                          "Lifts"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Lifts",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "Lifts"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                        Container(
-                          width: 112,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "ramp";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "ramp");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "ramp"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.stairs_rounded,
-                                      color: PathState.accessiblePath ==
-                                          "ramp"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Ramp",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "ramp"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute),
+
+                        ],
+                      ),
                     ),
                   )
                       : Container(),
@@ -11702,11 +11461,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 color: Colors.grey,
               ),
             ],
-            minHeight: 90,
-            snapPoint:
-            element.workingDays != null && element.workingDays!.length > 0
-                ? 220 / screenHeight
-                : 175 / screenHeight,
+            minHeight: 80,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -11716,23 +11471,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 6,
-                        margin: EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xffd9d9d9),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                      ),
-                    ],
-                  ),
+                  SizedBox(height: 6,),
                   Row(
                     children: [
                       Container(
+                        width: screenWidth-50,
                         margin: EdgeInsets.only(bottom: 20),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Semantics(
@@ -12678,9 +12421,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 //   )
                 // }
                 //     : {},
-          
+
                 polygons: getCombinedPolygons(),
-          
+
                 polylines: getCombinedPolylines(),
                 markers: getCombinedMarkers()
                     .union(_markers)
@@ -12688,14 +12431,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     .union(Markers)
                     .union(restBuildingMarker),
                 buildingsEnabled: false,
-                compassEnabled: true,
+                compassEnabled: false,
                 rotateGesturesEnabled: true,
                 minMaxZoomPreference: MinMaxZoomPreference(2, 30),
                 onMapCreated: (controller) {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
                   zoomWhileWait(buildingAllApi.allBuildingID, controller);
-          
+
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
@@ -12707,10 +12450,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   } else {
                     renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
-          
-          
-          
-          
+
+
+
+
                   if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                       mapState.target.latitude.toStringAsFixed(5)) {
                     mapState.aligned = false;
@@ -12741,9 +12484,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   if (markerSldShown) {
                     _updateMarkers11(cameraPosition.zoom);
                   } else {
-          
+
                   }
-          
+
                   // _updateEntryMarkers11(cameraPosition.zoom);
                   //_markerLocations.clear();
                   //
@@ -13181,10 +12924,40 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
+          //-------
+          // (user.isnavigating && recenter)? Positioned(
+          //   bottom: 145,
+          //   right: 220,
+          //   child: Container(
+          //     height: 50,
+          //     width: 150, // Adjust width as needed
+          //     child: ElevatedButton(
+          //       onPressed: () {
+          //         // Implement recenter logic here
+          //         _recenterMap();
+          //       },
+          //       style: ElevatedButton.styleFrom(
+          //         foregroundColor: Colors.white, // Background color
+          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(30), // Rounded corners
+          //         ),
+          //       ),
+          //       child: Row(
+          //         mainAxisSize: MainAxisSize.min,
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Icon(Icons.my_location, size: 24),
+          //           SizedBox(width: 8), // Space between icon and text
+          //           Text('Recenter', style: TextStyle(fontSize: 16)),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ):Container(),
           SafeArea(
             child: Stack(
-              children: [Positioned(
+              children:[Positioned(
                   top: 16,
                   left: 16,
                   right: 16,
@@ -13205,25 +12978,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                  ))],
+                  ))] ,
             ),
           ),
           FutureBuilder(
             future: SingletonFunctionController.building.landmarkdata,
             builder: (context, snapshot) {
               if (_isLandmarkPanelOpen) {
-                return landmarkdetailpannel(context, snapshot);
+                return SafeArea(child: landmarkdetailpannel(context, snapshot));
               } else {
                 return Semantics(excludeSemantics: true, child: Container());
               }
             },
           ),
-          routeDeatilPannel(),
-          feedbackPanel(context),
+          SafeArea(child: routeDeatilPannel()),
+          SafeArea(child: feedbackPanel(context)),
           navigationPannel(),
-          reroutePannel(context),
-          ExploreModePannel(),
-          detected ? Semantics(child: nearestLandmarkpannel()) : Container(),
+          SafeArea(child: reroutePannel(context)),
+          SafeArea(child: ExploreModePannel()),
+          detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           // FloatingActionButton(
           //     onPressed: (){
@@ -13322,6 +13095,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       ),
     );
   }
+
   //
   // int d=0;
   // bool listenToBin(){

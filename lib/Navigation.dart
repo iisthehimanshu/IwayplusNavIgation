@@ -671,6 +671,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }),
       );
     } catch (E) {}
+
+
     // fetchlist();
     // filterItems();
   }
@@ -3496,9 +3498,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     setState(() {
       isBlueToothLoading = true;
     });
-
+    List<String> ids = buildingAllApi.getStoredAllBuildingID().keys.toList();
     try {
-      var outBuildingData = await outBuilding().outbuilding(buildingAllApi.getStoredAllBuildingID().keys.toList());
+      var outBuildingData = await outBuilding().outbuilding(ids);
       if (outBuildingData != null) {
         buildingAllApi.outdoorID = outBuildingData.data!.campusId!;
         buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] =
@@ -3843,6 +3845,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   void createPatch(patchDataModel value) async {
+    print("patchformation $value");
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -3902,7 +3905,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex: -1),
+              zIndex:-1),
         );
         cachedPolygon.clear();
       });
@@ -4243,7 +4246,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex: 2),
+              zIndex: -1),
         );
         cachedPolygon.clear();
       });
@@ -11836,7 +11839,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print(polygons);
       return polygons;
     }
-    return cachedPolygon.union(otherpatch).union(blurPatch);
+    return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
 
   Set<gmap.Polyline> getCombinedPolylines() {
@@ -12646,715 +12649,677 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         MediaQuery.of(context).devicePixelRatio;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            detected
-                ? Semantics(excludeSemantics: true, child: ExploreModePannel())
-                : Semantics(excludeSemantics: true, child: Container()),
-            Stack(children: [
-              Semantics(
-                excludeSemantics: true,
-                child: Container(
-                  child: GoogleMap(
-                    padding:
-                    EdgeInsets.only(left: 20), // <--- padding added here
-                    initialCameraPosition: _initialCameraPosition,
-                    // myLocationButtonEnabled: true,
-                    // myLocationEnabled: true,
-                    zoomControlsEnabled: false,
-                    zoomGesturesEnabled: true,
-                    mapToolbarEnabled: false,
-                    // circles: _userLocation != null && _accuracy != null
-                    //     ? {
-                    //   Circle(
-                    //     circleId: CircleId('accuracyCircle'),
-                    //     center: _userLocation!,
-                    //     radius: _accuracy!,  // Draw accuracy circle
-                    //     strokeColor: Colors.blueAccent,
-                    //     fillColor: Colors.blueAccent.withOpacity(0.2),
-                    //     strokeWidth: 1,
-                    //   )
-                    // }
-                    //     : {},
-
-                    polygons: getCombinedPolygons(),
-
-                    polylines: getCombinedPolylines(),
-                    markers: getCombinedMarkers()
-                        .union(_markers)
-                        .union(focusturnArrow)
-                        .union(Markers)
-                        .union(restBuildingMarker),
-                    buildingsEnabled: false,
-                    compassEnabled: true,
-                    rotateGesturesEnabled: true,
-                    minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                    onMapCreated: (controller) {
-                      controller.setMapStyle(maptheme);
-                      _googleMapController = controller;
-                      zoomWhileWait(buildingAllApi.allBuildingID, controller);
-
-                      _initMarkers();
-                    },
-                    onCameraMove: (CameraPosition cameraPosition) {
-                      print(cameraPosition.zoom);
-                      if (cameraPosition.zoom > 16.8) {
-                        focusBuildingChecker(cameraPosition);
-                      } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                        renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
-                      } else {
-                        renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                      }
-
-
-
-
-                      if (cameraPosition.target.latitude.toStringAsFixed(5) !=
-                          mapState.target.latitude.toStringAsFixed(5)) {
-                        mapState.aligned = false;
-                      } else {
-                        mapState.aligned = true;
-                      }
-                      mapState.interaction = true;
-                      mapbearing = cameraPosition.bearing;
-                      if (!mapState.interaction) {
-                        mapState.zoom = cameraPosition.zoom;
-                      }
-                      if (true) {
-                        _updateMarkers(cameraPosition.zoom);
-                        //_updateBuilding(cameraPosition.zoom);
-                      }
-                      // _updateMarkers(cameraPosition.zoom);
-                      if (cameraPosition.zoom < 17) {
-                        _markers.clear();
-                        markerSldShown = false;
-                      } else {
-                        if (user.isnavigating) {
-                          _markers.clear();
-                          markerSldShown = false;
-                        } else {
-                          markerSldShown = true;
-                        }
-                      }
-                      if (markerSldShown) {
-                        _updateMarkers11(cameraPosition.zoom);
-                      } else {
-
-                      }
-
-                      // _updateEntryMarkers11(cameraPosition.zoom);
-                      //_markerLocations.clear();
-                      //
-                    },
-                    onCameraIdle: () {
-                      if (!mapState.interaction) {
-                        mapState.interaction2 = true;
-                      }
-                    },
-                    onCameraMoveStarted: () {
-                      user.building = SingletonFunctionController.building;
-                      mapState.interaction2 = false;
-                    },
-                    circles: circles,
-                  ),
-                ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          detected
+              ? Semantics(excludeSemantics: true, child: ExploreModePannel())
+              : Semantics(excludeSemantics: true, child: Container()),
+          Semantics(
+            excludeSemantics: true,
+            child: Container(
+              child: GoogleMap(
+                padding:
+                EdgeInsets.only(left: 20), // <--- padding added here
+                initialCameraPosition: _initialCameraPosition,
+                // myLocationButtonEnabled: true,
+                // myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                zoomGesturesEnabled: true,
+                mapToolbarEnabled: false,
+                // circles: _userLocation != null && _accuracy != null
+                //     ? {
+                //   Circle(
+                //     circleId: CircleId('accuracyCircle'),
+                //     center: _userLocation!,
+                //     radius: _accuracy!,  // Draw accuracy circle
+                //     strokeColor: Colors.blueAccent,
+                //     fillColor: Colors.blueAccent.withOpacity(0.2),
+                //     strokeWidth: 1,
+                //   )
+                // }
+                //     : {},
+          
+                polygons: getCombinedPolygons(),
+          
+                polylines: getCombinedPolylines(),
+                markers: getCombinedMarkers()
+                    .union(_markers)
+                    .union(focusturnArrow)
+                    .union(Markers)
+                    .union(restBuildingMarker),
+                buildingsEnabled: false,
+                compassEnabled: true,
+                rotateGesturesEnabled: true,
+                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                onMapCreated: (controller) {
+                  controller.setMapStyle(maptheme);
+                  _googleMapController = controller;
+                  zoomWhileWait(buildingAllApi.allBuildingID, controller);
+          
+                  _initMarkers();
+                },
+                onCameraMove: (CameraPosition cameraPosition) {
+                  print(cameraPosition.zoom);
+                  if (cameraPosition.zoom > 16.8) {
+                    focusBuildingChecker(cameraPosition);
+                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  } else {
+                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                  }
+          
+          
+          
+          
+                  if (cameraPosition.target.latitude.toStringAsFixed(5) !=
+                      mapState.target.latitude.toStringAsFixed(5)) {
+                    mapState.aligned = false;
+                  } else {
+                    mapState.aligned = true;
+                  }
+                  mapState.interaction = true;
+                  mapbearing = cameraPosition.bearing;
+                  if (!mapState.interaction) {
+                    mapState.zoom = cameraPosition.zoom;
+                  }
+                  if (true) {
+                    _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                  }
+                  // _updateMarkers(cameraPosition.zoom);
+                  if (cameraPosition.zoom < 17) {
+                    _markers.clear();
+                    markerSldShown = false;
+                  } else {
+                    if (user.isnavigating) {
+                      _markers.clear();
+                      markerSldShown = false;
+                    } else {
+                      markerSldShown = true;
+                    }
+                  }
+                  if (markerSldShown) {
+                    _updateMarkers11(cameraPosition.zoom);
+                  } else {
+          
+                  }
+          
+                  // _updateEntryMarkers11(cameraPosition.zoom);
+                  //_markerLocations.clear();
+                  //
+                },
+                onCameraIdle: () {
+                  if (!mapState.interaction) {
+                    mapState.interaction2 = true;
+                  }
+                },
+                onCameraMoveStarted: () {
+                  user.building = SingletonFunctionController.building;
+                  mapState.interaction2 = false;
+                },
+                circles: circles,
               ),
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: screenWidth,
-                  height: 30,
-                  color: Colors.white,
+            ),
+          ),
+          //debug----
+
+          DebugToggle.PDRIcon
+              ? Positioned(
+              top: 150,
+              right: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(20),
+                  color: (isPdr) ? Colors.green : Colors.red,
                 ),
-              )
-            ]),
-            //debug----
+                height: 20,
+                width: 20,
+              ))
+              : Container(),
 
-            DebugToggle.PDRIcon
-                ? Positioned(
-                top: 150,
-                right: 50,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(20),
-                    color: (isPdr) ? Colors.green : Colors.red,
-                  ),
-                  height: 20,
-                  width: 20,
-                ))
-                : Container(),
+          Positioned(
+            bottom: 150.0, // Adjust the position as needed
+            right: 16.0,
 
-            Positioned(
-              bottom: 150.0, // Adjust the position as needed
-              right: 16.0,
+            child: Semantics(
+              excludeSemantics: false,
+              child: Column(
+                children: [
+                  //
+                  // // Text(Building.thresh),
 
-              child: Semantics(
-                excludeSemantics: false,
-                child: Column(
-                  children: [
-                    //
-                    // // Text(Building.thresh),
-
-                    isSemanticEnabled
-                        ? Container()
-                        : SpeedDial(
-                      icon: _mainIcon,
-                      foregroundColor: _mainColor,
-                      backgroundColor: Colors.white,
-                      visible: true,
-                      curve: Curves.bounceInOut,
-                      children: [
-                        SpeedDialChild(
-                          child: Icon(Icons.volume_up_outlined,
-                              color: Colors.white),
-                          backgroundColor: Colors.green,
-                          onTap: () => {
-                            setState(() {
-                              _mainIcon = Icons.volume_up_outlined;
-                              _mainColor = Colors.green;
-                            }),
-                            UserState.ttsAllStop = false,
-                            UserState.ttsOnlyTurns = false,
-                          },
-                        ),
-                        SpeedDialChild(
-                          child: Icon(Icons.volume_down_outlined,
-                              color: Colors.black),
-                          backgroundColor: Colors.blueAccent,
-                          onTap: () => {
-                            setState(() {
-                              _mainIcon = Icons.volume_down_outlined;
-                              _mainColor = Colors.blueAccent;
-                            }),
-                            UserState.ttsOnlyTurns = true,
-                            UserState.ttsAllStop = false,
-                          },
-                        ),
-                        SpeedDialChild(
-                          child: Icon(Icons.volume_off_outlined,
-                              color: Colors.white),
-                          backgroundColor: Colors.red,
-                          onTap: () => {
-                            setState(() {
-                              _mainIcon = Icons.volume_off_outlined;
-                              _mainColor = Colors.red;
-                            }),
-                            UserState.ttsAllStop = true,
-                            UserState.ttsOnlyTurns = false,
-                          },
-                        ),
-                      ],
-                    ),
-                    Visibility(
-                      visible: DebugToggle.StepButton,
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(24))),
-                          child: IconButton(
-                              onPressed: () {
-                                //StartPDR();
-                                bool isvalid = MotionModel.isValidStep(
-                                    user,
-                                    SingletonFunctionController
-                                        .building.floorDimenssion[
-                                    user.Bid]![user.floor]![0],
-                                    SingletonFunctionController
-                                        .building.floorDimenssion[
-                                    user.Bid]![user.floor]![1],
-                                    SingletonFunctionController.building
-                                        .nonWalkable[user.Bid]![user.floor]!,
-                                    reroute);
-                                if (isvalid) {
-
-                                  user.move(context).then((value) {
-                                    print("renderedddd here");
-                                    renderHere();
-                                  });
-
-                                } else {
-                                  if (user.isnavigating) {
-                                    // reroute();
-                                    // showToast("You are out of path");
-                                  }
-                                }
-                              },
-                              icon: Icon(Icons.directions_walk))),
-                    ),
-
-                    SizedBox(height: 28.0),
-                    DebugToggle.Slider ? Text("${user.theta}") : Container(),
-
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                    // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
-                    //     "floor ${user.floor}\n"
-                    //     "userBid ${user.Bid} \n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
-
-                    DebugToggle.Slider
-                        ? Slider(
-                        value: user.theta,
-                        min: -180,
-                        max: 180,
-                        onChanged: (newvalue) {
-                          double? compassHeading = newvalue;
+                  isSemanticEnabled
+                      ? Container()
+                      : SpeedDial(
+                    icon: _mainIcon,
+                    foregroundColor: _mainColor,
+                    backgroundColor: Colors.white,
+                    visible: true,
+                    curve: Curves.bounceInOut,
+                    children: [
+                      SpeedDialChild(
+                        child: Icon(Icons.volume_up_outlined,
+                            color: Colors.white),
+                        backgroundColor: Colors.green,
+                        onTap: () => {
                           setState(() {
-                            user.theta = compassHeading!;
-                            if (mapState.interaction2) {
-                              mapState.bearing = compassHeading!;
-                              _googleMapController.moveCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                    target: mapState.target,
-                                    zoom: mapState.zoom,
-                                    bearing: mapState.bearing!,
-                                  ),
-                                ),
-                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              );
-                            } else {
-                              if (markers.length > 0)
-                                markers[user.Bid]?[0] = customMarker.rotate(
-                                    compassHeading! - mapbearing,
-                                    markers[user.Bid]![0]);
-                            }
-                          });
-                        })
-                        : Container(),
-                    !isSemanticEnabled
-                        ? Semantics(
-                      label: "Change floor",
-                      child: SpeedDial(
-                        child: Text(
-                          SingletonFunctionController.building.floor == 0
-                              ? 'G'
-                              : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xff24b9b0),
-                            height: 19 / 16,
-                          ),
-                        ),
-                        activeIcon: Icons.close,
-                        backgroundColor: Colors.white,
-                        children: List.generate(
-                          (Building.numberOfFloorsDelhi[
-                          buildingAllApi.getStoredString()] ??
-                              [0])
-                              .length,
-                              (int i) {
-                            //
-                            List<int> floorList = Building
-                                .numberOfFloorsDelhi[
-                            buildingAllApi.getStoredString()] ??
-                                [0];
-                            List<int> revfloorList = floorList;
-                            revfloorList.sort();
-                            // SingletonFunctionController.building.numberOfFloors[buildingAllApi
-                            //     .getStoredString()];
-                            //
-                            //
-                            return SpeedDialChild(
-                              child: Semantics(
-                                label: "${revfloorList[i]}",
-                                child: Text(
-                                  revfloorList[i] == 0
-                                      ? 'G'
-                                      : '${revfloorList[i]}',
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 19 / 16,
-                                  ),
+                            _mainIcon = Icons.volume_up_outlined;
+                            _mainColor = Colors.green;
+                          }),
+                          UserState.ttsAllStop = false,
+                          UserState.ttsOnlyTurns = false,
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: Icon(Icons.volume_down_outlined,
+                            color: Colors.black),
+                        backgroundColor: Colors.blueAccent,
+                        onTap: () => {
+                          setState(() {
+                            _mainIcon = Icons.volume_down_outlined;
+                            _mainColor = Colors.blueAccent;
+                          }),
+                          UserState.ttsOnlyTurns = true,
+                          UserState.ttsAllStop = false,
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: Icon(Icons.volume_off_outlined,
+                            color: Colors.white),
+                        backgroundColor: Colors.red,
+                        onTap: () => {
+                          setState(() {
+                            _mainIcon = Icons.volume_off_outlined;
+                            _mainColor = Colors.red;
+                          }),
+                          UserState.ttsAllStop = true,
+                          UserState.ttsOnlyTurns = false,
+                        },
+                      ),
+                    ],
+                  ),
+                  Visibility(
+                    visible: DebugToggle.StepButton,
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(24))),
+                        child: IconButton(
+                            onPressed: () {
+                              //StartPDR();
+                              bool isvalid = MotionModel.isValidStep(
+                                  user,
+                                  SingletonFunctionController
+                                      .building.floorDimenssion[
+                                  user.Bid]![user.floor]![0],
+                                  SingletonFunctionController
+                                      .building.floorDimenssion[
+                                  user.Bid]![user.floor]![1],
+                                  SingletonFunctionController.building
+                                      .nonWalkable[user.Bid]![user.floor]!,
+                                  reroute);
+                              if (isvalid) {
+
+                                user.move(context).then((value) {
+                                  print("renderedddd here");
+                                  renderHere();
+                                });
+
+                              } else {
+                                if (user.isnavigating) {
+                                  // reroute();
+                                  // showToast("You are out of path");
+                                }
+                              }
+                            },
+                            icon: Icon(Icons.directions_walk))),
+                  ),
+
+                  SizedBox(height: 28.0),
+                  DebugToggle.Slider ? Text("${user.theta}") : Container(),
+
+                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                  // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
+                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                  //     "floor ${user.floor}\n"
+                  //     "userBid ${user.Bid} \n"
+                  //     "index ${user.pathobj.index} \n"
+                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+
+                  DebugToggle.Slider
+                      ? Slider(
+                      value: user.theta,
+                      min: -180,
+                      max: 180,
+                      onChanged: (newvalue) {
+                        double? compassHeading = newvalue;
+                        setState(() {
+                          user.theta = compassHeading!;
+                          if (mapState.interaction2) {
+                            mapState.bearing = compassHeading!;
+                            _googleMapController.moveCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: mapState.target,
+                                  zoom: mapState.zoom,
+                                  bearing: mapState.bearing!,
                                 ),
                               ),
-                              backgroundColor: pathMarkers[i] == null
-                                  ? Colors.white
-                                  : Color(0xff24b9b0),
-                              onTap: () {
-                                _polygon.clear();
-                                cachedPolygon.clear();
-                                circles.clear();
+                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                            );
+                          } else {
+                            if (markers.length > 0)
+                              markers[user.Bid]?[0] = customMarker.rotate(
+                                  compassHeading! - mapbearing,
+                                  markers[user.Bid]![0]);
+                          }
+                        });
+                      })
+                      : Container(),
+                  !isSemanticEnabled
+                      ? Semantics(
+                    label: "Change floor",
+                    child: SpeedDial(
+                      child: Text(
+                        SingletonFunctionController.building.floor == 0
+                            ? 'G'
+                            : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff24b9b0),
+                          height: 19 / 16,
+                        ),
+                      ),
+                      activeIcon: Icons.close,
+                      backgroundColor: Colors.white,
+                      children: List.generate(
+                        (Building.numberOfFloorsDelhi[
+                        buildingAllApi.getStoredString()] ??
+                            [0])
+                            .length,
+                            (int i) {
+                          //
+                          List<int> floorList = Building
+                              .numberOfFloorsDelhi[
+                          buildingAllApi.getStoredString()] ??
+                              [0];
+                          List<int> revfloorList = floorList;
+                          revfloorList.sort();
+                          // SingletonFunctionController.building.numberOfFloors[buildingAllApi
+                          //     .getStoredString()];
+                          //
+                          //
+                          return SpeedDialChild(
+                            child: Semantics(
+                              label: "${revfloorList[i]}",
+                              child: Text(
+                                revfloorList[i] == 0
+                                    ? 'G'
+                                    : '${revfloorList[i]}',
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 19 / 16,
+                                ),
+                              ),
+                            ),
+                            backgroundColor: pathMarkers[i] == null
+                                ? Colors.white
+                                : Color(0xff24b9b0),
+                            onTap: () {
+                              _polygon.clear();
+                              cachedPolygon.clear();
+                              circles.clear();
 
-                                _markers.clear();
-                                _markerLocationsMap.clear();
-                                _markerLocationsMapLanName.clear();
+                              _markers.clear();
+                              _markerLocationsMap.clear();
+                              _markerLocationsMapLanName.clear();
 
+                              SingletonFunctionController
+                                  .building.floor[
+                              buildingAllApi
+                                  .getStoredString()] =
+                              revfloorList[i];
+                              createRooms(
+                                SingletonFunctionController
+                                    .building.polylinedatamap[
+                                buildingAllApi.getStoredString()]!,
                                 SingletonFunctionController
                                     .building.floor[
-                                buildingAllApi
-                                    .getStoredString()] =
-                                revfloorList[i];
-                                createRooms(
-                                  SingletonFunctionController
-                                      .building.polylinedatamap[
-                                  buildingAllApi.getStoredString()]!,
-                                  SingletonFunctionController
-                                      .building.floor[
-                                  buildingAllApi.getStoredString()]!,
-                                );
-                                if (pathMarkers[i] != null) {
-                                  //setCameraPosition(pathMarkers[i]!);
-                                }
-                                // Markers.clear();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  createMarkers(
-                                      value,
-                                      SingletonFunctionController
-                                          .building.floor[
-                                      buildingAllApi
-                                          .getStoredString()]!,
-                                      bid: buildingAllApi
-                                          .getStoredString());
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                        : nofloorColumn(),
-                    SizedBox(height: 28.0), // Adjust the height as needed
-
-                    // Container(
-                    //   width: 300,
-                    //   height: 100,
-                    //   child: SingleChildScrollView(
-                    //     scrollDirection: Axis.horizontal,
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Text(testBIn.keys.toString()),
-                    //         Text(testBIn.values.toString()),
-                    //         Text("summap"),
-                    //         Text(sortedsumMapfordebug.toString()),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-
-                    Semantics(
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          //  _getUserLocation();
-                          SingletonFunctionController.btadapter.emptyBin();
-                          if (!user.isnavigating && !isLocalized) {
-
-                            SingletonFunctionController.btadapter
-                                .stopScanning();
-                            if (Platform.isAndroid) {
-                              SingletonFunctionController.btadapter
-                                  .startScanning(
-                                  SingletonFunctionController.apibeaconmap);
-                            } else {
-                              SingletonFunctionController.btadapter
-                                  .startScanningIOS(
-                                  SingletonFunctionController.apibeaconmap);
-                            }
-                            setState(() {
-                              isLocalized = true;
-                              resBeacons =
-                                  SingletonFunctionController.apibeaconmap;
-                            });
-                            late Timer _timer;
-                            _timer = Timer.periodic(
-                                Duration(milliseconds: 5000), (timer) {
-                              localizeUser().then((value) => {
-                                setState(() {
-                                  isLocalized = false;
-                                })
+                                buildingAllApi.getStoredString()]!,
+                              );
+                              if (pathMarkers[i] != null) {
+                                //setCameraPosition(pathMarkers[i]!);
+                              }
+                              // Markers.clear();
+                              SingletonFunctionController
+                                  .building.landmarkdata!
+                                  .then((value) {
+                                createMarkers(
+                                    value,
+                                    SingletonFunctionController
+                                        .building.floor[
+                                    buildingAllApi
+                                        .getStoredString()]!,
+                                    bid: buildingAllApi
+                                        .getStoredString());
                               });
-
-                              _timer.cancel();
-                            });
-                          } else {
-                            _recenterMap();
-                          }
-                          ;
+                            },
+                          );
                         },
-                        child: Semantics(
-                          label:
-                          !user.isnavigating ? "Localize" : "Recenter Map",
-                          onDidGainAccessibilityFocus:
-                          close_isnavigationPannelOpen,
-                          child: (isLocalized)
-                              ? lott.Lottie.asset(
-                            'assets/localized.json', // Path to your Lottie animation
-                            width: 70,
-                            height: 70,
-                          )
-                              : Icon(
-                              (!user.isnavigating)
-                                  ? Icons.my_location_sharp
-                                  : (mapState.aligned
-                                  ? CupertinoIcons.location_north_fill
-                                  : CupertinoIcons.location_north),
-                              color: (!user.isnavigating)
-                                  ? Colors.black
-                                  : Colors.blue),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(26.0), // Change radius here
-                        ),
-                        backgroundColor:
-                        Colors.white, // Set the background color of the FAB
                       ),
-                    ),
-                    SizedBox(height: 28.0),
-                    !user.isnavigating &&
-                        (!_isLandmarkPanelOpen &&
-                            !_isRoutePanelOpen &&
-                            _isBuildingPannelOpen &&
-                            !_isnavigationPannelOpen && user.initialallyLocalised)
-                        ? FloatingActionButton(
-                      onPressed: () async {
-                        if (user.initialallyLocalised) {
-                          setState(() {
-                            if (isLiveLocalizing) {
-                              isLiveLocalizing = false;
-                              HelperClass.showToast(
-                                  "Explore mode is disabled");
-                              _exploreModeTimer!.cancel();
-                              _isExploreModePannelOpen = false;
-                              _isBuildingPannelOpen = true;
-                              lastBeaconValue = "";
-                            } else {
-                              speak(
-                                  "${LocaleData.exploremodenabled.getString(context)}",
-                                  _currentLocale);
-                              isLiveLocalizing = true;
-                              HelperClass.showToast(
-                                  "Explore mode enabled");
-                              _exploreModeTimer = Timer.periodic(
-                                  Duration(milliseconds: 5000),
-                                      (timer) async {
-                                    if (Platform.isAndroid) {
-                                      SingletonFunctionController.btadapter
-                                          .startScanning(
-                                          SingletonFunctionController
-                                              .apibeaconmap);
-                                    } else {
-                                      SingletonFunctionController.btadapter
-                                          .startScanningIOS(
-                                          SingletonFunctionController
-                                              .apibeaconmap);
-                                    }
-                                    Future.delayed(
-                                        Duration(milliseconds: 2000))
-                                        .then((value) => {
-                                      realTimeReLocalizeUser(
-                                          resBeacons)
-                                      // listenToBin()
-                                    });
-                                  });
-                              _isBuildingPannelOpen = false;
-                              _isExploreModePannelOpen = true;
-                            }
-                          });
-                        }
-                      },
-                      child: Semantics(
-                        label: "Explore mode",
-                        child: SvgPicture.asset(
-                          "assets/Navigation_RTLIcon.svg",
-                          // color:
-                          // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                        ),
-                      ),
-                      backgroundColor: Color(
-                          0xff24B9B0), // Set the background color of the FAB
-                    )
-                        : Container(), // Adjust the height as needed// Adjust the height as needed
-                    // FloatingActionButton(
-                    //   onPressed: () async {
-                    //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
-                    //   },
-                    //   child: Icon(Icons.settings),
-                    //   backgroundColor: Color(
-                    //       0xff24B9B0), // Set the background color of the FAB
-                    // )
-                  ],
-                ),
-              ),
-            ),
-            //-------
-            // (user.isnavigating && recenter)? Positioned(
-            //   bottom: 145,
-            //   right: 220,
-            //   child: Container(
-            //     height: 50,
-            //     width: 150, // Adjust width as needed
-            //     child: ElevatedButton(
-            //       onPressed: () {
-            //         // Implement recenter logic here
-            //         _recenterMap();
-            //       },
-            //       style: ElevatedButton.styleFrom(
-            //         foregroundColor: Colors.white, // Background color
-            //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(30), // Rounded corners
-            //         ),
-            //       ),
-            //       child: Row(
-            //         mainAxisSize: MainAxisSize.min,
-            //         mainAxisAlignment: MainAxisAlignment.center,
-            //         children: [
-            //           Icon(Icons.my_location, size: 24),
-            //           SizedBox(width: 8), // Space between icon and text
-            //           Text('Recenter', style: TextStyle(fontSize: 16)),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ):Container(),
-            Positioned(
-                top: 16,
-                left: 16,
-                right: 16,
-                child: _isLandmarkPanelOpen ||
-                    _isRoutePanelOpen ||
-                    _isnavigationPannelOpen
-                    ? Semantics(excludeSemantics: true, child: Container())
-                    : FocusScope(
-                  autofocus: true,
-                  child: Focus(
-                    child: Semantics(
-                      sortKey: const OrdinalSortKey(0), // header: true,
-                      child: HomepageSearch(
-                        onVenueClicked: onLandmarkVenueClicked,
-                        fromSourceAndDestinationPage:
-                        fromSourceAndDestinationPage,
-                        user: user,
-                      ),
-                    ),
-                  ),
-                )),
-            FutureBuilder(
-              future: SingletonFunctionController.building.landmarkdata,
-              builder: (context, snapshot) {
-                if (_isLandmarkPanelOpen) {
-                  return landmarkdetailpannel(context, snapshot);
-                } else {
-                  return Semantics(excludeSemantics: true, child: Container());
-                }
-              },
-            ),
-            routeDeatilPannel(),
-            feedbackPanel(context),
-            navigationPannel(),
-            reroutePannel(context),
-            ExploreModePannel(),
-            detected ? Semantics(child: nearestLandmarkpannel()) : Container(),
-            SizedBox(height: 28.0), // Adjust the height as needed
-            // FloatingActionButton(
-            //     onPressed: (){
-            //
-            //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-            //
-            //       int firstKey = SingletonFunctionController.building.floor.values.first;
-            //
-            //
-            //
-            //
-            //
-            //
-            //
-            //     },
-            //     child: Icon(Icons.add)
-            // ),
-
-            // FloatingActionButton(
-            //   onPressed: () async {
-            //
-            //     //StopPDR();
-            //
-            //     if (user.initialallyLocalised) {
-            //       setState(() {
-            //         isLiveLocalizing = !isLiveLocalizing;
-            //       });
-            //       HelperClass.showToast("realTimeReLocalizeUser started");
-            //
-            //       Timer.periodic(
-            //           Duration(milliseconds: 5000),
-            //               (timer) async {
-            //
-            //             SingletonFunctionController.btadapter.startScanning(resBeacons);
-            //
-            //
-            //             // setState(() {
-            //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
-            //             // });
-            //
-            //
-            //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-            //               realTimeReLocalizeUser(resBeacons)
-            //               // listenToBin()
-            //
-            //
-            //             });
-            //
-            //             setState(() {
-            //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
-            //
-            //             });
-            //
-            //           });
-            //
-            //     }
-            //
-            //   },
-            //   child: Icon(
-            //     Icons.location_history_sharp,
-            //     color: (isLiveLocalizing)
-            //         ? Colors.cyan
-            //         : Colors.black,
-            //   ),
-            //   backgroundColor: Colors
-            //       .white, // Set the background color of the FAB
-            // ),
-            (!SingletonFunctionController.building.destinationQr &&
-                !user.initialallyLocalised &&
-                !SingletonFunctionController.building.qrOpened)
-                ? Container(
-              height: screenHeight,
-              width: screenWidth,
-              color: Colors.white.withOpacity(0.8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  lott.Lottie.asset(
-                    'assets/loding_animation.json', // Path to your Lottie animation
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 56, right: 56),
-                    child: LinearProgressIndicator(
-                      value: _progressValue,
-                      backgroundColor: Colors.grey,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.red),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                   )
+                      : nofloorColumn(),
+                  SizedBox(height: 28.0), // Adjust the height as needed
+
+                  // Container(
+                  //   width: 300,
+                  //   height: 100,
+                  //   child: SingleChildScrollView(
+                  //     scrollDirection: Axis.horizontal,
+                  //     child: Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(testBIn.keys.toString()),
+                  //         Text(testBIn.values.toString()),
+                  //         Text("summap"),
+                  //         Text(sortedsumMapfordebug.toString()),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+
+                  Semantics(
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        //  _getUserLocation();
+                        SingletonFunctionController.btadapter.emptyBin();
+                        if (!user.isnavigating && !isLocalized) {
+
+                          SingletonFunctionController.btadapter
+                              .stopScanning();
+                          if (Platform.isAndroid) {
+                            SingletonFunctionController.btadapter
+                                .startScanning(
+                                SingletonFunctionController.apibeaconmap);
+                          } else {
+                            SingletonFunctionController.btadapter
+                                .startScanningIOS(
+                                SingletonFunctionController.apibeaconmap);
+                          }
+                          setState(() {
+                            isLocalized = true;
+                            resBeacons =
+                                SingletonFunctionController.apibeaconmap;
+                          });
+                          late Timer _timer;
+                          _timer = Timer.periodic(
+                              Duration(milliseconds: 5000), (timer) {
+                            localizeUser().then((value) => {
+                              setState(() {
+                                isLocalized = false;
+                              })
+                            });
+
+                            _timer.cancel();
+                          });
+                        } else {
+                          _recenterMap();
+                        }
+                        ;
+                      },
+                      child: Semantics(
+                        label:
+                        !user.isnavigating ? "Localize" : "Recenter Map",
+                        onDidGainAccessibilityFocus:
+                        close_isnavigationPannelOpen,
+                        child: (isLocalized)
+                            ? lott.Lottie.asset(
+                          'assets/localized.json', // Path to your Lottie animation
+                          width: 70,
+                          height: 70,
+                        )
+                            : Icon(
+                            (!user.isnavigating)
+                                ? Icons.my_location_sharp
+                                : (mapState.aligned
+                                ? CupertinoIcons.location_north_fill
+                                : CupertinoIcons.location_north),
+                            color: (!user.isnavigating)
+                                ? Colors.black
+                                : Colors.blue),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                        BorderRadius.circular(26.0), // Change radius here
+                      ),
+                      backgroundColor:
+                      Colors.white, // Set the background color of the FAB
+                    ),
+                  ),
+                  SizedBox(height: 28.0),
+                  !user.isnavigating &&
+                      (!_isLandmarkPanelOpen &&
+                          !_isRoutePanelOpen &&
+                          _isBuildingPannelOpen &&
+                          !_isnavigationPannelOpen && user.initialallyLocalised)
+                      ? FloatingActionButton(
+                    onPressed: () async {
+                      if (user.initialallyLocalised) {
+                        setState(() {
+                          if (isLiveLocalizing) {
+                            isLiveLocalizing = false;
+                            HelperClass.showToast(
+                                "Explore mode is disabled");
+                            _exploreModeTimer!.cancel();
+                            _isExploreModePannelOpen = false;
+                            _isBuildingPannelOpen = true;
+                            lastBeaconValue = "";
+                          } else {
+                            speak(
+                                "${LocaleData.exploremodenabled.getString(context)}",
+                                _currentLocale);
+                            isLiveLocalizing = true;
+                            HelperClass.showToast(
+                                "Explore mode enabled");
+                            _exploreModeTimer = Timer.periodic(
+                                Duration(milliseconds: 5000),
+                                    (timer) async {
+                                  if (Platform.isAndroid) {
+                                    SingletonFunctionController.btadapter
+                                        .startScanning(
+                                        SingletonFunctionController
+                                            .apibeaconmap);
+                                  } else {
+                                    SingletonFunctionController.btadapter
+                                        .startScanningIOS(
+                                        SingletonFunctionController
+                                            .apibeaconmap);
+                                  }
+                                  Future.delayed(
+                                      Duration(milliseconds: 2000))
+                                      .then((value) => {
+                                    realTimeReLocalizeUser(
+                                        resBeacons)
+                                    // listenToBin()
+                                  });
+                                });
+                            _isBuildingPannelOpen = false;
+                            _isExploreModePannelOpen = true;
+                          }
+                        });
+                      }
+                    },
+                    child: Semantics(
+                      label: "Explore mode",
+                      child: SvgPicture.asset(
+                        "assets/Navigation_RTLIcon.svg",
+                        // color:
+                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                      ),
+                    ),
+                    backgroundColor: Color(
+                        0xff24B9B0), // Set the background color of the FAB
+                  )
+                      : Container(), // Adjust the height as needed// Adjust the height as needed
+                  // FloatingActionButton(
+                  //   onPressed: () async {
+                  //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
+                  //   },
+                  //   child: Icon(Icons.settings),
+                  //   backgroundColor: Color(
+                  //       0xff24B9B0), // Set the background color of the FAB
+                  // )
                 ],
               ),
-            )
-                : Container()
-          ],
-        ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Stack(
+              children: [Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: _isLandmarkPanelOpen ||
+                      _isRoutePanelOpen ||
+                      _isnavigationPannelOpen
+                      ? Semantics(excludeSemantics: true, child: Container())
+                      : FocusScope(
+                    autofocus: true,
+                    child: Focus(
+                      child: Semantics(
+                        sortKey: const OrdinalSortKey(0), // header: true,
+                        child: HomepageSearch(
+                          onVenueClicked: onLandmarkVenueClicked,
+                          fromSourceAndDestinationPage:
+                          fromSourceAndDestinationPage,
+                          user: user,
+                        ),
+                      ),
+                    ),
+                  ))],
+            ),
+          ),
+          FutureBuilder(
+            future: SingletonFunctionController.building.landmarkdata,
+            builder: (context, snapshot) {
+              if (_isLandmarkPanelOpen) {
+                return landmarkdetailpannel(context, snapshot);
+              } else {
+                return Semantics(excludeSemantics: true, child: Container());
+              }
+            },
+          ),
+          routeDeatilPannel(),
+          feedbackPanel(context),
+          navigationPannel(),
+          reroutePannel(context),
+          ExploreModePannel(),
+          detected ? Semantics(child: nearestLandmarkpannel()) : Container(),
+          SizedBox(height: 28.0), // Adjust the height as needed
+          // FloatingActionButton(
+          //     onPressed: (){
+          //
+          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
+          //
+          //       int firstKey = SingletonFunctionController.building.floor.values.first;
+          //
+          //
+          //
+          //
+          //
+          //
+          //
+          //     },
+          //     child: Icon(Icons.add)
+          // ),
+
+          // FloatingActionButton(
+          //   onPressed: () async {
+          //
+          //     //StopPDR();
+          //
+          //     if (user.initialallyLocalised) {
+          //       setState(() {
+          //         isLiveLocalizing = !isLiveLocalizing;
+          //       });
+          //       HelperClass.showToast("realTimeReLocalizeUser started");
+          //
+          //       Timer.periodic(
+          //           Duration(milliseconds: 5000),
+          //               (timer) async {
+          //
+          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
+          //
+          //
+          //             // setState(() {
+          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
+          //             // });
+          //
+          //
+          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+          //               realTimeReLocalizeUser(resBeacons)
+          //               // listenToBin()
+          //
+          //
+          //             });
+          //
+          //             setState(() {
+          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
+          //
+          //             });
+          //
+          //           });
+          //
+          //     }
+          //
+          //   },
+          //   child: Icon(
+          //     Icons.location_history_sharp,
+          //     color: (isLiveLocalizing)
+          //         ? Colors.cyan
+          //         : Colors.black,
+          //   ),
+          //   backgroundColor: Colors
+          //       .white, // Set the background color of the FAB
+          // ),
+          (!SingletonFunctionController.building.destinationQr &&
+              !user.initialallyLocalised &&
+              !SingletonFunctionController.building.qrOpened)
+              ? Container(
+            height: screenHeight,
+            width: screenWidth,
+            color: Colors.white.withOpacity(0.8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                lott.Lottie.asset(
+                  'assets/loding_animation.json', // Path to your Lottie animation
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 56, right: 56),
+                  child: LinearProgressIndicator(
+                    value: _progressValue,
+                    backgroundColor: Colors.grey,
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                )
+              ],
+            ),
+          )
+              : Container()
+        ],
       ),
     );
   }

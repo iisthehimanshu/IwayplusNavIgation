@@ -181,10 +181,8 @@ class UserState {
 
     if (isnavigating) {
       checkForMerge();
-      moveinCampus(context);
       pathobj.index = pathobj.index + 1;
       if((Bid == buildingAllApi.outdoorID && Cellpath[pathobj.index].bid == buildingAllApi.outdoorID) && tools.calculateDistance([showcoordX, showcoordY], [Cellpath[pathobj.index].x,Cellpath[pathobj.index].y])>=3){
-        stepSize = 3;
         //destination check
         List<Cell> turnPoints =
         tools.getCellTurnpoints(Cellpath);
@@ -215,19 +213,33 @@ class UserState {
         Cell point = tools.findingprevpoint(Cellpath,pathobj.index);
         double angle = tools.calculateBearing([lat,lng], [Cellpath[pathobj.index].lat, Cellpath[pathobj.index].lng]);
         Map<String, double> data = tools.findslopeandintercept(point.x, point.y, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y);
-        List<int> transitionvalue = tools.findpoint(coordX,coordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
+        List<int> transitionvalue = tools.findpoint(showcoordX,showcoordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
+        List<int>? trans ;
+        if(angle-(theta<0?theta+360 : theta) <= 45  && angle-(theta<0?theta+360 : theta) >= -45){
+          List<int> tv = tools.eightcelltransition(angle);
+          trans = [tv[0]+coordX , tv[1]+coordY];
+        }else{
+          List<int> tv = tools.eightcelltransition(theta);
+          trans = [tv[0]+coordX , tv[1]+coordY];
+        }
         showcoordX = transitionvalue[0];
         showcoordY = transitionvalue[1];
-        coordX = transitionvalue[0];
-        coordY = transitionvalue[1];
+        print("himanshu check $trans");
+        coordX = trans[0];
+        coordY = trans[1];
         List<double> values = tools.moveLatLng([lat,lng], angle, 1);
         lat = values[0];
         lng = values[1];
         path.insert(pathobj.index, (showcoordY*cols)+showcoordX);
         Cellpath.insert(pathobj.index, Cell((showcoordY*cols)+showcoordX, showcoordX, showcoordY, tools.eightcelltransition, lat, lng, buildingAllApi.outdoorID, floor, cols,imaginedCell: true));
+        int d = tools
+            .calculateDistance([coordX, coordY], [showcoordX, showcoordY]).toInt();
+        if (d > 0) {
+          offPathDistance.add(d);
+        }
         return;
       }
-      stepSize = 2;
+
       if(Cellpath[pathobj.index].bid != null && Bid != Cellpath[pathobj.index].bid) {
         Bid = Cellpath[pathobj.index].bid!;
         cols = building!.floorDimenssion[Bid]![floor]![0];
@@ -468,10 +480,6 @@ class UserState {
     if (d > 0) {
       offPathDistance.add(d);
     }
-  }
-
-  Future<void> moveinCampus(context) async {
-
   }
 
   String convertTolng(

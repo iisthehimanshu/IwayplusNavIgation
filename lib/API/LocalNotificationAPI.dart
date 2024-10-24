@@ -11,7 +11,7 @@ import '../DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
 
 class LocalNotificationAPI{
 
-  final String baseUrl = kDebugMode? 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation' : 'https://maps.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation';
+  final String baseUrl = kDebugMode? 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwaymaps.navigation' : 'https://maps.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwaymaps.navigation';
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -34,7 +34,7 @@ class LocalNotificationAPI{
 
     if(!deviceConnected){
       print("LocalNotificationAPI DATA FROM DATABASE");
-      Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.navigation")!.responseBody;
+      Map<String, dynamic> responseBody = NotifiBox.get("com.iwaymaps.navigation")!.responseBody;
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
       List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
       return notificationsList;
@@ -55,7 +55,7 @@ class LocalNotificationAPI{
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
       List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
       final notificationSaveData = LocalNotificationAPIDatabaseModel(responseBody: responseBody);
-      NotifiBox.put("com.iwayplus.navigation", notificationSaveData);
+      NotifiBox.put("com.iwaymaps.navigation", notificationSaveData);
       notificationSaveData.save();
       return notificationsList;
     }

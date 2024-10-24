@@ -98,7 +98,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       itemBuilder: (context, index) {
         final notification = notificationsList[index];
         print(notification.appId.runtimeType);
-        if(notification.appId == 'com.iwayplus.navigation') {
+        if(notification.appId == 'com.iwaymaps.navigation') {
           return Card(
             elevation: 1,
             margin: EdgeInsets.only(bottom: 16),

@@ -631,7 +631,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       apiCalls(context);
     });
 
-    !DebugToggle.Slider ? handleCompassEvents() : () {};
+    handleCompassEvents();
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -1499,8 +1499,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     user.locationName = userSetLocation.name;
 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
 
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
@@ -2783,7 +2783,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         });
       } else {
         if (speakTTS) {
-          speak("${LocaleData.unabletofindyourlocation.getString(context)}",
+          speak("Unable to find your location. Scan nearby QR to know your location",
               _currentLocale);
           showLocationDialog(context);
           SingletonFunctionController.building.qrOpened = true;
@@ -11823,9 +11823,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
-    print("patch $patch");
     if(cachedPolygon.isEmpty){
       Set<Polygon> polygons = Set();
+
       closedpolygons.forEach((key, value) {
         polygons = polygons.union(value);
       });
@@ -11836,7 +11836,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       cachedPolygon = polygons;
       return polygons;
     }
-    return cachedPolygon.union(otherpatch).union(blurPatch);
+    return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
 
   Set<gmap.Polyline> getCombinedPolylines() {
@@ -12887,7 +12887,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     ),
 
                     SizedBox(height: 28.0),
-                    DebugToggle.Slider ? Text("${user.theta}") : Container(),
+                    DebugToggle.Slider ? Text("${peakThreshold}") : Container(),
 
                     // Text("coord [${user.coordX},${user.coordY}] \n"
                     //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12900,32 +12900,37 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
                     DebugToggle.Slider
                         ? Slider(
-                        value: user.theta,
-                        min: -180,
-                        max: 180,
+                        value: peakThreshold,
+                        min: 0,
+                        max: 18,
                         onChanged: (newvalue) {
-                          double? compassHeading = newvalue;
-                          setState(() {
-                            user.theta = compassHeading!;
-                            if (mapState.interaction2) {
-                              mapState.bearing = compassHeading!;
-                              _googleMapController.moveCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                    target: mapState.target,
-                                    zoom: mapState.zoom,
-                                    bearing: mapState.bearing!,
-                                  ),
-                                ),
-                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                              );
-                            } else {
-                              if (markers.length > 0)
-                                markers[user.Bid]?[0] = customMarker.rotate(
-                                    compassHeading! - mapbearing,
-                                    markers[user.Bid]![0]);
-                            }
-                          });
+
+                          if(Platform.isIOS){
+                            setState(() {
+                              peakThreshold = newvalue;
+                              valleyThreshold=-newvalue;
+                              // user.theta = compassHeading!;
+                              // if (mapState.interaction2) {
+                              //   mapState.bearing = compassHeading!;
+                              //   _googleMapController.moveCamera(
+                              //     CameraUpdate.newCameraPosition(
+                              //       CameraPosition(
+                              //         target: mapState.target,
+                              //         zoom: mapState.zoom,
+                              //         bearing: mapState.bearing!,
+                              //       ),
+                              //     ),
+                              //     //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              //   );
+                              // } else {
+                              //   if (markers.length > 0)
+                              //     markers[user.Bid]?[0] = customMarker.rotate(
+                              //         compassHeading! - mapbearing,
+                              //         markers[user.Bid]![0]);
+                              // }
+                            });
+                          }
+
                         })
                         : Container(),
                     !isSemanticEnabled

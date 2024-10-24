@@ -7958,7 +7958,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
       if (liftName != null) {
-
+        print("object ${PathState.accessiblePath}");
         liftDirection = direction(
             -1,
             "Take ${liftName} and Go to ${nextFloor} Floor",
@@ -7978,9 +7978,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           icon: await CustomMarker(
               text:
               "To Floor ${nextFloor ?? floor}",
-              dirIcon: (sourceX == PathState.sourceX)
-                  ? Icons.elevator_outlined
-                  : Icons.elevator_outlined)
+              dirIcon:(PathState.accessiblePath=='Lifts')?
+
+              Icons.elevator_outlined:(PathState.accessiblePath=='Stairs')?Icons.escalator:(PathState.accessiblePath=='Ramps')?Icons.accessible:Icons.escalator_warning)
               .toBitmapDescriptor(
               logicalSize: const Size(150, 150),
               imageSize: const Size(300, 400)),
@@ -8057,11 +8057,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-          child: RouteSelector(),
+          child: RouteSelector(
+            onRouteSelected: (String selectedRoute) {
+               // Print the selected route ID
+            },
+          ),
         );
       },
-    );
+    ).then((result) {
+      if (result != null) {
+        reroute(acc: result); // Handle the result after the dialog is closed
+      }
+    });
   }
+
 
   Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
       {String? liftName}) async {

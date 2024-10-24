@@ -16,31 +16,32 @@ RouteOption({
 }
 
 class RouteSelector extends StatelessWidget {
-  RouteSelector({Key? key}) : super(key: key);
+  final Function(String) onRouteSelected;
+  RouteSelector({Key? key, required this.onRouteSelected}) : super(key: key);
 
   final List<RouteOption> routes = [
     RouteOption(
-      id: 'stairs',
+      id: 'Stairs',
       label: 'Stairs',
-      icon: Icons.swap_vert,
+      icon: Icons.escalator,
       accessible: true,
     ),
     RouteOption(
-      id: 'lift',
+      id: 'Lifts',
       label: 'Lift',
       icon: Icons.elevator,
       accessible: true,
     ),
     RouteOption(
-      id: 'ramp',
+      id: 'Ramps',
       label: 'Ramp',
-      icon: Icons.trending_up,
+      icon: Icons.accessible,
       accessible: true,
     ),
     RouteOption(
-      id: 'escalator',
+      id: 'Escalators',
       label: 'Escalator',
-      icon: Icons.trending_up,
+      icon: Icons.escalator_warning,
       accessible: true,
     ),
   ];

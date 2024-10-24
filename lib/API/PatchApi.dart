@@ -18,7 +18,7 @@ import 'guestloginapi.dart';
 class patchAPI {
 
   String token = "";
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
+  final String baseUrl = kDebugMode? "https://maps.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -56,7 +56,7 @@ class patchAPI {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-
+      print("patchdata $responseBody");
       final patchData = PatchAPIModel(responseBody: responseBody);
       PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();

@@ -7207,7 +7207,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
-      {String accessibleby = "Lifts"}) async {
+      {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
 
     if (PathState.sourcePolyID == "") {
@@ -7238,6 +7238,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             .lifts;
       }
     } catch (e) {}
+
+    if(accessibleby == null){
+      if(landmarksMap[PathState.sourcePolyID]!.escalators != null && landmarksMap[PathState.sourcePolyID]!.escalators!.any((escalator)=>(escalator.distance??100) <=45)){
+        print("acccccccheck $accessibleby");
+        accessibleby = "Escalators";
+        PathState.accessiblePath = "Escalators";
+      }else{
+        accessibleby = "Lifts";
+        PathState.accessiblePath = "Lifts";
+      }
+    }
+
     // circles.clear();
 
     //
@@ -7279,10 +7291,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+        print("accccccc $accessibleby");
         List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,
-            accessibleby);
+            accessibleby??"Lifts");
 
         if (commonlifts.isEmpty) {
           setState(() {
@@ -7368,7 +7381,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.sourcePolyID]!,
                 buildingEntry!,
-                accessibleby);
+                accessibleby??"Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7424,7 +7437,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.destinationPolyID]!,
                 buildingEntry!,
-                accessibleby);
+                accessibleby??"Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7516,7 +7529,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               renderSource: false));
         } else if (destinationEntry.floor != PathState.destinationFloor) {
           List<dynamic> commonlifts = findCommonLifts(destinationEntry,
-              landmarksMap[PathState.destinationPolyID]!, accessibleby);
+              landmarksMap[PathState.destinationPolyID]!, accessibleby??"Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;
@@ -7606,7 +7619,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               renderDestination: false));
         } else if (PathState.sourceFloor != sourceEntry.floor) {
           List<dynamic> commonlifts = findCommonLifts(
-              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby);
+              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby??"Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;

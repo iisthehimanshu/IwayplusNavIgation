@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/routeOption.dart';
 import '/singletonClass.dart';
 import '/websocket/NotifIcationSocket.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -632,7 +633,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       apiCalls(context);
     });
 
-    !DebugToggle.Slider ? handleCompassEvents() : () {};
+    handleCompassEvents();
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -1502,8 +1503,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     user.locationName = userSetLocation.name;
 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
 
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
@@ -2786,7 +2787,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         });
       } else {
         if (speakTTS) {
-          speak("${LocaleData.unabletofindyourlocation.getString(context)}",
+          speak("Unable to find your location. Scan nearby QR to know your location",
               _currentLocale);
           showLocationDialog(context);
           SingletonFunctionController.building.qrOpened = true;
@@ -8004,6 +8005,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         .building.floor[buildingAllApi.getStoredString()]!,
                     bid: buildingAllApi.getStoredString());
               });
+            }else{
+              showRouteSelector(context);
+
             }
           },
         ));}catch(e){
@@ -8045,6 +8049,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       "dvalue": dvalue,
       "lift": liftDirection
     };
+  }
+  void showRouteSelector(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          child: RouteSelector(),
+        );
+      },
+    );
   }
 
   Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
@@ -11571,6 +11587,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Set<Polygon> getCombinedPolygons() {
     if(cachedPolygon.isEmpty){
       Set<Polygon> polygons = Set();
+
       closedpolygons.forEach((key, value) {
         polygons = polygons.union(value);
       });
@@ -12676,6 +12693,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           fontWeight: FontWeight.w500,
                           color: Color(0xff24b9b0),
                           height: 19 / 16,
+
                         ),
                       ),
                       activeIcon: Icons.close,

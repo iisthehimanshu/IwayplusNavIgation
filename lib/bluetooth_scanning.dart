@@ -265,8 +265,7 @@ class BLueToothClass {
     } else {
       binnumber = 6;
     }
-
-
+    
     if(BIN[binnumber]==null){
       startbin();
     }

@@ -5,6 +5,9 @@ PODS:
     - Flutter
   - bluetooth_enable_fork (0.1.4):
     - Flutter
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - device_info_plus (0.0.1):
     - Flutter
   - device_information (0.0.1):
@@ -140,6 +143,7 @@ DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - bluetooth_enable_fork (from `.symlinks/plugins/bluetooth_enable_fork/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - device_information (from `.symlinks/plugins/device_information/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -191,6 +195,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/app_settings/ios"
   bluetooth_enable_fork:
     :path: ".symlinks/plugins/bluetooth_enable_fork/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   device_information:
@@ -248,6 +254,7 @@ SPEC CHECKSUMS:
   app_links: e7a6750a915a9e161c58d91bc610e8cd1d4d0ad0
   app_settings: 017320c6a680cdc94c799949d95b84cb69389ebc
   bluetooth_enable_fork: 73b8ca6e67230a9baa04010cd5c1e824e00d2797
+  connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   device_information: d652f6dcea86bdc5300ffd495486de1d5047bf4f
   Firebase: 9f574c08c2396885b5e7e100ed4293d956218af9

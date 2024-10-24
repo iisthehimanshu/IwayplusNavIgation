@@ -471,9 +471,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
               final result = fuse.search(normalizedSearchText);
 
+
               result.forEach((fuseResult) {
-                print("fuseResult");
-                print(fuseResult);
+
                 if (fuseResult.score < 0.2) {
 
                   if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){

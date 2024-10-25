@@ -8023,7 +8023,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     bid: buildingAllApi.getStoredString());
               });
             }else{
-              showRouteSelector(context);
+              showRouteSelector(context,PathState.accessiblePath);
 
             }
           },
@@ -8067,7 +8067,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       "lift": liftDirection
     };
   }
-  void showRouteSelector(BuildContext context) {
+  void showRouteSelector(BuildContext context,String acc) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -8077,7 +8077,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           child: RouteSelector(
             onRouteSelected: (String selectedRoute) {
                // Print the selected route ID
-            },
+            }, acc: acc,
           ),
         );
       },

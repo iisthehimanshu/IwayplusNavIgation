@@ -7210,6 +7210,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
 
+    setState(() {
+      startingNavigation=false;
+    });
+
     if (PathState.sourcePolyID == "") {
       PathState.sourcePolyID = tools
           .localizefindNearbyLandmarkSecond(user, landmarksMap)!

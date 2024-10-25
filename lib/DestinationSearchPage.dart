@@ -23,6 +23,7 @@ import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -517,20 +518,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   }
                 }
               });
-            }else if (normalizedValueName.contains(normalizedSearchText)) {
+            }
+            else if (partialMatch(normalizedValueName, normalizedSearchText)) {
+
+              if (partialMatch(normalizedValueName, normalizedSearchText)) {
+                print('Match found!');
+              } else {
+                print('No match found.');
+              }
               final fuse = Fuzzy(
-                [normalizedValueName],
+                [normalizedSearchText],
                 options: FuzzyOptions(
                   findAllMatches: true,
                   tokenize: true,
-                  threshold: 0.5,
+                  threshold: 1,
                 ),
               );
-
               final result = fuse.search(normalizedSearchText);
-              print("fuseresult");
-              print(result);
-
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
                   searchResults.add(SearchpageResults(
@@ -551,6 +555,21 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         }
       }
     });
+  }
+  bool partialMatch(String dataName, String searchQuery) {
+    String normalizedData = normalizeString(dataName);
+    String normalizedQuery = normalizeString(searchQuery);
+
+    // Break query into keywords and check if all are present in data
+    List<String> queryKeywords = normalizedQuery.split(' ');
+    return queryKeywords.every((keyword) => normalizedData.contains(keyword));
+  }
+  String normalizeString(String input) {
+    // Remove common prefixes and convert to lowercase
+    input = input.toLowerCase().replaceAll(RegExp(r'^(dr|mr|mrs|ms|prof)\s*'), '');
+
+    // Return the cleaned-up string
+    return input;
   }
   void topSearchesFunc(){
     setState(() {

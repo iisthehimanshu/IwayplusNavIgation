@@ -17,7 +17,8 @@ RouteOption({
 
 class RouteSelector extends StatelessWidget {
   final Function(String) onRouteSelected;
-  RouteSelector({Key? key, required this.onRouteSelected}) : super(key: key);
+  final String acc;
+  RouteSelector({Key? key, required this.onRouteSelected, required this.acc}) : super(key: key);
 
   final List<RouteOption> routes = [
     RouteOption(
@@ -77,6 +78,7 @@ class RouteSelector extends StatelessWidget {
                 ),
               ),
               child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Select Route',
@@ -100,55 +102,59 @@ class RouteSelector extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final route = routes[index];
+                final isSelected = route.id == acc;
                 return InkWell(
                   onTap: () {
                     Navigator.of(context).pop(route.id);
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        // Icon Container
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            shape: BoxShape.circle,
+                  child: Container(
+                      color: isSelected ? Colors.blue.shade50 : Colors.transparent,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Icon Container
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              route.icon,
+                              color: Colors.blue.shade600,
+                              size: 20,
+                            ),
                           ),
-                          child: Icon(
-                            route.icon,
-                            color: Colors.blue.shade600,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
+                          const SizedBox(width: 16),
 
-                        // Route Details
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                route.label,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.chevron_right,
-                                    size: 18,
-                                    color: Colors.grey.shade400,
+                          // Route Details
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  route.label,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                ],
-                              ),
-                            ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 18,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );

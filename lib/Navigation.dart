@@ -45,6 +45,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/InitMarkerModel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
+import 'CONSTANTS.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'Elements/AccessiblePathButton.dart';
@@ -507,8 +508,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         }
-        print("__markers");
-        print(markers);
 
         // markers.add(
         //   MapMarker(
@@ -559,8 +558,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       _markers
         ..clear()
         ..addAll(updatedMarkers);
-      print("_markers");
-      print(_markers);
 
       setState(() {
         _areMarkersLoading = false;
@@ -3242,7 +3239,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     });
     FlutterBeep.beep();
-    speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+    if(acc!= null){
+      speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+    }else{
+      speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+    }
     if(acc != null){
       PathState.accessiblePath = acc;
       PathState.clearforaccessiblepath();
@@ -6532,7 +6533,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               child: IconButton(
                                   onPressed: () {
                                     HelperClass.shareContent(
-                                        "https://dev.iwayplus.in/#/iway-apps/ashoka.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=ashoka-navigation/id6505062168&playStore=com.iwayplus.accessibleashoka");
+                                        "https://dev.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
                                   },
                                   icon: Semantics(
                                       label: "Share route information",
@@ -7209,6 +7210,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
+
+
 
     setState(() {
       startingNavigation=false;
@@ -8274,8 +8277,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     );
   }
 
+  void addDirectionsWidget(){
+
+  }
+
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
+  List<Widget> directionWidgets = [];
   Widget routeDeatilPannel() {
     setState(() {
       semanticShouldBeExcluded = true;
@@ -8299,7 +8307,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    List<Widget> directionWidgets = [];
     directionWidgets.clear();
     if (PathState.directions.isNotEmpty) {
       if (PathState.directions[0].distanceToNextTurn != null) {
@@ -8314,6 +8321,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       for (int i = 1; i < PathState.directions.length; i++) {
         if (!PathState.directions[i].isDestination) {
+          print("directions updates");
           if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
               direction: PathState.directions[i].turnDirection == "Straight"
@@ -9049,23 +9057,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                       //   ),
                                                       // );
                                                     });
-                                                    alignMapToPath([
-                                                      user.lat,
-                                                      user.lng
-                                                    ], [
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lat,
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lng
-                                                    ]);
                                                   });
                                                   _isRoutePanelOpen = false;
 
@@ -9115,6 +9106,58 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                               .sourceBid);
                                                     });
                                                   }
+                                                  await Future.delayed(const Duration(milliseconds: 500));
+                                                  print("debugcheck ${[
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index]
+                                                        .x,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index ]
+                                                        .y
+                                                  ]}   ${[
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .x,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .y
+                                                  ]}");
+
+                                                  alignMapToPath([
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index]
+                                                        .lat,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index ]
+                                                        .lng
+                                                  ], [
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .lat,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .lng
+                                                  ]);
 
                                                   Future.delayed(Duration(seconds: 2)).then((onValue){
                                                     setState(() {
@@ -9253,7 +9296,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                     height: 22,
                                   ),
                                   Container(
-                                    height: screenHeight - 300,
+                                    height: screenHeight - 400,
+
                                     child: SingleChildScrollView(
                                       child: Column(
                                         children: [
@@ -10033,6 +10077,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                             SingletonFunctionController
                                                 .building
                                                 .floor[user.Bid]]!);
+                                        List<LatLng> ll = [pathMarkers[user.Bid]![
+                                        SingletonFunctionController
+                                            .building
+                                            .floor[user.Bid]]!.first.position, pathMarkers[user.Bid]![
+                                        SingletonFunctionController
+                                            .building
+                                            .floor[user.Bid]]!.last.position];
+                                        setCameraPositionusingCoords(ll);
                                       }
                                     });
                                   },
@@ -12428,6 +12480,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
     double screenWidthPixels = MediaQuery.of(context).size.width *
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
@@ -12447,8 +12500,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 padding:
                 EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
-                // myLocationButtonEnabled: true,
-                // myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                myLocationEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
@@ -12485,7 +12538,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  print(cameraPosition.zoom);
                   if (cameraPosition.zoom > 16.8) {
                     focusBuildingChecker(cameraPosition);
                   } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
@@ -12669,9 +12721,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
                   //     "floor ${user.floor}\n"
-                  //     "userBid ${user.Bid} \n"
+                  //     // "userBid ${user.Bid} \n"
                   //     "index ${user.pathobj.index} \n"
                   //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
@@ -13035,7 +13087,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               }
             },
           ),
-          SafeArea(child: routeDeatilPannel()),
+          Padding(
+            padding: EdgeInsets.only(top:statusBarHeight),
+            child: routeDeatilPannel(),
+          ),
           SafeArea(child: feedbackPanel(context)),
           navigationPannel(),
           SafeArea(child: reroutePannel(context)),

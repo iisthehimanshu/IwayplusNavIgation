@@ -10,6 +10,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
+  final IconData icon;
   final Function(bool selected) onSelect;
   final Function(String Text) onTap;
 
@@ -19,6 +20,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
     required this.svgPath,
     required this.text,
     this.selected = false,
+    required this.icon,
     required this.onSelect,
     required this.onTap,
   });
@@ -70,7 +72,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                child: Icon(widget.icon, size: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
               Semantics(
                 excludeSemantics: true,

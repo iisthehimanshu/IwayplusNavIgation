@@ -9,6 +9,7 @@ class HomepageFilter extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
+  IconData icon;
   final Function(bool selected) onSelect;
 
   HomepageFilter({
@@ -16,6 +17,7 @@ class HomepageFilter extends StatefulWidget {
     required this.text,
     this.selected = false,
     required this.onSelect,
+    required this.icon,
     required this.onClicked
   });
 
@@ -57,7 +59,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 4),
-              child: Icon(Icons.wallet_giftcard_outlined, size: 18),
+              child: Icon(widget.icon,size: 18,),
             ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),

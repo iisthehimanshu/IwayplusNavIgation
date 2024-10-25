@@ -7212,7 +7212,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     List<Function()> fetchrouteFutures = [];
 
 
-
+    PathState.singleCellListPath.clear();
     setState(() {
       startingNavigation=false;
     });
@@ -8312,14 +8312,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       if (PathState.directions[0].distanceToNextTurn != null) {
         directionWidgets.add(directionInstruction(
           direction: '${LocaleData.gostraight.getString(context)}',
-          distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
+          distance: (PathState.directions[0].distanceToNextTurn!)
               .ceil()
               .toString(),
           context: context,
         ));
       }
 
-      for (int i = 1; i < PathState.directions.length; i++) {
+      for (int i = 1; i < PathState.directions.length-1; i++) {
         if (!PathState.directions[i].isDestination) {
           print("directions updates");
           if (PathState.directions[i].nearbyLandmark != null) {
@@ -8339,6 +8339,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   distance:
                   "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",
                   context: context));
+              i++;
             } else {
               directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == "Straight"
@@ -8382,11 +8383,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     DateTime currentTime = DateTime.now();
     if (PathState.singleCellListPath.isNotEmpty) {
       distance = tools.PathDistance(PathState.singleCellListPath);
+      print("distance calc $distance");
       time = distance / 120;
       time = time.ceil().toDouble();
 
-      distance = distance * 0.3048;
-      distance = double.parse(distance.toStringAsFixed(1));
+      distance = (distance * 0.3048).ceil().toDouble();
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
@@ -8741,7 +8742,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                       Semantics(
                                         excludeSemantics: true,
                                         child: Text(
-                                          "(${distance} m)",
+                                          "(~ ${distance.toInt()} m)",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
                                             fontSize: 18,

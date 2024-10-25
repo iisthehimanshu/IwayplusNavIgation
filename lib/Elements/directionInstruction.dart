@@ -184,7 +184,7 @@ class _directionInstructionState extends State<directionInstruction> {
                       ),
                       ExcludeSemantics(
                         child: Text(
-                          (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${widget.distance} m",
+                          (widget.direction.substring(0,4)=="Take")? "${widget.distance}" :"${(double.parse(widget.distance)*0.3048).ceil()} m",
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 14,

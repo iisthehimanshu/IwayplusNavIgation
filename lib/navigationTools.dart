@@ -557,10 +557,38 @@ class tools {
     return [newLat,newLng];
   }
 
+  static List<List<T>> partitionByProperty<T>(List<T> list, bool Function(T) predicate) {
+    List<T> match = [];
+    List<T> nonMatch = [];
+
+    for (var item in list) {
+      if (predicate(item)) {
+        match.add(item);
+      } else {
+        nonMatch.add(item);
+      }
+    }
+
+    return [match, nonMatch];
+  }
+
+
   static double PathDistance(List<Cell> mergedList) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    if(mergedList.every((item) => (item.bid == mergedList.first.bid && item.floor == mergedList.first.floor))){
+      return mergedList.length.toDouble();
+    }
+
+    if(mergedList.every((item) => (item.bid == mergedList.first.bid))){
+      List<List<Cell>> result = partitionByProperty(mergedList,(item) => item.floor == mergedList.first.floor);
+      result.forEach((list){
+        totalDistance = totalDistance + list.length;
+      });
+      return totalDistance;
+    }
 
     Cell? firstCell;
     String? currentBid;
@@ -1049,7 +1077,10 @@ class tools {
     List<Cell> turns = tools.getTurnpoints_inCell(path);
     turns.insert(0, path[0]);
     turns.add(path.last);
+    print("turns $turns");
     double Nextdistance = tools.calculateDistance([turns[0].x,turns[0].y], [turns[1].x,turns[1].y]);
+    print("adding turn distance as $Nextdistance between ${[turns[0].x,turns[0].y]} and ${[turns[1].x,turns[1].y]}");
+
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
     for(int i = 1 ; i<turns.length-1 ; i++){
       if(turns[i].bid != turns[i-1].bid || turns[i].floor != turns[i-1].floor){
@@ -1061,6 +1092,7 @@ class tools {
       }
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
+      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]}");
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
       String direc = tools.angleToClocks(angle,context);
@@ -1690,6 +1722,7 @@ class tools {
         }else if(prevDeltaY==0 && nextDeltaY==0){
 
         }else{
+          print("adding turn ${currPos.x},${currPos.y}");
           res.add(currPos);
         }
 

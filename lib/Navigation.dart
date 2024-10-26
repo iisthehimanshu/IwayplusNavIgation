@@ -837,6 +837,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> setPdrThreshold() async {
+    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
+      peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
+      valleyThreshold = peakThreshold*-1;
+      return;
+    }
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
       String deviceModel = await DeviceInformation.deviceModel;
@@ -867,8 +872,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       } else if (manufacturer.toLowerCase().contains("apple")) {
-        peakThreshold = 10.111111;
-        valleyThreshold = -10.111111;
+        peakThreshold = 10.35;
+        valleyThreshold = -10.35;
       } else {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;

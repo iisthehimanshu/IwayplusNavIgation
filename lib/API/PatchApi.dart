@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,8 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+    String manufacturer = await DeviceInformation.deviceManufacturer;
+    String deviceModel = await DeviceInformation.deviceModel;
     print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
@@ -43,7 +46,9 @@ class patchAPI {
 
 
     final Map<String, dynamic> data = {
-      "id": id??buildingAllApi.getStoredString()
+      "id": id??buildingAllApi.getStoredString(),
+      "manufacturer":manufacturer,
+      "devicemodel": deviceModel
     };
 
     final response = await http.post(

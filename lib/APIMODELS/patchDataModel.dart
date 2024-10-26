@@ -33,6 +33,7 @@ class PatchData {
   String? createdAt;
   String? updatedAt;
   String? buildingAngle;
+  String? pdrThreshold;
   String? buildingName;
   String? corridorWidth;
   String? realtimeLocalisationThreshold;
@@ -50,6 +51,7 @@ class PatchData {
         this.createdAt,
         this.updatedAt,
         this.buildingAngle,
+        this.pdrThreshold,
         this.buildingName,
         this.corridorWidth,
         this.realtimeLocalisationThreshold,
@@ -61,6 +63,7 @@ class PatchData {
     breadth = json['breadth'];
     fileName = json['fileName'];
     length = json['length'];
+    pdrThreshold = json['pdrThreshold'];
     if (json['coordinates'] != null) {
       coordinates = <Coordinates>[];
       json['coordinates'].forEach((v) {
@@ -95,6 +98,7 @@ class PatchData {
     data['breadth'] = this.breadth;
     data['fileName'] = this.fileName;
     data['length'] = this.length;
+    data['pdrThreshold'] = this.pdrThreshold;
     if (this.coordinates != null) {
       data['coordinates'] = this.coordinates!.map((v) => v.toJson()).toList();
     }

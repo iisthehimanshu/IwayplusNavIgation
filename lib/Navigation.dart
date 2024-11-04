@@ -1154,6 +1154,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
           SingletonFunctionController.building.patchData[user.Bid]);
+      print("debugmarker ${markers[user.Bid]![0]}");
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
@@ -1962,21 +1963,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else {
           user.moveToFloor(userSetLocation.floor!);
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
-            anchor: Offset(0.5, 0.829),
-          ));
-          if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
         }
 
         SingletonFunctionController.building
@@ -2299,21 +2285,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else {
           user.moveToFloor(userSetLocation.floor!);
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
-            anchor: Offset(0.5, 0.829),
-          ));
-          if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
         }
 
         SingletonFunctionController.building
@@ -2639,21 +2610,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           } else {
             user.moveToFloor(SingletonFunctionController
                 .apibeaconmap[nearestBeacon]!.floor!);
-            markers.putIfAbsent(user.Bid, () => []);
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("UserLocation"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userloc),
-              anchor: Offset(0.5, 0.829),
-            ));
-            if (kDebugMode) {
-              markers[user.Bid]?.add(Marker(
-                markerId: MarkerId("debug"),
-                position: LatLng(user.lat, user.lng),
-                icon: BitmapDescriptor.fromBytes(userlocdebug),
-                anchor: Offset(0.5, 0.829),
-              ));
-            }
           }
 
           if (widget.directLandID.length < 2) {
@@ -2798,6 +2754,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
     }
+    widget.directLandID = "";
+    widget.directsourceID = "";
+    _recenterMap();
   }
 
   bool _isExpanded = false;
@@ -3245,7 +3204,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     FlutterBeep.beep();
     if(acc!= null){
-      speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+      speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
     }else{
       speak("${LocaleData.reroute.getString(context)}", _currentLocale);
     }
@@ -8084,7 +8043,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           insetPadding: const EdgeInsets.symmetric(horizontal: 16),
           child: RouteSelector(
             onRouteSelected: (String selectedRoute) {
-               // Print the selected route ID
+              // Print the selected route ID
             }, acc: acc,
           ),
         );
@@ -8326,7 +8285,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       for (int i = 1; i < PathState.directions.length-1; i++) {
         if (!PathState.directions[i].isDestination) {
-          print("directions updates");
           if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
               direction: PathState.directions[i].turnDirection == "Straight"
@@ -8388,7 +8346,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     DateTime currentTime = DateTime.now();
     if (PathState.singleCellListPath.isNotEmpty) {
       distance = tools.PathDistance(PathState.singleCellListPath);
-      print("distance calc $distance");
       time = distance / 120;
       time = time.ceil().toDouble();
 
@@ -8601,32 +8558,32 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      Container(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                PathState.swap();
-                                PathState.path.clear();
-                                pathMarkers.clear();
-                                PathState.directions.clear();
-                                if (user.isnavigating == false) {
-                                  clearPathVariables();
-                                }
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  calculateroute(value.landmarksMap!);
-                                });
-                              });
-                            },
-                            icon: Semantics(
-                              label: "Swap location",
-                              child: Icon(
-                                Icons.swap_vert_circle_outlined,
-                                size: 24,
-                              ),
-                            )),
-                      ),
+                      // Container(
+                      //   child: IconButton(
+                      //       onPressed: () {
+                      //         setState(() {
+                      //           PathState.swap();
+                      //           PathState.path.clear();
+                      //           pathMarkers.clear();
+                      //           PathState.directions.clear();
+                      //           if (user.isnavigating == false) {
+                      //             clearPathVariables();
+                      //           }
+                      //           SingletonFunctionController
+                      //               .building.landmarkdata!
+                      //               .then((value) {
+                      //             calculateroute(value.landmarksMap!);
+                      //           });
+                      //         });
+                      //       },
+                      //       icon: Semantics(
+                      //         label: "Swap location",
+                      //         child: Icon(
+                      //           Icons.swap_vert_circle_outlined,
+                      //           size: 24,
+                      //         ),
+                      //       )),
+                      // ),
                     ],
                   ),
                   PathState.sourceFloor != PathState.destinationFloor
@@ -9007,23 +8964,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                               .patchData[
                                                           PathState
                                                               .sourceBid]);
+                                                      if(markers.isEmpty){
+                                                        print("markers were empty");
+                                                        markers.putIfAbsent(
+                                                            user.Bid,
+                                                                () => []);
+                                                        markers[user.Bid]
+                                                            ?.add(Marker(
+                                                          markerId: MarkerId(
+                                                              "UserLocation"),
+                                                          position: LatLng(
+                                                              val[0], val[1]),
+                                                          icon:
+                                                          BitmapDescriptor
+                                                              .fromBytes(
+                                                              userloc),
+                                                          anchor: Offset(
+                                                              0.5, 0.829),
+                                                        ));
+                                                      }else{
+                                                        print("markers were not empty");
+                                                      }
 
-                                                      markers.putIfAbsent(
-                                                          user.Bid,
-                                                              () => []);
-                                                      markers[user.Bid]
-                                                          ?.add(Marker(
-                                                        markerId: MarkerId(
-                                                            "UserLocation"),
-                                                        position: LatLng(
-                                                            val[0], val[1]),
-                                                        icon:
-                                                        BitmapDescriptor
-                                                            .fromBytes(
-                                                            userloc),
-                                                        anchor: Offset(
-                                                            0.5, 0.829),
-                                                      ));
 
                                                       val = tools.localtoglobal(
                                                           user.coordX
@@ -9113,31 +9075,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                     });
                                                   }
                                                   await Future.delayed(const Duration(milliseconds: 500));
-                                                  print("debugcheck ${[
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index]
-                                                        .x,
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index ]
-                                                        .y
-                                                  ]}   ${[
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index +
-                                                        2]
-                                                        .x,
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index +
-                                                        2]
-                                                        .y
-                                                  ]}");
 
                                                   alignMapToPath([
                                                     PathState
@@ -9903,10 +9840,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           }
 
-          print("val $val     ${tools.calculateBearing_fromLatLng(
-              LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
-              LatLng(user.Cellpath[index + 1].lat,
-                  user.Cellpath[index + 1].lng))}");
           //
           //
 
@@ -12360,23 +12293,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
   void _recenterMap() {
-    alignMapToPath([
-      user.lat,
-      user.lng
-    ], [
-      PathState.singleCellListPath[user.pathobj.index + 1].lat,
-      PathState.singleCellListPath[user.pathobj.index + 1].lng
-    ]);
-    print("value at recenter");
-    print([
-      user.lat,
-      user.lng
-    ]);
-    print([
-      PathState.singleCellListPath[user.pathobj.index + 1].lat,
-      PathState.singleCellListPath[user.pathobj.index + 1].lng
-    ]);
-    mapState.aligned = true;
+    try {
+      alignMapToPath([
+        PathState.singleCellListPath[user.pathobj.index].lat,
+        PathState.singleCellListPath[user.pathobj.index].lng
+      ], [
+        PathState.singleCellListPath[user.pathobj.index + 1].lat,
+        PathState.singleCellListPath[user.pathobj.index + 1].lng
+      ]);
+      mapState.aligned = true;
+    }catch(e){
+
+    }
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(
@@ -12722,7 +12650,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
 
                   SizedBox(height: 28.0),
-                  DebugToggle.Slider ? Text("${user.theta}") : Container(),
+                  DebugToggle.Slider ? Text("${peakThreshold}") : Container(),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12735,31 +12663,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
                   DebugToggle.Slider
                       ? Slider(
-                      value: user.theta,
-                      min: -180,
-                      max: 180,
+                      value: peakThreshold,
+                      min: 0,
+                      max: 18,
                       onChanged: (newvalue) {
-                        double? compassHeading = newvalue;
                         setState(() {
-                          user.theta = compassHeading!;
-                          if (mapState.interaction2) {
-                            mapState.bearing = compassHeading!;
-                            _googleMapController.moveCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(
-                                  target: mapState.target,
-                                  zoom: mapState.zoom,
-                                  bearing: mapState.bearing!,
-                                ),
-                              ),
-                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                            );
-                          } else {
-                            if (markers.length > 0)
-                              markers[user.Bid]?[0] = customMarker.rotate(
-                                  compassHeading! - mapbearing,
-                                  markers[user.Bid]![0]);
-                          }
+                          peakThreshold = newvalue;
+                          valleyThreshold = -1*newvalue;
                         });
                       })
                       : Container(),

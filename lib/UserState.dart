@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
@@ -13,7 +13,7 @@ import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
 import 'Elements/locales.dart';
 import 'navigationTools.dart';
-import 'package:geodesy/geodesy.dart' as geo;
+import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 
 class UserState {
@@ -80,11 +80,11 @@ class UserState {
         this.coordYf = 0.0});
 
   // Future<void> move()async {
-  //   
-  //   
-  //   
+  //
+  //
+  //
   //   pathobj.index = pathobj.index + 1;
-  //   
+  //
   //
   //   List<int> transitionvalue = tools.eightcelltransition(this.theta);
   //   coordX = coordX + transitionvalue[0];
@@ -102,9 +102,9 @@ class UserState {
   //     showcoordY = coordY;
   //   }
   //
-  //   
-  //   
-  //   
+  //
+  //
+  //
   //
   // }
 

@@ -23,7 +23,6 @@ import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:string_similarity/string_similarity.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 

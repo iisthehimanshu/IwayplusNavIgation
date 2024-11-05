@@ -3,10 +3,14 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Navigation.dart';
-import 'package:iwaymaps/pathState.dart';
+import '../API/QRDataAPI.dart';
+import '../API/buildingAllApi.dart';
+import '../APIMODELS/QRDataAPIModel.dart';
+import '/Elements/HelperClass.dart';
+import '/Navigation.dart';
+import '/pathState.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({Key? key}) : super(key: key);
@@ -19,7 +23,12 @@ class _QRViewExampleState extends State<QRViewExample> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-
+  Map<String,g.LatLng> allBuildingID = {
+    "65d8835adb333f89456e687f": g.LatLng( 28.947238, 77.100917),
+       "65d8833adb333f89456e6519": g.LatLng(28.947236, 77.101992),
+       "65d8825cdb333f89456d0562": g.LatLng( 28.945987, 77.10206),
+    "66af7fcd858b7c576deb378b":g.LatLng( 28.556050000000027, 77.21693000000005),
+  };
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
@@ -148,20 +157,26 @@ class _QRViewExampleState extends State<QRViewExample> {
     setState(() {
       this.controller = controller;
     });
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       setState(() {
         result = scanData;
       });
       print("result");
       print(result!.code);
-      if(result != null){
-        String polyValue = HelperClass.extractLandmark(result!.code!);
-        print("polyValue $polyValue");
-        if(polyValue != ""){
-          Navigator.pop(context,polyValue);
-        }else{
-          HelperClass.showToast("Invalid QR");
-        }
+      if(result != null && result!.code != null){
+        final uri = Uri.parse(result!.code ?? '');
+        String qrCode = uri.fragment.split('/').last;
+        List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+        print("fetchQRData ${qrData}");
+        qrData?.forEach((e){
+          if(e.code == qrCode){
+            if(e.landmarkId == null){
+              HelperClass.launchURL(result!.code!);
+            }else{
+              Navigator.pop(context,e.landmarkId);
+            }
+          }
+        });
       }
     });
   }

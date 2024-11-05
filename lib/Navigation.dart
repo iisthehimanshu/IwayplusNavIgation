@@ -630,7 +630,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       apiCalls(context);
     });
 
-    handleCompassEvents();
+    !DebugToggle.Slider ? handleCompassEvents() : () {};
 
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
@@ -992,7 +992,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         isPdrStop = true;
         isPdr = false;
       });
-
       PDRTimer!.cancel();
       for (final subscription in pdr) {
         subscription.cancel();
@@ -1051,9 +1050,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     .building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
-
               user.move(context).then((value) {
-
                 renderHere();
               });
             } else {
@@ -9879,7 +9876,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+
+    }
 
     return Visibility(
         visible: _isnavigationPannelOpen,
@@ -12650,7 +12649,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   ),
 
                   SizedBox(height: 28.0),
-                  DebugToggle.Slider ? Text("${peakThreshold}") : Container(),
+                  DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12663,13 +12662,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
                   DebugToggle.Slider
                       ? Slider(
-                      value: peakThreshold,
-                      min: 0,
-                      max: 18,
+                      value: user.theta,
+                      min: -180,
+                      max: 180,
                       onChanged: (newvalue) {
+                        double? compassHeading = newvalue;
                         setState(() {
-                          peakThreshold = newvalue;
-                          valleyThreshold = -1*newvalue;
+                          user.theta = compassHeading!;
+                          if (mapState.interaction2) {
+                            mapState.bearing = compassHeading!;
+                            _googleMapController.moveCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: mapState.target,
+                                  zoom: mapState.zoom,
+                                  bearing: mapState.bearing!,
+                                ),
+                              ),
+                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                            );
+                          } else {
+                            if (markers.length > 0)
+                              markers[user.Bid]?[0] = customMarker.rotate(
+                                  compassHeading! - mapbearing,
+                                  markers[user.Bid]![0]);
+                          }
                         });
                       })
                       : Container(),

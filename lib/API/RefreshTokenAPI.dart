@@ -39,8 +39,6 @@ class RefreshTokenAPI {
       print(signInBox.get("accessToken"));
       signInBox.put("accessToken", newAccessToken);
       print(signInBox.get("accessToken"));
-
-
       return newAccessToken;
     } else {
       print(Exception);

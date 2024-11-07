@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   final screens = [
     VenueSelectionScreen(),
     MapScreen(),
-    QRViewExample(),
+    QRViewExample(frmMainPage: true,),
     FavouriteScreen(),
     ProfilePage()
   ];
@@ -47,6 +47,7 @@ class _MainScreenState extends State<MainScreen> {
     wsocket.message["userId"] = signInBox.get("userId");
   }
   var locBox=Hive.box('LocationPermission');
+
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     print(status);

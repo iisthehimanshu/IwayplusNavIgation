@@ -1,4 +1,5 @@
 
+import 'dart:collection';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,8 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 
 class QRViewExample extends StatefulWidget {
-  const QRViewExample({Key? key}) : super(key: key);
+  final bool frmMainPage;
+  QRViewExample({Key? key, required this.frmMainPage}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -27,7 +29,8 @@ class _QRViewExampleState extends State<QRViewExample> {
     "65d8835adb333f89456e687f": g.LatLng( 28.947238, 77.100917),
        "65d8833adb333f89456e6519": g.LatLng(28.947236, 77.101992),
        "65d8825cdb333f89456d0562": g.LatLng( 28.945987, 77.10206),
-    "66af7fcd858b7c576deb378b":g.LatLng( 28.556050000000027, 77.21693000000005),
+    "66af7fcd858b7c576deb378b":g.LatLng(28.556050000000027,77.21693000000005),
+    "6715cd7e9e8473b3ff515797":g.LatLng(28.6885,77.20953),
   };
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -164,16 +167,39 @@ class _QRViewExampleState extends State<QRViewExample> {
       print("result");
       print(result!.code);
       if(result != null && result!.code != null){
+        await controller.stopCamera();
         final uri = Uri.parse(result!.code ?? '');
         String qrCode = uri.fragment.split('/').last;
-        List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+        List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData((widget.frmMainPage)?allBuildingID.keys.toList():buildingAllApi.allBuildingID.keys.toList());
         print("fetchQRData ${qrData}");
         qrData?.forEach((e){
           if(e.code == qrCode){
             if(e.landmarkId == null){
               HelperClass.launchURL(result!.code!);
             }else{
-              Navigator.pop(context,e.landmarkId);
+              if(widget.frmMainPage){
+                HashMap<String,g.LatLng> map=new HashMap();
+                buildingAllApi.setStoredString(e.buildingID!);
+                buildingAllApi.setSelectedBuildingID(e.buildingID!);
+                allBuildingID.forEach((key, value) {
+                 if(key==e.buildingID){
+                   map[key]=value;
+                 }
+                });
+                print("map : $map");
+                buildingAllApi.setStoredAllBuildingID(map);
+                Navigator.push(context, MaterialPageRoute<void>(
+                  builder: (BuildContext context) => Navigation(directsourceID: e.landmarkId!,),
+                ),);
+              }else{
+                 Navigator.pop(context,e.landmarkId);
+              }
+
+
+
+
+
+
             }
           }
         });

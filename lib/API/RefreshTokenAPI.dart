@@ -40,6 +40,8 @@ class RefreshTokenAPI {
       signInBox.put("accessToken", newAccessToken);
       print(signInBox.get("accessToken"));
       return newAccessToken;
+    }  else if(response.statusCode == 400){
+      return "400";
     } else {
       print(Exception);
       print(response.statusCode);

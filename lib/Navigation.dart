@@ -837,7 +837,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> setPdrThreshold() async {
-    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
+    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
       peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
       valleyThreshold = peakThreshold*-1;
       return;
@@ -2885,7 +2885,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => QRViewExample()),
+                                builder: (context) => QRViewExample(frmMainPage: false,)),
                           ).then((value) {
                             setState(() {
                               isLoading = false;
@@ -3063,6 +3063,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           anchor: Offset(0.5, 0.829),
         ));
       }
+    });
+
+    Future.delayed(Duration(seconds: 1)).then((onValue){
+      _recenterMap();
     });
   }
 

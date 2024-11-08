@@ -12894,8 +12894,7 @@ bool isAppinForeground=true;
                             _timer.cancel();
                           });
                         } else {
-                       //  _recenterMap();
-                          reroute();
+                        _recenterMap();
                         }
                       },
                       child: Semantics(

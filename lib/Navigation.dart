@@ -148,7 +148,7 @@ class Navigation extends StatefulWidget {
   State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
+class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
   MapState mapState = new MapState();
   Timer? PDRTimer;
   Timer? _exploreModeTimer;
@@ -586,6 +586,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
+    WidgetsBinding.instance.addObserver(this);
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
@@ -670,16 +671,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }),
       );
     } catch (E) {}
-
-
     // fetchlist();
     // filterItems();
   }
-
   void initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
+    }
+  }
+bool isAppinForeground=true;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      print("App is in the background");
+      if(user.isnavigating){
+        StopPDR();
+        setState(() {
+          isAppinForeground=false;
+        });
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      print("App is in the foreground");
+      if(user.isnavigating){
+        setState(() {
+          isAppinForeground=true;
+        });
+      }
     }
   }
 
@@ -978,7 +999,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       setState(() {
         isPdr = true;
       });
-      pdrstepCount();
+      if(isAppinForeground){
+        pdrstepCount();
+      }
+
       // onStepCount();
     });
   }
@@ -8966,6 +8990,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                           PathState
                                                               .sourceBid]);
                                                       if(markers.isEmpty){
+
+                                                        _controller = AnimationController(
+                                                          vsync: this,
+                                                          duration: const Duration(seconds: 3),
+                                                        )..repeat(reverse: true);
+
+                                                        // Create the animation
+                                                        _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+                                                          ..addListener(() {
+                                                            _updateCircle(user.lat, user.lng);
+                                                          });
                                                         print("markers were empty");
                                                         markers.putIfAbsent(
                                                             user.Bid,
@@ -8983,6 +9018,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                           anchor: Offset(
                                                               0.5, 0.829),
                                                         ));
+
+                                                        circles.add(
+                                                          Circle(
+                                                              circleId: CircleId("circle"),
+                                                              center: LatLng(user.lat, user.lng),
+                                                              radius: _animation.value,
+                                                              strokeWidth: 1,
+                                                              strokeColor: Colors.blue,
+                                                              fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                              zIndex: 2
+                                                          ),
+                                                        );
+
                                                       }else{
                                                         print("markers were not empty");
                                                       }
@@ -12280,7 +12328,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     SingletonFunctionController.btadapter.stopScanning();
     _messageTimer?.cancel();
     _controller.dispose();
-
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -12847,7 +12895,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             _timer.cancel();
                           });
                         } else {
-                          _recenterMap();
+                        //  _recenterMap();
+                          reroute();
                         }
                         ;
                       },

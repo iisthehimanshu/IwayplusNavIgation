@@ -12,25 +12,29 @@ class QRDataAPI{
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
-  Future<List<QRDataAPIModel>?> fetchQRData(String id)async{
-    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs/$id" : "https://maps.iwayplus.in/secured/building-qrs/$id";
-
-    final response = await http.get(
+  Future<List<QRDataAPIModel>?> fetchQRData(List<String> id)async{
+    print("IDfetchQRData");
+    print(id);
+    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs" : "https://maps.iwayplus.in/secured/building-qrs";
+    final Map<String, dynamic> data = {
+      "buildingIds": id
+    };
+    final response = await http.post(
       Uri.parse(baseUrl),
+      body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken
       },
     );
-
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = jsonDecode(response.body);
+      print("QRDataAPI DATA FROM API");
+      print(jsonResponse);
       List<QRDataAPIModel> qrDataList = jsonResponse
           .map((data) => QRDataAPIModel.fromJson(data))
           .toList();
-      print("QRDataAPI DATA FROM API");
       return qrDataList;
-
     }else{
       return null;
     }

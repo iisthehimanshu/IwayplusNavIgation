@@ -21,7 +21,7 @@ class SignInAPI{
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
-      "appId":"com.iwayplus.navigation"
+      "appId":"com.iwaymaps.navigation"
     };
 
     final response = await http.post(

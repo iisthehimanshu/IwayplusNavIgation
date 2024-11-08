@@ -96,6 +96,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
             builder: (context) => FloorSelectionPage(filterName: widget.name, filterBuildingName: widget.buildingName,floors: sortedListString,),
           ),
         ).then((value){
+          print("value $value");
           widget.onClicked(value[0],value[1],value[2],value[3]);
         });
 

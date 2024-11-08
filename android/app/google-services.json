@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:61576302596:android:d3fe1d777f07152f14e551",
         "android_client_info": {
-          "package_name": "com.iwayplus.navigation"
+          "package_name": "com.iwaymaps.navigation"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "61576302596-73o6740t21hbo4m009scp9fepahv6nnl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.iwayplus.navigation",
+            "package_name": "com.iwaymaps.navigation",
             "certificate_hash": "b83f4e11352f913aba37fca5f0aa89178767a112"
           }
         },
@@ -43,7 +43,7 @@
               "client_id": "61576302596-dcb89vna6fj3kal7mkqqnkr74chfp7ib.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.iwayplus.navigation"
+                "bundle_id": "com.iwaymaps.navigation"
               }
             }
           ]

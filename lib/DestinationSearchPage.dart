@@ -34,6 +34,8 @@ import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
 import 'package:iwaymaps/buildingState.dart';
 
+import 'FloorSelectionPage.dart';
+
 
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
@@ -389,6 +391,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   ];
 
+  List<IconData> _icons = [
+    Icons.wash_sharp,
+    Icons.local_cafe,
+    Icons.water_drop,
+    Icons.atm_sharp,
+    Icons.door_front_door_outlined,
+    Icons.elevator,
+    Icons.desk_sharp,
+  ];
+
 
 
   void onChipSelected(int index) {
@@ -405,7 +417,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
-
 
   void search(String searchText,{String wantToFilter=''}) {
     setState(() {
@@ -435,15 +446,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             }
           });
 
-          optionListItemBuildingName.forEach((element) {
-            searcCategoryhResults.add(
-              SearchpageCategoryResults(
-                name: searchText,
-                buildingName: element,
-                onClicked: onVenueClicked,
-              ),
-            );
-          });
+            optionListItemBuildingName.forEach((element) {
+              searcCategoryhResults.add(
+                SearchpageCategoryResults(
+                  name: searchText,
+                  buildingName: element,
+                  onClicked: onVenueClicked,
+                ),
+              );
+            });
         }
       } else {
         category = false;
@@ -506,20 +517,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   }
                 }
               });
-            }else if (normalizedValueName.contains(normalizedSearchText)) {
+            }
+            else if (partialMatch(normalizedValueName, normalizedSearchText)) {
+
+              if (partialMatch(normalizedValueName, normalizedSearchText)) {
+                print('Match found!');
+              } else {
+                print('No match found.');
+              }
               final fuse = Fuzzy(
-                [normalizedValueName],
+                [normalizedSearchText],
                 options: FuzzyOptions(
                   findAllMatches: true,
                   tokenize: true,
-                  threshold: 0.5,
+                  threshold: 1,
                 ),
               );
-
               final result = fuse.search(normalizedSearchText);
-              print("fuseresult");
-              print(result);
-
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
                   searchResults.add(SearchpageResults(
@@ -540,6 +554,21 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         }
       }
     });
+  }
+  bool partialMatch(String dataName, String searchQuery) {
+    String normalizedData = normalizeString(dataName);
+    String normalizedQuery = normalizeString(searchQuery);
+
+    // Break query into keywords and check if all are present in data
+    List<String> queryKeywords = normalizedQuery.split(' ');
+    return queryKeywords.every((keyword) => normalizedData.contains(keyword));
+  }
+  String normalizeString(String input) {
+    // Remove common prefixes and convert to lowercase
+    input = input.toLowerCase().replaceAll(RegExp(r'^(dr|mr|mrs|ms|prof)\s*'), '');
+
+    // Return the cleaned-up string
+    return input;
   }
   void topSearchesFunc(){
     setState(() {
@@ -616,11 +645,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
   }
 
-  List<IconData> _icons = [
-    Icons.home,
-    Icons.wash_sharp,
-    Icons.school,
-  ];
+
   List<String> optionsTags = [];
   List<String> floorOptionsTags = [];
   String currentSelectedFilter = "";
@@ -640,6 +665,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+
 
 
     // if(speetchText.isNotListening){
@@ -648,336 +675,332 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     // }else{
     //   micColor = Color(0xff24B9B0);
     // }
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-        ),
-        body: Container(
-          color: Colors.white,
-          child: !promptLoader? Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        color: Colors.white,
+        child: !promptLoader? Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
 
-              Semantics(
-                header: true,
-                label: "Search",
-                child: Container(
-                    width: screenWidth - 32,
-                    height: 48,
-                    margin: EdgeInsets.only(top: 16, left: 16, right: 17),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color:
-                        containerBoxColor, // You can customize the border color
-                        width: 1.0, // You can customize the border width
-                      ),
+            Semantics(
+              header: true,
+              label: "Search",
+              child: Container(
+                  width: screenWidth - 32,
+                  height: 48,
+                  margin: EdgeInsets.only(top: 16, left: 16, right: 17),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color:
+                      containerBoxColor, // You can customize the border color
+                      width: 1.0, // You can customize the border width
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 6,),
-                        Container(
-                          width: 48,
-                          height: 48,
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Semantics(
-                              label: "Back",
-                              child: SvgPicture.asset(
-                                  "assets/DestinationSearchPage_BackIcon.svg"),
-                            ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(width: 6,),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Semantics(
+                            label: "Back",
+                            child: SvgPicture.asset(
+                                "assets/DestinationSearchPage_BackIcon.svg"),
                           ),
                         ),
-                        Expanded(
-                          child: FocusScope(
-                            autofocus: true,
-                            child: Focus(
-                              child: Container(
-                                  child: TextField(
-                                    autofocus: true,
-                                    controller: _controller,
-                                    decoration: InputDecoration(
-                                      hintText: "${searchHintString}",
-                                      border: InputBorder.none, // Remove default border
-                                    ),
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff18181b),
-                                      height: 25 / 16,
-                                    ),
-                                    onTap: () {
-                                      if (containerBoxColor == Color(0xffA1A1AA)) {
-                                        containerBoxColor = Color(0xff24B9B0);
-                                      } else {
-                                        containerBoxColor = Color(0xffA1A1AA);
-                                      }
-                                    },
-                                    onSubmitted: (value) {
+                      ),
+                      Expanded(
+                        child: FocusScope(
+                          autofocus: true,
+                          child: Focus(
+                            child: Container(
+                                child: TextField(
+                                  autofocus: true,
+                                  controller: _controller,
+                                  decoration: InputDecoration(
+                                    hintText: "${searchHintString}",
+                                    border: InputBorder.none, // Remove default border
+                                  ),
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff18181b),
+                                    height: 25 / 16,
+                                  ),
+                                  onTap: () {
+                                    if (containerBoxColor == Color(0xffA1A1AA)) {
+                                      containerBoxColor = Color(0xff24B9B0);
+                                    } else {
+                                      containerBoxColor = Color(0xffA1A1AA);
+                                    }
+                                  },
+                                  onSubmitted: (value) {
 
-                                      search(value);
-                                    },
-                                    onChanged: (value) {
-                                      search(value);
-                                      if(_controller.text.isEmpty){
-                                        topSearches.clear();
-                                        topSearchesFunc();
-                                      }
-                                      // print("Final Set");
-                                      // print(cardSet);
-                                    },
-                                  )),
-                            ),
+                                    search(value);
+                                  },
+                                  onChanged: (value) {
+                                    search(value);
+                                    if(_controller.text.isEmpty){
+                                      topSearches.clear();
+                                      topSearchesFunc();
+                                    }
+                                    // print("Final Set");
+                                    // print(cardSet);
+                                  },
+                                )),
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.only(right: 6),
-                          width: 40,
-                          height: 48,
-                          child: Center(
-                            child: _controller.text.isNotEmpty
-                                ? IconButton(
-                                onPressed: (){
-                                  _controller.text = "";
-                                  setState((){
-                                    vall = -1;
-                                    search(_controller.text);
-                                    recentResults = [];
-                                    searcCategoryhResults = [];
-                                    category=false;
-                                    topSearches.clear();
-                                    topSearchesFunc();
-                                  });
-                                },
-                                icon: Semantics(
-                                    container: true,
-
-                                    label: "Close", child: Icon(Icons.close)))
-                                : IconButton(
-                              onPressed: () {
-                                initSpeech();
-                                setState(() {
-                                  speetchText.isListening
-                                      ? stopListening()
-                                      : startListening();
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(right: 6),
+                        width: 40,
+                        height: 48,
+                        child: Center(
+                          child: _controller.text.isNotEmpty
+                              ? IconButton(
+                              onPressed: (){
+                                _controller.text = "";
+                                setState((){
+                                  vall = -1;
+                                  search(_controller.text);
+                                  recentResults = [];
+                                  searcCategoryhResults = [];
+                                  category=false;
+                                  topSearches.clear();
+                                  topSearchesFunc();
                                 });
-                                if (!micselected) {
-                                  micColor = Color(0xff24B9B0);
-                                }
-
-                                setState(() {});
                               },
                               icon: Semantics(
-                                label: "Voice Search",
-                                child: Icon(
-                                  Icons.mic,
-                                  color: micColor,
-                                ),
+                                  container: true,
+
+                                  label: "Close", child: Icon(Icons.close)))
+                              : IconButton(
+                            onPressed: () {
+                              initSpeech();
+                              setState(() {
+                                speetchText.isListening
+                                    ? stopListening()
+                                    : startListening();
+                              });
+                              if (!micselected) {
+                                micColor = Color(0xff24B9B0);
+                              }
+
+                              setState(() {});
+                            },
+                            icon: Semantics(
+                              label: "Voice Search",
+                              child: Icon(
+                                Icons.mic,
+                                color: micColor,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    )),
-              ),
-              (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
-                onTap: (){
-                  Navigator.pop(context, widget.userLocalized);
-                },
-                child: Container(
-                  margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(width: 16,),
-                          Image.asset("assets/rw.png"),
-                          SizedBox(width: 24,),
-                          Text(style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff000000),
-                          ),"Your Current Location")
-                        ],
                       ),
                     ],
-                  ),
-                ),
-              ):Container(),
-              searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-              Semantics(
-                label: "Filter Section",
-                header: true,
-                child: Container(
-                  margin: EdgeInsets.only(left: 7,top: 4),
-                  width: screenWidth,
-                  child: ChipsChoice<int>.single(
-                    value: vall,
-                    onChanged: (val) {
-
-                      if(HelperClass.SemanticEnabled) {
-                        speak("${optionListForUI[val]} selected");
-                      }
-
-                      selectedButton = optionListForUI[val];
-                      setState(() => vall = val);
-                      lastval = val;
-
-
-                      _controller.text = optionListForUI[val];
-                      search(optionListForUI[val]);
-                    },
-                    choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListForUI,
-                      value: (i, v) => i,
-                      label: (i, v) => v,
+                  )),
+            ),
+            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
+              onTap: (){
+                Navigator.pop(context, widget.userLocalized);
+              },
+              child: Container(
+                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 16,),
+                        Image.asset("assets/rw.png"),
+                        SizedBox(width: 24,),
+                        Text(style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff000000),
+                        ),"Your Current Location")
+                      ],
                     ),
-
-                    choiceBuilder: (item, i) {
-                      if(!item.selected){
-                        vall = -1;
-                      }
-                      return DestinationPageChipsWidget(
-                        svgPath: '',
-                        text: optionListForUI[i],
-                        onSelect: item.select!,
-                        selected: item.selected,
-
-                        onTap: (String Text) {
-                          if (Text.isNotEmpty) {
-                            search(Text);
-                          } else {
-                            search(Text);
-                            _controller.text="";
-                            searchResults = [];
-                            searcCategoryhResults = [];
-                            vall = -1;
-                          }
-                        },
-                      );
-                    },
-                    direction: Axis.horizontal,
-                  ),
+                  ],
                 ),
               ),
-              !category && _controller.text.isNotEmpty ? Semantics(
-                header: true,
-                label: "Building Filter section",
-                child: Container(
-                  margin: EdgeInsets.only(left: 7,top: 4),
-                  width: screenWidth,
-                  child: ChipsChoice<int>.single(
-                    value: newvall,
-                    onChanged: (val) {
+            ):Container(),
+            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+            Semantics(
+              label: "Filter Section",
+              header: true,
+              child: Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: vall,
+                  onChanged: (val) {
 
-                      // if(HelperClass.SemanticEnabled) {
-                      //   speak("${optionListItemBuildingName.toList()[val]} selected");
-                      // }
-                      //
-                      // selectedButton = optionListItemBuildingName.toList()[val];
-                      setState(() => newvall = val);
-                      //
-                      //
-                      // //_controller.text = optionListItemBuildingName.toList()[val];
-                      // search(optionListItemBuildingName.toList()[val]);
-                    },
-                    choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListItemBuildingNameNew.toList(),
-                      value: (i, v) => i,
-                      label: (i, v) => v,
-                    ),
+                    if(HelperClass.SemanticEnabled) {
+                      speak("${optionListForUI[val]} selected");
+                    }
 
-                    choiceBuilder: (item, i) {
-                      if(!item.selected){
-                        newvall = -1;
-                      }
-                      return DestinationPageChipsWidget(
-                        svgPath: '',
-                        text: optionListItemBuildingNameNew.toList()[i],
-                        onSelect: item.select!,
-                        selected: item.selected,
+                    selectedButton = optionListForUI[val];
+                    setState(() => vall = val);
+                    lastval = val;
 
-                        onTap: (String Text) {
-                          print("tapped$Text");
 
-                          if (Text.isNotEmpty) {
-                            search(_controller.text,wantToFilter: Text);
-                          }
-                          // else {
-                          //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                          //   _controller.text="";
-                          //   searchResults = [];
-                          //   searcCategoryhResults = [];
-                          //   newvall = -1;
-                          // }
-                        },
-                      );
-                    },
-                    direction: Axis.horizontal,
+                    _controller.text = optionListForUI[val];
+                    search(optionListForUI[val]);
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: optionListForUI,
+                    value: (i, v) => i,
+                    label: (i, v) => v,
                   ),
+
+                  choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      vall = -1;
+                    }
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
+                      text: optionListForUI[i],
+                      onSelect: item.select!,
+                      selected: item.selected,
+
+                      onTap: (String Text) {
+                        if (Text.isNotEmpty) {
+                          search(Text);
+                        } else {
+                          search(Text);
+                          _controller.text="";
+                          searchResults = [];
+                          searcCategoryhResults = [];
+                          vall = -1;
+                        }
+                      }, icon: _icons[i],
+                    );
+                  },
+                  direction: Axis.horizontal,
                 ),
-              ) : Container(),
-
-              SizedBox(height: 4,),
-              Divider(thickness: 6,color: Color(0xfff2f3f5)),
-              Flexible(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                      child: Semantics(
-                        label: "Search Results",
-                        header: true,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
-
-                        ),
-                      ),
-                  )),
-              if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
-
-                Column(
-                 children: [
-                   SizedBox(height: 16,),
-                   Padding(
-                     padding: const EdgeInsets.all(8.0),
-                     child: Image.asset('assets/noResults.png'),
-                   ),
-                   Text(
-                     'Sorry, No Results Found',
-                     textAlign: TextAlign.center,
-                     style: TextStyle(
-                       color: Colors.black,
-                       fontSize: 16,
-                       fontFamily: 'Roboto',
-                       fontWeight: FontWeight.w500,
-                     ),
-                   ),
-                   Text(
-                     ' Try something new  with different keywords',
-                     textAlign: TextAlign.center,
-                     style: TextStyle(
-                       color: Color(0xFFA1A1AA),
-                       fontSize: 14,
-                       fontFamily: 'Roboto',
-                       fontWeight: FontWeight.w400,
-                     ),
-                   )
-                 ]
-                )
-
-            ],
-          ) : Center(
-            child: CircularProgressIndicator(
-              color: Colors.red,
+              ),
             ),
+            !category && _controller.text.isNotEmpty ? Semantics(
+              header: true,
+              label: "Building Filter section",
+              child: Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: newvall,
+                  onChanged: (val) {
+
+                    // if(HelperClass.SemanticEnabled) {
+                    //   speak("${optionListItemBuildingName.toList()[val]} selected");
+                    // }
+                    //
+                    // selectedButton = optionListItemBuildingName.toList()[val];
+                    setState(() => newvall = val);
+                    //
+                    //
+                    // //_controller.text = optionListItemBuildingName.toList()[val];
+                    // search(optionListItemBuildingName.toList()[val]);
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: optionListItemBuildingNameNew.toList(),
+                    value: (i, v) => i,
+                    label: (i, v) => v,
+                  ),
+
+                  choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      newvall = -1;
+                    }
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
+                      text: optionListItemBuildingNameNew.toList()[i],
+                      onSelect: item.select!,
+                      selected: item.selected,
+
+                      onTap: (String Text) {
+                        print("tapped$Text");
+
+                        if (Text.isNotEmpty) {
+                          search(_controller.text,wantToFilter: Text);
+                        }
+                        // else {
+                        //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                        //   _controller.text="";
+                        //   searchResults = [];
+                        //   searcCategoryhResults = [];
+                        //   newvall = -1;
+                        // }
+                      }, icon: _icons[i],
+                    );
+                  },
+                  direction: Axis.horizontal,
+                ),
+              ),
+            ) : Container(),
+
+            SizedBox(height: 4,),
+            Divider(thickness: 6,color: Color(0xfff2f3f5)),
+            Flexible(
+                flex: 1,
+                child: SingleChildScrollView(
+                  child: Semantics(
+                    label: "Search Results",
+                    header: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
+
+                    ),
+                  ),
+                )),
+            if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+
+              Column(
+                  children: [
+                    SizedBox(height: 16,),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset('assets/noResults.png'),
+                    ),
+                    Text(
+                      'Sorry, No Results Found',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      ' Try something new  with different keywords',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFFA1A1AA),
+                        fontSize: 14,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )
+                  ]
+              )
+
+          ],
+        ) : Center(
+          child: CircularProgressIndicator(
+            color: Colors.red,
           ),
         ),
       ),

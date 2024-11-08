@@ -82,6 +82,8 @@ class Landmarks {
   String? name;
   List<Lifts>? lifts;
   List<Stairs>? stairs;
+  List<Escalator>? escalators;
+  List<Ramps>? ramps;
   List<Others>? others;
   String? createdAt;
   String? updatedAt;
@@ -107,6 +109,8 @@ class Landmarks {
         this.name,
         this.lifts,
         this.stairs,
+        this.ramps,
+        this.escalators,
         this.others,
         this.createdAt,
         this.updatedAt,
@@ -152,6 +156,18 @@ class Landmarks {
         stairs!.add(new Stairs.fromJson(v));
       });
     }
+    if (json['escalators'] != null) {
+      escalators = <Escalator>[];
+      json['escalators'].forEach((v) {
+        escalators!.add(new Escalator.fromJson(v));
+      });
+    }
+    if (json['ramps'] != null) {
+      ramps = <Ramps>[];
+      json['ramps'].forEach((v) {
+        ramps!.add(new Ramps.fromJson(v));
+      });
+    }
     if (json['others'] != null) {
       others = <Others>[];
       json['others'].forEach((v) {
@@ -187,6 +203,12 @@ class Landmarks {
     data['name'] = this.name;
     if (this.lifts != null) {
       data['lifts'] = this.lifts!.map((v) => v.toJson()).toList();
+    }
+    if (this.escalators != null) {
+      data['escalators'] = this.escalators!.map((v) => v.toJson()).toList();
+    }
+    if (this.ramps != null) {
+      data['ramps'] = this.ramps!.map((v) => v.toJson()).toList();
     }
     if (this.stairs != null) {
       data['stairs'] = this.stairs!.map((v) => v.toJson()).toList();
@@ -554,6 +576,56 @@ class Stairs {
   Stairs({this.name, this.distance, this.x, this.y});
 
   Stairs.fromJson(Map<dynamic, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+
+class Escalator {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Escalator({this.name, this.distance, this.x, this.y});
+
+  Escalator.fromJson(Map<dynamic, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+
+class Ramps {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Ramps({this.name, this.distance, this.x, this.y});
+
+  Ramps.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
     x = json['x'].toInt();

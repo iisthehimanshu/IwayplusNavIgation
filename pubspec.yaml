@@ -94,10 +94,8 @@ dependencies:
   wakelock_plus: ^1.2.7
   widget_to_marker:
   app_settings: ^5.1.1
-  connectivity_plus: ^3.0.5
-  new_version_plus: ^0.0.11
-  url_launcher: ^6.1.14
-
+  connectivity_plus: ^6.0.3
+  string_similarity: ^2.1.1
 
 
 

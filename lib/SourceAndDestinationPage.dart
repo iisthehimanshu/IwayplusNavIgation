@@ -180,131 +180,131 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          padding: EdgeInsets.only(top: 16),
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                height: 119,
-                width: screenWidth-32,
-                padding: EdgeInsets.only(top: 15,bottom: 15),
+    double statusBarHeight = MediaQuery.of(context).padding.top;
 
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      child: IconButton(onPressed: (){
-                        print("h2");
-                        Navigator.pop(context);
-                      }, icon: Semantics(label:"Back",child: Icon(Icons.arrow_back_ios_new,size: 24,))),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          FocusScope(
-                            autofocus: true,
-                            child: Focus(
-                              child: Semantics(
-                                label: "SourceName",
-                                child: InkWell(
-                                  child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(color: Color(0xffE2E2E2)),
-                                  ),
-                                    padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
-                                    child: Text(
-                                      SourceName,
-                                      style:  TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),),
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
-                                    ).then((value){
-                                      setState(() {
-                                        widget.SourceID = value;
-                                        print("dataPOpped:$value");
-                                        SourceName = widget.user?.key == value ? "Your current location":landmarkData.landmarksMap![value]!.name!;
-                                        if(widget.SourceID != "" && widget.DestinationID != ""){
-                                          print("h3");
-                                          Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                                        }
-                                      });
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 119,
+              width: screenWidth-32,
+              padding: EdgeInsets.only(top: 15,bottom: 15),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    child: IconButton(onPressed: (){
+                      print("h2");
+                      Navigator.pop(context);
+                    }, icon: Semantics(label:"Back",child: Icon(Icons.arrow_back_ios_new,size: 24,))),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        FocusScope(
+                          autofocus: true,
+                          child: Focus(
+                            child: Semantics(
+                              label: "SourceName",
+                              child: InkWell(
+                                child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                  padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
+                                  child: Text(
+                                    SourceName,
+                                    style:  TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),),
+                                onTap: (){
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
+                                  ).then((value){
+                                    setState(() {
+                                      widget.SourceID = value;
+                                      print("dataPOpped:$value");
+                                      SourceName = widget.user?.key == value ? "Your current location":landmarkData.landmarksMap![value]!.name!;
+                                      if(widget.SourceID != "" && widget.DestinationID != ""){
+                                        print("h3");
+                                        Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                                      }
                                     });
-                                  },
-                                ),
+                                  });
+                                },
+                              ),
 
-                              ),),
+                            ),),
 
 
+                        ),
+                        InkWell(
+                          child: Container(height:40,width:double.infinity,decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Color(0xffE2E2E2)),
                           ),
-                          InkWell(
-                            child: Container(height:40,width:double.infinity,decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                              padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
-                              child: Text(
-                                DestinationName,
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff282828),
-                                ),
-                                textAlign: TextAlign.left,
-                              ),),
-                            onTap: (){
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                              ).then((value){
-                                setState(() {
-                                  widget.DestinationID = value;
-                                  DestinationName = landmarkData.landmarksMap![value]!.name??landmarkData.landmarksMap![value]!.element!.subType!;
-                                  if(widget.SourceID != "" && widget.DestinationID != ""){
-                                    print("h4");
-                                    Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                                  }
-                                });
+                            padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
+                            child: Text(
+                              DestinationName,
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff282828),
+                              ),
+                              textAlign: TextAlign.left,
+                            ),),
+                          onTap: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                            ).then((value){
+                              setState(() {
+                                widget.DestinationID = value;
+                                DestinationName = landmarkData.landmarksMap![value]!.name??landmarkData.landmarksMap![value]!.element!.subType!;
+                                if(widget.SourceID != "" && widget.DestinationID != ""){
+                                  print("h4");
+                                  Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                                }
                               });
-                            },
-                          ),
-                        ],
-                      ),
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    Container(
-                      child: IconButton(onPressed: (){
-                        swap();
-                      }, icon: Semantics(label: "Swap Directions",child: Icon(Icons.swap_vert_circle_outlined,size: 24,))),
-                    ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    child: IconButton(onPressed: (){
+                      swap();
+                    }, icon: Semantics(label: "Swap Directions",child: Icon(Icons.swap_vert_circle_outlined,size: 24,))),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 16,
-              ),
-              Container(
-                width: screenWidth,
-                height: 1,
-                color: Color(0xffB3B3B3),
-              ),
-              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: recentResults,)))
-            ],
-          ),
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            Container(
+              width: screenWidth,
+              height: 1,
+              color: Color(0xffB3B3B3),
+            ),
+            Flexible(flex:1,child: SingleChildScrollView(child: Column(children: recentResults,)))
+          ],
         ),
       ),
     );

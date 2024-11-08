@@ -116,6 +116,7 @@ mixin LocaleData {
   static const String near='near';
   static const String unabletofindyourlocation='Unable to find your location. Scan nearby QR to know your location';
   static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
+  static const String changingaccessiblepath= 'Calculating new path.';
   static const String issss= 'is';
   static const String meteraway='meter away';
   static const String clickstarttonavigate= 'Click Start to Navigate';
@@ -362,7 +363,7 @@ mixin LocaleData {
     'Where you want to go?':'Where you want to go?',
     'Scan nearby QR to know your location':'Scan nearby QR to know your location',
     'You are going away from the path. Rerouting you to the destination':'You are going away from the path. Rerouting you to the destination',
-
+    'Calculating new path.':'Calculating new path.'
 
 
 
@@ -487,6 +488,7 @@ mixin LocaleData {
     'Where you want to go?':'आप कहाँ जाना चाहते हैं?',
     'Scan nearby QR to know your location':'अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें',
     'You are going away from the path. Rerouting you to the destination':'आप रास्ते से दूर जा रहे हैं। आपको आपकी मंजिल की दिशा में रीरूट किया जाया जा रहा है',
+    'Calculating new path.':'नया रास्ता खोजा जा रहा है'
   };
 
   static const Map<String, dynamic> TA = {

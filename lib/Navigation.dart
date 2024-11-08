@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/routeOption.dart';
 import '/singletonClass.dart';
 import '/websocket/NotifIcationSocket.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -44,8 +45,10 @@ import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/InitMarkerModel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
+import 'CONSTANTS.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'Elements/AccessiblePathButton.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'Elements/locales.dart';
 import 'MainScreen.dart';
@@ -505,8 +508,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         }
-        print("__markers");
-        print(markers);
 
         // markers.add(
         //   MapMarker(
@@ -557,8 +558,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       _markers
         ..clear()
         ..addAll(updatedMarkers);
-      print("_markers");
-      print(_markers);
 
       setState(() {
         _areMarkersLoading = false;
@@ -838,6 +837,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> setPdrThreshold() async {
+    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
+      peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
+      valleyThreshold = peakThreshold*-1;
+      return;
+    }
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
       String deviceModel = await DeviceInformation.deviceModel;
@@ -868,8 +872,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       } else if (manufacturer.toLowerCase().contains("apple")) {
-        peakThreshold = 10.111111;
-        valleyThreshold = -10.111111;
+        peakThreshold = 10.35;
+        valleyThreshold = -10.35;
       } else {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
@@ -988,7 +992,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         isPdrStop = true;
         isPdr = false;
       });
-
       PDRTimer!.cancel();
       for (final subscription in pdr) {
         subscription.cancel();
@@ -1047,9 +1050,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     .building.nonWalkable[user.Bid]![user.floor]!,
                 reroute);
             if (isvalid) {
-
               user.move(context).then((value) {
-
                 renderHere();
               });
             } else {
@@ -1150,6 +1151,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
           SingletonFunctionController.building.patchData[user.Bid]);
+      print("debugmarker ${markers[user.Bid]![0]}");
       markers[user.Bid]?[0] = customMarker.move(
           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
 
@@ -1501,8 +1503,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     user.locationName = userSetLocation.name;
 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
 
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
@@ -1958,21 +1960,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else {
           user.moveToFloor(userSetLocation.floor!);
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
-            anchor: Offset(0.5, 0.829),
-          ));
-          if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
         }
 
         SingletonFunctionController.building
@@ -2295,21 +2282,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           );
         } else {
           user.moveToFloor(userSetLocation.floor!);
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
-            anchor: Offset(0.5, 0.829),
-          ));
-          if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
         }
 
         SingletonFunctionController.building
@@ -2635,21 +2607,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           } else {
             user.moveToFloor(SingletonFunctionController
                 .apibeaconmap[nearestBeacon]!.floor!);
-            markers.putIfAbsent(user.Bid, () => []);
-            markers[user.Bid]?.add(Marker(
-              markerId: MarkerId("UserLocation"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userloc),
-              anchor: Offset(0.5, 0.829),
-            ));
-            if (kDebugMode) {
-              markers[user.Bid]?.add(Marker(
-                markerId: MarkerId("debug"),
-                position: LatLng(user.lat, user.lng),
-                icon: BitmapDescriptor.fromBytes(userlocdebug),
-                anchor: Offset(0.5, 0.829),
-              ));
-            }
           }
 
           if (widget.directLandID.length < 2) {
@@ -2785,7 +2742,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         });
       } else {
         if (speakTTS) {
-          speak("${LocaleData.unabletofindyourlocation.getString(context)}",
+          speak("Unable to find your location. Scan nearby QR to know your location",
               _currentLocale);
           showLocationDialog(context);
           SingletonFunctionController.building.qrOpened = true;
@@ -2794,6 +2751,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
     }
+    widget.directLandID = "";
+    widget.directsourceID = "";
+    _recenterMap();
   }
 
   bool _isExpanded = false;
@@ -2925,7 +2885,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => QRViewExample()),
+                                builder: (context) => QRViewExample(frmMainPage: false,)),
                           ).then((value) {
                             setState(() {
                               isLoading = false;
@@ -3104,9 +3064,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ));
       }
     });
+
+    Future.delayed(Duration(seconds: 1)).then((onValue){
+      _recenterMap();
+    });
   }
 
-  void autoreroute() {
+  void autoreroute({String? acc}) {
     Future.delayed(Duration(milliseconds: 100)).then((value) {
       fitPolygonInScreen(patch.first);
     });
@@ -3139,7 +3103,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         // }
 
         SingletonFunctionController.building.landmarkdata!.then((value) async {
-          await calculateroute(value.landmarksMap!).then((value) {
+          await calculateroute(value.landmarksMap!,accessibleby: acc??PathState.accessiblePath).then((value) {
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
               user.path = [
@@ -3217,7 +3181,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
   }
 
-  void reroute() {
+  void reroute({String? acc}) {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -3240,9 +3204,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     });
     FlutterBeep.beep();
-    speak("${LocaleData.reroute.getString(context)}", _currentLocale);
-
-    autoreroute();
+    if(acc!= null){
+      speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
+    }else{
+      speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+    }
+    if(acc != null){
+      PathState.accessiblePath = acc;
+      PathState.clearforaccessiblepath();
+    }
+    autoreroute(acc: acc);
   }
 
   Future<void> requestBluetoothConnectPermission() async {
@@ -6152,9 +6123,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
     }
 
-    bool microService = snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != null &&
-        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != null &&
-        snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != null;
+    bool microService = false;
 
     bool startTime = snapshot
         .data!
@@ -6529,7 +6498,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               child: IconButton(
                                   onPressed: () {
                                     HelperClass.shareContent(
-                                        "https://dev.iwayplus.in/#/iway-apps/ashoka.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=ashoka-navigation/id6505062168&playStore=com.iwayplus.accessibleashoka");
+                                        "https://dev.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
                                   },
                                   icon: Semantics(
                                       label: "Share route information",
@@ -6777,108 +6746,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         ),
                       )
                           : Container(),
-                      microService? Container(
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        padding: EdgeInsets.fromLTRB(0, 11, 0, 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  width: 1.0, color: Color(0xffebebeb))),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                                margin: EdgeInsets.only(right: 16),
-                                width: 32,
-                                height: 32,
-                                child: Icon(
-                                  Icons.accessible,
-                                  color: Color(0xff24B9B0),
-                                  size: 24,
-                                )),
-                            Column(
-                              children: [
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock != "null"?
-
-                                            "As your entry, washroom has ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numCubicles} toilet cubicles on ${
-                                                UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString()}'o clock "
-                                                    : tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.cubicleClock.toString())
-                                            }. ":""
-
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}, "
-                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}."
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock != "null"?
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numUrinals} urinals on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"?"${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString()}'o clock ": tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.urinalClock.toString())}. ":""
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: screenWidth - 100,
-                                  margin: EdgeInsets.only(top: 8),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff4a4545),
-                                        height: 25 / 16,
-                                      ),
-                                      children: [
-                                        TextSpan(
-                                            text:
-                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin!="null" && snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock != "null"?
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.numWashbasin} handwashing stations on ${UserCredentials().getuserNavigationModeSetting() != "Natural Direction"? "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString()}o'clock":tools.convertClockDirectionToLRFB(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.basinClock.toString())}.":""
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                          : Container(),
                     ],
                   ),
                 );
@@ -7110,9 +6977,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
         }
       }
-    } else if (accessibleby == "ramp") {
-      for (var ramp1 in landmark1.others!) {
-        for (var ramp2 in landmark2.others!) {
+    } else if (accessibleby == "Ramps") {
+      for (var ramp1 in landmark1.ramps!) {
+        for (var ramp2 in landmark2.ramps!) {
           if (ramp1.name == ramp2.name) {
             // Create a new Lifts object with x and y values from both input lists
 
@@ -7124,6 +6991,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 y2: ramp2.y,
                 d1: ramp1.distance,
                 d2: ramp2.distance));
+            break;
+          }
+        }
+      }
+    } else if (accessibleby == "Escalators") {
+      for (var escalator1 in landmark1.escalators!) {
+        for (var escalator2 in landmark2.escalators!) {
+          if (escalator1.name == escalator2.name) {
+            // Create a new Lifts object with x and y values from both input lists
+
+            commonLifts.add(CommonConnection(
+                name: escalator1.name,
+                x1: escalator1.x,
+                y1: escalator1.y,
+                x2: escalator2.x,
+                y2: escalator2.y,
+                d1: escalator1.distance,
+                d2: escalator2.distance));
             break;
           }
         }
@@ -7288,8 +7173,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
-      {String accessibleby = "Lifts"}) async {
+      {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
+
+
+    PathState.singleCellListPath.clear();
+    setState(() {
+      startingNavigation=false;
+    });
 
     if (PathState.sourcePolyID == "") {
       PathState.sourcePolyID = tools
@@ -7319,6 +7210,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             .lifts;
       }
     } catch (e) {}
+
+    if(accessibleby == null){
+      if(landmarksMap[PathState.sourcePolyID]!.escalators != null && landmarksMap[PathState.sourcePolyID]!.escalators!.any((escalator)=>(escalator.distance??100) <=45)){
+        print("acccccccheck $accessibleby");
+        accessibleby = "Escalators";
+        PathState.accessiblePath = "Escalators";
+      }else{
+        accessibleby = "Lifts";
+        PathState.accessiblePath = "Lifts";
+      }
+    }
+
     // circles.clear();
 
     //
@@ -7360,10 +7263,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
+        print("accccccc $accessibleby");
         List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,
-            accessibleby);
+            accessibleby??"Lifts");
 
         if (commonlifts.isEmpty) {
           setState(() {
@@ -7449,7 +7353,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.sourcePolyID]!,
                 buildingEntry!,
-                accessibleby);
+                accessibleby??"Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7505,7 +7409,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.destinationPolyID]!,
                 buildingEntry!,
-                accessibleby);
+                accessibleby??"Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7597,7 +7501,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               renderSource: false));
         } else if (destinationEntry.floor != PathState.destinationFloor) {
           List<dynamic> commonlifts = findCommonLifts(destinationEntry,
-              landmarksMap[PathState.destinationPolyID]!, accessibleby);
+              landmarksMap[PathState.destinationPolyID]!, accessibleby??"Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;
@@ -7687,7 +7591,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               renderDestination: false));
         } else if (PathState.sourceFloor != sourceEntry.floor) {
           List<dynamic> commonlifts = findCommonLifts(
-              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby);
+              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby??"Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;
@@ -8039,7 +7943,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
       if (liftName != null) {
-
+        print("object ${PathState.accessiblePath}");
         liftDirection = direction(
             -1,
             "Take ${liftName} and Go to ${nextFloor} Floor",
@@ -8059,9 +7963,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           icon: await CustomMarker(
               text:
               "To Floor ${nextFloor ?? floor}",
-              dirIcon: (sourceX == PathState.sourceX)
-                  ? Icons.elevator_outlined
-                  : Icons.elevator_outlined)
+              dirIcon:(PathState.accessiblePath=='Lifts')?
+
+              Icons.elevator_outlined:(PathState.accessiblePath=='Stairs')?Icons.escalator:(PathState.accessiblePath=='Ramps')?Icons.accessible:Icons.escalator_warning)
               .toBitmapDescriptor(
               logicalSize: const Size(150, 150),
               imageSize: const Size(300, 400)),
@@ -8086,6 +7990,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         .building.floor[buildingAllApi.getStoredString()]!,
                     bid: buildingAllApi.getStoredString());
               });
+            }else{
+              showRouteSelector(context,PathState.accessiblePath);
+
             }
           },
         ));}catch(e){
@@ -8128,6 +8035,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       "lift": liftDirection
     };
   }
+  void showRouteSelector(BuildContext context,String acc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+          child: RouteSelector(
+            onRouteSelected: (String selectedRoute) {
+              // Print the selected route ID
+            }, acc: acc,
+          ),
+        );
+      },
+    ).then((result) {
+      if (result != null) {
+        reroute(acc: result); // Handle the result after the dialog is closed
+      }
+    });
+  }
+
 
   Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
       {String? liftName}) async {
@@ -8314,8 +8242,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     );
   }
 
+  void addDirectionsWidget(){
+
+  }
+
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
+  List<Widget> directionWidgets = [];
   Widget routeDeatilPannel() {
     setState(() {
       semanticShouldBeExcluded = true;
@@ -8339,20 +8272,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    List<Widget> directionWidgets = [];
     directionWidgets.clear();
     if (PathState.directions.isNotEmpty) {
       if (PathState.directions[0].distanceToNextTurn != null) {
         directionWidgets.add(directionInstruction(
           direction: '${LocaleData.gostraight.getString(context)}',
-          distance: (PathState.directions[0].distanceToNextTurn! * 0.3048)
+          distance: (PathState.directions[0].distanceToNextTurn!)
               .ceil()
               .toString(),
           context: context,
         ));
       }
 
-      for (int i = 1; i < PathState.directions.length; i++) {
+      for (int i = 1; i < PathState.directions.length-1; i++) {
         if (!PathState.directions[i].isDestination) {
           if (PathState.directions[i].nearbyLandmark != null) {
             directionWidgets.add(directionInstruction(
@@ -8371,6 +8303,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   distance:
                   "${LocaleData.and.getString(context)} ${LocaleData.goto.getString(context)} ${PathState.directions[i].distanceToPrevTurn?.toInt() ?? 0.toInt()} ${LocaleData.floor.getString(context)}",
                   context: context));
+              i++;
             } else {
               directionWidgets.add(directionInstruction(
                 direction: PathState.directions[i].turnDirection == "Straight"
@@ -8417,8 +8350,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       time = distance / 120;
       time = time.ceil().toDouble();
 
-      distance = distance * 0.3048;
-      distance = double.parse(distance.toStringAsFixed(1));
+      distance = (distance * 0.3048).ceil().toDouble();
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
 
@@ -8430,11 +8362,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             height:
             PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
             width: screenWidth,
+            margin: EdgeInsets.only(left:8, right:8),
             padding: EdgeInsets.only(top: 15, right: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10.0),
-                bottomRight: Radius.circular(10.0),
+                bottomLeft: Radius.circular(16.0),
+                bottomRight: Radius.circular(16.0),
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
               ),
               boxShadow: [
                 BoxShadow(
@@ -8449,6 +8384,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             child: Semantics(
               child: Column(
                 children: [
+                  SizedBox(height: 7,),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -8623,212 +8559,49 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      Container(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                PathState.swap();
-                                PathState.path.clear();
-                                pathMarkers.clear();
-                                PathState.directions.clear();
-                                if (user.isnavigating == false) {
-                                  clearPathVariables();
-                                }
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  calculateroute(value.landmarksMap!);
-                                });
-                              });
-                            },
-                            icon: Semantics(
-                              label: "Swap location",
-                              child: Icon(
-                                Icons.swap_vert_circle_outlined,
-                                size: 24,
-                              ),
-                            )),
-                      ),
+                      // Container(
+                      //   child: IconButton(
+                      //       onPressed: () {
+                      //         setState(() {
+                      //           PathState.swap();
+                      //           PathState.path.clear();
+                      //           pathMarkers.clear();
+                      //           PathState.directions.clear();
+                      //           if (user.isnavigating == false) {
+                      //             clearPathVariables();
+                      //           }
+                      //           SingletonFunctionController
+                      //               .building.landmarkdata!
+                      //               .then((value) {
+                      //             calculateroute(value.landmarksMap!);
+                      //           });
+                      //         });
+                      //       },
+                      //       icon: Semantics(
+                      //         label: "Swap location",
+                      //         child: Icon(
+                      //           Icons.swap_vert_circle_outlined,
+                      //           size: 24,
+                      //         ),
+                      //       )),
+                      // ),
                     ],
                   ),
                   PathState.sourceFloor != PathState.destinationFloor
                       ? Container(
                     margin: EdgeInsets.only(top: 8, left: 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 112,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "Stairs";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "Stairs");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "Stairs"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.stairs,
-                                      color: PathState.accessiblePath ==
-                                          "Stairs"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Stairs",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "Stairs"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                        Container(
-                          width: 110,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "Lifts";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "Lifts");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "Lifts"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.elevator,
-                                      color: PathState.accessiblePath ==
-                                          "Lifts"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Lifts",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "Lifts"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                        Container(
-                          width: 112,
-                          margin: EdgeInsets.only(left: 8),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                PathState.accessiblePath = "ramp";
-                                PathState.clearforaccessiblepath();
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  try {
-                                    calculateroute(value.landmarksMap!,
-                                        accessibleby: "ramp");
-                                  } catch (e) {}
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.greenAccent,
-                                  backgroundColor:
-                                  PathState.accessiblePath == "ramp"
-                                      ? Color(0xff24B9B0)
-                                      : Colors.white,
-                                  elevation:
-                                  0 // Set the text color to black
-                              ),
-                              child: Center(
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.stairs_rounded,
-                                      color: PathState.accessiblePath ==
-                                          "ramp"
-                                          ? Colors.white
-                                          : Color(0xff24B9B0),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 3),
-                                      child: Text(
-                                        "Ramp",
-                                        style: TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                          PathState.accessiblePath ==
-                                              "ramp"
-                                              ? Colors.white
-                                              : Colors.black,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
+                          AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute),
+
+                        ],
+                      ),
                     ),
                   )
                       : Container(),
@@ -8932,7 +8705,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                       Semantics(
                                         excludeSemantics: true,
                                         child: Text(
-                                          "(${distance} m)",
+                                          "(~ ${distance.toInt()} m)",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
                                             fontSize: 18,
@@ -9192,23 +8965,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                               .patchData[
                                                           PathState
                                                               .sourceBid]);
+                                                      if(markers.isEmpty){
+                                                        print("markers were empty");
+                                                        markers.putIfAbsent(
+                                                            user.Bid,
+                                                                () => []);
+                                                        markers[user.Bid]
+                                                            ?.add(Marker(
+                                                          markerId: MarkerId(
+                                                              "UserLocation"),
+                                                          position: LatLng(
+                                                              val[0], val[1]),
+                                                          icon:
+                                                          BitmapDescriptor
+                                                              .fromBytes(
+                                                              userloc),
+                                                          anchor: Offset(
+                                                              0.5, 0.829),
+                                                        ));
+                                                      }else{
+                                                        print("markers were not empty");
+                                                      }
 
-                                                      markers.putIfAbsent(
-                                                          user.Bid,
-                                                              () => []);
-                                                      markers[user.Bid]
-                                                          ?.add(Marker(
-                                                        markerId: MarkerId(
-                                                            "UserLocation"),
-                                                        position: LatLng(
-                                                            val[0], val[1]),
-                                                        icon:
-                                                        BitmapDescriptor
-                                                            .fromBytes(
-                                                            userloc),
-                                                        anchor: Offset(
-                                                            0.5, 0.829),
-                                                      ));
 
                                                       val = tools.localtoglobal(
                                                           user.coordX
@@ -9248,23 +9026,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                       //   ),
                                                       // );
                                                     });
-                                                    alignMapToPath([
-                                                      user.lat,
-                                                      user.lng
-                                                    ], [
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lat,
-                                                      PathState
-                                                          .singleCellListPath[
-                                                      user.pathobj
-                                                          .index +
-                                                          1]
-                                                          .lng
-                                                    ]);
                                                   });
                                                   _isRoutePanelOpen = false;
 
@@ -9314,6 +9075,33 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                               .sourceBid);
                                                     });
                                                   }
+                                                  await Future.delayed(const Duration(milliseconds: 500));
+
+                                                  alignMapToPath([
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index]
+                                                        .lat,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index ]
+                                                        .lng
+                                                  ], [
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .lat,
+                                                    PathState
+                                                        .singleCellListPath[
+                                                    user.pathobj
+                                                        .index +
+                                                        2]
+                                                        .lng
+                                                  ]);
 
                                                   Future.delayed(Duration(seconds: 2)).then((onValue){
                                                     setState(() {
@@ -9452,7 +9240,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                     height: 22,
                                   ),
                                   Container(
-                                    height: screenHeight - 300,
+                                    height: screenHeight - 400,
+
                                     child: SingleChildScrollView(
                                       child: Column(
                                         children: [
@@ -10052,10 +9841,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
           }
 
-          print("val $val     ${tools.calculateBearing_fromLatLng(
-              LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
-              LatLng(user.Cellpath[index + 1].lat,
-                  user.Cellpath[index + 1].lng))}");
           //
           //
 
@@ -10095,7 +9880,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+
+    }
 
     return Visibility(
         visible: _isnavigationPannelOpen,
@@ -10232,6 +10019,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                             SingletonFunctionController
                                                 .building
                                                 .floor[user.Bid]]!);
+                                        List<LatLng> ll = [pathMarkers[user.Bid]![
+                                        SingletonFunctionController
+                                            .building
+                                            .floor[user.Bid]]!.first.position, pathMarkers[user.Bid]![
+                                        SingletonFunctionController
+                                            .building
+                                            .floor[user.Bid]]!.last.position];
+                                        setCameraPositionusingCoords(ll);
                                       }
                                     });
                                   },
@@ -11702,11 +11497,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 color: Colors.grey,
               ),
             ],
-            minHeight: 90,
-            snapPoint:
-            element.workingDays != null && element.workingDays!.length > 0
-                ? 220 / screenHeight
-                : 175 / screenHeight,
+            minHeight: 80,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -11716,23 +11507,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 6,
-                        margin: EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xffd9d9d9),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                      ),
-                    ],
-                  ),
+                  SizedBox(height: 6,),
                   Row(
                     children: [
                       Container(
+                        width: screenWidth-50,
                         margin: EdgeInsets.only(bottom: 20),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Semantics(
@@ -11828,6 +11607,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Set<Polygon> getCombinedPolygons() {
     if(cachedPolygon.isEmpty){
       Set<Polygon> polygons = Set();
+
       closedpolygons.forEach((key, value) {
         polygons = polygons.union(value);
       });
@@ -12517,23 +12297,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
   void _recenterMap() {
-    alignMapToPath([
-      user.lat,
-      user.lng
-    ], [
-      PathState.singleCellListPath[user.pathobj.index + 1].lat,
-      PathState.singleCellListPath[user.pathobj.index + 1].lng
-    ]);
-    print("value at recenter");
-    print([
-      user.lat,
-      user.lng
-    ]);
-    print([
-      PathState.singleCellListPath[user.pathobj.index + 1].lat,
-      PathState.singleCellListPath[user.pathobj.index + 1].lng
-    ]);
-    mapState.aligned = true;
+    try {
+      alignMapToPath([
+        PathState.singleCellListPath[user.pathobj.index].lat,
+        PathState.singleCellListPath[user.pathobj.index].lng
+      ], [
+        PathState.singleCellListPath[user.pathobj.index + 1].lat,
+        PathState.singleCellListPath[user.pathobj.index + 1].lng
+      ]);
+      mapState.aligned = true;
+    }catch(e){
+
+    }
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(
@@ -12643,6 +12418,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
     double screenWidthPixels = MediaQuery.of(context).size.width *
         MediaQuery.of(context).devicePixelRatio;
     double screenHeightPixel = MediaQuery.of(context).size.height *
@@ -12662,8 +12438,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 padding:
                 EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
-                // myLocationButtonEnabled: true,
-                // myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                myLocationEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
@@ -12679,9 +12455,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 //   )
                 // }
                 //     : {},
-          
+
                 polygons: getCombinedPolygons(),
-          
+
                 polylines: getCombinedPolylines(),
                 markers: getCombinedMarkers()
                     .union(_markers)
@@ -12689,18 +12465,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                     .union(Markers)
                     .union(restBuildingMarker),
                 buildingsEnabled: false,
-                compassEnabled: true,
+                compassEnabled: false,
                 rotateGesturesEnabled: true,
                 minMaxZoomPreference: MinMaxZoomPreference(2, 30),
                 onMapCreated: (controller) {
                   controller.setMapStyle(maptheme);
                   _googleMapController = controller;
                   zoomWhileWait(buildingAllApi.allBuildingID, controller);
-          
+
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  print(cameraPosition.zoom);
                   if (cameraPosition.zoom > 16.8) {
                     focusBuildingChecker(cameraPosition);
                   } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
@@ -12708,10 +12483,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   } else {
                     renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
-          
-          
-          
-          
+
+
+
+
                   if (cameraPosition.target.latitude.toStringAsFixed(5) !=
                       mapState.target.latitude.toStringAsFixed(5)) {
                     mapState.aligned = false;
@@ -12742,9 +12517,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   if (markerSldShown) {
                     _updateMarkers11(cameraPosition.zoom);
                   } else {
-          
+
                   }
-          
+
                   // _updateEntryMarkers11(cameraPosition.zoom);
                   //_markerLocations.clear();
                   //
@@ -12884,9 +12659,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0}"
+                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
                   //     "floor ${user.floor}\n"
-                  //     "userBid ${user.Bid} \n"
+                  //     // "userBid ${user.Bid} \n"
                   //     "index ${user.pathobj.index} \n"
                   //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
@@ -12934,6 +12709,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                           fontWeight: FontWeight.w500,
                           color: Color(0xff24b9b0),
                           height: 19 / 16,
+
                         ),
                       ),
                       activeIcon: Icons.close,
@@ -13182,10 +12958,40 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
+          //-------
+          // (user.isnavigating && recenter)? Positioned(
+          //   bottom: 145,
+          //   right: 220,
+          //   child: Container(
+          //     height: 50,
+          //     width: 150, // Adjust width as needed
+          //     child: ElevatedButton(
+          //       onPressed: () {
+          //         // Implement recenter logic here
+          //         _recenterMap();
+          //       },
+          //       style: ElevatedButton.styleFrom(
+          //         foregroundColor: Colors.white, // Background color
+          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(30), // Rounded corners
+          //         ),
+          //       ),
+          //       child: Row(
+          //         mainAxisSize: MainAxisSize.min,
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Icon(Icons.my_location, size: 24),
+          //           SizedBox(width: 8), // Space between icon and text
+          //           Text('Recenter', style: TextStyle(fontSize: 16)),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ):Container(),
           SafeArea(
             child: Stack(
-              children: [Positioned(
+              children:[Positioned(
                   top: 16,
                   left: 16,
                   right: 16,
@@ -13206,25 +13012,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                  ))],
+                  ))] ,
             ),
           ),
           FutureBuilder(
             future: SingletonFunctionController.building.landmarkdata,
             builder: (context, snapshot) {
               if (_isLandmarkPanelOpen) {
-                return landmarkdetailpannel(context, snapshot);
+                return SafeArea(child: landmarkdetailpannel(context, snapshot));
               } else {
                 return Semantics(excludeSemantics: true, child: Container());
               }
             },
           ),
-          routeDeatilPannel(),
-          feedbackPanel(context),
+          Padding(
+            padding: EdgeInsets.only(top:statusBarHeight),
+            child: routeDeatilPannel(),
+          ),
+          SafeArea(child: feedbackPanel(context)),
           navigationPannel(),
-          reroutePannel(context),
-          ExploreModePannel(),
-          detected ? Semantics(child: nearestLandmarkpannel()) : Container(),
+          SafeArea(child: reroutePannel(context)),
+          SafeArea(child: ExploreModePannel()),
+          detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           // FloatingActionButton(
           //     onPressed: (){
@@ -13323,6 +13132,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       ),
     );
   }
+
   //
   // int d=0;
   // bool listenToBin(){

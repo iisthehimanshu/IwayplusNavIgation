@@ -42,9 +42,10 @@ class _HomepageSearchState extends State<HomepageSearch> {
   ];
 
   List<IconData> _icons = [
-    Icons.home,
     Icons.wash_sharp,
-    Icons.school,
+    Icons.door_front_door_outlined,
+    Icons.desk_sharp,
+    Icons.elevator
   ];
   //double ratio=0.0;
   String currentSelectedFilter = "";
@@ -227,7 +228,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 label: (i, v) => v,
               ),
               choiceBuilder: (item, i) {
-                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked,);
+                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: _icons[i],);
               },
               direction: Axis.horizontal,
             ),

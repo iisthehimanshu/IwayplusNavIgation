@@ -113,7 +113,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: InkWell(
               onTap: () {
 
-                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.navigation');
+                _launchURL('https://play.google.com/store/apps/details?id=com.iwaymaps.navigation');
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -201,7 +201,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.navigation");
+                _shareContent("https://play.google.com/store/apps/details?id=com.iwaymaps.navigation");
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,

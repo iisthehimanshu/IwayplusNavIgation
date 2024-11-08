@@ -4719,12 +4719,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     return diff;
   }
 
+  int currentToggleFloor =0;
+
   Future<void> createRooms(polylinedata value, int floor) async {
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
     }
 
     closedpolygons[value.polyline!.buildingID!]?.clear();
+
+
 
     if (widget.directLandID.length < 2) {
       selectedroomMarker.clear();
@@ -5318,6 +5322,69 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
       }
     });
+
+    if(PathState.destinationPolyID != "") {
+
+    }
+    List<PolyArray>? FloorPolyArrays = SingletonFunctionController.building
+        .polyLineData!.polyline!.floors![PathState.destinationFloor]
+        .polyArray;
+    for (int i = 0; i < FloorPolyArrays!.length; i++) {
+      if (FloorPolyArrays[i].id == PathState.destinationPolyID) {
+        List<LatLng> coordinates = [];
+        for (Nodes node in FloorPolyArrays[i].nodes!) {
+          //coordinates.add(LatLng(node.lat!,node.lon!));
+          coordinates.add(LatLng(
+              tools.localtoglobal(
+                  node.coordx!,
+                  node.coordy!,
+                  SingletonFunctionController
+                      .building.patchData[SingletonFunctionController
+                      .building.polyLineData!.polyline!.buildingID])[0],
+              tools.localtoglobal(
+                  node.coordx!,
+                  node.coordy!,
+                  SingletonFunctionController
+                      .building.patchData[SingletonFunctionController
+                      .building.polyLineData!.polyline!.buildingID])[1]));
+        }
+
+
+        if (currentToggleFloor == PathState.destinationFloor) {
+          closedpolygons[value.polyline?.buildingID!]?.add(Polygon(
+              polygonId: PolygonId("$coordinates"),
+              points: coordinates,
+              fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+              strokeColor: Colors.blue,
+              strokeWidth: 2,
+              visible: true
+          ));
+        } else {
+          final Polygon? polygon = closedpolygons[value.polyline
+              ?.buildingID!]!.firstWhereOrNull(
+                (polygon) => polygon.points == coordinates,
+          );
+
+          if (polygon != null) {
+            // If the polygon exists, make it invisible by creating a new instance with visibility false.
+            closedpolygons[value.polyline?.buildingID!]!.remove(polygon);
+            closedpolygons[value.polyline?.buildingID!]!.add(
+              Polygon(
+                polygonId: polygon.polygonId,
+                points: polygon.points,
+                fillColor: polygon.fillColor,
+                strokeColor: polygon.strokeColor,
+                strokeWidth: polygon.strokeWidth,
+                visible: false,
+              ),
+            );
+          }
+        }
+      }
+      break;
+    }
+
+
     cachedPolygon.clear();
     return;
   }
@@ -7742,6 +7809,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
 
+  Set<Polygon> destinationLandmarkPolygon = Set();
+
+
   Future<Map<String, dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
@@ -7999,6 +8069,37 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         }
       }
+
+      // List<PolyArray>? FloorPolyArray = SingletonFunctionController.building.polyLineData!.polyline!.floors![PathState.destinationFloor].polyArray;
+      // FloorPolyArray?.forEach((value){
+      //   if(value.id == PathState.destinationPolyID){
+      //     List<LatLng> coordinates = [];
+      //     for (Nodes node in value.nodes!) {
+      //       //coordinates.add(LatLng(node.lat!,node.lon!));
+      //       coordinates.add(LatLng(
+      //           tools.localtoglobal(
+      //               node.coordx!,
+      //               node.coordy!,
+      //               SingletonFunctionController
+      //                   .building.patchData[SingletonFunctionController.building.polyLineData!.polyline!.buildingID])[0],
+      //           tools.localtoglobal(
+      //               node.coordx!,
+      //               node.coordy!,
+      //               SingletonFunctionController
+      //                   .building.patchData[SingletonFunctionController.building.polyLineData!.polyline!.buildingID])[1]));
+      //     }
+      //
+      //
+      //     destinationLandmarkPolygon.add(Polygon(
+      //       polygonId: PolygonId("$coordinates"),
+      //       points: coordinates,
+      //       fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+      //       strokeColor: Colors.blue,
+      //       strokeWidth: 2,
+      //       visible: true
+      //     ));
+      //   }
+      // });
 
       setState(() {
         if (renderDestination && liftName == null) {
@@ -8763,6 +8864,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                               onStart=false;
                                               startingNavigation=false;
                                             });
+
+                                            List<LatLng> coordinates = [];
+
+
+                                            final Polygon? polygon = closedpolygons[SingletonFunctionController.building.polyLineData!.polyline?.buildingID!]!.firstWhereOrNull(
+                                                  (polygon) => polygon.points == coordinates,
+                                            );
+                                            if (polygon != null) {
+                                              // If the polygon exists, make it invisible by creating a new instance with visibility false.
+                                              closedpolygons[SingletonFunctionController.building.polyLineData!.polyline?.buildingID!]!.remove(polygon);
+                                              closedpolygons[SingletonFunctionController.building.polyLineData!.polyline?.buildingID!]!.add(
+                                                Polygon(
+                                                  polygonId: polygon.polygonId,
+                                                  points: polygon.points,
+                                                  fillColor: polygon.fillColor,
+                                                  strokeColor: polygon.strokeColor,
+                                                  strokeWidth: polygon.strokeWidth,
+                                                  visible: false,
+                                                ),
+                                              );
+                                            }
+
                                           },
                                           icon: Semantics(
                                             label: "Close Navigation",
@@ -12456,7 +12579,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 // }
                 //     : {},
 
-                polygons: getCombinedPolygons(),
+                polygons: getCombinedPolygons().union(_polygon).union(destinationLandmarkPolygon),
 
                 polylines: getCombinedPolylines(),
                 markers: getCombinedMarkers()
@@ -12758,6 +12881,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                               _markerLocationsMap.clear();
                               _markerLocationsMapLanName.clear();
 
+                              currentToggleFloor = revfloorList[i];
+
                               SingletonFunctionController
                                   .building.floor[
                               buildingAllApi
@@ -12787,6 +12912,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                     bid: buildingAllApi
                                         .getStoredString());
                               });
+
+
                             },
                           );
                         },

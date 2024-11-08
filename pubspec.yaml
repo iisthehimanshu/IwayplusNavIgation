@@ -96,6 +96,10 @@ dependencies:
   app_settings: ^5.1.1
   connectivity_plus: ^6.0.3
   string_similarity: ^2.1.1
+  new_version_plus: ^0.0.12
+
+
+
 
 
 

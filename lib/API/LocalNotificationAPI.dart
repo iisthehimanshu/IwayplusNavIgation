@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
@@ -19,10 +20,8 @@ class LocalNotificationAPI{
 
 
   Future<List<NotificationsInLocalNotificationModule>> getNotifications()async {
-    ConnectivityResult connectivityResult = await (Connectivity().checkConnectivity());
+    List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
     bool deviceConnected = false;
-    print("connectivity result");
-    print(connectivityResult.name);
 
     // if(connectivityResult.contains(ConnectivityResult.mobile)){
     //   deviceConnected = true;

@@ -12891,14 +12891,12 @@ bool isAppinForeground=true;
                                 isLocalized = false;
                               })
                             });
-
                             _timer.cancel();
                           });
                         } else {
-                        //  _recenterMap();
+                       //  _recenterMap();
                           reroute();
                         }
-                        ;
                       },
                       child: Semantics(
                         label:

@@ -108,141 +108,95 @@ class UserState {
   //
   // }
 
-  Future<void> move(context) async {
+  Future<void> move(BuildContext context) async {
     List<Cell> turnPoints = [];
     try {
-      turnPoints =
-          tools.getCellTurnpoints(Cellpath);
-    }catch(_){}
+      turnPoints = tools.getCellTurnpoints(Cellpath);
+    } catch (_) {}
+
     moveOneStep(context);
-    print("stepSize $stepSize");
+
     for (int i = 1; i < stepSize.toInt(); i++) {
-      bool movementAllowed = true;
-
-      if (!MotionModel.isValidStep(
-          this, cols, rows, nonWalkable[Bid]![floor]!, reroute)) {
-
-        movementAllowed = false;
-      }
-
-      if (isnavigating) {
-        int prevX = Cellpath[pathobj.index - 1].x;
-        int prevY = Cellpath[pathobj.index - 1].y;
-        int nextX = Cellpath[pathobj.index + 1].x;
-        int nextY = Cellpath[pathobj.index + 1].y;
-        //non Walkable Check
-
-        //destination check
-        if (tools.calculateDistance([showcoordX, showcoordY], [pathobj.destinationX, pathobj.destinationY]) < 6) {
-          print('movementAllowed made false due to destination check where \n'
-              'Cellpath.length = ${Cellpath.length}\n'
-              'pathobj.index = ${pathobj.index}');
-          movementAllowed = false;
-        }
-
-        //turn check
-        try{
-          if(Bid == buildingAllApi.outdoorID){
-            for(var c in turnPoints){
-              if(c.bid == Bid && c.x == showcoordX && c.y == showcoordY){
-                print('movementAllowed made false due to turn check (try) where \n'
-                    'c.x = ${c.x} \n'
-                    'c.y = ${c.y}');
-                movementAllowed = false;
-              }
-            }
-          }else{
-            if (tools
-                .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
-              print('movementAllowed made false due to turn check (catch) where');
-              movementAllowed = false;
-            }
-          }}catch(_){}
-
-
-        //lift check
-
-        if (pathobj.connections[Bid]?[floor] ==
-            showcoordY * cols + showcoordX) {
-          print("movementAllowed made false due to lift check where \n"
-              "pathobj.connections[Bid]?[floor] = ${pathobj.connections[Bid]?[floor]} \n"
-              "showcoordY * cols + showcoordX = ${showcoordY * cols + showcoordX}");
-          movementAllowed = false;
-        }
-      }
-
-      if (movementAllowed) {
-        moveOneStep(context);
-      } else if (!movementAllowed) {
+      if (!isMovementAllowed(turnPoints)) {
         return;
       }
+      moveOneStep(context);
+    }
+  }
+
+  bool isMovementAllowed(List<Cell> turnPoints) {
+    bool movementAllowed = MotionModel.isValidStep(
+        this, cols, rows, nonWalkable[Bid]![floor]!, reroute);
+
+    if (!movementAllowed || !isnavigating) return movementAllowed;
+
+    int prevX = Cellpath[pathobj.index - 1].x;
+    int prevY = Cellpath[pathobj.index - 1].y;
+    int nextX = Cellpath[pathobj.index + 1].x;
+    int nextY = Cellpath[pathobj.index + 1].y;
+
+    if (tools.calculateDistance(
+        [showcoordX, showcoordY], [pathobj.destinationX, pathobj.destinationY]) < 6) {
+      print('Destination reached.');
+      return false;
     }
 
-    if (stepSize.toInt() != stepSize) {}
+    if (isTurnCheck(prevX, prevY, nextX, nextY, turnPoints) || isLiftCheck()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool isTurnCheck(int prevX, int prevY, int nextX, int nextY, List<Cell> turnPoints) {
+    if (Bid == buildingAllApi.outdoorID) {
+      for (var c in turnPoints) {
+        if (c.bid == Bid && c.x == showcoordX && c.y == showcoordY) {
+          print('Turn check failed.');
+          return true;
+        }
+      }
+    } else if (tools.isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
+      print('Indoor turn check failed.');
+      return true;
+    }
+    return false;
+  }
+
+  bool isLiftCheck() {
+    if (pathobj.connections[Bid]?[floor] == showcoordY * cols + showcoordX) {
+      print("Lift check failed.");
+      return true;
+    }
+    return false;
   }
 
   Future<void> moveOneStep(context) async {
-    wsocket.message["userPosition"]["X"] = coordX;
-    wsocket.message["userPosition"]["Y"] = coordY;
-    wsocket.message["userPosition"]["floor"] = floor;
+    userLogData();
 
     if (isnavigating) {
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      if((Bid == buildingAllApi.outdoorID && Cellpath[pathobj.index].bid == buildingAllApi.outdoorID) && tools.calculateDistance([showcoordX, showcoordY], [Cellpath[pathobj.index].x,Cellpath[pathobj.index].y])>=3){
+
+      if(isInOutdoor()){
+
         //destination check
-        List<Cell> turnPoints =
-        tools.getCellTurnpoints(Cellpath);
-        print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
-            [pathobj.destinationX, pathobj.destinationY]) <
-            6)}");
-        bool isSameFloorAndBuilding = floor == pathobj.destinationFloor &&
-            Bid == pathobj.destinationBid;
-
-        bool isNearLastTurnPoint = tools.calculateDistance(
-            [turnPoints.last.x, turnPoints.last.y],
-            [pathobj.destinationX, pathobj.destinationY]) < 10;
-
-        bool isAtLastTurnPoint = showcoordX == turnPoints.last.x &&
-            showcoordY == turnPoints.last.y;
-
-        bool isNearDestination = tools.calculateDistance(
-            [showcoordX, showcoordY],
-            [pathobj.destinationX, pathobj.destinationY]) < 6;
-
-        if (isSameFloorAndBuilding &&
-            ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination)) {
+        if (shouldTerminateNavigation()) {
           createCircle(lat, lng);
           closeNavigation();
+          return;
         }
 
+        Cell previousPoint = tools.findingprevpoint(Cellpath, pathobj.index);
+        double angleToNextCell = tools.calculateBearing(
+            [lat, lng],
+            [Cellpath[pathobj.index].lat, Cellpath[pathobj.index].lng]
+        );
 
-        Cell point = tools.findingprevpoint(Cellpath,pathobj.index);
-        double angle = tools.calculateBearing([lat,lng], [Cellpath[pathobj.index].lat, Cellpath[pathobj.index].lng]);
-        Map<String, double> data = tools.findslopeandintercept(point.x, point.y, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y);
-        List<int> transitionvalue = tools.findpoint(showcoordX,showcoordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
-        List<int>? trans ;
-        if(angle-(theta<0?theta+360 : theta) <= 45  && angle-(theta<0?theta+360 : theta) >= -45){
-          List<int> tv = tools.eightcelltransition(angle);
-          trans = [tv[0]+coordX , tv[1]+coordY];
-        }else{
-          List<int> tv = tools.eightcelltransition(theta);
-          trans = [tv[0]+coordX , tv[1]+coordY];
-        }
-        showcoordX = transitionvalue[0];
-        showcoordY = transitionvalue[1];
-        print("himanshu check $trans");
-        coordX = trans[0];
-        coordY = trans[1];
-        List<double> values = tools.moveLatLng([lat,lng], angle, 1);
-        lat = values[0];
-        lng = values[1];
-        path.insert(pathobj.index, (showcoordY*cols)+showcoordX);
-        Cellpath.insert(pathobj.index, Cell((showcoordY*cols)+showcoordX, showcoordX, showcoordY, tools.eightcelltransition, lat, lng, buildingAllApi.outdoorID, floor, cols,imaginedCell: true));
-        int d = tools
-            .calculateDistance([coordX, coordY], [showcoordX, showcoordY]).toInt();
-        if (d > 0) {
-          offPathDistance.add(d);
+        updateCoordinatesAndPath(previousPoint, angleToNextCell);
+
+        if (calculateOffPathDistance() > 0) {
+          offPathDistance.add(calculateOffPathDistance());
         }
         return;
       }
@@ -327,39 +281,11 @@ class UserState {
       //non Walkable Check
 
       //destination check
-      List<Cell> turnPoints =
-      tools.getCellTurnpoints(Cellpath);
-      print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
-          [pathobj.destinationX, pathobj.destinationY]) <
-          6)}");
-      bool isSameFloorAndBuilding = floor == pathobj.destinationFloor &&
-          Bid == pathobj.destinationBid;
-
-      bool isNearLastTurnPoint = tools.calculateDistance(
-          [turnPoints.last.x, turnPoints.last.y],
-          [pathobj.destinationX, pathobj.destinationY]) < 10;
-
-      bool isAtLastTurnPoint = showcoordX == turnPoints.last.x &&
-          showcoordY == turnPoints.last.y;
-
-      bool isNearDestination = tools.calculateDistance(
-          [showcoordX, showcoordY],
-          [pathobj.destinationX, pathobj.destinationY]) < 6;
-
-      if (isSameFloorAndBuilding &&
-          ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination)) {
+      if (shouldTerminateNavigation()) {
         createCircle(lat, lng);
         closeNavigation();
+        return;
       }
-      // if (floor == pathobj.destinationFloor &&
-      //     Bid == pathobj.destinationBid &&
-      //     showcoordX == turnPoints[turnPoints.length - 1].x &&
-      //     showcoordY == turnPoints[turnPoints.length - 1].y &&
-      //     tools.calculateDistance([showcoordX, showcoordY],
-      //             [pathobj.destinationX, pathobj.destinationY]) <
-      //         6) {
-      //
-      // }
 
       //turn check
       if (tools
@@ -488,6 +414,89 @@ class UserState {
       offPathDistance.add(d);
     }
   }
+
+  void userLogData() {
+    wsocket.message["userPosition"]["X"] = coordX;
+    wsocket.message["userPosition"]["Y"] = coordY;
+    wsocket.message["userPosition"]["floor"] = floor;
+  }
+
+  bool shouldTerminateNavigation() {
+    List<Cell> turnPoints = tools.getCellTurnpoints(Cellpath);
+    bool isSameFloorAndBuilding = floor == pathobj.destinationFloor &&
+        Bid == pathobj.destinationBid;
+
+    bool isNearLastTurnPoint = tools.calculateDistance(
+        [turnPoints.last.x, turnPoints.last.y],
+        [pathobj.destinationX, pathobj.destinationY]) < 10;
+
+    bool isAtLastTurnPoint = showcoordX == turnPoints.last.x &&
+        showcoordY == turnPoints.last.y;
+
+    bool isNearDestination = tools.calculateDistance(
+        [showcoordX, showcoordY],
+        [pathobj.destinationX, pathobj.destinationY]) < 6;
+
+    return (isSameFloorAndBuilding && ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination));
+  }
+
+  void updateCoordinatesAndPath(Cell previousPoint, double angle) {
+    Map<String, double> lineData = tools.findslopeandintercept(
+        previousPoint.x, previousPoint.y,
+        Cellpath[pathobj.index].x, Cellpath[pathobj.index].y
+    );
+
+    List<int> nextTransition = tools.findpoint(
+        showcoordX, showcoordY, Cellpath[pathobj.index].x,
+        Cellpath[pathobj.index].y, lineData
+    );
+
+    List<int>? correctedTransition = getCorrectedTransition(angle);
+
+    // Update main coordinates and display coordinates
+    showcoordX = nextTransition[0];
+    showcoordY = nextTransition[1];
+    coordX = correctedTransition[0];
+    coordY = correctedTransition[1];
+
+    List<double> newLatLng = tools.moveLatLng([lat, lng], angle, 1);
+    lat = newLatLng[0];
+    lng = newLatLng[1];
+
+    path.insert(pathobj.index, (showcoordY * cols) + showcoordX);
+    Cellpath.insert(pathobj.index, Cell(
+        (showcoordY * cols) + showcoordX,
+        showcoordX, showcoordY,
+        tools.eightcelltransition, lat, lng,
+        buildingAllApi.outdoorID, floor, cols,
+        imaginedCell: true
+    ));
+  }
+
+  List<int> getCorrectedTransition(double angle) {
+    List<int> transitionValues;
+
+    if ((angle - (theta < 0 ? theta + 360 : theta)).abs() <= 45) {
+      transitionValues = tools.eightcelltransition(angle);
+    } else {
+      transitionValues = tools.eightcelltransition(theta);
+    }
+
+    return [
+      transitionValues[0] + coordX,
+      transitionValues[1] + coordY
+    ];
+  }
+
+  int calculateOffPathDistance() {
+    return tools.calculateDistance([coordX, coordY], [showcoordX, showcoordY]).toInt();
+  }
+
+  bool isInOutdoor(){
+    return (Bid == buildingAllApi.outdoorID && Cellpath[pathobj.index].bid == buildingAllApi.outdoorID) && tools.calculateDistance([showcoordX, showcoordY], [Cellpath[pathobj.index].x,Cellpath[pathobj.index].y])>=3;
+  }
+
+
 
   String convertTolng(
       String msg, String? name, double agl, BuildContext context, double a,String nextBuildingName ,String currentBuildingName,

@@ -1210,7 +1210,7 @@ class tools {
     pCoord.add(user.coordY!);
     landmarksMap.forEach((key, value) {
 
-      if(user.Bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+      if(user.bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (user.floor == value.floor) {
 
           double d = 0.0;

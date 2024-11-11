@@ -925,9 +925,9 @@ bool isAppinForeground=true;
             //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
           );
         } else {
-          if (markers.length > 0 && markers[user.Bid] != null)
-            markers[user.Bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing, markers[user.Bid]![0]);
+          if (markers.length > 0 && markers[user.bid] != null)
+            markers[user.bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing, markers[user.bid]![0]);
         }
       });
     }, onError: (error) {
@@ -1067,11 +1067,11 @@ bool isAppinForeground=true;
             bool isvalid = MotionModel.isValidStep(
                 user,
                 SingletonFunctionController
-                    .building.floorDimenssion[user.Bid]![user.floor]![0],
+                    .building.floorDimenssion[user.bid]![user.floor]![0],
                 SingletonFunctionController
-                    .building.floorDimenssion[user.Bid]![user.floor]![1],
+                    .building.floorDimenssion[user.bid]![user.floor]![1],
                 SingletonFunctionController
-                    .building.nonWalkable[user.Bid]![user.floor]!,
+                    .building.nonWalkable[user.bid]![user.floor]!,
                 reroute);
             if (isvalid) {
               user.move(context).then((value) {
@@ -1100,15 +1100,15 @@ bool isAppinForeground=true;
   }
 
   Future<void> paintMarker(LatLng Location) async {
-    if (markers.containsKey(user.Bid)) {
-      markers[user.Bid]?.add(Marker(
+    if (markers.containsKey(user.bid)) {
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1116,15 +1116,15 @@ bool isAppinForeground=true;
         ));
       }
     } else {
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1174,10 +1174,10 @@ bool isAppinForeground=true;
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      print("debugmarker ${markers[user.Bid]![0]}");
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+          SingletonFunctionController.building.patchData[user.bid]);
+      print("debugmarker ${markers[user.bid]![0]}");
+      markers[user.bid]?[0] = customMarker.move(
+          LatLng(user.lat, user.lng), markers[user.bid]![0]);
 
       print("insideee this");
       print(onStart);
@@ -1211,9 +1211,9 @@ bool isAppinForeground=true;
 
       List<double> ldvalue = tools.localtoglobal(
           user.coordX.toInt(), user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      markers[user.Bid]?[1] = customMarker.move(
-          LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+          SingletonFunctionController.building.patchData[user.bid]);
+      markers[user.bid]?[1] = customMarker.move(
+          LatLng(ldvalue[0], ldvalue[1]), markers[user.bid]![1]);
     }
 
   }
@@ -1226,29 +1226,29 @@ bool isAppinForeground=true;
           bool isvalid = MotionModel.isValidStep(
               user,
               SingletonFunctionController
-                  .building.floorDimenssion[user.Bid]![user.floor]![0],
+                  .building.floorDimenssion[user.bid]![user.floor]![0],
               SingletonFunctionController
-                  .building.floorDimenssion[user.Bid]![user.floor]![1],
+                  .building.floorDimenssion[user.bid]![user.floor]![1],
               SingletonFunctionController
-                  .building.nonWalkable[user.Bid]![user.floor]!,
+                  .building.nonWalkable[user.bid]![user.floor]!,
               reroute);
           if (isvalid) {
             user.move(context).then((value) {
               setState(() {
                 if (markers.length > 0) {
-                  markers[user.Bid]![0] = customMarker.move(
+                  markers[user.bid]![0] = customMarker.move(
                       LatLng(
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
                               SingletonFunctionController
-                                  .building.patchData[user.Bid])[0],
+                                  .building.patchData[user.bid])[0],
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
                               SingletonFunctionController
-                                  .building.patchData[user.Bid])[1]),
-                      markers[user.Bid]![0]);
+                                  .building.patchData[user.bid])[1]),
+                      markers[user.bid]![0]);
                 }
               });
             });
@@ -1523,7 +1523,7 @@ bool isAppinForeground=true;
 
     mapState.target = LatLng(values[0], values[1]);
 
-    user.Bid = userSetLocation.buildingID!;
+    user.bid = userSetLocation.buildingID!;
     user.locationName = userSetLocation.name;
 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -1582,7 +1582,7 @@ bool isAppinForeground=true;
     UserState.lngCode = _currentLocale;
     UserState.reroute = reroute;
     UserState.closeNavigation = closeNavigation;
-    UserState.AlignMapToPath = alignMapToPath;
+    UserState.alignMapToPath = alignMapToPath;
     UserState.startOnPath = startOnPath;
     UserState.speak = speak;
     UserState.paintMarker = paintMarker;
@@ -1639,15 +1639,15 @@ bool isAppinForeground=true;
 
       // else {
       user.moveToFloor(userSetLocation.floor!);
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: LatLng(user.lat, user.lng),
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: LatLng(user.lat, user.lng),
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1664,7 +1664,7 @@ bool isAppinForeground=true;
       }
 
       SingletonFunctionController.building.landmarkdata!.then((value) {
-        createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+        createMarkers(value, userSetLocation!.floor!, bid: user.bid);
       });
     });
 
@@ -1713,12 +1713,12 @@ bool isAppinForeground=true;
           SingletonFunctionController.building.polyLineData!,
           SingletonFunctionController
               .building.floor[buildingAllApi.getStoredString()]!);
-      if (pathMarkers[user.Bid] != null &&
-          pathMarkers[user.Bid]![user.floor] != null) {
-        setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+      if (pathMarkers[user.bid] != null &&
+          pathMarkers[user.bid]![user.floor] != null) {
+        setCameraPosition(pathMarkers[user.bid]![user.floor]!);
       }
       if (markers.length > 0)
-        markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+        markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
       if (user.initialallyLocalised) {
         mapState.interaction = !mapState.interaction;
       }
@@ -1870,7 +1870,7 @@ bool isAppinForeground=true;
 
       mapState.target = LatLng(values[0], values[1]);
 
-      user.Bid = userSetLocation.buildingID!;
+      user.bid = userSetLocation.buildingID!;
       user.locationName = userSetLocation.name;
 
       //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -1926,7 +1926,7 @@ bool isAppinForeground=true;
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
-      UserState.AlignMapToPath = alignMapToPath;
+      UserState.alignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
@@ -1956,15 +1956,15 @@ bool isAppinForeground=true;
         markers.clear();
         //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
+          markers.putIfAbsent(user.bid, () => []);
+          markers[user.bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: LatLng(user.lat, user.lng),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1994,7 +1994,7 @@ bool isAppinForeground=true;
         }
 
         SingletonFunctionController.building.landmarkdata!.then((value) {
-          createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+          createMarkers(value, userSetLocation!.floor!, bid: user.bid);
         });
       });
 
@@ -2043,12 +2043,12 @@ bool isAppinForeground=true;
             SingletonFunctionController.building.polyLineData!,
             SingletonFunctionController
                 .building.floor[buildingAllApi.getStoredString()]!);
-        if (pathMarkers[user.Bid] != null &&
-            pathMarkers[user.Bid]![user.floor] != null) {
-          setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+        if (pathMarkers[user.bid] != null &&
+            pathMarkers[user.bid]![user.floor] != null) {
+          setCameraPosition(pathMarkers[user.bid]![user.floor]!);
         }
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -2192,7 +2192,7 @@ bool isAppinForeground=true;
 
       mapState.target = LatLng(values[0], values[1]);
 
-      user.Bid = userSetLocation.buildingID!;
+      user.bid = userSetLocation.buildingID!;
       user.locationName = userSetLocation.name;
 
       //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -2248,7 +2248,7 @@ bool isAppinForeground=true;
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
-      UserState.AlignMapToPath = alignMapToPath;
+      UserState.alignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
@@ -2278,15 +2278,15 @@ bool isAppinForeground=true;
         markers.clear();
         //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
+          markers.putIfAbsent(user.bid, () => []);
+          markers[user.bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: LatLng(user.lat, user.lng),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -2316,7 +2316,7 @@ bool isAppinForeground=true;
         }
 
         SingletonFunctionController.building.landmarkdata!.then((value) {
-          createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+          createMarkers(value, userSetLocation!.floor!, bid: user.bid);
         });
       });
 
@@ -2365,12 +2365,12 @@ bool isAppinForeground=true;
             SingletonFunctionController.building.polyLineData!,
             SingletonFunctionController
                 .building.floor[buildingAllApi.getStoredString()]!);
-        if (pathMarkers[user.Bid] != null &&
-            pathMarkers[user.Bid]![user.floor] != null) {
-          setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+        if (pathMarkers[user.bid] != null &&
+            pathMarkers[user.bid]![user.floor] != null) {
+          setCameraPosition(pathMarkers[user.bid]![user.floor]!);
         }
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -2515,7 +2515,7 @@ bool isAppinForeground=true;
 
         mapState.target = LatLng(values[0], values[1]);
 
-        user.Bid = SingletonFunctionController
+        user.bid = SingletonFunctionController
             .apibeaconmap[nearestBeacon]!.buildingID!;
         user.locationName =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.name;
@@ -2580,7 +2580,7 @@ bool isAppinForeground=true;
         UserState.lngCode = _currentLocale;
         UserState.reroute = reroute;
         UserState.closeNavigation = closeNavigation;
-        UserState.AlignMapToPath = alignMapToPath;
+        UserState.alignMapToPath = alignMapToPath;
         UserState.startOnPath = startOnPath;
         UserState.speak = speak;
         UserState.paintMarker = paintMarker;
@@ -2602,15 +2602,15 @@ bool isAppinForeground=true;
           markers.clear();
           //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
           if (render) {
-            markers.putIfAbsent(user.Bid, () => []);
-            markers[user.Bid]?.add(Marker(
+            markers.putIfAbsent(user.bid, () => []);
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("UserLocation"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
             if (kDebugMode) {
-              markers[user.Bid]?.add(Marker(
+              markers[user.bid]?.add(Marker(
                 markerId: MarkerId("debug"),
                 position: LatLng(user.lat, user.lng),
                 icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -2640,7 +2640,7 @@ bool isAppinForeground=true;
                 .apibeaconmap[nearestBeacon]!.buildingID!] =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
             createRooms(
-                SingletonFunctionController.building.polylinedatamap[user.Bid]!,
+                SingletonFunctionController.building.polylinedatamap[user.bid]!,
                 SingletonFunctionController
                     .apibeaconmap[nearestBeacon]!.floor!);
           }
@@ -2648,7 +2648,7 @@ bool isAppinForeground=true;
           SingletonFunctionController.building.landmarkdata!.then((value) {
             createMarkers(value,
                 SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!,
-                bid: user.Bid);
+                bid: user.bid);
           });
         });
 
@@ -2697,13 +2697,13 @@ bool isAppinForeground=true;
               SingletonFunctionController.building.polyLineData!,
               SingletonFunctionController
                   .building.floor[buildingAllApi.getStoredString()]!);
-          if (pathMarkers[user.Bid] != null &&
-              pathMarkers[user.Bid]![user.floor] != null) {
-            setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+          if (pathMarkers[user.bid] != null &&
+              pathMarkers[user.bid]![user.floor] != null) {
+            setCameraPosition(pathMarkers[user.bid]![user.floor]!);
           }
           if (markers.length > 0)
-            markers[user.Bid]?[0] =
-                customMarker.rotate(0, markers[user.Bid]![0]);
+            markers[user.bid]?[0] =
+                customMarker.rotate(0, markers[user.bid]![0]);
           if (user.initialallyLocalised) {
             mapState.interaction = !mapState.interaction;
           }
@@ -3072,15 +3072,15 @@ bool isAppinForeground=true;
 
     setState(() {
       markers.clear();
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: userlocation,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: userlocation,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -3134,26 +3134,26 @@ bool isAppinForeground=true;
                 ...PathState.path[PathState.sourceFloor]!,
                 ...PathState.path[PathState.destinationFloor]!,
               ];
-              user.Cellpath = PathState.singleCellListPath;
+              user.cellPath = PathState.singleCellListPath;
               user.pathobj.index = 0;
               user.isnavigating = true;
               user.temporaryExit = false;
               user.moveToStartofPath().then((value) {
                 setState(() {
                   if (markers.length > 0) {
-                    markers[user.Bid]?[0] = customMarker.move(
+                    markers[user.bid]?[0] = customMarker.move(
                         LatLng(
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
                                 SingletonFunctionController
-                                    .building.patchData[user.Bid])[0],
+                                    .building.patchData[user.bid])[0],
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
                                 SingletonFunctionController
-                                    .building.patchData[user.Bid])[1]),
-                        markers[user.Bid]![0]);
+                                    .building.patchData[user.bid])[1]),
+                        markers[user.bid]![0]);
                   }
                 });
               });
@@ -3222,9 +3222,9 @@ bool isAppinForeground=true;
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),
             user.coordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[0] = customMarker.move(
-            LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
+            SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(
+            LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
     FlutterBeep.beep();
@@ -6837,7 +6837,7 @@ bool isAppinForeground=true;
                             .landmarksMap![SingletonFunctionController
                             .building.selectedLandmarkID]!
                             .floor!;
-                        PathState.sourceBid = user.Bid;
+                        PathState.sourceBid = user.bid;
 
                         PathState.destinationBid = snapshot
                             .data!
@@ -7281,7 +7281,7 @@ bool isAppinForeground=true;
             .building.floor[buildingAllApi.getStoredString()] = user.floor;
 
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -8895,7 +8895,7 @@ bool isAppinForeground=true;
                                                   UserState
                                                       .closeNavigation =
                                                       closeNavigation;
-                                                  UserState.AlignMapToPath =
+                                                  UserState.alignMapToPath =
                                                       alignMapToPath;
                                                   UserState.startOnPath =
                                                       startOnPath;
@@ -8937,7 +8937,7 @@ bool isAppinForeground=true;
                                                   PathState
                                                       .sourceBid]![PathState
                                                       .sourceFloor]![1];
-                                                  user.Bid =
+                                                  user.bid =
                                                       PathState.sourceBid;
                                                   user.coordX =
                                                       PathState.sourceX;
@@ -8950,7 +8950,7 @@ bool isAppinForeground=true;
                                                   UserState
                                                       .closeNavigation =
                                                       closeNavigation;
-                                                  UserState.AlignMapToPath =
+                                                  UserState.alignMapToPath =
                                                       alignMapToPath;
                                                   UserState.startOnPath =
                                                       startOnPath;
@@ -8968,7 +8968,7 @@ bool isAppinForeground=true;
                                                   user.path = PathState
                                                       .singleListPath;
                                                   user.isnavigating = true;
-                                                  user.Cellpath = PathState
+                                                  user.cellPath = PathState
                                                       .singleCellListPath;
                                                   PathState
                                                       .singleCellListPath
@@ -9003,9 +9003,9 @@ bool isAppinForeground=true;
                                                           });
                                                         print("markers were empty");
                                                         markers.putIfAbsent(
-                                                            user.Bid,
+                                                            user.bid,
                                                                 () => []);
-                                                        markers[user.Bid]
+                                                        markers[user.bid]
                                                             ?.add(Marker(
                                                           markerId: MarkerId(
                                                               "UserLocation"),
@@ -9049,7 +9049,7 @@ bool isAppinForeground=true;
 
 
                                                       if (kDebugMode) {
-                                                        markers[user.Bid]
+                                                        markers[user.bid]
                                                             ?.add(Marker(
                                                           markerId: MarkerId(
                                                               "debug"),
@@ -9751,7 +9751,7 @@ bool isAppinForeground=true;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
         user.showcoordY.toInt(),
-        SingletonFunctionController.building.patchData[user.Bid]);
+        SingletonFunctionController.building.patchData[user.bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
@@ -9852,11 +9852,11 @@ bool isAppinForeground=true;
       //
       // }
 
-      if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
-        int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+      if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
+        int col = user.pathobj.numCols![user.bid]![user.floor]!;
 
         if (MotionModel.reached(user, col) == false &&
-            user.Bid == user.Cellpath[user.pathobj.index + 1].bid) {
+            user.bid == user.cellPath[user.pathobj.index + 1].bid) {
           List<int> a = [user.showcoordX, user.showcoordY];
           List<int> tval = tools.eightcelltransition(user.theta);
           //
@@ -9873,12 +9873,12 @@ bool isAppinForeground=true;
           int val = tools.calculateAngleSecond(a, b, c).toInt();
 
           try {
-            if (user.Bid == buildingAllApi.outdoorID) {
+            if (user.bid == buildingAllApi.outdoorID) {
               double a = user.theta<0?user.theta+360:user.theta;
               val = (tools.calculateBearing_fromLatLng(
-                  LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
-                  LatLng(user.Cellpath[index + 1].lat,
-                      user.Cellpath[index + 1].lng)) - a).toInt().abs();
+                  LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
+                  LatLng(user.cellPath[index + 1].lat,
+                      user.cellPath[index + 1].lng)) - a).toInt().abs();
 
               if(val<10 && val>-10){
                 val = 0;
@@ -10049,7 +10049,7 @@ bool isAppinForeground=true;
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
                                       PathState.sourceFloor = user.floor;
-                                      PathState.sourceBid = user.Bid;
+                                      PathState.sourceBid = user.bid;
                                       PathState.sourceLat = user.lat;
                                       PathState.sourceLng = user.lng;
                                       PathState.sourceName =
@@ -10060,19 +10060,19 @@ bool isAppinForeground=true;
                                       _isRoutePanelOpen = true;
                                       _isnavigationPannelOpen = false;
 
-                                      if (pathMarkers[user.Bid] != null) {
+                                      if (pathMarkers[user.bid] != null) {
                                         setCameraPosition(
-                                            pathMarkers[user.Bid]![
+                                            pathMarkers[user.bid]![
                                             SingletonFunctionController
                                                 .building
-                                                .floor[user.Bid]]!);
-                                        List<LatLng> ll = [pathMarkers[user.Bid]![
+                                                .floor[user.bid]]!);
+                                        List<LatLng> ll = [pathMarkers[user.bid]![
                                         SingletonFunctionController
                                             .building
-                                            .floor[user.Bid]]!.first.position, pathMarkers[user.Bid]![
+                                            .floor[user.bid]]!.first.position, pathMarkers[user.bid]![
                                         SingletonFunctionController
                                             .building
-                                            .floor[user.Bid]]!.last.position];
+                                            .floor[user.bid]]!.last.position];
                                         setCameraPositionusingCoords(ll);
                                       }
                                     });
@@ -10146,9 +10146,9 @@ bool isAppinForeground=true;
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
             user.showcoordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[0] = customMarker.move(
-            LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+            SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(
+            LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
       }
     });
   }
@@ -11642,7 +11642,7 @@ bool isAppinForeground=true;
     });
 
     // Always union the general Markers set at the end
-    if (SingletonFunctionController.building.floor[user.Bid] == user.floor) {
+    if (SingletonFunctionController.building.floor[user.bid] == user.floor) {
       markers.forEach((key, value) {
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
       });
@@ -11866,9 +11866,9 @@ bool isAppinForeground=true;
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+          SingletonFunctionController.building.patchData[user.bid]);
+      markers[user.bid]?[0] = customMarker.move(
+          LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
     }
     // });
     showFeedback = true;
@@ -12020,7 +12020,7 @@ bool isAppinForeground=true;
               .landmarksMap![
           SingletonFunctionController.building.selectedLandmarkID]!
               .floor!;
-          PathState.sourceBid = user.Bid;
+          PathState.sourceBid = user.bid;
 
           PathState.destinationBid = snapshot!
               .landmarksMap![
@@ -12675,12 +12675,12 @@ bool isAppinForeground=true;
                                   user,
                                   SingletonFunctionController
                                       .building.floorDimenssion[
-                                  user.Bid]![user.floor]![0],
+                                  user.bid]![user.floor]![0],
                                   SingletonFunctionController
                                       .building.floorDimenssion[
-                                  user.Bid]![user.floor]![1],
+                                  user.bid]![user.floor]![1],
                                   SingletonFunctionController.building
-                                      .nonWalkable[user.Bid]![user.floor]!,
+                                      .nonWalkable[user.bid]![user.floor]!,
                                   reroute);
                               if (isvalid) {
 
@@ -12704,7 +12704,7 @@ bool isAppinForeground=true;
 
                   Text("coord [${user.coordX},${user.coordY}] \n"
                       "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
+                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
                   // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
                       "floor ${user.floor}\n"
                       // "userBid ${user.Bid} \n"
@@ -12734,9 +12734,9 @@ bool isAppinForeground=true;
                             );
                           } else {
                             if (markers.length > 0)
-                              markers[user.Bid]?[0] = customMarker.rotate(
+                              markers[user.bid]?[0] = customMarker.rotate(
                                   compassHeading! - mapbearing,
-                                  markers[user.Bid]![0]);
+                                  markers[user.bid]![0]);
                           }
                         });
                       })

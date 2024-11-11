@@ -133,8 +133,10 @@ class UserState {
         //non Walkable Check
 
         //destination check
-        if (Cellpath.length - pathobj.index < 6) {
-
+        if (tools.calculateDistance([showcoordX, showcoordY], [pathobj.destinationX, pathobj.destinationY]) < 6) {
+          print('movementAllowed made false due to destination check where \n'
+              'Cellpath.length = ${Cellpath.length}\n'
+              'pathobj.index = ${pathobj.index}');
           movementAllowed = false;
         }
 
@@ -143,13 +145,16 @@ class UserState {
           if(Bid == buildingAllApi.outdoorID){
             for(var c in turnPoints){
               if(c.bid == Bid && c.x == showcoordX && c.y == showcoordY){
+                print('movementAllowed made false due to turn check (try) where \n'
+                    'c.x = ${c.x} \n'
+                    'c.y = ${c.y}');
                 movementAllowed = false;
               }
             }
           }else{
             if (tools
                 .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
-
+              print('movementAllowed made false due to turn check (catch) where');
               movementAllowed = false;
             }
           }}catch(_){}
@@ -159,7 +164,9 @@ class UserState {
 
         if (pathobj.connections[Bid]?[floor] ==
             showcoordY * cols + showcoordX) {
-
+          print("movementAllowed made false due to lift check where \n"
+              "pathobj.connections[Bid]?[floor] = ${pathobj.connections[Bid]?[floor]} \n"
+              "showcoordY * cols + showcoordX = ${showcoordY * cols + showcoordX}");
           movementAllowed = false;
         }
       }

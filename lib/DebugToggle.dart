@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DebugToggle extends StatefulWidget {
-  static bool Slider = false;
-  static bool StepButton = false;
-  static bool PDRIcon = false;
+  //always change only the first boolean value only
+  static bool Slider = kDebugMode?true:true;
+  static bool StepButton = kDebugMode?true:true;
+  static bool PDRIcon = kDebugMode?false:true;
   const DebugToggle({super.key});
 
   @override

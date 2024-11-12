@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
 import 'package:iwaymaps/navigationTools.dart';
@@ -391,7 +392,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= int.parse(threshold!)) {
+              highestweight >= int.parse(threshold!) && widget.user.Bid!=buildingAllApi.outdoorID) {
             widget.user.onConnection = false;
             //
             List<int> beaconcoord = [
@@ -407,15 +408,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             int? indexOnPath = null;
             int numCols = widget
                 .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
-            widget.user.Cellpath.forEach((node) {
+            widget.user.Cellpath.forEach((node){
               List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
               if (d1 < distanceFromPath) {
                 distanceFromPath = d1.toInt();
-                //
-                //
                 indexOnPath = widget.user.path.indexOf(node.node);
-                //
               }
             });
 

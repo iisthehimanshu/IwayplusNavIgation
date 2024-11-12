@@ -609,6 +609,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 400), // Adjust for smoother animation
+      vsync: this,
+    );
+
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
@@ -627,7 +632,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
-
       apiCalls(context);
     });
 
@@ -1039,6 +1043,10 @@ bool isAppinForeground=true;
   double filteredZ = 0;
   bool restartScanning = false;
 
+  List<double> orientationHistory = [];
+  int orientationWindowSize = 10;  // Number of readings for stability check
+  double orientationThreshold = 0.1;
+
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
@@ -1052,6 +1060,28 @@ bool isAppinForeground=true;
         filteredX = alpha * filteredX + (1 - alpha) * event.x;
         filteredY = alpha * filteredY + (1 - alpha) * event.y;
         filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+
+
+
+        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+        double orientation = atan2(filteredY, sqrt(filteredX * filteredX + filteredZ * filteredZ));
+
+        // Add orientation to history and check variability
+        orientationHistory.add(orientation);
+        if (orientationHistory.length > orientationWindowSize) {
+          orientationHistory.removeAt(0);  // Maintain a fixed window size
+
+          // Calculate standard deviation of orientation
+          double avgOrientation = orientationHistory.reduce((a, b) => a + b) / orientationWindowSize;
+          double orientationVariance = orientationHistory.fold(0, (sum, value) => sum + pow(value - avgOrientation, 2).toInt()) / orientationWindowSize;
+          double orientationStability = sqrt(orientationVariance);
+
+          // Suppress step detection if orientation is too variable
+          if (orientationStability > orientationThreshold) {
+            // Too random, assume the user is stationary or talking, ignore steps
+            return;
+          }
+        }
         // Compute magnitude of acceleration vector
         double magnitude = sqrt((filteredX * filteredX +
             filteredY * filteredY +
@@ -1166,56 +1196,77 @@ bool isAppinForeground=true;
   //     }
   //   });
   // }
+  Animation<LatLng>? _markerAnimation;
 
   void renderHere() async {
-    double screenHeight=MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (markers.length > 0) {
+
+    if (markers.isNotEmpty) {
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      print("debugmarker ${markers[user.Bid]![0]}");
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+          SingletonFunctionController.building.patchData[user.Bid]
+      );
 
-      print("insideee this");
-      print(onStart);
+      LatLng currentMarkerPosition = markers[user.Bid]![0].position;
+      LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
 
-      mapState.target = LatLng(lvalue[0], lvalue[1]);
+      // Define a smooth transition animation
+      _markerAnimation = LatLngTween(
+        begin: currentMarkerPosition,
+        end: newMarkerPosition,
+      ).animate(CurvedAnimation(
+        parent: _animationController!,
+        curve: Curves.easeInOut,
+      ));
+      // Start the animation
+      _animationController!.forward(from: 0);
+      _animationController!.addListener(() {
+        setState(() {
+          // Update marker position as animation progresses
+          markers[user.Bid]?[0] = customMarker.move(
+            _markerAnimation!.value,
+            markers[user.Bid]![0],
+          );
+        });
+      });
 
-      // Calculate the pixel position of the current center of the map
-      ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      mapState.target = newMarkerPosition;
 
-      // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-      int newY=0;
-      if(Platform.isAndroid){
-        newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-      }else{
-        newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-      }
-      // Adjust 300 as needed for how far you want the user at the bottom
+      // ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      //
+      // int newY = Platform.isAndroid
+      //     ? screenCenter.y - (screenHeight * 0.58).toInt()
+      //     : screenCenter.y - (screenHeight * 0.58).toInt();
+      //
+      // LatLng newCameraTarget = await _googleMapController.getLatLng(
+      //     ScreenCoordinate(x: screenCenter.x, y: newY)
+      // );
 
-      // Convert the new screen coordinate back to LatLng
-      LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
-      setState(() {
-        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
           CameraPosition(
-            target:(UserState.isTurn || onStart==false)?mapState.target:mapState.target,
+            target: (UserState.isTurn || onStart == false)
+                ? mapState.target
+                :  mapState.target,
             zoom: mapState.zoom,
-            bearing: mapState.bearing!??0,
+            bearing: mapState.bearing ?? 0,
             tilt: mapState.tilt,
           ),
-        ));
-      });
+        ),
+      );
 
       List<double> ldvalue = tools.localtoglobal(
           user.coordX.toInt(), user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      markers[user.Bid]?[1] = customMarker.move(
-          LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-    }
+          SingletonFunctionController.building.patchData[user.Bid]
+      );
 
+      markers[user.Bid]?[1] = customMarker.move(
+          LatLng(ldvalue[0], ldvalue[1]),
+          markers[user.Bid]![1]
+      );
+    }
   }
 
   void onStepCount() {
@@ -2652,7 +2703,15 @@ bool isAppinForeground=true;
           });
         });
 
+        List<nearestLandInfo> getallnearbylandmark=[];
+        await SingletonFunctionController.building.landmarkdata!.then((value) {
+          getallnearbylandmark = tools.localizefindAllNearbyLandmark(
+              SingletonFunctionController.apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        });
+
+
         double value = 0;
+        double value2 = 0;
         if (nearestLandInfomation != null) {
           value = tools.calculateAngle2(
               [user.coordX, user.coordY],
@@ -2662,21 +2721,39 @@ bool isAppinForeground=true;
                 nearestLandInfomation!.coordinateY!
               ]);
         }
-
+        double distBetweenLandmarks=0.0;
+        if(getallnearbylandmark.length>2){
+          distBetweenLandmarks=tools.calculateDistance([user.coordX,user.coordY], [getallnearbylandmark[1].coordinateX!,getallnearbylandmark[1].coordinateY!]);
+          value2 = tools.calculateAngle2(
+              [user.coordX, user.coordY],
+              newUserCord,
+              [
+                getallnearbylandmark[1].coordinateX!,
+                getallnearbylandmark[1].coordinateY!
+              ]);
+        }
         mapState.zoom = 22;
-
         if (value < 45) {
           value = value + 45;
+        }
+
+        if(value2<45){
+          value2=value2+45;
         }
         String? finalvalue = value == 0
             ? null
             : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
 
+        String? finalvalue2 = value2 == 0
+            ? null
+            : tools.angleToClocksForNearestLandmarkToBeacon(value2, context);
+
+        print("the two nerarby landmarks are ${finalvalue} ${finalvalue2}  ${getallnearbylandmark[1].name}  ${value2}");
+
         // double value =
         //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
         //
         // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-
         //
         //
         if (user.isnavigating == false && speakTTS) {
@@ -2708,7 +2785,6 @@ bool isAppinForeground=true;
             mapState.interaction = !mapState.interaction;
           }
           fitPolygonInScreen(patch.first);
-
           if (speakTTS) {
             if (finalvalue == null) {
               speak(
@@ -2718,12 +2794,19 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              speak(
-                  convertTolng(
-                      "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                      _currentLocale,
-                      finalvalue),
-                  _currentLocale);
+              if(distBetweenLandmarks<=20 && finalvalue2!=null){
+                speak(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale);
+              }else{
+                speak(
+                    convertTolng(
+                        "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                        _currentLocale,
+                        finalvalue),
+                    _currentLocale);
+              }
+
             }
           }
         } else {
@@ -2736,12 +2819,18 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              speak(
-                  convertTolng(
-                      "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                      _currentLocale,
-                      finalvalue),
-                  _currentLocale);
+              if(distBetweenLandmarks<=20 && finalvalue2!=null){
+                speak(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale);
+              }else{
+                speak(
+                    convertTolng(
+                        "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                        _currentLocale,
+                        finalvalue),
+                    _currentLocale);
+              }
             }
           }
         }
@@ -2755,7 +2844,7 @@ bool isAppinForeground=true;
             ),
           );
         }
-        Future.delayed(Duration(milliseconds: 3000)).then((value){
+        Future.delayed(Duration(milliseconds: 5000)).then((value){
           if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
             UserState.lowCompassAccuracy=true;
             speak(
@@ -11694,7 +11783,6 @@ bool isAppinForeground=true;
 
     return poly;
   }
-
   void _updateMarkers(double zoom) {
     if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
@@ -11778,7 +11866,6 @@ bool isAppinForeground=true;
       }
     }
   }
-
   void hideMarkers() {
     SingletonFunctionController.building.updateMarkers = false;
     Set<Marker> updatedMarkers = Set();
@@ -11788,12 +11875,10 @@ bool isAppinForeground=true;
     });
     Markers = updatedMarkers;
   }
-
   void showMarkers() {
     SingletonFunctionController.building.ignoredMarker.clear();
     SingletonFunctionController.building.updateMarkers = true;
   }
-
   void _updateBuilding(double zoom) {
     Set<Polygon> updatedclosedPolygon = Set();
     Set<Polygon> updatedpatchPolygon = Set();
@@ -11829,11 +11914,17 @@ bool isAppinForeground=true;
     destiName = destname;
 
     List<int> tv = tools.eightcelltransition(user.theta);
+    List<Cell> turnPoints =
+    tools.getCellTurnpoints(user.Cellpath);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks3(angle, context);
+    String direction2=tools.angleToClocks(angle, context);
+
+
+    print("direction:: ${direction} ${direction2}");
 
     flutterTts.pause().then((value) {
       speak(
@@ -11872,9 +11963,9 @@ bool isAppinForeground=true;
           LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
     }
     // });
-    showFeedback = true;
-    Future.delayed(Duration(seconds: 5));
-    _feedbackController.open();
+    // showFeedback = true;
+    // Future.delayed(Duration(seconds: 5));
+    // _feedbackController.open();
   }
 
   void onLandmarkVenueClicked(String ID,
@@ -13401,4 +13492,16 @@ class ChatMessageClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class LatLngTween extends Tween<LatLng> {
+  LatLngTween({required LatLng begin, required LatLng end}) : super(begin: begin, end: end);
+
+  @override
+  LatLng lerp(double t) {
+    return LatLng(
+      begin!.latitude + (end!.latitude - begin!.latitude) * t,
+      begin!.longitude + (end!.longitude - begin!.longitude) * t,
+    );
+  }
 }

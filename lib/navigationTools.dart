@@ -358,6 +358,33 @@ class tools {
     }
   }
 
+  static String angleToClocks4(double angle, context) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
+
+    if (angle >= 330 || angle <= 30) {
+      return (currentDir == 'Natural Direction') ? "on your Front" : "12 o'clock";
+    } else if (angle > 30 && angle <= 75) {
+      return (currentDir == 'Natural Direction') ? "on your Right" : "1 o'clock";
+    } else if (angle > 75 && angle <= 120) {
+      return (currentDir == 'Natural Direction') ? "on your Right" : "3 o'clock";
+    } else if (angle > 120 && angle <= 165) {
+      return (currentDir == 'Natural Direction') ? "on your Right" : "4 o'clock";
+    } else if (angle > 165 && angle <= 195) {
+      return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
+    } else if (angle > 195 && angle <= 240) {
+      return (currentDir == 'Natural Direction') ? "on your Left" : "8 o'clock";
+    } else if (angle > 240 && angle <= 285) {
+      return (currentDir == 'Natural Direction') ? "on your Left" : "9 o'clock";
+    } else if (angle > 285 && angle <= 330) {
+      return (currentDir == 'Natural Direction') ? "on your Left" : "10 o'clock";
+    } else {
+      return "Unknown";
+    }
+  }
+
   static String angleToClocks3(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
@@ -377,6 +404,7 @@ class tools {
       return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
     }
   }
+
 
   static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
     if (angle < 0) {

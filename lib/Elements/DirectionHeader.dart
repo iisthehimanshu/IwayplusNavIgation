@@ -59,9 +59,9 @@ class DirectionHeader extends StatefulWidget {
   }) {
     try {
       double angle = tools.calculateAngleBWUserandCellPath(
-          user.Cellpath[0],
-          user.Cellpath[1],
-          user.pathobj.numCols![user.Bid]![user.floor]!,
+          user.cellPath[0],
+          user.cellPath[1],
+          user.pathobj.numCols![user.bid]![user.floor]!,
           user.theta);
       direction = tools.angleToClocks(angle, context);
       if (direction == "Straight") {
@@ -141,7 +141,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue = "";
 
     if (widget.user.floor != widget.user.pathobj.destinationFloor &&
-        widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] ==
+        widget.user.pathobj.connections[widget.user.bid]?[widget.user.floor] ==
             (widget.user.showcoordY * UserState.cols +
                 widget.user.showcoordX)) {
       speak(
@@ -155,29 +155,29 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           _currentLocale,
           prevpause: true);
     } else if (widget
-        .user.pathobj.numCols![widget.user.Bid]![widget.user.floor] !=
+        .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
         null) {
-      turnPoints = tools.getTurnpoints_inCell(widget.user.Cellpath);
-      turnPoints.add(widget.user.Cellpath.last);
+      turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
+      turnPoints.add(widget.user.cellPath.last);
 
-      (widget.user.Cellpath.length % 2 == 0)
+      (widget.user.cellPath.length % 2 == 0)
           ? turnPoints
-          .add(widget.user.Cellpath[widget.user.Cellpath.length - 2])
+          .add(widget.user.cellPath[widget.user.cellPath.length - 2])
           : turnPoints
-          .add(widget.user.Cellpath[widget.user.Cellpath.length - 1]);
+          .add(widget.user.cellPath[widget.user.cellPath.length - 1]);
 
       List<Cell> remainingPath =
-      widget.user.Cellpath.sublist(widget.user.pathobj.index + 1);
+      widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
+          nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
       double angle = 0.0;
       if (widget.user.pathobj.index < widget.user.path.length - 1) {
         //
         angle = tools.calculateAngleBWUserandCellPath(
-            widget.user.Cellpath[widget.user.pathobj.index],
-            widget.user.Cellpath[widget.user.pathobj.index + 1],
-            widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,
+            widget.user.cellPath[widget.user.pathobj.index],
+            widget.user.cellPath[widget.user.pathobj.index + 1],
+            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
             widget.user.theta);
         //
       }
@@ -245,10 +245,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
     print("threshold");
-    threshold = (widget.user.building!.patchData[widget.user.Bid]!.patchData!
+    threshold = (widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold !=
         null)
-        ? widget.user.building!.patchData[widget.user.Bid]!.patchData!
+        ? widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold!
         : '5';
     print(threshold);
@@ -347,7 +347,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               Building.apibeaconmap[nearestBeacon]!.coordinateY!
             ];
             int distanceFromPath = 100000000;
-            widget.user.Cellpath.forEach((node) {
+            widget.user.cellPath.forEach((node) {
               if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
                   node.bid ==
                       Building.apibeaconmap[nearestBeacon]!.buildingID) {
@@ -407,8 +407,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             int distanceFromPath = 100000000;
             int? indexOnPath = null;
             int numCols = widget
-                .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
-            widget.user.Cellpath.forEach((node){
+                .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!;
+            widget.user.cellPath.forEach((node) {
               List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
               if (d1 < distanceFromPath) {
@@ -673,10 +673,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if (widget.user.floor == widget.user.pathobj.sourceFloor &&
         widget.user.pathobj.connections.isNotEmpty &&
         widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
-            widget.user.pathobj.connections[widget.user.Bid]
+            widget.user.pathobj.connections[widget.user.bid]
             ?[widget.user.pathobj.sourceFloor]) {
     } else if (widget.user.path.isNotEmpty &&
-        widget.user.Cellpath.length - 1 > widget.user.pathobj.index) {
+        widget.user.cellPath.length - 1 > widget.user.pathobj.index) {
       widget.user.pathobj.connections.forEach((key, value) {
         value.forEach((inkey, invalue) {
           if (widget.user.path[widget.user.pathobj.index] == invalue) {
@@ -685,7 +685,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       });
       List<Cell> remainingPath =
-      widget.user.Cellpath.sublist(widget.user.pathobj.index + 1);
+      widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
       //
       //
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
@@ -697,12 +697,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       //
 
       if (turnPoints
-          .contains(widget.user.Cellpath[widget.user.pathobj.index])) {
+          .contains(widget.user.cellPath[widget.user.pathobj.index])) {
         if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
           DirectionIndex = widget.user.pathobj.directions.indexWhere(
                   (element) =>
               element.node ==
-                  widget.user.Cellpath[widget.user.pathobj.index].node) +
+                  widget.user.cellPath[widget.user.pathobj.index].node) +
               1;
         }
         if (DirectionIndex >= widget.user.pathobj.directions.length) {
@@ -710,33 +710,33 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       }
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
+          nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
       double angle = 0.0;
       try {
         angle = tools.calculateAnglefifth(
-            widget.user.Cellpath[widget.user.pathobj.index].node,
-            widget.user.Cellpath[widget.user.pathobj.index + 1].node,
-            widget.user.Cellpath[widget.user.pathobj.index + 2].node,
-            widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+            widget.user.cellPath[widget.user.pathobj.index].node,
+            widget.user.cellPath[widget.user.pathobj.index + 1].node,
+            widget.user.cellPath[widget.user.pathobj.index + 2].node,
+            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
       } catch (e) {
         print("error to be solved later $e");
       }
       if (widget.user.pathobj.index != 0) {
         try {
           angle = tools.calculateAnglefifth(
-              widget.user.Cellpath[widget.user.pathobj.index - 1].node,
-              widget.user.Cellpath[widget.user.pathobj.index].node,
-              widget.user.Cellpath[widget.user.pathobj.index + 1].node,
+              widget.user.cellPath[widget.user.pathobj.index - 1].node,
+              widget.user.cellPath[widget.user.pathobj.index].node,
+              widget.user.cellPath[widget.user.pathobj.index + 1].node,
               widget
-                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         } catch (e) {
           print("problem to be solved later $e");
         }
       }
       double userangle = tools.calculateAngleBWUserandCellPath(
-          widget.user.Cellpath[widget.user.pathobj.index],
-          widget.user.Cellpath[widget.user.pathobj.index + 1],
-          widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,
+          widget.user.cellPath[widget.user.pathobj.index],
+          widget.user.cellPath[widget.user.pathobj.index + 1],
+          widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
 
       widget.direction = tools.angleToClocks(angle, widget.context) == "None"
@@ -758,32 +758,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = userdirection;
       }
 
-      int index = widget.user.Cellpath.indexOf(nextTurn);
+      int index = widget.user.cellPath.indexOf(nextTurn);
       //
       double a = 0;
       if (index + 1 == widget.user.path.length) {
-        if (widget.user.Cellpath[index - 2].bid ==
-            widget.user.Cellpath[index - 1].bid &&
-            widget.user.Cellpath[index - 1].bid ==
-                widget.user.Cellpath[index].bid) {
+        if (widget.user.cellPath[index - 2].bid ==
+            widget.user.cellPath[index - 1].bid &&
+            widget.user.cellPath[index - 1].bid ==
+                widget.user.cellPath[index].bid) {
           a = tools.calculateAnglefifth(
               widget.user.path[index - 2],
               widget.user.path[index - 1],
               widget.user.path[index],
               widget
-                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         }
       } else {
-        if (widget.user.Cellpath[index - 1].bid ==
-            widget.user.Cellpath[index].bid &&
-            widget.user.Cellpath[index].bid ==
-                widget.user.Cellpath[index + 1].bid) {
+        if (widget.user.cellPath[index - 1].bid ==
+            widget.user.cellPath[index].bid &&
+            widget.user.cellPath[index].bid ==
+                widget.user.cellPath[index + 1].bid) {
           a = tools.calculateAnglefifth(
               widget.user.path[index - 1],
               widget.user.path[index],
               widget.user.path[index + 1],
               widget
-                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         }
       }
 
@@ -835,7 +835,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               widget.user.path[widget.user.pathobj.index + 1],
               widget.user.path[widget.user.pathobj.index + 2],
               widget
-                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         } catch (e) {
           print("problem to be solved later $e");
         }
@@ -846,7 +846,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
         widget.user.move(context);
       } else if (nextTurn != turnPoints.last &&
-          widget.user.pathobj.connections[widget.user.Bid]
+          widget.user.pathobj.connections[widget.user.bid]
           ?[widget.user.floor] !=
               nextTurn &&
           (widget.distance / UserState.stepSize).ceil() == 7) {

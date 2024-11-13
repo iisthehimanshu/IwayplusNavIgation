@@ -4376,10 +4376,13 @@ bool isAppinForeground=true;
   }
 
   Set<Polygon> _polygon = Set();
-
+  PolygonId matchPolygonId = PolygonId("");
+  List<LatLng> matchPolygonPoints = [];
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,
       {Color? color}) async {
     selectedroomMarker.clear(); // Clear existing markers
+    matchPolygonId = PolygonId("$polygonPoints");
+    matchPolygonPoints = polygonPoints;
     _polygon.clear(); // Clear existing markers
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
@@ -4831,12 +4834,16 @@ bool isAppinForeground=true;
     return diff;
   }
 
+  int currentToggleFloor =0;
+
   Future<void> createRooms(polylinedata value, int floor) async {
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
     }
 
     closedpolygons[value.polyline!.buildingID!]?.clear();
+
+
 
     if (widget.directLandID.length < 2) {
       selectedroomMarker.clear();
@@ -5430,6 +5437,7 @@ bool isAppinForeground=true;
         }
       }
     });
+
     cachedPolygon.clear();
     return;
   }
@@ -6894,7 +6902,7 @@ bool isAppinForeground=true;
                       ),
                     ),
                     onPressed: () async {
-                      _polygon.clear();
+                      //_polygon.clear();
                       cachedPolygon.clear();
                       // circles.clear();
                       Markers.clear();
@@ -7854,6 +7862,8 @@ bool isAppinForeground=true;
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
 
+
+
   Future<Map<String, dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
@@ -8111,6 +8121,7 @@ bool isAppinForeground=true;
 
         }
       }
+
 
       setState(() {
         if (renderDestination && liftName == null) {
@@ -8565,6 +8576,7 @@ bool isAppinForeground=true;
                                     ?.add(temp!);
                                 pathMarkers.clear();
                               });
+                              _polygon.clear();
                             },
                             icon: Semantics(
                               label: "Back",
@@ -8901,6 +8913,8 @@ bool isAppinForeground=true;
                                               onStart=false;
                                               startingNavigation=false;
                                             });
+                                            _polygon.clear();
+
                                           },
                                           icon: Semantics(
                                             label: "Close Navigation",
@@ -11772,6 +11786,7 @@ bool isAppinForeground=true;
       polygons.union(blurPatch);
       polygons.union(patch);
       cachedPolygon = polygons;
+      print(polygons);
       return polygons;
     }
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
@@ -12618,7 +12633,7 @@ bool isAppinForeground=true;
                 // }
                 //     : {},
 
-                polygons: getCombinedPolygons(),
+                polygons: getCombinedPolygons().union(_polygon),
 
                 polylines: getCombinedPolylines(),
                 markers: getCombinedMarkers()
@@ -12912,13 +12927,32 @@ bool isAppinForeground=true;
                                 ? Colors.white
                                 : Color(0xff24b9b0),
                             onTap: () {
-                              _polygon.clear();
+                              if(revfloorList[i] == PathState.destinationFloor){
+                                _polygon.clear();
+                                _polygon.add(Polygon(
+                                  polygonId: PolygonId("$matchPolygonPoints"),
+                                  points: matchPolygonPoints,
+                                  fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+                                  strokeColor:Colors.blue,
+                                  strokeWidth: 2,
+                                ));
+                              }else{
+                                _polygon.clear();
+                              }
+
+
+                              //_polygon.clear();
+                              print("_polygon.length");
+                              print(_polygon.length);
+
                               cachedPolygon.clear();
                               circles.clear();
 
                               _markers.clear();
                               _markerLocationsMap.clear();
                               _markerLocationsMapLanName.clear();
+
+                              currentToggleFloor = revfloorList[i];
 
                               SingletonFunctionController
                                   .building.floor[
@@ -12949,6 +12983,8 @@ bool isAppinForeground=true;
                                     bid: buildingAllApi
                                         .getStoredString());
                               });
+
+
                             },
                           );
                         },

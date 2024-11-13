@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
@@ -16,15 +17,14 @@ class LocalNotificationAPI{
   String refreshToken = signInBox.get("refreshToken");
   final NotifiBox = LocalNotificationAPIDatabaseModelBOX.getData();
   Future<List<NotificationsInLocalNotificationModule>> getNotifications()async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
+    List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
     bool deviceConnected = false;
-    print("connectivityResult");
-    if(connectivityResult.contains(ConnectivityResult.mobile)){
-      deviceConnected = true;
-    }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
-      deviceConnected = true;
-    }
-    if(!deviceConnected){
+    // if(connectivityResult.contains(ConnectivityResult.mobile)){
+    //   deviceConnected = true;
+    // }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
+    //   deviceConnected = true;
+    // }
+    if(!deviceConnected && NotifiBox.containsKey("com.iwayplus.navigation")){
       print("LocalNotificationAPI DATA FROM DATABASE");
       Map<String, dynamic> responseBody = NotifiBox.get("com.iwaymaps.navigation")!.responseBody;
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);

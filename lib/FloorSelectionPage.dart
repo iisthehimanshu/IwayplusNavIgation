@@ -149,13 +149,38 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
               if(floor.isNotEmpty){
                 print(value.floor);
                 if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
-                  searchResults.add(SearchpageResults(name: "${value.name}",
-                    location: "Floor ${value.floor}, ${value
-                        .buildingName}, ${value.venueName}",
-                    onClicked: onVenueClicked,
-                    ID: value.properties!.polyId!,
-                    bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
+                  // print("--TRUE");
+                  // print("${ value.element!.subType!.toLowerCase()} ${filterText.toLowerCase()}");
+                  if(value.element!.subType != null && value.element!.subType!.toLowerCase().contains(filterText.toLowerCase())){
+                    print("--TRUE");
+                    searchResults.add(SearchpageResults(name: "${value.name}",
+                        location: "Floor ${value.floor}, ${value
+                            .buildingName}, ${value.venueName}",
+                        onClicked: onVenueClicked,
+                        ID: value.properties!.polyId!,
+                        bid: value.buildingID!,
+                        floor: value.floor!,
+                        coordX: value.doorX ?? value.coordinateX!,
+                        coordY: value.doorY ?? value.coordinateY!,
+                        accessible: value.element!.subType == "restRoom" &&
+                            value.properties!.washroomType == "Handicapped"
+                            ? "true"
+                            : "false"));
+                  }else if(searchResults.length < 10) {
+                    searchResults.add(SearchpageResults(name: "${value.name}",
+                        location: "Floor ${value.floor}, ${value
+                            .buildingName}, ${value.venueName}",
+                        onClicked: onVenueClicked,
+                        ID: value.properties!.polyId!,
+                        bid: value.buildingID!,
+                        floor: value.floor!,
+                        coordX: value.doorX ?? value.coordinateX!,
+                        coordY: value.doorY ?? value.coordinateY!,
+                        accessible: value.element!.subType == "restRoom" &&
+                            value.properties!.washroomType == "Handicapped"
+                            ? "true"
+                            : "false"));
+                  }
                 }else{
                   print("NO");
                 }
@@ -400,7 +425,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       child: Semantics(
                         header: true,
                         label: "Column",
-                          child: Column(children:searchResults,))
+                          child: Column(children:searchResults.reversed.toList(),))
                   )
               ),
 

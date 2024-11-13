@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'API/LocalNotificationAPI.dart';
 import 'APIMODELS/LocalNotificationAPIModel.dart';
+import 'Elements/HelperClass.dart';
 import 'Elements/Translator.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -92,77 +93,79 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget _buildNotificationList() {
+
     return ListView.builder(
       itemCount: notificationsList.length,
       padding: EdgeInsets.all(16),
       itemBuilder: (context, index) {
-        final notification = notificationsList[index];
+        final notification = notificationsList[notificationsList.length-index-1];
         print(notification.appId.runtimeType);
-        if(notification.appId == 'com.iwaymaps.navigation') {
-          return Card(
-            elevation: 1,
-            margin: EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        if(notification.appId == 'com.iwayplus.navigation') {
+          return Container(
+            margin: EdgeInsets.only(top: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Color(0xffEBEBEB),
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
-            child: InkWell(
-              onTap: () {
-                // Handle notification tap
-              },
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 35,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      alignment: Alignment.bottomCenter,
-                      child: Icon(
-                        Icons.notifications,
-                        color: Colors.blue,
-                        size: 30,
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
+            child: Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 8),
+                  padding: EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xffF5F5F5),
+                  ),
+                  child: Icon(
+                    Icons.notifications_none,
+                    color: Color(0xff000000),
+                    size: 25,
+                  ),
+                ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            notification.title ?? '',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                          Container(
+                            margin: EdgeInsets.only(top: 12, left: 18),
+                            child: Text(
+                              notification.title!,
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            notification.body ?? '',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
+                          Container(
+                            margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
+                            child: Text(
+                              HelperClass.truncateString(notification.body!, 40),
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff8d8c8c),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
-                          SizedBox(height: 8),
-                          // Text(
-                          //   _formatDate(),
-                          //   style: TextStyle(
-                          //     fontSize: 12,
-                          //     color: Colors.black45,
-                          //   ),
-                          // ),
                         ],
                       ),
-                    ),
-                  ],
+
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           );
         }else{

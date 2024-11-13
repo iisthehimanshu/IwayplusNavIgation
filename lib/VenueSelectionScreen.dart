@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import 'dart:collection';
 
 import 'dart:math';
@@ -28,7 +23,9 @@ import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/Building.dart';
@@ -72,13 +69,84 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     super.initState();
     //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
     NotificationSocket.receiveMessage();
-//startScan();
+    // checkForUpdate();
+    //startScan();
     getLocs();
 
     apiCall();
     print("venueHashMap");
     print(venueHashMap);
   }
+
+  bool _updateAvailable = false;
+  bool _checkingForUpdate = true;
+  String? currentVersion = "";
+
+  Future<void> checkForUpdate() async {
+    final newVersion = NewVersionPlus(
+      androidId: 'com.iwayplus.navigation',
+      iOSId: 'com.iwayplus.navigation',
+    );
+
+    try {
+      final status = await newVersion.getVersionStatus();
+      print("status");
+      print(status!.canUpdate);
+      setState(() {
+        currentVersion = status?.localVersion;
+        _updateAvailable = status != null && status.canUpdate;
+        _checkingForUpdate = false;
+      });
+
+      // Show dialog if update is available
+      if (_updateAvailable) {
+        _showUpdateDialog();
+      }
+
+    } catch (e) {
+      print('Error checking for updates: $e');
+      setState(() {
+        _checkingForUpdate = false;
+      });
+    }
+  }
+
+  // Function to show update dialog
+  void _showUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Update Available"),
+          content: Text("A new version of the app is available. Please update to the latest version."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Update Now"),
+              onPressed: () async {
+                // Add your app update logic here
+                final url = Theme.of(context).platform ==
+                    TargetPlatform.iOS
+                    ? 'https://apps.apple.com/in/app/iwaymaps/id6478580371'
+                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.navigation';
+                if (await canLaunch(url)) {
+                  await launch(url);
+                } else {
+                  print('Could not launch $url');
+                }
+              },
+            ),
+            TextButton(
+              child: Text("Close"),
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   void startScan(){
     FlutterBluePlus.startScan();

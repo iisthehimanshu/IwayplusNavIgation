@@ -50,4 +50,13 @@ class customMarker {
   static Polygon Polygonvisibility(bool visible , Polygon polygon ) {
     return polygon.copyWith(visibleParam: visible);
   }
+
+  static Polyline extendPolyline(Polyline polyline, List<LatLng> points) {
+    return Polyline(
+      polylineId: polyline.polylineId,
+      points: points,
+      color: polyline.color,
+      width: polyline.width,
+    );
+  }
 }

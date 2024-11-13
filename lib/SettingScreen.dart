@@ -7,14 +7,7 @@ import 'package:hive/hive.dart';
 
 import 'Elements/UserCredential.dart';
 import 'Elements/locales.dart';
-
 // import '../../Elements/locales.dart';
-
-
-
-
-
-
 class SettingScreen extends StatefulWidget {
   @override
   State<SettingScreen> createState() => _SettingScreenState();

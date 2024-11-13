@@ -148,7 +148,7 @@ class Navigation extends StatefulWidget {
   State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
+class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
   MapState mapState = new MapState();
   Timer? PDRTimer;
   Timer? _exploreModeTimer;
@@ -174,6 +174,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   Map<String, List<Marker>> markers = Map();
   // Building SingletonFunctionController.building = Building(floor: Map(), numberOfFloors: Map());
   Map<String, Map<int, Set<gmap.Polyline>>> singleroute = {};
+  Map<String, Map<int, Set<gmap.Polyline>>> pathCovered = {};
   Map<int, Set<Marker>> dottedSingleRoute = {};
   // BLueToothClass SingletonFunctionController.btadBLueToothClass();
   bool _isLandmarkPanelOpen = false;
@@ -586,6 +587,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
+    WidgetsBinding.instance.addObserver(this);
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
@@ -608,6 +610,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 400), // Adjust for smoother animation
+      vsync: this,
+    );
+
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
@@ -626,7 +633,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
-
       apiCalls(context);
     });
 
@@ -670,16 +676,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }),
       );
     } catch (E) {}
-
-
     // fetchlist();
     // filterItems();
   }
-
   void initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
+    }
+  }
+bool isAppinForeground=true;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      print("App is in the background");
+      if(user.isnavigating){
+        StopPDR();
+        setState(() {
+          isAppinForeground=false;
+        });
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      print("App is in the foreground");
+      if(user.isnavigating){
+        setState(() {
+          isAppinForeground=true;
+        });
+      }
     }
   }
 
@@ -904,9 +930,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
           );
         } else {
-          if (markers.length > 0 && markers[user.Bid] != null)
-            markers[user.Bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing, markers[user.Bid]![0]);
+          if (markers.length > 0 && markers[user.bid] != null)
+            markers[user.bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing, markers[user.bid]![0]);
         }
       });
     }, onError: (error) {
@@ -978,7 +1004,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       setState(() {
         isPdr = true;
       });
-      pdrstepCount();
+      if(isAppinForeground){
+        pdrstepCount();
+      }
+
       // onStepCount();
     });
   }
@@ -1015,6 +1044,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   double filteredZ = 0;
   bool restartScanning = false;
 
+  List<double> orientationHistory = [];
+  int orientationWindowSize = 10;  // Number of readings for stability check
+  double orientationThreshold = 0.1;
+
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
@@ -1028,6 +1061,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         filteredX = alpha * filteredX + (1 - alpha) * event.x;
         filteredY = alpha * filteredY + (1 - alpha) * event.y;
         filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+
+
+
+        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+        double orientation = atan2(filteredY, sqrt(filteredX * filteredX + filteredZ * filteredZ));
+
+        // Add orientation to history and check variability
+        orientationHistory.add(orientation);
+        if (orientationHistory.length > orientationWindowSize) {
+          orientationHistory.removeAt(0);  // Maintain a fixed window size
+
+          // Calculate standard deviation of orientation
+          double avgOrientation = orientationHistory.reduce((a, b) => a + b) / orientationWindowSize;
+          double orientationVariance = orientationHistory.fold(0, (sum, value) => sum + pow(value - avgOrientation, 2).toInt()) / orientationWindowSize;
+          double orientationStability = sqrt(orientationVariance);
+
+          // Suppress step detection if orientation is too variable
+          if (orientationStability > orientationThreshold) {
+            // Too random, assume the user is stationary or talking, ignore steps
+            return;
+          }
+        }
         // Compute magnitude of acceleration vector
         double magnitude = sqrt((filteredX * filteredX +
             filteredY * filteredY +
@@ -1043,11 +1098,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             bool isvalid = MotionModel.isValidStep(
                 user,
                 SingletonFunctionController
-                    .building.floorDimenssion[user.Bid]![user.floor]![0],
+                    .building.floorDimenssion[user.bid]![user.floor]![0],
                 SingletonFunctionController
-                    .building.floorDimenssion[user.Bid]![user.floor]![1],
+                    .building.floorDimenssion[user.bid]![user.floor]![1],
                 SingletonFunctionController
-                    .building.nonWalkable[user.Bid]![user.floor]!,
+                    .building.nonWalkable[user.bid]![user.floor]!,
                 reroute);
             if (isvalid) {
               user.move(context).then((value) {
@@ -1076,15 +1131,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   }
 
   Future<void> paintMarker(LatLng Location) async {
-    if (markers.containsKey(user.Bid)) {
-      markers[user.Bid]?.add(Marker(
+    if (markers.containsKey(user.bid)) {
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1092,15 +1147,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         ));
       }
     } else {
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: Location,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1142,56 +1197,77 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
   //     }
   //   });
   // }
+  Animation<LatLng>? _markerAnimation;
 
   void renderHere() async {
-    double screenHeight=MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (markers.length > 0) {
+
+    if (markers.isNotEmpty) {
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      print("debugmarker ${markers[user.Bid]![0]}");
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+          SingletonFunctionController.building.patchData[user.bid]
+      );
 
-      print("insideee this");
-      print(onStart);
+      LatLng currentMarkerPosition = markers[user.bid]![0].position;
+      LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
 
-      mapState.target = LatLng(lvalue[0], lvalue[1]);
+      // Define a smooth transition animation
+      _markerAnimation = LatLngTween(
+        begin: currentMarkerPosition,
+        end: newMarkerPosition,
+      ).animate(CurvedAnimation(
+        parent: _animationController!,
+        curve: Curves.easeInOut,
+      ));
+      // Start the animation
+      _animationController!.forward(from: 0);
+      _animationController!.addListener(() {
+        setState(() {
+          // Update marker position as animation progresses
+          markers[user.bid]?[0] = customMarker.move(
+            _markerAnimation!.value,
+            markers[user.bid]![0],
+          );
+        });
+      });
 
-      // Calculate the pixel position of the current center of the map
-      ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      mapState.target = newMarkerPosition;
 
-      // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-      int newY=0;
-      if(Platform.isAndroid){
-        newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-      }else{
-        newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-      }
-      // Adjust 300 as needed for how far you want the user at the bottom
+      // ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      //
+      // int newY = Platform.isAndroid
+      //     ? screenCenter.y - (screenHeight * 0.58).toInt()
+      //     : screenCenter.y - (screenHeight * 0.58).toInt();
+      //
+      // LatLng newCameraTarget = await _googleMapController.getLatLng(
+      //     ScreenCoordinate(x: screenCenter.x, y: newY)
+      // );
 
-      // Convert the new screen coordinate back to LatLng
-      LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: screenCenter.x, y: newY));
-      setState(() {
-        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
           CameraPosition(
-            target:(UserState.isTurn || onStart==false)?mapState.target:mapState.target,
+            target: (UserState.isTurn || onStart == false)
+                ? mapState.target
+                :  mapState.target,
             zoom: mapState.zoom,
-            bearing: mapState.bearing!??0,
+            bearing: mapState.bearing ?? 0,
             tilt: mapState.tilt,
           ),
-        ));
-      });
+        ),
+      );
 
       List<double> ldvalue = tools.localtoglobal(
           user.coordX.toInt(), user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      markers[user.Bid]?[1] = customMarker.move(
-          LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-    }
+          SingletonFunctionController.building.patchData[user.bid]
+      );
 
+      markers[user.bid]?[1] = customMarker.move(
+          LatLng(ldvalue[0], ldvalue[1]),
+          markers[user.bid]![1]
+      );
+    }
   }
 
   void onStepCount() {
@@ -1202,29 +1278,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           bool isvalid = MotionModel.isValidStep(
               user,
               SingletonFunctionController
-                  .building.floorDimenssion[user.Bid]![user.floor]![0],
+                  .building.floorDimenssion[user.bid]![user.floor]![0],
               SingletonFunctionController
-                  .building.floorDimenssion[user.Bid]![user.floor]![1],
+                  .building.floorDimenssion[user.bid]![user.floor]![1],
               SingletonFunctionController
-                  .building.nonWalkable[user.Bid]![user.floor]!,
+                  .building.nonWalkable[user.bid]![user.floor]!,
               reroute);
           if (isvalid) {
             user.move(context).then((value) {
               setState(() {
                 if (markers.length > 0) {
-                  markers[user.Bid]![0] = customMarker.move(
+                  markers[user.bid]![0] = customMarker.move(
                       LatLng(
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
                               SingletonFunctionController
-                                  .building.patchData[user.Bid])[0],
+                                  .building.patchData[user.bid])[0],
                           tools.localtoglobal(
                               user.showcoordX.toInt(),
                               user.showcoordY.toInt(),
                               SingletonFunctionController
-                                  .building.patchData[user.Bid])[1]),
-                      markers[user.Bid]![0]);
+                                  .building.patchData[user.bid])[1]),
+                      markers[user.bid]![0]);
                 }
               });
             });
@@ -1499,7 +1575,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     mapState.target = LatLng(values[0], values[1]);
 
-    user.Bid = userSetLocation.buildingID!;
+    user.bid = userSetLocation.buildingID!;
     user.locationName = userSetLocation.name;
 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -1558,7 +1634,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     UserState.lngCode = _currentLocale;
     UserState.reroute = reroute;
     UserState.closeNavigation = closeNavigation;
-    UserState.AlignMapToPath = alignMapToPath;
+    UserState.alignMapToPath = alignMapToPath;
     UserState.startOnPath = startOnPath;
     UserState.speak = speak;
     UserState.paintMarker = paintMarker;
@@ -1615,15 +1691,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       // else {
       user.moveToFloor(userSetLocation.floor!);
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: LatLng(user.lat, user.lng),
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: LatLng(user.lat, user.lng),
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1640,7 +1716,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
 
       SingletonFunctionController.building.landmarkdata!.then((value) {
-        createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+        createMarkers(value, userSetLocation!.floor!, bid: user.bid);
       });
     });
 
@@ -1689,12 +1765,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           SingletonFunctionController.building.polyLineData!,
           SingletonFunctionController
               .building.floor[buildingAllApi.getStoredString()]!);
-      if (pathMarkers[user.Bid] != null &&
-          pathMarkers[user.Bid]![user.floor] != null) {
-        setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+      if (pathMarkers[user.bid] != null &&
+          pathMarkers[user.bid]![user.floor] != null) {
+        setCameraPosition(pathMarkers[user.bid]![user.floor]!);
       }
       if (markers.length > 0)
-        markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+        markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
       if (user.initialallyLocalised) {
         mapState.interaction = !mapState.interaction;
       }
@@ -1846,7 +1922,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       mapState.target = LatLng(values[0], values[1]);
 
-      user.Bid = userSetLocation.buildingID!;
+      user.bid = userSetLocation.buildingID!;
       user.locationName = userSetLocation.name;
 
       //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -1902,7 +1978,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
-      UserState.AlignMapToPath = alignMapToPath;
+      UserState.alignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
@@ -1932,15 +2008,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         markers.clear();
         //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
+          markers.putIfAbsent(user.bid, () => []);
+          markers[user.bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: LatLng(user.lat, user.lng),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -1970,7 +2046,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
 
         SingletonFunctionController.building.landmarkdata!.then((value) {
-          createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+          createMarkers(value, userSetLocation!.floor!, bid: user.bid);
         });
       });
 
@@ -2019,12 +2095,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             SingletonFunctionController.building.polyLineData!,
             SingletonFunctionController
                 .building.floor[buildingAllApi.getStoredString()]!);
-        if (pathMarkers[user.Bid] != null &&
-            pathMarkers[user.Bid]![user.floor] != null) {
-          setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+        if (pathMarkers[user.bid] != null &&
+            pathMarkers[user.bid]![user.floor] != null) {
+          setCameraPosition(pathMarkers[user.bid]![user.floor]!);
         }
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -2168,7 +2244,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
       mapState.target = LatLng(values[0], values[1]);
 
-      user.Bid = userSetLocation.buildingID!;
+      user.bid = userSetLocation.buildingID!;
       user.locationName = userSetLocation.name;
 
       //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
@@ -2224,7 +2300,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       UserState.lngCode = _currentLocale;
       UserState.reroute = reroute;
       UserState.closeNavigation = closeNavigation;
-      UserState.AlignMapToPath = alignMapToPath;
+      UserState.alignMapToPath = alignMapToPath;
       UserState.startOnPath = startOnPath;
       UserState.speak = speak;
       UserState.paintMarker = paintMarker;
@@ -2254,15 +2330,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         markers.clear();
         //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
         if (render) {
-          markers.putIfAbsent(user.Bid, () => []);
-          markers[user.Bid]?.add(Marker(
+          markers.putIfAbsent(user.bid, () => []);
+          markers[user.bid]?.add(Marker(
             markerId: MarkerId("UserLocation"),
             position: LatLng(user.lat, user.lng),
             icon: BitmapDescriptor.fromBytes(userloc),
             anchor: Offset(0.5, 0.829),
           ));
           if (kDebugMode) {
-            markers[user.Bid]?.add(Marker(
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -2292,7 +2368,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         }
 
         SingletonFunctionController.building.landmarkdata!.then((value) {
-          createMarkers(value, userSetLocation!.floor!, bid: user.Bid);
+          createMarkers(value, userSetLocation!.floor!, bid: user.bid);
         });
       });
 
@@ -2341,12 +2417,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             SingletonFunctionController.building.polyLineData!,
             SingletonFunctionController
                 .building.floor[buildingAllApi.getStoredString()]!);
-        if (pathMarkers[user.Bid] != null &&
-            pathMarkers[user.Bid]![user.floor] != null) {
-          setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+        if (pathMarkers[user.bid] != null &&
+            pathMarkers[user.bid]![user.floor] != null) {
+          setCameraPosition(pathMarkers[user.bid]![user.floor]!);
         }
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -2491,7 +2567,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
         mapState.target = LatLng(values[0], values[1]);
 
-        user.Bid = SingletonFunctionController
+        user.bid = SingletonFunctionController
             .apibeaconmap[nearestBeacon]!.buildingID!;
         user.locationName =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.name;
@@ -2556,7 +2632,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         UserState.lngCode = _currentLocale;
         UserState.reroute = reroute;
         UserState.closeNavigation = closeNavigation;
-        UserState.AlignMapToPath = alignMapToPath;
+        UserState.alignMapToPath = alignMapToPath;
         UserState.startOnPath = startOnPath;
         UserState.speak = speak;
         UserState.paintMarker = paintMarker;
@@ -2578,15 +2654,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           markers.clear();
           //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
           if (render) {
-            markers.putIfAbsent(user.Bid, () => []);
-            markers[user.Bid]?.add(Marker(
+            markers.putIfAbsent(user.bid, () => []);
+            markers[user.bid]?.add(Marker(
               markerId: MarkerId("UserLocation"),
               position: LatLng(user.lat, user.lng),
               icon: BitmapDescriptor.fromBytes(userloc),
               anchor: Offset(0.5, 0.829),
             ));
             if (kDebugMode) {
-              markers[user.Bid]?.add(Marker(
+              markers[user.bid]?.add(Marker(
                 markerId: MarkerId("debug"),
                 position: LatLng(user.lat, user.lng),
                 icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -2616,7 +2692,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 .apibeaconmap[nearestBeacon]!.buildingID!] =
             SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!;
             createRooms(
-                SingletonFunctionController.building.polylinedatamap[user.Bid]!,
+                SingletonFunctionController.building.polylinedatamap[user.bid]!,
                 SingletonFunctionController
                     .apibeaconmap[nearestBeacon]!.floor!);
           }
@@ -2624,11 +2700,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           SingletonFunctionController.building.landmarkdata!.then((value) {
             createMarkers(value,
                 SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!,
-                bid: user.Bid);
+                bid: user.bid);
           });
         });
 
+        List<nearestLandInfo> getallnearbylandmark=[];
+        await SingletonFunctionController.building.landmarkdata!.then((value) {
+          getallnearbylandmark = tools.localizefindAllNearbyLandmark(
+              SingletonFunctionController.apibeaconmap[nearestBeacon]!, value.landmarksMap!);
+        });
+
+
         double value = 0;
+        double value2 = 0;
         if (nearestLandInfomation != null) {
           value = tools.calculateAngle2(
               [user.coordX, user.coordY],
@@ -2638,21 +2722,37 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 nearestLandInfomation!.coordinateY!
               ]);
         }
-
+        double distBetweenLandmarks=0.0;
+        if(getallnearbylandmark.length>2){
+          distBetweenLandmarks=tools.calculateDistance([user.coordX,user.coordY], [getallnearbylandmark[1].coordinateX!,getallnearbylandmark[1].coordinateY!]);
+          value2 = tools.calculateAngle2(
+              [user.coordX, user.coordY],
+              newUserCord,
+              [
+                getallnearbylandmark[1].coordinateX!,
+                getallnearbylandmark[1].coordinateY!
+              ]);
+        }
         mapState.zoom = 22;
-
         if (value < 45) {
           value = value + 45;
+        }
+
+        if(value2<45){
+          value2=value2+45;
         }
         String? finalvalue = value == 0
             ? null
             : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
 
+        String? finalvalue2 = value2 == 0
+            ? null
+            : tools.angleToClocksForNearestLandmarkToBeacon(value2, context);
+
         // double value =
         //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
         //
         // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-
         //
         //
         if (user.isnavigating == false && speakTTS) {
@@ -2673,18 +2773,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               SingletonFunctionController.building.polyLineData!,
               SingletonFunctionController
                   .building.floor[buildingAllApi.getStoredString()]!);
-          if (pathMarkers[user.Bid] != null &&
-              pathMarkers[user.Bid]![user.floor] != null) {
-            setCameraPosition(pathMarkers[user.Bid]![user.floor]!);
+          if (pathMarkers[user.bid] != null &&
+              pathMarkers[user.bid]![user.floor] != null) {
+            setCameraPosition(pathMarkers[user.bid]![user.floor]!);
           }
           if (markers.length > 0)
-            markers[user.Bid]?[0] =
-                customMarker.rotate(0, markers[user.Bid]![0]);
+            markers[user.bid]?[0] =
+                customMarker.rotate(0, markers[user.bid]![0]);
           if (user.initialallyLocalised) {
             mapState.interaction = !mapState.interaction;
           }
           fitPolygonInScreen(patch.first);
-
           if (speakTTS) {
             if (finalvalue == null) {
               speak(
@@ -2694,12 +2793,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       ''),
                   _currentLocale);
             } else {
-              speak(
-                  convertTolng(
-                      "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                      _currentLocale,
-                      finalvalue),
-                  _currentLocale);
+              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
+                speak(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale);
+              }else{
+                speak(
+                    convertTolng(
+                        "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                        _currentLocale,
+                        finalvalue),
+                    _currentLocale);
+              }
+
             }
           }
         } else {
@@ -2712,12 +2818,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       ''),
                   _currentLocale);
             } else {
-              speak(
-                  convertTolng(
-                      "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                      _currentLocale,
-                      finalvalue),
-                  _currentLocale);
+              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
+                speak(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale);
+              }else{
+                speak(
+                    convertTolng(
+                        "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
+                        _currentLocale,
+                        finalvalue),
+                    _currentLocale);
+              }
             }
           }
         }
@@ -2731,7 +2843,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             ),
           );
         }
-        Future.delayed(Duration(milliseconds: 3000)).then((value){
+        Future.delayed(Duration(milliseconds: 5000)).then((value){
           if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
             UserState.lowCompassAccuracy=true;
             speak(
@@ -3048,15 +3160,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
     setState(() {
       markers.clear();
-      markers.putIfAbsent(user.Bid, () => []);
-      markers[user.Bid]?.add(Marker(
+      markers.putIfAbsent(user.bid, () => []);
+      markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
         position: userlocation,
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
       if (kDebugMode) {
-        markers[user.Bid]?.add(Marker(
+        markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: userlocation,
           icon: BitmapDescriptor.fromBytes(userlocdebug),
@@ -3110,26 +3222,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                 ...PathState.path[PathState.sourceFloor]!,
                 ...PathState.path[PathState.destinationFloor]!,
               ];
-              user.Cellpath = PathState.singleCellListPath;
+              user.cellPath = PathState.singleCellListPath;
               user.pathobj.index = 0;
               user.isnavigating = true;
               user.temporaryExit = false;
               user.moveToStartofPath().then((value) {
                 setState(() {
                   if (markers.length > 0) {
-                    markers[user.Bid]?[0] = customMarker.move(
+                    markers[user.bid]?[0] = customMarker.move(
                         LatLng(
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
                                 SingletonFunctionController
-                                    .building.patchData[user.Bid])[0],
+                                    .building.patchData[user.bid])[0],
                             tools.localtoglobal(
                                 user.showcoordX.toInt(),
                                 user.showcoordY.toInt(),
                                 SingletonFunctionController
-                                    .building.patchData[user.Bid])[1]),
-                        markers[user.Bid]![0]);
+                                    .building.patchData[user.bid])[1]),
+                        markers[user.bid]![0]);
                   }
                 });
               });
@@ -3198,9 +3310,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),
             user.coordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[0] = customMarker.move(
-            LatLng(dvalue[0], dvalue[1]), markers[user.Bid]![0]);
+            SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(
+            LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
     FlutterBeep.beep();
@@ -6821,7 +6933,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             .landmarksMap![SingletonFunctionController
                             .building.selectedLandmarkID]!
                             .floor!;
-                        PathState.sourceBid = user.Bid;
+                        PathState.sourceBid = user.bid;
 
                         PathState.destinationBid = snapshot
                             .data!
@@ -7265,7 +7377,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             .building.floor[buildingAllApi.getStoredString()] = user.floor;
 
         if (markers.length > 0)
-          markers[user.Bid]?[0] = customMarker.rotate(0, markers[user.Bid]![0]);
+          markers[user.bid]?[0] = customMarker.rotate(0, markers[user.bid]![0]);
         if (user.initialallyLocalised) {
           mapState.interaction = !mapState.interaction;
         }
@@ -8065,6 +8177,32 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         reroute(acc: result); // Handle the result after the dialog is closed
       }
     });
+  }
+
+  void modifyPathCovered(String bid, int floor, LatLng point){
+    pathCovered.putIfAbsent(bid, () => {floor:Set()});
+    pathCovered[bid]!.putIfAbsent(floor, ()=> Set());
+    List<LatLng> coordinates = [];
+    if(pathCovered[bid]![floor] != null && pathCovered[bid]![floor]!.isNotEmpty){
+      coordinates.addAll(pathCovered[bid]![floor]!.first.points);
+    }
+    coordinates.add(point);
+    setState(() {
+      if(pathCovered[bid]![floor] == null || pathCovered[bid]![floor]!.isEmpty){
+        pathCovered[bid]![floor]!.add(gmap.Polyline(
+          polylineId: const PolylineId("path covered"),
+          points: coordinates,
+          color: Colors.blueGrey,
+          width: 10,
+        ));
+      }else {
+        gmap.Polyline polyline = customMarker.extendPolyline(
+            pathCovered[bid]![floor]!.first, coordinates);
+        pathCovered[bid]![floor]!.clear();
+        pathCovered[bid]![floor]!.add(polyline);
+      }
+    });
+    print("pathCovered $pathCovered");
   }
 
 
@@ -8885,7 +9023,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                   UserState
                                                       .closeNavigation =
                                                       closeNavigation;
-                                                  UserState.AlignMapToPath =
+                                                  UserState.alignMapToPath =
                                                       alignMapToPath;
                                                   UserState.startOnPath =
                                                       startOnPath;
@@ -8927,7 +9065,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                   PathState
                                                       .sourceBid]![PathState
                                                       .sourceFloor]![1];
-                                                  user.Bid =
+                                                  user.bid =
                                                       PathState.sourceBid;
                                                   user.coordX =
                                                       PathState.sourceX;
@@ -8940,7 +9078,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                   UserState
                                                       .closeNavigation =
                                                       closeNavigation;
-                                                  UserState.AlignMapToPath =
+                                                  UserState.alignMapToPath =
                                                       alignMapToPath;
                                                   UserState.startOnPath =
                                                       startOnPath;
@@ -8958,7 +9096,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                   user.path = PathState
                                                       .singleListPath;
                                                   user.isnavigating = true;
-                                                  user.Cellpath = PathState
+                                                  user.cellPath = PathState
                                                       .singleCellListPath;
                                                   PathState
                                                       .singleCellListPath
@@ -8980,11 +9118,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                           PathState
                                                               .sourceBid]);
                                                       if(markers.isEmpty){
+
+                                                        _controller = AnimationController(
+                                                          vsync: this,
+                                                          duration: const Duration(seconds: 3),
+                                                        )..repeat(reverse: true);
+
+                                                        // Create the animation
+                                                        _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+                                                          ..addListener(() {
+                                                            _updateCircle(user.lat, user.lng);
+                                                          });
                                                         print("markers were empty");
                                                         markers.putIfAbsent(
-                                                            user.Bid,
+                                                            user.bid,
                                                                 () => []);
-                                                        markers[user.Bid]
+                                                        markers[user.bid]
                                                             ?.add(Marker(
                                                           markerId: MarkerId(
                                                               "UserLocation"),
@@ -8997,6 +9146,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                           anchor: Offset(
                                                               0.5, 0.829),
                                                         ));
+
+                                                        circles.add(
+                                                          Circle(
+                                                              circleId: CircleId("circle"),
+                                                              center: LatLng(user.lat, user.lng),
+                                                              radius: _animation.value,
+                                                              strokeWidth: 1,
+                                                              strokeColor: Colors.blue,
+                                                              fillColor: Colors.lightBlue.withOpacity(0.2),
+                                                              zIndex: 2
+                                                          ),
+                                                        );
+
                                                       }else{
                                                         print("markers were not empty");
                                                       }
@@ -9015,7 +9177,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
                                                       if (kDebugMode) {
-                                                        markers[user.Bid]
+                                                        markers[user.bid]
                                                             ?.add(Marker(
                                                           markerId: MarkerId(
                                                               "debug"),
@@ -9717,7 +9879,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
         user.showcoordY.toInt(),
-        SingletonFunctionController.building.patchData[user.Bid]);
+        SingletonFunctionController.building.patchData[user.bid]);
     mapState.target = LatLng(val[0], val[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
@@ -9818,11 +9980,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       //
       // }
 
-      if (user.isnavigating && user.pathobj.numCols![user.Bid] != null) {
-        int col = user.pathobj.numCols![user.Bid]![user.floor]!;
+      if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
+        int col = user.pathobj.numCols![user.bid]![user.floor]!;
 
         if (MotionModel.reached(user, col) == false &&
-            user.Bid == user.Cellpath[user.pathobj.index + 1].bid) {
+            user.bid == user.cellPath[user.pathobj.index + 1].bid) {
           List<int> a = [user.showcoordX, user.showcoordY];
           List<int> tval = tools.eightcelltransition(user.theta);
           //
@@ -9839,13 +10001,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           int val = tools.calculateAngleSecond(a, b, c).toInt();
 
           try {
-            if (user.Bid == buildingAllApi.outdoorID) {
+            if (user.bid == buildingAllApi.outdoorID) {
               double a = user.theta<0?user.theta+360:user.theta;
               val = (tools.calculateBearing_fromLatLng(
-                  LatLng(user.Cellpath[index].lat, user.Cellpath[index].lng),
-                  LatLng(user.Cellpath[index + 1].lat,
-                      user.Cellpath[index + 1].lng)) - a).toInt().abs();
-              print("turn stopping check ${user.Cellpath[index].x}, ${user.Cellpath[index].y}      ${user.Cellpath[index+1].x}, ${user.Cellpath[index+1].y}   $val");
+                  LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
+                  LatLng(user.cellPath[index + 1].lat,
+                      user.cellPath[index + 1].lng)) - a).toInt().abs();
 
               if(val<10 && val>-10){
                 val = 0;
@@ -10016,7 +10177,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                       PathState.sourceX = user.coordX;
                                       PathState.sourceY = user.coordY;
                                       PathState.sourceFloor = user.floor;
-                                      PathState.sourceBid = user.Bid;
+                                      PathState.sourceBid = user.bid;
                                       PathState.sourceLat = user.lat;
                                       PathState.sourceLng = user.lng;
                                       PathState.sourceName =
@@ -10027,19 +10188,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                       _isRoutePanelOpen = true;
                                       _isnavigationPannelOpen = false;
 
-                                      if (pathMarkers[user.Bid] != null) {
+                                      if (pathMarkers[user.bid] != null) {
                                         setCameraPosition(
-                                            pathMarkers[user.Bid]![
+                                            pathMarkers[user.bid]![
                                             SingletonFunctionController
                                                 .building
-                                                .floor[user.Bid]]!);
-                                        List<LatLng> ll = [pathMarkers[user.Bid]![
+                                                .floor[user.bid]]!);
+                                        List<LatLng> ll = [pathMarkers[user.bid]![
                                         SingletonFunctionController
                                             .building
-                                            .floor[user.Bid]]!.first.position, pathMarkers[user.Bid]![
+                                            .floor[user.bid]]!.first.position, pathMarkers[user.bid]![
                                         SingletonFunctionController
                                             .building
-                                            .floor[user.Bid]]!.last.position];
+                                            .floor[user.bid]]!.last.position];
                                         setCameraPositionusingCoords(ll);
                                       }
                                     });
@@ -10113,9 +10274,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
         List<double> lvalue = tools.localtoglobal(
             user.showcoordX.toInt(),
             user.showcoordY.toInt(),
-            SingletonFunctionController.building.patchData[user.Bid]);
-        markers[user.Bid]?[0] = customMarker.move(
-            LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+            SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(
+            LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
       }
     });
   }
@@ -11405,17 +11566,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   String nearestLandmarkNameForPannel = "";
   String nearestAddressForPannel = "";
-
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
-
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
     for (int i = 0; i < getallnearestInfo.length; i++) {
       Exwidgets.add(
           ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
     }
-
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
@@ -11574,7 +11732,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
           ),
         ));
   }
-
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
 
@@ -11609,14 +11766,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
 
     // Always union the general Markers set at the end
-    if (SingletonFunctionController.building.floor[user.Bid] == user.floor) {
+    if (SingletonFunctionController.building.floor[user.bid] == user.floor) {
       markers.forEach((key, value) {
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
       });
     }
     return combinedMarkers;
   }
-
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
     if(cachedPolygon.isEmpty){
@@ -11659,9 +11815,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     });
 
+    buildingAllApi.allBuildingID.forEach((key, value) {
+      if (pathCovered[key] != null &&
+          pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
+              null) {
+        poly = poly.union(pathCovered[key]![
+        SingletonFunctionController.building.floor[key]]!);
+      }
+    });
+
     return poly;
   }
-
   void _updateMarkers(double zoom) {
     if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
@@ -11745,7 +11909,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     }
   }
-
   void hideMarkers() {
     SingletonFunctionController.building.updateMarkers = false;
     Set<Marker> updatedMarkers = Set();
@@ -11755,12 +11918,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     });
     Markers = updatedMarkers;
   }
-
   void showMarkers() {
     SingletonFunctionController.building.ignoredMarker.clear();
     SingletonFunctionController.building.updateMarkers = true;
   }
-
   void _updateBuilding(double zoom) {
     Set<Polygon> updatedclosedPolygon = Set();
     Set<Polygon> updatedpatchPolygon = Set();
@@ -11796,11 +11957,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     destiName = destname;
 
     List<int> tv = tools.eightcelltransition(user.theta);
+    List<Cell> turnPoints =
+    tools.getCellTurnpoints(user.cellPath);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
-    String direction = tools.angleToClocks3(angle, context);
+    String direction = tools.angleToClocks4(angle, context);
 
     flutterTts.pause().then((value) {
       speak(
@@ -11834,14 +11997,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]);
-      markers[user.Bid]?[0] = customMarker.move(
-          LatLng(lvalue[0], lvalue[1]), markers[user.Bid]![0]);
+          SingletonFunctionController.building.patchData[user.bid]);
+      markers[user.bid]?[0] = customMarker.move(
+          LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
     }
     // });
-    showFeedback = true;
-    Future.delayed(Duration(seconds: 5));
-    _feedbackController.open();
+    // showFeedback = true;
+    // Future.delayed(Duration(seconds: 5));
+    // _feedbackController.open();
   }
 
   void onLandmarkVenueClicked(String ID,
@@ -11988,7 +12151,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
               .landmarksMap![
           SingletonFunctionController.building.selectedLandmarkID]!
               .floor!;
-          PathState.sourceBid = user.Bid;
+          PathState.sourceBid = user.bid;
 
           PathState.destinationBid = snapshot!
               .landmarksMap![
@@ -12295,7 +12458,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     SingletonFunctionController.btadapter.stopScanning();
     _messageTimer?.cancel();
     _controller.dispose();
-
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -12643,12 +12806,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                   user,
                                   SingletonFunctionController
                                       .building.floorDimenssion[
-                                  user.Bid]![user.floor]![0],
+                                  user.bid]![user.floor]![0],
                                   SingletonFunctionController
                                       .building.floorDimenssion[
-                                  user.Bid]![user.floor]![1],
+                                  user.bid]![user.floor]![1],
                                   SingletonFunctionController.building
-                                      .nonWalkable[user.Bid]![user.floor]!,
+                                      .nonWalkable[user.bid]![user.floor]!,
                                   reroute);
                               if (isvalid) {
 
@@ -12670,14 +12833,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
-                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  // "next coord [${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].y:0}]\n"
-                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                  //     "floor ${user.floor}\n"
-                  //     // "userBid ${user.Bid} \n"
-                  //     "index ${user.pathobj.index} \n"
-                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                  Text("coord [${user.coordX},${user.coordY}] \n"
+                      "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                      "floor ${user.floor}\n"
+                      // "userBid ${user.Bid} \n"
+                      "index ${user.pathobj.index} \n"
+                      "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
                   DebugToggle.Slider
                       ? Slider(
@@ -12702,9 +12865,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                             );
                           } else {
                             if (markers.length > 0)
-                              markers[user.Bid]?[0] = customMarker.rotate(
+                              markers[user.bid]?[0] = customMarker.rotate(
                                   compassHeading! - mapbearing,
-                                  markers[user.Bid]![0]);
+                                  markers[user.bid]![0]);
                           }
                         });
                       })
@@ -12879,13 +13042,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                 isLocalized = false;
                               })
                             });
-
                             _timer.cancel();
                           });
                         } else {
-                          _recenterMap();
+                        _recenterMap();
                         }
-                        ;
                       },
                       child: Semantics(
                         label:
@@ -13391,4 +13552,16 @@ class ChatMessageClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class LatLngTween extends Tween<LatLng> {
+  LatLngTween({required LatLng begin, required LatLng end}) : super(begin: begin, end: end);
+
+  @override
+  LatLng lerp(double t) {
+    return LatLng(
+      begin!.latitude + (end!.latitude - begin!.latitude) * t,
+      begin!.longitude + (end!.longitude - begin!.longitude) * t,
+    );
+  }
 }

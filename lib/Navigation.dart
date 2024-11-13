@@ -174,6 +174,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Map<String, List<Marker>> markers = Map();
   // Building SingletonFunctionController.building = Building(floor: Map(), numberOfFloors: Map());
   Map<String, Map<int, Set<gmap.Polyline>>> singleroute = {};
+  Map<String, Map<int, Set<gmap.Polyline>>> pathCovered = {};
   Map<int, Set<Marker>> dottedSingleRoute = {};
   // BLueToothClass SingletonFunctionController.btadBLueToothClass();
   bool _isLandmarkPanelOpen = false;
@@ -1215,7 +1216,6 @@ bool isAppinForeground=true;
       markers[user.bid]?[1] = customMarker.move(
           LatLng(ldvalue[0], ldvalue[1]), markers[user.bid]![1]);
     }
-
   }
 
   void onStepCount() {
@@ -8080,6 +8080,32 @@ bool isAppinForeground=true;
     });
   }
 
+  void modifyPathCovered(String bid, int floor, LatLng point){
+    pathCovered.putIfAbsent(bid, () => {floor:Set()});
+    pathCovered[bid]!.putIfAbsent(floor, ()=> Set());
+    List<LatLng> coordinates = [];
+    if(pathCovered[bid]![floor] != null && pathCovered[bid]![floor]!.isNotEmpty){
+      coordinates.addAll(pathCovered[bid]![floor]!.first.points);
+    }
+    coordinates.add(point);
+    setState(() {
+      if(pathCovered[bid]![floor] == null || pathCovered[bid]![floor]!.isEmpty){
+        pathCovered[bid]![floor]!.add(gmap.Polyline(
+          polylineId: const PolylineId("path covered"),
+          points: coordinates,
+          color: Colors.blueGrey,
+          width: 10,
+        ));
+      }else {
+        gmap.Polyline polyline = customMarker.extendPolyline(
+            pathCovered[bid]![floor]!.first, coordinates);
+        pathCovered[bid]![floor]!.clear();
+        pathCovered[bid]![floor]!.add(polyline);
+      }
+    });
+    print("pathCovered $pathCovered");
+  }
+
 
   Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
       {String? liftName}) async {
@@ -11687,6 +11713,15 @@ bool isAppinForeground=true;
           singleroute[key]![SingletonFunctionController.building.floor[key]] !=
               null) {
         poly = poly.union(singleroute[key]![
+        SingletonFunctionController.building.floor[key]]!);
+      }
+    });
+
+    buildingAllApi.allBuildingID.forEach((key, value) {
+      if (pathCovered[key] != null &&
+          pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
+              null) {
+        poly = poly.union(pathCovered[key]![
         SingletonFunctionController.building.floor[key]]!);
       }
     });

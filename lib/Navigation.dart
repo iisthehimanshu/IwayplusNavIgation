@@ -1207,10 +1207,10 @@ bool isAppinForeground=true;
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]
+          SingletonFunctionController.building.patchData[user.bid]
       );
 
-      LatLng currentMarkerPosition = markers[user.Bid]![0].position;
+      LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
 
       // Define a smooth transition animation
@@ -1226,9 +1226,9 @@ bool isAppinForeground=true;
       _animationController!.addListener(() {
         setState(() {
           // Update marker position as animation progresses
-          markers[user.Bid]?[0] = customMarker.move(
+          markers[user.bid]?[0] = customMarker.move(
             _markerAnimation!.value,
-            markers[user.Bid]![0],
+            markers[user.bid]![0],
           );
         });
       });
@@ -1260,12 +1260,12 @@ bool isAppinForeground=true;
 
       List<double> ldvalue = tools.localtoglobal(
           user.coordX.toInt(), user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.Bid]
+          SingletonFunctionController.building.patchData[user.bid]
       );
 
-      markers[user.Bid]?[1] = customMarker.move(
+      markers[user.bid]?[1] = customMarker.move(
           LatLng(ldvalue[0], ldvalue[1]),
-          markers[user.Bid]![1]
+          markers[user.bid]![1]
       );
     }
   }
@@ -11943,7 +11943,7 @@ bool isAppinForeground=true;
 
     List<int> tv = tools.eightcelltransition(user.theta);
     List<Cell> turnPoints =
-    tools.getCellTurnpoints(user.Cellpath);
+    tools.getCellTurnpoints(user.cellPath);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],

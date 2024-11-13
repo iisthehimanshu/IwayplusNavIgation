@@ -2748,8 +2748,6 @@ bool isAppinForeground=true;
             ? null
             : tools.angleToClocksForNearestLandmarkToBeacon(value2, context);
 
-        print("the two nerarby landmarks are ${finalvalue} ${finalvalue2}  ${getallnearbylandmark[1].name}  ${value2}");
-
         // double value =
         //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
         //
@@ -2794,7 +2792,7 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              if(distBetweenLandmarks<=20 && finalvalue2!=null){
+              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
                 speak(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
                     _currentLocale);
@@ -2819,7 +2817,7 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              if(distBetweenLandmarks<=20 && finalvalue2!=null){
+              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
                 speak(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
                     _currentLocale);
@@ -11528,17 +11526,14 @@ bool isAppinForeground=true;
 
   String nearestLandmarkNameForPannel = "";
   String nearestAddressForPannel = "";
-
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
-
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
     for (int i = 0; i < getallnearestInfo.length; i++) {
       Exwidgets.add(
           ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
     }
-
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
@@ -11697,7 +11692,6 @@ bool isAppinForeground=true;
           ),
         ));
   }
-
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
 
@@ -11739,7 +11733,6 @@ bool isAppinForeground=true;
     }
     return combinedMarkers;
   }
-
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
     if(cachedPolygon.isEmpty){
@@ -11920,11 +11913,7 @@ bool isAppinForeground=true;
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
-    String direction = tools.angleToClocks3(angle, context);
-    String direction2=tools.angleToClocks(angle, context);
-
-
-    print("direction:: ${direction} ${direction2}");
+    String direction = tools.angleToClocks4(angle, context);
 
     flutterTts.pause().then((value) {
       speak(

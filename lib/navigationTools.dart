@@ -358,7 +358,7 @@ class tools {
     }
   }
 
-  static String angleToClocks3(double angle, context) {
+  static String angleToClocks4(double angle, context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -382,6 +382,26 @@ class tools {
       return (currentDir == 'Natural Direction') ? "on your Left" : "10 o'clock";
     } else {
       return "Unknown";
+    }
+  }
+
+  static String angleToClocks3(double angle,context) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    String currentDir = UserCredentials().getuserNavigationModeSetting();
+    if (angle >= 315 || angle <= 45) {
+      return (currentDir == 'Natural Direction')
+          ? "on your Front"
+          : "on 12 o'clock";
+    } else if (angle > 45 && angle <= 180) {
+      return (currentDir == 'Natural Direction')
+          ? "on your Right"
+          : "3 o'clock";
+    } else if (angle > 180 && angle <= 315) {
+      return (currentDir == 'Natural Direction') ? "on your Left" : "9 o'clock";
+    } else {
+      return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
     }
   }
 

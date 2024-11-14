@@ -8,7 +8,7 @@ class MotionModel{
   static int stuckCount = 0;
 
   static bool isValidStep(UserState user, int cols, int rows, List<int> nonWalkable, Function reroute){
-    if(user.pathobj.index+1 > user.Cellpath.length-1){
+    if(user.pathobj.index+1 > user.cellPath.length-1){
       UserState.closeNavigation();
     }
     if(user.onConnection || user.temporaryExit){
@@ -16,7 +16,7 @@ class MotionModel{
     }
     List<int> transitionValue = tools.eightcelltransition(user.theta);
     if(user.isnavigating){
-      transitionValue = user.Cellpath[user.pathobj.index+1].move(user.theta);
+      transitionValue = user.cellPath[user.pathobj.index+1].move(user.theta);
     }
     int newX = user.coordX + transitionValue[0];
     int newY = user.coordY + transitionValue[1];
@@ -39,7 +39,7 @@ class MotionModel{
     }
 
     try{
-      if(user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
+      if(user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
         if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>20){
           reroute();
         }

@@ -2793,7 +2793,7 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
+              if(getallnearbylandmark.length>=2 && distBetweenLandmarks<=20 && finalvalue2!=null){
                 speak(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
                     _currentLocale);
@@ -2818,7 +2818,7 @@ bool isAppinForeground=true;
                       ''),
                   _currentLocale);
             } else {
-              if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
+              if(getallnearbylandmark.length>=2 && distBetweenLandmarks<=20 && finalvalue2!=null){
                 speak(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
                     _currentLocale);
@@ -3416,6 +3416,7 @@ bool isAppinForeground=true;
   }
 
   SingletonFunctionController controller = SingletonFunctionController();
+
   void apiCalls(context) async {
     try{
       await DataVersionApi()
@@ -3832,6 +3833,8 @@ bool isAppinForeground=true;
         break;
       }
     }
+
+    SingletonFunctionController.currentBeacon=nearestBeacon;
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
@@ -8111,7 +8114,6 @@ bool isAppinForeground=true;
 
         }
       }
-
       setState(() {
         if (renderDestination && liftName == null) {
           innerMarker.add(

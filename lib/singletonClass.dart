@@ -20,6 +20,19 @@ class SingletonFunctionController {
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static Building building = Building(floor: Map(), numberOfFloors: Map());
   static Future<void>? timer;
+  static String currentBeacon="";
+
+  bool isBinEmpty() {
+    for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
+      if (SingletonFunctionController.btadapter.BIN[i] != null &&
+          SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+        // If any bin is not empty, return false
+        return false;
+      }
+    }
+    // If all bins are empty, return true
+    return true;
+  }
   Future<void> executeFunction(Map<String,LatLng> allBuildingID) async {
     if (_isRunning) {
       // Wait for the currently running instance to finish
@@ -84,5 +97,14 @@ class SingletonFunctionController {
       _completer?.complete();
 
     }
+  }
+
+  beacon? getlocalizedBeacon(){
+    double highestweight = 0;
+    String nearestBeacon = "";
+   // if(isBinEmpty() == false){
+    // }
+
+    return (SingletonFunctionController.currentBeacon!="")?Building.apibeaconmap[SingletonFunctionController.currentBeacon]:null;
   }
 }

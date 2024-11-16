@@ -17,6 +17,7 @@ class SearchpageResults extends StatefulWidget {
   int coordX;
   int coordY;
   String accessible;
+  int distance;
 
   SearchpageResults({
     required this.name,
@@ -27,7 +28,8 @@ class SearchpageResults extends StatefulWidget {
     required this.floor,
     required this.coordX,
     required this.coordY,
-    required this.accessible
+    required this.accessible,
+    required this.distance
   });
 
   @override
@@ -67,18 +69,36 @@ class _SearchpageResultsState extends State<SearchpageResults> {
         ),
         child: Row(
           children: [
-            Container(
-              margin: EdgeInsets.only(left: 8),
-              padding: EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xffF5F5F5),
-              ),
-              child: Icon(
-                Icons.location_on_outlined,
-                color: Color(0xff000000),
-                size: 25,
-              ),
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 8),
+                  padding: EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xffF5F5F5),
+                  ),
+                  child: Icon(
+                    Icons.location_on_outlined,
+                    color: Color(0xff000000),
+                    size: 25,
+                  ),
+                ),
+                if(widget.distance!=0) Container(
+                  margin: EdgeInsets.only(top: 4, left: 11),
+                  child: Text(
+                    "${widget.distance.toString()}m",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff8d8c8c),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
             ),
             Expanded(
               child: Row(

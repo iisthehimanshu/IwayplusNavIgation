@@ -24,6 +24,7 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
+import '../singletonClass.dart';
 import 'UserCredential.dart';
 import 'locales.dart';
 
@@ -392,7 +393,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= int.parse(threshold!) && widget.user.bid!=buildingAllApi.outdoorID) {
+              highestweight >= int.parse(threshold!)) {
             widget.user.onConnection = false;
             //
             List<int> beaconcoord = [
@@ -411,12 +412,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             widget.user.cellPath.forEach((node) {
               List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-              if (d1 < distanceFromPath) {
+
+
+              if (d1 < distanceFromPath && widget.user.bid!=buildingAllApi.outdoorID) {
                 distanceFromPath = d1.toInt();
                 indexOnPath = widget.user.path.indexOf(node.node);
+              }else if(d1 < distanceFromPath && widget.user.bid==buildingAllApi.outdoorID){
+                distanceFromPath = d1.toInt();
+                List<Cell> nearPoints=findTwoNearestPoints(beaconcoord,widget.user.cellPath,widget.user.bid);
+                Cell newPoint=projectCellOntoSegment(beaconcoord, nearPoints[0], nearPoints[1],widget
+                    .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+                print("new point :: ${nearPoints[0].x} ${nearPoints[0].y} :: ${nearPoints[1].x} ${nearPoints[1].y} :: ${newPoint.x} ${newPoint.y}");
               }
             });
-
             if (distanceFromPath > 10) {
               print("calling expected function22");
               _timer.cancel();
@@ -429,7 +437,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               double dis = tools.calculateDistance(
                   [widget.user.showcoordX, widget.user.showcoordY],
                   beaconcoord);
-
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               if (!UserState.ttsOnlyTurns) {
                 speak(
@@ -510,6 +517,45 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // btadapter.emptyBin();
 
     return false;
+  }
+
+  List<Cell> findTwoNearestPoints(List<int> beaconcoord, List<Cell> turnPoints,String userBid) {
+    // Sort the list of turn points by distance to the beacon
+    List<Cell> filteredPoints = turnPoints.where((point) =>
+     point.bid == userBid && point.imaginedCell == false
+    ).toList();
+    filteredPoints.sort((a, b) => tools.calculateDistance(beaconcoord, [a.x,a.y]).compareTo(tools.calculateDistance(beaconcoord, [b.x,b.y])));
+    // Return the first two points in the sorted list
+    return [turnPoints[0], turnPoints[1]];
+  }
+  Cell projectCellOntoSegment(List<int> beacon, Cell a, Cell b,int numcols) {
+    // Vector AB
+    int abX = (b.x - a.x).abs();
+    int abY = (b.y - a.y).abs();
+
+    // Vector AP
+    int apX = (beacon[0] - a.x).abs();
+    int apY = (beacon[1] - a.y).abs();
+
+    // Dot products and integer scaling
+    int abDotAb = abX * abX + abY * abY;
+    int apDotAb = apX * abX + apY * abY;
+
+    // Scale factor to retain precision for `t`
+    int scale = 1000;
+
+    // Calculate scaled projection scalar t
+    int tScaled = (apDotAb * scale) ~/ abDotAb;
+
+    // Clamp tScaled to stay within the segment [0, scale]
+    tScaled = tScaled.clamp(0, scale);
+
+    // Projected point P' on the line segment, scaled back
+    int projX = (a.x + (tScaled * abX ~/ scale)).floor();
+    int projY = (a.y + (tScaled * abY ~/ scale)).floor();
+    List<double> latlng=tools.localtoglobal(projX, projY,SingletonFunctionController.building.patchData[widget.user.bid]);
+    return Cell(projX+projY*numcols,projX, projY,(double angle, {int? currPointer, int? totalCells}) {},latlng[0],latlng[1],a.bid,a.floor,numcols,imaginedCell: true);
+
   }
 
   FlutterTts flutterTts = FlutterTts();

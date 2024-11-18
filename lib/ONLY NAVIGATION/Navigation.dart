@@ -1205,7 +1205,6 @@ bool isAppinForeground=true;
           user.showcoordY.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
-
       LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
 
@@ -1263,6 +1262,8 @@ bool isAppinForeground=true;
           LatLng(ldvalue[0], ldvalue[1]),
           markers[user.bid]![1]
       );
+
+      modifyPathCovered(user.bid, user.floor, newMarkerPosition);
     }
   }
 
@@ -8188,7 +8189,7 @@ bool isAppinForeground=true;
         pathCovered[bid]![floor]!.add(gmap.Polyline(
           polylineId: const PolylineId("path covered"),
           points: coordinates,
-          color: Colors.blueGrey,
+          color: const Color(0xffcdcddb),
           width: 10,
         ));
       }else {

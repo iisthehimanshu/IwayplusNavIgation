@@ -4963,7 +4963,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -4975,7 +4975,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5025,7 +5025,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -5037,7 +5037,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5086,7 +5086,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -5098,7 +5098,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5160,7 +5160,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -5172,7 +5172,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5214,7 +5214,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -5226,7 +5226,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5268,7 +5268,7 @@ bool isAppinForeground=true;
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
@@ -5280,7 +5280,7 @@ bool isAppinForeground=true;
                                 .add(polyArray.id!);
                             _isBuildingPannelOpen = false;
                             _isRoutePanelOpen = false;
-                            singleroute.clear();
+                            singleroute.clear(); pathCovered.clear();
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
@@ -5908,7 +5908,7 @@ bool isAppinForeground=true;
                             .building.selectedLandmarkID =
                             landmarks[i].properties!.polyId;
                         _isRoutePanelOpen = false;
-                        singleroute.clear();
+                        singleroute.clear(); pathCovered.clear();
                         //realWorldPath.clear();
                         _isLandmarkPanelOpen = true;
                         addselectedMarker(LatLng(value[0], value[1]));
@@ -6011,7 +6011,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
+              //           singleroute.clear(); pathCovered.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6056,7 +6056,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
+              //           singleroute.clear(); pathCovered.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6113,7 +6113,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
+              //           singleroute.clear(); pathCovered.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6125,7 +6125,7 @@ bool isAppinForeground=true;
               //         SingletonFunctionController.building.selectedLandmarkID =
               //             landmarks[i].properties!.polyId;
               //         _isRoutePanelOpen = false;
-              //         singleroute.clear();
+              //         singleroute.clear(); pathCovered.clear();
               //         _isLandmarkPanelOpen = true;
               //         addselectedMarker(LatLng(value[0], value[1]));
               //       }
@@ -7351,7 +7351,7 @@ bool isAppinForeground=true;
     //
 
     PathState.noPathFound = false;
-    singleroute.clear();
+    singleroute.clear(); pathCovered.clear();
     pathMarkers.clear();
     Markers.clear();
 
@@ -8193,7 +8193,7 @@ bool isAppinForeground=true;
         pathCovered[bid]![floor]!.add(gmap.Polyline(
           polylineId: const PolylineId("path covered"),
           points: coordinates,
-          color: const Color(0xffcdcddb),
+          color: const Color(0xffb5b5c9),
           width: 10,
         ));
       }else {
@@ -8560,7 +8560,7 @@ bool isAppinForeground=true;
                               PathState.path.clear();
                               PathState.sourcePolyID = "";
                               PathState.destinationPolyID = "";
-                              singleroute.clear();
+                              singleroute.clear(); pathCovered.clear();
                               //realWorldPath.clear();
                               _isBuildingPannelOpen = true;
                               if (user.isnavigating == false) {
@@ -8900,7 +8900,7 @@ bool isAppinForeground=true;
                                             "";
                                             PathState.sourceBid = "";
                                             PathState.destinationBid = "";
-                                            singleroute.clear();
+                                            singleroute.clear(); pathCovered.clear();
                                             //realWorldPath.clear();
                                             PathState.directions = [];
                                             interBuildingPath.clear();
@@ -10268,7 +10268,7 @@ bool isAppinForeground=true;
     PathState.path.clear();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
-    singleroute.clear();
+    singleroute.clear(); pathCovered.clear();
     fitPolygonInScreen(patch.first);
     setState(() {
       if (markers.length > 0) {
@@ -11985,7 +11985,7 @@ bool isAppinForeground=true;
     PathState.path.clear();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
-    singleroute.clear();
+    singleroute.clear(); pathCovered.clear();
     fitPolygonInScreen(patch.first);
     Future.delayed(Duration.zero, () async {
       setState(() {
@@ -12112,7 +12112,7 @@ bool isAppinForeground=true;
         PathState.path.clear();
         PathState.sourcePolyID = "";
         PathState.destinationPolyID = "";
-        singleroute.clear();
+        singleroute.clear(); pathCovered.clear();
 
         user.isnavigating = false;
         _isnavigationPannelOpen = false;
@@ -12121,7 +12121,7 @@ bool isAppinForeground=true;
         SingletonFunctionController.building.ignoredMarker.add(ID);
         _isBuildingPannelOpen = false;
         _isRoutePanelOpen = false;
-        singleroute.clear();
+        singleroute.clear(); pathCovered.clear();
         _isLandmarkPanelOpen = true;
         PathState.directions = [];
         interBuildingPath.clear();
@@ -12840,6 +12840,7 @@ bool isAppinForeground=true;
                   // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
                       "floor ${user.floor}\n"
                       // "userBid ${user.Bid} \n"
+                  "stepSize ${UserState.stepSize}\n"
                       "index ${user.pathobj.index} \n"
                       "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 

@@ -673,67 +673,108 @@ class tools {
     };
   }
 
-  static List<int> findpoint(int x1, int y1, int x2, int y2, Map<String, double> data) {
-    // Calculate the slope (m)
-    double angleInRadians = atan(data['slope']!);
-    double angleInDegrees = angleInRadians * (180 / pi);
-    double normalizedSlope = angleInDegrees % 360;
-    if (normalizedSlope < 0) {
-      normalizedSlope += 360;
-    }
-    int dx = x2-x1;
-    int dy = y2-y1;
-    if(dx<0){
-      dx = dx*-1;
-    }
-    if(dy<0){
-      dy = dy*-1;
+  static List<int> findPoint(int x1, int y1, int x2, int y2, Map<String, double> data) {
+    double slope = data['slope']!;
+    double intercept = data['intercept']!;
+    int dx = (x2 - x1).abs();
+    int dy = (y2 - y1).abs();
+
+    // Determine direction based on the relative positions
+    int stepX = x1 < x2 ? 1 : -1;
+    int stepY = y1 < y2 ? 1 : -1;
+
+    if (dy < dx) {
+      x1 += stepX;
+      y1 = (slope * x1 + intercept).round();
+    } else if (dx < dy) {
+      y1 += stepY;
+      x1 = ((y1 - intercept) / slope).round();
+    } else {
+      x1 += stepX;
+      y1 += stepY;
     }
 
-    if(dy<dx){
-      if(x1<x2){
-        x1++;
-      }else{
-        x1--;
-      }
-      print("returned ${[x1,((x1*data['slope']!)+data['intercept']!).round()]}");
-      return [x1,((x1*data['slope']!)+data['intercept']!).round()];
-    }else if(dx<dy){
-      if(y1<y2){
-        y1++;
-      }else{
-        y1--;
-      }
-      print("returned ${[((y1-data['intercept']!)/data['slope']!).round(),y1]}");
-      return [((y1-data['intercept']!)/data['slope']!).round(),y1];
-    }else{
-      if(x1<x2){
-        x1++;
-      }else{
-        x1--;
-      }
-      if(y1<y2){
-        y1++;
-      }else{
-        y1--;
-      }
-      return [x1,y1];
-    }
+    return [x1, y1];
   }
+
+
+  static int stepsToReachTarget(int x1, int y1, int x2, int y2, Map<String, double> data) {
+    print("$x1, $y1, $x2, $y2, $data");
+    int steps = 0;
+    int startX = x1;
+    int startY = y1;
+
+    while (x1 != x2 || y1 != y2) {
+      List<int> nextPoint = findPoint(x1, y1, x2, y2, data);
+      x1 = nextPoint[0];
+      y1 = nextPoint[1];
+      steps++;
+
+      // Check if we've overshot the target
+      bool overshotX = (startX < x2 && x1 > x2) || (startX > x2 && x1 < x2);
+      bool overshotY = (startY < y2 && y1 > y2) || (startY > y2 && y1 < y2);
+
+      if (overshotX && overshotY) {
+        return steps;
+      }
+    }
+
+    return steps;
+  }
+
+
 
   static Cell findingprevpoint(List<Cell> path, int index){
     for(int i = index-1; i>=0; i--){
       if(!path[i].imaginedCell){
-        print("found ${path[i].x},${path[i].y}");
         return path[i];
       }
     }
-    print("not found");
     return path[index];
   }
 
+  static List<int> findIntegersWithMean(double d) {
+    print("Desired mean is $d -----> ${double.parse(d.toStringAsFixed(1))}");
 
+    // Step 1: Convert the decimal to a fraction
+    int numerator = (double.parse(d.toStringAsFixed(1)) * 10).toInt();  // Handle precision to 3 decimal places
+    int denominator = 10;
 
+    // Simplify the fraction by finding the GCD
+    int gcd = _gcd(numerator, denominator);
+    numerator ~/= gcd;
+    denominator ~/= gcd;
+
+    // Step 2: Choose n as the denominator
+    int n = denominator;
+
+    // Step 3: Calculate the closest integers
+    int base = numerator ~/ n;  // Base value for each integer (typically 2 or 3)
+    int remainder = numerator % n;  // The remainder to distribute
+
+    // Step 4: Generate the list with base values (minimum integers)
+    List<int> integers = List.generate(n, (i) => base);
+
+    // Step 5: Distribute the remainder more uniformly between elements
+    // By alternating placement of extra values
+    int step = n ~/ remainder;  // Step to spread increments evenly
+    for (int i = 0; i < remainder; i++) {
+      int position = (i * step + i) % n; // Offset each increment slightly to spread
+      integers[position]++;
+    }
+
+    return integers;
+  }
+
+// Helper function to calculate GCD
+  static int _gcd(int a, int b) {
+    while (b != 0) {
+      int temp = b;
+      b = a % b;
+      a = temp;
+    }
+    return a;
+  }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
     
@@ -2047,7 +2088,7 @@ class tools {
 
     
 
-
+    //return calculateDistance([node1.x,node1.y], [node2.x,node2.y]).toInt();
     // //
     // //
     return calculateDistanceInFeet(x1,y1,x2,y2).toInt();

@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/buildingAll.dart';
@@ -9,12 +10,15 @@ import '../APIMODELS/polylinedata.dart';
 import '../APIMODELS/landmark.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
 
 class buildingAllApi {
   final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/all" : "https://maps.iwayplus.in/secured/building/all";
-  String token = "";
+  static var signInBox = Hive.box('SignInDatabase');
+  var versionBox = Hive.box('VersionData');
+  String accessToken = signInBox.get("accessToken");
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";
@@ -32,18 +36,13 @@ class buildingAllApi {
 
   void checkForUpdate() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
+    accessToken = signInBox.get("accessToken");
 
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token
+        'x-access-token': accessToken
       },
     );
     if (response.statusCode == 200) {
@@ -65,7 +64,13 @@ class buildingAllApi {
           buildingData.save();
         }
       }
-    } else {
+    }else if(response.statusCode == 403) {
+      print('DATA VERSION API in error 403');
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+      return checkForUpdate();
+    }else{
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');
@@ -86,17 +91,13 @@ class buildingAllApi {
       return buildingList;
     }
 
-    await guestApi().guestlogin().then((value){
-      if(value.accessToken != null){
-        token = value.accessToken!;
-      }
-    });
+    accessToken = signInBox.get("accessToken");
 
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': token
+        'x-access-token': accessToken
       },
     );
     if (response.statusCode == 200) {
@@ -111,6 +112,12 @@ class buildingAllApi {
           .toList();
       return buildingList;
 
+    }else if(response.statusCode == 403){
+      print('DATA VERSION API in error 403');
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+      return fetchBuildingAllData();
     } else {
       print(response.statusCode);
       print(response.body);

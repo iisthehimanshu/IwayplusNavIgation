@@ -711,6 +711,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
       widget.distance = tools.distancebetweennodes_inCell(
           nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
+      print("nextTurn debug [${nextTurn.x},${nextTurn.y}] ---> [${widget.user.cellPath[widget.user.pathobj.index].x},${widget.user.cellPath[widget.user.pathobj.index].y}]");
       double angle = 0.0;
       try {
         angle = tools.calculateAnglefifth(
@@ -761,31 +762,36 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int index = widget.user.cellPath.indexOf(nextTurn);
       //
       double a = 0;
-      if (index + 1 == widget.user.path.length) {
-        if (widget.user.cellPath[index - 2].bid ==
-            widget.user.cellPath[index - 1].bid &&
-            widget.user.cellPath[index - 1].bid ==
-                widget.user.cellPath[index].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[index - 2],
-              widget.user.path[index - 1],
-              widget.user.path[index],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+      try{
+        if (index + 1 == widget.user.path.length) {
+          if (widget.user.cellPath[index - 2].bid ==
+              widget.user.cellPath[index - 1].bid &&
+              widget.user.cellPath[index - 1].bid ==
+                  widget.user.cellPath[index].bid) {
+            a = tools.calculateAnglefifth(
+                widget.user.path[index - 2],
+                widget.user.path[index - 1],
+                widget.user.path[index],
+                widget
+                    .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+          }
+        } else {
+          if (widget.user.cellPath[index - 1].bid ==
+              widget.user.cellPath[index].bid &&
+              widget.user.cellPath[index].bid ==
+                  widget.user.cellPath[index + 1].bid) {
+            a = tools.calculateAnglefifth(
+                widget.user.path[index - 1],
+                widget.user.path[index],
+                widget.user.path[index + 1],
+                widget
+                    .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+          }
         }
-      } else {
-        if (widget.user.cellPath[index - 1].bid ==
-            widget.user.cellPath[index].bid &&
-            widget.user.cellPath[index].bid ==
-                widget.user.cellPath[index + 1].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[index - 1],
-              widget.user.path[index],
-              widget.user.path[index + 1],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
+      }catch(_){
+
       }
+
 
       String direc = tools.angleToClocks(a, widget.context);
       turnDirection = direc;

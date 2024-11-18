@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -35,6 +36,7 @@ class UserState {
   List<int> offPathDistance = [];
   bool onConnection = false;
   bool temporaryExit = false;
+  Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   static double geoLat = 0.0;
   static double geoLng = 0.0;
   static bool ttsAllStop = false;
@@ -89,6 +91,7 @@ class UserState {
       }
       moveOneStep(context, turnPoints);
     }
+    incrementSteps();
   }
 
   bool isMovementAllowed(List<Cell> turnPoints) {
@@ -158,7 +161,6 @@ class UserState {
         Cell previousPoint = tools.findingprevpoint(cellPath, pathobj.index);
         double angleToNextCell = tools.calculateBearing([lat, lng],
             [cellPath[pathobj.index].lat, cellPath[pathobj.index].lng]);
-
         updateCoordinatesAndPath(previousPoint, angleToNextCell);
 
         if (calculateOffPathDistance() > 0) {
@@ -166,7 +168,7 @@ class UserState {
         }
         return;
       }
-
+      initializeStepsArray(0, [2]);
       if (cellPath[pathobj.index].bid != null &&
           bid != cellPath[pathobj.index].bid) {
         bid = cellPath[pathobj.index].bid!;
@@ -268,11 +270,40 @@ class UserState {
         ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination));
   }
 
+  void initializeStepsArray(int index, List<int> array){
+    print("array changed to $array");
+    stepsArray = {"index":[index], "array":array};
+  }
+
+  void incrementSteps(){
+    print("index was ${stepsArray["index"]}");
+    int i = stepsArray["index"]!.first;
+    stepsArray["index"] = [i+1];
+    if(stepsArray["index"]!.first == stepsArray["array"]!.length){
+      stepsArray["index"]!.first = 0;
+    }
+    stepSize = stepsArray["array"]![stepsArray["index"]!.first].toDouble();
+    print("changed step size to $stepSize on index ${stepsArray["index"]} and should have been ${stepsArray["array"]![stepsArray["index"]!.first].toDouble()}");
+  }
+
   void updateCoordinatesAndPath(Cell previousPoint, double angle) {
     Map<String, double> lineData = tools.findslopeandintercept(previousPoint.x,
         previousPoint.y, cellPath[pathobj.index].x, cellPath[pathobj.index].y);
+    try{
+      int stepsRequired = tools.stepsToReachTarget(previousPoint.x, previousPoint.y, cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);
+      double d = tools.calculateDistance([previousPoint.x, previousPoint.y], [cellPath[pathobj.index].x, cellPath[pathobj.index].y]);
+      print("stepsRequired $stepsRequired d $d");
+      List<int> Array = tools.findIntegersWithMean((stepsRequired/d)*2);
+      print("length of array ${stepsArray["array"]!.length}  ${Array.length}  ${ListEquality().equals(stepsArray["array"], Array)}");
+      if(!const ListEquality().equals(stepsArray["array"], Array)){
+        initializeStepsArray(0, Array);
+      }
+    }catch(e){
+      print("error in stepsArray $e");
+      initializeStepsArray(0, [2]);
+    }
 
-    List<int> nextTransition = tools.findpoint(showcoordX, showcoordY,
+    List<int> nextTransition = tools.findPoint(showcoordX, showcoordY,
         cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);
 
     List<int>? correctedTransition = getCorrectedTransition(angle);
@@ -283,7 +314,7 @@ class UserState {
     coordX = correctedTransition[0];
     coordY = correctedTransition[1];
 
-    List<double> newLatLng = tools.moveLatLng([lat, lng], angle, 1);
+    List<double> newLatLng = tools.localtoglobal(showcoordX, showcoordY, building!.patchData[bid]);
     lat = newLatLng[0];
     lng = newLatLng[1];
 

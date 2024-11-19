@@ -111,6 +111,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
+    print("print widget.user");
+    print(widget.user.pathobj.directions);
+
     for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
       //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
@@ -125,6 +128,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
+
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       //
@@ -515,8 +519,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg, String lngcode,
-      {bool prevpause = false}) async {
+  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
     if (!UserState.ttsAllStop) {
       if (disposed) return;
 
@@ -1110,8 +1113,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                             setState(() {
                               if (DirectionIndex - 1 >= 1) {
                                 DirectionIndex--;
-                                widget.focusOnTurn(widget
-                                    .user.pathobj.directions[DirectionIndex]);
+                                widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
                                 if (DirectionIndex == nextTurnIndex) {
                                   widget.clearFocusTurnArrow();
                                 }

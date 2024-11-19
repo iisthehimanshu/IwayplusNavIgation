@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-import 'package:iwaymaps/ONLY%20NAVIGATION/Navigation.dart';
+import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 
 import '../API/buildingAllApi.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';

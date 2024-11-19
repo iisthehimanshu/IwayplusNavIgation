@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '/IWAYPLUS/Elements/HelperClass.dart';
 
-import '/ONLY NAVIGATION/API/RefreshTokenAPI.dart';
+import '/NAVIGATION/API/RefreshTokenAPI.dart';
 
 class DeleteApi {
   static String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/user/delete" : "https://maps.iwayplus.in/secured/user/delete";

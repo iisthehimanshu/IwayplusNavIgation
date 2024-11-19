@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import '../API/QRDataAPI.dart';
 import '../API/buildingAllApi.dart';
 import '/IWAYPLUS/APIMODELS/QRDataAPIModel.dart';
-import '/ONLY NAVIGATION/Navigation.dart';
-import '/ONLY NAVIGATION/pathState.dart';
+import '/NAVIGATION/Navigation.dart';
+import '/NAVIGATION/pathState.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 

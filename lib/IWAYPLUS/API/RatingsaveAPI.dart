@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '/IWAYPLUS/Elements/HelperClass.dart';
 
-import '/ONLY NAVIGATION/API/RefreshTokenAPI.dart';
+import '/NAVIGATION/API/RefreshTokenAPI.dart';
 
 class RatingsaveAPI{
   final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/rating-save" : "https://maps.iwayplus.in/secured/rating-save";

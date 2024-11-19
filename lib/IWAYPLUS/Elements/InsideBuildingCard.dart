@@ -8,10 +8,10 @@ import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import '/IWAYPLUS/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../API/buildingAllApi.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
-import '/ONLY NAVIGATION/DATABASE/BOXES/BuildingAPIModelBox.dart';
+import '/NAVIGATION/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import '/ONLY NAVIGATION/Navigation.dart';
+import '/NAVIGATION/Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {
   String buildingImageURL;

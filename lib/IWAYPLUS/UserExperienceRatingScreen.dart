@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iwaymaps/IWAYPLUS/VenueSelectionScreen.dart';
 import 'package:test/scaffolding.dart';
 
-import '/ONLY NAVIGATION/Navigation.dart';
+import '/NAVIGATION/Navigation.dart';
 
 class UserExperienceRatingScreen extends StatefulWidget {
   @override

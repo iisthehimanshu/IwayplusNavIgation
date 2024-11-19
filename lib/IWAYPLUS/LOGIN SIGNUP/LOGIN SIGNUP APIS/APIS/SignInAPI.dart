@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '../../../../ONLY NAVIGATION/API/RefreshTokenAPI.dart';
+import '../../../../NAVIGATION/API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
 import '../../../Elements/UserCredential.dart';
 import '../MODELS/SignInAPIModel.dart';

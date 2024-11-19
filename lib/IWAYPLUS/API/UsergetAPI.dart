@@ -6,7 +6,7 @@ import '/IWAYPLUS/APIMODELS/UsergetAPIModel.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 
 import '../Elements/HelperClass.dart';
-import '/ONLY NAVIGATION/API/RefreshTokenAPI.dart';
+import '/NAVIGATION/API/RefreshTokenAPI.dart';
 
 
 class UsergetAPI{

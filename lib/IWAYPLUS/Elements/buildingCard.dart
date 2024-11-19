@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import '../API/buildingAllApi.dart';
-import '/ONLY NAVIGATION/Navigation.dart';
+import '/NAVIGATION/Navigation.dart';
 
 class buildingCard extends StatelessWidget {
   String imageURL;

@@ -8,15 +8,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
-import '/ONLY NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
-import '/ONLY NAVIGATION/DebugToggle.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import '/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
+import '/NAVIGATION/DebugToggle.dart';
 import 'package:http/http.dart' as http;
 
 import 'API/DeleteApi.dart';

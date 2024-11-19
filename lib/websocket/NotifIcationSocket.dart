@@ -17,7 +17,7 @@ class NotificationSocket{
   });
 
   static void receiveMessage(){
-    channel.on("com.iwaymaps.navigation", (value){
+    channel.on("com.iwayplus.navigation", (value){
       NotificationData notification = NotificationData.fromJson(value);
       PushNotifications.showSimpleNotificationwithImage(body: notification.title,imageUrl: notification.filepath,payload: notification.body,title: notification.title);
       print("socketMessage${value}");

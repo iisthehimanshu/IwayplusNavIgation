@@ -8,7 +8,7 @@
 PRODUCT_NAME = iwayplusnav
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.iwaymaps.navigation.iwayplusnav
+PRODUCT_BUNDLE_IDENTIFIER = com.iwayplus.navigation.iwayplusnav
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2024 com.iwaymaps.navigation. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 com.iwayplus.navigation. All rights reserved.

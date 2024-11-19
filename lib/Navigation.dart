@@ -12834,15 +12834,15 @@ bool isAppinForeground=true;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  Text("coord [${user.coordX},${user.coordY}] \n"
-                      "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                      "floor ${user.floor}\n"
-                      // "userBid ${user.Bid} \n"
-                  "stepSize ${UserState.stepSize}\n"
-                      "index ${user.pathobj.index} \n"
-                      "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                  // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                  //     "floor ${user.floor}\n"
+                  //     // "userBid ${user.Bid} \n"
+                  // "stepSize ${UserState.stepSize}\n"
+                  //     "index ${user.pathobj.index} \n"
+                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
                   DebugToggle.Slider
                       ? Slider(

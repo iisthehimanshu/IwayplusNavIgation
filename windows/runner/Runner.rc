@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.iwaymaps.navigation" "\0"
+            VALUE "CompanyName", "com.iwayplus.navigation" "\0"
             VALUE "FileDescription", "iwayplusnav" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "iwayplusnav" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.iwaymaps.navigation. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.iwayplus.navigation. All rights reserved." "\0"
             VALUE "OriginalFilename", "iwayplusnav.exe" "\0"
             VALUE "ProductName", "iwayplusnav" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

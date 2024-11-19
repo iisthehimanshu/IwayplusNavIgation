@@ -20,7 +20,7 @@ class RatingsaveAPI{
       "destinationId": destinationID,
       "rating": rating,
       "feedback": feedback,
-      "appId": "com.iwaymaps.navigation"
+      "appId": "com.iwayplus.navigation"
     };
 
     final response = await http.post(

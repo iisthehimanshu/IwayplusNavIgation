@@ -1062,7 +1062,7 @@
 			<key>entitlements</key>
 			<dict>
 				<key>application-identifier</key>
-				<string>TQBS9TGN6R.com.iwaymaps.navigation</string>
+				<string>TQBS9TGN6R.com.iwayplus.navigation</string>
 				<key>aps-environment</key>
 				<string>production</string>
 				<key>com.apple.developer.team-identifier</key>
@@ -1079,7 +1079,7 @@
 				<key>dateExpires</key>
 				<string>03/09/25</string>
 				<key>name</key>
-				<string>iOS Team Ad Hoc Provisioning Profile: com.iwaymaps.navigation</string>
+				<string>iOS Team Ad Hoc Provisioning Profile: com.iwayplus.navigation</string>
 			</dict>
 			<key>team</key>
 			<dict>

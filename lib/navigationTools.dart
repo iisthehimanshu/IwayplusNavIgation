@@ -1413,6 +1413,20 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
+  static List<int> findLocalCoordinates(Cell A, Cell C, List<double> globalB) {
+    // Step 1: Calculate the parameter `t` (the proportion of B on the line AC in the global system)
+    double t = ((globalB[0] - A.lat) * (C.lat - A.lat) +
+        (globalB[1] - A.lng) * (C.lng - A.lng)) /
+        ((C.lat - A.lat) * (C.lat - A.lat) +
+            (C.lng - A.lng) * (C.lng - A.lng));
+
+    // Step 2: Interpolate local coordinates of B using `t`
+    double localBX = A.x + t * (C.x - A.x);
+    double localBY = A.y + t * (C.y - A.y);
+
+    return [localBX.toInt(), localBY.toInt()];
+  }
+
   static double calculateAerialDist(double lat1, double lon1, double lat2, double lon2) {
     // Approximate conversion factor: 1 degree of latitude/longitude to meters
     const double metersPerDegree = 111320;

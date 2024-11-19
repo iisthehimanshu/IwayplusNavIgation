@@ -3198,6 +3198,7 @@ bool isAppinForeground=true;
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
+        PathState.sourceBid = user.bid;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
@@ -8867,12 +8868,10 @@ bool isAppinForeground=true;
                                             widget.directLandID = "";
                                             selectedroomMarker.clear();
                                             pathMarkers.clear();
-
                                             SingletonFunctionController
                                                 .building
                                                 .selectedLandmarkID =
                                             null;
-
                                             PathState =
                                                 pathState.withValues(
                                                     -1,
@@ -8956,9 +8955,8 @@ bool isAppinForeground=true;
                                             ),
                                             child: TextButton(
                                               onPressed: () async {
-
-
                                                 if(startingNavigation){
+                                                  print("entered after the navigation");
                                                   tools.setBuildingAngle(
                                                       SingletonFunctionController
                                                           .building
@@ -9980,11 +9978,7 @@ bool isAppinForeground=true;
 
           int index =
           user.path.indexOf((user.showcoordY * col) + user.showcoordX);
-
           int node = user.path[index + 1];
-
-
-
           List<int> c = [node % col, node ~/ col];
           int val = tools.calculateAngleSecond(a, b, c).toInt();
 
@@ -10001,41 +9995,21 @@ bool isAppinForeground=true;
               }
             }
           }catch(_){
-
           }
-
-          //
-          //
-
-          //
           for (int i = 0; i < getPoints.length; i++) {
-            //
-            //
-            //
-            //
-            //
-
-            //
-
-            //
             if (isPdrStop && val == 0) {
-              //
-
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                 print("pdr started"),
                 StartPDR(),
               });
-
               setState(() {
                 isPdrStop = false;
               });
-
               break;
             }
             if (getPoints[i][0] == user.showcoordX &&
                 getPoints[i][1] == user.showcoordY) {
               print("pdr stopped");
-
               StopPDR();
               getPoints.removeAt(i);
               break;
@@ -11942,7 +11916,6 @@ bool isAppinForeground=true;
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
     destiName = destname;
-
     List<int> tv = tools.eightcelltransition(user.theta);
     List<Cell> turnPoints =
     tools.getCellTurnpoints(user.cellPath);
@@ -11951,7 +11924,6 @@ bool isAppinForeground=true;
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
-
     flutterTts.pause().then((value) {
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
@@ -11961,6 +11933,9 @@ bool isAppinForeground=true;
     });
     clearPathVariables();
     StopPDR();
+    for (final subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
     PathState.didPathStart = true;
     _isnavigationPannelOpen = false;
     user.temporaryExit = true;
@@ -11972,13 +11947,13 @@ bool isAppinForeground=true;
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
     singleroute.clear();
+
     fitPolygonInScreen(patch.first);
     Future.delayed(Duration.zero, () async {
       setState(() {
         focusturnArrow.clear();
       });
     });
-
     // setState(() {
     if (markers.length > 0) {
       List<double> lvalue = tools.localtoglobal(
@@ -11993,7 +11968,6 @@ bool isAppinForeground=true;
     // Future.delayed(Duration(seconds: 5));
     // _feedbackController.open();
   }
-
   void onLandmarkVenueClicked(String ID,
       {bool DirectlyStartNavigation = false}) async {
     final snapshot = await SingletonFunctionController.building.landmarkdata;
@@ -12820,14 +12794,14 @@ bool isAppinForeground=true;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  Text("coord [${user.coordX},${user.coordY}] \n"
-                      "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                      "floor ${user.floor}\n"
-                      // "userBid ${user.Bid} \n"
-                      "index ${user.pathobj.index} \n"
-                      "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                  // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                  //     "floor ${user.floor}\n"
+                  //     // "userBid ${user.Bid} \n"
+                  //     "index ${user.pathobj.index} \n"
+                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
                   DebugToggle.Slider
                       ? Slider(

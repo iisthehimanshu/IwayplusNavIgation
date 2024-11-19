@@ -421,14 +421,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
-
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
               return;
             }
-
             String normalizedValueName = normalizeText(value.name!);
-
             if(searchText.toLowerCase() == ("entry")){
               final fuse = Fuzzy(
                 [normalizedValueName],
@@ -843,16 +840,12 @@ if(searchResults.length>2){
                 child: ChipsChoice<int>.single(
                   value: vall,
                   onChanged: (val) {
-
                     if(HelperClass.SemanticEnabled) {
                       speak("${optionListForUI[val]} selected");
                     }
-
                     selectedButton = optionListForUI[val];
                     setState(() => vall = val);
                     lastval = val;
-
-
                     _controller.text = optionListForUI[val];
                     search(optionListForUI[val]);
                   },

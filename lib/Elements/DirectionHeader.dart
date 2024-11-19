@@ -126,10 +126,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
-      //
-      //
-      // //
-      // HelperClass.showToast("Bin cleared");
       if (widget.user.pathobj.index > 1) {
         listenToBin();
       }
@@ -246,12 +242,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
     print("threshold");
-    threshold = (widget.user.building!.patchData[widget.user.bid]!.patchData!
-        .realtimeLocalisationThreshold !=
-        null)
-        ? widget.user.building!.patchData[widget.user.bid]!.patchData!
-        .realtimeLocalisationThreshold!
-        : '5';
+    threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!
+        .realtimeLocalisationThreshold??'5';
+    print(widget.user.building!.patchData[widget.user.bid]!.patchData!
+        .realtimeLocalisationThreshold);
     print(threshold);
     //
     sortedsumMap.clear();
@@ -407,103 +401,67 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             double d = tools.calculateDistance(beaconcoord, usercoord);
             int distanceFromPath = 100000000;
             int? indexOnPath = null;
-            int numCols = widget
-                .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!;
+           List<double> newPoint=[];
+          if(widget.user.bid==buildingAllApi.outdoorID){
+            List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
+            List<Cell> nearPoints=findTwoNearestPoints(beaconLatLng,widget.user.cellPath,widget.user.bid);
+            for(var point in nearPoints){
+              print("found near point is [${point.x},${point.y}]");
+            }
+
+            newPoint=projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1],widget
+                .user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
+
+            List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
+            Cell point = Cell((np[1]*nearPoints[0].numCols)+np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
+
+            indexOnPath=insertProjectedPoint(widget.user.cellPath,point);
+            widget.user.path.insert(indexOnPath, point.node);
+            widget.user.cellPath.insert(
+                indexOnPath,
+                Cell(
+                    point.node,
+                    point.x,
+                    point.y,
+                    tools.eightcelltransition,
+                    point.lat,
+                    point.lng,
+                    buildingAllApi.outdoorID,
+                    point.floor,
+                    point.numCols,
+                    imaginedCell: true));
+          }else{
             widget.user.cellPath.forEach((node) {
               List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-
-
-              if (d1 < distanceFromPath && widget.user.bid!=buildingAllApi.outdoorID) {
+              if (d1 < distanceFromPath) {
                 distanceFromPath = d1.toInt();
                 indexOnPath = widget.user.path.indexOf(node.node);
-              }else if(d1 < distanceFromPath && widget.user.bid==buildingAllApi.outdoorID){
-                distanceFromPath = d1.toInt();
-                List<Cell> nearPoints=findTwoNearestPoints(beaconcoord,widget.user.cellPath,widget.user.bid);
-                Cell newPoint=projectCellOntoSegment(beaconcoord, nearPoints[0], nearPoints[1],widget
-                    .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-                print("new point :: ${nearPoints[0].x} ${nearPoints[0].y} :: ${nearPoints[1].x} ${nearPoints[1].y} :: ${newPoint.x} ${newPoint.y}");
               }
             });
+          }
             if (distanceFromPath > 10) {
-              print("calling expected function22");
               _timer.cancel();
               widget.repaint(nearestBeacon);
               widget.reroute;
               DirectionIndex = 1;
               nextTurnIndex = 1;
               return false; //away from path
-            } else {
-              double dis = tools.calculateDistance(
-                  [widget.user.showcoordX, widget.user.showcoordY],
-                  beaconcoord);
-              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-              if (!UserState.ttsOnlyTurns) {
-                speak(
-                    "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
-                    _currentLocale);
-              }
-              widget.user.moveToPointOnPath(indexOnPath!);
-
-              widget.moveUser();
-              DirectionIndex = nextTurnIndex;
+            }else {
+                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+                if (!UserState.ttsOnlyTurns) {
+                  speak(
+                      "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
+                      _currentLocale);
+                }
+                widget.user.moveToPointOnPath(indexOnPath!);
+                widget.moveUser();
+                DirectionIndex = nextTurnIndex;
               return true; //moved on path
             }
-            // if (d < 5) {
-            //
-            //   //near to user so nothing to do
-            //   return true;
-            // } else {
-            //   //
-            //   int distanceFromPath = 100000000;
-            //   int? indexOnPath = null;
-            //   int numCols = widget.user.pathobj.numCols![widget.user
-            //       .Bid]![widget.user.floor]!;
-            //   widget.user.path.forEach((node) {
-            //     List<int> pathcoord = [node % numCols, node ~/ numCols];
-            //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-            //     if (d1 < distanceFromPath) {
-            //       distanceFromPath = d1.toInt();
-            //       //
-            //       //
-            //       indexOnPath = widget.user.path.indexOf(node);
-            //       //
-            //     }
-            //   });
-            //
-            //   if (distanceFromPath > 10) {
-            //
-            //     _timer.cancel();
-            //     widget.repaint(nearestBeacon);
-            //     widget.reroute;
-            //     DirectionIndex = 1;
-            //     return false; //away from path
-            //   } else {
-            //
-            //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-            //     speak(
-            //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
-            //         _currentLocale
-            //     );
-            //     widget.user.moveToPointOnPath(indexOnPath!);
-            //     widget.moveUser();
-            //     DirectionIndex = nextTurnIndex;
-            //     return true; //moved on path
-            //   }
-            // }
-
-            //
-            //
-            //
-            //
-            //
           }
         }
       } else {
-        //
-        //
-
-        //
         if (highestweight > 1.2) {
           print("calling expected function 3");
           _timer.cancel();
@@ -518,45 +476,81 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     return false;
   }
+  int insertProjectedPointInIntList(List<int> path, int projectedPoint, int numCols) {
+    // Helper function to compute x, y for a given element
+    List<int> getXY(int element) {
+      int x = element % numCols;
+      int y = element ~/ numCols;
+      return [x, y];
+    }
 
-  List<Cell> findTwoNearestPoints(List<int> beaconcoord, List<Cell> turnPoints,String userBid) {
+    // Calculate x, y for the projected point
+    List<int> projectedXY = getXY(projectedPoint);
+
+    // Find the index to insert the projected point
+    int indexToInsert = path.indexWhere((element) {
+      List<int> elementXY = getXY(element);
+
+      // Compare first by x, then by y if x is the same
+      return (elementXY[0] > projectedXY[0]) ||
+          (elementXY[0] == projectedXY[0] && elementXY[1] > projectedXY[1]);
+    });
+
+    return indexToInsert;
+  }
+
+  int insertProjectedPoint(List<Cell> path, Cell projectedPoint) {
+    // Find the index of the next greater point
+    int indexToInsert = path.indexWhere((cell) {
+      // Compare by some criterion; here we're using the `x` coordinate
+      return (cell.x > projectedPoint.x) ||
+          (cell.x == projectedPoint.x && cell.y > projectedPoint.y);
+    });
+
+
+    return indexToInsert;
+  }
+
+  List<Cell> findTwoNearestPoints(List<double> beaconcoord, List<Cell> turnPoints,String userBid){
     // Sort the list of turn points by distance to the beacon
+    print("turnPoints[0].x ${turnPoints.length} ${turnPoints[0].x}");
     List<Cell> filteredPoints = turnPoints.where((point) =>
-     point.bid == userBid && point.imaginedCell == false
+     (point.bid == userBid && point.imaginedCell == false)
     ).toList();
-    filteredPoints.sort((a, b) => tools.calculateDistance(beaconcoord, [a.x,a.y]).compareTo(tools.calculateDistance(beaconcoord, [b.x,b.y])));
+    print("filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
+
+    filteredPoints.sort((a, b) => tools.calculateAerialDist(beaconcoord[0],beaconcoord[1], a.lat,a.lng).compareTo(tools.calculateAerialDist(beaconcoord[0],beaconcoord[1], b.lat,b.lng)));
+    print("filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
     // Return the first two points in the sorted list
-    return [turnPoints[0], turnPoints[1]];
+    return [filteredPoints[0], filteredPoints[1]];
   }
-  Cell projectCellOntoSegment(List<int> beacon, Cell a, Cell b,int numcols) {
-    // Vector AB
-    int abX = (b.x - a.x).abs();
-    int abY = (b.y - a.y).abs();
+  List<double> projectCellOntoSegment(
+      List<double> beaconLatLng, Cell a, Cell b, int numCols) {
+    // Vector AB (lat/lng)
+    double abLat = b.lat - a.lat;
+    double abLng = b.lng - a.lng;
+    // Vector AP (lat/lng)
+    double apLat = beaconLatLng[0] - a.lat;
+    double apLng = beaconLatLng[1] - a.lng;
+    // Dot products
+    double abDotAb = abLat * abLat + abLng * abLng;
+    double apDotAb = apLat * abLat + apLng * abLng;
 
-    // Vector AP
-    int apX = (beacon[0] - a.x).abs();
-    int apY = (beacon[1] - a.y).abs();
+    // Projection scalar t
+    double t = apDotAb / abDotAb;
 
-    // Dot products and integer scaling
-    int abDotAb = abX * abX + abY * abY;
-    int apDotAb = apX * abX + apY * abY;
+    // Clamp t to stay within the segment [0, 1]
+    t = t.clamp(0.0, 1.0);
 
-    // Scale factor to retain precision for `t`
-    int scale = 1000;
+    // Projected point P' on the line segment
+    double projLat = a.lat + t * abLat;
+    double projLng = a.lng + t * abLng;
 
-    // Calculate scaled projection scalar t
-    int tScaled = (apDotAb * scale) ~/ abDotAb;
+    // Convert projected lat/lng back to x/y for the Cell object
 
-    // Clamp tScaled to stay within the segment [0, scale]
-    tScaled = tScaled.clamp(0, scale);
-
-    // Projected point P' on the line segment, scaled back
-    int projX = (a.x + (tScaled * abX ~/ scale)).floor();
-    int projY = (a.y + (tScaled * abY ~/ scale)).floor();
-    List<double> latlng=tools.localtoglobal(projX, projY,SingletonFunctionController.building.patchData[widget.user.bid]);
-    return Cell(projX+projY*numcols,projX, projY,(double angle, {int? currPointer, int? totalCells}) {},latlng[0],latlng[1],a.bid,a.floor,numcols,imaginedCell: true);
-
+    return [projLat,projLng];
   }
+
 
   FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg, String lngcode,
@@ -1267,20 +1261,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             )
                 : Container(),
 
-            // Container(
-            //   width: 300,
-            //   height: 100,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Text(sumMap.toString()),
-            //         Text(binString),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              width: 300,
+              height: 100,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(sumMap.toString()),
+                  ],
+                ),
+              ),
+            ),
 
             // Container(
             //   width: 300,

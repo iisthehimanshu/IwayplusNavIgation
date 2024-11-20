@@ -10,10 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/Elements/UserCredential.dart';
+import '../../IWAYPLUS/Elements/locales.dart';
+import '/IWAYPLUS/API/buildingAllApi.dart';
 
-import 'package:iwaymaps/navigationTools.dart';
 import 'package:vibration/vibration.dart';
 
 import '../Cell.dart';
@@ -24,9 +25,8 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
+import '../navigationTools.dart';
 import '../singletonClass.dart';
-import 'UserCredential.dart';
-import 'locales.dart';
 
 class DirectionHeader extends StatefulWidget {
   String direction;

@@ -12,13 +12,10 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/API/ladmarkApi.dart';
-import 'package:iwaymaps/APIMODELS/buildingAll.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Elements/SearchNearby.dart';
-import 'package:iwaymaps/Elements/SearchpageRecents.dart';
-import 'package:iwaymaps/singletonClass.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/API/buildingAllApi.dart';
+import '/NAVIGATION/API/ladmarkApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 

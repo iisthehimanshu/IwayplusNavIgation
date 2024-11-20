@@ -12,28 +12,23 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/API/ladmarkApi.dart';
-import 'package:iwaymaps/APIMODELS/buildingAll.dart';
-import 'package:iwaymaps/Elements/DestinationPageChipsWidget.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Elements/SearchNearby.dart';
-import 'package:iwaymaps/Elements/SearchpageRecents.dart';
-import 'package:iwaymaps/UserState.dart';
-import 'package:iwaymaps/pathState.dart';
-import 'package:iwaymaps/singletonClass.dart';
+import 'package:iwaymaps/IWAYPLUS/API/buildingAllApi.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
-import 'package:iwaymaps/buildingState.dart';
+
 
 import 'FloorSelectionPage.dart';
 import 'navigationTools.dart';
@@ -349,7 +344,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   ];
-
   List<IconData> _icons = [
     Icons.wash_sharp,
     Icons.local_cafe,
@@ -359,8 +353,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Icons.elevator,
     Icons.desk_sharp,
   ];
-
-
 
   void onChipSelected(int index) {
     setState(() {

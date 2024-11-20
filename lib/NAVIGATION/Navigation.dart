@@ -8,25 +8,12 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/path.dart';
+import 'package:iwaymaps/NAVIGATION/pathState.dart';
+import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
 import 'package:iwaymaps/NAVIGATION/routeOption.dart';
-import '../IWAYPLUS/API/RatingsaveAPI.dart';
-import '../IWAYPLUS/API/buildingAllApi.dart';
-import '../IWAYPLUS/API/slackApi.dart';
-import '../IWAYPLUS/CLUSTERING/InitMarkerModel.dart';
-import '../IWAYPLUS/CLUSTERING/MapHelper.dart';
-import '../IWAYPLUS/CLUSTERING/MapMarkers.dart';
-import '../IWAYPLUS/CONSTANTS.dart';
-import '../IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../IWAYPLUS/Elements/HelperClass.dart';
-import '../IWAYPLUS/Elements/QRLandmarkScreen.dart';
-import '../IWAYPLUS/Elements/UserCredential.dart';
-import '../IWAYPLUS/Elements/landmarkPannelShimmer.dart';
-import '../IWAYPLUS/Elements/locales.dart';
-import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
-import '../IWAYPLUS/localizedData.dart';
-import '../IWAYPLUS/websocket/UserLog.dart';
-import 'ViewModel/DirectionInstructionViewModel.dart';
-import 'singletonClass.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+import 'package:iwaymaps/NAVIGATION/waypoint.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -39,28 +26,42 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
-import 'API/waypoint.dart';
-import 'DebugToggle.dart';
-import 'ELEMENTS/DirectionHeader.dart';
-import 'ELEMENTS/ExploreModeWidget.dart';
+import '../IWAYPLUS/API/buildingAllApi.dart';
+import '../IWAYPLUS/API/slackApi.dart';
+import '../IWAYPLUS/APIMODELS/buildingAll.dart';
+import '../IWAYPLUS/CLUSTERING/InitMarkerModel.dart';
+import '../IWAYPLUS/CLUSTERING/MapHelper.dart';
+import '../IWAYPLUS/CLUSTERING/MapMarkers.dart';
+import '../IWAYPLUS/CONSTANTS.dart';
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import '../IWAYPLUS/Elements/QRLandmarkScreen.dart';
+import '../IWAYPLUS/Elements/UserCredential.dart';
+import '../IWAYPLUS/Elements/landmarkPannelShimmer.dart';
+import '../IWAYPLUS/Elements/locales.dart';
+import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
-import 'dijkastra.dart';
-import 'fetchrouteParams.dart';
-import 'realWorldModel.dart';
-import 'wayPointPath.dart';
-import 'waypoint.dart';
+import '../IWAYPLUS/localizedData.dart';
+import '../IWAYPLUS/websocket/UserLog.dart';
+import '/IWAYPLUS/API/RatingsaveAPI.dart';
 import 'API/DataVersionApi.dart';
+import 'API/PolyLineApi.dart';
 import 'API/outBuilding.dart';
+import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
+import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import 'ELEMENTS/AccessiblePathButton.dart';
-import '../IWAYPLUS/MainScreen.dart';
-import 'APIMODELS/polylinedata.dart';
-import '../IWAYPLUS/UserExperienceRatingScreen.dart';
+import 'DebugToggle.dart';
+import 'ELEMENTS/DirectionHeader.dart';
+import 'ELEMENTS/DirectionInstruction.dart';
+import 'ELEMENTS/ExploreModeWidget.dart';
+import 'Elements/AccessiblePathButton.dart';
+import 'UserState.dart';
 import 'VersioInfo.dart';
+import 'ViewModel/DirectionInstructionViewModel.dart';
 import 'centeroid.dart';
+import 'dijkastra.dart';
 import 'directionClass.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:device_information/device_information.dart';
@@ -80,16 +81,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'API/PolyLineApi.dart';
-import 'APIMODELS/landmark.dart';
-import 'ELEMENTS/HomepageLandmarkClickedSearchBar.dart';
-import 'ELEMENTS/directionInstruction.dart';
-import 'UserState.dart';
-import 'buildingState.dart';
-import 'navigationTools.dart';
-import 'path.dart';
-import 'pathState.dart';
-import 'pathState.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -98,14 +89,15 @@ import 'API/beaconapi.dart';
 import 'API/ladmarkApi.dart';
 import 'API/outbuildingapi.dart';
 import 'APIMODELS/beaconData.dart';
-import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
+import '/IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DestinationSearchPage.dart';
-import 'ELEMENTS/HomepageSearch.dart';
-import 'ELEMENTS/NavigationFilterCard.dart';
-import 'ELEMENTS/SearchNearby.dart';
+import 'Elements/HomepageSearch.dart';
+import 'Elements/NavigationFilterCard.dart';
+import 'Elements/SearchNearby.dart';
 import 'MapState.dart';
 import 'MotionModel.dart';
 import 'SourceAndDestinationPage.dart';
@@ -115,11 +107,13 @@ import 'buildingState.dart';
 import 'buildingState.dart';
 import 'cutommarker.dart';
 import 'dart:math' as math;
-import 'APIMODELS/landmark.dart';
+import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
-import 'ELEMENTS/DirectionHeader.dart';
+
+import 'fetchrouteParams.dart';
+import 'navigationTools.dart';
 
 void main() {
   runApp(MyApp());
@@ -1206,6 +1200,7 @@ bool isAppinForeground=true;
           user.showcoordY.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
+
       LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
 
@@ -3196,6 +3191,7 @@ bool isAppinForeground=true;
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
+        PathState.sourceBid = user.bid;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
@@ -4841,8 +4837,6 @@ bool isAppinForeground=true;
 
     closedpolygons[value.polyline!.buildingID!]?.clear();
 
-
-
     if (widget.directLandID.length < 2) {
       selectedroomMarker.clear();
       _isLandmarkPanelOpen = false;
@@ -6008,7 +6002,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear(); pathCovered.clear();
+              //           singleroute.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6053,7 +6047,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear(); pathCovered.clear();
+              //           singleroute.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6110,7 +6104,7 @@ bool isAppinForeground=true;
               //           SingletonFunctionController.building.selectedLandmarkID =
               //               landmarks[i].properties!.polyId;
               //           _isRoutePanelOpen = false;
-              //           singleroute.clear(); pathCovered.clear();
+              //           singleroute.clear();
               //           _isLandmarkPanelOpen = true;
               //           addselectedMarker(LatLng(value[0], value[1]));
               //         }
@@ -6122,7 +6116,7 @@ bool isAppinForeground=true;
               //         SingletonFunctionController.building.selectedLandmarkID =
               //             landmarks[i].properties!.polyId;
               //         _isRoutePanelOpen = false;
-              //         singleroute.clear(); pathCovered.clear();
+              //         singleroute.clear();
               //         _isLandmarkPanelOpen = true;
               //         addselectedMarker(LatLng(value[0], value[1]));
               //       }
@@ -6900,7 +6894,7 @@ bool isAppinForeground=true;
                       ),
                     ),
                     onPressed: () async {
-                      //_polygon.clear();
+                      _polygon.clear();
                       cachedPolygon.clear();
                       // circles.clear();
                       Markers.clear();
@@ -11663,7 +11657,6 @@ bool isAppinForeground=true;
       polygons.union(blurPatch);
       polygons.union(patch);
       cachedPolygon = polygons;
-      print(polygons);
       return polygons;
     }
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);

@@ -54,8 +54,8 @@ class BLueToothClass {
     weight[2] = 4.0;
     weight[3] = 0.5;
     weight[4] = 0.25;
-    weight[5] = 0.0;
-    weight[6] = 0.0;
+    weight[5] = 0.15;
+    weight[6] = 0.1;
   }
 
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>

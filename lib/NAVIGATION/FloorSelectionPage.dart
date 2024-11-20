@@ -7,20 +7,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
-import '../IWAYPLUS/API/buildingAllApi.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
-import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchNearby.dart';
-import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchpageRecents.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fuzzy/data/result.dart';
+import 'package:fuzzy/fuzzy.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/API/buildingAllApi.dart';
+import '/NAVIGATION/API/ladmarkApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
-import 'ELEMENTS/DestinationPageChipsWidget.dart';
-import 'ELEMENTS/HomepageFilter.dart';
+import 'Elements/DestinationPageChipsWidget.dart';
+import 'Elements/HomepageFilter.dart';
 
-import 'ELEMENTS/SearchpageCategoryResult.dart';
-import 'ELEMENTS/SearchpageResults.dart';
+import 'Elements/SearchpageCategoryResult.dart';
+import 'Elements/SearchpageResults.dart';
+import 'navigationTools.dart';
 class FloorSelectionPage extends StatefulWidget {
   String filterName ;
   String filterBuildingName;
@@ -35,9 +40,9 @@ class FloorSelectionPage extends StatefulWidget {
 class _FloorSelectionPageState extends State<FloorSelectionPage> {
   land landmarkData = land();
 
-  List<Widget> searchResults = [];
+  List<SearchpageResults> searchResults = [];
 
-  List<Widget> recentResults = [];
+  List<SearchpageResults> recentResults = [];
 
   List<dynamic> recent = [];
 
@@ -143,38 +148,13 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
               if(floor.isNotEmpty){
                 print(value.floor);
                 if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
-                  // print("--TRUE");
-                  // print("${ value.element!.subType!.toLowerCase()} ${filterText.toLowerCase()}");
-                  if(value.element!.subType != null && value.element!.subType!.toLowerCase().contains(filterText.toLowerCase())){
-                    print("--TRUE");
-                    searchResults.add(SearchpageResults(name: "${value.name}",
-                        location: "Floor ${value.floor}, ${value
-                            .buildingName}, ${value.venueName}",
-                        onClicked: onVenueClicked,
-                        ID: value.properties!.polyId!,
-                        bid: value.buildingID!,
-                        floor: value.floor!,
-                        coordX: value.doorX ?? value.coordinateX!,
-                        coordY: value.doorY ?? value.coordinateY!,
-                        accessible: value.element!.subType == "restRoom" &&
-                            value.properties!.washroomType == "Handicapped"
-                            ? "true"
-                            : "false"));
-                  }else if(searchResults.length < 10) {
-                    searchResults.add(SearchpageResults(name: "${value.name}",
-                        location: "Floor ${value.floor}, ${value
-                            .buildingName}, ${value.venueName}",
-                        onClicked: onVenueClicked,
-                        ID: value.properties!.polyId!,
-                        bid: value.buildingID!,
-                        floor: value.floor!,
-                        coordX: value.doorX ?? value.coordinateX!,
-                        coordY: value.doorY ?? value.coordinateY!,
-                        accessible: value.element!.subType == "restRoom" &&
-                            value.properties!.washroomType == "Handicapped"
-                            ? "true"
-                            : "false"));
-                  }
+                  searchResults.add(SearchpageResults(name: "${value.name}",
+                    location: "Floor ${value.floor}, ${value
+                        .buildingName}, ${value.venueName}",
+                    onClicked: onVenueClicked,
+                    ID: value.properties!.polyId!,
+                    bid: value.buildingID!,
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
                   print("NO");
                 }
@@ -186,12 +166,11 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
                   print("NO-");
                 }
               }
-
             }
           } else {
             return;
@@ -200,27 +179,38 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       }
 
 
+      if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
+        sortResultsByDistance(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!);
+      }
     });
 
     print("optionListItemBuildingName");
     print(optionListItemBuildingName);
   }
 
-  void fetchRecents()async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedData = prefs.getString('recents');
-    if(savedData != null){
-      recent = jsonDecode(savedData);
-      setState(() {
-        for(List<dynamic> value in recent){
-          if(buildingAllApi.getStoredAllBuildingID()[value[3]] != null){
-            recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2], bid: value[3],));
-            searchResults = recentResults;
-          }
-        }
-      });
-    }
+  void sortResultsByDistance(int userLat, int userLng) {
+    print("searchResults before: ${searchResults[0].name}");
+    print("coordinates : $userLat, $userLng");
+
+
+    // Sort by distance after ensuring the list is already sorted by floor and building
+    searchResults.sort((a, b) {
+      // Convert coordinates of elements (a and b) to global coordinates
+      // Calculate the distances between the user's location and the elements (a and b)
+      print("coordinates a ${a.coordX},${a.coordY}");
+      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX, a.coordY]);
+      double distanceB = tools.calculateDistance([userLat, userLng],  [b.coordX, b.coordY]);
+      a.distance = (distanceA*0.306).toInt();
+      b.distance = (distanceB*0.306).toInt();
+      // Sort by distance in increasing order
+      return distanceA.compareTo(distanceB);
+    });
+
+    print("searchResults after in floor: ${searchResults[0].name}  ${searchResults[0].coordX} ${searchResults[0].coordY}");
   }
+
+
+
 
   void onVenueClicked(String name, String location, String ID, String bid){
     Navigator.pop(context,[name,location,ID,bid]);
@@ -419,7 +409,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       child: Semantics(
                         header: true,
                         label: "Column",
-                          child: Column(children:searchResults.reversed.toList(),))
+                          child: Column(children:searchResults,))
                   )
               ),
 

@@ -12,30 +12,26 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
-import 'package:iwaymaps/NAVIGATION/ELEMENTS/DestinationPageChipsWidget.dart';
-import '../IWAYPLUS/API/buildingAllApi.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
-import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchNearby.dart';
-import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchpageRecents.dart';
-import 'package:iwaymaps/NAVIGATION/UserState.dart';
-import 'package:iwaymaps/NAVIGATION/pathState.dart';
+import 'package:iwaymaps/IWAYPLUS/API/buildingAllApi.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
-import 'ELEMENTS/DestinationPageChipsWidget.dart';
-import 'ELEMENTS/HomepageFilter.dart';
+import 'Elements/DestinationPageChipsWidget.dart';
+import 'Elements/HomepageFilter.dart';
 
-import 'ELEMENTS/SearchpageCategoryResult.dart';
-import 'ELEMENTS/SearchpageResults.dart';
-import 'package:iwaymaps/NAVIGATION/buildingState.dart';
+import 'Elements/SearchpageCategoryResult.dart';
+import 'Elements/SearchpageResults.dart';
+
 
 import 'FloorSelectionPage.dart';
-
-
+import 'navigationTools.dart';
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
@@ -55,9 +51,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   land landmarkData = land();
   List<String> landmarkFuzzyNameList = [];
 
-  List<Widget> searchResults = [];
+  List<SearchpageResults> searchResults = [];
 
-  List<Widget> recentResults = [];
+  List<SearchpageResults> recentResults = [];
   List<Widget> topSearches=[];
 
   List<dynamic> recent = [];
@@ -114,47 +110,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     });
 
     fetchRecents();
-    recentResults.add(Container(
-      margin: EdgeInsets.only(left: 16, right: 16, top: 8),
-      child: Semantics(
-        excludeSemantics: true,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Recent Searches",
-              style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xff000000),
-                height: 23 / 16,
-              ),
-              textAlign: TextAlign.left,
-            ),
-            TextButton(
-                onPressed: () {
-                  clearAllRecents();
-                  recent.clear();
-                  setState(() {
-                    recentResults.clear();
-                  });
-                },
-                child: Text(
-                  "Clear all",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff24b9b0),
-                    height: 25 / 16,
-                  ),
-                  textAlign: TextAlign.left,
-                ))
-          ],
-        ),
-      ),
-    ));
   }
   String name = "";
   String floor = "";
@@ -389,7 +344,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   ];
-
   List<IconData> _icons = [
     Icons.wash_sharp,
     Icons.local_cafe,
@@ -399,8 +353,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Icons.elevator,
     Icons.desk_sharp,
   ];
-
-
 
   void onChipSelected(int index) {
     setState(() {
@@ -461,14 +413,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
-
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
               return;
             }
-
             String normalizedValueName = normalizeText(value.name!);
-
             if(searchText.toLowerCase() == ("entry")){
               final fuse = Fuzzy(
                 [normalizedValueName],
@@ -478,14 +427,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   threshold: 0.5,
                 ),
               );
-
               final result = fuse.search(normalizedSearchText);
-
-
               result.forEach((fuseResult) {
-
+                print("fuseResult");
+                print(fuseResult);
                 if (fuseResult.score < 0.2) {
-
                   if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){
                     print('In--IF');
                     searchResults.add(SearchpageResults(
@@ -497,7 +443,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
+                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
                     ));
                   }else{
                     print('In--ELSE');
@@ -511,19 +457,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
-                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"
+                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
                     ));
                   }
                 }
               });
             }
             else if (partialMatch(normalizedValueName, normalizedSearchText)) {
-
-              if (partialMatch(normalizedValueName, normalizedSearchText)) {
-                print('Match found!');
-              } else {
-                print('No match found.');
-              }
               final fuse = Fuzzy(
                 [normalizedSearchText],
                 options: FuzzyOptions(
@@ -535,25 +475,79 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               final result = fuse.search(normalizedSearchText);
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
-                  searchResults.add(SearchpageResults(
-                    name: value.name!,
-                    location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                    onClicked: onVenueClicked,
-                    ID: value.properties!.polyId!,
-                    bid: value.buildingID!,
-                    floor: value.floor!,
-                    coordX: value.coordinateX!,
-                    coordY: value.coordinateY!,
-                    accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
-                  ));
+
+                  if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
+                     sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
+                  }else{
+                    searchResults.add(SearchpageResults(
+                      name: value.name!,
+                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                      onClicked: onVenueClicked,
+                      ID: value.properties!.polyId!,
+                      bid: value.buildingID!,
+                      floor: value.floor!,
+                      coordX: value.coordinateX!,
+                      coordY: value.coordinateY!,
+                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
+                    ));
+                  }
+
                 }
               });
             }
           });
+
+
         }
       }
     });
   }
+
+
+  void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
+
+
+    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
+      searchResults.add(SearchpageResults(
+        name: value.name!,
+        location: value.buildingID == buildingAllApi.outdoorID ? "${value
+            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
+            .venueName}",
+        onClicked: onVenueClicked,
+        ID: value.properties!.polyId!,
+        bid: value.buildingID!,
+        floor: value.floor!,
+        coordX: value.doorX??value.coordinateX!,
+        coordY: value.doorY??value.coordinateY!,
+        accessible: value.element!.subType == "restRoom" &&
+            value.properties!.washroomType == "Handicapped" ? "true" : "false",
+        distance: 0,
+      ));
+    }
+    // Step 1: Sort the main list as per previous logic
+    searchResults.sort((a, b) {
+      // Building comparison
+      // Distance comparison within the same building and floor
+      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
+      double distanceB = tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
+      // Populate the distance field for each element
+      a.distance = (distanceA*0.306).toInt();
+      b.distance = (distanceB*0.306).toInt();
+      return distanceA.compareTo(distanceB);
+    });
+if(searchResults.length>2){
+  print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
+}
+
+  }
+
+
+
+
+
+
+
+
   bool partialMatch(String dataName, String searchQuery) {
     String normalizedData = normalizeString(dataName);
     String normalizedQuery = normalizeString(searchQuery);
@@ -603,7 +597,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               floor: value.floor!,
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
-              accessible:  value.properties!.wheelChairAccessibility??"",
+              accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
 
             ));
           }
@@ -630,13 +624,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         for (List<dynamic> value in recent) {
           if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
-            recentResults.add(SearchpageRecents(
-              name: value[0],
-              location: value[1],
-              onVenueClicked: onVenueClicked,
-              ID: value[2],
-              bid: value[3],
-            ));
             searchResults = recentResults;
           }
         }
@@ -845,16 +832,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 child: ChipsChoice<int>.single(
                   value: vall,
                   onChanged: (val) {
-
                     if(HelperClass.SemanticEnabled) {
                       speak("${optionListForUI[val]} selected");
                     }
-
                     selectedButton = optionListForUI[val];
                     setState(() => vall = val);
                     lastval = val;
-
-
                     _controller.text = optionListForUI[val];
                     search(optionListForUI[val]);
                   },

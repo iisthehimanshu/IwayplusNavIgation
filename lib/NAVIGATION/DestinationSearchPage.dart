@@ -120,37 +120,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   bool promptLoader = false;
   Set<String> optionListItemBuildingNameNew = {};
 
-  int levenshtein(String s1, String s2) {
-    List<List<int>> matrix = List.generate(
-      s1.length + 1,
-          (_) => List.filled(s2.length + 1, 0),
-    );
-
-    for (int i = 0; i <= s1.length; i++) matrix[i][0] = i;
-    for (int j = 0; j <= s2.length; j++) matrix[0][j] = j;
-
-    for (int i = 1; i <= s1.length; i++) {
-      for (int j = 1; j <= s2.length; j++) {
-        int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
-        matrix[i][j] = [
-          matrix[i - 1][j] + 1, // Deletion
-          matrix[i][j - 1] + 1, // Insertion
-          matrix[i - 1][j - 1] + cost // Substitution
-        ].reduce((a, b) => a < b ? a : b);
-      }
-    }
-
-    return matrix[s1.length][s2.length];
-  }
-
-
-  double calculateSimilarity(String s1, String s2) {
-    int distance = levenshtein(s1, s2);
-    int maxLength = s1.length > s2.length ? s1.length : s2.length;
-
-    return ((maxLength - distance) / maxLength) * 100;
-  }
-
 
 
   void _onSearchChanged() {

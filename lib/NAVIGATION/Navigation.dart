@@ -8956,7 +8956,7 @@ bool isAppinForeground=true;
                                 ],
                               ),
                             ),
-                            Container(
+                            PathState.sourceFloor != PathState.destinationFloor? Container(
                               child: Row(
                                   children:[
                                     Container(
@@ -8999,7 +8999,7 @@ bool isAppinForeground=true;
 
                                   ]
                               ),
-                            ),
+                            ) : Container(),
                             SizedBox(height: screenHeight*0.02),
                             Container(
                               color: Color(0xffFAFAFA),

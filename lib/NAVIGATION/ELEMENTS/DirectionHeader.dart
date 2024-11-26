@@ -779,11 +779,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
 
-      widget.direction = tools.angleToClocks(angle, widget.context) == "None"
+      widget.direction = (tools.angleToClocks(angle, widget.context) == "None" || tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
           ? oldWidget.direction
           : tools.angleToClocks(angle, widget.context);
       String userdirection =
-      tools.angleToClocks(userangle, widget.context) == "None"
+      (tools.angleToClocks(userangle, widget.context) == "None"|| tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
           ? oldWidget.direction
           : tools.angleToClocks(userangle, widget.context);
       if (userdirection == "Straight") {
@@ -1261,19 +1261,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             )
                 : Container(),
 
-            Container(
-              width: 300,
-              height: 100,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(sumMap.toString()),
-                  ],
-                ),
-              ),
-            ),
+            // Container(
+            //   width: 300,
+            //   height: 100,
+            //   child: SingleChildScrollView(
+            //     scrollDirection: Axis.horizontal,
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         Text(sumMap.toString()),
+            //       ],
+            //     ),
+            //   ),
+            // ),
 
             // Container(
             //   width: 300,

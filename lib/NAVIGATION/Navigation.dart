@@ -6658,16 +6658,19 @@ bool isAppinForeground=true;
                                 //     : SizedBox(),
                               ],
                             ),
-                            Container(
-                                margin: EdgeInsets.only(top: 8, right: 16),
-                                child: IconButton(
-                                    onPressed: () {
-                                      HelperClass.shareContent(
-                                          "https://dev.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
-                                    },
-                                    icon: Semantics(
-                                        label: "Share route information",
-                                        child: Icon(Icons.share))))
+                            Semantics(
+                              excludeSemantics: true,
+                              child: Container(
+                                  margin: EdgeInsets.only(top: 8, right: 16),
+                                  child: IconButton(
+                                      onPressed: () {
+                                        HelperClass.shareContent(
+                                            "https://dev.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
+                                      },
+                                      icon: Semantics(
+                                          label: "Share route information",
+                                          child: Icon(Icons.share)))),
+                            )
                           ],
                         ),
                         SizedBox(
@@ -9556,6 +9559,7 @@ bool isAppinForeground=true;
                             label:
                             "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN} ${BuildingName ?? ""}",
                             excludeSemantics: true,
+                            header: true,
                             child: Container(
                               width: screenWidth,
                               padding: EdgeInsets.fromLTRB(17, 32, 17, 16),
@@ -9780,6 +9784,7 @@ bool isAppinForeground=true;
                       child: Semantics(
                         label: "Submit feedback",
                         excludeSemantics: true,
+                        header: true,
                         child: Text(
                           (_rating > 0) ? 'Done' : 'Exit',
                           style: TextStyle(fontSize: 18, color: Colors.white),
@@ -9983,7 +9988,7 @@ bool isAppinForeground=true;
             //
 
             //
-            if (isPdrStop && val == 0) {
+            if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
               //
 
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -11918,8 +11923,7 @@ bool isAppinForeground=true;
     String direction = tools.angleToClocks4(angle, context);
 
 
-
-    isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
+    //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
     flutterTts.pause().then((value) {
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
@@ -11927,6 +11931,14 @@ bool isAppinForeground=true;
               destname: destname),
           _currentLocale);
     });
+    // if(isSemanticEnabled) {
+    //   showFeedback = true;
+    //   Future.delayed(Duration(seconds: 5));
+    //   _feedbackController.open();
+    //   _feedbackTextController.clear();
+    //   feedbackPanel(context);
+    //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
+    // }
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -11957,9 +11969,9 @@ bool isAppinForeground=true;
           LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
     }
     // });
-    // showFeedback = true;
-    // Future.delayed(Duration(seconds: 5));
-    // _feedbackController.open();
+    showFeedback = true;
+    Future.delayed(Duration(seconds: 5));
+    _feedbackController.open();
   }
 
   void onLandmarkVenueClicked(String ID,
@@ -12967,7 +12979,7 @@ bool isAppinForeground=true;
                   //   ),
                   // ),
 
-                  isSemanticEnabled && _isRoutePanelOpen ? Container(): Semantics(
+                  isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
                         //  _getUserLocation();

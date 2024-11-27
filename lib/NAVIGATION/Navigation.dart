@@ -3294,7 +3294,6 @@ bool isAppinForeground=true;
     _isreroutePannelOpen = true;
     user.isnavigating = false;
     user.temporaryExit = true;
-
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
     setState(() {
@@ -3309,6 +3308,7 @@ bool isAppinForeground=true;
             LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
+    PDRTimer!.cancel();
     FlutterBeep.beep();
     if(acc!= null){
       speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
@@ -3850,6 +3850,7 @@ bool isAppinForeground=true;
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
+      SingletonFunctionController.currentBeacon=nearestBeacon;
     }
     paintUser(nearestBeacon, speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -11842,6 +11843,7 @@ bool isAppinForeground=true;
               destname: destname),
           _currentLocale);
     });
+    PDRTimer!.cancel();
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;

@@ -379,24 +379,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchResults.clear();
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
-
       if (optionList.contains(searchText)) {
         category = true;
         topCategory=false;
         vall = optionList.indexOf(searchText);
-
         if (landmarkData.landmarksMap != null) {
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
               final lowerCaseName = value.name!.toLowerCase();
               if(searchText.toLowerCase().contains("entry") && value.element!.subType == "main entry"){
                 optionListItemBuildingName.add(value.buildingName!);
+
               }else if (lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
                 optionListItemBuildingName.add(value.buildingName!);
               }
             }
           });
-
+          print("entered here");
             optionListItemBuildingName.forEach((element) {
               searcCategoryhResults.add(
                 SearchpageCategoryResults(
@@ -475,7 +474,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               final result = fuse.search(normalizedSearchText);
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
-
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
                      sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
                   }else{

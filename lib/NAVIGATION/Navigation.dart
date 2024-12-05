@@ -9881,9 +9881,12 @@ bool isAppinForeground=true;
   }
 
   void noshouldStepOpenfunc() {
-    setState(() {
-      shouldStepOpen = false;
+    Future.delayed(Duration(seconds: 10)).then((_){
+      setState(() {
+        shouldStepOpen = false;
+      });
     });
+
   }
 
   bool isLift = false;
@@ -10065,7 +10068,7 @@ bool isAppinForeground=true;
                                       CrossAxisAlignment.start,
                                       children: [
                                         Semantics(
-                                          excludeSemantics: false,
+                                          excludeSemantics: true,
                                           child: Row(
                                             children: [
                                               Semantics(

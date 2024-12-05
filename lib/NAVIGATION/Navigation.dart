@@ -593,7 +593,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       wsocket.sendmessg();
 
     });
-    setPdrThreshold();
     listenToMagnetometer();
 
     _controller = AnimationController(
@@ -635,8 +634,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       maptheme = value;
     });
     checkPermissions();
-
-    getDeviceManufacturer();
+    if(!kIsWeb){
+      setPdrThreshold();
+      getDeviceManufacturer();
+    }
     try {
       _streamSubscriptions.add(
         userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
@@ -3492,10 +3493,12 @@ bool isAppinForeground=true;
     // }\
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
-    (SingletonFunctionController.btadapter.isScanningOn() == false &&
-        isBinEmpty() == true)
-        ? controller.executeFunction(buildingAllApi.allBuildingID)
-        : null;
+        if(!kIsWeb){
+      (SingletonFunctionController.btadapter.isScanningOn() == false &&
+              isBinEmpty() == true)
+          ? controller.executeFunction(buildingAllApi.allBuildingID)
+          : null;
+    }
 
     setState(() {
       resBeacons = SingletonFunctionController.apibeaconmap;

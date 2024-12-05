@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
@@ -47,10 +48,22 @@ Future _firebaseBackgroundMessage(RemoteMessage message) async {
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
-  var directory = await getApplicationDocumentsDirectory();
-  Hive.init(directory.path);
+  localDBInitialsation();
+  if(!kIsWeb){
+    mobileInitialization();
+    runApp(const MobileApp());
+  }else{
+    runApp(const WebApp());
+  }
+}
+
+Future<void> localDBInitialsation() async {
+  if(kIsWeb){
+    await Hive.initFlutter();
+  }else {
+    var directory = await getApplicationDocumentsDirectory();
+    Hive.init(directory.path);
+  }
   Hive.registerAdapter(LandMarkApiModelAdapter());
   await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
   Hive.registerAdapter(PatchAPIModelAdapter());
@@ -77,11 +90,15 @@ Future<void> main() async {
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
-
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+}
+
+Future<void> mobileInitialization () async {
+  WidgetsFlutterBinding.ensureInitialized();
+  WakelockPlus.enable();
   await Firebase.initializeApp(
     //options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -132,30 +149,19 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  WakelockPlus.enable();
-
-  // FlutterError.onError = (FlutterErrorDetails details) {
-  //   // Log the error or send it to a monitoring service
-  //   print("global error handler");
-  //   print(details.exceptionAsString());
-  //
-  //   // Perform your desired action
-  //   sendErrorToSlack(details.exceptionAsString(), details.stack);
-  //   // Forward to the default handler
-  //   FlutterError.dumpErrorToConsole(details);
-  // };
-  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+
+
+
+class MobileApp extends StatefulWidget {
+  const MobileApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MobileApp> createState() => _MobileAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MobileAppState extends State<MobileApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket('com.iwaypus.navigation');
@@ -269,3 +275,34 @@ requestLocationPermission();
     );
   }
 }
+
+class WebApp extends StatefulWidget {
+  const WebApp({super.key});
+
+  @override
+  State<WebApp> createState() => _WebAppState();
+}
+
+class _WebAppState extends State<WebApp> {
+  final FlutterLocalization localization = FlutterLocalization.instance;
+
+  @override
+  void initState() {
+    configureLocalization();
+    super.initState();
+  }
+
+  void configureLocalization(){
+    localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
+    localization.onTranslatedLanguage = ontranslatedLanguage;
+  }
+  void ontranslatedLanguage(Locale? locale){
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: SignIn(emailOrPhoneNumber: "mailtohimanshu100@gmail.com",password: "BlackWater4232",));
+  }
+}
+

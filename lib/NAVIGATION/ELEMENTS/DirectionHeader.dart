@@ -1091,6 +1091,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   Widget build(BuildContext context) {
+    print("user coordinates ${UserState.geoLat}, ${UserState.geoLng}");
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;

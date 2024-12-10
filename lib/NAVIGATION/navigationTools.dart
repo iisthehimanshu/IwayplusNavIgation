@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -518,7 +519,10 @@ class tools {
   // }
 
 
-
+  static Cell findNearestWayPoint (List<Cell> path, Position coordinate){
+    return path.reduce((a, b) =>
+    calculateAerialDist(a.lat, a.lng, coordinate.latitude, coordinate.longitude) < calculateAerialDist(b.lat, b.lng, coordinate.latitude, coordinate.longitude) ? a : b);
+  }
 
   static double calculateBearing(List<double> pointA, List<double> pointB) {
     double lat1 = toRadians(pointA[0]); //user

@@ -286,7 +286,7 @@ class WebApp extends StatefulWidget {
 
 class _WebAppState extends State<WebApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
-
+  var SignInDatabasebox = Hive.box('SignInDatabase');
   @override
   void initState() {
     configureLocalization();
@@ -303,7 +303,7 @@ class _WebAppState extends State<WebApp> {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: SignIn(emailOrPhoneNumber: "mailtohimanshu100@gmail.com",password: "BlackWater4232",));
+    return MaterialApp(home: SignInDatabasebox.containsKey("accessToken")?MainScreen(initialIndex: 0):SignIn());
   }
 }
 

@@ -8296,7 +8296,7 @@ bool isAppinForeground=true;
                       ),
                     ),
                   ),
-                  ElevatedButton.icon(
+                  kIsWeb?Container():ElevatedButton.icon(
                     icon: Icon(Icons.navigation, color: Colors.white),
                     label: Text('Start', style: TextStyle(color: Colors.white)),
                     onPressed: () async {

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +35,8 @@ class DirectionHeader extends StatefulWidget {
   UserState user;
   String getSemanticValue;
   BuildContext context;
-  final Function(String nearestBeacon, {bool render}) paint;
+  final  Function(String? nearestBeacon,String? polyID, gmap.LatLng? gpsCoordinates,
+  {bool speakTTS, bool render}) paint;
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
   final Function() moveUser;
@@ -373,7 +374,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               DirectionIndex = nextTurnIndex;
               //need to render on beacon for aiims jammu
               print("calling expected function");
-              widget.paint(nearestBeacon, render: false);
+              widget.paint(nearestBeacon, null, null, render: false);
               return true;
             }
           }

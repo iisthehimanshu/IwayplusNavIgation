@@ -1,4 +1,4 @@
-name: Flutter Web Build
+name: CI
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0' # Specify a specific version or use stable
+          flutter-version: '3.27.0'
 
       - name: Install dependencies
         run: flutter pub get

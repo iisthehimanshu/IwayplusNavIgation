@@ -280,6 +280,7 @@ requestLocationPermission();
 class WebApp extends StatefulWidget {
   const WebApp({super.key});
 
+
   @override
   State<WebApp> createState() => _WebAppState();
 }

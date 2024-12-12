@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - Web # Change this to your branch name if necessary
+  pull_request:
+    branches:
+      - Web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --base-href "/iwaymaps/"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter-web-build
+          path: build/web

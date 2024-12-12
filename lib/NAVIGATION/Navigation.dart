@@ -1384,9 +1384,7 @@ bool isAppinForeground=true;
         );
 
         // Check if the landmark is within 25 units and has required properties
-        if (dist <= 25 &&
-            landmark.properties?.polyId != null &&
-            landmark.name?.isNotEmpty == true) {
+        if (landmark.properties?.polyId != null && landmark.name?.isNotEmpty == true) {
 
           // Update if this landmark is closer
           if (minDistance == null || dist < minDistance!) {
@@ -1416,6 +1414,7 @@ bool isAppinForeground=true;
                     coordinates.latitude,
                     coordinates.longitude
                 );
+                print("distance $dist");
                 if (dist <= 25) {
                   // Update if this landmark is closer
                   if (minDistance == null || dist < minDistance!) {
@@ -1429,13 +1428,16 @@ bool isAppinForeground=true;
         });
       }
     });
-    print("waypoint ${waypoint!.coordx} ${waypoint!.coordy}");
-    closestLandmark!.coordinateX = waypoint!.coordx;
-    closestLandmark!.coordinateY = waypoint!.coordy;
-    closestLandmark!.doorX = waypoint!.coordx;
-    closestLandmark!.doorY = waypoint!.coordy;
-    closestLandmark!.properties!.latitude = waypoint!.lat.toString();
-    closestLandmark!.properties!.longitude = waypoint!.lon.toString();
+    if(waypoint != null){
+      print("waypoint ${waypoint!.coordx} ${waypoint!.coordy}");
+      closestLandmark!.coordinateX = waypoint!.coordx;
+      closestLandmark!.coordinateY = waypoint!.coordy;
+      closestLandmark!.doorX = waypoint!.coordx;
+      closestLandmark!.doorY = waypoint!.coordy;
+      closestLandmark!.properties!.latitude = waypoint!.lat.toString();
+      closestLandmark!.properties!.longitude = waypoint!.lon.toString();
+    }
+
 
     return closestLandmark;
   }
@@ -1619,7 +1621,7 @@ bool isAppinForeground=true;
       bool speakTTS,
       bool render
       ) async {
-    try {
+    print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
       final userSetLocation = await getglobalcoords(
           LatLng(UserState.geoLat, UserState.geoLng)
       );
@@ -1630,10 +1632,7 @@ bool isAppinForeground=true;
       } else {
         unableToFindLocation();
       }
-    } catch (e) {
-      print("Error during global coordinates localization: $e");
-      if (speakTTS) unableToFindLocation();
-    }
+
   }
 
 

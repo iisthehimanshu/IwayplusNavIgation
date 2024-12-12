@@ -1,12 +1,12 @@
-name: CI
+name: Flutter Web Build
 
 on:
   push:
     branches:
-      - Web # Change this to your branch name if necessary
+      - main
   pull_request:
     branches:
-      - Web
+      - main
 
 jobs:
   build:
@@ -19,13 +19,13 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.27.0' # Specify a specific version or use stable
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --base-href "/iwaymaps/"
+        run: flutter build web
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3

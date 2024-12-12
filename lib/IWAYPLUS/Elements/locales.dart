@@ -10,7 +10,7 @@ const List<MapLocale> LOCALES=[
   MapLocale('ne', LocaleData.NE), // Punjabi
 ];
 
-mixin LocaleData {
+class LocaleData {
   static const String iss = "iss";
   static const String title = 'title';
   static const String generalSettings = 'generalSettings';

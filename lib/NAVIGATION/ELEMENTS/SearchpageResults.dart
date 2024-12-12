@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
 
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../MainScreen.dart';

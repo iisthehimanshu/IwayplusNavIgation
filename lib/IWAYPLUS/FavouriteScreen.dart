@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import '/IWAYPLUS/Elements/buildingCard.dart';
+import '/IWAYPLUS/ELEMENTS/buildingCard.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 import '/NAVIGATION/API/BuildingAPI.dart';
 import '/NAVIGATION/APIMODELS/Building.dart';

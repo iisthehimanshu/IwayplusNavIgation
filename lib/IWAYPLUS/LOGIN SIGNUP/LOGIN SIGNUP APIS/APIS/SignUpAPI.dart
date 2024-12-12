@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '/IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
 class SignUpAPI{
 
   final String baseUrl = "https://dev.iwayplus.in/auth/signup";

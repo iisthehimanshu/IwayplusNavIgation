@@ -5,7 +5,7 @@ import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '../APIMODELS/outbuildingmodel.dart';
 import "package:http/http.dart" as http;
 

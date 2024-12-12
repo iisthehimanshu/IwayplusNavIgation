@@ -6,7 +6,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/locales.dart';
+import '../../IWAYPLUS/ELEMENTS/locales.dart';
 import '../ViewModel/DirectionInstructionViewModel.dart';
 import 'DirectionInstructionWidget.dart';
 import 'OutDoorInstructionWidget.dart';

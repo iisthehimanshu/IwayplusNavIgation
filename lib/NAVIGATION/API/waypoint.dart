@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '../VersioInfo.dart';
 import '../waypoint.dart';
 import 'RefreshTokenAPI.dart';

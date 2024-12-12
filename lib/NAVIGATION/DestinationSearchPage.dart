@@ -21,14 +21,14 @@ import 'package:string_similarity/string_similarity.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
-import '../IWAYPLUS/Elements/HelperClass.dart';
+import '../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
-import 'Elements/DestinationPageChipsWidget.dart';
-import 'Elements/HomepageFilter.dart';
+import 'ELEMENTS/DestinationPageChipsWidget.dart';
+import 'ELEMENTS/HomepageFilter.dart';
 
-import 'Elements/SearchpageCategoryResult.dart';
-import 'Elements/SearchpageResults.dart';
+import 'ELEMENTS/SearchpageCategoryResult.dart';
+import 'ELEMENTS/SearchpageResults.dart';
 
 
 import 'FloorSelectionPage.dart';

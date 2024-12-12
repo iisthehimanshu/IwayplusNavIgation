@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '/NAVIGATION/APIMODELS/Building.dart';
 import 'RefreshTokenAPI.dart';
 

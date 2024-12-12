@@ -7,7 +7,7 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '/NAVIGATION/APIMODELS/polylinedata.dart';
 import '../VersioInfo.dart';
 

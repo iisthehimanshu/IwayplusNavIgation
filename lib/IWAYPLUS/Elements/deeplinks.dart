@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 

@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '/IWAYPLUS/APIMODELS/UsergetAPIModel.dart';
-import '/IWAYPLUS/Elements/UserCredential.dart';
+import '/IWAYPLUS/ELEMENTS/UserCredential.dart';
 
-import '../Elements/HelperClass.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '/NAVIGATION/API/RefreshTokenAPI.dart';
 
 

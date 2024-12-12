@@ -7,8 +7,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
-import '/IWAYPLUS/Elements/locales.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/locales.dart';
 import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
 
 import '/NAVIGATION/APIMODELS/landmark.dart';

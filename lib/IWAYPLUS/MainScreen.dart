@@ -8,7 +8,7 @@ import 'package:iwaymaps/IWAYPLUS/VenueSelectionScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'Elements/QRLandmarkScreen.dart';
+import 'ELEMENTS/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 import 'ProfilePage.dart';
 

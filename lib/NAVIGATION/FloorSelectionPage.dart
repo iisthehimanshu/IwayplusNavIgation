@@ -13,18 +13,18 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
-import '../IWAYPLUS/Elements/HelperClass.dart';
+import '../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '/IWAYPLUS/API/buildingAllApi.dart';
 import '/NAVIGATION/API/ladmarkApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'APIMODELS/landmark.dart';
-import 'Elements/DestinationPageChipsWidget.dart';
-import 'Elements/HomepageFilter.dart';
+import 'ELEMENTS/DestinationPageChipsWidget.dart';
+import 'ELEMENTS/HomepageFilter.dart';
 
-import 'Elements/SearchpageCategoryResult.dart';
-import 'Elements/SearchpageResults.dart';
+import 'ELEMENTS/SearchpageCategoryResult.dart';
+import 'ELEMENTS/SearchpageResults.dart';
 import 'navigationTools.dart';
 class FloorSelectionPage extends StatefulWidget {
   String filterName ;

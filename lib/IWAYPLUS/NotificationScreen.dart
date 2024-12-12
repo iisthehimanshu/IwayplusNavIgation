@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '/IWAYPLUS/APIMODELS/LocalNotificationAPIModel.dart';
 import 'API/LocalNotificationAPI.dart';
-import 'Elements/HelperClass.dart';
-import 'Elements/Translator.dart';
+import 'ELEMENTS/HelperClass.dart';
+import 'ELEMENTS/Translator.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});

@@ -5,10 +5,10 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
 
-import 'Elements/UserCredential.dart';
-import 'Elements/locales.dart';
+import 'ELEMENTS/UserCredential.dart';
+import 'ELEMENTS/locales.dart';
 
-// import '../../Elements/locales.dart';
+// import '../../ELEMENTS/locales.dart';
 class SettingScreen extends StatefulWidget {
   @override
   State<SettingScreen> createState() => _SettingScreenState();

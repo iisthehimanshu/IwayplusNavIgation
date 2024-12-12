@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/MotionModel.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
-import '../IWAYPLUS/Elements/locales.dart';
+import '../IWAYPLUS/ELEMENTS/locales.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
 import 'GPSStreamHandler.dart';
 import 'buildingState.dart' as b;

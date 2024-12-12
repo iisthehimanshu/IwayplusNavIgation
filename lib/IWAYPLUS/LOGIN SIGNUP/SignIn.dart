@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
-import '../Elements/HelperClass.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '../MainScreen.dart';
 import 'ForgetPassword.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/locales.dart';
+import '../../IWAYPLUS/ELEMENTS/locales.dart';
 import '../directionClass.dart';
 
 class DirectionInstructionViewModel extends ChangeNotifier {

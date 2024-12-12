@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';

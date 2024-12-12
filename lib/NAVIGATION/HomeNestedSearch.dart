@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../IWAYPLUS/API/buildingAllApi.dart';
-import '../IWAYPLUS/Elements/buildingCard.dart';
+import '../IWAYPLUS/ELEMENTS/buildingCard.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import 'Navigation.dart';
 

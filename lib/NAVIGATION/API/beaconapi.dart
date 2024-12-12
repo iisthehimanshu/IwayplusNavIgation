@@ -6,7 +6,7 @@ import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import '../APIMODELS/beaconData.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
+import '/IWAYPLUS/ELEMENTS/HelperClass.dart';
 
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';

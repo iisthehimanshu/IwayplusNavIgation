@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../../../NAVIGATION/API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
-import '../../../Elements/UserCredential.dart';
+import '../../../ELEMENTS/UserCredential.dart';
 import '../MODELS/SignInAPIModel.dart';
 
 class SignInAPI{

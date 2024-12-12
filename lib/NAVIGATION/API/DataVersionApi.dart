@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
 import '../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import '/NAVIGATION/APIMODELS/DataVersion.dart';

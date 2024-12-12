@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import '../../IWAYPLUS/Elements/HelperClass.dart';
-import '../../IWAYPLUS/Elements/UserCredential.dart';
-import '../../IWAYPLUS/Elements/locales.dart';
+import '../../IWAYPLUS/ELEMENTS/HelperClass.dart';
+import '../../IWAYPLUS/ELEMENTS/UserCredential.dart';
+import '../../IWAYPLUS/ELEMENTS/locales.dart';
 import '/IWAYPLUS/API/buildingAllApi.dart';
 
 import 'package:vibration/vibration.dart';

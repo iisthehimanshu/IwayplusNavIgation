@@ -9,7 +9,7 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'dart:math';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
-import '../Elements/HelperClass.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '../MainScreen.dart';
 import 'LOGIN SIGNUP APIS/APIS/SendOTPAPI.dart';
 import 'SignIn.dart';

@@ -25,8 +25,8 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    String manufacturer = await DeviceInformation.deviceManufacturer;
-    String deviceModel = await DeviceInformation.deviceModel;
+    String manufacturer = kIsWeb?"WEB":await DeviceInformation.deviceManufacturer;
+    String deviceModel = kIsWeb?"WEB":await DeviceInformation.deviceModel;
     print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);

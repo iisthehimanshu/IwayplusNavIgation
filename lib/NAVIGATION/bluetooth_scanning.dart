@@ -67,11 +67,8 @@ class BLueToothClass {
   }
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-
     wsocket.message["AppInitialization"]["bleScanResults"] = {};
-
     // print("himanshu 1");
-
     startbin();
     // print("himanshu 2");
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));

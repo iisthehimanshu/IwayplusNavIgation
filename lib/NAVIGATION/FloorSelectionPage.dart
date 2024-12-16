@@ -114,7 +114,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       search(widget.filterName, widget.filterBuildingName,[(currFloor!=null)?currFloor:int.parse(widget.floors[0])]);
     }
   }
-
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
@@ -122,7 +121,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       });
     });
   }
-
   bool category = false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
@@ -135,11 +133,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
 
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
-
   List<int> checkfloors = [];
-
   void search(String filterText,String buildingText,List<int> floor){
-
     setState(() {
       if(landmarkData.landmarksMap!.isNotEmpty) {
         searchResults.clear();
@@ -186,7 +181,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     print("optionListItemBuildingName");
     print(optionListItemBuildingName);
   }
-
   void sortResultsByDistance(int userLat, int userLng) {
     print("searchResults before: ${searchResults[0].name}");
     print("coordinates : $userLat, $userLng");

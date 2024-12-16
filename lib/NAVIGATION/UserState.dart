@@ -34,9 +34,10 @@ class UserState {
   bool initialallyLocalised = false;
   String bid;
   List<int> offPathDistance = [];
-  bool onConnection = false;
+   bool onConnection = false;
   bool temporaryExit = false;
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
+  static Function autoRecenter=() {};
   static double geoLat = 0.0;
   static double geoLng = 0.0;
   static bool ttsAllStop = false;
@@ -358,7 +359,6 @@ class UserState {
                 [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
             3;
   }
-
   void announceLiftUsage(BuildContext context) {
     onConnection = true;
     createCircle(lat, lng);
@@ -380,6 +380,7 @@ class UserState {
     pathState.nearbyLandmarks.retainWhere((element) {
       if (element.element!.subType == "room door" &&
           element.properties!.polygonExist != true) {
+
         if (tools.calculateDistance([
               showcoordX,
               showcoordY
@@ -387,7 +388,8 @@ class UserState {
               element.doorX ?? element.coordinateX!,
               element.doorY ?? element.coordinateY!
             ]) <=
-            3) {
+            5) {
+
           if (!UserState.ttsOnlyTurns) {
             speak(
                 convertTolng("Passing by ${element.name}", element.name, 0.0,
@@ -395,8 +397,58 @@ class UserState {
                 lngCode);
           }
           return false;
+        } else if(tools.calculateDistance([
+          showcoordX,
+          showcoordY
+        ], [
+          element.doorX ?? element.coordinateX!,
+          element.doorY ?? element.coordinateY!
+        ]) <=
+            10) {
+          print("speak passing by ${tools.calculateDistance([
+            showcoordX,
+            showcoordY
+          ], [
+            element.doorX ?? element.coordinateX!,
+            element.doorY ?? element.coordinateY!
+          ])}");
+          double angle = tools.calculateAngle2(
+              [showcoordX, showcoordY],
+              [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
+              [element.coordinateX!, element.coordinateY!]);
+          if (!UserState.ttsOnlyTurns) {
+            if(tools.angleToClocks(angle, context)=="Straight"){
+              speak(
+                //convertTolng(
+                  "${element.name} door ahead",
+                  // element.name!,
+                  // 0.0,
+                  // context,
+                  // 0.0,
+                  // "",
+                  // ""),
+                  lngCode);
+            }else{
+              speak(
+                //convertTolng(
+                  "${element.name} door is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
+                  // element.name!,
+                  // 0.0,
+                  // context,
+                  // 0.0,
+                  // "",
+                  // ""),
+                  lngCode);
+            }
+
+          }
+          return false;
         }
-      } else if (tools.calculateDistance([
+      }
+
+
+
+      else if (tools.calculateDistance([
             showcoordX,
             showcoordY
           ], [
@@ -639,6 +691,10 @@ class UserState {
     lng = values[1];
     createCircle(values[0], values[1]);
     alignMapToPath([values[0], values[1]], values);
+
+    Future.delayed(Duration(seconds: 1)).then((onValue){
+      autoRecenter();
+    });
   }
 
   Future<int> moveToNearestPoint() async {

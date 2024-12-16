@@ -11501,14 +11501,12 @@ bool isAppinForeground=true;
     // String closestBuildingId = "";
 
     double? minDistance;
-
     Building.allBuildingID.forEach((key, value) {
       if (key != buildingAllApi.outdoorID) {
         num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
           geo.LatLng(value.latitude, value.longitude),
           geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
         );
-
         // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
           minDistance = distance.toDouble();
@@ -11555,12 +11553,10 @@ bool isAppinForeground=true;
   List<String> scannedDevices = [];
 
   Set<gmap.Polyline> finalSet = {};
-
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized = false;
-
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
   void _recenterMap() {
@@ -11573,9 +11569,7 @@ bool isAppinForeground=true;
         PathState.singleCellListPath[user.pathobj.index + 1].lng
       ]);
       mapState.aligned = true;
-    }catch(e){
-
-    }
+    }catch(e){}
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(

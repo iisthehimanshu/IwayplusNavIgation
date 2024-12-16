@@ -200,6 +200,7 @@ if(userLoc!=null){
    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
       try{
         Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        Geolocator.getLocationAccuracy();
         return position;
       }catch(e){
         print("error in location fetching");

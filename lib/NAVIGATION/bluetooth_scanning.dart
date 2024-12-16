@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
@@ -28,15 +29,18 @@ class BLueToothClass {
 
 
   BLueToothClass(){
-    try {
-      FlutterBluePlus.systemDevices;
-    } catch (e) {
+    if(!kIsWeb){
+      try {
+        FlutterBluePlus.systemDevices;
+      } catch (e) {
 
-    }
-    try {
-      FlutterBluePlus.startScan();
-    } catch (e) {
+      }
+      try {
 
+        FlutterBluePlus.startScan();
+      } catch (e) {
+
+      }
     }
   }
 

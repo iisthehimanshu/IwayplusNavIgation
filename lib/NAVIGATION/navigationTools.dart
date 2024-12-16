@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -518,7 +519,10 @@ class tools {
   // }
 
 
-
+  static Cell findNearestWayPoint (List<Cell> path, Position coordinate){
+    return path.reduce((a, b) =>
+    calculateAerialDist(a.lat, a.lng, coordinate.latitude, coordinate.longitude) < calculateAerialDist(b.lat, b.lng, coordinate.latitude, coordinate.longitude) ? a : b);
+  }
 
   static double calculateBearing(List<double> pointA, List<double> pointB) {
     double lat1 = toRadians(pointA[0]); //user
@@ -1209,9 +1213,9 @@ class tools {
   }
 
 
-  static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
-    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
+    PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=20;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
@@ -1242,8 +1246,7 @@ class tools {
           }
           if (d<distance) {
 
-            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            Landmarks currentLandInfo = value;
             
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
@@ -1255,9 +1258,9 @@ class tools {
       }
     });
 
-    nearestLandInfo? nearestLandmark;
+    Landmarks? nearestLandmark;
     if(priorityQueue.isNotEmpty){
-      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
       nearestLandmark = entry.key;
     }else{
       //
@@ -1326,15 +1329,15 @@ class tools {
 
     return nearestLandmark;
   }
-  static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static List<Landmarks> localizefindAllNearbyLandmark(beacon? Beacon, Map<String, Landmarks> landmarksMap,{Landmarks? la}) {
 
-    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
+    PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
+      if((la?.buildingID ?? Beacon!.buildingID) == value.buildingID && value.element!.subType != "beacons" && value.name != null && (la?.floor ?? Beacon!.floor!) == value.floor){
           List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
+          pCoord.add(la?.coordinateX ?? Beacon!.coordinateX!);
+          pCoord.add(la?.coordinateY ?? Beacon!.coordinateY!);
           double d = 0.0;
 
           if (value.doorX != null) {
@@ -1343,8 +1346,7 @@ class tools {
             //
             //
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+              Landmarks currentLandInfo = value;
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }else{
@@ -1353,21 +1355,20 @@ class tools {
             //
             //
             if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+              Landmarks currentLandInfo = value;
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
           }
 
       }
     });
-    List<nearestLandInfo> nearestLandmark=[];
+    List<Landmarks> nearestLandmark=[];
     if(priorityQueue.isNotEmpty){
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       //
       while(priorityQueue.isNotEmpty)
         {
-          MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+          MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
           nearestLandmark.add(entry.key);
         }
     }else{

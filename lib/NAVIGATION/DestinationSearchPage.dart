@@ -17,6 +17,7 @@ import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -144,61 +145,76 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         // Perform search
         //_performSearch(_controller.text);
 
-        String modifiedString = _controller.text.replaceAll(stringToRemove, "");
-        if(modifiedString.trim().length>0){
-          final fuse = Fuzzy(
-            landmarkData.landmarkNames,
-            options: FuzzyOptions(
-              findAllMatches: true,
-              tokenize: true,
-              threshold: 0.7,
-            ),
-          );
-          final outputresult = fuse.search(modifiedString.toLowerCase());
-          // Assuming `result` is a List<FuseResult<dynamic>>
-          outputresult.forEach((fuseResult) {
-            // Access the item property of the result to get the matched value
-            String matchedName = fuseResult.item;
-            fuseResult.matches.length;
-
-            // Access the score of the match
-            double score = fuseResult.score;
-
-            // Do something with the matchedName or score
-            // score == 0.0
-            //     ? print('Matched Name: $matchedName, Score: $score')
-            //     : print("");
-            if (score <= 0.3) { //0.5 for normal
-              finalName = fuseResult.item;
-            }
-          });
+        String modifiedString = _controller.text.replaceAll(stringToRemove, "").trimLeft();
+        print("modifiedString");
+        print(modifiedString);
+        if(modifiedString.trimLeft().length>0){
+          finalName = modifiedString;
+          // print(finalName);
+          // final fuse = Fuzzy(
+          //   landmarkData.landmarkNames,
+          //   options: FuzzyOptions(
+          //     findAllMatches: true,
+          //     tokenize: true,
+          //     threshold: 0.7,
+          //   ),
+          // );
+          // final outputresult = fuse.search(modifiedString.toLowerCase());
+          // // Assuming `result` is a List<FuseResult<dynamic>>
+          // outputresult.forEach((fuseResult) {
+          //   // Access the item property of the result to get the matched value
+          //   String matchedName = fuseResult.item;
+          //   fuseResult.matches.length;
+          //
+          //   // Access the score of the match
+          //   double score = fuseResult.score;
+          //
+          //   // Do something with the matchedName or score
+          //   // score == 0.0
+          //   //     ? print('Matched Name: $matchedName, Score: $score')
+          //   //     : print("");
+          //   if (score <= 0.3) { //0.5 for normal
+          //     finalName = fuseResult.item;
+          //   }
+          // });
 
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
-              if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
+              String landmarkNameOf3 = "";
+              if(value.name?.split('').length==3){
+                value.name?.split('').forEach((e){
+                  if(e != " ") landmarkNameOf3+=e;
+                });
+              }else{
+                landmarkNameOf3 = value.name!.replaceAll('-', ' ');
+              }
+
+              if (landmarkNameOf3.toLowerCase().contains(finalName.toLowerCase())) {
                 name = value.name!;
                 floor = value.name!;
                 polyID = value.properties!.polyId!;
                 buildingID = value.buildingID!;
+                print(name);
+                print(polyID);
+                print(floor);
+                print(buildingID);
+                print("--------");
               }else{
-                print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
+                //print("nooo${landmarkNameOf3.toLowerCase()} ----- ${finalName.toLowerCase()}");
               }
             }
           });
 
-          if(landmarkData.landmarkNames!.contains(finalName)){
-            //onVenueClicked(name, floor, polyID, buildingID);
-            if(polyID.isNotEmpty){
-              HelperClass.showToast("Navigating to ${finalName}");
-              setState(() {
-                promptLoader = false;
-              });
-              //Future.delayed(Duration(seconds: 2));
-              Navigator.pop(context, polyID);
-            }else{
-            }
+          if(polyID.isNotEmpty){
+            HelperClass.showToast("Navigating to ${finalName}");
+            setState(() {
+              promptLoader = false;
+            });
+            //Future.delayed(Duration(seconds: 2));
+            Navigator.pop(context, polyID);
+          }else{
+
           }
-          
         }else{
           HelperClass.showToast("Provide a Landmark name !!");
         }
@@ -233,6 +249,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         searchHintString = widget.hintText;
       });
+    }else{
+      print("speetchText.isNotListening");
     }
     HelperClass.showToast("Speak to search");
     await Future.delayed(Duration(seconds: 5));
@@ -241,13 +259,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void onSpeechResult(result) {
+    print("onSpeechResult");
     setState(() {
       print("Listening from mic");
 
       setState(() {
         _controller.text = result.recognizedWords;
         search(result.recognizedWords);
-        // print(_controller.text);
+        print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
 

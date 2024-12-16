@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/MotionModel.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
+import 'GPSStreamHandler.dart';
 import 'buildingState.dart' as b;
 
 import 'Cell.dart';
@@ -38,6 +42,8 @@ class UserState {
   bool temporaryExit = false;
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   static Function autoRecenter=() {};
+  GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
+  StreamSubscription<Position>? _positionStreamSubscription;
   static double geoLat = 0.0;
   static double geoLng = 0.0;
   static bool ttsAllStop = false;
@@ -144,6 +150,17 @@ class UserState {
     return false;
   }
 
+  void gpsHandler(){
+    Stream<Position>? position = gpsStreamHandler.startStream();
+    if(position != null) {
+      _positionStreamSubscription =
+          position.listen((Position p) {
+            Cell cell = tools.findNearestWayPoint(cellPath,p);
+            moveToPointOnPath(cellPath.indexWhere((element)=>(element.x==cell.x && element.y==cell.y)));
+          });
+    }
+  }
+
   Future<void> moveOneStep(context, List<Cell> turnPoints) async {
     userLogData();
 
@@ -159,6 +176,10 @@ class UserState {
           return;
         }
 
+        if (!gpsStreamHandler.isStreamActive()) {
+          //gpsHandler();
+        }
+
         Cell previousPoint = tools.findingprevpoint(cellPath, pathobj.index);
         double angleToNextCell = tools.calculateBearing([lat, lng],
             [cellPath[pathobj.index].lat, cellPath[pathobj.index].lng]);
@@ -169,6 +190,11 @@ class UserState {
         }
         return;
       }
+
+      if(gpsStreamHandler.isStreamActive()){
+        gpsStreamHandler.stopStream();
+      }
+
       initializeStepsArray(0, [2]);
       if (cellPath[pathobj.index].bid != null &&
           bid != cellPath[pathobj.index].bid) {
@@ -303,6 +329,8 @@ class UserState {
       print("error in stepsArray $e");
       initializeStepsArray(0, [2]);
     }
+
+
 
     List<int> nextTransition = tools.findPoint(showcoordX, showcoordY,
         cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);

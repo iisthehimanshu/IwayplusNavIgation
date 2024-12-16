@@ -46,6 +46,7 @@ Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start,
       if(isoutdoorPath){
         return path.reversed.toList();
       }
+      print("graph path debug ${path.reversed.toList()}");
       return addCoordinatesBetweenVertices(path.reversed.toList(), col);
     }
 
@@ -260,15 +261,27 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
   String goal1 = states[2];
   String goal2 = states[3];
 
+  print("states debug $states");
+
+
   List<List<int>> temppath1 = await dijkstra(graph,start1,goal1,col,isoutdoorPath: isoutdoorPath);
   List<List<int>> temppath2 = await dijkstra(graph,start2,goal2,col, isoutdoorPath: isoutdoorPath);
 
   List<List<int>> temppath =[];
-  if(temppath1.length>temppath2.length){
-    temppath = temppath2;
+
+  if(tools.calculateDistance(start1.split(',').map(int.parse).toList(), start2.split(',').map(int.parse).toList()) <=10){
+    if(temppath1.length>temppath2.length){
+      print("returning 1 $temppath2");
+      temppath = temppath2;
+    }else{
+      print("returning 2");
+      temppath = temppath1;
+    }
   }else{
+    print("returning 3");
     temppath = temppath1;
   }
+
 
   if(tools.calculateDistance(temppath.first, [sourceX,sourceY])==1){
     temppath.insert(0, [sourceX,sourceY]);
@@ -317,7 +330,18 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
   }
 
   if(l1.isNotEmpty || l3.isNotEmpty){
-    return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, col, sourceX, sourceY, destinationX, destinationY);
+    try {
+      return getFinalOptimizedPath(
+          mergeLists(l1, l2, l3),
+          nonWalkableCells,
+          col,
+          sourceX,
+          sourceY,
+          destinationX,
+          destinationY);
+    }catch(e){
+      return mergeLists(l1, l2, l3);
+    }
   }else{
     return mergeLists(l1, l2, l3);
   }

@@ -10,7 +10,7 @@ import 'package:http/http.dart' as ht;
 
 
 // import '../fcmapi.dart';
-import '../main.dart';
+import '../../main.dart';
 // import '../userdata.dart';
 
 class PushNotifications {

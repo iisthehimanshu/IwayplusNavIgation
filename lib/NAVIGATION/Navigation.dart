@@ -2630,7 +2630,7 @@ bool isAppinForeground=true;
         patchData.patchData!.buildingName;
     SingletonFunctionController
         .building.patchData[patchData.patchData!.buildingID!] = patchData;
-    createPatch(patchData);
+    //createPatch(patchData);
     findCentroid(
         patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
 
@@ -2777,7 +2777,7 @@ bool isAppinForeground=true;
 
             Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
             SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
-            createotherPatch(key,patchData);
+            //createotherPatch(key,patchData);
 
             findCentroid(patchData.patchData!.coordinates!, key);
             print("apicalls testing 4 for $key");
@@ -10865,7 +10865,7 @@ bool isAppinForeground=true;
       polygons.union(otherpatch);
       polygons.union(_polygon);
       polygons.union(blurPatch);
-      polygons.union(patch);
+      // polygons.union(patch);
       cachedPolygon = polygons;
       return polygons;
     }
@@ -11680,6 +11680,47 @@ bool isAppinForeground=true;
   //     },
   //   ));
   // }
+bool isLocating=false;
+  Position? userLoc;
+  void getLocs()async{
+    setState(() {
+      isLocating=true;
+    });
+    userLoc= await getUsersCurrentLatLng();
+    if(userLoc!=null){
+      UserState.geoLat=userLoc!.latitude;
+      UserState.geoLng=userLoc!.longitude;
+    }else{
+      userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    }
+    if(mounted){
+      setState(() {
+        isLocating=false;
+      });
+    }
+
+  }
+
+  Future<Position?> getUsersCurrentLatLng()async{
+    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
+    try{
+      Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Geolocator.getLocationAccuracy();
+      return position;
+    }catch(e){
+      print("error in location fetching");
+      return null;
+    }
+
+
+
+    // }
+    // else{
+    //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    //   return pos;
+    // }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11743,13 +11784,13 @@ bool isAppinForeground=true;
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  if (cameraPosition.zoom > 16.8) {
-                    focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
-                  } else {
-                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                  }
+                  // if (cameraPosition.zoom > 16.8) {
+                  //   focusBuildingChecker(cameraPosition);
+                  // } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                  //   renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  // } else {
+                  //   renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                  // }
 
 
 
@@ -11923,7 +11964,7 @@ bool isAppinForeground=true;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                  Text("coord [${UserState.geoLat},${UserState.geoLng}] \n"),
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
                   // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
@@ -12101,6 +12142,13 @@ bool isAppinForeground=true;
                   //     ),
                   //   ),
                   // ),
+                  
+                  
+                  FloatingActionButton(onPressed: (){
+                  getLocs();
+                  }, child:Icon(Icons.accessibility)),
+
+                  
 
                   isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
                     child: FloatingActionButton(

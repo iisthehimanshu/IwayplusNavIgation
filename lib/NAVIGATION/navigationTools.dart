@@ -812,8 +812,6 @@ class tools {
 
     return angleInDegrees;
   }
-
-
     static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //
     // //
@@ -835,6 +833,26 @@ class tools {
 
     return angleInDegrees;
   }
+
+  static double calculateAngle5(List<double> a, List<double> b, List<double> c) {
+    // Convert the points to vectors
+    List<double> ab = [b[0] - a[0], b[1] - a[1]];
+    List<double> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the angle between the two vectors in radians
+    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+    // Ensure the angle is within [0, 360] degrees
+    if (angleInDegrees < 0) {
+      angleInDegrees += 360;
+    }
+
+    return angleInDegrees;
+  }
+
 
   static void setBuildingAngle(String angle){
     AngleBetweenBuildingandGlobalNorth = double.parse(angle);
@@ -1329,36 +1347,37 @@ class tools {
 
     return nearestLandmark;
   }
-  static List<Landmarks> localizefindAllNearbyLandmark(beacon? Beacon, Map<String, Landmarks> landmarksMap,{Landmarks? la}) {
-
+  static List<Landmarks> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
     PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
     landmarksMap.forEach((key, value) {
-      if((la?.buildingID ?? Beacon!.buildingID) == value.buildingID && value.element!.subType != "beacons" && value.name != null && (la?.floor ?? Beacon!.floor!) == value.floor){
-          List<int> pCoord = [];
-          pCoord.add(la?.coordinateX ?? Beacon!.coordinateX!);
-          pCoord.add(la?.coordinateY ?? Beacon!.coordinateY!);
-          double d = 0.0;
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
 
-          if (value.doorX != null) {
-            d = calculateDistance(
-                pCoord, [value.doorX!, value.doorY!]);
-            //
-            //
-            if (d<distance) {
-              Landmarks currentLandInfo = value;
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
-          }else{
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-            //
-            //
-            if (d<distance) {
-              Landmarks currentLandInfo = value;
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+        if (value.doorX != null) {
+          d = calculateDistance(
+              pCoord, [value.doorX!, value.doorY!]);
+          //
+          //
+          if (d<distance) {
+            Landmarks currentLandInfo = Landmarks(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
           }
+        }else{
+          d = calculateDistance(
+              pCoord, [value.coordinateX!, value.coordinateY!]);
+          //
+          //
+          if (d<distance) {
+            Landmarks currentLandInfo = Landmarks(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+          }
+        }
 
       }
     });
@@ -1367,19 +1386,17 @@ class tools {
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       //
       while(priorityQueue.isNotEmpty)
-        {
-          MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
-          nearestLandmark.add(entry.key);
-        }
+      {
+        MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
+        nearestLandmark.add(entry.key);
+      }
     }else{
       //
     }
     return nearestLandmark;
   }
+
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-
-    //
-
     int distance=10;
     List<int> coordinates=[];
     int i=0;

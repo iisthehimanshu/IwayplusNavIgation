@@ -388,7 +388,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= int.parse(threshold!)) {
+              highestweight >= double.parse(threshold!)) {
             widget.user.onConnection = false;
             //
             List<int> beaconcoord = [

@@ -896,6 +896,11 @@ bool isAppinForeground=true;
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }
+      if(UserCredentials().getUserPersonWithDisability()>0)
+      {
+        peakThreshold= peakThreshold+0.5;
+        valleyThreshold= valleyThreshold-0.5;
+      }
     } catch (e) {
       throw (e);
     }
@@ -996,6 +1001,7 @@ bool isAppinForeground=true;
       //
       setState(() {
         isPdr = true;
+        isPdrActive = true;
       });
       if(isAppinForeground){
         pdrstepCount();
@@ -1013,6 +1019,7 @@ bool isAppinForeground=true;
       setState(() {
         isPdrStop = true;
         isPdr = false;
+        isPdrActive = false;
       });
       PDRTimer!.cancel();
       for (final subscription in pdr) {
@@ -1051,43 +1058,12 @@ bool isAppinForeground=true;
         wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
         wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
         // Apply low-pass filter
-        filteredX = alpha * filteredX + (1 - alpha) * event.x;
-        filteredY = alpha * filteredY + (1 - alpha) * event.y;
-        filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-
-
-
-        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-        double orientation = atan2(filteredY, sqrt(filteredX * filteredX + filteredZ * filteredZ));
-
-        // Add orientation to history and check variability
-        orientationHistory.add(orientation);
-        if (orientationHistory.length > orientationWindowSize) {
-          orientationHistory.removeAt(0);  // Maintain a fixed window size
-
-          // Calculate standard deviation of orientation
-          double avgOrientation = orientationHistory.reduce((a, b) => a + b) / orientationWindowSize;
-          double orientationVariance = orientationHistory.fold(0, (sum, value) => sum + pow(value - avgOrientation, 2).toInt()) / orientationWindowSize;
-          double orientationStability = sqrt(orientationVariance);
-
-          // Suppress step detection if orientation is too variable
-          if (orientationStability > orientationThreshold) {
-            // Too random, assume the user is stationary or talking, ignore steps
-            return;
-          }
-        }
-        // Compute magnitude of acceleration vector
-        double magnitude = sqrt((filteredX * filteredX +
-            filteredY * filteredY +
-            filteredZ * filteredZ));
-        // Detect peak and valley
-        if (magnitude > peakThreshold &&
-            DateTime.now().millisecondsSinceEpoch - lastPeakTime >
-                peakInterval) {
+        if (detectStep(event.x, event.y, event.z)) {
           setState(() {
-            lastPeakTime = DateTime.now().millisecondsSinceEpoch;
+            lastPeakTime = DateTime
+                .now()
+                .millisecondsSinceEpoch;
             stepCount++;
-
             bool isvalid = MotionModel.isValidStep(
                 user,
                 SingletonFunctionController
@@ -1108,13 +1084,83 @@ bool isAppinForeground=true;
               }
             }
           });
-        } else if (magnitude < valleyThreshold &&
-            DateTime.now().millisecondsSinceEpoch - lastValleyTime >
-                valleyInterval) {
-          setState(() {
-            lastValleyTime = DateTime.now().millisecondsSinceEpoch;
-          });
         }
+        else {
+          filteredX = alpha * filteredX + (1 - alpha) * event.x;
+          filteredY = alpha * filteredY + (1 - alpha) * event.y;
+          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+          double orientation = atan2(filteredY,
+              sqrt(filteredX * filteredX + filteredZ * filteredZ))
+          ;
+          // Add orientation to history and check variability
+          orientationHistory.add(orientation);
+          if (orientationHistory.length > orientationWindowSize) {
+            orientationHistory.removeAt(0); // Maintain a fixed window size
+
+            // Calculate standard deviation of orientation
+            double avgOrientation = orientationHistory.reduce((a, b) =>
+            a + b) / orientationWindowSize;
+            double orientationVariance = orientationHistory.fold(
+                0, (sum, value) => sum +
+                pow(value - avgOrientation, 2).toInt()) /
+                orientationWindowSize;
+            double orientationStability = sqrt(orientationVariance);
+
+            // Suppress step detection if orientation is too variable
+            if (orientationStability > orientationThreshold) {
+              // Too random, assume the user is stationary or talking, ignore steps
+              return;
+            }
+          }
+          // Compute magnitude of acceleration vector
+          double magnitude = sqrt((filteredX * filteredX +
+              filteredY * filteredY +
+              filteredZ * filteredZ));
+          // Detect peak and valley
+          if (magnitude > peakThreshold &&
+              DateTime
+                  .now()
+                  .millisecondsSinceEpoch - lastPeakTime >
+                  peakInterval) {
+            setState(() {
+              lastPeakTime = DateTime
+                  .now()
+                  .millisecondsSinceEpoch;
+              stepCount++;
+              bool isvalid = MotionModel.isValidStep(
+                  user,
+                  SingletonFunctionController
+                      .building.floorDimenssion[user.bid]![user.floor]![0],
+                  SingletonFunctionController
+                      .building.floorDimenssion[user.bid]![user.floor]![1],
+                  SingletonFunctionController
+                      .building.nonWalkable[user.bid]![user.floor]!,
+                  reroute);
+              if (isvalid) {
+                user.move(context).then((value) {
+                  renderHere();
+                });
+              } else {
+                if (user.isnavigating) {
+                  // reroute();
+                  // showToast("You are out of path");
+                }
+              }
+            });
+          } else if (magnitude < valleyThreshold &&
+              DateTime
+                  .now()
+                  .millisecondsSinceEpoch - lastValleyTime >
+                  valleyInterval) {
+            setState(() {
+              lastValleyTime = DateTime
+                  .now()
+                  .millisecondsSinceEpoch;
+            });
+          }
+        }
+
       },
       onError: (error) {
         wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
@@ -1122,7 +1168,38 @@ bool isAppinForeground=true;
       },
     ));
   }
+  DateTime? lastStepTime; // To track the last step detection time
+  final Duration stepCooldown = Duration(milliseconds: 800);
+  bool isPdrActive = false;
+  bool detectStep(double x, double y, double z) {
+    if (!isPdrActive) return false;
+    // Calculate pitch and roll
+    double pitch = atan(x / sqrt(y * y + z * z)) * (180 / pi);
+    double roll = atan(y / sqrt(x * x + z * z)) * (180 / pi);
 
+    // Define problematic orientation thresholds
+    bool isProblematicOrientation =
+        (pitch > 80 && pitch < 100) || (roll > 80 && roll < 100);
+
+    // Calculate movement magnitude
+    double magnitude = sqrt(x * x + y * y + z * z);
+
+    // Threshold to detect significant movement
+    double movementThreshold = 9.85;// Adjust based on your testing
+
+    // Check if a step is detected
+    if (isProblematicOrientation && magnitude > movementThreshold) {
+      DateTime now = DateTime.now();
+
+      // Ensure cooldown between steps
+      if (lastStepTime == null || now.difference(lastStepTime!) > stepCooldown) {
+
+        lastStepTime = now; // Update the last step detection time
+        return true; // Step detected
+      }
+    }
+    return false; // No step detected
+  }
   Future<void> paintMarker(LatLng Location) async {
     if (markers.containsKey(user.bid)) {
       markers[user.bid]?.add(Marker(
@@ -1581,7 +1658,7 @@ bool isAppinForeground=true;
           );
 
           if (userSetLocation != null) {
-            initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
+            initializeUser(userSetLocation,beaconData ,speakTTS: speakTTS, render: render);
           } else {
             unableToFindLocation();
           }
@@ -1596,7 +1673,6 @@ bool isAppinForeground=true;
       if (speakTTS) unableToFindLocation();
     }
   }
-
   Future<void> _handlePolygonLocalization(
       String polyID,
       bool speakTTS,
@@ -1607,7 +1683,7 @@ bool isAppinForeground=true;
       final userSetLocation = landmarkData?.landmarksMap?[polyID];
 
       if (userSetLocation != null) {
-        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
+        initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
       } else {
         unableToFindLocation();
       }
@@ -1628,7 +1704,7 @@ bool isAppinForeground=true;
 
       if (userSetLocation != null) {
         String polyID = userSetLocation.properties!.polyId!;
-        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
+        initializeUser(userSetLocation,null,speakTTS: speakTTS, render: render);
       } else {
         unableToFindLocation();
       }
@@ -1643,7 +1719,7 @@ bool isAppinForeground=true;
     SingletonFunctionController.building.qrOpened = true;
   }
 
-  void initializeUser(Landmarks userSetLocation,{bool speakTTS = true, bool render = true})async{
+  void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
     setState(() {
@@ -1829,10 +1905,13 @@ bool isAppinForeground=true;
     });
 
     List<Landmarks> getallnearbylandmark=[];
-    await SingletonFunctionController.building.landmarkdata!.then((value) {
-      getallnearbylandmark = tools.localizefindAllNearbyLandmark(
-          null, value.landmarksMap!, la:userSetLocation);
-    });
+    if(localizedBeacon!=null){
+      await SingletonFunctionController.building.landmarkdata!.then((value) {
+        getallnearbylandmark = tools.localizefindAllNearbyLandmark(
+          localizedBeacon!, value.landmarksMap!);
+      });
+    }
+
 
 
     double value = 0;
@@ -1848,6 +1927,7 @@ bool isAppinForeground=true;
     }
     double distBetweenLandmarks=0.0;
     if(getallnearbylandmark.length>2){
+      print("got into it");
       distBetweenLandmarks=tools.calculateDistance([user.coordX,user.coordY], [getallnearbylandmark[1].coordinateX!,getallnearbylandmark[1].coordinateY!]);
       value2 = tools.calculateAngle2(
           [user.coordX, user.coordY],
@@ -3015,6 +3095,7 @@ bool isAppinForeground=true;
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
+      SingletonFunctionController.currentBeacon=nearestBeacon;
     }
     paintUser(nearestBeacon,null,null, speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -5450,7 +5531,7 @@ bool isAppinForeground=true;
             .properties!
             .url !=
             null));
-
+    _focusNodeC.requestFocus();
     return Stack(
       children: [
         Positioned(
@@ -6058,159 +6139,162 @@ bool isAppinForeground=true;
                 ),
                 child: Center(
                   // Center the button vertically
-                  child: SizedBox(
-                    height: 40, // Set the desired height for the TextButton
-                    width: screenWidth - 32, // Set the width as needed
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        backgroundColor: Color(0xff6CC8BF),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(27.0),
-                        ),
-                      ),
-                      onPressed: () async {
-                        _polygon.clear();
-                        cachedPolygon.clear();
-                        // circles.clear();
-                        Markers.clear();
-
-                        if (user.coordY != 0 && user.coordX != 0) {
-                          PathState.sourceX = user.coordX;
-                          PathState.sourceY = user.coordY;
-                          PathState.sourceFloor = user.floor;
-                          PathState.sourcePolyID = user.key;
-
-                          PathState.sourceName = "Your current location";
-                          PathState.destinationPolyID =
-                          SingletonFunctionController
-                              .building.selectedLandmarkID!;
-                          PathState.destinationName = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![SingletonFunctionController
-                                  .building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!;
-                          PathState.destinationFloor = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .floor!;
-                          PathState.sourceBid = user.bid;
-
-                          PathState.destinationBid = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .buildingID!;
-
-                          setState(() {
-                            calculatingPath = true;
-                          });
-                          // bool calibrate = isCalibrationNeeded(magneticValues);
-                          // print("calibrate1");
-                          // print(calibrate);
-                          // if (calibrate == true) {
-                          //   setState(() {
-                          //     accuracy = true;
-                          //   });
-                          //   speak(
-                          //       "low accuracy found.Please calibrate your device",
-                          //       _currentLocale);
-                          //   showLowAccuracyDialog();
-                          //   magneticValues.clear();
-                          //   listenToMagnetometer();
-                          //   _timerCompass =
-                          //       Timer.periodic(Duration(seconds: 1), (timer) {
-                          //         calibrate = isCalibrationNeeded(magneticValues);
-                          //         print("calibrate2");
-                          //         print(calibrate);
-                          //         if (calibrate == false) {
-                          //           setState(() {
-                          //             accuracy = false;
-                          //           });
-                          //           magneticValues.clear();
-                          //           _timerCompass?.cancel();
-                          //         } else {
-                          //           listenToMagnetometeronCalibration();
-                          //           _timerCompass?.cancel();
-                          //         }
-                          //       });
-                          // }
-
-                          Future.delayed(Duration(seconds: 1), () {
-                            calculateroute(snapshot.data!.landmarksMap!)
-                                .then((value) {
-                              calculatingPath = false;
-
-                              _isLandmarkPanelOpen = false;
-                              _isRoutePanelOpen = true;
-                            });
-                          });
-                        } else {
-                          PathState.sourceName = "Choose Starting Point";
-                          PathState.destinationPolyID =
-                          SingletonFunctionController
-                              .building.selectedLandmarkID!;
-                          PathState.destinationName = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![SingletonFunctionController
-                                  .building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!;
-                          PathState.destinationFloor = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .floor!;
-                          SingletonFunctionController
-                              .building.selectedLandmarkID = "";
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SourceAndDestinationPage(
-                                    DestinationID:
-                                    PathState.destinationPolyID,
-                                    user: user,
-                                  ))).then((value) {
-                            if (value != null) {
-                              fromSourceAndDestinationPage(value);
-                            }
-                          });
-                        }
-                      },
-                      child: (!calculatingPath)
-                          ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.directions,
-                            color: Colors.white,
+                  child: Focus(
+                    focusNode:_focusNodeC,
+                    child: SizedBox(
+                      height: 40, // Set the desired height for the TextButton
+                      width: screenWidth - 32, // Set the width as needed
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Color(0xff6CC8BF),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(27.0),
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            "${LocaleData.direction.getString(context)}",
-                            style: TextStyle(
+                        ),
+                        onPressed: () async {
+                          _polygon.clear();
+                          cachedPolygon.clear();
+                          // circles.clear();
+                          Markers.clear();
+                    
+                          if (user.coordY != 0 && user.coordX != 0) {
+                            PathState.sourceX = user.coordX;
+                            PathState.sourceY = user.coordY;
+                            PathState.sourceFloor = user.floor;
+                            PathState.sourcePolyID = user.key;
+                    
+                            PathState.sourceName = "Your current location";
+                            PathState.destinationPolyID =
+                            SingletonFunctionController
+                                .building.selectedLandmarkID!;
+                            PathState.destinationName = snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .name ??
+                                snapshot
+                                    .data!
+                                    .landmarksMap![SingletonFunctionController
+                                    .building.selectedLandmarkID]!
+                                    .element!
+                                    .subType!;
+                            PathState.destinationFloor = snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .floor!;
+                            PathState.sourceBid = user.bid;
+                    
+                            PathState.destinationBid = snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .buildingID!;
+                    
+                            setState(() {
+                              calculatingPath = true;
+                            });
+                            // bool calibrate = isCalibrationNeeded(magneticValues);
+                            // print("calibrate1");
+                            // print(calibrate);
+                            // if (calibrate == true) {
+                            //   setState(() {
+                            //     accuracy = true;
+                            //   });
+                            //   speak(
+                            //       "low accuracy found.Please calibrate your device",
+                            //       _currentLocale);
+                            //   showLowAccuracyDialog();
+                            //   magneticValues.clear();
+                            //   listenToMagnetometer();
+                            //   _timerCompass =
+                            //       Timer.periodic(Duration(seconds: 1), (timer) {
+                            //         calibrate = isCalibrationNeeded(magneticValues);
+                            //         print("calibrate2");
+                            //         print(calibrate);
+                            //         if (calibrate == false) {
+                            //           setState(() {
+                            //             accuracy = false;
+                            //           });
+                            //           magneticValues.clear();
+                            //           _timerCompass?.cancel();
+                            //         } else {
+                            //           listenToMagnetometeronCalibration();
+                            //           _timerCompass?.cancel();
+                            //         }
+                            //       });
+                            // }
+                    
+                            Future.delayed(Duration(seconds: 1), () {
+                              calculateroute(snapshot.data!.landmarksMap!)
+                                  .then((value) {
+                                calculatingPath = false;
+                    
+                                _isLandmarkPanelOpen = false;
+                                _isRoutePanelOpen = true;
+                              });
+                            });
+                          } else {
+                            PathState.sourceName = "Choose Starting Point";
+                            PathState.destinationPolyID =
+                            SingletonFunctionController
+                                .building.selectedLandmarkID!;
+                            PathState.destinationName = snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .name ??
+                                snapshot
+                                    .data!
+                                    .landmarksMap![SingletonFunctionController
+                                    .building.selectedLandmarkID]!
+                                    .element!
+                                    .subType!;
+                            PathState.destinationFloor = snapshot
+                                .data!
+                                .landmarksMap![SingletonFunctionController
+                                .building.selectedLandmarkID]!
+                                .floor!;
+                            SingletonFunctionController
+                                .building.selectedLandmarkID = "";
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SourceAndDestinationPage(
+                                      DestinationID:
+                                      PathState.destinationPolyID,
+                                      user: user,
+                                    ))).then((value) {
+                              if (value != null) {
+                                fromSourceAndDestinationPage(value);
+                              }
+                            });
+                          }
+                        },
+                        child: (!calculatingPath)
+                            ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.directions,
                               color: Colors.white,
                             ),
-                          )
-                        ],
-                      )
-                          : Container(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
+                            SizedBox(width: 8),
+                            Text(
+                              "${LocaleData.direction.getString(context)}",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            )
+                          ],
+                        )
+                            : Container(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -6436,6 +6520,9 @@ bool isAppinForeground=true;
         distance = distance * 0.3048;
         distance = double.parse(distance.toStringAsFixed(1));
         setState(() {
+          _focusNodeA.unfocus();
+          _focusNodeA.requestFocus();
+          semanticsLabel="Start button double tap to navigate";
           startingNavigation=true;
         });
 
@@ -6460,7 +6547,7 @@ bool isAppinForeground=true;
     //   return;
     // }
   }
-
+  String semanticsLabel="";
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
@@ -6468,7 +6555,9 @@ bool isAppinForeground=true;
 
     PathState.singleCellListPath.clear();
     setState(() {
+      _focusNodeA.requestFocus();
       startingNavigation=false;
+      semanticsLabel="Please wait calculating the path";
     });
 
     if (PathState.sourcePolyID == "") {
@@ -8292,309 +8381,315 @@ bool isAppinForeground=true;
                       ),
                     ),
                   ),
-                  kIsWeb?Container():ElevatedButton.icon(
-                    icon: Icon(Icons.navigation, color: Colors.white),
-                    label: Text('Start', style: TextStyle(color: Colors.white)),
-                    onPressed: () async {
+                  kIsWeb?Container():Focus(
+                    focusNode: _focusNodeA,
+                    child: Semantics(
+                      label:semanticsLabel,
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.navigation, color: Colors.white),
+                        label: Text('Start', style: TextStyle(color: Colors.white)),
+                        onPressed: () async {
 
 
-                      if(startingNavigation){
-                        tools.setBuildingAngle(
+                          if(startingNavigation){
+                            tools.setBuildingAngle(
+                                SingletonFunctionController
+                                    .building
+                                    .patchData[PathState
+                                    .sourceBid]!
+                                    .patchData!
+                                    .buildingAngle!);
+                            if (PathState.sourceX ==
+                                PathState
+                                    .destinationX &&
+                                PathState.sourceY ==
+                                    PathState
+                                        .destinationY) {
+                              //HelperClass.showToast("Source and Destination can not be same");
+                              setState(() {
+                                _isRoutePanelOpen =
+                                false;
+                              });
+                              closeNavigation();
+                              return;
+                            }
+                            setState(() {
+                              circles.clear();
+                              _markers.clear();
+                              markerSldShown = false;
+
+                            });
+                            user.onConnection = false;
+                            PathState.didPathStart =
+                            true;
+
+                            UserState.cols =
                             SingletonFunctionController
                                 .building
-                                .patchData[PathState
-                                .sourceBid]!
-                                .patchData!
-                                .buildingAngle!);
-                        if (PathState.sourceX ==
+                                .floorDimenssion[
                             PathState
-                                .destinationX &&
-                            PathState.sourceY ==
+                                .sourceBid]![PathState
+                                .sourceFloor]![0];
+                            UserState
+                                .rows = SingletonFunctionController
+                                .building
+                                .floorDimenssion[
+                            PathState
+                                .destinationBid]![PathState
+                                .destinationFloor]![1];
+                            UserState.lngCode =
+                                _currentLocale;
+                            UserState.reroute =
+                                reroute;
+                            UserState
+                                .closeNavigation =
+                                closeNavigation;
+                            UserState.alignMapToPath = alignMapToPath;
+                            UserState.startOnPath =
+                                startOnPath;
+                            UserState.speak = speak;
+                            UserState.paintMarker =
+                                paintMarker;
+                            UserState.createCircle =
+                                updateCircle;
+
+                            //detected=false;
+                            //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                            wsocket.message["path"]
+                            ["source"] =
+                                PathState.sourceName;
+                            wsocket.message["path"]
+                            ["destination"] =
                                 PathState
-                                    .destinationY) {
-                          //HelperClass.showToast("Source and Destination can not be same");
-                          setState(() {
-                            _isRoutePanelOpen =
+                                    .destinationName;
+                            // user.ListofPaths = PathState.listofPaths;
+                            // user.patchData = SingletonFunctionController.building.patchData;
+                            // user.buildingNumber = PathState.listofPaths.length-1;
+                            buildingAllApi
+                                .selectedID =
+                                PathState.sourceBid;
+                            buildingAllApi
+                                .selectedBuildingID =
+                                PathState.sourceBid;
+                            UserState.cols =
+                            SingletonFunctionController
+                                .building
+                                .floorDimenssion[
+                            PathState
+                                .sourceBid]![PathState
+                                .sourceFloor]![0];
+                            UserState.rows =
+                            SingletonFunctionController
+                                .building
+                                .floorDimenssion[
+                            PathState
+                                .sourceBid]![PathState
+                                .sourceFloor]![1];
+                            user.bid =
+                                PathState.sourceBid;
+                            user.coordX =
+                                PathState.sourceX;
+                            user.coordY =
+                                PathState.sourceY;
+                            user.temporaryExit =
                             false;
-                          });
-                          closeNavigation();
-                          return;
-                        }
-                        setState(() {
-                          circles.clear();
-                          _markers.clear();
-                          markerSldShown = false;
-
-                        });
-                        user.onConnection = false;
-                        PathState.didPathStart =
-                        true;
-
-                        UserState.cols =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![0];
-                        UserState
-                            .rows = SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .destinationBid]![PathState
-                            .destinationFloor]![1];
-                        UserState.lngCode =
-                            _currentLocale;
-                        UserState.reroute =
-                            reroute;
-                        UserState
-                            .closeNavigation =
-                            closeNavigation;
-                        UserState.alignMapToPath = alignMapToPath;
-                        UserState.startOnPath =
-                            startOnPath;
-                        UserState.speak = speak;
-                        UserState.paintMarker =
-                            paintMarker;
-                        UserState.createCircle =
-                            updateCircle;
-
-                        //detected=false;
-                        //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                        wsocket.message["path"]
-                        ["source"] =
-                            PathState.sourceName;
-                        wsocket.message["path"]
-                        ["destination"] =
+                            UserState.reroute =
+                                reroute;
+                            UserState
+                                .closeNavigation =
+                                closeNavigation;
+                            UserState.alignMapToPath =
+                                alignMapToPath;
+                            UserState.startOnPath =
+                                startOnPath;
+                            UserState.speak = speak;
+                            UserState.paintMarker =
+                                paintMarker;
+                            UserState.createCircle =
+                                updateCircle;
+                            UserState.changeBuilding =
+                                changeBuilding;
+                            //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                            user.floor =
+                                PathState.sourceFloor;
+                            user.pathobj = PathState;
+                            user.path = PathState
+                                .singleListPath;
+                            user.isnavigating = true;
+                            user.cellPath = PathState
+                                .singleCellListPath;
                             PathState
-                                .destinationName;
-                        // user.ListofPaths = PathState.listofPaths;
-                        // user.patchData = SingletonFunctionController.building.patchData;
-                        // user.buildingNumber = PathState.listofPaths.length-1;
-                        buildingAllApi
-                            .selectedID =
-                            PathState.sourceBid;
-                        buildingAllApi
-                            .selectedBuildingID =
-                            PathState.sourceBid;
-                        UserState.cols =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![0];
-                        UserState.rows =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![1];
-                        user.bid =
-                            PathState.sourceBid;
-                        user.coordX =
-                            PathState.sourceX;
-                        user.coordY =
-                            PathState.sourceY;
-                        user.temporaryExit =
-                        false;
-                        UserState.reroute =
-                            reroute;
-                        UserState
-                            .closeNavigation =
-                            closeNavigation;
-                        UserState.alignMapToPath =
-                            alignMapToPath;
-                        UserState.startOnPath =
-                            startOnPath;
-                        UserState.speak = speak;
-                        UserState.paintMarker =
-                            paintMarker;
-                        UserState.createCircle =
-                            updateCircle;
-                        UserState.changeBuilding =
-                            changeBuilding;
-                        //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                        user.floor =
-                            PathState.sourceFloor;
-                        user.pathobj = PathState;
-                        user.path = PathState
-                            .singleListPath;
-                        user.isnavigating = true;
-                        user.cellPath = PathState
-                            .singleCellListPath;
-                        PathState
-                            .singleCellListPath
-                            .forEach(
-                                (element) {});
-                        user
-                            .moveToStartofPath()
-                            .then((value) async {
-                          setState(() {
-                            markers.clear();
-                            List<double> val = tools.localtoglobal(
-                                user.showcoordX
-                                    .toInt(),
-                                user.showcoordY
-                                    .toInt(),
-                                SingletonFunctionController
-                                    .building
-                                    .patchData[
-                                PathState
-                                    .sourceBid]);
-                            if(markers.isEmpty){
-                              print("markers were empty");
-                              markers.putIfAbsent(
-                                  user.bid,
-                                      () => []);
-                              markers[user.bid]
-                                  ?.add(Marker(
-                                markerId: MarkerId(
-                                    "UserLocation"),
-                                position: LatLng(
-                                    val[0], val[1]),
-                                icon:
-                                BitmapDescriptor
-                                    .fromBytes(
-                                    userloc),
-                                anchor: Offset(
-                                    0.5, 0.829),
-                              ));
-                            }else{
-                              print("markers were not empty");
-                            }
+                                .singleCellListPath
+                                .forEach(
+                                    (element) {});
+                            user
+                                .moveToStartofPath()
+                                .then((value) async {
+                              setState(() {
+                                markers.clear();
+                                List<double> val = tools.localtoglobal(
+                                    user.showcoordX
+                                        .toInt(),
+                                    user.showcoordY
+                                        .toInt(),
+                                    SingletonFunctionController
+                                        .building
+                                        .patchData[
+                                    PathState
+                                        .sourceBid]);
+                                if(markers.isEmpty){
+                                  print("markers were empty");
+                                  markers.putIfAbsent(
+                                      user.bid,
+                                          () => []);
+                                  markers[user.bid]
+                                      ?.add(Marker(
+                                    markerId: MarkerId(
+                                        "UserLocation"),
+                                    position: LatLng(
+                                        val[0], val[1]),
+                                    icon:
+                                    BitmapDescriptor
+                                        .fromBytes(
+                                        userloc),
+                                    anchor: Offset(
+                                        0.5, 0.829),
+                                  ));
+                                }else{
+                                  print("markers were not empty");
+                                }
 
 
-                            val = tools.localtoglobal(
-                                user.coordX
-                                    .toInt(),
-                                user.coordY
-                                    .toInt(),
-                                SingletonFunctionController
-                                    .building
-                                    .patchData[
-                                PathState
-                                    .sourceBid]);
+                                val = tools.localtoglobal(
+                                    user.coordX
+                                        .toInt(),
+                                    user.coordY
+                                        .toInt(),
+                                    SingletonFunctionController
+                                        .building
+                                        .patchData[
+                                    PathState
+                                        .sourceBid]);
 
 
-                            if (kDebugMode) {
-                              markers[user.bid]
-                                  ?.add(Marker(
-                                markerId: MarkerId(
-                                    "debug"),
-                                position: LatLng(
-                                    val[0],
-                                    val[1]),
-                                icon: BitmapDescriptor
-                                    .fromBytes(
-                                    userlocdebug),
-                                anchor: Offset(
-                                    0.5, 0.829),
-                              ));
-                            }
-                            // circles.add(
-                            //   Circle(
-                            //     circleId: CircleId("circle"),
-                            //     center: LatLng(user.lat,user.lng),
-                            //     radius: _animation.value,
-                            //     strokeWidth: 1,
-                            //     strokeColor: Colors.blue,
-                            //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                            //   ),
-                            // );
-                          });
-                        });
-                        _isRoutePanelOpen = false;
+                                if (kDebugMode) {
+                                  markers[user.bid]
+                                      ?.add(Marker(
+                                    markerId: MarkerId(
+                                        "debug"),
+                                    position: LatLng(
+                                        val[0],
+                                        val[1]),
+                                    icon: BitmapDescriptor
+                                        .fromBytes(
+                                        userlocdebug),
+                                    anchor: Offset(
+                                        0.5, 0.829),
+                                  ));
+                                }
+                                // circles.add(
+                                //   Circle(
+                                //     circleId: CircleId("circle"),
+                                //     center: LatLng(user.lat,user.lng),
+                                //     radius: _animation.value,
+                                //     strokeWidth: 1,
+                                //     strokeColor: Colors.blue,
+                                //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                                //   ),
+                                // );
+                              });
+                            });
+                            _isRoutePanelOpen = false;
 
-                        SingletonFunctionController
-                            .building
-                            .selectedLandmarkID =
-                        null;
+                            SingletonFunctionController
+                                .building
+                                .selectedLandmarkID =
+                            null;
 
-                        _isnavigationPannelOpen =
-                        true;
+                            _isnavigationPannelOpen =
+                            true;
 
-                        semanticShouldBeExcluded =
-                        false;
+                            semanticShouldBeExcluded =
+                            false;
 
-                        StartPDR();
+                            StartPDR();
 
-                        if (SingletonFunctionController
-                            .building
-                            .floor[
-                        PathState
-                            .sourceBid] !=
+                            if (SingletonFunctionController
+                                .building
+                                .floor[
                             PathState
-                                .sourceFloor) {
-                          SingletonFunctionController
-                              .building.floor[
-                          PathState
-                              .sourceBid] =
+                                .sourceBid] !=
+                                PathState
+                                    .sourceFloor) {
+                              SingletonFunctionController
+                                  .building.floor[
                               PathState
-                                  .sourceFloor;
-                          createRooms(
+                                  .sourceBid] =
+                                  PathState
+                                      .sourceFloor;
+                              createRooms(
+                                  SingletonFunctionController
+                                      .building
+                                      .polylinedatamap[
+                                  PathState
+                                      .sourceBid]!,
+                                  PathState
+                                      .sourceFloor);
                               SingletonFunctionController
                                   .building
-                                  .polylinedatamap[
+                                  .landmarkdata!
+                                  .then((value) {
+                                createMarkers(
+                                    value,
+                                    PathState
+                                        .sourceFloor,
+                                    bid: PathState
+                                        .sourceBid);
+                              });
+                            }
+                            await Future.delayed(const Duration(milliseconds: 500));
+
+                            alignMapToPath([
                               PathState
-                                  .sourceBid]!,
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index]
+                                  .lat,
                               PathState
-                                  .sourceFloor);
-                          SingletonFunctionController
-                              .building
-                              .landmarkdata!
-                              .then((value) {
-                            createMarkers(
-                                value,
-                                PathState
-                                    .sourceFloor,
-                                bid: PathState
-                                    .sourceBid);
-                          });
-                        }
-                        await Future.delayed(const Duration(milliseconds: 500));
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index ]
+                                  .lng
+                            ], [
+                              PathState
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index +
+                                  2]
+                                  .lat,
+                              PathState
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index +
+                                  2]
+                                  .lng
+                            ]);
 
-                        alignMapToPath([
-                          PathState
-                              .singleCellListPath[
-                          user.pathobj
-                              .index]
-                              .lat,
-                          PathState
-                              .singleCellListPath[
-                          user.pathobj
-                              .index ]
-                              .lng
-                        ], [
-                          PathState
-                              .singleCellListPath[
-                          user.pathobj
-                              .index +
-                              2]
-                              .lat,
-                          PathState
-                              .singleCellListPath[
-                          user.pathobj
-                              .index +
-                              2]
-                              .lng
-                        ]);
+                            Future.delayed(Duration(seconds: 2)).then((onValue){
+                              setState(() {
+                                onStart=true;
+                              });
+                            });
+                          }
 
-                        Future.delayed(Duration(seconds: 2)).then((onValue){
-                          setState(() {
-                            onStart=true;
-                          });
-                        });
-                      }
-
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -8606,6 +8701,8 @@ bool isAppinForeground=true;
       ),
     );
   }
+  final FocusNode _focusNodeA = FocusNode();
+  final FocusNode _focusNodeC = FocusNode();
 
 
   int _rating = 0;
@@ -8648,6 +8745,7 @@ bool isAppinForeground=true;
         autofocus: true,
         child: Semantics(
           excludeSemantics: false,
+          label:"You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
           child: Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -9057,7 +9155,7 @@ bool isAppinForeground=true;
       //     UserState.reachedLift=false;
       //
       // }
-
+      _focusNodeB.requestFocus();
       if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
         int col = user.pathobj.numCols![user.bid]![user.floor]!;
 
@@ -9308,23 +9406,26 @@ bool isAppinForeground=true;
                 ),
               ),
             ),
-            DirectionHeader(
-              user: user,
-              paint: paintUser,
-              repaint: repaintUser,
-              reroute: reroute,
-              moveUser: moveUser,
-              closeNavigation: closeNavigation,
-              isRelocalize: false,
-              focusOnTurn: focusOnTurn,
-              clearFocusTurnArrow: clearFocusTurnArrow,
-              context: context,
-              //turnMarkersVisible:turnMarkersVisible,
+            Focus(
+              focusNode: _focusNodeB,
+              child: DirectionHeader(
+                user: user,
+                paint: paintUser,
+                repaint: repaintUser,
+                reroute: reroute,
+                moveUser: moveUser,
+                closeNavigation: closeNavigation,
+                isRelocalize: false,
+                focusOnTurn: focusOnTurn,
+                clearFocusTurnArrow: clearFocusTurnArrow,
+                context: context,
+                //turnMarkersVisible:turnMarkersVisible,
+              ),
             )
           ],
         ));
   }
-
+  final FocusNode _focusNodeB = FocusNode();
   void exitNavigation() {
     setState(() {
       if (PathState.didPathStart) {
@@ -9358,114 +9459,117 @@ bool isAppinForeground=true;
       }
     });
   }
-
   bool rerouting = false;
   Widget reroutePannel(context) {
     return Visibility(
         visible: _isreroutePannelOpen,
-        child: SlidingUpPanel(
-          minHeight: 119,
-          backdropEnabled: true,
-          isDraggable: false,
-          panel: Container(
-            padding: EdgeInsets.only(left: 13, top: 13),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SvgPicture.asset("assets/Reroutevector.svg"),
-                SizedBox(
-                  width: 12,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Off-Path Notification",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff000000),
-                        height: 26 / 20,
+        child: Semantics(
+          excludeSemantics: true,
+          label:"You are Going away from the path rerouting you to the destination",
+          child: SlidingUpPanel(
+            minHeight: 119,
+            backdropEnabled: true,
+            isDraggable: false,
+            panel: Container(
+              padding: EdgeInsets.only(left: 13, top: 13),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SvgPicture.asset("assets/Reroutevector.svg"),
+                  SizedBox(
+                    width: 12,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Off-Path Notification",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff000000),
+                          height: 26 / 20,
+                        ),
+                        textAlign: TextAlign.left,
                       ),
-                      textAlign: TextAlign.left,
-                    ),
-                    Text(
-                      "Lost the path? New route?",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff8d8c8c),
-                        height: 20 / 14,
+                      Text(
+                        "Lost the path? New route?",
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff8d8c8c),
+                          height: 20 / 14,
+                        ),
+                        textAlign: TextAlign.left,
                       ),
-                      textAlign: TextAlign.left,
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Row(
-                      children: [
-                        FocusScope(
-                          autofocus: true,
-                          child: Semantics(
-                            label: "Reroute",
-                            child: Container(
-                              width: 85,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: Color(0xff24B9B0),
-                                borderRadius: BorderRadius.circular(4.0),
-                              ),
-                              child: TextButton(
-                                key: rerouteButton,
-                                onPressed: () async {
-                                  autoreroute();
-                                },
-                                child: Container(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        children: [
+                          FocusScope(
+                            autofocus: true,
+                            child: Semantics(
+                              label: "Reroute",
+                              child: Container(
+                                width: 85,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff24B9B0),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: TextButton(
+                                  key: rerouteButton,
+                                  onPressed: () async {
+                                    autoreroute();
+                                  },
+                                  child: Container(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 12,
-                        ),
-                        // Container(
-                        //   width: 92,
-                        //   height: 36,
-                        //   decoration: BoxDecoration(
-                        //       borderRadius: BorderRadius.circular(4.0),
-                        //       border: Border.all(color: Colors.black)),
-                        //   // child: TextButton(
-                        //   //   onPressed: () {
-                        //   //
-                        //   //   },
-                        //   //
-                        //   //
-                        //   //   child: Text(
-                        //   //     "Continue",
-                        //   //     style: const TextStyle(
-                        //   //       fontFamily: "Roboto",
-                        //   //       fontSize: 14,
-                        //   //       fontWeight: FontWeight.w400,
-                        //   //       color: Color(0xff000000),
-                        //   //       height: 20 / 14,
-                        //   //     ),
-                        //   //     textAlign: TextAlign.left,
-                        //   //   ),
-                        //   // ),
-                        // )
-                      ],
-                    )
-                  ],
-                )
-              ],
+                          SizedBox(
+                            width: 12,
+                          ),
+                          // Container(
+                          //   width: 92,
+                          //   height: 36,
+                          //   decoration: BoxDecoration(
+                          //       borderRadius: BorderRadius.circular(4.0),
+                          //       border: Border.all(color: Colors.black)),
+                          //   // child: TextButton(
+                          //   //   onPressed: () {
+                          //   //
+                          //   //   },
+                          //   //
+                          //   //
+                          //   //   child: Text(
+                          //   //     "Continue",
+                          //   //     style: const TextStyle(
+                          //   //       fontFamily: "Roboto",
+                          //   //       fontSize: 14,
+                          //   //       fontWeight: FontWeight.w400,
+                          //   //       color: Color(0xff000000),
+                          //   //       height: 20 / 14,
+                          //   //     ),
+                          //   //     textAlign: TextAlign.left,
+                          //   //   ),
+                          //   // ),
+                          // )
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ));
@@ -11027,7 +11131,7 @@ bool isAppinForeground=true;
       focusturnArrow.clear();
     });
   }
-
+  String finalDestinationDirection="";
   void closeNavigation() {
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
@@ -11041,16 +11145,18 @@ bool isAppinForeground=true;
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
-
+    finalDestinationDirection=direction;
 
     //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
-    flutterTts.pause().then((value) {
-      speak(
-          user.convertTolng("You have reached ${destname}. It is ${direction}",
-              "", 0.0, context, angle, "", "",
-              destname: destname),
-          _currentLocale);
-    });
+    if(UserCredentials().getUserPersonWithDisability()==0){
+      flutterTts.pause().then((value) {
+        speak(
+            user.convertTolng("You have reached ${destname}. It is ${direction}",
+                "", 0.0, context, angle, "", "",
+                destname: destname),
+            _currentLocale);
+      });
+    }
     // if(isSemanticEnabled) {
     //   showFeedback = true;
     //   Future.delayed(Duration(seconds: 5));
@@ -12081,7 +12187,6 @@ bool isAppinForeground=true;
                   )
                       : nofloorColumn(),
                   SizedBox(height: 28.0), // Adjust the height as needed
-
                   // Container(
                   //   width: 300,
                   //   height: 100,
@@ -12098,7 +12203,6 @@ bool isAppinForeground=true;
                   //     ),
                   //   ),
                   // ),
-
                   isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {

@@ -62,84 +62,88 @@ class _SearchpageResultsState extends State<SearchpageResults> {
           ),
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: Row(
-          children: [
-            Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 8),
-                  padding: EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xffF5F5F5),
-                  ),
-                  child: Icon(
-                    Icons.location_on_outlined,
-                    color: Color(0xff000000),
-                    size: 25,
-                  ),
-                ),
-                if(widget.distance!=0) Container(
-                  margin: EdgeInsets.only(top: 4, left: 11),
-                  child: Text(
-                    "${widget.distance.toString()}m",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff8d8c8c),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Row(
+        child: Semantics(
+          excludeSemantics: true,
+          label: (widget.distance!=0)?"${widget.name}, ${widget.distance} meter away":"${widget.name}",
+          child: Row(
+            children: [
+              Column(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 12, left: 18),
-                        child: Text(
-                          widget.name,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff000000),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
-                        child: Text(
-                          HelperClass.truncateString(widget.location, 40),
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff8d8c8c),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ],
+                  Container(
+                    margin: EdgeInsets.only(left: 8),
+                    padding: EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xffF5F5F5),
+                    ),
+                    child: Icon(
+                      Icons.location_on_outlined,
+                      color: Color(0xff000000),
+                      size: 25,
+                    ),
                   ),
-                  Spacer(),
-                  widget.accessible == "true"? Container(
-                    margin: EdgeInsets.only(right: 15),
-                    child: Icon(Icons.accessible,color: Colors.black,),
-                  ) : Container()
+                  if(widget.distance!=0) Container(
+                    margin: EdgeInsets.only(top: 4, left: 11),
+                    child: Text(
+                      "${widget.distance.toString()}m",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8d8c8c),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 12, left: 18),
+                          child: Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
+                          child: Text(
+                            HelperClass.truncateString(widget.location, 40),
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff8d8c8c),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    widget.accessible == "true"? Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Icon(Icons.accessible,color: Colors.black,),
+                    ) : Container()
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

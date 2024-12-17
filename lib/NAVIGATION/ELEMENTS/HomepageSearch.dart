@@ -62,10 +62,8 @@ class _HomepageSearchState extends State<HomepageSearch> {
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    Future.delayed(Duration(seconds: 5), () {
-
-    });
     print("Running init");
   }
 
@@ -74,14 +72,9 @@ class _HomepageSearchState extends State<HomepageSearch> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    Future.delayed(Duration(seconds: 5), () {
-
-    });
-
     return Column(
       children: [
         Semantics(
-
           header: true,
           label: "Search Bar",
           child: Container(
@@ -107,35 +100,40 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Semantics(
-                      sortKey: const OrdinalSortKey(0),
-                      label: "${LocaleData.waytogo.getString(context)}",
-
-                      child: InkWell(
-                        onTap: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                          ).then((value){
-                            print("POP22");
-                            widget.onVenueClicked(value,DirectlyStartNavigation: false);
-                          });
-                        },
+                    child: FocusScope(
+                      autofocus: true,
+                      child: Focus(
                         child: Semantics(
-                          excludeSemantics: true,
-                          child: Container(
-                              margin: EdgeInsets.only(left: 16),
-                              child: Text(
-                                "${LocaleData.waytogo.getString(context)}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff8e8d8d),
-                                  height: 25 / 16,
-                                ),
-                              )),
+                          sortKey: const OrdinalSortKey(0),
+                          label: "${LocaleData.waytogo.getString(context)}",
+
+                          child: InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                              ).then((value){
+                                print("POP22");
+                                widget.onVenueClicked(value,DirectlyStartNavigation: false);
+                              });
+                            },
+                            child: Semantics(
+                              excludeSemantics: true,
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  child: Text(
+                                    "${LocaleData.waytogo.getString(context)}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8e8d8d),
+                                      height: 25 / 16,
+                                    ),
+                                  )),
+                            ),
+                          ),
                         ),
                       ),
                     ),

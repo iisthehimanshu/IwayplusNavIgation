@@ -1646,16 +1646,13 @@ bool isAppinForeground=true;
   void initializeUser(Landmarks userSetLocation,{bool speakTTS = true, bool render = true})async{
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
-
     setState(() {
       buildingAllApi.selectedID = userSetLocation!.buildingID!;
       buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
     });
-
     List<int> localBeconCord = [];
     localBeconCord.add(userSetLocation.coordinateX!);
     localBeconCord.add(userSetLocation.coordinateY!);
-
     pathState().beaconCords = localBeconCord;
 
     List<double> values = [];

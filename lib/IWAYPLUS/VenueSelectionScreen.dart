@@ -17,6 +17,7 @@ import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
+import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
@@ -346,6 +347,7 @@ if(userLoc!=null){
             child: InkWell(
               onTap: (){
                 RefreshTokenAPI.refresh();
+
               },
               child: Container(
                 alignment: Alignment.bottomLeft,
@@ -402,7 +404,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NotificationScreen(),
+                    builder: (context) => BluetoothScanAndroid(),
                   ),
                 );
               },

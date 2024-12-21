@@ -3371,8 +3371,7 @@ bool isAppinForeground=true;
   }
 
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
@@ -3926,8 +3925,14 @@ bool isAppinForeground=true;
   Map<String, double> sortedsumMapfordebug = new Map();
   String lastBeaconValue = "";
 
+
   Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
+
+    print("apibeaconmap");
+    print(apibeaconmap);
+
+
     sumMap.clear();
     setState(() {
       sumMap = SingletonFunctionController.btadapter.calculateAverage();
@@ -13090,6 +13095,7 @@ bool isAppinForeground=true;
                                   Future.delayed(
                                       Duration(milliseconds: 2000))
                                       .then((value) => {
+
                                     realTimeReLocalizeUser(
                                         resBeacons)
                                     // listenToBin()

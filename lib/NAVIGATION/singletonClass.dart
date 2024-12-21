@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
+import 'BluetoothScanAndroidClass.dart';
 import 'buildingState.dart';
 
 import 'API/beaconapi.dart';
@@ -17,6 +18,7 @@ class SingletonFunctionController {
   bool _isRunning = false;
   Completer<void>? _completer;
   static BLueToothClass btadapter = new BLueToothClass();
+  BluetoothScanAndroidClass blueToothAndroid = BluetoothScanAndroidClass();
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static Building building = Building(floor: Map(), numberOfFloors: Map());
   static Future<void>? timer;
@@ -81,7 +83,9 @@ class SingletonFunctionController {
         print("blue statusssss");
         print(await FlutterBluePlus.isOn);
         if(Platform.isAndroid){
-
+          // print("apibeaconmap");
+          // print(apibeaconmap);
+          // blueToothAndroid.listenToScanUpdates(apibeaconmap);
           btadapter.startScanning(apibeaconmap);
         }else{
           btadapter.startScanningIOS(apibeaconmap);

@@ -1364,9 +1364,10 @@ bool isAppinForeground=true;
     landmarkData?.landmarks?.forEach((landmark) {
       // Check if the landmark belongs to the same building and has valid coordinates
       if (landmark.buildingID == buildingAllApi.outdoorID &&
+          landmark.element!.type != "FloorConnection" &&
+          landmark.element!.subType != "restRoom" &&
           landmark.coordinateX != null &&
-          landmark.coordinateY != null &&
-          !(landmark.wasPolyIdNull ?? false)) {
+          landmark.coordinateY != null ) {
 
         // Convert local coordinates to global latitude and longitude
         List<double> latLngValue = tools.localtoglobal(
@@ -1621,9 +1622,10 @@ bool isAppinForeground=true;
       bool speakTTS,
       bool render
       ) async {
-    print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
+    if(UserState.geoLat != null && UserState.geoLng != null) {
+      print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
       final userSetLocation = await getglobalcoords(
-          LatLng(UserState.geoLat, UserState.geoLng)
+          LatLng(UserState.geoLat!, UserState.geoLng!)
       );
 
       if (userSetLocation != null) {
@@ -1632,7 +1634,9 @@ bool isAppinForeground=true;
       } else {
         unableToFindLocation();
       }
-
+    }else{
+      unableToFindLocation();
+    }
   }
 
 

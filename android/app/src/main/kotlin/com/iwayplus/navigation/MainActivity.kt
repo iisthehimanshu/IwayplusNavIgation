@@ -54,13 +54,16 @@ class MainActivity : FlutterActivity() {
                 val device = BluetoothDevice(device.name,device.address,rssi.toString())
                 Log.d("deviceInfo","${device.DeviceAddress} ${device.DeviceName} ${device.DeviceRssi}")
                 //Log.d("deviceDetails","${deviceDetails}")
+                if (!deviceDetailsList.contains(deviceDetails)) {
+                    deviceDetailsList.add(deviceDetails)
+                    Log.d("BluetoothScan", "New Device Found: $deviceDetails")
+                    eventSink?.success(deviceDetails) // Send real-time updates to Flutterdetails.run
+                }
+                Log.d("deviceInfo",deviceDetailsList.size.toString());
+
 
                 eventSink?.success(deviceDetails)
-//                if (!deviceDetailsList.contains(deviceDetails)) {
-//                    deviceDetailsList.add(deviceDetails)
-//                    Log.d("BluetoothScan", "New Device Found: $deviceDetails")
-//                    eventSink?.success(deviceDetails) // Send real-time updates to Flutterdetails.run
-//                }
+
             }
         }
 

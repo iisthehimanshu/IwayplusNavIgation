@@ -87,13 +87,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   bool disposed = false;
-  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
+  BluetoothScanAndroidClass bluetoothScanAndroidClass =
+      BluetoothScanAndroidClass();
 
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
   bool isSpeaking = false;
   String? threshold;
+
+  String closestdevice = "";
 
   void initTts() {
     flutterTts.setCompletionHandler(() {
@@ -108,7 +111,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     super.initState();
 
     // initTts();
-
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
@@ -128,12 +130,16 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //   }
     // }
 
-
     bluetoothScanAndroidClass.startbin();
     bluetoothScanAndroidClass.emptyBin();
-    bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+    closestdevice =
+        bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+
+    print("closestdevice");
+    print(closestdevice);
+    setState(() {});
     //btadapter.startScanning(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
       if (widget.user.pathobj.index > 1) {
         listenToBin();
       }
@@ -160,19 +166,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           _currentLocale,
           prevpause: true);
     } else if (widget
-        .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
+            .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
         null) {
       turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
       turnPoints.add(widget.user.cellPath.last);
 
       (widget.user.cellPath.length % 2 == 0)
           ? turnPoints
-          .add(widget.user.cellPath[widget.user.cellPath.length - 2])
+              .add(widget.user.cellPath[widget.user.cellPath.length - 2])
           : turnPoints
-          .add(widget.user.cellPath[widget.user.cellPath.length - 1]);
+              .add(widget.user.cellPath[widget.user.cellPath.length - 1]);
 
       List<Cell> remainingPath =
-      widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
+          widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes_inCell(
           nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
@@ -212,15 +218,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("${widget.direction}", _currentLocale, prevpause: true);
           }
           widget.getSemanticValue =
-          "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
+              "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
         }
       });
     }
 
     try {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white// Set the icon color to dark
-      ));
+          systemNavigationBarColor: Colors.white // Set the icon color to dark
+          ));
     } catch (e) {}
   }
 
@@ -239,7 +245,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   String debuglastNearestbeacon = "";
   String debuglNearestbeacon = "";
   Map<String, double> sortedsumMap = {};
-  Map<String, double> sumMap = {};
+  Map<String, List<double>> sumMap = {};
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
@@ -255,7 +261,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     print(Building.apibeaconmap);
     print(sumMap);
     // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
-    threshold = '4';
+    threshold = '3.5';
     print(widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold);
     print(threshold);
@@ -263,17 +269,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     sortedsumMap.clear();
     //
 
-    sumMap.forEach((key, value) {
-      if (highestweight <= value) {
-        nearestBeacon = key;
-        highestweight = value;
-      }
-    });
-
-    setState(() {
-      sumMap;
-      ShowsumMap = HelperClass().sortMapByValue(sumMap);
-    });
+    // sumMap.forEach((key, value) {
+    //   if (highestweight <= value) {
+    //     nearestBeacon = key;
+    //     highestweight = value;
+    //   }
+    // });
+    //
+    // setState(() {
+    //   sumMap;
+    //   ShowsumMap = HelperClass().sortMapByValue(sumMap);
+    // });
 
     // btadapter.emptyBin();
     // btadapter.priorityQueue.clear();
@@ -281,7 +287,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // btadapter.startScanning(Building.apibeaconmap);
 
     sortedsumMap.entries.forEach((element) {
-      if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
+      if (Building.apibeaconmap[element.key]!.floor ==
+              widget.user.pathobj.destinationFloor &&
+          element.value >= 0.05) {
         nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
         highestweight = element.value;
       }
@@ -335,7 +343,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         debuglastNearestbeacon = nearestBeacon;
       }
     });
-    nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+    nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
+    setState(() {});
     print("nearestBeacon");
     print(nearestBeacon);
     print(Building.apibeaconmap[nearestBeacon]!);
@@ -360,7 +369,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               int distanceFromPath = 100000000;
               widget.user.cellPath.forEach((node) {
                 if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
-                    node.bid == Building.apibeaconmap[nearestBeacon]!.buildingID) {
+                    node.bid ==
+                        Building.apibeaconmap[nearestBeacon]!.buildingID) {
                   List<int> pathcoord = [node.x, node.y];
                   double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                   if (d1 < distanceFromPath) {
@@ -383,8 +393,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 UserState.createCircle(widget.user.lat, widget.user.lng);
                 speak(
-                    "You have reached ${tools.numericalToAlphabetical(
-                        Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
                     _currentLocale);
                 DirectionIndex = nextTurnIndex;
                 //need to render on beacon for aiims jammu
@@ -402,7 +411,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             // }
 
             else if (widget.user.floor ==
-                Building.apibeaconmap[nearestBeacon]!.floor && highestweight >= double.parse(threshold!)) {
+                    Building.apibeaconmap[nearestBeacon]!.floor &&
+                highestweight >= double.parse(threshold!)) {
               widget.user.onConnection = false;
               //
               List<int> beaconcoord = [
@@ -419,9 +429,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               List<double> newPoint = [];
               if (widget.user.bid == buildingAllApi.outdoorID) {
                 List<double> beaconLatLng = tools.localtoglobal(
-                    beaconcoord[0], beaconcoord[1],
-                    SingletonFunctionController.building.patchData[Building
-                        .apibeaconmap[nearestBeacon]!.buildingID!]);
+                    beaconcoord[0],
+                    beaconcoord[1],
+                    SingletonFunctionController.building.patchData[
+                        Building.apibeaconmap[nearestBeacon]!.buildingID!]);
                 List<Cell> nearPoints = findTwoNearestPoints(
                     beaconLatLng, widget.user.cellPath, widget.user.bid);
                 for (var point in nearPoints) {
@@ -429,9 +440,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
 
                 newPoint = projectCellOntoSegment(
-                    beaconLatLng, nearPoints[0], nearPoints[1], widget
-                    .user.pathobj.numCols![widget.user.bid]![Building
-                    .apibeaconmap[nearestBeacon]!.floor]!);
+                    beaconLatLng,
+                    nearPoints[0],
+                    nearPoints[1],
+                    widget.user.pathobj.numCols![widget.user.bid]![
+                        Building.apibeaconmap[nearestBeacon]!.floor]!);
 
                 List<int> np = tools.findLocalCoordinates(
                     nearPoints[0], nearPoints[1], newPoint);
@@ -450,11 +463,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.user.path.insert(indexOnPath, point.node);
                 widget.user.cellPath.insert(
                     indexOnPath,
-                    Cell(
-                        point.node,
-                        point.x,
-                        point.y,
-                        tools.eightcelltransition,
+                    Cell(point.node, point.x, point.y, tools.eightcelltransition,
                         point.lat,
                         point.lng,
                         buildingAllApi.outdoorID,
@@ -482,8 +491,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 if (!UserState.ttsOnlyTurns) {
                   speak(
-                      "${widget.direction} ${tools.convertFeet(
-                          widget.distance, widget.context)}",
+                      "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
                       _currentLocale);
                 }
                 widget.user.moveToPointOnPath(indexOnPath!);
@@ -503,15 +511,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           return false;
         }
       }
-    }catch(e){
-
-    }
+    } catch (e) {}
 
     // btadapter.emptyBin();
 
     return false;
   }
-  int insertProjectedPointInIntList(List<int> path, int projectedPoint, int numCols) {
+
+  int insertProjectedPointInIntList(
+      List<int> path, int projectedPoint, int numCols) {
     // Helper function to compute x, y for a given element
     List<int> getXY(int element) {
       int x = element % numCols;
@@ -542,23 +550,29 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           (cell.x == projectedPoint.x && cell.y > projectedPoint.y);
     });
 
-
     return indexToInsert;
   }
 
-  List<Cell> findTwoNearestPoints(List<double> beaconcoord, List<Cell> turnPoints,String userBid){
+  List<Cell> findTwoNearestPoints(
+      List<double> beaconcoord, List<Cell> turnPoints, String userBid) {
     // Sort the list of turn points by distance to the beacon
     print("turnPoints[0].x ${turnPoints.length} ${turnPoints[0].x}");
-    List<Cell> filteredPoints = turnPoints.where((point) =>
-     (point.bid == userBid && point.imaginedCell == false)
-    ).toList();
-    print("filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
+    List<Cell> filteredPoints = turnPoints
+        .where((point) => (point.bid == userBid && point.imaginedCell == false))
+        .toList();
+    print(
+        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
 
-    filteredPoints.sort((a, b) => tools.calculateAerialDist(beaconcoord[0],beaconcoord[1], a.lat,a.lng).compareTo(tools.calculateAerialDist(beaconcoord[0],beaconcoord[1], b.lat,b.lng)));
-    print("filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
+    filteredPoints.sort((a, b) => tools
+        .calculateAerialDist(beaconcoord[0], beaconcoord[1], a.lat, a.lng)
+        .compareTo(tools.calculateAerialDist(
+            beaconcoord[0], beaconcoord[1], b.lat, b.lng)));
+    print(
+        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
     // Return the first two points in the sorted list
     return [filteredPoints[0], filteredPoints[1]];
   }
+
   List<double> projectCellOntoSegment(
       List<double> beaconLatLng, Cell a, Cell b, int numCols) {
     // Vector AB (lat/lng)
@@ -583,9 +597,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     // Convert projected lat/lng back to x/y for the Cell object
 
-    return [projLat,projLng];
+    return [projLat, projLng];
   }
-
 
   FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg, String lngcode,
@@ -661,7 +674,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           0,
           0,
           0,
-              (double angle, {int? currPointer, int? totalCells}) {},
+          (double angle, {int? currPointer, int? totalCells}) {},
           0.0,
           0.0,
           "",
@@ -686,9 +699,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} मंज़िल पर जाएँ";
       }
     } else if ((widget.user.pathobj.associateTurnWithLandmark[nextTurn] !=
-        null &&
-        widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name !=
-            null) &&
+                null &&
+            widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name !=
+                null) &&
         msg ==
             "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}") {
       if (lngcode == 'en') {
@@ -749,7 +762,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.user.pathobj.connections.isNotEmpty &&
         widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
             widget.user.pathobj.connections[widget.user.bid]
-            ?[widget.user.pathobj.sourceFloor]) {
+                ?[widget.user.pathobj.sourceFloor]) {
     } else if (widget.user.path.isNotEmpty &&
         widget.user.cellPath.length - 1 > widget.user.pathobj.index) {
       widget.user.pathobj.connections.forEach((key, value) {
@@ -760,7 +773,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       });
       List<Cell> remainingPath =
-      widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
+          widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
       //
       //
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
@@ -776,8 +789,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
           DirectionIndex = widget.user.pathobj.directions.indexWhere(
                   (element) =>
-              element.node ==
-                  widget.user.cellPath[widget.user.pathobj.index].node) +
+                      element.node ==
+                      widget.user.cellPath[widget.user.pathobj.index].node) +
               1;
         }
         if (DirectionIndex >= widget.user.pathobj.directions.length) {
@@ -814,13 +827,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
 
-      widget.direction = (tools.angleToClocks(angle, widget.context) == "None" || tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
-          ? oldWidget.direction
-          : tools.angleToClocks(angle, widget.context);
+      widget.direction =
+          (tools.angleToClocks(angle, widget.context) == "None" ||
+                  tools
+                      .angleToClocks(angle, widget.context)
+                      .toLowerCase()
+                      .contains("slight"))
+              ? oldWidget.direction
+              : tools.angleToClocks(angle, widget.context);
       String userdirection =
-      (tools.angleToClocks(userangle, widget.context) == "None"|| tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
-          ? oldWidget.direction
-          : tools.angleToClocks(userangle, widget.context);
+          (tools.angleToClocks(userangle, widget.context) == "None" ||
+                  tools
+                      .angleToClocks(angle, widget.context)
+                      .toLowerCase()
+                      .contains("slight"))
+              ? oldWidget.direction
+              : tools.angleToClocks(userangle, widget.context);
       if (userdirection == "Straight") {
         widget.direction = "Straight";
       }
@@ -838,7 +860,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       double a = 0;
       if (index + 1 == widget.user.path.length) {
         if (widget.user.cellPath[index - 2].bid ==
-            widget.user.cellPath[index - 1].bid &&
+                widget.user.cellPath[index - 1].bid &&
             widget.user.cellPath[index - 1].bid ==
                 widget.user.cellPath[index].bid) {
           a = tools.calculateAnglefifth(
@@ -850,7 +872,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       } else {
         if (widget.user.cellPath[index - 1].bid ==
-            widget.user.cellPath[index].bid &&
+                widget.user.cellPath[index].bid &&
             widget.user.cellPath[index].bid ==
                 widget.user.cellPath[index + 1].bid) {
           a = tools.calculateAnglefifth(
@@ -922,11 +944,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.user.move(context);
       } else if (nextTurn != turnPoints.last &&
           widget.user.pathobj.connections[widget.user.bid]
-          ?[widget.user.floor] !=
+                  ?[widget.user.floor] !=
               nextTurn &&
           (widget.distance / UserState.stepSize).ceil() == 7) {
         if ((!direc.toLowerCase().contains("slight") &&
-            !direc.toLowerCase().contains("straight")) &&
+                !direc.toLowerCase().contains("straight")) &&
             widget.user.pathobj.index > 4) {
           if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
             if (!UserState.ttsOnlyTurns) {
@@ -1148,21 +1170,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           children: [
             Container(
               padding: EdgeInsets.only(top: 8, bottom: 8),
-              margin: EdgeInsets.only(left: 8,right: 8),
+              margin: EdgeInsets.only(left: 8, right: 8),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(16),
                       bottomRight: Radius.circular(16),
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16)),
-                  boxShadow: [BoxShadow(
-                    color: Color(0xff01544f).withOpacity(0.4),
-                    spreadRadius: 5,                      // How wide the shadow should be
-                    blurRadius: 7,                        // How soft the shadow should be
-                    offset: Offset(0, 3),
-                  )],
-
-
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff01544f).withOpacity(0.4),
+                      spreadRadius: 5, // How wide the shadow should be
+                      blurRadius: 7, // How soft the shadow should be
+                      offset: Offset(0, 3),
+                    )
+                  ],
                   color: getColor()),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1222,19 +1244,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                                 widget.focusOnTurn(widget
                                     .user.pathobj.directions[DirectionIndex]);
                                 if (widget.user.pathobj.directions.length -
-                                    DirectionIndex ==
-                                    2 &&
+                                            DirectionIndex ==
+                                        2 &&
                                     widget
-                                        .user
-                                        .pathobj
-                                        .directions[DirectionIndex]
-                                        .distanceToNextTurn !=
+                                            .user
+                                            .pathobj
+                                            .directions[DirectionIndex]
+                                            .distanceToNextTurn !=
                                         null &&
                                     widget
-                                        .user
-                                        .pathobj
-                                        .directions[DirectionIndex]
-                                        .distanceToNextTurn! <=
+                                            .user
+                                            .pathobj
+                                            .directions[DirectionIndex]
+                                            .distanceToNextTurn! <=
                                         5 &&
                                     DirectionIndex + 1 <
                                         widget.user.pathobj.directions.length) {
@@ -1249,7 +1271,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,
                             color: DirectionIndex + 1 <
-                                widget.user.pathobj.directions.length
+                                    widget.user.pathobj.directions.length
                                 ? Colors.white
                                 : Colors.grey,
                             size: 24,
@@ -1261,43 +1283,43 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
             DirectionIndex == nextTurnIndex
                 ? Semantics(
-              excludeSemantics: true,
-              child: Container(
-                width: 98,
-                height: 39,
-                margin: EdgeInsets.only(left: 9, top: 5),
-                padding: EdgeInsets.only(left: 16, right: 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  color: Color(0xff013633),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "${LocaleData.then.getString(context)}",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffFFFFFF),
-                        height: 25 / 16,
+                    excludeSemantics: true,
+                    child: Container(
+                      width: 98,
+                      height: 39,
+                      margin: EdgeInsets.only(left: 9, top: 5),
+                      padding: EdgeInsets.only(left: 16, right: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        color: Color(0xff013633),
                       ),
-                      textAlign: TextAlign.left,
+                      child: Row(
+                        children: [
+                          Text(
+                            "${LocaleData.then.getString(context)}",
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffFFFFFF),
+                              height: 25 / 16,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                          SizedBox(
+                            width: 6,
+                          ),
+                          // Text(DirectionIndex.toString()),
+                          // Text(nextTurnIndex.toString())
+                          getNextCustomIcon(turnDirection)
+                        ],
+                      ),
                     ),
-                    SizedBox(
-                      width: 6,
-                    ),
-                    // Text(DirectionIndex.toString()),
-                    // Text(nextTurnIndex.toString())
-                    getNextCustomIcon(turnDirection)
-                  ],
-                ),
-              ),
-            )
+                  )
                 : Container(),
 
             Container(
-              width: 300,
+              width: screenWidth,
               height: 100,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -1305,8 +1327,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(sumMap.toString()),
-                    Text(Building.apibeaconmap.containsKey(debuglNearestbeacon)?Building.apibeaconmap[debuglNearestbeacon]!.name.toString():""),
-                    Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
+                    Text(closestdevice),
+                    Text(Building.apibeaconmap
+                        .containsKey(debuglNearestbeacon)
+                        .toString()),
                   ],
                 ),
               ),
@@ -1467,24 +1491,24 @@ class scrollableDirection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ((chooseDirection().toLowerCase().contains("lift") ||
-                      chooseDirection()
-                          .toLowerCase()
-                          .contains("stair")) ||
-                      listOfDirections.isEmpty ||
-                      (DirectionIndex > 0 &&
-                          listOfDirections.length > DirectionIndex &&
-                          listOfDirections[DirectionIndex].isDestination))
+                              chooseDirection()
+                                  .toLowerCase()
+                                  .contains("stair")) ||
+                          listOfDirections.isEmpty ||
+                          (DirectionIndex > 0 &&
+                              listOfDirections.length > DirectionIndex &&
+                              listOfDirections[DirectionIndex].isDestination))
                       ? Container()
                       : Text(
-                    chooseSteps().replaceAll("meter", "m"),
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 26 / 16,
-                    ),
-                  ),
+                          chooseSteps().replaceAll("meter", "m"),
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 26 / 16,
+                          ),
+                        ),
                   SizedBox(
                     height: 4,
                   ),
@@ -1496,7 +1520,7 @@ class scrollableDirection extends StatelessWidget {
                       shape: BoxShape.circle, // Make the container a circle
                     ),
                     child:
-                    chooseIcon(), // Your icon or widget inside the circle
+                        chooseIcon(), // Your icon or widget inside the circle
                   )
                 ],
               ),

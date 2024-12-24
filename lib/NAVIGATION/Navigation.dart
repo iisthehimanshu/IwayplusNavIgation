@@ -9187,19 +9187,8 @@ bool isAppinForeground=true;
 
 
                       if(startingNavigation){
-                        tools.setBuildingAngle(
-                            SingletonFunctionController
-                                .building
-                                .patchData[PathState
-                                .sourceBid]!
-                                .patchData!
-                                .buildingAngle!);
-                        if (PathState.sourceX ==
-                            PathState
-                                .destinationX &&
-                            PathState.sourceY ==
-                                PathState
-                                    .destinationY) {
+                        tools.setBuildingAngle(SingletonFunctionController.building.patchData[PathState.sourceBid]!.patchData!.buildingAngle!);
+                        if (PathState.sourceX == PathState.destinationX && PathState.sourceY == PathState.destinationY) {
                           //HelperClass.showToast("Source and Destination can not be same");
                           setState(() {
                             _isRoutePanelOpen =
@@ -9215,38 +9204,18 @@ bool isAppinForeground=true;
 
                         });
                         user.onConnection = false;
-                        PathState.didPathStart =
-                        true;
+                        PathState.didPathStart = true;
 
-                        UserState.cols =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![0];
-                        UserState
-                            .rows = SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .destinationBid]![PathState
-                            .destinationFloor]![1];
-                        UserState.lngCode =
-                            _currentLocale;
-                        UserState.reroute =
-                            reroute;
-                        UserState
-                            .closeNavigation =
-                            closeNavigation;
+                        UserState.cols = SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                        UserState.rows = SingletonFunctionController.building.floorDimenssion[PathState.destinationBid]![PathState.destinationFloor]![1];
+                        UserState.lngCode = _currentLocale;
+                        UserState.reroute = reroute;
+                        UserState.closeNavigation = closeNavigation;
                         UserState.alignMapToPath = alignMapToPath;
-                        UserState.startOnPath =
-                            startOnPath;
+                        UserState.startOnPath = startOnPath;
                         UserState.speak = speak;
-                        UserState.paintMarker =
-                            paintMarker;
-                        UserState.createCircle =
-                            updateCircle;
+                        UserState.paintMarker = paintMarker;
+                        UserState.createCircle = updateCircle;
 
                         //detected=false;
                         //user.SingletonFunctionController.building = SingletonFunctionController.building;
@@ -9260,30 +9229,12 @@ bool isAppinForeground=true;
                         // user.ListofPaths = PathState.listofPaths;
                         // user.patchData = SingletonFunctionController.building.patchData;
                         // user.buildingNumber = PathState.listofPaths.length-1;
-                        buildingAllApi
-                            .selectedID =
-                            PathState.sourceBid;
-                        buildingAllApi
-                            .selectedBuildingID =
-                            PathState.sourceBid;
-                        UserState.cols =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![0];
-                        UserState.rows =
-                        SingletonFunctionController
-                            .building
-                            .floorDimenssion[
-                        PathState
-                            .sourceBid]![PathState
-                            .sourceFloor]![1];
-                        user.bid =
-                            PathState.sourceBid;
-                        user.coordX =
-                            PathState.sourceX;
+                        buildingAllApi.selectedID = PathState.sourceBid;
+                        buildingAllApi.selectedBuildingID = PathState.sourceBid;
+                        UserState.cols = SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+                        UserState.rows = SingletonFunctionController.building.floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![1];
+                        user.bid = PathState.sourceBid;
+                        user.coordX = PathState.sourceX;
                         user.coordY =
                             PathState.sourceY;
                         user.temporaryExit =
@@ -9317,8 +9268,7 @@ bool isAppinForeground=true;
                             .singleCellListPath
                             .forEach(
                                 (element) {});
-                        user
-                            .moveToStartofPath()
+                        user.moveToStartofPath()
                             .then((value) async {
                           setState(() {
                             markers.clear();
@@ -9409,27 +9359,9 @@ bool isAppinForeground=true;
 
                         StartPDR();
 
-                        if (SingletonFunctionController
-                            .building
-                            .floor[
-                        PathState
-                            .sourceBid] !=
-                            PathState
-                                .sourceFloor) {
-                          SingletonFunctionController
-                              .building.floor[
-                          PathState
-                              .sourceBid] =
-                              PathState
-                                  .sourceFloor;
-                          createRooms(
-                              SingletonFunctionController
-                                  .building
-                                  .polylinedatamap[
-                              PathState
-                                  .sourceBid]!,
-                              PathState
-                                  .sourceFloor);
+                        if (SingletonFunctionController.building.floor[PathState.sourceBid] != PathState.sourceFloor) {
+                          SingletonFunctionController.building.floor[PathState.sourceBid] = PathState.sourceFloor;
+                          createRooms(SingletonFunctionController.building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);
                           SingletonFunctionController
                               .building
                               .landmarkdata!

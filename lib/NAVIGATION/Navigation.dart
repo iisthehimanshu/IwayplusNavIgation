@@ -1553,6 +1553,7 @@ bool isAppinForeground=true;
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
+      print("moving for gps");
       await _handleGlobalCoordinatesLocalization(speakTTS, render);
     }
 

@@ -13,20 +13,22 @@ class BluetoothScanAndroidClass{
   static const eventChannel = EventChannel('com.example.bluetooth/scanUpdates');
   List<BluetoothDevice> devices = [];
   bool isScanning = false;
-
+  static StreamSubscription? _scanSubscription; // Variable to hold the subscription
   int count = 0;
-
 
   Map<String, String> deviceNames = {};
   Map<String, List<int>> rssiValues = {};
   Map<String, double> distances = {};
   String closestDeviceDetails = "";
   String closestrssiDevice = "";
+  String closestRSSI = "";
   Map<String, double> sumMapCallBack = {};
   Map<String, double> rssiAverage = {};
   Map<String, List<double>> rssiWeight = {};
 
   Map<String, List<double>> newList = {};
+
+
 
 
   Future<void> startScan() async {
@@ -70,7 +72,64 @@ class BluetoothScanAndroidClass{
       throw Exception('Invalid device details string');
     }
   }
-  String listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
+  String listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap){
+    startScan();
+    Map<String, String> IL_DEVICE_NAME = {};
+    Map<String, List<int>> IL_RSSI_VALUES = {};
+    Map<String, List<double>> IL_RSSI_WEIGHT = {};
+    Map<String, double> IL_RSSI_AVERAGE = {};
+
+
+    String deviceMacId = "";
+    // Start listening to the stream continuously
+
+    eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+      print("deviceDetail");
+      print(deviceDetail);
+
+      BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+      if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
+        deviceMacId = deviceDetails.DeviceAddress;
+        print("iffffff");
+        print(deviceDetails.DeviceName);
+        IL_DEVICE_NAME[deviceDetails.DeviceAddress] =
+            deviceDetails.DeviceName;
+        IL_RSSI_VALUES.putIfAbsent(deviceDetails.DeviceAddress, () => []);
+        IL_RSSI_WEIGHT.putIfAbsent(deviceDetails.DeviceAddress, () => []);
+
+        IL_RSSI_VALUES[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
+
+        IL_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
+
+
+
+      } else {
+
+      }
+    });
+
+    Future.delayed(Duration(seconds: 9)).then((_) {
+      print("DelayCHeck");
+      print(IL_DEVICE_NAME);
+      print(IL_RSSI_VALUES);
+      print(IL_RSSI_WEIGHT);
+
+      IL_RSSI_AVERAGE = calculateAverageFromRssi(IL_RSSI_VALUES, IL_DEVICE_NAME, IL_RSSI_WEIGHT);
+
+      closestDeviceDetails = findLowestRssiDevice(IL_RSSI_AVERAGE);
+
+      print("closestDeviceDetails");
+      print(closestDeviceDetails);
+
+    });
+
+
+
+    emptyBin();
+    return "";
+  }
+
+  void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
     print("listenToScanUpdates");
     // startbin();
@@ -129,21 +188,13 @@ class BluetoothScanAndroidClass{
     Map<String, List<int>> rssiValues = {};
     String deviceMacId = "";
     // Start listening to the stream continuously
-    eventChannel.receiveBroadcastStream().listen((deviceDetail) {
-
-
-
+    _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
-
-
-
-
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         deviceMacId = deviceDetails.DeviceAddress;
         print("iffffff");
         print(deviceDetails.DeviceName);
         deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
-
 
 
         rssiValues.putIfAbsent(deviceDetails.DeviceAddress, () => []);
@@ -159,7 +210,10 @@ class BluetoothScanAndroidClass{
 
 
         rssiValues[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
-        rssiWeight[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi))));
+        print("deviceDetails.DeviceRssi");
+        print(deviceDetails.DeviceRssi);
+
+        rssiWeight[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
 
         if (rssiValues[deviceDetails.DeviceAddress]!.length > 7) {
           rssiValues[deviceDetails.DeviceAddress]!.removeAt(0);
@@ -237,17 +291,24 @@ class BluetoothScanAndroidClass{
 
     emptyBin();
 
-    return closestDeviceDetails;
+
   }
 
   Map<String, List<double>> giveSumMapCallBack(){
     print("newList");
+
     print(newList);
     return newList;
   }
 
   String giveClosestDeviceCallBAck(){
     return closestrssiDevice;
+  }
+  String giveRssiMapCallBAck(){
+    return closestrssiDevice;
+  }
+  String giveRssiCallBAck(){
+    return closestRSSI;
   }
 
   Map<String, double> calculateAverageFromRssi(
@@ -264,7 +325,9 @@ class BluetoothScanAndroidClass{
 
         // Update the newList for debugging or other purposes
         newList[deviceList[address]!] = rssiList;
+
         print("deviceList[address]");
+        print(average);
         print(newList);
 
         // Add the average to the map
@@ -326,11 +389,14 @@ class BluetoothScanAndroidClass{
     double? lowestValue;
 
     rssiAverage.forEach((key, value) {
-      if (lowestValue == null || value < lowestValue!) {
+      if (lowestValue == null || value > lowestValue!) {
         lowestValue = value;
         lowestKey = key;
       }
     });
+    closestRSSI = lowestValue.toString();
+    print("findLowestRssiDevice");
+    print(lowestValue);
 
     return lowestKey ?? "No devices found";
   }
@@ -342,10 +408,13 @@ class BluetoothScanAndroidClass{
 
   int getBinNumber(int Rssi){
     if (Rssi <= 65) {
+      print("getBinNumber0");
       return 0;
     } else if (Rssi <= 75) {
+      print("getBinNumber1");
       return 1;
     } else if (Rssi <= 80) {
+      print("getBinNumber2");
       return 2;
     } else if (Rssi <= 85) {
       return 3;
@@ -357,6 +426,8 @@ class BluetoothScanAndroidClass{
       return 6;
     }
   }
+
+
   double getWeight(int num){
     switch(num) {
       case 0:
@@ -370,7 +441,7 @@ class BluetoothScanAndroidClass{
       case 4:
         return 0.25;
       case 5:
-        return 0.25;
+        return 0.15;
       case 6:
         return 0.1;
       default:

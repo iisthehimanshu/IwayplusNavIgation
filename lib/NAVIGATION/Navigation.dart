@@ -3458,12 +3458,12 @@ bool isAppinForeground=true;
 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
-    try{
-      await DataVersionApi()
-          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-    }catch(e){
-      print(" APICALLS DataVersionApi API TRY-CATCH");
-    }
+    // try{
+    //   await DataVersionApi()
+    //       .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    // }catch(e){
+    //   print(" APICALLS DataVersionApi API TRY-CATCH");
+    // }
     _updateProgress();
     print("apicalls testing 1");
     // await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
@@ -3646,9 +3646,9 @@ bool isAppinForeground=true;
           } catch (_) {}
           print("apicalls testing 2 for $key");
           if (key != buildingAllApi.getSelectedBuildingID()) {
-            try {
-              await DataVersionApi().fetchDataVersionApiData(key);
-            } catch (e) {}
+            // try {
+            //   await DataVersionApi().fetchDataVersionApiData(key);
+            // } catch (e) {}
             print("apicalls testing 3 for $key");
             var patchData = await patchAPI().fetchPatchData(id: key);
             Building.buildingData ??= Map();
@@ -12560,13 +12560,13 @@ bool isAppinForeground=true;
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  if (cameraPosition.zoom > 16.8) {
-                    focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
-                  } else {
-                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                  }
+                  // if (cameraPosition.zoom > 16.8) {
+                  //   focusBuildingChecker(cameraPosition);
+                  // } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                  //   renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  // } else {
+                  //   renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                  // }
 
 
 

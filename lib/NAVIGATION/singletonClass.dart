@@ -18,11 +18,12 @@ class SingletonFunctionController {
   bool _isRunning = false;
   Completer<void>? _completer;
   static BLueToothClass btadapter = new BLueToothClass();
-  BluetoothScanAndroidClass blueToothAndroid = BluetoothScanAndroidClass();
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static Building building = Building(floor: Map(), numberOfFloors: Map());
   static Future<void>? timer;
   static String currentBeacon="";
+  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
+
 
   bool isBinEmpty() {
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
@@ -86,7 +87,10 @@ class SingletonFunctionController {
           // print("apibeaconmap");
           // print(apibeaconmap);
           // blueToothAndroid.listenToScanUpdates(apibeaconmap);
+          String nearestLandmark = bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap);
+          bluetoothScanAndroidClass.stopScan();
           btadapter.startScanning(apibeaconmap);
+
         }else{
           btadapter.startScanningIOS(apibeaconmap);
         }

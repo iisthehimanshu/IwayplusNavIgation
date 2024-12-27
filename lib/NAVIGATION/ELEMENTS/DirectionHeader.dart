@@ -87,8 +87,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   bool disposed = false;
-  BluetoothScanAndroidClass bluetoothScanAndroidClass =
-      BluetoothScanAndroidClass();
+  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
 
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
@@ -96,7 +95,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   bool isSpeaking = false;
   String? threshold;
 
-  String closestdevice = "";
 
   void initTts() {
     flutterTts.setCompletionHandler(() {
@@ -132,11 +130,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     bluetoothScanAndroidClass.startbin();
     bluetoothScanAndroidClass.emptyBin();
-    closestdevice =
-        bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+    setState(() {
+      bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
 
-    print("closestdevice");
-    print(closestdevice);
+    });
+
+
     setState(() {});
     //btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
@@ -232,6 +231,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   void dispose() {
+    bluetoothScanAndroidClass.stopScan();
     disposed = true;
     flutterTts.stop();
     _timer.cancel();
@@ -249,19 +249,55 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
+  String displayString = "";
+  String? highestKey;
+  double highestAverage = double.negativeInfinity;
 
-  bool listenToBin() {
-    double highestweight = 0;
+  double highestweight = 3.25;
+  bool listenToBin()  {
+    // print("listentobin");
+
     String nearestBeacon = "";
     sumMap.clear();
     // sumMap = btadapter.calculateAverage();
-
+    nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+    sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
+    threshold = bluetoothScanAndroidClass.closestRSSI;
+    print("---nearestBeacon");
+    print(nearestBeacon);
+    debuglNearestbeacon = nearestBeacon;
     sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+    print("listenToBin${sumMap} ");
+
+    sumMap.forEach((key, value) {
+      if (value.isNotEmpty) {
+        double average = value.reduce((a, b) => a + b) / value.length;
+        print("--average");
+        print(average);
+        if (average > highestAverage) {
+          highestAverage = average;
+          highestKey = key;
+        }
+      }else{
+        print("else---");
+      }
+    });
+
+
+    // setState(() {
+    //   // displayString = sumMap.entries
+    //   //     .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
+    //   //     .join("\n");
+    //
+    //
+    // });
+
+
     print("threshold");
     print(Building.apibeaconmap);
     print(sumMap);
     // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
-    threshold = '3.5';
+    //threshold = '3.5';
     print(widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold);
     print(threshold);
@@ -286,14 +322,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // btadapter.stopScanning();
     // btadapter.startScanning(Building.apibeaconmap);
 
-    sortedsumMap.entries.forEach((element) {
-      if (Building.apibeaconmap[element.key]!.floor ==
-              widget.user.pathobj.destinationFloor &&
-          element.value >= 0.05) {
-        nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
-        highestweight = element.value;
-      }
-    });
+    // sortedsumMap.entries.forEach((element) {
+    //   if (Building.apibeaconmap[element.key]!.floor ==
+    //           widget.user.pathobj.destinationFloor &&
+    //       element.value >= 0.05) {
+    //     nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
+    //     highestweight = element.value;
+    //   }
+    // });
+    // highestweight = 12;
 
     // //
     // //
@@ -337,17 +374,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     nearestBeacon = key;
     //   }
     // });
-    setState(() {
-      debuglNearestbeacon = nearestBeacon;
-      if (debuglastNearestbeacon != nearestBeacon) {
-        debuglastNearestbeacon = nearestBeacon;
-      }
-    });
-    nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
-    setState(() {});
-    print("nearestBeacon");
-    print(nearestBeacon);
-    print(Building.apibeaconmap[nearestBeacon]!);
+    // setState(() {
+    //   debuglNearestbeacon = nearestBeacon;
+    //   if (debuglastNearestbeacon != nearestBeacon) {
+    //     debuglastNearestbeacon = nearestBeacon;
+    //   }
+    // });
+    // nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
+    // setState(() {});
+    // print("nearestBeacon");
+    // print(nearestBeacon);
+    // print(Building.apibeaconmap[nearestBeacon]!);
 
     ////
 
@@ -380,7 +417,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               });
 
               if (distanceFromPath > 10) {
-                print("calling expected function22");
+
                 _timer.cancel();
                 widget.repaint(nearestBeacon);
                 widget.reroute;
@@ -410,9 +447,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //   return true;
             // }
 
-            else if (widget.user.floor ==
-                    Building.apibeaconmap[nearestBeacon]!.floor &&
-                highestweight >= double.parse(threshold!)) {
+            else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= highestweight) {
+              print("calling expected function 2${highestweight} -- ${threshold}");
               widget.user.onConnection = false;
               //
               List<int> beaconcoord = [
@@ -1320,17 +1356,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
             Container(
               width: screenWidth,
-              height: 100,
+              height: 300,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(sumMap.toString()),
-                    Text(closestdevice),
-                    Text(Building.apibeaconmap
-                        .containsKey(debuglNearestbeacon)
-                        .toString()),
+                    //Text("Beacon ${highestKey} - ${highestAverage}"),
+                    Text(debuglNearestbeacon),
+                    Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+                    //Text(displayString),
+                    Text("-------"),
+                    Text(sumMapAvg.toString()),
+                    Text("${highestAverage} ${threshold.toString()}")
+
+
+                    // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
                   ],
                 ),
               ),

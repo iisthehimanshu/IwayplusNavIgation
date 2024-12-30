@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:iwaymaps/NAVIGATION/APIMODELS/beaconData.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../../IWAYPLUS/Elements/UserCredential.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
@@ -128,7 +129,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       if (widget.user.pathobj.index > 1) {
-        listenToBin();
+       //listenToBin();
       }
     });
 
@@ -236,7 +237,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
-
+  Map<String, DateTime> beaconTimeouts = {};
+double weight=0;
   bool listenToBin() {
     double highestweight = 0;
     String nearestBeacon = "";
@@ -245,14 +247,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     print("threshold");
     threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold??'5';
-    print(widget.user.building!.patchData[widget.user.bid]!.patchData!
-        .realtimeLocalisationThreshold);
-    print(threshold);
-    //
+    print(beaconTimeouts);
     sortedsumMap.clear();
-    //
-
     sumMap.forEach((key, value) {
+      // Check if the beacon is within the timeout
+      if (beaconTimeouts.containsKey(key) &&
+          beaconTimeouts[key]!.isAfter(DateTime.now())) {
+        return; // Skip beacons in timeout
+      }
+
       if (highestweight <= value) {
         nearestBeacon = key;
         highestweight = value;
@@ -260,6 +263,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     });
 
     setState(() {
+      weight= highestweight;
       sumMap;
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
     });
@@ -268,65 +272,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     btadapter.priorityQueue.clear();
     btadapter.stopScanning();
     btadapter.startScanning(Building.apibeaconmap);
-
-    // sortedsumMap.entries.forEach((element) {
-    //   if(Building.apibeaconmap[element.key]!.floor == widget.user.pathobj.destinationFloor && element.value >= 0.05){
-    //     nearestBeacon = element.key;
-    //     highestweight = element.value;
-    //   }
-    // });
-    // //
-    // //
-
-    // for (int i = 0; i < btadapter.BIN.length; i++) {
-    //   if (btadapter.BIN[i]!.isNotEmpty) {
-    //
-    //     btadapter.BIN[i]!.forEach((key, value) {
-    //       //
-    //       //
-    //       //
-    //
-    //       setState(() {
-    //             widget.direction = "${widget.direction}$key   $value\n";
-    //           });
-    //
-    //       //
-    //
-    //       if (value > highestweight) {
-    //         highestweight = value;
-    //         //nearestBeacon = key;
-    //       }
-    //     });
-    //     break;
-    //   }
-    // }
-
-    // btadapter.emptyBin();
-    //
-
-    // sortedsumMap.forEach((key, value) {
-    //
-    //   setState(() {
-    //     widget.direction = "${widget.direction}$key   $value\n";
-    //   });
-    //
-    //   //
-    //
-    //   if(value>highestweight){
-    //     highestweight =  value;
-    //     nearestBeacon = key;
-    //   }
-    // });
     setState(() {
       debuglNearestbeacon = nearestBeacon;
       if (debuglastNearestbeacon != nearestBeacon) {
         debuglastNearestbeacon = nearestBeacon;
       }
     });
-
-    ////
-
-    //
     if (nearestBeacon != "") {
       if (widget
           .user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] !=
@@ -354,7 +305,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               }
             });
-
             if (distanceFromPath > 10) {
               print("calling expected function22");
               _timer.cancel();
@@ -365,7 +315,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               return false; //away from path
             } else {
               widget.user.onConnection = false;
-
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               UserState.createCircle(widget.user.lat, widget.user.lng);
               speak(
@@ -388,8 +337,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= double.parse(threshold!)) {
+              highestweight >= 3.0) {
             widget.user.onConnection = false;
+            beaconTimeouts[nearestBeacon] = DateTime.now().add(Duration(minutes: 1));
             //
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -431,7 +381,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     point.floor,
                     point.numCols,
                     imaginedCell: true));
-          }else{
+          }
+          else{
             widget.user.cellPath.forEach((node) {
               List<int> pathcoord = [node.x, node.y];
               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
@@ -448,9 +399,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               DirectionIndex = 1;
               nextTurnIndex = 1;
               return false; //away from path
-            }else {
+            }else{
                 widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                if (!UserState.ttsOnlyTurns) {
+                if (!UserState.ttsOnlyTurns){
                   speak(
                       "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
                       _currentLocale);
@@ -558,7 +509,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       {bool prevpause = false}) async {
     if (!UserState.ttsAllStop) {
       if (disposed) return;
-
       // if (isSpeaking) {
       //   await flutterTts.stop();
       // }
@@ -618,7 +568,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       }
     }
-
     // If no number is greater than the target, return null
     if (path.length >= widget.user.pathobj.index) {
       return path[widget.user.pathobj.index];
@@ -706,7 +655,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
     return "";
   }
-
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -780,11 +728,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
 
-      widget.direction = (tools.angleToClocks(angle, widget.context) == "None" || tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+      widget.direction = tools.angleToClocks(angle, widget.context) == "None"
           ? oldWidget.direction
           : tools.angleToClocks(angle, widget.context);
       String userdirection =
-      (tools.angleToClocks(userangle, widget.context) == "None"|| tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+      tools.angleToClocks(userangle, widget.context) == "None"
           ? oldWidget.direction
           : tools.angleToClocks(userangle, widget.context);
       if (userdirection == "Straight") {
@@ -923,6 +871,222 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     }
   }
+  // @override
+  // void didUpdateWidget(DirectionHeader oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //
+  //   if (widget.user.floor == widget.user.pathobj.sourceFloor &&
+  //       widget.user.pathobj.connections.isNotEmpty &&
+  //       widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
+  //           widget.user.pathobj.connections[widget.user.bid]
+  //           ?[widget.user.pathobj.sourceFloor]) {
+  //   } else if (widget.user.path.isNotEmpty &&
+  //       widget.user.cellPath.length - 1 > widget.user.pathobj.index) {
+  //     widget.user.pathobj.connections.forEach((key, value) {
+  //       value.forEach((inkey, invalue) {
+  //         if (widget.user.path[widget.user.pathobj.index] == invalue) {
+  //           widget.direction = "You have reached ";
+  //         }
+  //       });
+  //     });
+  //     List<Cell> remainingPath =
+  //     widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
+  //     //
+  //     //
+  //     Cell nextTurn = findNextTurn(turnPoints, remainingPath);
+  //     //
+  //     //
+  //
+  //     nextTurnIndex = widget.user.pathobj.directions
+  //         .indexWhere((element) => element.node == nextTurn.node);
+  //     //
+  //
+  //     if (turnPoints
+  //         .contains(widget.user.cellPath[widget.user.pathobj.index])) {
+  //       if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
+  //         DirectionIndex = widget.user.pathobj.directions.indexWhere(
+  //                 (element) =>
+  //             element.node ==
+  //                 widget.user.cellPath[widget.user.pathobj.index].node) +
+  //             1;
+  //       }
+  //       if (DirectionIndex >= widget.user.pathobj.directions.length) {
+  //         DirectionIndex = widget.user.pathobj.directions.length - 1;
+  //       }
+  //     }
+  //     widget.distance = tools.distancebetweennodes_inCell(
+  //         nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
+  //     double angle = 0.0;
+  //     try {
+  //       angle = tools.calculateAnglefifth(
+  //           widget.user.cellPath[widget.user.pathobj.index].node,
+  //           widget.user.cellPath[widget.user.pathobj.index + 1].node,
+  //           widget.user.cellPath[widget.user.pathobj.index + 2].node,
+  //           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+  //     } catch (e) {
+  //       print("error to be solved later $e");
+  //     }
+  //     if (widget.user.pathobj.index != 0) {
+  //       try {
+  //         angle = tools.calculateAnglefifth(
+  //             widget.user.cellPath[widget.user.pathobj.index - 1].node,
+  //             widget.user.cellPath[widget.user.pathobj.index].node,
+  //             widget.user.cellPath[widget.user.pathobj.index + 1].node,
+  //             widget
+  //                 .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+  //       } catch (e) {
+  //         print("problem to be solved later $e");
+  //       }
+  //     }
+  //     double userangle = tools.calculateAngleBWUserandCellPath(
+  //         widget.user.cellPath[widget.user.pathobj.index],
+  //         widget.user.cellPath[widget.user.pathobj.index + 1],
+  //         widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
+  //         widget.user.theta);
+  //
+  //     widget.direction = (tools.angleToClocks(angle, widget.context) == "None" || tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+  //         ? oldWidget.direction
+  //         : tools.angleToClocks(angle, widget.context);
+  //     String userdirection =
+  //     (tools.angleToClocks(userangle, widget.context) == "None"|| tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+  //         ? oldWidget.direction
+  //         : tools.angleToClocks(userangle, widget.context);
+  //     if (userdirection == "Straight") {
+  //       widget.direction = "Straight";
+  //     }
+  //     if (widget.user.pathobj.index < 3) {
+  //       widget.direction = userdirection;
+  //     }
+  //
+  //     if (UserCredentials().getUserPersonWithDisability() == 1 ||
+  //         UserCredentials().getUserPersonWithDisability() == 2) {
+  //       widget.direction = userdirection;
+  //     }
+  //
+  //     int index = widget.user.cellPath.indexOf(nextTurn);
+  //     //
+  //     double a = 0;
+  //     if (index + 1 == widget.user.path.length) {
+  //       if (widget.user.cellPath[index - 2].bid ==
+  //           widget.user.cellPath[index - 1].bid &&
+  //           widget.user.cellPath[index - 1].bid ==
+  //               widget.user.cellPath[index].bid) {
+  //         a = tools.calculateAnglefifth(
+  //             widget.user.path[index - 2],
+  //             widget.user.path[index - 1],
+  //             widget.user.path[index],
+  //             widget
+  //                 .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+  //       }
+  //     } else {
+  //       if (widget.user.cellPath[index - 1].bid ==
+  //           widget.user.cellPath[index].bid &&
+  //           widget.user.cellPath[index].bid ==
+  //               widget.user.cellPath[index + 1].bid) {
+  //         a = tools.calculateAnglefifth(
+  //             widget.user.path[index - 1],
+  //             widget.user.path[index],
+  //             widget.user.path[index + 1],
+  //             widget
+  //                 .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+  //       }
+  //     }
+  //
+  //     String direc = tools.angleToClocks(a, widget.context);
+  //     turnDirection = direc;
+  //
+  //     if (oldWidget.direction != widget.direction) {
+  //       if (oldWidget.direction == "Straight") {
+  //         Vibration.vibrate();
+  //
+  //         // if(nextTurn == turnPoints.last){
+  //         //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+  //         // }else{
+  //         //   speak("${widget.direction} ${widget.distance} meter");
+  //         // }
+  //
+  //         speak(
+  //             convertTolng(
+  //                 "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+  //                 _currentLocale,
+  //                 widget.direction,
+  //                 "",
+  //                 0,
+  //                 ""),
+  //             _currentLocale,
+  //             prevpause: true);
+  //
+  //         //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+  //       } else if (widget.direction == "Straight") {
+  //         Vibration.vibrate();
+  //         UserState.isTurn = false;
+  //         if (!UserState.ttsOnlyTurns) {
+  //           speak(
+  //               "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
+  //               _currentLocale,
+  //               prevpause: true);
+  //         }
+  //       }
+  //     }
+  //
+  //     if (nextTurn == turnPoints.last && widget.distance == 7) {
+  //       double angle = 0.0;
+  //       try {
+  //         angle = tools.calculateAngleThird(
+  //             [
+  //               widget.user.pathobj.destinationX,
+  //               widget.user.pathobj.destinationY
+  //             ],
+  //             widget.user.path[widget.user.pathobj.index + 1],
+  //             widget.user.path[widget.user.pathobj.index + 2],
+  //             widget
+  //                 .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+  //       } catch (e) {
+  //         print("problem to be solved later $e");
+  //       }
+  //       if (!UserState.ttsOnlyTurns) {
+  //         speak(
+  //             "${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
+  //             _currentLocale);
+  //       }
+  //       widget.user.move(context);
+  //     } else if (nextTurn != turnPoints.last &&
+  //         widget.user.pathobj.connections[widget.user.bid]
+  //         ?[widget.user.floor] !=
+  //             nextTurn &&
+  //         (widget.distance / UserState.stepSize).ceil() == 7) {
+  //       if ((!direc.toLowerCase().contains("slight") &&
+  //           !direc.toLowerCase().contains("straight")) &&
+  //           widget.user.pathobj.index > 4) {
+  //         if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
+  //           if (!UserState.ttsOnlyTurns) {
+  //             speak(
+  //                 convertTolng(
+  //                     "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
+  //                     _currentLocale,
+  //                     '',
+  //                     direc,
+  //                     nextTurn!.node,
+  //                     ""),
+  //                 _currentLocale);
+  //           }
+  //
+  //           return;
+  //           //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+  //         } else {
+  //           if (!UserState.ttsOnlyTurns) {
+  //             speak(
+  //                 convertTolng("You are approaching ${direc} turn",
+  //                     _currentLocale, '', direc, nextTurn!.node, ""),
+  //                 _currentLocale);
+  //           }
+  //           widget.user.move(widget.context);
+  //           return;
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   static Icon getCustomIcon(String direction) {
     if (direction.toLowerCase().contains("lift")) {
@@ -1263,19 +1427,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             )
                 : Container(),
 
-            // Container(
-            //   width: 300,
-            //   height: 100,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Text(sumMap.toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              width: 300,
+              height: 100,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(weight.toString()),
+                  ],
+                ),
+              ),
+            ),
 
             // Container(
             //   width: 300,

@@ -249,7 +249,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                         child: Icon(Icons.keyboard_arrow_down),
                       ),
                       !ListExpand? Container(child:  Text(
-                        "${widget.Turns} Turns (${widget.TotalDistance} m)",
+                        "${widget.Turns} Turns (${(widget.TotalDistance*0.306).ceil()}m)",
                         style: const TextStyle(
                           fontFamily: "Roboto",
                           fontSize: 14,
@@ -272,7 +272,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                     ],
                   ),
                   ListExpand? Container() : Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,),
-
                   ListExpand? SizedBox(height: 20,):Container(),
                   ListView.builder(
                     itemCount: ListExpand?widget.directionList.length : min(widget.directionList.length, 0),
@@ -385,7 +384,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
 
                                         :ExcludeSemantics(
                                       child: Text(
-                                        ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurn}" :"${(direction.distanceToNextTurn??0*0.3048).ceil()} m",
+                                        ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurn}" :"${((direction.distanceToNextTurn!=null)?direction.distanceToNextTurn!*0.3048:0*0.3048).ceil()} m",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 14,

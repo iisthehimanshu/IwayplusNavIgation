@@ -1,12 +1,9 @@
 import 'package:iwaymaps/NAVIGATION/navigationTools.dart';
-
 import 'UserState.dart';
 import 'buildingState.dart';
 
 class MotionModel{
-
   static int stuckCount = 0;
-
   static bool isValidStep(UserState user, int cols, int rows, List<int> nonWalkable, Function reroute){
     if(user.pathobj.index+1 > user.cellPath.length-1){
       UserState.closeNavigation();
@@ -20,15 +17,10 @@ class MotionModel{
     }
     int newX = user.coordX + transitionValue[0];
     int newY = user.coordY + transitionValue[1];
-
     print("newxnewy $newX,$newY");
-
-
-
     if(newX<0 || newX >=cols || newY < 0 || newY >= rows){
       return false;
     }
-
     if(nonWalkable.contains((newY*cols)+newX)){
       stuckCount++;
       if(stuckCount==5){
@@ -37,7 +29,6 @@ class MotionModel{
       }
       return false;
     }
-
     try{
       if(user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
         if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>20){
@@ -48,15 +39,9 @@ class MotionModel{
           reroute();
         }
       }
-    }catch(e){
-
-    }
-
-
-
+    }catch(e){}
     return true;
   }
-
   static bool reached(UserState state,int col){
     int x=0;
     int y=0;
@@ -64,7 +49,6 @@ class MotionModel{
       x=state.path[state.path.length-1]%col ;
       y=state.path[state.path.length-1]~/col;
     }
-
     if(state.showcoordX==x && state.showcoordY==y){
       return true;
     }

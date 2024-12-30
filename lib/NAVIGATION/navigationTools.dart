@@ -1163,16 +1163,22 @@ class tools {
           lifts.removeLast();
         }
       }
+      if(turns[i].bid != turns[i+1].bid){
+        continue;
+      }
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
-      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]}");
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
+      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]} distance $Nextdistance and $Prevdistance");
+
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
+      if(path[index-1].bid != path[index].bid){
+        angle = 0;
+      }
       String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
     }
     Directions.add(direction(turns.last.node, "Straight", null, null, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
-
     return Directions;
   }
 

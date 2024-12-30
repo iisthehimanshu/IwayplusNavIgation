@@ -104,8 +104,8 @@ class DirectionInstructionViewModel extends ChangeNotifier {
         _sourceUPHeight+=50;
       }
       totalSourceTurns++;
-      if(dir.distanceToNextTurn != null) {
-        totalSourceDistance += dir.distanceToNextTurn!;
+      if(dir.distanceToNextTurnInFeet != null) {
+        totalSourceDistance += dir.distanceToNextTurnInFeet!;
       }
     }
     if(_MultiBuilding){
@@ -120,15 +120,15 @@ class DirectionInstructionViewModel extends ChangeNotifier {
           _destinationUpHeight+=50;
         }
         totalDestinationTurns++;
-        if(dir.distanceToNextTurn != null) {
-          totalDestinationDistance += dir.distanceToNextTurn!;
+        if(dir.distanceToNextTurnInFeet != null) {
+          totalDestinationDistance += dir.distanceToNextTurnInFeet!;
         }
       }
 
       _outdoorWidgetHeight = 50 * _outdoorDirection.length.toDouble();
       for (var dir in _outdoorDirection) {
-        if(dir.distanceToNextTurn != null) {
-          totalOutdoorLength += dir.distanceToNextTurn!;
+        if(dir.distanceToNextTurnInFeet != null) {
+          totalOutdoorLength += dir.distanceToNextTurnInFeet!;
         }
       }
     }

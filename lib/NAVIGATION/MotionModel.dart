@@ -32,6 +32,7 @@ class MotionModel{
     if(nonWalkable.contains((newY*cols)+newX)){
       stuckCount++;
       if(stuckCount==5){
+        //if the pointer gets stuck in the non walkable during navigation.
         user.moveToPointOnPath((user.pathobj.index+(stuckCount*UserState.stepSize)-1).toInt());
         stuckCount = 0;
       }

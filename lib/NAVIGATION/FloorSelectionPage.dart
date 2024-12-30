@@ -72,7 +72,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       widget.floors.add("");
     }else{
       setState(() {
-        if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
+        if(SingletonFunctionController().getlocalizedBeacon()!=null){
+          tag=SingletonFunctionController().getlocalizedBeacon()!.floor!;
+        }else if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
           setState(() {
             tag = 0;
           });
@@ -85,7 +87,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           print("Tag=00");
         }
       });
-
     }
 
     optionListForUI.add(widget.filterName);
@@ -102,18 +103,17 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     setState(() {
       searchHintString = widget.filterName;
     });
-    fetchandBuild();
+    fetchandBuild(currFloor: tag);
   }
 
 
-  void fetchandBuild()async{
+  void fetchandBuild({int? currFloor})async{
     await fetchlist();
     if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
       print("fetchandbuild debug ${[int.parse(widget.floors[0])]}");
-      search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
+      search(widget.filterName, widget.filterBuildingName,[(currFloor!=null)?currFloor:int.parse(widget.floors[0])]);
     }
   }
-
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
@@ -121,7 +121,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       });
     });
   }
-
   bool category = false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
@@ -134,11 +133,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
 
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
-
   List<int> checkfloors = [];
-
   void search(String filterText,String buildingText,List<int> floor){
-
     setState(() {
       if(landmarkData.landmarksMap!.isNotEmpty) {
         searchResults.clear();
@@ -177,8 +173,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           }
         });
       }
-
-
       if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
         sortResultsByDistance(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!);
       }
@@ -187,7 +181,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     print("optionListItemBuildingName");
     print(optionListItemBuildingName);
   }
-
   void sortResultsByDistance(int userLat, int userLng) {
     print("searchResults before: ${searchResults[0].name}");
     print("coordinates : $userLat, $userLng");
@@ -208,17 +201,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
 
     print("searchResults after in floor: ${searchResults[0].name}  ${searchResults[0].coordX} ${searchResults[0].coordY}");
   }
-
-
-
-
   void onVenueClicked(String name, String location, String ID, String bid){
     Navigator.pop(context,[name,location,ID,bid]);
   }
-
-
-
-
   List<IconData> _icons = [
     Icons.home,
     Icons.wash_sharp,
@@ -234,9 +219,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   int vall2 = 0;
   int tag=0;
   int lastPosition = 0;
-
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -312,7 +294,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                                         containerBoxColor = Color(0xffA1A1AA);
                                       }
                                       print("Final Set");
-
                                     },
                                   )),
                             ),

@@ -398,24 +398,23 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchResults.clear();
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
-
       if (optionList.contains(searchText)) {
         category = true;
         topCategory=false;
         vall = optionList.indexOf(searchText);
-
         if (landmarkData.landmarksMap != null) {
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
               final lowerCaseName = value.name!.toLowerCase();
               if(searchText.toLowerCase().contains("entry") && value.element!.subType == "main entry"){
                 optionListItemBuildingName.add(value.buildingName!);
+
               }else if (lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
                 optionListItemBuildingName.add(value.buildingName!);
               }
             }
           });
-
+          print("entered here");
             optionListItemBuildingName.forEach((element) {
               searcCategoryhResults.add(
                 SearchpageCategoryResults(
@@ -494,7 +493,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               final result = fuse.search(normalizedSearchText);
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
-
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
                      sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
                   }else{
@@ -660,6 +658,7 @@ if(searchResults.length>2){
   int vall = -1;
   int newvall = -1;
   int lastval =-1;
+  bool isTyping=true;
 
 
 
@@ -755,8 +754,13 @@ if(searchResults.length>2){
                                   onChanged: (value) {
                                     search(value);
                                     if(_controller.text.isEmpty){
+                                      isTyping=true;
                                       topSearches.clear();
                                       topSearchesFunc();
+                                    }else{
+                                      setState(() {
+                                        isTyping=false;
+                                      });
                                     }
                                     // print("Final Set");
                                     // print(cardSet);
@@ -780,13 +784,13 @@ if(searchResults.length>2){
                                   recentResults = [];
                                   searcCategoryhResults = [];
                                   category=false;
+                                  isTyping=true;
                                   topSearches.clear();
                                   topSearchesFunc();
                                 });
                               },
                               icon: Semantics(
                                   container: true,
-
                                   label: "Close", child: Icon(Icons.close)))
                               : IconButton(
                             onPressed: () {
@@ -842,58 +846,60 @@ if(searchResults.length>2){
               ),
             ):Container(),
             searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-            Semantics(
-              label: "Filter Section",
-              header: true,
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: vall,
-                  onChanged: (val) {
-                    if(HelperClass.SemanticEnabled) {
-                      speak("${optionListForUI[val]} selected");
-                    }
-                    selectedButton = optionListForUI[val];
-                    setState(() => vall = val);
-                    lastval = val;
-                    _controller.text = optionListForUI[val];
-                    search(optionListForUI[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListForUI,
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+            Visibility(
+              visible: isTyping,
+              child: Semantics(
+                label: "Filter Section",
+                header: true,
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: vall,
+                    onChanged: (val) {
+                      if(HelperClass.SemanticEnabled) {
+                        speak("${optionListForUI[val]} selected");
+                      }
+                      selectedButton = optionListForUI[val];
+                      setState(() => vall = val);
+                      lastval = val;
+                      _controller.text = optionListForUI[val];
+                      search(optionListForUI[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListForUI,
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        vall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListForUI[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
+
+                        onTap: (String Text) {
+                          if (Text.isNotEmpty) {
+                            search(Text);
+                          } else {
+                            search(Text);
+                            _controller.text="";
+                            searchResults = [];
+                            searcCategoryhResults = [];
+                            vall = -1;
+                          }
+                        }, icon: _icons[i],
+                      );
+                    },
+                    direction: Axis.horizontal,
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      vall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListForUI[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text);
-                        } else {
-                          search(Text);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                        }
-                      }, icon: _icons[i],
-                    );
-                  },
-                  direction: Axis.horizontal,
                 ),
               ),
             ),
-
 
             SizedBox(height: 4,),
             Divider(thickness: 6,color: Color(0xfff2f3f5)),
@@ -901,12 +907,10 @@ if(searchResults.length>2){
                 flex: 1,
                 child: SingleChildScrollView(
                   child: Semantics(
-                    label: "Search Results",
                     header: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
-
                     ),
                   ),
                 )),

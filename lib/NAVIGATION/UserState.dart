@@ -43,9 +43,9 @@ class UserState {
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
   StreamSubscription<Position>? _positionStreamSubscription;
+  static double? geoLat ;
+  static double? geoLng ;
   static Function autoRecenter=() {};
-  static double geoLat = 0.0;
-  static double geoLng = 0.0;
   static bool ttsAllStop = false;
   static bool ttsOnlyTurns = false;
   b.Building? building;

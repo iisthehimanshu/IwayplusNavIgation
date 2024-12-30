@@ -749,11 +749,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
 
-      widget.direction = (tools.angleToClocks(angle, widget.context) == "None" || tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+      widget.direction = (tools.angleToClocks(angle, widget.context) == "None")
           ? oldWidget.direction
           : tools.angleToClocks(angle, widget.context);
       String userdirection =
-      (tools.angleToClocks(userangle, widget.context) == "None"|| tools.angleToClocks(angle, widget.context).toLowerCase().contains("slight"))
+      (tools.angleToClocks(userangle, widget.context) == "None")
           ? oldWidget.direction
           : tools.angleToClocks(userangle, widget.context);
       if (userdirection == "Straight") {

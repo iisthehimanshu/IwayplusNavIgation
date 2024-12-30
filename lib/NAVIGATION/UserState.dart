@@ -43,9 +43,9 @@ class UserState {
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
   StreamSubscription<Position>? _positionStreamSubscription;
+  static double? geoLat ;
+  static double? geoLng ;
   static Function autoRecenter=() {};
-  static double geoLat = 0.0;
-  static double geoLng = 0.0;
   static bool ttsAllStop = false;
   static bool ttsOnlyTurns = false;
   b.Building? building;
@@ -329,17 +329,24 @@ class UserState {
       print("error in stepsArray $e");
       initializeStepsArray(0, [2]);
     }
+
+
+
     List<int> nextTransition = tools.findPoint(showcoordX, showcoordY,
         cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);
+
     List<int>? correctedTransition = getCorrectedTransition(angle);
+
     // Update main coordinates and display coordinates
     showcoordX = nextTransition[0];
     showcoordY = nextTransition[1];
     coordX = correctedTransition[0];
     coordY = correctedTransition[1];
+
     List<double> newLatLng = tools.localtoglobal(showcoordX, showcoordY, building!.patchData[bid]);
     lat = newLatLng[0];
     lng = newLatLng[1];
+
     path.insert(pathobj.index, (showcoordY * cols) + showcoordX);
     cellPath.insert(
         pathobj.index,
@@ -367,10 +374,12 @@ class UserState {
 
     return [transitionValues[0] + coordX, transitionValues[1] + coordY];
   }
+
   int calculateOffPathDistance() {
     return tools
         .calculateDistance([coordX, coordY], [showcoordX, showcoordY]).toInt();
   }
+
   bool isInOutdoor() {
     return (bid == buildingAllApi.outdoorID &&
             cellPath[pathobj.index].bid == buildingAllApi.outdoorID) &&
@@ -378,6 +387,7 @@ class UserState {
                 [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
             3;
   }
+
   void announceLiftUsage(BuildContext context) {
     onConnection = true;
     createCircle(lat, lng);
@@ -401,12 +411,12 @@ class UserState {
           element.properties!.polygonExist != true) {
 
         if (tools.calculateDistance([
-          showcoordX,
-          showcoordY
-        ], [
-          element.doorX ?? element.coordinateX!,
-          element.doorY ?? element.coordinateY!
-        ]) <=
+              showcoordX,
+              showcoordY
+            ], [
+              element.doorX ?? element.coordinateX!,
+              element.doorY ?? element.coordinateY!
+            ]) <=
             5) {
 
           if (!UserState.ttsOnlyTurns) {
@@ -433,7 +443,7 @@ class UserState {
           ])}");
           double angle = tools.calculateAngle2(
               [showcoordX, showcoordY],
-              [showcoordX + transitionvalue[0] ,showcoordY + transitionvalue[1]],
+              [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
               [element.coordinateX!, element.coordinateY!]);
           if (!UserState.ttsOnlyTurns) {
             if(tools.angleToClocks(angle, context)=="Straight"){
@@ -468,12 +478,12 @@ class UserState {
 
 
       else if (tools.calculateDistance([
-        showcoordX,
-        showcoordY
-      ], [
-        element.doorX ?? element.coordinateX!,
-        element.doorY ?? element.coordinateY!
-      ]) <=
+            showcoordX,
+            showcoordY
+          ], [
+            element.doorX ?? element.coordinateX!,
+            element.doorY ?? element.coordinateY!
+          ]) <=
           6) {
         double angle = tools.calculateAngle2(
             [showcoordX, showcoordY],
@@ -710,6 +720,7 @@ class UserState {
     lng = values[1];
     createCircle(values[0], values[1]);
     alignMapToPath([values[0], values[1]], values);
+
     Future.delayed(Duration(seconds: 1)).then((onValue){
       autoRecenter();
     });

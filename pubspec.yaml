@@ -50,7 +50,6 @@ dependencies:
   flutter_svg: ^2.0.9
   path_provider:
   hive: ^2.2.3
-  firebase_core:
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:

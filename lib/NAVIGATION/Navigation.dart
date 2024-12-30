@@ -138,6 +138,7 @@ class Navigation extends StatefulWidget {
   @override
   State<Navigation> createState() => _NavigationState();
 }
+
 class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
   MapState mapState = new MapState();
   Timer? PDRTimer;
@@ -201,6 +202,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   final pdr = <StreamSubscription<dynamic>>[];
   Duration sensorInterval = Duration(milliseconds: 100);
+
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
   List<String> allBuildingList = [];
@@ -498,7 +500,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             ),
           );
         }
-
         // markers.add(
         //   MapMarker(
         //     id: keys.toString(),
@@ -508,14 +509,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         // );
       }
     } catch (e) {}
-
-
     _clusterManager = await MapHelper.initClusterManager(
         markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
-
     await _updateMarkers11();
   }
-
   /// Gets the markers and clusters to be displayed on the map for the current zoom level and
   /// updates state.
   Future<void> _updateMarkers11([double? updatedZoom]) async {
@@ -554,7 +551,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
     }
   }
-
   Future<Uint8List> getIconBytes(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
@@ -566,7 +562,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .asUint8List();
     return bytes;
   }
-
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   @override
@@ -587,6 +582,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
     }
+    // if(UserCredentials().getUserPersonWithDisability()>0){
+    //   UserCredentials().setUserNavigationModeSetting('Clock Direction');
+    // }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
 
@@ -830,7 +828,6 @@ bool isAppinForeground=true;
       });
     }
   }
-
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
@@ -851,7 +848,6 @@ bool isAppinForeground=true;
       throw (e);
     }
   }
-
   Future<void> setPdrThreshold() async {
     if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
       peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
@@ -861,87 +857,133 @@ bool isAppinForeground=true;
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
       String deviceModel = await DeviceInformation.deviceModel;
-
-      if (manufacturer.toLowerCase().contains("samsung")){
+      if (manufacturer.toLowerCase().contains("samsung")) {
         if (deviceModel.startsWith("A", 3)) {
           //
           peakThreshold = 10.7;
           valleyThreshold = -10.7;
-        } else if (deviceModel.startsWith("M", 3)){
+        } else if (deviceModel.startsWith("M", 3)) {
           peakThreshold = 11.0;
           valleyThreshold = -11.0;
         } else {
           peakThreshold = 11.111111;
           valleyThreshold = -11.111111;
         }
-      } else if (manufacturer.toLowerCase().contains("oneplus")){
+      } else if (manufacturer.toLowerCase().contains("oneplus")) {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
         // step_threshold = 0.7;
-      } else if (manufacturer.toLowerCase().contains("realme")){
+      } else if (manufacturer.toLowerCase().contains("realme")) {
         peakThreshold = 11.0;
         valleyThreshold = -11.0;
-      } else if (manufacturer.toLowerCase().contains("redmi")){
+      } else if (manufacturer.toLowerCase().contains("redmi")) {
         peakThreshold = 11.3;
         valleyThreshold = -11.3;
-      } else if (manufacturer.toLowerCase().contains("google")){
+      } else if (manufacturer.toLowerCase().contains("google")) {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
-      } else if (manufacturer.toLowerCase().contains("apple")){
-        if(deviceModel.toLowerCase().contains("iphone14")){
-          print("iphone13,14");
-          peakThreshold = 9.9;
-          valleyThreshold = -9.9;
-        }else {
-          print("other than 13,14");
-          peakThreshold = 10.111111;
-          valleyThreshold = -10.111111;
-        }
+      } else if (manufacturer.toLowerCase().contains("apple")) {
+        peakThreshold = 10.35;
+        valleyThreshold = -10.35;
       } else {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }
       if(UserCredentials().getUserPersonWithDisability()>0)
-      {
-        peakThreshold= peakThreshold+0.5;
-        valleyThreshold= valleyThreshold-0.5;
-      }
+        {
+          peakThreshold= peakThreshold+0.5;
+          valleyThreshold= valleyThreshold-0.5;
+        }
     } catch (e) {
       throw (e);
     }
+    print("threshold::${valleyThreshold}");
+  }
+  bool _isSubscriptionActive() {
+    try {
+      if (compassSubscription!.isPaused) {
+        print("Resumed the paused compass stream.");
+        return true;
+      }
+      return true; // Already active
+    } catch (e) {
+      return false; // Not initialized or canceled
+    }
   }
   void handleCompassEvents() {
-    compassSubscription = FlutterCompass.events!.listen((event) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
-      double? compassHeading = event.heading!;
+    // Check if the subscription exists and is active
+    // if (_isSubscriptionActive()) {
+    //   print("Compass stream is already active. Returning.");
+    //   return;
+    // }
+    // Create a new subscription to the compass events
+    compassSubscription = FlutterCompass.events!.listen(
+          (event) {
+        wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
+        wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
 
-      setState(() {
-        user.theta = compassHeading!;
-        if (mapState.interaction2) {
-          mapState.bearing = compassHeading!;
-          _googleMapController.moveCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: mapState.target,
-                zoom: mapState.zoom,
-                bearing: mapState.bearing!,
+        double? compassHeading = event.heading!;
+        setState(() {
+          user.theta = compassHeading!;
+          if (mapState.interaction2) {
+            mapState.bearing = compassHeading!;
+            _googleMapController.moveCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: mapState.target,
+                  zoom: mapState.zoom,
+                  bearing: mapState.bearing!,
+                ),
               ),
-            ),
-            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-          );
-        } else {
-          if (markers.length > 0 && markers[user.bid] != null)
-            markers[user.bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing, markers[user.bid]![0]);
-        }
-      });
-    }, onError: (error) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
-    });
+            );
+          } else {
+            if (markers.isNotEmpty && markers[user.bid] != null) {
+              markers[user.bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing,
+                markers[user.bid]![0],
+              );
+            }
+          }
+        });
+      },
+      onError: (error) {
+        wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
+        wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+      },
+    );
   }
 
+  // void handleCompassEvents() {
+  //
+  //   compassSubscription = FlutterCompass.events!.listen((event) {
+  //     wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
+  //     wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+  //     double? compassHeading = event.heading!;
+  //     setState(() {
+  //       user.theta = compassHeading!;
+  //       if (mapState.interaction2) {
+  //         mapState.bearing = compassHeading!;
+  //         _googleMapController.moveCamera(
+  //           CameraUpdate.newCameraPosition(
+  //             CameraPosition(
+  //               target: mapState.target,
+  //               zoom: mapState.zoom,
+  //               bearing: mapState.bearing!,
+  //             ),
+  //           ),
+  //           //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+  //         );
+  //       } else {
+  //         if (markers.length > 0 && markers[user.bid] != null)
+  //           markers[user.bid]![0] = customMarker.rotate(
+  //               compassHeading! - mapbearing, markers[user.bid]![0]);
+  //       }
+  //     });
+  //   }, onError: (error) {
+  //     wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
+  //     wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+  //   });
+  // }
   void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -953,7 +995,6 @@ bool isAppinForeground=true;
       fontSize: 16.0,
     );
   }
-
   bool disposed = false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
@@ -986,39 +1027,33 @@ bool isAppinForeground=true;
       await flutterTts.speak(msg);
     }
   }
-
   void checkPermissions() async {
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     await enableBT();
     //  await requestActivityPermission();
   }
-
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});
   }
-
   bool isPdr = false;
   // Function to start the timer
   void StartPDR() {
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
       //
-      print("still activee");
       setState(() {
         isPdr = true;
         isPdrActive = true;
       });
       if(isAppinForeground){
-        pdrstepCount();
+         pdrstepCount();
       }
 
       // onStepCount();
     });
   }
-
 // Function to stop the timer
   bool isPdrStop = false;
-
   void StopPDR() async {
     if (PDRTimer != null && PDRTimer!.isActive) {
       setState(() {
@@ -1047,123 +1082,125 @@ bool isAppinForeground=true;
   double filteredY = 0;
   double filteredZ = 0;
   bool restartScanning = false;
+
   List<double> orientationHistory = [];
   int orientationWindowSize = 10;  // Number of readings for stability check
   double orientationThreshold = 0.1;
+
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
           (AccelerometerEvent event) {
-        if (pdr == null) {
-          return; // Exit the event listener if subscription is canceled
-        }
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
-        // Apply low-pass filter
-        if (detectStep(event.x, event.y, event.z)) {
-          setState(() {
-            lastPeakTime = DateTime
-                .now()
-                .millisecondsSinceEpoch;
-            stepCount++;
-            bool isvalid = MotionModel.isValidStep(
-                user,
-                SingletonFunctionController
-                    .building.floorDimenssion[user.bid]![user.floor]![0],
-                SingletonFunctionController
-                    .building.floorDimenssion[user.bid]![user.floor]![1],
-                SingletonFunctionController
-                    .building.nonWalkable[user.bid]![user.floor]!,
-                reroute);
-            if (isvalid) {
-              user.move(context).then((value) {
-                renderHere();
+            if (pdr == null) {
+              return; // Exit the event listener if subscription is canceled
+            }
+            wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
+            wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+            // Apply low-pass filter
+            if (detectStep(event.x, event.y, event.z)) {
+              setState(() {
+                lastPeakTime = DateTime
+                    .now()
+                    .millisecondsSinceEpoch;
+                stepCount++;
+                bool isvalid = MotionModel.isValidStep(
+                    user,
+                    SingletonFunctionController
+                        .building.floorDimenssion[user.bid]![user.floor]![0],
+                    SingletonFunctionController
+                        .building.floorDimenssion[user.bid]![user.floor]![1],
+                    SingletonFunctionController
+                        .building.nonWalkable[user.bid]![user.floor]!,
+                    reroute);
+                if (isvalid) {
+                  user.move(context).then((value) {
+                    renderHere();
+                  });
+                } else {
+                  if (user.isnavigating) {
+                    // reroute();
+                    // showToast("You are out of path");
+                  }
+                }
               });
-            } else {
-              if (user.isnavigating) {
-                // reroute();
-                // showToast("You are out of path");
-              }
             }
-          });
-        }
-        else {
-          filteredX = alpha * filteredX + (1 - alpha) * event.x;
-          filteredY = alpha * filteredY + (1 - alpha) * event.y;
-          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-          double orientation = atan2(filteredY,
-              sqrt(filteredX * filteredX + filteredZ * filteredZ))
-          ;
-          // Add orientation to history and check variability
-          orientationHistory.add(orientation);
-          if (orientationHistory.length > orientationWindowSize) {
-            orientationHistory.removeAt(0); // Maintain a fixed window size
+            else {
+              filteredX = alpha * filteredX + (1 - alpha) * event.x;
+              filteredY = alpha * filteredY + (1 - alpha) * event.y;
+              filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+              // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+              double orientation = atan2(filteredY,
+                  sqrt(filteredX * filteredX + filteredZ * filteredZ))
+              ;
+              // Add orientation to history and check variability
+              orientationHistory.add(orientation);
+              if (orientationHistory.length > orientationWindowSize) {
+                orientationHistory.removeAt(0); // Maintain a fixed window size
 
-            // Calculate standard deviation of orientation
-            double avgOrientation = orientationHistory.reduce((a, b) =>
-            a + b) / orientationWindowSize;
-            double orientationVariance = orientationHistory.fold(
-                0, (sum, value) => sum +
-                pow(value - avgOrientation, 2).toInt()) /
-                orientationWindowSize;
-            double orientationStability = sqrt(orientationVariance);
+                // Calculate standard deviation of orientation
+                double avgOrientation = orientationHistory.reduce((a, b) =>
+                a + b) / orientationWindowSize;
+                double orientationVariance = orientationHistory.fold(
+                    0, (sum, value) => sum +
+                    pow(value - avgOrientation, 2).toInt()) /
+                    orientationWindowSize;
+                double orientationStability = sqrt(orientationVariance);
 
-            // Suppress step detection if orientation is too variable
-            if (orientationStability > orientationThreshold) {
-              // Too random, assume the user is stationary or talking, ignore steps
-              return;
-            }
-          }
-          // Compute magnitude of acceleration vector
-          double magnitude = sqrt((filteredX * filteredX +
-              filteredY * filteredY +
-              filteredZ * filteredZ));
-          // Detect peak and valley
-          if (magnitude > peakThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastPeakTime >
-                  peakInterval) {
-            setState(() {
-              lastPeakTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-              stepCount++;
-              bool isvalid = MotionModel.isValidStep(
-                  user,
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![0],
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![1],
-                  SingletonFunctionController
-                      .building.nonWalkable[user.bid]![user.floor]!,
-                  reroute);
-              if (isvalid) {
-                user.move(context).then((value) {
-                  renderHere();
-                });
-              } else {
-                if (user.isnavigating) {
-                  // reroute();
-                  // showToast("You are out of path");
+                // Suppress step detection if orientation is too variable
+                if (orientationStability > orientationThreshold) {
+                  // Too random, assume the user is stationary or talking, ignore steps
+                  return;
                 }
               }
-            });
-          } else if (magnitude < valleyThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastValleyTime >
-                  valleyInterval) {
-            setState(() {
-              lastValleyTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-            });
-          }
-        }
+              // Compute magnitude of acceleration vector
+              double magnitude = sqrt((filteredX * filteredX +
+                  filteredY * filteredY +
+                  filteredZ * filteredZ));
+              // Detect peak and valley
+              if (magnitude > peakThreshold &&
+                  DateTime
+                      .now()
+                      .millisecondsSinceEpoch - lastPeakTime >
+                      peakInterval) {
+                setState(() {
+                  lastPeakTime = DateTime
+                      .now()
+                      .millisecondsSinceEpoch;
+                  stepCount++;
+                  bool isvalid = MotionModel.isValidStep(
+                      user,
+                      SingletonFunctionController
+                          .building.floorDimenssion[user.bid]![user.floor]![0],
+                      SingletonFunctionController
+                          .building.floorDimenssion[user.bid]![user.floor]![1],
+                      SingletonFunctionController
+                          .building.nonWalkable[user.bid]![user.floor]!,
+                      reroute);
+                  if (isvalid) {
+                    user.move(context).then((value) {
+                      renderHere();
+                    });
+                  } else {
+                    if (user.isnavigating) {
+                      // reroute();
+                      // showToast("You are out of path");
+                    }
+                  }
+                });
+              } else if (magnitude < valleyThreshold &&
+                  DateTime
+                      .now()
+                      .millisecondsSinceEpoch - lastValleyTime >
+                      valleyInterval) {
+                setState(() {
+                  lastValleyTime = DateTime
+                      .now()
+                      .millisecondsSinceEpoch;
+                });
+              }
+            }
 
-      },
+          },
       onError: (error) {
         wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
         wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
@@ -1178,13 +1215,17 @@ bool isAppinForeground=true;
     // Calculate pitch and roll
     double pitch = atan(x / sqrt(y * y + z * z)) * (180 / pi);
     double roll = atan(y / sqrt(x * x + z * z)) * (180 / pi);
+
     // Define problematic orientation thresholds
     bool isProblematicOrientation =
         (pitch > 80 && pitch < 100) || (roll > 80 && roll < 100);
+
     // Calculate movement magnitude
     double magnitude = sqrt(x * x + y * y + z * z);
+
     // Threshold to detect significant movement
     double movementThreshold = 9.85;// Adjust based on your testing
+
     // Check if a step is detected
     if (isProblematicOrientation && magnitude > movementThreshold) {
       DateTime now = DateTime.now();
@@ -1198,6 +1239,8 @@ bool isAppinForeground=true;
     }
     return false; // No step detected
   }
+
+
   Future<void> paintMarker(LatLng Location) async {
     if (markers.containsKey(user.bid)) {
       markers[user.bid]?.add(Marker(
@@ -1232,23 +1275,55 @@ bool isAppinForeground=true;
       }
     }
   }
+
   void changeBuilding(String oldBid, String newBid) {
     markers[newBid] = markers[oldBid]!;
     tools.setBuildingAngle(SingletonFunctionController
         .building.patchData[newBid]!.patchData!.buildingAngle!);
   }
+
+  // void renderHere() {
+  //   setState(() {
+  //     if (markers.length > 0) {
+  //       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
+  //           user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[0] = customMarker.move(
+  //           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
+  //
+  //       print("insideee thiss");
+  //
+  //       mapState.target = LatLng(lvalue[0], lvalue[1]);
+  //       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //             target: mapState.target,
+  //             zoom: mapState.zoom,
+  //             bearing: mapState.bearing!,
+  //             tilt: mapState.tilt),
+  //       ));
+  //
+  //       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
+  //           user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
+  //       markers[user.Bid]?[1] = customMarker.move(
+  //           LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
+  //     }
+  //   });
+  // }
   Animation<LatLng>? _markerAnimation;
+
   void renderHere() async {
     double screenHeight = MediaQuery.of(context).size.height;
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+
     if (markers.isNotEmpty) {
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
+
       LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
+
       // Define a smooth transition animation
       _markerAnimation = LatLngTween(
         begin: currentMarkerPosition,
@@ -1268,7 +1343,19 @@ bool isAppinForeground=true;
           );
         });
       });
+
       mapState.target = newMarkerPosition;
+
+      // ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
+      //
+      // int newY = Platform.isAndroid
+      //     ? screenCenter.y - (screenHeight * 0.58).toInt()
+      //     : screenCenter.y - (screenHeight * 0.58).toInt();
+      //
+      // LatLng newCameraTarget = await _googleMapController.getLatLng(
+      //     ScreenCoordinate(x: screenCenter.x, y: newY)
+      // );
+
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -1281,10 +1368,12 @@ bool isAppinForeground=true;
           ),
         ),
       );
+
       List<double> ldvalue = tools.localtoglobal(
           user.coordX.toInt(), user.coordY.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
+
       markers[user.bid]?[1] = customMarker.move(
           LatLng(ldvalue[0], ldvalue[1]),
           markers[user.bid]![1]
@@ -1293,6 +1382,7 @@ bool isAppinForeground=true;
       modifyPathCovered(user.bid, user.floor, newMarkerPosition);
     }
   }
+
   void onStepCount() {
     setState(() {
       if (_userAccelerometerEvent?.y != null) {
@@ -1334,6 +1424,7 @@ bool isAppinForeground=true;
       }
     });
   }
+
   List<String> finalDirections = [];
   List<String> calcDirectionsExploreMode(List<int> userCords,
       List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
@@ -1343,16 +1434,22 @@ bool isAppinForeground=true;
         nearbyLandmarkCoords[i].coordinateX!,
         nearbyLandmarkCoords[i].coordinateY!
       ]);
+
+      //
+      //
       String finalvalue =
       tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      //
       finalDirections.add(finalvalue);
     }
     return finalDirections;
   }
+
   void repaintUser(String nearestBeacon) {
     reroute();
     paintUser(nearestBeacon, null, null, speakTTS: false);
   }
+
   String convertTolng(String msg, String lngcode, String finalvalue) {
     if (msg ==
         "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}") {
@@ -1378,20 +1475,25 @@ bool isAppinForeground=true;
   Future<Landmarks?> getglobalcoords(LatLng coordinates) async {
     Landmarks? closestLandmark;
     double? minDistance;
+
     // Fetching landmark data
     final landmarkData = await SingletonFunctionController.building.landmarkdata;
+
     landmarkData?.landmarks?.forEach((landmark) {
       // Check if the landmark belongs to the same building and has valid coordinates
       if (landmark.buildingID == buildingAllApi.outdoorID &&
+          landmark.element!.type != "FloorConnection" &&
+          landmark.element!.subType != "restRoom" &&
           landmark.coordinateX != null &&
-          landmark.coordinateY != null &&
-          !(landmark.wasPolyIdNull ?? false)) {
+          landmark.coordinateY != null ) {
+
         // Convert local coordinates to global latitude and longitude
         List<double> latLngValue = tools.localtoglobal(
             landmark.coordinateX!,
             landmark.coordinateY!,
             SingletonFunctionController.building.patchData[landmark.buildingID]
         );
+
         // Calculate the aerial distance from the user's location
         double dist = tools.calculateAerialDist(
             latLngValue[0],
@@ -1399,6 +1501,7 @@ bool isAppinForeground=true;
             coordinates.latitude,
             coordinates.longitude
         );
+
         // Check if the landmark is within 25 units and has required properties
         if (landmark.properties?.polyId != null && landmark.name?.isNotEmpty == true) {
 
@@ -1457,6 +1560,7 @@ bool isAppinForeground=true;
 
     return closestLandmark;
   }
+
   double currentHeading = 10.0; // Example current heading
   double referenceHeading = 0.0; // Example reference heading (North)
   double threshold = 10.0;
@@ -1464,6 +1568,7 @@ bool isAppinForeground=true;
   double expectedFieldStrength = 50.0; // µT, typical for Earth
   double acceptableDeviationPercentage = 0.2;
   List<double> magneticValues = []; // 20% deviation is acceptable
+
 // Function to check if calibration is needed
   bool isCalibrationNeeded(List<double> magneticFieldStrengths) {
     double acceptableLowerBound =
@@ -1484,9 +1589,11 @@ bool isAppinForeground=true;
     }
     return false; // No calibration needed
   }
+
   double calculateMagneticFieldStrength(double x, double y, double z) {
     return sqrt(x * x + y * y + z * z);
   }
+
   void listenToMagnetometer() {
     magnetometerEvents.listen((MagnetometerEvent event) {
       double x = event.x;
@@ -1501,6 +1608,7 @@ bool isAppinForeground=true;
       // print('Magnetic Field Strength: $magneticFieldStrength µT');
     });
   }
+
   late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;
   void listenToMagnetometeronCalibration() {
     double lowerThreshold = 40.0;
@@ -1537,6 +1645,7 @@ bool isAppinForeground=true;
           // print('Magnetic Field Strength: $magneticFieldStrength µT');
         });
   }
+
   void paintUser(
       String? nearestBeacon,
       String? polyID,
@@ -1562,6 +1671,7 @@ bool isAppinForeground=true;
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
+      print("moving for gps");
       await _handleGlobalCoordinatesLocalization(speakTTS, render);
     }
 
@@ -1570,6 +1680,7 @@ bool isAppinForeground=true;
     widget.directsourceID = '';
     _recenterMap();
   }
+
   Future<void> _handleBeaconLocalization(
       String nearestBeacon,
       bool speakTTS,
@@ -1577,6 +1688,7 @@ bool isAppinForeground=true;
       ) async {
     try {
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
+
       final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
       if (beaconData != null) {
         print("beacon debug: $beaconData");
@@ -1587,8 +1699,9 @@ bool isAppinForeground=true;
               beaconData,
               landmarkData.landmarksMap!
           );
+
           if (userSetLocation != null) {
-            initializeUser(userSetLocation,beaconData ,speakTTS: speakTTS, render: render);
+            initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
           } else {
             unableToFindLocation();
           }
@@ -1603,6 +1716,7 @@ bool isAppinForeground=true;
       if (speakTTS) unableToFindLocation();
     }
   }
+
   Future<void> _handlePolygonLocalization(
       String polyID,
       bool speakTTS,
@@ -1613,7 +1727,7 @@ bool isAppinForeground=true;
       final userSetLocation = landmarkData?.landmarksMap?[polyID];
 
       if (userSetLocation != null) {
-        initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
+        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
       } else {
         unableToFindLocation();
       }
@@ -1622,39 +1736,53 @@ bool isAppinForeground=true;
       if (speakTTS) unableToFindLocation();
     }
   }
+
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS,
       bool render
       ) async {
-    print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
+    if(UserState.geoLat != null && UserState.geoLng != null) {
+      print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
       final userSetLocation = await getglobalcoords(
-          LatLng(UserState.geoLat, UserState.geoLng)
+          LatLng(UserState.geoLat!, UserState.geoLng!)
       );
+
       if (userSetLocation != null) {
         String polyID = userSetLocation.properties!.polyId!;
-        initializeUser(userSetLocation,null,speakTTS: speakTTS, render: render);
+        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
       } else {
         unableToFindLocation();
       }
+    }else{
+      unableToFindLocation();
+    }
   }
+
+
   void unableToFindLocation(){
     speak("Unable to find your location. Scan nearby QR to know your location",
         _currentLocale);
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
   }
-  void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
+
+  void initializeUser(Landmarks userSetLocation,{bool speakTTS = true, bool render = true})async{
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
-    setState((){
+
+    setState(() {
       buildingAllApi.selectedID = userSetLocation!.buildingID!;
       buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
     });
+
     List<int> localBeconCord = [];
     localBeconCord.add(userSetLocation.coordinateX!);
     localBeconCord.add(userSetLocation.coordinateY!);
+
     pathState().beaconCords = localBeconCord;
+
     List<double> values = [];
+
     //floor alignment
     await SingletonFunctionController.building.landmarkdata!.then((land) {
       if (userSetLocation.floor != 0) {
@@ -1672,9 +1800,12 @@ bool isAppinForeground=true;
                 .polylinedatamap[userSetLocation.buildingID!]!
                 .polyline!
                 .floors!);
+
         for (int i = 0; i < prevFloorLifts.length; i++) {}
+
         for (int i = 0; i < currFloorLifts.length; i++) {}
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(
@@ -1692,11 +1823,16 @@ bool isAppinForeground=true;
                 .building.patchData[userSetLocation.buildingID!]);
       }
     });
+
     mapState.target = LatLng(values[0], values[1]);
+
     user.bid = userSetLocation.buildingID!;
     user.locationName = userSetLocation.name;
+
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
+
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
     user.coordY = userSetLocation.coordinateY!;
@@ -1707,8 +1843,9 @@ bool isAppinForeground=true;
             .building.patchData[userSetLocation.buildingID]);
     user.lat = ls[0];
     user.lng = ls[1];
+
     if (userSetLocation!.doorX != null) {
-      print("usercoord fetched ${user.coordX},${user.coordY} ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
+      print("usercoord fetched ${user.coordX},${user.coordY}       ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
       user.coordX = userSetLocation!.doorX!;
       user.coordY = userSetLocation!.doorY!;
       List<double> latlng = tools.localtoglobal(
@@ -1818,13 +1955,10 @@ bool isAppinForeground=true;
     });
 
     List<Landmarks> getallnearbylandmark=[];
-    if(localizedBeacon!=null){
-      await SingletonFunctionController.building.landmarkdata!.then((value) {
-        getallnearbylandmark = tools.localizefindAllNearbyLandmark(
-          localizedBeacon!, value.landmarksMap!);
-      });
-    }
-
+    await SingletonFunctionController.building.landmarkdata!.then((value) {
+      getallnearbylandmark = tools.localizefindAllNearbyLandmark(
+          null, value.landmarksMap!, la:userSetLocation);
+    });
 
 
     double value = 0;
@@ -1840,7 +1974,6 @@ bool isAppinForeground=true;
     }
     double distBetweenLandmarks=0.0;
     if(getallnearbylandmark.length>2){
-      print("got into it");
       distBetweenLandmarks=tools.calculateDistance([user.coordX,user.coordY], [getallnearbylandmark[1].coordinateX!,getallnearbylandmark[1].coordinateY!]);
       value2 = tools.calculateAngle2(
           [user.coordX, user.coordY],
@@ -1968,10 +2101,16 @@ bool isAppinForeground=true;
       }
     });
   }
+
+
+
+
   bool _isExpanded = false;
   String? qrText;
+
   void showDestinationDialog(BuildContext context,String text){
     double screenWidth = MediaQuery.of(context).size.width;
+
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -1997,6 +2136,7 @@ bool isAppinForeground=true;
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 2),
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -2008,12 +2148,14 @@ bool isAppinForeground=true;
                   ),
                 ),
               ],
+
             ),
           ),
         );
       },
     );
   }
+
   void showLocationDialog(BuildContext context) {
     Future.delayed(Duration(milliseconds: 2000)).then((value) {
       //speak("${LocaleData.scanQr.getString(context)}", _currentLocale);
@@ -2031,7 +2173,7 @@ bool isAppinForeground=true;
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                 const Text(
+                  Text(
                     "Choose Your Location",
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -2043,7 +2185,7 @@ bool isAppinForeground=true;
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 2),
-                 const Text(
+                  Text(
                     "We couldn't detect your location",
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -2090,7 +2232,7 @@ bool isAppinForeground=true;
                               isSemanticEnabled
                                   ? ""
                                   : 'Search your current location',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
@@ -2104,7 +2246,7 @@ bool isAppinForeground=true;
                     ),
                   ),
                   SizedBox(height: 20),
-                 const Text(
+                  Text(
                     "Or",
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -2116,7 +2258,7 @@ bool isAppinForeground=true;
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 16),
-                 const Text(
+                  Text(
                     "Scan the Nearby QR Code",
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -2192,8 +2334,10 @@ bool isAppinForeground=true;
       );
     });
   }
+
   bool accuracy = false;
   ValueNotifier<bool> accuracyNotifier = ValueNotifier<bool>(true);
+
   void showLowAccuracyDialog() {
     showDialog(
       context: context,
@@ -2247,6 +2391,47 @@ bool isAppinForeground=true;
       },
     );
   }
+
+  // void showLowAccuracyDialog() {
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //
+  //       return StatefulBuilder(builder: (BuildContext context, StateSetter setStateDialog){
+  //
+  //         return AlertDialog(
+  //           title: Text("Low Compass Accuracy"),
+  //           content: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Image.asset('assets/calibrate.gif'),
+  //               RichText(text: TextSpan(text: "Compass accuracy:",style: TextStyle(color: Colors.black), children: <TextSpan>[
+  //                 TextSpan(
+  //                     text: '${accuracy==true?"Low":"High"}', style: TextStyle(fontWeight: FontWeight.bold,color: accuracy==true?Colors.red:Colors.green)),
+  //               ],),)
+  //               // Text("Compass accuracy:${_accuracy==true?"Low":"High"}",style: TextStyle(color: _accuracy==true?Colors.red:Colors.green),),
+  //             ],
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: Text("OK"),
+  //               onPressed: () {
+  //                 setState(() {
+  //                   magneticValues.clear();
+  //                 });
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       });
+  //
+  //
+  //     },
+  //   );
+  // }
+
   void moveUser() async {
     LatLng userlocation = LatLng(user.lat, user.lng);
     mapState.target = LatLng(user.lat, user.lng);
@@ -2257,6 +2442,7 @@ bool isAppinForeground=true;
         20, // Specify your custom zoom level here
       ),
     );
+
     setState(() {
       markers.clear();
       markers.putIfAbsent(user.bid, () => []);
@@ -2279,6 +2465,7 @@ bool isAppinForeground=true;
       _recenterMap();
     });
   }
+
   void autoreroute({String? acc}) {
     Future.delayed(Duration(milliseconds: 100)).then((value) {
       fitPolygonInScreen(patch.first);
@@ -2292,7 +2479,6 @@ bool isAppinForeground=true;
         clearPathVariables();
         // }
         PathState.clear();
-        PDRTimer!.cancel();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
         PathState.sourceBid = user.bid;
@@ -2311,7 +2497,6 @@ bool isAppinForeground=true;
         //     }
         //   }
         // }
-
         SingletonFunctionController.building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!,accessibleby: acc??PathState.accessiblePath).then((value) {
             if (PathState.path.isNotEmpty) {
@@ -2390,6 +2575,7 @@ bool isAppinForeground=true;
       }
     });
   }
+
   void reroute({String? acc}) {
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
@@ -2411,6 +2597,7 @@ bool isAppinForeground=true;
             LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
+    PDRTimer!.cancel();
     FlutterBeep.beep();
     if(acc!= null){
       speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
@@ -2423,6 +2610,7 @@ bool isAppinForeground=true;
     }
     autoreroute(acc: acc);
   }
+
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
     await Permission.bluetoothScan.request();
@@ -2563,7 +2751,7 @@ bool isAppinForeground=true;
         patchData.patchData!.buildingName;
     SingletonFunctionController
         .building.patchData[patchData.patchData!.buildingID!] = patchData;
-    createPatch(patchData);
+    //createPatch(patchData);
     findCentroid(
         patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
 
@@ -2710,7 +2898,7 @@ bool isAppinForeground=true;
 
             Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
             SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
-            createotherPatch(key,patchData);
+            //createotherPatch(key,patchData);
 
             findCentroid(patchData.patchData!.coordinates!, key);
             print("apicalls testing 4 for $key");
@@ -2865,7 +3053,6 @@ bool isAppinForeground=true;
             fillColor: Colors.lightBlue.withOpacity(0.2),
             zIndex: 2
         );
-
         setState(() {
           circles
               .removeWhere((circle) => circle.circleId == CircleId("circle"));
@@ -2892,11 +3079,9 @@ bool isAppinForeground=true;
 
     return distance;
   }
-
   double degreesToRadians(double degrees) {
     return degrees * pi / 180;
   }
-
   String getRandomString(List<String> stringList) {
     Random random = Random();
     int randomIndex = random.nextInt(stringList.length);
@@ -2927,14 +3112,11 @@ bool isAppinForeground=true;
         break;
       }
     }
-
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
-
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
-
     setState(() {
       testBIn = SingletonFunctionController.btadapter.BIN;
       testBIn.forEach((key, value) {
@@ -2942,7 +3124,6 @@ bool isAppinForeground=true;
       });
     });
     SingletonFunctionController.btadapter.stopScanning();
-
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
     if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
       buildingAllApi
@@ -2957,7 +3138,6 @@ bool isAppinForeground=true;
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
-
     //emptying the bin manually
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
@@ -2969,7 +3149,6 @@ bool isAppinForeground=true;
     }
     SingletonFunctionController.btadapter.BIN.clear();
   }
-
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
@@ -5977,186 +6156,185 @@ bool isAppinForeground=true;
         ),
         Positioned(
           bottom: 0,
-          child: Semantics(
-            header: true,
-            child: Container(
-                height: 80,
-                width: screenWidth,
-                decoration: BoxDecoration(
-                  color: Colors.white, // Set the background color
-                  boxShadow: (contactDetail || microService)?[
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1), // Shadow color
-                      offset: Offset(0, -3), // Shadow offset (top shadow)
-                      blurRadius: 6, // Blur radius
-                      spreadRadius: 1, // Spread radius
-                    )
-                  ]:null,
-                ),
-                child: Center(
-                  // Center the button vertically
-                  child: Focus(
-                    focusNode:_focusNodeC,
-                    child: SizedBox(
-                      height: 40, // Set the desired height for the TextButton
-                      width: screenWidth - 32, // Set the width as needed
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Color(0xff6CC8BF),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(27.0),
-                          ),
-                        ),
-                        onPressed: () async {
-                          _polygon.clear();
-                          cachedPolygon.clear();
-                          // circles.clear();
-                          Markers.clear();
-                    
-                          if (user.coordY != 0 && user.coordX != 0) {
-                            PathState.sourceX = user.coordX;
-                            PathState.sourceY = user.coordY;
-                            PathState.sourceFloor = user.floor;
-                            PathState.sourcePolyID = user.key;
-                    
-                            PathState.sourceName = "Your current location";
-                            PathState.destinationPolyID =
-                            SingletonFunctionController
-                                .building.selectedLandmarkID!;
-                            PathState.destinationName = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .name ??
-                                snapshot
-                                    .data!
-                                    .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
-                                    .element!
-                                    .subType!;
-                            PathState.destinationFloor = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .floor!;
-                            PathState.sourceBid = user.bid;
-                    
-                            PathState.destinationBid = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .buildingID!;
-                    
-                            setState(() {
-                              calculatingPath = true;
+          child: Container(
+              height: 80,
+              width: screenWidth,
+              decoration: BoxDecoration(
+                color: Colors.white, // Set the background color
+                boxShadow: (contactDetail || microService)?[
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1), // Shadow color
+                    offset: Offset(0, -3), // Shadow offset (top shadow)
+                    blurRadius: 6, // Blur radius
+                    spreadRadius: 1, // Spread radius
+                  )
+                ]:null,
+              ),
+              child:
+
+              Center(
+                // Center the button vertically
+                child:Focus(
+                  focusNode:_focusNodeC,
+                child:SizedBox(
+                  height: 40, // Set the desired height for the TextButton
+                  width: screenWidth - 32, // Set the width as needed
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Color(0xff6CC8BF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(27.0),
+                      ),
+                      onPressed: () async {
+                        _polygon.clear();
+                        cachedPolygon.clear();
+                        // circles.clear();
+                        Markers.clear();
+
+                        if (user.coordY != 0 && user.coordX != 0) {
+                          PathState.sourceX = user.coordX;
+                          PathState.sourceY = user.coordY;
+                          PathState.sourceFloor = user.floor;
+                          PathState.sourcePolyID = user.key;
+
+                          PathState.sourceName = "Your current location";
+                          PathState.destinationPolyID =
+                          SingletonFunctionController
+                              .building.selectedLandmarkID!;
+                          PathState.destinationName = snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .name ??
+                              snapshot
+                                  .data!
+                                  .landmarksMap![SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .element!
+                                  .subType!;
+                          PathState.destinationFloor = snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .floor!;
+                          PathState.sourceBid = user.bid;
+
+                          PathState.destinationBid = snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .buildingID!;
+
+                          setState(() {
+                            calculatingPath = true;
+                          });
+                          // bool calibrate = isCalibrationNeeded(magneticValues);
+                          // print("calibrate1");
+                          // print(calibrate);
+                          // if (calibrate == true) {
+                          //   setState(() {
+                          //     accuracy = true;
+                          //   });
+                          //   speak(
+                          //       "low accuracy found.Please calibrate your device",
+                          //       _currentLocale);
+                          //   showLowAccuracyDialog();
+                          //   magneticValues.clear();
+                          //   listenToMagnetometer();
+                          //   _timerCompass =
+                          //       Timer.periodic(Duration(seconds: 1), (timer) {
+                          //         calibrate = isCalibrationNeeded(magneticValues);
+                          //         print("calibrate2");
+                          //         print(calibrate);
+                          //         if (calibrate == false) {
+                          //           setState(() {
+                          //             accuracy = false;
+                          //           });
+                          //           magneticValues.clear();
+                          //           _timerCompass?.cancel();
+                          //         } else {
+                          //           listenToMagnetometeronCalibration();
+                          //           _timerCompass?.cancel();
+                          //         }
+                          //       });
+                          // }
+
+                          Future.delayed(Duration(seconds: 1), () {
+                            calculateroute(snapshot.data!.landmarksMap!)
+                                .then((value) {
+                              calculatingPath = false;
+
+                              _isLandmarkPanelOpen = false;
+                              _isRoutePanelOpen = true;
                             });
-                            // bool calibrate = isCalibrationNeeded(magneticValues);
-                            // print("calibrate1");
-                            // print(calibrate);
-                            // if (calibrate == true) {
-                            //   setState(() {
-                            //     accuracy = true;
-                            //   });
-                            //   speak(
-                            //       "low accuracy found.Please calibrate your device",
-                            //       _currentLocale);
-                            //   showLowAccuracyDialog();
-                            //   magneticValues.clear();
-                            //   listenToMagnetometer();
-                            //   _timerCompass =
-                            //       Timer.periodic(Duration(seconds: 1), (timer) {
-                            //         calibrate = isCalibrationNeeded(magneticValues);
-                            //         print("calibrate2");
-                            //         print(calibrate);
-                            //         if (calibrate == false) {
-                            //           setState(() {
-                            //             accuracy = false;
-                            //           });
-                            //           magneticValues.clear();
-                            //           _timerCompass?.cancel();
-                            //         } else {
-                            //           listenToMagnetometeronCalibration();
-                            //           _timerCompass?.cancel();
-                            //         }
-                            //       });
-                            // }
-                    
-                            Future.delayed(Duration(seconds: 1), () {
-                              calculateroute(snapshot.data!.landmarksMap!)
-                                  .then((value) {
-                                calculatingPath = false;
-                    
-                                _isLandmarkPanelOpen = false;
-                                _isRoutePanelOpen = true;
-                              });
-                            });
-                          } else {
-                            PathState.sourceName = "Choose Starting Point";
-                            PathState.destinationPolyID =
-                            SingletonFunctionController
-                                .building.selectedLandmarkID!;
-                            PathState.destinationName = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .name ??
-                                snapshot
-                                    .data!
-                                    .landmarksMap![SingletonFunctionController
-                                    .building.selectedLandmarkID]!
-                                    .element!
-                                    .subType!;
-                            PathState.destinationFloor = snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .floor!;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = "";
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SourceAndDestinationPage(
-                                      DestinationID:
-                                      PathState.destinationPolyID,
-                                      user: user,
-                                    ))).then((value) {
-                              if (value != null) {
-                                fromSourceAndDestinationPage(value);
-                              }
-                            });
-                          }
-                        },
-                        child: (!calculatingPath)
-                            ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.directions,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              "${LocaleData.direction.getString(context)}",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            )
-                          ],
-                        )
-                            : Container(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
+                          });
+                        } else {
+                          PathState.sourceName = "Choose Starting Point";
+                          PathState.destinationPolyID =
+                          SingletonFunctionController
+                              .building.selectedLandmarkID!;
+                          PathState.destinationName = snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .name ??
+                              snapshot
+                                  .data!
+                                  .landmarksMap![SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .element!
+                                  .subType!;
+                          PathState.destinationFloor = snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .floor!;
+                          SingletonFunctionController
+                              .building.selectedLandmarkID = "";
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SourceAndDestinationPage(
+                                    DestinationID:
+                                    PathState.destinationPolyID,
+                                    user: user,
+                                  ))).then((value) {
+                            if (value != null) {
+                              fromSourceAndDestinationPage(value);
+                            }
+                          });
+                        }
+                      },
+                      child: (!calculatingPath)
+                          ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.directions,
                             color: Colors.white,
                           ),
+                          SizedBox(width: 8),
+                          Text(
+                            "${LocaleData.direction.getString(context)}",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      )
+                          : Container(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
                 )),
           ),
+              )), 
         )
       ],
     );
@@ -6381,17 +6559,23 @@ bool isAppinForeground=true;
           semanticsLabel="Start button double tap to navigate";
           startingNavigation=true;
         });
-
-        if (PathState.destinationName ==
-            "${LocaleData.yourcurrentloc.getString(context)}") {
-          speak(
-              " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
-        } else {
-          speak(
-              "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
-        }
+    if(UserCredentials().getUserPersonWithDisability()==0) {
+      if (PathState.destinationName ==
+          "${LocaleData.yourcurrentloc.getString(context)}") {
+        speak(
+            " ${LocaleData.issss.getString(context)} $distance ${LocaleData
+                .meteraway.getString(context)}. ${LocaleData
+                .clickstarttonavigate.getString(context)}",
+            _currentLocale);
+      } else {
+        speak(
+            "${PathState.destinationName} ${LocaleData.issss.getString(
+                context)} $distance ${LocaleData.meteraway.getString(
+                context)}. ${LocaleData.clickstarttonavigate.getString(
+                context)}",
+            _currentLocale);
+      }
+    }
       }
     } else {
       print("starting calc not happening");
@@ -6403,7 +6587,7 @@ bool isAppinForeground=true;
     //   return;
     // }
   }
-  String semanticsLabel="";
+String semanticsLabel="";
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
@@ -7189,7 +7373,7 @@ bool isAppinForeground=true;
             null,
             null,
             Cellpath.first.floor,
-            Cellpath.first.bid ?? "",liftDestinationFloor: nextFloor);
+            Cellpath.first.bid ?? "");
 
         try{innerMarker.add(Marker(
           markerId: MarkerId("lift${bid}"),
@@ -7238,7 +7422,7 @@ bool isAppinForeground=true;
 
 
       setState(() {
-        if (renderDestination) {
+        if (renderDestination && liftName == null) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('destination${bid}'),
@@ -7536,7 +7720,6 @@ bool isAppinForeground=true;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     directionWidgets.clear();
-
     // for (int i = 0; i < PathState.directions.length; i++) {
     //   if (PathState.directions[i].keys.first == "Straight") {
     //     directionWidgets.add(directionInstruction(
@@ -7569,6 +7752,8 @@ bool isAppinForeground=true;
       distance = (distance * 0.3048).ceil().toDouble();
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+
+
 
     return Visibility(
       visible: _isRoutePanelOpen,
@@ -8236,319 +8421,320 @@ bool isAppinForeground=true;
                         ),
                       ),
                     ),
-                  ),
-                  kIsWeb?Container():Focus(
+                  Focus(
                     focusNode: _focusNodeA,
-                    child: Semantics(
-                      label:semanticsLabel,
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.navigation, color: Colors.white),
-                        label: Text('Start', style: TextStyle(color: Colors.white)),
-                        onPressed: () async {
+                    child:
+                    Semantics(
+                        label: semanticsLabel,
+                        child: kIsWeb?Container():ElevatedButton.icon(
+                    icon: Icon(Icons.navigation, color: Colors.white),
+                    label: (startingNavigation)?Text('Start', style: TextStyle(color: Colors.white)): Container(
+                        width: 24,
+                        height: 24,
+                        child:
+                        CircularProgressIndicator(
+                          color:
+                          Colors.white,
+                        )),
+                    onPressed: () async {
+                      if(startingNavigation){
+                        tools.setBuildingAngle(
+                            SingletonFunctionController
+                                .building
+                                .patchData[PathState
+                                .sourceBid]!
+                                .patchData!
+                                .buildingAngle!);
+                        if (PathState.sourceX ==
+                            PathState
+                                .destinationX &&
+                            PathState.sourceY ==
+                                PathState
+                                    .destinationY) {
+                          //HelperClass.showToast("Source and Destination can not be same");
+                          setState(() {
+                            _isRoutePanelOpen =
+                            false;
+                          });
+                          closeNavigation();
+                          return;
+                        }
+                        setState(() {
+                          circles.clear();
+                          _markers.clear();
+                          markerSldShown = false;
 
+                        });
+                        user.onConnection = false;
+                        PathState.didPathStart =
+                        true;
+                        UserState.cols =
+                        SingletonFunctionController
+                            .building
+                            .floorDimenssion[
+                        PathState
+                            .sourceBid]![PathState
+                            .sourceFloor]![0];
+                        UserState
+                            .rows = SingletonFunctionController
+                            .building
+                            .floorDimenssion[
+                        PathState
+                            .destinationBid]![PathState
+                            .destinationFloor]![1];
+                        UserState.lngCode =
+                            _currentLocale;
+                        UserState.reroute =
+                            reroute;
+                        UserState
+                            .closeNavigation =
+                            closeNavigation;
+                        UserState.alignMapToPath = alignMapToPath;
+                        UserState.startOnPath =
+                            startOnPath;
+                        UserState.speak = speak;
+                        UserState.paintMarker =
+                            paintMarker;
+                        UserState.createCircle =
+                            updateCircle;
+                        UserState.autoRecenter=_recenterMap;
 
-                          if(startingNavigation){
-                            tools.setBuildingAngle(
+                        //detected=false;
+                        //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                        wsocket.message["path"]
+                        ["source"] =
+                            PathState.sourceName;
+                        wsocket.message["path"]
+                        ["destination"] =
+                            PathState
+                                .destinationName;
+                        // user.ListofPaths = PathState.listofPaths;
+                        // user.patchData = SingletonFunctionController.building.patchData;
+                        // user.buildingNumber = PathState.listofPaths.length-1;
+                        buildingAllApi
+                            .selectedID =
+                            PathState.sourceBid;
+                        buildingAllApi
+                            .selectedBuildingID =
+                            PathState.sourceBid;
+                        UserState.cols =
+                        SingletonFunctionController
+                            .building
+                            .floorDimenssion[
+                        PathState
+                            .sourceBid]![PathState
+                            .sourceFloor]![0];
+                        UserState.rows =
+                        SingletonFunctionController
+                            .building
+                            .floorDimenssion[
+                        PathState
+                            .sourceBid]![PathState
+                            .sourceFloor]![1];
+                        user.bid =
+                            PathState.sourceBid;
+                        user.coordX =
+                            PathState.sourceX;
+                        user.coordY =
+                            PathState.sourceY;
+                        user.temporaryExit =
+                        false;
+                        UserState.reroute =
+                            reroute;
+                        UserState
+                            .closeNavigation =
+                            closeNavigation;
+                        UserState.alignMapToPath =
+                            alignMapToPath;
+                        UserState.startOnPath =
+                            startOnPath;
+                        UserState.speak = speak;
+                        UserState.paintMarker =
+                            paintMarker;
+                        UserState.createCircle =
+                            updateCircle;
+                        UserState.changeBuilding =
+                            changeBuilding;
+                        //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                        user.floor =
+                            PathState.sourceFloor;
+                        user.pathobj = PathState;
+                        user.path = PathState
+                            .singleListPath;
+                        user.isnavigating = true;
+                        user.cellPath = PathState
+                            .singleCellListPath;
+                        PathState
+                            .singleCellListPath
+                            .forEach(
+                                (element) {});
+                        user
+                            .moveToStartofPath()
+                            .then((value) async {
+                          setState(() {
+                            markers.clear();
+                            List<double> val = tools.localtoglobal(
+                                user.showcoordX
+                                    .toInt(),
+                                user.showcoordY
+                                    .toInt(),
                                 SingletonFunctionController
                                     .building
-                                    .patchData[PathState
-                                    .sourceBid]!
-                                    .patchData!
-                                    .buildingAngle!);
-                            if (PathState.sourceX ==
+                                    .patchData[
                                 PathState
-                                    .destinationX &&
-                                PathState.sourceY ==
-                                    PathState
-                                        .destinationY) {
-                              //HelperClass.showToast("Source and Destination can not be same");
-                              setState(() {
-                                _isRoutePanelOpen =
-                                false;
-                              });
-                              closeNavigation();
-                              return;
+                                    .sourceBid]);
+                            if(markers.isEmpty){
+                              print("markers were empty");
+                              markers.putIfAbsent(
+                                  user.bid,
+                                      () => []);
+                              markers[user.bid]
+                                  ?.add(Marker(
+                                markerId: MarkerId(
+                                    "UserLocation"),
+                                position: LatLng(
+                                    val[0], val[1]),
+                                icon:
+                                BitmapDescriptor
+                                    .fromBytes(
+                                    userloc),
+                                anchor: Offset(
+                                    0.5, 0.829),
+                              ));
+                            }else{
+                              print("markers were not empty");
                             }
-                            setState(() {
-                              circles.clear();
-                              _markers.clear();
-                              markerSldShown = false;
 
-                            });
-                            user.onConnection = false;
-                            PathState.didPathStart =
-                            true;
 
-                            UserState.cols =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![0];
-                            UserState
-                                .rows = SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .destinationBid]![PathState
-                                .destinationFloor]![1];
-                            UserState.lngCode =
-                                _currentLocale;
-                            UserState.reroute =
-                                reroute;
-                            UserState
-                                .closeNavigation =
-                                closeNavigation;
-                            UserState.alignMapToPath = alignMapToPath;
-                            UserState.startOnPath =
-                                startOnPath;
-                            UserState.speak = speak;
-                            UserState.paintMarker =
-                                paintMarker;
-                            UserState.createCircle =
-                                updateCircle;
-
-                            //detected=false;
-                            //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                            wsocket.message["path"]
-                            ["source"] =
-                                PathState.sourceName;
-                            wsocket.message["path"]
-                            ["destination"] =
+                            val = tools.localtoglobal(
+                                user.coordX
+                                    .toInt(),
+                                user.coordY
+                                    .toInt(),
+                                SingletonFunctionController
+                                    .building
+                                    .patchData[
                                 PathState
-                                    .destinationName;
-                            // user.ListofPaths = PathState.listofPaths;
-                            // user.patchData = SingletonFunctionController.building.patchData;
-                            // user.buildingNumber = PathState.listofPaths.length-1;
-                            buildingAllApi
-                                .selectedID =
-                                PathState.sourceBid;
-                            buildingAllApi
-                                .selectedBuildingID =
-                                PathState.sourceBid;
-                            UserState.cols =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
+                                    .sourceBid]);
+
+
+                            if (kDebugMode) {
+                              markers[user.bid]
+                                  ?.add(Marker(
+                                markerId: MarkerId(
+                                    "debug"),
+                                position: LatLng(
+                                    val[0],
+                                    val[1]),
+                                icon: BitmapDescriptor
+                                    .fromBytes(
+                                    userlocdebug),
+                                anchor: Offset(
+                                    0.5, 0.829),
+                              ));
+                            }
+                            // circles.add(
+                            //   Circle(
+                            //     circleId: CircleId("circle"),
+                            //     center: LatLng(user.lat,user.lng),
+                            //     radius: _animation.value,
+                            //     strokeWidth: 1,
+                            //     strokeColor: Colors.blue,
+                            //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                            //   ),
+                            // );
+                          });
+                        });
+                        _isRoutePanelOpen = false;
+                        SingletonFunctionController
+                            .building
+                            .selectedLandmarkID =
+                        null;
+
+                        _isnavigationPannelOpen =
+                        true;
+
+                        semanticShouldBeExcluded =
+                        false;
+
+                        StartPDR();
+
+                        if (SingletonFunctionController
+                            .building
+                            .floor[
+                        PathState
+                            .sourceBid] !=
                             PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![0];
-                            UserState.rows =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![1];
-                            user.bid =
-                                PathState.sourceBid;
-                            user.coordX =
-                                PathState.sourceX;
-                            user.coordY =
-                                PathState.sourceY;
-                            user.temporaryExit =
-                            false;
-                            UserState.reroute =
-                                reroute;
-                            UserState
-                                .closeNavigation =
-                                closeNavigation;
-                            UserState.alignMapToPath =
-                                alignMapToPath;
-                            UserState.startOnPath =
-                                startOnPath;
-                            UserState.speak = speak;
-                            UserState.paintMarker =
-                                paintMarker;
-                            UserState.createCircle =
-                                updateCircle;
-                            UserState.changeBuilding =
-                                changeBuilding;
-                            //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                            user.floor =
-                                PathState.sourceFloor;
-                            user.pathobj = PathState;
-                            user.path = PathState
-                                .singleListPath;
-                            user.isnavigating = true;
-                            user.cellPath = PathState
-                                .singleCellListPath;
-                            PathState
-                                .singleCellListPath
-                                .forEach(
-                                    (element) {});
-                            user
-                                .moveToStartofPath()
-                                .then((value) async {
-                              setState(() {
-                                markers.clear();
-                                List<double> val = tools.localtoglobal(
-                                    user.showcoordX
-                                        .toInt(),
-                                    user.showcoordY
-                                        .toInt(),
-                                    SingletonFunctionController
-                                        .building
-                                        .patchData[
-                                    PathState
-                                        .sourceBid]);
-                                if(markers.isEmpty){
-                                  print("markers were empty");
-                                  markers.putIfAbsent(
-                                      user.bid,
-                                          () => []);
-                                  markers[user.bid]
-                                      ?.add(Marker(
-                                    markerId: MarkerId(
-                                        "UserLocation"),
-                                    position: LatLng(
-                                        val[0], val[1]),
-                                    icon:
-                                    BitmapDescriptor
-                                        .fromBytes(
-                                        userloc),
-                                    anchor: Offset(
-                                        0.5, 0.829),
-                                  ));
-                                }else{
-                                  print("markers were not empty");
-                                }
-
-
-                                val = tools.localtoglobal(
-                                    user.coordX
-                                        .toInt(),
-                                    user.coordY
-                                        .toInt(),
-                                    SingletonFunctionController
-                                        .building
-                                        .patchData[
-                                    PathState
-                                        .sourceBid]);
-
-
-                                if (kDebugMode) {
-                                  markers[user.bid]
-                                      ?.add(Marker(
-                                    markerId: MarkerId(
-                                        "debug"),
-                                    position: LatLng(
-                                        val[0],
-                                        val[1]),
-                                    icon: BitmapDescriptor
-                                        .fromBytes(
-                                        userlocdebug),
-                                    anchor: Offset(
-                                        0.5, 0.829),
-                                  ));
-                                }
-                                // circles.add(
-                                //   Circle(
-                                //     circleId: CircleId("circle"),
-                                //     center: LatLng(user.lat,user.lng),
-                                //     radius: _animation.value,
-                                //     strokeWidth: 1,
-                                //     strokeColor: Colors.blue,
-                                //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                //   ),
-                                // );
-                              });
-                            });
-                            _isRoutePanelOpen = false;
-
-                            SingletonFunctionController
-                                .building
-                                .selectedLandmarkID =
-                            null;
-
-                            _isnavigationPannelOpen =
-                            true;
-
-                            semanticShouldBeExcluded =
-                            false;
-
-                            StartPDR();
-
-                            if (SingletonFunctionController
-                                .building
-                                .floor[
-                            PathState
-                                .sourceBid] !=
-                                PathState
-                                    .sourceFloor) {
-                              SingletonFunctionController
-                                  .building.floor[
+                                .sourceFloor) {
+                          SingletonFunctionController
+                              .building.floor[
+                          PathState
+                              .sourceBid] =
                               PathState
-                                  .sourceBid] =
-                                  PathState
-                                      .sourceFloor;
-                              createRooms(
-                                  SingletonFunctionController
-                                      .building
-                                      .polylinedatamap[
-                                  PathState
-                                      .sourceBid]!,
-                                  PathState
-                                      .sourceFloor);
+                                  .sourceFloor;
+                          createRooms(
                               SingletonFunctionController
                                   .building
-                                  .landmarkdata!
-                                  .then((value) {
-                                createMarkers(
-                                    value,
-                                    PathState
-                                        .sourceFloor,
-                                    bid: PathState
-                                        .sourceBid);
-                              });
-                            }
-                            await Future.delayed(const Duration(milliseconds: 500));
+                                  .polylinedatamap[
+                              PathState
+                                  .sourceBid]!,
+                              PathState
+                                  .sourceFloor);
+                          SingletonFunctionController
+                              .building
+                              .landmarkdata!
+                              .then((value) {
+                            createMarkers(
+                                value,
+                                PathState
+                                    .sourceFloor,
+                                bid: PathState
+                                    .sourceBid);
+                          });
+                        }
+                        await Future.delayed(const Duration(milliseconds: 500));
 
-                            alignMapToPath([
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index]
-                                  .lat,
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index ]
-                                  .lng
-                            ], [
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lat,
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lng
-                            ]);
-
-                            Future.delayed(Duration(seconds: 2)).then((onValue){
-                              setState(() {
-                                onStart=true;
-                              });
-                            });
-                          }
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
+                        alignMapToPath([
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index]
+                              .lat,
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index ]
+                              .lng
+                        ], [
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index +
+                              2]
+                              .lat,
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index +
+                              2]
+                              .lng
+                        ]);
+                        Future.delayed(Duration(seconds: 2)).then((onValue){
+                          setState((){
+                            onStart=true;
+                          });
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                  ),
+                  )),)
+
                 ],
               ),
             ),
@@ -8559,7 +8745,6 @@ bool isAppinForeground=true;
   }
   final FocusNode _focusNodeA = FocusNode();
   final FocusNode _focusNodeC = FocusNode();
-
 
   int _rating = 0;
   String _feedback = '';
@@ -8601,7 +8786,7 @@ bool isAppinForeground=true;
         autofocus: true,
         child: Semantics(
           excludeSemantics: false,
-          label:"You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
+          label: "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
           child: Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -8732,7 +8917,6 @@ bool isAppinForeground=true;
                                           } else if (_rating == 3 || _rating == 4) {
                                             _feedbackTextController.clear();
                                           }
-
                                           setState(() {});
                                         },
                                         child: Padding(
@@ -8878,7 +9062,6 @@ bool isAppinForeground=true;
       ),
     );
   }
-
   void _submitFeedback() {
     String feedbackMessage = 'Rating: $_rating\n';
     if (_feedback.isNotEmpty) {
@@ -8987,21 +9170,11 @@ bool isAppinForeground=true;
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-
-  void pauseCompassSubscription() {
-    compassSubscription?.pause();
-  }
-
-// Function to resume the compass subscription
-  void resumeCompassSubscription() {
-    compassSubscription?.resume();
-  }
-  void cancelCompassSubscription() {
-    compassSubscription.cancel();
-  }
-
-  void getPathDirections(){
-    setState(() {
+  void pauseCompass() {
+    if(compassSubscription!.isPaused){
+      return;
+    }
+    setState((){
       user.theta = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
       if (mapState.interaction2) {
         mapState.bearing = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
@@ -9020,10 +9193,27 @@ bool isAppinForeground=true;
           markers[user.bid]![0] = customMarker.rotate(
               tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng)) - mapbearing, markers[user.bid]![0]);
       }
-
     });
+    //user.theta=tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
+    compassSubscription?.pause();
   }
-bool insideLift=false;
+  // void resumeCompass() {
+  //   if (compassSubscription != null) {
+  //     if (compassSubscription.isPaused) {
+  //       // Cancel the existing subscription and restart it for better responsiveness
+  //       print("Resumed compass stream by restarting.");
+  //     } else {
+  //       print("Compass stream is already active.");
+  //     }
+  //   } else {
+  //     // If no subscription exists, start a new one
+  //     handleCompassEvents();
+  //     print("Started a new compass stream.");
+  //   }
+  // }
+  void prepareForCompass() {
+     compassSubscription.resume();
+  }
   bool onStart=false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -9040,24 +9230,16 @@ bool insideLift=false;
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
-    // print("new angle at the desti floor ${tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng))}");
-    if(user.isnavigating &&  user.pathobj.connections[user.bid]?[user.floor] ==
-        (user.showcoordY * UserState.cols + user.showcoordX)){
-      setState(() {
-        insideLift=true;
-      });
-      pauseCompassSubscription();
-    }else if(user.onConnection==false && insideLift){
-      cancelCompassSubscription();
-      getPathDirections();
-      setState((){
-        insideLift=false;
-      });
-      Future.delayed(const Duration(seconds: 5)).then((onValue){
-        handleCompassEvents();
-      });
-    }
     try {
+    // print("new angle at the desti floor ${tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng))}");
+    //   if(user.onConnection){
+    //
+    //   }else if(user.onConnection==false && user.floor==PathState.destinationFloor){
+    //     pauseCompass();
+    //     // Future.delayed(Duration(seconds: 8)).then((onValue){
+    //     //   prepareForCompass();
+    //     // });
+    //   }
       _focusNodeB.requestFocus();
       if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
         int col = user.pathobj.numCols![user.bid]![user.floor]!;
@@ -9078,15 +9260,29 @@ bool insideLift=false;
                   LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
                   LatLng(user.cellPath[index + 1].lat,
                       user.cellPath[index + 1].lng)) - a).toInt().abs();
-
               if(val<10 && val>-10){
                 val = 0;
               }
             }
-          }catch(_){
           }
+          catch(_){
+
+          }
+
           for (int i = 0; i < getPoints.length; i++) {
+            //
+            //
+            //
+            //
+            //
+
+            //
+
+            //
             if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
+              //
+
+            if (isPdrStop && val == 0) {
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                 print("pdr started"),
                 StartPDR(),
@@ -9103,7 +9299,6 @@ bool insideLift=false;
               print("pdr stopped");
 
               StopPDR();
-              PDRTimer!.cancel();
               getPoints.removeAt(i);
               break;
             }
@@ -9286,28 +9481,29 @@ bool insideLift=false;
               ),
             ),
             Focus(
-              focusNode: _focusNodeB,
-              child: DirectionHeader(
-                user: user,
-                paint: paintUser,
-                repaint: repaintUser,
-                reroute: reroute,
-                moveUser: moveUser,
-                closeNavigation: closeNavigation,
-                isRelocalize: false,
-                focusOnTurn: focusOnTurn,
-                clearFocusTurnArrow: clearFocusTurnArrow,
-                context: context,
-                //turnMarkersVisible:turnMarkersVisible,
-              ),
-            )
+                focusNode: _focusNodeB,
+                child:  DirectionHeader(
+              user: user,
+              paint: paintUser,
+              repaint: repaintUser,
+              reroute: reroute,
+              moveUser: moveUser,
+              closeNavigation: closeNavigation,
+              isRelocalize: false,
+              focusOnTurn: focusOnTurn,
+              clearFocusTurnArrow: clearFocusTurnArrow,
+              context: context,
+              //turnMarkersVisible:turnMarkersVisible,
+            ))
+
           ],
         ));
   }
   final FocusNode _focusNodeB = FocusNode();
   void exitNavigation() {
     setState(() {
-      if (PathState.didPathStart) {
+       if (PathState.didPathStart) {
+        print("got into it");
         showFeedback = true;
         Future.delayed(Duration(seconds: 5));
         _feedbackController.open();
@@ -9354,7 +9550,10 @@ bool insideLift=false;
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SvgPicture.asset("assets/Reroutevector.svg"),
+                  Semantics(
+                    excludeSemantics: true,
+                    label: "heuhuhe",
+                      child: SvgPicture.asset("assets/Reroutevector.svg")),
                   SizedBox(
                     width: 12,
                   ),
@@ -9386,64 +9585,41 @@ bool insideLift=false;
                       SizedBox(
                         height: 8,
                       ),
-                      Row(
-                        children: [
-                          FocusScope(
-                            autofocus: true,
-                            child: Semantics(
-                              label: "Reroute",
-                              child: Container(
-                                width: 85,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: Color(0xff24B9B0),
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                                child: TextButton(
-                                  key: rerouteButton,
-                                  onPressed: () async {
-                                    autoreroute();
-                                  },
-                                  child: Container(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                    ),
+                      Semantics(
+                        excludeSemantics: true,
+                        label: "yehi haiiiii",
+                        child: Container(
+                          width: 85,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Color(0xff24B9B0),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Semantics(
+                            excludeSemantics: true,
+                            label: "hjgfbhbedbcd",
+                            child: TextButton(
+                              key: rerouteButton,
+                              onPressed: () async {
+                                autoreroute();
+                              },
+                              child: Semantics(
+                                excludeSemantics: true,
+                                label: "jkhdwgw",
+                                child: Container(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 12,
-                          ),
-                          // Container(
-                          //   width: 92,
-                          //   height: 36,
-                          //   decoration: BoxDecoration(
-                          //       borderRadius: BorderRadius.circular(4.0),
-                          //       border: Border.all(color: Colors.black)),
-                          //   // child: TextButton(
-                          //   //   onPressed: () {
-                          //   //
-                          //   //   },
-                          //   //
-                          //   //
-                          //   //   child: Text(
-                          //   //     "Continue",
-                          //   //     style: const TextStyle(
-                          //   //       fontFamily: "Roboto",
-                          //   //       fontSize: 14,
-                          //   //       fontWeight: FontWeight.w400,
-                          //   //       color: Color(0xff000000),
-                          //   //       height: 20 / 14,
-                          //   //     ),
-                          //   //     textAlign: TextAlign.left,
-                          //   //   ),
-                          //   // ),
-                          // )
-                        ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 12,
                       )
                     ],
                   )
@@ -10845,12 +11021,13 @@ bool insideLift=false;
       polygons.union(otherpatch);
       polygons.union(_polygon);
       polygons.union(blurPatch);
-      polygons.union(patch);
+      // polygons.union(patch);
       cachedPolygon = polygons;
       return polygons;
     }
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
+
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
 
@@ -10882,6 +11059,7 @@ bool insideLift=false;
         SingletonFunctionController.building.floor[key]]!);
       }
     });
+
     return poly;
   }
   void _updateMarkers(double zoom) {
@@ -11002,12 +11180,13 @@ bool insideLift=false;
       polylines[buildingAllApi.getStoredString()] = updatedpolyline;
     });
   }
+
   void clearFocusTurnArrow() {
     setState(() {
       focusturnArrow.clear();
     });
   }
-  String finalDestinationDirection="";
+String finalDestinationDirection="";
   void closeNavigation() {
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
@@ -11021,7 +11200,6 @@ bool insideLift=false;
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
     finalDestinationDirection=direction;
-    //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
     if(UserCredentials().getUserPersonWithDisability()==0){
       flutterTts.pause().then((value) {
         speak(
@@ -11031,6 +11209,17 @@ bool insideLift=false;
             _currentLocale);
       });
     }
+
+
+
+    //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
+    flutterTts.pause().then((value) {
+      speak(
+          user.convertTolng("You have reached ${destname}. It is ${direction}",
+              "", 0.0, context, angle, "", "",
+              destname: destname),
+          _currentLocale);
+    });
     // if(isSemanticEnabled) {
     //   showFeedback = true;
     //   Future.delayed(Duration(seconds: 5));
@@ -11039,6 +11228,9 @@ bool insideLift=false;
     //   feedbackPanel(context);
     //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
     // }
+
+    PDRTimer!.cancel();
+
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -11478,14 +11670,12 @@ bool insideLift=false;
     // String closestBuildingId = "";
 
     double? minDistance;
-
     Building.allBuildingID.forEach((key, value) {
       if (key != buildingAllApi.outdoorID) {
         num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
           geo.LatLng(value.latitude, value.longitude),
           geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
         );
-
         // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
           minDistance = distance.toDouble();
@@ -11532,15 +11722,13 @@ bool insideLift=false;
   List<String> scannedDevices = [];
 
   Set<gmap.Polyline> finalSet = {};
-
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized = false;
-
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
-  void _recenterMap() {
+  void _recenterMap(){
     try {
       alignMapToPath([
         PathState.singleCellListPath[user.pathobj.index].lat,
@@ -11550,9 +11738,9 @@ bool insideLift=false;
         PathState.singleCellListPath[user.pathobj.index + 1].lng
       ]);
       mapState.aligned = true;
-    }catch(e){
 
-    }
+    }catch(e){}
+
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(
@@ -11657,6 +11845,47 @@ bool insideLift=false;
   //     },
   //   ));
   // }
+bool isLocating=false;
+  Position? userLoc;
+  void getLocs()async{
+    setState(() {
+      isLocating=true;
+    });
+    userLoc= await getUsersCurrentLatLng();
+    if(userLoc!=null){
+      UserState.geoLat=userLoc!.latitude;
+      UserState.geoLng=userLoc!.longitude;
+    }else{
+      userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    }
+    if(mounted){
+      setState(() {
+        isLocating=false;
+      });
+    }
+
+  }
+
+  Future<Position?> getUsersCurrentLatLng()async{
+    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
+    try{
+      Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Geolocator.getLocationAccuracy();
+      return position;
+    }catch(e){
+      print("error in location fetching");
+      return null;
+    }
+
+
+
+    // }
+    // else{
+    //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    //   return pos;
+    // }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11720,13 +11949,13 @@ bool insideLift=false;
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  if (cameraPosition.zoom > 16.8) {
-                    focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
-                  } else {
-                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                  }
+                  // if (cameraPosition.zoom > 16.8) {
+                  //   focusBuildingChecker(cameraPosition);
+                  // } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                  //   renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  // } else {
+                  //   renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                  // }
 
 
 
@@ -11900,7 +12129,7 @@ bool insideLift=false;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                  Text("coord [${UserState.geoLat},${UserState.geoLng}] \n"),
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
                   // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
@@ -12061,6 +12290,7 @@ bool insideLift=false;
                   )
                       : nofloorColumn(),
                   SizedBox(height: 28.0), // Adjust the height as needed
+
                   // Container(
                   //   width: 300,
                   //   height: 100,
@@ -12077,6 +12307,14 @@ bool insideLift=false;
                   //     ),
                   //   ),
                   // ),
+                  
+                  
+                  FloatingActionButton(onPressed: (){
+                  getLocs();
+                  }, child:Icon(Icons.accessibility)),
+
+                  
+
                   isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
@@ -12111,8 +12349,7 @@ bool insideLift=false;
                             _timer.cancel();
                           });
                         } else {
-                          reroute();
-                       // _recenterMap();
+                          prepareForCompass();
                         }
                       },
                       child: Semantics(

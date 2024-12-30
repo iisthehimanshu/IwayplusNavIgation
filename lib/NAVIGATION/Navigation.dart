@@ -500,6 +500,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             ),
           );
         }
+
         // markers.add(
         //   MapMarker(
         //     id: keys.toString(),
@@ -509,10 +510,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         // );
       }
     } catch (e) {}
+
+
     _clusterManager = await MapHelper.initClusterManager(
         markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
+
     await _updateMarkers11();
   }
+
   /// Gets the markers and clusters to be displayed on the map for the current zoom level and
   /// updates state.
   Future<void> _updateMarkers11([double? updatedZoom]) async {
@@ -551,6 +556,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
     }
   }
+
   Future<Uint8List> getIconBytes(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
@@ -562,6 +568,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .asUint8List();
     return bytes;
   }
+
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   @override
@@ -582,9 +589,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
     }
-    // if(UserCredentials().getUserPersonWithDisability()>0){
-    //   UserCredentials().setUserNavigationModeSetting('Clock Direction');
-    // }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
 
@@ -673,7 +677,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
     }
   }
-bool isAppinForeground=true;
+  bool isAppinForeground=true;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -828,6 +832,7 @@ bool isAppinForeground=true;
       });
     }
   }
+
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
@@ -848,6 +853,7 @@ bool isAppinForeground=true;
       throw (e);
     }
   }
+
   Future<void> setPdrThreshold() async {
     if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
       peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
@@ -857,6 +863,7 @@ bool isAppinForeground=true;
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
       String deviceModel = await DeviceInformation.deviceModel;
+
       if (manufacturer.toLowerCase().contains("samsung")) {
         if (deviceModel.startsWith("A", 3)) {
           //
@@ -889,101 +896,43 @@ bool isAppinForeground=true;
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
       }
-      if(UserCredentials().getUserPersonWithDisability()>0)
-        {
-          peakThreshold= peakThreshold+0.5;
-          valleyThreshold= valleyThreshold-0.5;
-        }
     } catch (e) {
       throw (e);
     }
-    print("threshold::${valleyThreshold}");
   }
-  bool _isSubscriptionActive() {
-    try {
-      if (compassSubscription!.isPaused) {
-        print("Resumed the paused compass stream.");
-        return true;
-      }
-      return true; // Already active
-    } catch (e) {
-      return false; // Not initialized or canceled
-    }
-  }
+
   void handleCompassEvents() {
-    // Check if the subscription exists and is active
-    // if (_isSubscriptionActive()) {
-    //   print("Compass stream is already active. Returning.");
-    //   return;
-    // }
-    // Create a new subscription to the compass events
-    compassSubscription = FlutterCompass.events!.listen(
-          (event) {
-        wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
-        wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+    compassSubscription = FlutterCompass.events!.listen((event) {
+      wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
+      wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+      double? compassHeading = event.heading!;
 
-        double? compassHeading = event.heading!;
-        setState(() {
-          user.theta = compassHeading!;
-          if (mapState.interaction2) {
-            mapState.bearing = compassHeading!;
-            _googleMapController.moveCamera(
-              CameraUpdate.newCameraPosition(
-                CameraPosition(
-                  target: mapState.target,
-                  zoom: mapState.zoom,
-                  bearing: mapState.bearing!,
-                ),
+      setState(() {
+        user.theta = compassHeading!;
+        if (mapState.interaction2) {
+          mapState.bearing = compassHeading!;
+          _googleMapController.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: mapState.target,
+                zoom: mapState.zoom,
+                bearing: mapState.bearing!,
               ),
-            );
-          } else {
-            if (markers.isNotEmpty && markers[user.bid] != null) {
-              markers[user.bid]![0] = customMarker.rotate(
-                compassHeading! - mapbearing,
-                markers[user.bid]![0],
-              );
-            }
-          }
-        });
-      },
-      onError: (error) {
-        wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
-        wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
-      },
-    );
+            ),
+            //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+          );
+        } else {
+          if (markers.length > 0 && markers[user.bid] != null)
+            markers[user.bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing, markers[user.bid]![0]);
+        }
+      });
+    }, onError: (error) {
+      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
+      wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+    });
   }
 
-  // void handleCompassEvents() {
-  //
-  //   compassSubscription = FlutterCompass.events!.listen((event) {
-  //     wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
-  //     wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
-  //     double? compassHeading = event.heading!;
-  //     setState(() {
-  //       user.theta = compassHeading!;
-  //       if (mapState.interaction2) {
-  //         mapState.bearing = compassHeading!;
-  //         _googleMapController.moveCamera(
-  //           CameraUpdate.newCameraPosition(
-  //             CameraPosition(
-  //               target: mapState.target,
-  //               zoom: mapState.zoom,
-  //               bearing: mapState.bearing!,
-  //             ),
-  //           ),
-  //           //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-  //         );
-  //       } else {
-  //         if (markers.length > 0 && markers[user.bid] != null)
-  //           markers[user.bid]![0] = customMarker.rotate(
-  //               compassHeading! - mapbearing, markers[user.bid]![0]);
-  //       }
-  //     });
-  //   }, onError: (error) {
-  //     wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
-  //     wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
-  //   });
-  // }
   void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -995,6 +944,7 @@ bool isAppinForeground=true;
       fontSize: 16.0,
     );
   }
+
   bool disposed = false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
@@ -1027,15 +977,18 @@ bool isAppinForeground=true;
       await flutterTts.speak(msg);
     }
   }
+
   void checkPermissions() async {
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     await enableBT();
     //  await requestActivityPermission();
   }
+
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});
   }
+
   bool isPdr = false;
   // Function to start the timer
   void StartPDR() {
@@ -1043,23 +996,23 @@ bool isAppinForeground=true;
       //
       setState(() {
         isPdr = true;
-        isPdrActive = true;
       });
       if(isAppinForeground){
-         pdrstepCount();
+        pdrstepCount();
       }
 
       // onStepCount();
     });
   }
+
 // Function to stop the timer
   bool isPdrStop = false;
+
   void StopPDR() async {
     if (PDRTimer != null && PDRTimer!.isActive) {
       setState(() {
         isPdrStop = true;
         isPdr = false;
-        isPdrActive = false;
       });
       PDRTimer!.cancel();
       for (final subscription in pdr) {
@@ -1067,6 +1020,7 @@ bool isAppinForeground=true;
       }
     }
   }
+
   int stepCount = 0;
   int lastPeakTime = 0;
   int lastValleyTime = 0;
@@ -1091,155 +1045,83 @@ bool isAppinForeground=true;
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
           (AccelerometerEvent event) {
-            if (pdr == null) {
-              return; // Exit the event listener if subscription is canceled
-            }
-            wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
-            wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
-            // Apply low-pass filter
-            if (detectStep(event.x, event.y, event.z)) {
-              setState(() {
-                lastPeakTime = DateTime
-                    .now()
-                    .millisecondsSinceEpoch;
-                stepCount++;
-                bool isvalid = MotionModel.isValidStep(
-                    user,
-                    SingletonFunctionController
-                        .building.floorDimenssion[user.bid]![user.floor]![0],
-                    SingletonFunctionController
-                        .building.floorDimenssion[user.bid]![user.floor]![1],
-                    SingletonFunctionController
-                        .building.nonWalkable[user.bid]![user.floor]!,
-                    reroute);
-                if (isvalid) {
-                  user.move(context).then((value) {
-                    renderHere();
-                  });
-                } else {
-                  if (user.isnavigating) {
-                    // reroute();
-                    // showToast("You are out of path");
-                  }
-                }
+        if (pdr == null) {
+          return; // Exit the event listener if subscription is canceled
+        }
+        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
+        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+        // Apply low-pass filter
+        filteredX = alpha * filteredX + (1 - alpha) * event.x;
+        filteredY = alpha * filteredY + (1 - alpha) * event.y;
+        filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+
+
+
+        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+        double orientation = atan2(filteredY, sqrt(filteredX * filteredX + filteredZ * filteredZ));
+
+        // Add orientation to history and check variability
+        orientationHistory.add(orientation);
+        if (orientationHistory.length > orientationWindowSize) {
+          orientationHistory.removeAt(0);  // Maintain a fixed window size
+
+          // Calculate standard deviation of orientation
+          double avgOrientation = orientationHistory.reduce((a, b) => a + b) / orientationWindowSize;
+          double orientationVariance = orientationHistory.fold(0, (sum, value) => sum + pow(value - avgOrientation, 2).toInt()) / orientationWindowSize;
+          double orientationStability = sqrt(orientationVariance);
+
+          // Suppress step detection if orientation is too variable
+          if (orientationStability > orientationThreshold) {
+            // Too random, assume the user is stationary or talking, ignore steps
+            return;
+          }
+        }
+        // Compute magnitude of acceleration vector
+        double magnitude = sqrt((filteredX * filteredX +
+            filteredY * filteredY +
+            filteredZ * filteredZ));
+        // Detect peak and valley
+        if (magnitude > peakThreshold &&
+            DateTime.now().millisecondsSinceEpoch - lastPeakTime >
+                peakInterval) {
+          setState(() {
+            lastPeakTime = DateTime.now().millisecondsSinceEpoch;
+            stepCount++;
+
+            bool isvalid = MotionModel.isValidStep(
+                user,
+                SingletonFunctionController
+                    .building.floorDimenssion[user.bid]![user.floor]![0],
+                SingletonFunctionController
+                    .building.floorDimenssion[user.bid]![user.floor]![1],
+                SingletonFunctionController
+                    .building.nonWalkable[user.bid]![user.floor]!,
+                reroute);
+            if (isvalid) {
+              user.move(context).then((value) {
+                renderHere();
               });
-            }
-            else {
-              filteredX = alpha * filteredX + (1 - alpha) * event.x;
-              filteredY = alpha * filteredY + (1 - alpha) * event.y;
-              filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-              // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-              double orientation = atan2(filteredY,
-                  sqrt(filteredX * filteredX + filteredZ * filteredZ))
-              ;
-              // Add orientation to history and check variability
-              orientationHistory.add(orientation);
-              if (orientationHistory.length > orientationWindowSize) {
-                orientationHistory.removeAt(0); // Maintain a fixed window size
-
-                // Calculate standard deviation of orientation
-                double avgOrientation = orientationHistory.reduce((a, b) =>
-                a + b) / orientationWindowSize;
-                double orientationVariance = orientationHistory.fold(
-                    0, (sum, value) => sum +
-                    pow(value - avgOrientation, 2).toInt()) /
-                    orientationWindowSize;
-                double orientationStability = sqrt(orientationVariance);
-
-                // Suppress step detection if orientation is too variable
-                if (orientationStability > orientationThreshold) {
-                  // Too random, assume the user is stationary or talking, ignore steps
-                  return;
-                }
-              }
-              // Compute magnitude of acceleration vector
-              double magnitude = sqrt((filteredX * filteredX +
-                  filteredY * filteredY +
-                  filteredZ * filteredZ));
-              // Detect peak and valley
-              if (magnitude > peakThreshold &&
-                  DateTime
-                      .now()
-                      .millisecondsSinceEpoch - lastPeakTime >
-                      peakInterval) {
-                setState(() {
-                  lastPeakTime = DateTime
-                      .now()
-                      .millisecondsSinceEpoch;
-                  stepCount++;
-                  bool isvalid = MotionModel.isValidStep(
-                      user,
-                      SingletonFunctionController
-                          .building.floorDimenssion[user.bid]![user.floor]![0],
-                      SingletonFunctionController
-                          .building.floorDimenssion[user.bid]![user.floor]![1],
-                      SingletonFunctionController
-                          .building.nonWalkable[user.bid]![user.floor]!,
-                      reroute);
-                  if (isvalid) {
-                    user.move(context).then((value) {
-                      renderHere();
-                    });
-                  } else {
-                    if (user.isnavigating) {
-                      // reroute();
-                      // showToast("You are out of path");
-                    }
-                  }
-                });
-              } else if (magnitude < valleyThreshold &&
-                  DateTime
-                      .now()
-                      .millisecondsSinceEpoch - lastValleyTime >
-                      valleyInterval) {
-                setState(() {
-                  lastValleyTime = DateTime
-                      .now()
-                      .millisecondsSinceEpoch;
-                });
+            } else {
+              if (user.isnavigating) {
+                // reroute();
+                // showToast("You are out of path");
               }
             }
-
-          },
+          });
+        } else if (magnitude < valleyThreshold &&
+            DateTime.now().millisecondsSinceEpoch - lastValleyTime >
+                valleyInterval) {
+          setState(() {
+            lastValleyTime = DateTime.now().millisecondsSinceEpoch;
+          });
+        }
+      },
       onError: (error) {
         wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
         wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
       },
     ));
   }
-  DateTime? lastStepTime; // To track the last step detection time
-  final Duration stepCooldown = Duration(milliseconds: 800);
-  bool isPdrActive = false;
-  bool detectStep(double x, double y, double z) {
-    if (!isPdrActive) return false;
-    // Calculate pitch and roll
-    double pitch = atan(x / sqrt(y * y + z * z)) * (180 / pi);
-    double roll = atan(y / sqrt(x * x + z * z)) * (180 / pi);
-
-    // Define problematic orientation thresholds
-    bool isProblematicOrientation =
-        (pitch > 80 && pitch < 100) || (roll > 80 && roll < 100);
-
-    // Calculate movement magnitude
-    double magnitude = sqrt(x * x + y * y + z * z);
-
-    // Threshold to detect significant movement
-    double movementThreshold = 9.85;// Adjust based on your testing
-
-    // Check if a step is detected
-    if (isProblematicOrientation && magnitude > movementThreshold) {
-      DateTime now = DateTime.now();
-
-      // Ensure cooldown between steps
-      if (lastStepTime == null || now.difference(lastStepTime!) > stepCooldown) {
-
-        lastStepTime = now; // Update the last step detection time
-        return true; // Step detected
-      }
-    }
-    return false; // No step detected
-  }
-
 
   Future<void> paintMarker(LatLng Location) async {
     if (markers.containsKey(user.bid)) {
@@ -1671,7 +1553,6 @@ bool isAppinForeground=true;
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
-      print("moving for gps");
       await _handleGlobalCoordinatesLocalization(speakTTS, render);
     }
 
@@ -2148,7 +2029,6 @@ bool isAppinForeground=true;
                   ),
                 ),
               ],
-
             ),
           ),
         );
@@ -2461,6 +2341,7 @@ bool isAppinForeground=true;
         ));
       }
     });
+
     Future.delayed(Duration(seconds: 1)).then((onValue){
       _recenterMap();
     });
@@ -2478,6 +2359,7 @@ bool isAppinForeground=true;
         //  if(user.isnavigating==false){
         clearPathVariables();
         // }
+
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
@@ -2497,6 +2379,7 @@ bool isAppinForeground=true;
         //     }
         //   }
         // }
+
         SingletonFunctionController.building.landmarkdata!.then((value) async {
           await calculateroute(value.landmarksMap!,accessibleby: acc??PathState.accessiblePath).then((value) {
             if (PathState.path.isNotEmpty) {
@@ -2583,6 +2466,7 @@ bool isAppinForeground=true;
     _isreroutePannelOpen = true;
     user.isnavigating = false;
     user.temporaryExit = true;
+
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
     setState(() {
@@ -2597,7 +2481,6 @@ bool isAppinForeground=true;
             LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
-    PDRTimer!.cancel();
     FlutterBeep.beep();
     if(acc!= null){
       speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
@@ -2732,9 +2615,9 @@ bool isAppinForeground=true;
     // }\
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
-        if(!kIsWeb){
+    if(!kIsWeb){
       (SingletonFunctionController.btadapter.isScanningOn() == false &&
-              isBinEmpty() == true)
+          isBinEmpty() == true)
           ? controller.executeFunction(buildingAllApi.allBuildingID)
           : null;
     }
@@ -2751,7 +2634,7 @@ bool isAppinForeground=true;
         patchData.patchData!.buildingName;
     SingletonFunctionController
         .building.patchData[patchData.patchData!.buildingID!] = patchData;
-    //createPatch(patchData);
+    createPatch(patchData);
     findCentroid(
         patchData.patchData!.coordinates!, buildingAllApi.selectedBuildingID);
 
@@ -2898,7 +2781,7 @@ bool isAppinForeground=true;
 
             Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
             SingletonFunctionController.building.patchData[patchData.patchData!.buildingID!] = patchData;
-            //createotherPatch(key,patchData);
+            createotherPatch(key,patchData);
 
             findCentroid(patchData.patchData!.coordinates!, key);
             print("apicalls testing 4 for $key");
@@ -3053,6 +2936,7 @@ bool isAppinForeground=true;
             fillColor: Colors.lightBlue.withOpacity(0.2),
             zIndex: 2
         );
+
         setState(() {
           circles
               .removeWhere((circle) => circle.circleId == CircleId("circle"));
@@ -3079,9 +2963,11 @@ bool isAppinForeground=true;
 
     return distance;
   }
+
   double degreesToRadians(double degrees) {
     return degrees * pi / 180;
   }
+
   String getRandomString(List<String> stringList) {
     Random random = Random();
     int randomIndex = random.nextInt(stringList.length);
@@ -3112,11 +2998,14 @@ bool isAppinForeground=true;
         break;
       }
     }
+
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
+
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
+
     setState(() {
       testBIn = SingletonFunctionController.btadapter.BIN;
       testBIn.forEach((key, value) {
@@ -3124,6 +3013,7 @@ bool isAppinForeground=true;
       });
     });
     SingletonFunctionController.btadapter.stopScanning();
+
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
     if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
       buildingAllApi
@@ -3132,12 +3022,12 @@ bool isAppinForeground=true;
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
-      SingletonFunctionController.currentBeacon=nearestBeacon;
     }
     paintUser(nearestBeacon,null,null, speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
+
     //emptying the bin manually
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
@@ -3149,6 +3039,7 @@ bool isAppinForeground=true;
     }
     SingletonFunctionController.btadapter.BIN.clear();
   }
+
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
@@ -5566,7 +5457,7 @@ bool isAppinForeground=true;
             .properties!
             .url !=
             null));
-    _focusNodeC.requestFocus();
+
     return Stack(
       children: [
         Positioned(
@@ -6156,35 +6047,34 @@ bool isAppinForeground=true;
         ),
         Positioned(
           bottom: 0,
-          child: Container(
-              height: 80,
-              width: screenWidth,
-              decoration: BoxDecoration(
-                color: Colors.white, // Set the background color
-                boxShadow: (contactDetail || microService)?[
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1), // Shadow color
-                    offset: Offset(0, -3), // Shadow offset (top shadow)
-                    blurRadius: 6, // Blur radius
-                    spreadRadius: 1, // Spread radius
-                  )
-                ]:null,
-              ),
-              child:
-
-              Center(
-                // Center the button vertically
-                child:Focus(
-                  focusNode:_focusNodeC,
-                child:SizedBox(
-                  height: 40, // Set the desired height for the TextButton
-                  width: screenWidth - 32, // Set the width as needed
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: Color(0xff6CC8BF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(27.0),
+          child: Semantics(
+            header: true,
+            child: Container(
+                height: 80,
+                width: screenWidth,
+                decoration: BoxDecoration(
+                  color: Colors.white, // Set the background color
+                  boxShadow: (contactDetail || microService)?[
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1), // Shadow color
+                      offset: Offset(0, -3), // Shadow offset (top shadow)
+                      blurRadius: 6, // Blur radius
+                      spreadRadius: 1, // Spread radius
+                    )
+                  ]:null,
+                ),
+                child: Center(
+                  // Center the button vertically
+                  child: SizedBox(
+                    height: 40, // Set the desired height for the TextButton
+                    width: screenWidth - 32, // Set the width as needed
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Color(0xff6CC8BF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(27.0),
+                        ),
                       ),
                       onPressed: () async {
                         _polygon.clear();
@@ -6334,7 +6224,6 @@ bool isAppinForeground=true;
                   ),
                 )),
           ),
-              )), 
         )
       ],
     );
@@ -6554,28 +6443,19 @@ bool isAppinForeground=true;
         distance = distance * 0.3048;
         distance = double.parse(distance.toStringAsFixed(1));
         setState(() {
-          _focusNodeA.unfocus();
-          _focusNodeA.requestFocus();
-          semanticsLabel="Start button double tap to navigate";
           startingNavigation=true;
         });
-    if(UserCredentials().getUserPersonWithDisability()==0) {
-      if (PathState.destinationName ==
-          "${LocaleData.yourcurrentloc.getString(context)}") {
-        speak(
-            " ${LocaleData.issss.getString(context)} $distance ${LocaleData
-                .meteraway.getString(context)}. ${LocaleData
-                .clickstarttonavigate.getString(context)}",
-            _currentLocale);
-      } else {
-        speak(
-            "${PathState.destinationName} ${LocaleData.issss.getString(
-                context)} $distance ${LocaleData.meteraway.getString(
-                context)}. ${LocaleData.clickstarttonavigate.getString(
-                context)}",
-            _currentLocale);
-      }
-    }
+
+        if (PathState.destinationName ==
+            "${LocaleData.yourcurrentloc.getString(context)}") {
+          speak(
+              " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+              _currentLocale);
+        } else {
+          speak(
+              "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+              _currentLocale);
+        }
       }
     } else {
       print("starting calc not happening");
@@ -6587,7 +6467,7 @@ bool isAppinForeground=true;
     //   return;
     // }
   }
-String semanticsLabel="";
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String? accessibleby}) async {
     List<Function()> fetchrouteFutures = [];
@@ -6595,9 +6475,7 @@ String semanticsLabel="";
 
     PathState.singleCellListPath.clear();
     setState(() {
-      _focusNodeA.requestFocus();
       startingNavigation=false;
-      semanticsLabel="Please wait calculating the path";
     });
 
     if (PathState.sourcePolyID == "") {
@@ -7720,6 +7598,7 @@ String semanticsLabel="";
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     directionWidgets.clear();
+
     // for (int i = 0; i < PathState.directions.length; i++) {
     //   if (PathState.directions[i].keys.first == "Straight") {
     //     directionWidgets.add(directionInstruction(
@@ -7752,8 +7631,6 @@ String semanticsLabel="";
       distance = (distance * 0.3048).ceil().toDouble();
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
-
-
 
     return Visibility(
       visible: _isRoutePanelOpen,
@@ -8421,22 +8298,13 @@ String semanticsLabel="";
                         ),
                       ),
                     ),
-                  Focus(
-                    focusNode: _focusNodeA,
-                    child:
-                    Semantics(
-                        label: semanticsLabel,
-                        child: kIsWeb?Container():ElevatedButton.icon(
+                  ),
+                  kIsWeb?Container():ElevatedButton.icon(
                     icon: Icon(Icons.navigation, color: Colors.white),
-                    label: (startingNavigation)?Text('Start', style: TextStyle(color: Colors.white)): Container(
-                        width: 24,
-                        height: 24,
-                        child:
-                        CircularProgressIndicator(
-                          color:
-                          Colors.white,
-                        )),
+                    label: Text('Start', style: TextStyle(color: Colors.white)),
                     onPressed: () async {
+
+
                       if(startingNavigation){
                         tools.setBuildingAngle(
                             SingletonFunctionController
@@ -8468,6 +8336,7 @@ String semanticsLabel="";
                         user.onConnection = false;
                         PathState.didPathStart =
                         true;
+
                         UserState.cols =
                         SingletonFunctionController
                             .building
@@ -8497,7 +8366,6 @@ String semanticsLabel="";
                             paintMarker;
                         UserState.createCircle =
                             updateCircle;
-                        UserState.autoRecenter=_recenterMap;
 
                         //detected=false;
                         //user.SingletonFunctionController.building = SingletonFunctionController.building;
@@ -8646,6 +8514,7 @@ String semanticsLabel="";
                           });
                         });
                         _isRoutePanelOpen = false;
+
                         SingletonFunctionController
                             .building
                             .selectedLandmarkID =
@@ -8719,12 +8588,14 @@ String semanticsLabel="";
                               2]
                               .lng
                         ]);
+
                         Future.delayed(Duration(seconds: 2)).then((onValue){
-                          setState((){
+                          setState(() {
                             onStart=true;
                           });
                         });
                       }
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -8733,8 +8604,7 @@ String semanticsLabel="";
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                  )),)
-
+                  ),
                 ],
               ),
             ),
@@ -8743,8 +8613,7 @@ String semanticsLabel="";
       ),
     );
   }
-  final FocusNode _focusNodeA = FocusNode();
-  final FocusNode _focusNodeC = FocusNode();
+
 
   int _rating = 0;
   String _feedback = '';
@@ -8786,7 +8655,6 @@ String semanticsLabel="";
         autofocus: true,
         child: Semantics(
           excludeSemantics: false,
-          label: "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
           child: Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -8917,6 +8785,7 @@ String semanticsLabel="";
                                           } else if (_rating == 3 || _rating == 4) {
                                             _feedbackTextController.clear();
                                           }
+
                                           setState(() {});
                                         },
                                         child: Padding(
@@ -9062,6 +8931,7 @@ String semanticsLabel="";
       ),
     );
   }
+
   void _submitFeedback() {
     String feedbackMessage = 'Rating: $_rating\n';
     if (_feedback.isNotEmpty) {
@@ -9170,50 +9040,6 @@ String semanticsLabel="";
   // void _addCircle(double l1,double l2){
   //   _updateCircle();
   // }
-  void pauseCompass() {
-    if(compassSubscription!.isPaused){
-      return;
-    }
-    setState((){
-      user.theta = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
-      if (mapState.interaction2) {
-        mapState.bearing = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
-        _googleMapController.moveCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: mapState.target,
-              zoom: mapState.zoom,
-              bearing: mapState.bearing!,
-            ),
-          ),
-          //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-        );
-      } else {
-        if (markers.length > 0 && markers[user.bid] != null)
-          markers[user.bid]![0] = customMarker.rotate(
-              tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng)) - mapbearing, markers[user.bid]![0]);
-      }
-    });
-    //user.theta=tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
-    compassSubscription?.pause();
-  }
-  // void resumeCompass() {
-  //   if (compassSubscription != null) {
-  //     if (compassSubscription.isPaused) {
-  //       // Cancel the existing subscription and restart it for better responsiveness
-  //       print("Resumed compass stream by restarting.");
-  //     } else {
-  //       print("Compass stream is already active.");
-  //     }
-  //   } else {
-  //     // If no subscription exists, start a new one
-  //     handleCompassEvents();
-  //     print("Started a new compass stream.");
-  //   }
-  // }
-  void prepareForCompass() {
-     compassSubscription.resume();
-  }
   bool onStart=false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -9230,29 +9056,35 @@ String semanticsLabel="";
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
+
     try {
-    // print("new angle at the desti floor ${tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng))}");
-    //   if(user.onConnection){
-    //
-    //   }else if(user.onConnection==false && user.floor==PathState.destinationFloor){
-    //     pauseCompass();
-    //     // Future.delayed(Duration(seconds: 8)).then((onValue){
-    //     //   prepareForCompass();
-    //     // });
-    //   }
-      _focusNodeB.requestFocus();
+      //implement the turn functionality.
+      // if(UserState.reachedLift){
+      //    updateCircle(user.lat,user.lng);
+      //     UserState.reachedLift=false;
+      //
+      // }
+
       if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
         int col = user.pathobj.numCols![user.bid]![user.floor]!;
+
         if (MotionModel.reached(user, col) == false &&
             user.bid == user.cellPath[user.pathobj.index + 1].bid) {
           List<int> a = [user.showcoordX, user.showcoordY];
           List<int> tval = tools.eightcelltransition(user.theta);
+          //
           List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
+
           int index =
           user.path.indexOf((user.showcoordY * col) + user.showcoordX);
+
           int node = user.path[index + 1];
+
+
+
           List<int> c = [node % col, node ~/ col];
           int val = tools.calculateAngleSecond(a, b, c).toInt();
+
           try {
             if (user.bid == buildingAllApi.outdoorID) {
               double a = user.theta<0?user.theta+360:user.theta;
@@ -9260,15 +9092,19 @@ String semanticsLabel="";
                   LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
                   LatLng(user.cellPath[index + 1].lat,
                       user.cellPath[index + 1].lng)) - a).toInt().abs();
+
               if(val<10 && val>-10){
                 val = 0;
               }
             }
-          }
-          catch(_){
+          }catch(_){
 
           }
 
+          //
+          //
+
+          //
           for (int i = 0; i < getPoints.length; i++) {
             //
             //
@@ -9282,7 +9118,6 @@ String semanticsLabel="";
             if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
               //
 
-            if (isPdrStop && val == 0) {
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                 print("pdr started"),
                 StartPDR(),
@@ -9480,9 +9315,7 @@ String semanticsLabel="";
                 ),
               ),
             ),
-            Focus(
-                focusNode: _focusNodeB,
-                child:  DirectionHeader(
+            DirectionHeader(
               user: user,
               paint: paintUser,
               repaint: repaintUser,
@@ -9494,16 +9327,14 @@ String semanticsLabel="";
               clearFocusTurnArrow: clearFocusTurnArrow,
               context: context,
               //turnMarkersVisible:turnMarkersVisible,
-            ))
-
+            )
           ],
         ));
   }
-  final FocusNode _focusNodeB = FocusNode();
+
   void exitNavigation() {
     setState(() {
-       if (PathState.didPathStart) {
-        print("got into it");
+      if (PathState.didPathStart) {
         showFeedback = true;
         Future.delayed(Duration(seconds: 5));
         _feedbackController.open();
@@ -9534,78 +9365,70 @@ String semanticsLabel="";
       }
     });
   }
+
   bool rerouting = false;
   Widget reroutePannel(context) {
     return Visibility(
         visible: _isreroutePannelOpen,
-        child: Semantics(
-          excludeSemantics: true,
-          label:"You are Going away from the path rerouting you to the destination",
-          child: SlidingUpPanel(
-            minHeight: 119,
-            backdropEnabled: true,
-            isDraggable: false,
-            panel: Container(
-              padding: EdgeInsets.only(left: 13, top: 13),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Semantics(
-                    excludeSemantics: true,
-                    label: "heuhuhe",
-                      child: SvgPicture.asset("assets/Reroutevector.svg")),
-                  SizedBox(
-                    width: 12,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Off-Path Notification",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xff000000),
-                          height: 26 / 20,
-                        ),
-                        textAlign: TextAlign.left,
+        child: SlidingUpPanel(
+          minHeight: 119,
+          backdropEnabled: true,
+          isDraggable: false,
+          panel: Container(
+            padding: EdgeInsets.only(left: 13, top: 13),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset("assets/Reroutevector.svg"),
+                SizedBox(
+                  width: 12,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Off-Path Notification",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff000000),
+                        height: 26 / 20,
                       ),
-                      Text(
-                        "Lost the path? New route?",
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff8d8c8c),
-                          height: 20 / 14,
-                        ),
-                        textAlign: TextAlign.left,
+                      textAlign: TextAlign.left,
+                    ),
+                    Text(
+                      "Lost the path? New route?",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8d8c8c),
+                        height: 20 / 14,
                       ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Semantics(
-                        excludeSemantics: true,
-                        label: "yehi haiiiii",
-                        child: Container(
-                          width: 85,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: Color(0xff24B9B0),
-                            borderRadius: BorderRadius.circular(4.0),
-                          ),
+                      textAlign: TextAlign.left,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                      children: [
+                        FocusScope(
+                          autofocus: true,
                           child: Semantics(
-                            excludeSemantics: true,
-                            label: "hjgfbhbedbcd",
-                            child: TextButton(
-                              key: rerouteButton,
-                              onPressed: () async {
-                                autoreroute();
-                              },
-                              child: Semantics(
-                                excludeSemantics: true,
-                                label: "jkhdwgw",
+                            label: "Reroute",
+                            child: Container(
+                              width: 85,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: Color(0xff24B9B0),
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              child: TextButton(
+                                key: rerouteButton,
+                                onPressed: () async {
+                                  autoreroute();
+                                },
                                 child: Container(
                                   height: 24,
                                   width: 24,
@@ -9617,14 +9440,39 @@ String semanticsLabel="";
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 12,
-                      )
-                    ],
-                  )
-                ],
-              ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        // Container(
+                        //   width: 92,
+                        //   height: 36,
+                        //   decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(4.0),
+                        //       border: Border.all(color: Colors.black)),
+                        //   // child: TextButton(
+                        //   //   onPressed: () {
+                        //   //
+                        //   //   },
+                        //   //
+                        //   //
+                        //   //   child: Text(
+                        //   //     "Continue",
+                        //   //     style: const TextStyle(
+                        //   //       fontFamily: "Roboto",
+                        //   //       fontSize: 14,
+                        //   //       fontWeight: FontWeight.w400,
+                        //   //       color: Color(0xff000000),
+                        //   //       height: 20 / 14,
+                        //   //     ),
+                        //   //     textAlign: TextAlign.left,
+                        //   //   ),
+                        //   // ),
+                        // )
+                      ],
+                    )
+                  ],
+                )
+              ],
             ),
           ),
         ));
@@ -11021,7 +10869,7 @@ String semanticsLabel="";
       polygons.union(otherpatch);
       polygons.union(_polygon);
       polygons.union(blurPatch);
-      // polygons.union(patch);
+      polygons.union(patch);
       cachedPolygon = polygons;
       return polygons;
     }
@@ -11186,11 +11034,12 @@ String semanticsLabel="";
       focusturnArrow.clear();
     });
   }
-String finalDestinationDirection="";
+
   void closeNavigation() {
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
     destiName = destname;
+
     List<int> tv = tools.eightcelltransition(user.theta);
     List<Cell> turnPoints =
     tools.getCellTurnpoints(user.cellPath);
@@ -11199,17 +11048,6 @@ String finalDestinationDirection="";
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
-    finalDestinationDirection=direction;
-    if(UserCredentials().getUserPersonWithDisability()==0){
-      flutterTts.pause().then((value) {
-        speak(
-            user.convertTolng("You have reached ${destname}. It is ${direction}",
-                "", 0.0, context, angle, "", "",
-                destname: destname),
-            _currentLocale);
-      });
-    }
-
 
 
     //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
@@ -11228,9 +11066,6 @@ String finalDestinationDirection="";
     //   feedbackPanel(context);
     //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
     // }
-
-    PDRTimer!.cancel();
-
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -11670,12 +11505,14 @@ String finalDestinationDirection="";
     // String closestBuildingId = "";
 
     double? minDistance;
+
     Building.allBuildingID.forEach((key, value) {
       if (key != buildingAllApi.outdoorID) {
         num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
           geo.LatLng(value.latitude, value.longitude),
           geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
         );
+
         // Update closestBuildingId if this SingletonFunctionController.building is closer
         if (minDistance == null || distance < minDistance!) {
           minDistance = distance.toDouble();
@@ -11722,13 +11559,15 @@ String finalDestinationDirection="";
   List<String> scannedDevices = [];
 
   Set<gmap.Polyline> finalSet = {};
+
   bool ispdrStart = false;
   bool semanticShouldBeExcluded = false;
   bool isSemanticEnabled = false;
   bool isLocalized = false;
+
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
-  void _recenterMap(){
+  void _recenterMap() {
     try {
       alignMapToPath([
         PathState.singleCellListPath[user.pathobj.index].lat,
@@ -11738,9 +11577,9 @@ String finalDestinationDirection="";
         PathState.singleCellListPath[user.pathobj.index + 1].lng
       ]);
       mapState.aligned = true;
+    }catch(e){
 
-    }catch(e){}
-
+    }
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(
@@ -11845,47 +11684,6 @@ String finalDestinationDirection="";
   //     },
   //   ));
   // }
-bool isLocating=false;
-  Position? userLoc;
-  void getLocs()async{
-    setState(() {
-      isLocating=true;
-    });
-    userLoc= await getUsersCurrentLatLng();
-    if(userLoc!=null){
-      UserState.geoLat=userLoc!.latitude;
-      UserState.geoLng=userLoc!.longitude;
-    }else{
-      userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-    }
-    if(mounted){
-      setState(() {
-        isLocating=false;
-      });
-    }
-
-  }
-
-  Future<Position?> getUsersCurrentLatLng()async{
-    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
-    try{
-      Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      Geolocator.getLocationAccuracy();
-      return position;
-    }catch(e){
-      print("error in location fetching");
-      return null;
-    }
-
-
-
-    // }
-    // else{
-    //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-    //   return pos;
-    // }
-
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -11949,13 +11747,13 @@ bool isLocating=false;
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-                  // if (cameraPosition.zoom > 16.8) {
-                  //   focusBuildingChecker(cameraPosition);
-                  // } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                  //   renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
-                  // } else {
-                  //   renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                  // }
+                  if (cameraPosition.zoom > 16.8) {
+                    focusBuildingChecker(cameraPosition);
+                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
+                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  } else {
+                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                  }
 
 
 
@@ -12129,7 +11927,7 @@ bool isLocating=false;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
 
-                  Text("coord [${UserState.geoLat},${UserState.geoLng}] \n"),
+                  // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
                   // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
@@ -12307,13 +12105,6 @@ bool isLocating=false;
                   //     ),
                   //   ),
                   // ),
-                  
-                  
-                  FloatingActionButton(onPressed: (){
-                  getLocs();
-                  }, child:Icon(Icons.accessibility)),
-
-                  
 
                   isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
                     child: FloatingActionButton(
@@ -12349,7 +12140,7 @@ bool isLocating=false;
                             _timer.cancel();
                           });
                         } else {
-                          prepareForCompass();
+                          _recenterMap();
                         }
                       },
                       child: Semantics(

@@ -237,6 +237,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
+  Map<String, DateTime> beaconTimeouts = {};
+  double weight=0;
 
   bool listenToBin() {
     double highestweight = 0;

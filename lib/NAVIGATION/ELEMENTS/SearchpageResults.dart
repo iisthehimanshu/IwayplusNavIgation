@@ -106,16 +106,21 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                       children: [
                         Container(
                           margin: EdgeInsets.only(top: 12, left: 18),
-                          child: Text(
-                            widget.name,
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff000000),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width-100, // Adjust width if needed
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                            child: Text(
+                              widget.name,
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ),
                         Container(

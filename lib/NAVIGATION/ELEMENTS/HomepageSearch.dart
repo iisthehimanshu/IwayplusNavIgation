@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/newSearchPage.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/locales.dart';
 import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
@@ -112,7 +113,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                                      builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                               ).then((value){
                                 print("POP22");
                                 widget.onVenueClicked(value,DirectlyStartNavigation: false);
@@ -148,7 +149,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
+                                  builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                           ).then((value){
                             print("POPPP");
                             widget.onVenueClicked(value);

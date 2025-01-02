@@ -94,6 +94,7 @@ class UsergetAPI{
 
 
       }else{
+        print("UsergetAPI response ${response.body}");
         HelperClass.showToast('Failed to load data');
         throw Exception('Failed to load data');
       }

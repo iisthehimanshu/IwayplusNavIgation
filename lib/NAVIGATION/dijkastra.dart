@@ -313,9 +313,14 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
       // print("l1 $l1");
     });
   }
+
   for(int i = s ; i<=e; i++){
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
+  if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && isoutdoorPath){
+    l2.insert(0,(sourceY*col)+sourceX);
+  }
+
   // print("l2 $l2");
   if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX && !isoutdoorPath){
 

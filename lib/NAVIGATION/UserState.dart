@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/MotionModel.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
+import '../path_snapper.dart';
 import 'GPSStreamHandler.dart';
 import 'buildingState.dart' as b;
 
@@ -42,7 +42,6 @@ class UserState {
   bool temporaryExit = false;
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
-  StreamSubscription<Position>? _positionStreamSubscription;
   static double? geoLat ;
   static double? geoLng ;
   static Function autoRecenter=() {};
@@ -65,8 +64,12 @@ class UserState {
   static Function alignMapToPath = () {};
   static Function changeBuilding = () {};
   static Function startOnPath = () {};
+  static Function renderHere = () {};
   static Function paintMarker = (geo.LatLng location) {};
   static Function createCircle = (double lat, double lng) {};
+  static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id}){};
+  PathSnapper snapper = PathSnapper();
+
 
   UserState(
       {required this.floor,
@@ -150,16 +153,55 @@ class UserState {
     return false;
   }
 
-  void gpsHandler(){
-    Stream<Position>? position = gpsStreamHandler.startStream();
-    if(position != null) {
-      _positionStreamSubscription =
-          position.listen((Position p) {
-            Cell cell = tools.findNearestWayPoint(cellPath,p);
-            moveToPointOnPath(cellPath.indexWhere((element)=>(element.x==cell.x && element.y==cell.y)));
-          });
+  void handleGPS(){
+    print("handleGPS invoked");
+    snapper.snappedCellStream.listen((snapped) {
+      if(snapped.imaginedIndex != null){
+        path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
+        cellPath.insert(snapped.imaginedIndex!, snapped);
+        moveToPointOnPath(snapped.imaginedIndex!);
+        renderHere();
+        //addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
+      }
+    });
+  }
+
+
+  Cell computeWeightedLocation(Map<String, dynamic> data) {
+    if(data["Accuracy"] != null){
+      Cell snappedCell = data["cell"];
+      Map<String,double> weights = computeWeights(data["Accuracy"]);
+      double? wGps = weights["wGps"];
+      double? wUser = weights["wUser"];
+      if(wGps != null && wUser != null){
+        double finalLat = wGps * snappedCell.lat + wUser * cellPath[pathobj.index].lat;
+        double finalLon = wGps * snappedCell.lng + wUser * cellPath[pathobj.index].lng;
+        int finalX = (wGps * snappedCell.x + wUser * cellPath[pathobj.index].x).toInt();
+        int finalY = (wGps * snappedCell.y + wUser * cellPath[pathobj.index].y).toInt();
+        snappedCell.lat = finalLat;
+        snappedCell.lng = finalLon;
+        snappedCell.x = finalX;
+        snappedCell.y = finalY;
+        return snappedCell;
+      }else{
+        return cellPath[pathobj.index];
+      }
+    }else{
+      return cellPath[pathobj.index];
     }
   }
+
+  // Compute weights
+  Map<String,double> computeWeights(double gpsAccuracy){
+    double? wGps;
+    double? wUser;
+    double gpsConfidence = 1 / (1 + gpsAccuracy);
+    double totalConfidence = gpsConfidence + 0.6;
+    wGps = gpsConfidence / totalConfidence;
+    wUser = 0.6 / totalConfidence;
+    return {"wGps":wGps,"wUser":wUser};
+  }
+
 
   Future<void> moveOneStep(context, List<Cell> turnPoints) async {
     userLogData();

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
@@ -16,6 +17,7 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'Navigation.dart';
 import 'directionClass.dart';
 import 'path.dart';
 import 'package:intl/intl.dart';
@@ -517,12 +519,6 @@ class tools {
   //
   //   return bearingDegrees;
   // }
-
-
-  static Cell findNearestWayPoint (List<Cell> path, Position coordinate){
-    return path.reduce((a, b) =>
-    calculateAerialDist(a.lat, a.lng, coordinate.latitude, coordinate.longitude) < calculateAerialDist(b.lat, b.lng, coordinate.latitude, coordinate.longitude) ? a : b);
-  }
 
   static double calculateBearing(List<double> pointA, List<double> pointB) {
     double lat1 = toRadians(pointA[0]); //user
@@ -1163,16 +1159,22 @@ class tools {
           lifts.removeLast();
         }
       }
+      if(turns[i].bid != turns[i+1].bid){
+        continue;
+      }
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
-      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]}");
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
+      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]} distance $Nextdistance and $Prevdistance");
+
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
+      if(path[index-1].bid != path[index].bid){
+        angle = 0;
+      }
       String direc = tools.angleToClocks(angle,context);
-      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
+      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i].node], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
     }
     Directions.add(direction(turns.last.node, "Straight", null, null, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
-
     return Directions;
   }
 
@@ -1181,6 +1183,72 @@ class tools {
     return number >= 0 ? rounded : rounded - 1;
   }
 
+  static List<LatLng> convertToLatLngList(List<dynamic> coordinates) {
+    return coordinates.map((coordinate) {
+      // Split the coordinate string by comma
+      var parts = coordinate.split(',');
+      // Convert the parts to double and return as LatLng
+      return LatLng(double.parse(parts[0]), double.parse(parts[1]));
+    }).toList();
+  }
+
+  static List<IntPoint> convertToIntPointList(List<dynamic> coordinates) {
+    return coordinates.map((coordinate) {
+      // Split the coordinate string by comma
+      var parts = coordinate.split(',');
+      // Convert the parts to int and return as IntPoint
+      return IntPoint(int.parse(parts[0]), int.parse(parts[1]));
+    }).toList();
+  }
+
+  static bool isPointOnLineSegment(List<int> x, List<int> y, List<int> z) {
+    // Check if point x is collinear with points y and z using the area of triangle approach
+    int area = (y[0] * (z[1] - x[1])) + (x[0] * (y[1] - z[1])) + (z[0] * (x[1] - y[1]));
+
+    // If the area is zero, points are collinear, now check if x is within the segment range
+    if (area == 0) {
+      // Check if point x is between points y and z on both x and y coordinates
+      return (x[0] >= y[0] && x[0] <= z[0] || x[0] <= y[0] && x[0] >= z[0]) &&
+          (x[1] >= y[1] && x[1] <= z[1] || x[1] <= y[1] && x[1] >= z[1]);
+    }
+    return false;
+  }
+
+  static navPoints findCartesianCoordinates(navPoints pointX, navPoints pointY, navPoints pointZ) {
+    // Calculate the transformation parameters (slopes)
+    double slopeX = (pointY.x - pointX.x) / (pointY.latitude - pointX.latitude);
+    double slopeY = (pointY.y - pointX.y) / (pointY.latitude - pointX.latitude);
+
+    // Apply the transformation to point Z
+    int xZ = pointX.x + (slopeX * (pointZ.latitude - pointX.latitude)).round();
+    int yZ = pointX.y + (slopeY * (pointZ.latitude - pointX.latitude)).round();
+
+    // Return the Cartesian coordinates of point Z
+    return navPoints(pointZ.latitude, pointZ.longitude, xZ, yZ);
+  }
+
+  static IntPoint findCoordinatesOfWaypoint(LatLng waypoint){
+    final polylineData = SingletonFunctionController.building.polylinedatamap;
+    IntPoint point = IntPoint(0, 0);
+    polylineData.forEach((key,value){
+      if(key == buildingAllApi.outdoorID ){
+        for (var floor in value.polyline!.floors!) {
+          for (var polyline in floor.polyArray!) {
+            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(0)){
+              for (var node in polyline.nodes!) {
+                if(node.lat == waypoint.latitude && node.lon == waypoint.longitude){
+                  point.x = node.coordx!;
+                  point.y = node.coordy!;
+                  continue;
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return point;
+  }
 
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,
@@ -2270,5 +2338,19 @@ class Element {
     data['type'] = this.type;
     data['subType'] = this.subType;
     return data;
+  }
+}
+
+class navPoints {
+  final double latitude;
+  final double longitude;
+  final int x;
+  final int y;
+
+  navPoints(this.latitude, this.longitude, this.x, this.y);
+
+  @override
+  String toString() {
+    return 'navPoints{latitude: $latitude, longitude: $longitude, x: $x, y: $y}';
   }
 }

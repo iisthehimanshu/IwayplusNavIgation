@@ -101,11 +101,11 @@ class DirectionInstructionViewModel extends ChangeNotifier {
       if(toggleForLiftFoundS){
         _sourceDownHeight+=50;
       }else{
-        _sourceUPHeight+=50;
+        _sourceUPHeight+=68;
       }
       totalSourceTurns++;
-      if(dir.distanceToNextTurn != null) {
-        totalSourceDistance += dir.distanceToNextTurn!;
+      if(dir.distanceToNextTurnInFeet != null) {
+        totalSourceDistance += dir.distanceToNextTurnInFeet!;
       }
     }
     if(_MultiBuilding){
@@ -120,15 +120,15 @@ class DirectionInstructionViewModel extends ChangeNotifier {
           _destinationUpHeight+=50;
         }
         totalDestinationTurns++;
-        if(dir.distanceToNextTurn != null) {
-          totalDestinationDistance += dir.distanceToNextTurn!;
+        if(dir.distanceToNextTurnInFeet != null) {
+          totalDestinationDistance += dir.distanceToNextTurnInFeet!;
         }
       }
 
       _outdoorWidgetHeight = 50 * _outdoorDirection.length.toDouble();
       for (var dir in _outdoorDirection) {
-        if(dir.distanceToNextTurn != null) {
-          totalOutdoorLength += dir.distanceToNextTurn!;
+        if(dir.distanceToNextTurnInFeet != null) {
+          totalOutdoorLength += dir.distanceToNextTurnInFeet!;
         }
       }
     }
@@ -189,10 +189,11 @@ class DirectionInstructionViewModel extends ChangeNotifier {
     for(var direction in directionList){
       if(direction.turnDirection != null && direction.turnDirection!.split(' ').first.toLowerCase() != "go" && direction.turnDirection!.split(' ').first.toLowerCase() != "turn" && direction.turnDirection!.split(' ').first.toLowerCase() != "take"){
         if(direction.nearbyLandmark != null){
+          print("found landmark ${direction.nearbyLandmark}");
           parsedList.add(direction.changeDirection(
               direction.turnDirection == "Straight"
                   ? '${LocaleData.gostraight.getString(context)}'
-                  : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(direction.turnDirection!, context)} ${LocaleData.from.getString(context)} ${direction.nearbyLandmark!.name!} ${LocaleData.getProperty2(direction.turnDirection!, context)} ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"
+                  : "${LocaleData.turn.getString(context)} ${LocaleData.getProperty3(direction.turnDirection!, context)} ${LocaleData.from.getString(context)} ${direction.nearbyLandmark!.name!} ${LocaleData.getProperty2(direction.turnDirection!, context)}\n ${LocaleData.and.getString(context)} ${LocaleData.gostraight.getString(context)}"
           ));
         }else{
           parsedList.add(direction.changeDirection(

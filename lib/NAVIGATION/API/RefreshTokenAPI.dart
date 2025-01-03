@@ -14,7 +14,7 @@ class RefreshTokenAPI {
     print(refreshToken);
 
     final Map<String, dynamic> data = {
-      "refreshToken": refreshToken
+      "refreshToken": refreshToken,
     };
 
     final response = await http.post(
@@ -28,17 +28,22 @@ class RefreshTokenAPI {
       print("in refreshTOken");
       Map<String, dynamic> responseBody = json.decode(response.body);
       final newAccessToken = responseBody["accessToken"];
+      final newRefreshToken = responseBody["refreshToken"];
       signInBox.delete("accessToken");
-      print(signInBox.get("accessToken"));
       signInBox.put("accessToken", newAccessToken);
-      print(signInBox.get("accessToken"));
+      print("New access token: ${signInBox.get("accessToken")}");
+
+      signInBox.delete("refreshToken");
+      signInBox.put("refreshToken", newRefreshToken);
+      print("New refresh token: ${signInBox.get("refreshToken")}");
+
       return newAccessToken;
-    }  else if(response.statusCode == 400){
+    } else if (response.statusCode == 400) {
       return "400";
     } else {
-      print(Exception);
+      print("Error refreshing tokens:");
       print(response.statusCode);
-      throw Exception('Failed to load data');
+      throw Exception('Failed to refresh tokens');
     }
   }
 }

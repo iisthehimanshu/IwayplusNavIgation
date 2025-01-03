@@ -520,7 +520,11 @@ class Lifts {
 
   Lifts.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
-    distance = json['distance'];
+    try {
+      distance = json['distance'];
+    }catch(e){
+      print('name $name');
+    }
     x = json['x'].toInt();
     y = json['y'].toInt();
   }

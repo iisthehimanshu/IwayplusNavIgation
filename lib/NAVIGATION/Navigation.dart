@@ -1445,6 +1445,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         List<IntPoint> intPoints = tools.convertToIntPointList(adjList);
         closestPoint = shortestPoint(coordinates, LatLng(waypoint!.lat!, waypoint!.lon!), IntPoint(waypoint!.coordx!, waypoint!.coordy!), latLngPoints, intPoints);
         print("closestPoint ${closestPoint.intPoint.x} ${closestPoint.intPoint.y}");
+        double distance = tools.calculateDistance([closestPoint.intPoint.x,closestPoint.intPoint.y], [waypoint!.coordx!,waypoint!.coordy!]);
+        if(distance<=10){
+          closestPoint = ClosestPointResult(LatLng(waypoint!.lat!,waypoint!.lon!), IntPoint(waypoint!.coordx!, waypoint!.coordy!));
+        }
       }else{
         print("adj ${adj} adjGlobl ${adjGlobl}");
         print("adjList ${adjList} adjGlobalList ${adjGlobalList}");

@@ -156,7 +156,9 @@ class UserState {
   void handleGPS(){
     print("handleGPS invoked");
     snapper.snappedCellStream.listen((snapped) {
-      if(snapped.imaginedIndex != null){
+      double d = tools.calculateAerialDist(snapped.position!.latitude, snapped.position!.longitude, lat, lng);
+      print("distance calc is $d");
+      if(snapped.imaginedIndex != null && d>snapped.position!.accuracy){
         path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
         cellPath.insert(snapped.imaginedIndex!, snapped);
         moveToPointOnPath(snapped.imaginedIndex!);
@@ -165,43 +167,6 @@ class UserState {
       }
     });
   }
-
-
-  Cell computeWeightedLocation(Map<String, dynamic> data) {
-    if(data["Accuracy"] != null){
-      Cell snappedCell = data["cell"];
-      Map<String,double> weights = computeWeights(data["Accuracy"]);
-      double? wGps = weights["wGps"];
-      double? wUser = weights["wUser"];
-      if(wGps != null && wUser != null){
-        double finalLat = wGps * snappedCell.lat + wUser * cellPath[pathobj.index].lat;
-        double finalLon = wGps * snappedCell.lng + wUser * cellPath[pathobj.index].lng;
-        int finalX = (wGps * snappedCell.x + wUser * cellPath[pathobj.index].x).toInt();
-        int finalY = (wGps * snappedCell.y + wUser * cellPath[pathobj.index].y).toInt();
-        snappedCell.lat = finalLat;
-        snappedCell.lng = finalLon;
-        snappedCell.x = finalX;
-        snappedCell.y = finalY;
-        return snappedCell;
-      }else{
-        return cellPath[pathobj.index];
-      }
-    }else{
-      return cellPath[pathobj.index];
-    }
-  }
-
-  // Compute weights
-  Map<String,double> computeWeights(double gpsAccuracy){
-    double? wGps;
-    double? wUser;
-    double gpsConfidence = 1 / (1 + gpsAccuracy);
-    double totalConfidence = gpsConfidence + 0.6;
-    wGps = gpsConfidence / totalConfidence;
-    wUser = 0.6 / totalConfidence;
-    return {"wGps":wGps,"wUser":wUser};
-  }
-
 
   Future<void> moveOneStep(context, List<Cell> turnPoints) async {
     userLogData();

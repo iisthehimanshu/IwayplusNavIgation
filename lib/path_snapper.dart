@@ -57,7 +57,7 @@ class PathSnapper {
 
     await gps.startGpsUpdates();
     gps.positionStream.listen((position) {
-      processGpsData(position.latitude, position.longitude);
+      processGpsData(position);
       accuracy = position.accuracy;
     });
   }
@@ -69,15 +69,13 @@ class PathSnapper {
   }
 
   // Process GPS data
-  void processGpsData(double lat, double lng) {
+  void processGpsData(Position position) {
     //_kalmanFilter.applyFilter(lat, lng);
     // var snapped = _snapToPath(
     //     _kalmanFilter.latitudeEstimate ?? lat,
     //     _kalmanFilter.longitudeEstimate ?? lng);
-    var snapped = _snapToPath(lat, lng);
+    var snapped = _snapToPath(position);
     if (snapped != null) {
-      double d = tools.calculateAerialDist(snapped.lat, snapped.lng, lat, lng);
-      print("made latlng (${snapped.lat},${snapped.lng})  (${snapped.x},${snapped.y}) with distance $d");
       _snappedCellController.add(snapped);
     }
   }
@@ -89,7 +87,7 @@ class PathSnapper {
   }
 
   // Snap to the nearest point on the path
-  Cell? _snapToPath(double currLat, double currLng) {
+  Cell? _snapToPath(Position position) {
     double minDistance = double.infinity;
     Cell? nearestCell;
 
@@ -100,12 +98,12 @@ if(start.x == end.x && start.y == end.y){
   continue;
 }
       // Find the projection on the segment
-      var projection = _projectPointOnSegment(currLat, currLng, start, end);
+      var projection = _projectPointOnSegment(position.latitude, position.longitude, start, end);
       if (projection != null) {
         double projectionLat = projection.latitude ?? 0.0;
         double projectionLng = projection.longitude ?? 0.0;
 
-        double distance = _haversineDistance(currLat, currLng, projectionLat, projectionLng);
+        double distance = _haversineDistance(position.latitude, position.longitude, projectionLat, projectionLng);
 
         if (distance < minDistance) {
           minDistance = distance;
@@ -121,6 +119,7 @@ if(start.x == end.x && start.y == end.y){
             start.numCols,
             imaginedIndex: path.indexOf(start) + 1,
             imaginedCell: true,
+            position: position
           );
         }
       }

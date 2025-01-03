@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/MotionModel.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
+import '../path_snapper.dart';
 import 'GPSStreamHandler.dart';
 import 'buildingState.dart' as b;
 
@@ -42,7 +42,6 @@ class UserState {
   bool temporaryExit = false;
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
-  StreamSubscription<Position>? _positionStreamSubscription;
   static double? geoLat ;
   static double? geoLng ;
   static Function autoRecenter=() {};
@@ -65,8 +64,12 @@ class UserState {
   static Function alignMapToPath = () {};
   static Function changeBuilding = () {};
   static Function startOnPath = () {};
+  static Function renderHere = () {};
   static Function paintMarker = (geo.LatLng location) {};
   static Function createCircle = (double lat, double lng) {};
+  static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id}){};
+  PathSnapper snapper = PathSnapper();
+
 
   UserState(
       {required this.floor,
@@ -150,15 +153,19 @@ class UserState {
     return false;
   }
 
-  void gpsHandler(){
-    Stream<Position>? position = gpsStreamHandler.startStream();
-    if(position != null) {
-      _positionStreamSubscription =
-          position.listen((Position p) {
-            Cell cell = tools.findNearestWayPoint(cellPath,p);
-            moveToPointOnPath(cellPath.indexWhere((element)=>(element.x==cell.x && element.y==cell.y)));
-          });
-    }
+  void handleGPS(){
+    print("handleGPS invoked");
+    snapper.snappedCellStream.listen((snapped) {
+      double d = tools.calculateAerialDist(snapped.position!.latitude, snapped.position!.longitude, lat, lng);
+      print("distance calc is $d");
+      if(snapped.imaginedIndex != null && d>snapped.position!.accuracy){
+        path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
+        cellPath.insert(snapped.imaginedIndex!, snapped);
+        moveToPointOnPath(snapped.imaginedIndex!);
+        renderHere();
+        //addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
+      }
+    });
   }
 
   Future<void> moveOneStep(context, List<Cell> turnPoints) async {

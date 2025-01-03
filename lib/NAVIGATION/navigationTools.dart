@@ -1289,10 +1289,7 @@ class tools {
                 pCoord, [value.doorX!, value.doorY!]);
 
           }else{
-
-
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
+            d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
             // if (d<distance) {
             //   nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
             //     doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);

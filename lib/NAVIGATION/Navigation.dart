@@ -50,6 +50,7 @@ import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DebugToggle.dart';
@@ -214,6 +215,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   final GlobalKey rerouteButton = GlobalKey();
+
+  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
+
+
 
   //-----------------------------------------------------------------------------------------
   /// Set of displayed markers and cluster markers on the map
@@ -973,6 +978,7 @@ bool isAppinForeground=true;
       }
 
       await flutterTts.setPitch(1.0);
+
       await flutterTts.speak(msg);
     }
   }
@@ -3856,23 +3862,25 @@ bool isAppinForeground=true;
   Future<void> localizeUser({bool speakTTS = true}) async {
     double highestweight = 0;
     String nearestBeacon = "";
-    print("binresult ${SingletonFunctionController.btadapter.BIN}");
-    for (int i = 0;
-    i < SingletonFunctionController.btadapter.BIN.length;
-    i++) {
-      if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-        SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-          if (value < 0) {
-            value = value * -1;
-          }
-          if (value > highestweight) {
-            highestweight = value;
-            nearestBeacon = key;
-          }
-        });
-        break;
-      }
-    }
+    // print("binresult ${SingletonFunctionController.btadapter.BIN}");
+    // for (int i = 0;
+    // i < SingletonFunctionController.btadapter.BIN.length;
+    // i++) {
+    //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+    //     SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+    //       if (value < 0) {
+    //         value = value * -1;
+    //       }
+    //       if (value > highestweight) {
+    //         highestweight = value;
+    //         nearestBeacon = key;
+    //       }
+    //     });
+    //     break;
+    //   }
+    // }
+
+    nearestBeacon = SingletonFunctionController.SC_LOCALIZED_BEACON;
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
@@ -12739,6 +12747,7 @@ bool isAppinForeground=true;
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
+                  Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12925,13 +12934,19 @@ bool isAppinForeground=true;
                         //  _getUserLocation();
                         SingletonFunctionController.btadapter.emptyBin();
                         if (!user.isnavigating && !isLocalized) {
-
                           SingletonFunctionController.btadapter
                               .stopScanning();
                           if (Platform.isAndroid) {
-                            SingletonFunctionController.btadapter
-                                .startScanning(
-                                SingletonFunctionController.apibeaconmap);
+                            bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((_){
+                              localizeUser().then((value) => {
+                                setState(() {
+                                  isLocalized = false;
+                                })
+                              });
+                            });
+
+                            // SingletonFunctionController.btadapter.startScanning(
+                            //     SingletonFunctionController.apibeaconmap);
                           } else {
                             SingletonFunctionController.btadapter
                                 .startScanningIOS(
@@ -12942,16 +12957,17 @@ bool isAppinForeground=true;
                             resBeacons =
                                 SingletonFunctionController.apibeaconmap;
                           });
-                          late Timer _timer;
-                          _timer = Timer.periodic(
-                              Duration(milliseconds: 5000), (timer) {
-                            localizeUser().then((value) => {
-                              setState(() {
-                                isLocalized = false;
-                              })
-                            });
-                            _timer.cancel();
-                          });
+
+                          // late Timer _timer;
+                          // _timer = Timer.periodic(
+                          //     Duration(milliseconds: 5000), (timer) {
+                          //   localizeUser().then((value) => {
+                          //     setState(() {
+                          //       isLocalized = false;
+                          //     })
+                          //   });
+                          //   _timer.cancel();
+                          // });
                         } else {
                         _recenterMap();
                         }

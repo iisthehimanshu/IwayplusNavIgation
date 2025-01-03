@@ -2,11 +2,15 @@ package com.iwayplus.navigation
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -40,7 +44,6 @@ class MainActivity : FlutterActivity() {
                     Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                Log.d("ErrorScan","Permission not granted");
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -52,25 +55,34 @@ class MainActivity : FlutterActivity() {
             }
             if (device.name != null && device.name.contains("IW")) {
                 val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi"
-                val device = BluetoothDevice(device.name,device.address,rssi.toString())
-                Log.d("deviceInfo","${device.DeviceAddress} ${device.DeviceName} ${device.DeviceRssi}")
-                //Log.d("deviceDetails","${deviceDetails}")
                 if (!deviceDetailsList.contains(deviceDetails)) {
                     deviceDetailsList.add(deviceDetails)
                     Log.d("BluetoothScan", "New Device Found: $deviceDetails")
-                    eventSink?.success(deviceDetails) // Send real-time updates to Flutterdetails.run
+                    eventSink?.success(deviceDetails)
                 }
-                Log.d("deviceInfo",deviceDetailsList.size.toString());
-
-
-                eventSink?.success(deviceDetails)
-
             }
         }
 
         override fun onScanFailed(errorCode: Int) {
             Log.e("BluetoothScan", "Scan failed with error code: $errorCode")
             eventSink?.error("SCAN_FAILED", "Scan failed with error code: $errorCode", null)
+        }
+    }
+
+    private val discoveryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action: String? = intent.action
+            if (BluetoothDevice.ACTION_FOUND == action) {
+                val device: BluetoothDevice? =
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                device?.let {
+                    val deviceDetails = "Device Name: ${"Unknown"}\nAddress: ${it.address}"
+                    if (!deviceDetailsList.contains(deviceDetails)) {
+                        deviceDetailsList.add(deviceDetails)
+                        eventSink?.success(deviceDetails)
+                    }
+                }
+            }
         }
     }
 
@@ -81,15 +93,16 @@ class MainActivity : FlutterActivity() {
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
 
-        // Request permissions if not already granted
         if (!hasPermissions()) {
             requestPermissions()
         }
+
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        registerReceiver(discoveryReceiver, filter)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        Log.d("MainActivity", "MethodChannel and EventChannel initialized")
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -104,9 +117,7 @@ class MainActivity : FlutterActivity() {
                 "getScannedDevices" -> {
                     result.success(deviceDetailsList)
                 }
-                else -> {
-                    result.notImplemented()
-                }
+                else -> result.notImplemented()
             }
         }
 
@@ -133,24 +144,34 @@ class MainActivity : FlutterActivity() {
                 return
             }
 
-            Log.d("BluetoothScan", "Starting scan...")
+            Log.d("BluetoothScan", "Starting BLE scan...")
             bluetoothLeScanner.startScan(scanCallback)
+
             isScanning = true
         }
     }
 
     private fun stopScan() {
-        if (isScanning) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions()
-                return
+        try {
+            if (isScanning) {
+                // Check if the required permission is granted
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) {
+                    bluetoothLeScanner.stopScan(scanCallback)
+                    isScanning = false
+                    Log.d("BluetoothScan", "Scanning stopped")
+                } else {
+                    Log.e("BluetoothScan", "Permission not granted for stopping the scan")
+                    requestPermissions()
+                }
+            } else {
+                Log.d("BluetoothScan", "Scan is not running, no need to stop")
             }
-
-            Log.d("BluetoothScan", "Stopping scan...")
-            bluetoothLeScanner.stopScan(scanCallback)
-            isScanning = false
+        } catch (e: SecurityException) {
+            Log.e("BluetoothScan", "SecurityException: ${e.message}")
+            Toast.makeText(this, "Failed to stop scanning due to missing permissions", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun hasPermissions(): Boolean {
         val permissions = mutableListOf(
@@ -163,8 +184,8 @@ class MainActivity : FlutterActivity() {
             permissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
         }
 
-        return permissions.all { permission ->
-            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        return permissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -180,5 +201,10 @@ class MainActivity : FlutterActivity() {
         }
 
         ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 101)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(discoveryReceiver)
     }
 }

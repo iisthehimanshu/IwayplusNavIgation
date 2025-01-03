@@ -39,6 +39,8 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+import 'NAVIGATION/BluetoothScanAndroid.dart';
+
 Future _firebaseBackgroundMessage(RemoteMessage message) async {
   if(message.notification != null){
     print("Some notification Received");

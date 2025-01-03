@@ -127,19 +127,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     });
     //   }
     // }
-
-    bluetoothScanAndroidClass.startbin();
-    bluetoothScanAndroidClass.emptyBin();
-    setState(() {
-      bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
-
+    Future.delayed(Duration(seconds: 4)).then((_) {
+      bluetoothScanAndroidClass.startbin();
+      bluetoothScanAndroidClass.emptyBin();
+      setState(() {
+        bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+      });
     });
+
+
+
 
 
     setState(() {});
     //btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
-      if (widget.user.pathobj.index > 1) {
+      print("widget.user.pathobj.index");
+      print(widget.user.pathobj.index);
+
+      if (widget.user.pathobj.index > 3) {
         listenToBin();
       }
     });

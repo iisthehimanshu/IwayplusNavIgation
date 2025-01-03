@@ -63,6 +63,51 @@ String getDecryptedData(String encryptedData){
       },
     );
     if (response.statusCode == 200) {
+      try{
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        print("checkid $id");
+        String APITime = responseBody['landmarks'][0]['updatedAt']!;
+        final landmarkData = LandMarkApiModel(responseBody: responseBody);
+
+        print('LANDMARK DATA FROM API');
+        print(responseBody.containsValue("polylineExist"));
+        // print(LandMarkBox.length);
+        //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
+        //print(demoresponseBody?.responseBody);
+        LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
+
+        // print(LandMarkBox.length);
+        // print('TESTING LANDMARK API DATABASE OVER');
+        landmarkData.save();
+
+
+        //print("object ${responseBody['landmarks'][0].runtimeType}");
+        return land.fromJson(responseBody);
+
+      }catch(e){
+        String finalResponse=getDecryptedData(response.body);
+        // Output the transformed response
+        Map<String, dynamic> responseBody = json.decode(finalResponse);
+        print("checkid $id");
+        String APITime = responseBody['landmarks'][0]['updatedAt']!;
+        final landmarkData = LandMarkApiModel(responseBody: responseBody);
+        print('LANDMARK DATA FROM API');
+        print(responseBody.containsValue("polylineExist"));
+        // print(LandMarkBox.length);
+        //LandMarkApiModel? demoresponseBody = LandMarkBox.getAt(0);
+        //print(demoresponseBody?.responseBody);
+        LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
+
+        // print(LandMarkBox.length);
+        // print('TESTING LANDMARK API DATABASE OVER');
+        landmarkData.save();
+
+
+        //print("object ${responseBody['landmarks'][0].runtimeType}");
+        return land.fromJson(responseBody);
+
+      }
+
     String finalResponse=getDecryptedData(response.body);
       // Output the transformed response
       Map<String, dynamic> responseBody = json.decode(finalResponse);

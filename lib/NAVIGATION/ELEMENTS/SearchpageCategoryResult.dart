@@ -66,7 +66,6 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
   Future<void> calculateFloor() async{
     print("In calfloor");
     setState(() {
-
       landmarkData.landmarksMap!.forEach((key, value) {
         if (value.floor != null && value.buildingName == widget.buildingName) {
           floors.add(value.floor!);

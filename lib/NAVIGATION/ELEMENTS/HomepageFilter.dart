@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iwaymaps/newSearchPage.dart';
 
 import '../DestinationSearchPage.dart';
 import '../SourceAndDestinationPage.dart';
@@ -49,7 +50,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => DestinationSearchPage(previousFilter: widget.text,voiceInputEnabled: false,))
+                  builder: (context) => NewSearchPage(previousFilter: widget.text.toLowerCase(),voiceInputEnabled: false,))
           ).then((value){
             widget.onClicked(value);
           });

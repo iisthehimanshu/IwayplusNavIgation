@@ -493,8 +493,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               });
             }
           });
-
-
         }
       }
     });
@@ -595,7 +593,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
               accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
-
             ));
           }
 
@@ -650,15 +647,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
-
-
-
-    // if(speetchText.isNotListening){
-    //   micColor = Colors.black;
-    //   print("Not listening");
-    // }else{
-    //   micColor = Color(0xff24B9B0);
-    // }
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(top: statusBarHeight),
@@ -953,7 +941,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   ),
                 )),
             if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
-
               Column(
                   children: [
                     SizedBox(height: 16,),
@@ -983,7 +970,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     )
                   ]
               )
-
           ],
         ) : Center(
           child: CircularProgressIndicator(

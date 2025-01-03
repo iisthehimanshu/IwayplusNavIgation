@@ -37,6 +37,7 @@ class BuildingAPI {
       },
     );
     if (response.statusCode == 200) {
+      print("responseeeee ${response.body}");
       Map<String,dynamic> responseBody = json.decode(response.body);
       final BuildingData = BuildingAPIModel(responseBody: responseBody);
       print(responseBody);

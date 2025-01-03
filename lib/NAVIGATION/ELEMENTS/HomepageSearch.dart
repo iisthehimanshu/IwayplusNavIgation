@@ -19,8 +19,6 @@ import 'package:animated_checkmark/animated_checkmark.dart';
 import '../UserState.dart';
 import 'HomepageFilter.dart';
 
-
-
 class HomepageSearch extends StatefulWidget {
   final searchText;
   UserState? user;
@@ -205,14 +203,13 @@ class _HomepageSearchState extends State<HomepageSearch> {
         ),
         Semantics(
           header: true,
-          label: "Filters",
+          label: "Facilities Filter",
           child: Container(
             width: screenWidth,
             child: ChipsChoice<int>.single(
               value: vall,
               onChanged: (val){
                 setState(() => vall = val);
-
                 if(HelperClass.SemanticEnabled){
                   speak("${options[val]} selected");
                 }else if(lastValueStored == val){
@@ -228,7 +225,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 label: (i, v) => v,
               ),
               choiceBuilder: (item, i) {
-                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: _icons[i],);
+                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(options[i].toLowerCase()),);
               },
               direction: Axis.horizontal,
             ),
@@ -238,6 +235,29 @@ class _HomepageSearchState extends State<HomepageSearch> {
     );
   }
 }
+
+IconData getIcon(String option) {
+  switch (option.toLowerCase()) {
+    case 'washroom':
+      return Icons.wash_sharp;
+    case 'cafeteria':
+      return Icons.local_cafe;
+    case 'drinking water':
+      return Icons.water_drop;
+    case 'atm':
+      return Icons.atm_sharp;
+    case 'entry':
+      return Icons.door_front_door_outlined;
+    case 'lift':
+      return Icons.elevator;
+    case 'reception':
+      return Icons.desk_sharp;
+    default:
+      return Icons.help_outline; // Return a default icon if no match is found
+  }
+}
+
+
 
 class CustomChip extends StatelessWidget {
   final String label;

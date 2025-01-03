@@ -26,6 +26,7 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import '../GPS.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/API/slackApi.dart';
 import '../IWAYPLUS/APIMODELS/buildingAll.dart';
@@ -43,6 +44,7 @@ import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/localizedData.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
 import '../newSearchPage.dart';
+import '../path_snapper.dart';
 import '/IWAYPLUS/API/RatingsaveAPI.dart';
 import 'API/DataVersionApi.dart';
 import 'API/PolyLineApi.dart';
@@ -1428,7 +1430,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   // land userSetLandmarkMap = land().landmarksMap;
   Future<Landmarks?> getglobalcoords(LatLng coordinates) async {
     Landmarks? closestLandmark;
-    double? minDistance;
+    double? minDistance = 100;
 
     // Fetching landmark data
     final landmarkData = await SingletonFunctionController.building.landmarkdata;
@@ -1460,7 +1462,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         if (landmark.properties?.polyId != null && landmark.name?.isNotEmpty == true) {
 
           // Update if this landmark is closer
-          if (minDistance == null || dist < minDistance!) {
+          if (dist < minDistance!) {
             minDistance = dist;
             closestLandmark = landmark;
             print("Closest landmark distance: $minDistance");
@@ -1474,7 +1476,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Nodes? waypoint;
     minDistance = null;
     final polylineData = SingletonFunctionController.building.polylinedatamap;
-
+    PathModel model = Building.waypoint[buildingAllApi.outdoorID]!
+        .firstWhere((element) => element.floor == 0);
+    Map<String, List<dynamic>> adj = model.pathNetwork;
+    Map<String, List<dynamic>> adjGlobl = model.pathNetworkGlobal;
     polylineData.forEach((key,value){
       if(key == buildingAllApi.outdoorID ){
         value.polyline!.floors!.forEach((floor){
@@ -1488,32 +1493,143 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     coordinates.longitude
                 );
                 print("distance $dist");
-                if (dist <= 25) {
+                List<dynamic>? adjList = adj["${node.coordx},${node.coordy}"];
                   // Update if this landmark is closer
-                  if (minDistance == null || dist < minDistance!) {
+                  if ((adjList!=null && adj.length>1 )&& (minDistance == null || dist < minDistance!)) {
                     minDistance = dist;
                     waypoint = node;
                   }
-                }
               });
             }
           });
         });
       }
     });
-    if(waypoint != null){
+    if(closestLandmark!=null && waypoint != null){
       print("waypoint ${waypoint!.coordx} ${waypoint!.coordy}");
-      closestLandmark!.coordinateX = waypoint!.coordx;
-      closestLandmark!.coordinateY = waypoint!.coordy;
-      closestLandmark!.doorX = waypoint!.coordx;
-      closestLandmark!.doorY = waypoint!.coordy;
-      closestLandmark!.properties!.latitude = waypoint!.lat.toString();
-      closestLandmark!.properties!.longitude = waypoint!.lon.toString();
+      List<dynamic>? adjList = adj["${waypoint!.coordx},${waypoint!.coordy}"];
+      List<dynamic>? adjGlobalList = adjGlobl["${waypoint!.lat},${waypoint!.lon}"];
+      ClosestPointResult? closestPoint = ClosestPointResult(LatLng(waypoint!.lat!,waypoint!.lon!), IntPoint(waypoint!.coordx!, waypoint!.coordy!));
+      if(adjList!= null && adjGlobalList != null){
+        adjList.remove("${waypoint!.coordx},${waypoint!.coordy}");
+        adjGlobalList.remove("${waypoint!.lat},${waypoint!.lon}");
+        List<LatLng> latLngPoints = tools.convertToLatLngList(adjGlobalList);
+        List<IntPoint> intPoints = tools.convertToIntPointList(adjList);
+        closestPoint = shortestPoint(coordinates, LatLng(waypoint!.lat!, waypoint!.lon!), IntPoint(waypoint!.coordx!, waypoint!.coordy!), latLngPoints, intPoints);
+        print("closestPoint ${closestPoint.intPoint.x} ${closestPoint.intPoint.y}");
+        double distance = tools.calculateDistance([closestPoint.intPoint.x,closestPoint.intPoint.y], [waypoint!.coordx!,waypoint!.coordy!]);
+        if(distance<=10){
+          closestPoint = ClosestPointResult(LatLng(waypoint!.lat!,waypoint!.lon!), IntPoint(waypoint!.coordx!, waypoint!.coordy!));
+        }
+      }else{
+        print("adj ${adj} adjGlobl ${adjGlobl}");
+        print("adjList ${adjList} adjGlobalList ${adjGlobalList}");
+      }
+
+
+
+      closestLandmark!.coordinateX = closestPoint.intPoint.x;
+      closestLandmark!.coordinateY = closestPoint.intPoint.y;
+      closestLandmark!.doorX = closestPoint.intPoint.x;
+      closestLandmark!.doorY = closestPoint.intPoint.y;
+      closestLandmark!.properties!.latitude = closestPoint.latLngPoint.latitude.toString();
+      closestLandmark!.properties!.longitude = closestPoint.latLngPoint.longitude.toString();
     }
 
 
     return closestLandmark;
   }
+
+  Set<Marker> debugMarker = Set();
+  void addDebugMarkers(LatLng point, {double? hue,int? id}){
+    print("adding marker at $point");
+      setState(() {
+        debugMarker.add(Marker(
+          markerId: MarkerId("debug${DateTime.now().toString()}"),
+          position: point,
+          visible: true,
+          onTap: () {},
+          infoWindow: InfoWindow(
+              title: id.toString(),
+              // snippet: '${landmarks[i].properties!.polyId}',
+              // Replace with additional information
+              onTap: () {}),
+          icon: BitmapDescriptor.defaultMarkerWithHue(hue??BitmapDescriptor.hueAzure),
+        ));
+      });
+  }
+
+
+  ClosestPointResult shortestPoint(
+      LatLng userLatLng, LatLng targetLatLng, IntPoint targetintPoint,
+      List<LatLng> latLngPoints, List<IntPoint> intPoints) {
+
+    addDebugMarkers(targetLatLng,hue:BitmapDescriptor.hueMagenta);
+    double distanceBetweenLatLng(LatLng a, LatLng b) {
+      return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
+    }
+
+    LatLng? projectLatLngIfWithinSegment(
+        LatLng user, LatLng start, LatLng end) {
+      double ax = user.latitude - start.latitude;
+      double ay = user.longitude - start.longitude;
+      double bx = end.latitude - start.latitude;
+      double by = end.longitude - start.longitude;
+
+      double t = (ax * bx + ay * by) / (bx * bx + by * by);
+
+      // Check if the projection lies within the segment
+      if (t < 0 || t > 1) {
+        return null; // Outside the segment
+      }
+
+      print("latlng projected are ${start.latitude + t * bx},${start.longitude + t * by}");
+      return LatLng(start.latitude + t * bx, start.longitude + t * by);
+    }
+
+    double minDistanceLatLng = double.infinity;
+    LatLng? closestLatLngPoint;
+    LatLng? xPoint;
+    LatLng? yPoint;
+    navPoints? closestIntPoint;
+
+    for (int i = 0; i < latLngPoints.length; i++) {
+      LatLng latLngPoint = latLngPoints[i];
+      LatLng? projectedLatLng = projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
+
+      if (projectedLatLng != null) {
+        addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
+        double distance = distanceBetweenLatLng(userLatLng, projectedLatLng);
+        if (distance < minDistanceLatLng) {
+          minDistanceLatLng = distance;
+          closestLatLngPoint = projectedLatLng;
+          xPoint = targetLatLng;
+          yPoint = latLngPoint;
+        }
+      }
+    }
+
+    // Check if the direct distance to the target is shorter
+    double distanceToTargetLatLng = distanceBetweenLatLng(userLatLng, targetLatLng);
+    if (distanceToTargetLatLng < minDistanceLatLng) {
+      return ClosestPointResult(targetLatLng, targetintPoint!); // Return target for both formats
+    }
+
+    if(closestLatLngPoint != null && xPoint!= null && yPoint != null){
+
+      IntPoint xintegerpoint = tools.findCoordinatesOfWaypoint(xPoint);
+      IntPoint yintegerpoint = tools.findCoordinatesOfWaypoint(yPoint);
+      navPoints X = navPoints(xPoint.latitude,xPoint.longitude,xintegerpoint.x,xintegerpoint.y);
+      navPoints Y = navPoints(yPoint.latitude,yPoint.longitude,yintegerpoint.x,yintegerpoint.y);
+      navPoints Z = navPoints(closestLatLngPoint.latitude,closestLatLngPoint.longitude,0,0);
+      closestIntPoint = tools.findCartesianCoordinates(X, Y, Z);
+
+    }
+
+
+    return ClosestPointResult(closestLatLngPoint ?? targetLatLng, closestIntPoint!=null?IntPoint(closestIntPoint.x, closestIntPoint.y):targetintPoint);
+  }
+
 
   double currentHeading = 10.0; // Example current heading
   double referenceHeading = 0.0; // Example reference heading (North)
@@ -1543,6 +1659,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     return false; // No calibration needed
   }
+
 
   double calculateMagneticFieldStrength(double x, double y, double z) {
     return sqrt(x * x + y * y + z * z);
@@ -1632,6 +1749,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     widget.directLandID = '';
     widget.directsourceID = '';
     _recenterMap();
+    setState(() {
+      isLocalized = false;
+    });
   }
 
   Future<void> _handleBeaconLocalization(
@@ -1690,11 +1810,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
+
+
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS,
       bool render
       ) async {
-    if(UserState.geoLat != null && UserState.geoLng != null) {
+
+    GPS gps = GPS();
+    KalmanFilter _kalmanFilter = KalmanFilter();
+    await gps.startGpsUpdates();
+    StreamSubscription<Position>? subscription;
+    subscription = gps.positionStream.listen((position) {
+      _kalmanFilter.applyFilter(position.latitude, position.longitude);
+    });
+    await Future.delayed(Duration(seconds: 9));
+    subscription.cancel();
+    gps.dispose();
+
+    if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
+      UserState.geoLat = _kalmanFilter.latitudeEstimate;
+      UserState.geoLng = _kalmanFilter.longitudeEstimate;
       print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
       final userSetLocation = await getglobalcoords(
           LatLng(UserState.geoLat!, UserState.geoLng!)
@@ -1840,6 +1976,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.speak = speak;
     UserState.paintMarker = paintMarker;
     UserState.createCircle = updateCircle;
+    UserState.addDebugMarkers = addDebugMarkers;
+    UserState.renderHere = renderHere;
     List<int> userCords = [];
     userCords.add(user.coordX);
     userCords.add(user.coordY);
@@ -8657,31 +8795,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   .index]
                                   .lat,
                               PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index ]
-                                  .lng
-                            ], [
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lat,
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lng
-                            ]);
+                                  .sourceFloor);
+                          SingletonFunctionController
+                              .building
+                              .landmarkdata!
+                              .then((value) {
+                            createMarkers(
+                                value,
+                                PathState
+                                    .sourceFloor,
+                                bid: PathState
+                                    .sourceBid);
+                          });
+                        }
+                        await Future.delayed(const Duration(milliseconds: 500));
 
-                            Future.delayed(Duration(seconds: 2)).then((onValue){
-                              setState(() {
-                                onStart=true;
-                              });
-                            });
-                          }
+                        alignMapToPath([
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index]
+                              .lat,
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index ]
+                              .lng
+                        ], [
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index +
+                              2]
+                              .lat,
+                          PathState
+                              .singleCellListPath[
+                          user.pathobj
+                              .index +
+                              2]
+                              .lng
+                        ]);
+
+                        Future.delayed(Duration(seconds: 2)).then((onValue){
+                          setState(() {
+                            onStart=true;
+                          });
+                        });
+                        user.snapper.setPath(user.cellPath);
+                        await user.snapper.startGpsUpdates();
+                        user.handleGPS();
+
+                      }
 
                         },
                         style: ElevatedButton.styleFrom(
@@ -11876,7 +12040,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker),
+                    .union(restBuildingMarker).union(debugMarker),
                 buildingsEnabled: false,
                 compassEnabled: false,
                 rotateGesturesEnabled: true,
@@ -12274,11 +12438,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           late Timer _timer;
                           _timer = Timer.periodic(
                               Duration(milliseconds: 5000), (timer) {
-                            localizeUser().then((value) => {
-                              setState(() {
-                                isLocalized = false;
-                              })
-                            });
+                            localizeUser();
                             _timer.cancel();
                           });
                         } else {
@@ -12801,4 +12961,17 @@ class LatLngTween extends Tween<LatLng> {
       begin!.longitude + (end!.longitude - begin!.longitude) * t,
     );
   }
+}
+
+class ClosestPointResult {
+  final LatLng latLngPoint;
+  final IntPoint intPoint;
+
+  ClosestPointResult(this.latLngPoint, this.intPoint);
+}
+class IntPoint {
+   int x;
+   int y;
+
+  IntPoint(this.x, this.y);
 }

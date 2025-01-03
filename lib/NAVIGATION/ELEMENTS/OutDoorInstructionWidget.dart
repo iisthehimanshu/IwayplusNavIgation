@@ -11,7 +11,7 @@ import '../directionClass.dart';
 
 class OutDoorInstructionWidget extends StatefulWidget{
   double ListHeight;
-  double TotalOutDoorMeter;
+  double TotalOutDoorInFeet;
   String EndBuildingName;
 
   List<direction> directions;
@@ -19,7 +19,7 @@ class OutDoorInstructionWidget extends StatefulWidget{
   String endName;
 
 
-  OutDoorInstructionWidget({required this.ListHeight,required this.TotalOutDoorMeter,required this.EndBuildingName,required this.directions,required this.ShowLandmark,required this.endName});
+  OutDoorInstructionWidget({required this.ListHeight,required this.TotalOutDoorInFeet,required this.EndBuildingName,required this.directions,required this.ShowLandmark,required this.endName});
 
   @override
   _OutDoorInstructionWidgetState createState() => _OutDoorInstructionWidgetState();
@@ -101,7 +101,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                             child: Icon(Icons.keyboard_arrow_down),
                           ),
                           !ListExpand? Container(child: Text(
-                            "Walk ${widget.TotalOutDoorMeter.toInt()} meters to reach ${widget.EndBuildingName}",
+                            "Walk ${(widget.TotalOutDoorInFeet*0.3048).ceil()} meters to reach ${widget.EndBuildingName}",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -111,7 +111,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                             ),
                             textAlign: TextAlign.left,
                           ),) : Container(child: Text(
-                            "Walk ${widget.TotalOutDoorMeter.toInt()} meters to reach ${widget.EndBuildingName}",
+                            "Walk ${(widget.TotalOutDoorInFeet*0.3048).ceil()} meters to reach ${widget.EndBuildingName}",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -169,7 +169,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                                         SizedBox(height: 1,),
                                         ExcludeSemantics(
                                           child: Text(
-                                            ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurn}" :"${(direction.distanceToNextTurn??0*0.3048).ceil()} m",
+                                            ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${((direction.distanceToNextTurnInFeet??0)*0.3048).ceil()} m",
                                             style: const TextStyle(
                                               fontFamily: "Roboto",
                                               fontSize: 14,

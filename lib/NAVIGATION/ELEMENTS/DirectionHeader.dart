@@ -1200,13 +1200,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                                         .user
                                         .pathobj
                                         .directions[DirectionIndex]
-                                        .distanceToNextTurn !=
+                                        .distanceToNextTurnInFeet !=
                                         null &&
                                     widget
                                         .user
                                         .pathobj
                                         .directions[DirectionIndex]
-                                        .distanceToNextTurn! <=
+                                        .distanceToNextTurnInFeet! <=
                                         5 &&
                                     DirectionIndex + 1 <
                                         widget.user.pathobj.directions.length) {
@@ -1366,7 +1366,7 @@ class scrollableDirection extends StatelessWidget {
         } else if (DirectionIndex == nextTurnIndex) {
           return '$steps';
         } else {
-          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurn ?? 1).toInt(), context)}';
+          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurnInFeet ?? 1).toInt(), context)}';
         }
       } else {
         return "";

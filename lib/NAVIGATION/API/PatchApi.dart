@@ -124,7 +124,7 @@ class patchAPI {
         return patchDataModel.fromJson(responseBody);
 
       }else{
-        print("PATCH API EMPTY DATA FROM API AFTER 403");
+        print("${response.body}  PATCH API EMPTY DATA FROM API AFTER 403");
         patchDataModel patchData = patchDataModel();
         return patchData;
       }

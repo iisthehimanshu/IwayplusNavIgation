@@ -42,7 +42,7 @@ class SingletonFunctionController {
     // Mark the function as running and create a new Completer
     _isRunning = true;
     _completer = Completer<void>();
-    
+
 
     var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
     building.beacondata = beaconData;
@@ -99,7 +99,7 @@ class SingletonFunctionController {
   beacon? getlocalizedBeacon(){
     double highestweight = 0;
     String nearestBeacon = "";
-   // if(isBinEmpty() == false){
+    // if(isBinEmpty() == false){
     // }
 
     return (SingletonFunctionController.currentBeacon!="")?Building.apibeaconmap[SingletonFunctionController.currentBeacon]:null;

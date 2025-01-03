@@ -17,7 +17,6 @@ import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:string_similarity/string_similarity.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -145,76 +144,61 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         // Perform search
         //_performSearch(_controller.text);
 
-        String modifiedString = _controller.text.replaceAll(stringToRemove, "").trimLeft();
-        print("modifiedString");
-        print(modifiedString);
-        if(modifiedString.trimLeft().length>0){
-          finalName = modifiedString;
-          // print(finalName);
-          // final fuse = Fuzzy(
-          //   landmarkData.landmarkNames,
-          //   options: FuzzyOptions(
-          //     findAllMatches: true,
-          //     tokenize: true,
-          //     threshold: 0.7,
-          //   ),
-          // );
-          // final outputresult = fuse.search(modifiedString.toLowerCase());
-          // // Assuming `result` is a List<FuseResult<dynamic>>
-          // outputresult.forEach((fuseResult) {
-          //   // Access the item property of the result to get the matched value
-          //   String matchedName = fuseResult.item;
-          //   fuseResult.matches.length;
-          //
-          //   // Access the score of the match
-          //   double score = fuseResult.score;
-          //
-          //   // Do something with the matchedName or score
-          //   // score == 0.0
-          //   //     ? print('Matched Name: $matchedName, Score: $score')
-          //   //     : print("");
-          //   if (score <= 0.3) { //0.5 for normal
-          //     finalName = fuseResult.item;
-          //   }
-          // });
+        String modifiedString = _controller.text.replaceAll(stringToRemove, "");
+        if(modifiedString.trim().length>0){
+          final fuse = Fuzzy(
+            landmarkData.landmarkNames,
+            options: FuzzyOptions(
+              findAllMatches: true,
+              tokenize: true,
+              threshold: 0.7,
+            ),
+          );
+          final outputresult = fuse.search(modifiedString.toLowerCase());
+          // Assuming `result` is a List<FuseResult<dynamic>>
+          outputresult.forEach((fuseResult) {
+            // Access the item property of the result to get the matched value
+            String matchedName = fuseResult.item;
+            fuseResult.matches.length;
+
+            // Access the score of the match
+            double score = fuseResult.score;
+
+            // Do something with the matchedName or score
+            // score == 0.0
+            //     ? print('Matched Name: $matchedName, Score: $score')
+            //     : print("");
+            if (score <= 0.3) { //0.5 for normal
+              finalName = fuseResult.item;
+            }
+          });
 
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
-              String landmarkNameOf3 = "";
-              if(value.name?.split('').length==3){
-                value.name?.split('').forEach((e){
-                  if(e != " ") landmarkNameOf3+=e;
-                });
-              }else{
-                landmarkNameOf3 = value.name!.replaceAll('-', ' ');
-              }
-
-              if (landmarkNameOf3.toLowerCase().contains(finalName.toLowerCase())) {
+              if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
                 name = value.name!;
                 floor = value.name!;
                 polyID = value.properties!.polyId!;
                 buildingID = value.buildingID!;
-                print(name);
-                print(polyID);
-                print(floor);
-                print(buildingID);
-                print("--------");
               }else{
-                //print("nooo${landmarkNameOf3.toLowerCase()} ----- ${finalName.toLowerCase()}");
+                print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
               }
             }
           });
 
-          if(polyID.isNotEmpty){
-            HelperClass.showToast("Navigating to ${finalName}");
-            setState(() {
-              promptLoader = false;
-            });
-            //Future.delayed(Duration(seconds: 2));
-            Navigator.pop(context, polyID);
-          }else{
-
+          if(landmarkData.landmarkNames!.contains(finalName)){
+            //onVenueClicked(name, floor, polyID, buildingID);
+            if(polyID.isNotEmpty){
+              HelperClass.showToast("Navigating to ${finalName}");
+              setState(() {
+                promptLoader = false;
+              });
+              //Future.delayed(Duration(seconds: 2));
+              Navigator.pop(context, polyID);
+            }else{
+            }
           }
+
         }else{
           HelperClass.showToast("Provide a Landmark name !!");
         }
@@ -249,8 +233,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         searchHintString = widget.hintText;
       });
-    }else{
-      print("speetchText.isNotListening");
     }
     HelperClass.showToast("Speak to search");
     await Future.delayed(Duration(seconds: 5));
@@ -259,14 +241,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void onSpeechResult(result) {
-    print("onSpeechResult");
     setState(() {
       print("Listening from mic");
 
       setState(() {
         _controller.text = result.recognizedWords;
         search(result.recognizedWords);
-        print(_controller.text);
+        // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
 
@@ -393,7 +374,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       if (searchText.isEmpty) {
         return;
       }
-
       searchText = searchText.toLowerCase();
       searchResults.clear();
       searcCategoryhResults.clear();
@@ -408,24 +388,24 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               final lowerCaseName = value.name!.toLowerCase();
               if(searchText.toLowerCase().contains("entry") && value.element!.subType == "main entry"){
                 optionListItemBuildingName.add(value.buildingName!);
-
               }else if (lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
                 optionListItemBuildingName.add(value.buildingName!);
               }
             }
           });
           print("entered here");
-            optionListItemBuildingName.forEach((element) {
-              searcCategoryhResults.add(
-                SearchpageCategoryResults(
-                  name: searchText,
-                  buildingName: element,
-                  onClicked: onVenueClicked,
-                ),
-              );
-            });
+          optionListItemBuildingName.forEach((element) {
+            searcCategoryhResults.add(
+              SearchpageCategoryResults(
+                name: searchText,
+                buildingName: element,
+                onClicked: onVenueClicked,
+              ),
+            );
+          });
         }
-      } else {
+      }
+      else {
         category = false;
         vall = -1;
         topCategory=false;
@@ -475,7 +455,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
-                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
+                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
                     ));
                   }
                 }
@@ -494,7 +474,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               result.forEach((fuseResult) {
                 if (fuseResult.score < 0.5) {
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
-                     sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
+                    sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
                   }else{
                     searchResults.add(SearchpageResults(
                       name: value.name!,
@@ -513,8 +493,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               });
             }
           });
-
-
         }
       }
     });
@@ -552,9 +530,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       b.distance = (distanceB*0.306).toInt();
       return distanceA.compareTo(distanceB);
     });
-if(searchResults.length>2){
-  print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
-}
+    if(searchResults.length>2){
+      print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
+    }
 
   }
 
@@ -615,7 +593,6 @@ if(searchResults.length>2){
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
               accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
-
             ));
           }
 
@@ -670,15 +647,6 @@ if(searchResults.length>2){
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
-
-
-
-    // if(speetchText.isNotListening){
-    //   micColor = Colors.black;
-    //   print("Not listening");
-    // }else{
-    //   micColor = Color(0xff24B9B0);
-    // }
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(top: statusBarHeight),
@@ -686,7 +654,6 @@ if(searchResults.length>2){
         child: !promptLoader? Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-
             Semantics(
               header: true,
               label: "Search",
@@ -748,7 +715,6 @@ if(searchResults.length>2){
                                     }
                                   },
                                   onSubmitted: (value) {
-
                                     search(value);
                                   },
                                   onChanged: (value) {
@@ -900,6 +866,66 @@ if(searchResults.length>2){
                 ),
               ),
             ),
+            !category && _controller.text.isNotEmpty ? Visibility(
+              visible: isTyping,
+              child: Semantics(
+                header: true,
+                label: "Building Filter section",
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: newvall,
+                    onChanged: (val) {
+
+                      // if(HelperClass.SemanticEnabled) {
+                      //   speak("${optionListItemBuildingName.toList()[val]} selected");
+                      // }
+                      //
+                      // selectedButton = optionListItemBuildingName.toList()[val];
+                      setState(() => newvall = val);
+                      //
+                      //
+                      // //_controller.text = optionListItemBuildingName.toList()[val];
+                      // search(optionListItemBuildingName.toList()[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListItemBuildingNameNew.toList(),
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        newvall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListItemBuildingNameNew.toList()[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
+
+                        onTap: (String Text) {
+                          print("tapped$Text");
+
+                          if (Text.isNotEmpty) {
+                            search(_controller.text,wantToFilter: Text);
+                          }
+                          // else {
+                          //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                          //   _controller.text="";
+                          //   searchResults = [];
+                          //   searcCategoryhResults = [];
+                          //   newvall = -1;
+                          // }
+                        }, icon: _icons[i],
+                      );
+                    },
+                    direction: Axis.horizontal,
+                  ),
+                ),
+              ),
+            ) : Container(),
 
             SizedBox(height: 4,),
             Divider(thickness: 6,color: Color(0xfff2f3f5)),
@@ -915,7 +941,6 @@ if(searchResults.length>2){
                   ),
                 )),
             if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
-
               Column(
                   children: [
                     SizedBox(height: 16,),
@@ -945,7 +970,6 @@ if(searchResults.length>2){
                     )
                   ]
               )
-
           ],
         ) : Center(
           child: CircularProgressIndicator(

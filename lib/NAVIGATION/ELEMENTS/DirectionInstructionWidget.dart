@@ -272,7 +272,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                     ],
                   ),
                   ListExpand? Container() : Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,),
-
                   ListExpand? SizedBox(height: 20,):Container(),
                   ListView.builder(
                     itemCount: ListExpand?widget.directionList.length : min(widget.directionList.length, 0),

@@ -38,7 +38,7 @@ class UserState {
   bool initialallyLocalised = false;
   String bid;
   List<int> offPathDistance = [];
-   bool onConnection = false;
+  bool onConnection = false;
   bool temporaryExit = false;
   Map<String,List<int>> stepsArray = {"index":[0], "array":[2]};
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
@@ -394,6 +394,7 @@ class UserState {
                 [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
             3;
   }
+
   void announceLiftUsage(BuildContext context) {
     onConnection = true;
     createCircle(lat, lng);

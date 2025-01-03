@@ -8795,7 +8795,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   .index]
                                   .lat,
                               PathState
-                                  .sourceFloor);
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index ]
+                                  .lng
+                            ], [
+                              PathState
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index +
+                                  2]
+                                  .lat,
+                              PathState
+                                  .singleCellListPath[
+                              user.pathobj
+                                  .index +
+                                  2]
+                                  .lng
+                            ]);
+
                           SingletonFunctionController
                               .building
                               .landmarkdata!
@@ -8845,9 +8863,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         await user.snapper.startGpsUpdates();
                         user.handleGPS();
 
-                      }
-
-                        },
+                      },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),

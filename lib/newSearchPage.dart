@@ -547,6 +547,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                         onSelect: item.select!,
                         selected: item.selected,
                         onTap: (String Text) {
+                          print("again tapped ${Text}");
                           if (Text.isNotEmpty) {
                             search(Text);
                           } else {

@@ -63,9 +63,11 @@ bool isBlack=false;
               setState(() {
                 widget.onTap("");
               });
+            }else{
+              widget.onTap(widget.text);
+              widget.onSelect(widget.selected);
             }
-            widget.onTap(widget.text);
-            widget.onSelect(widget.selected);
+
             widget.selected ? print("black") : print("white");
             // Navigator.push(
             //     context,

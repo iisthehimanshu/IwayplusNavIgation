@@ -1088,7 +1088,7 @@ bool isAppinForeground=true;
         // Detect peak and valley
         if (magnitude > peakThreshold &&
             DateTime.now().millisecondsSinceEpoch - lastPeakTime >
-                peakInterval) {
+                peakInterval ) {
           setState(() {
             lastPeakTime = DateTime.now().millisecondsSinceEpoch;
             stepCount++;

@@ -893,7 +893,7 @@ if(searchResults.length>2){
                 ),
               ),
             ),
-            !category && _controller.text.isNotEmpty ? Semantics(
+            category && _controller.text.isNotEmpty ? Semantics(
               header: true,
               label: "Building Filter section",
               child: Container(

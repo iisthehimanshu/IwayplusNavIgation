@@ -34,43 +34,46 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return GestureDetector(
-          onTap: (){
-            ListExpand = !ListExpand;
-          },
-          child: Container(
-            padding: EdgeInsets.only(left: 20,top: 0,right: 10),
-            child: Row(
+      onTap: (){
+        ListExpand = !ListExpand;
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 20,top: 0,right: 10),
+        child: Row(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    Container(
-                      width: 10, // Width of the circle
-                      height: 10, // Height of the circle
-                      decoration: BoxDecoration(
-                        color: Color(0xffE5E7EB), // Color of the circle
-                        shape: BoxShape.circle, // Makes the container a circle
-                      ),
-                    ),
-                    Container(height:ListExpand?widget.ListHeight: widget.ShowLandmark? 105: 65,width: 1, color: Color(0xffE5E7EB)),
-                    Container(
-                      width: 10, // Width of the circle
-                      height: 10, // Height of the circle
-                      decoration: BoxDecoration(
-                        color: Color(0xffE5E7EB), // Color of the circle
-                        shape: BoxShape.circle, // Makes the container a circle
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 20,),
                 Container(
-                  width: screenWidth*0.74,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
+                  width: 10, // Width of the circle
+                  height: 10, // Height of the circle
+                  decoration: BoxDecoration(
+                    color: Color(0xffE5E7EB), // Color of the circle
+                    shape: BoxShape.circle, // Makes the container a circle
+                  ),
+                ),
+                Container(height:ListExpand?widget.ListHeight: widget.ShowLandmark? 105: 65,width: 1, color: Color(0xffE5E7EB)),
+                Container(
+                  width: 10, // Width of the circle
+                  height: 10, // Height of the circle
+                  decoration: BoxDecoration(
+                    color: Color(0xffE5E7EB), // Color of the circle
+                    shape: BoxShape.circle, // Makes the container a circle
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(width: 20,),
+            Semantics(
+              label: "Take Outdoor path and Walk ${widget.TotalOutDoorInFeet.toInt()} meters to reach ${widget.EndBuildingName}",
+              child: Container(
+                width: screenWidth*0.74,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ExcludeSemantics(
+                      child: Container(
                         margin:EdgeInsets.only(top: 5),
                         child: Text(
                           "Outdoor Path",
@@ -84,10 +87,12 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      SizedBox(height:10),
-                      !ListExpand? Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,) : Container(),
-                      SizedBox(height:7),
-                      Row(
+                    ),
+                    SizedBox(height:10),
+                    !ListExpand? Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,) : Container(),
+                    SizedBox(height:7),
+                    ExcludeSemantics(
+                      child: Row(
                         children: [
                           ListExpand?Container(
                             height: 35,
@@ -123,86 +128,87 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                           ),),
                         ],
                       ),
-                      ListExpand?SizedBox(height:15): Container(),
+                    ),
+                    ListExpand?SizedBox(height:15): Container(),
 
 
-                      ListView.builder(
-                        itemCount: ListExpand? widget.directions.length: min(widget.directions.length,0),
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(top: 10),
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final direction = widget.directions[index];
-                          return GestureDetector(
-                            onTap: (){
-                              ListExpand = !ListExpand;
-                            },
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ListExpand? Container():Container(
-                                      height: 35,
-                                      width: 18,
-                                      margin: EdgeInsets.only(right: 20),
-                                      child: Icon(Icons.keyboard_arrow_down_sharp),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 3,),
+                    ListView.builder(
+                      itemCount: ListExpand? widget.directions.length: min(widget.directions.length,0),
+                      shrinkWrap: true,
+                      padding: EdgeInsets.only(top: 10),
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final direction = widget.directions[index];
+                        return Semantics(
+                          label: index == widget.directions.length-1? "${direction.turnDirection} ${((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${(direction.distanceToNextTurnInFeet??0*0.3048).ceil()} m"}, you'll reach ${widget.endName}":"${direction.turnDirection} ${((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${(direction.distanceToNextTurnInFeet??0*0.3048).ceil()} m"}",
+                          excludeSemantics: true,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ListExpand? Container():Container(
+                                    height: 35,
+                                    width: 18,
+                                    margin: EdgeInsets.only(right: 20),
+                                    child: Icon(Icons.keyboard_arrow_down_sharp),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 3,),
 
-                                        ExcludeSemantics(
-                                          child: Text(
-                                            (direction.turnDirection??""),
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff0e0d0d),
-                                              height: 25 / 16,
-                                            ),
-                                            textAlign: TextAlign.left,
+                                      ExcludeSemantics(
+                                        child: Text(
+                                          (direction.turnDirection??""),
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff0e0d0d),
+                                            height: 25 / 16,
                                           ),
+                                          textAlign: TextAlign.left,
                                         ),
-                                        SizedBox(height: 1,),
-                                        ExcludeSemantics(
-                                          child: Text(
-                                            ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${((direction.distanceToNextTurnInFeet??0)*0.3048).ceil()} m",
-                                            style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xff8d8c8c),
-                                              height: 20 / 14,
-                                            ),
-                                            textAlign: TextAlign.left,
+                                      ),
+                                      SizedBox(height: 1,),
+                                      ExcludeSemantics(
+                                        child: Text(
+                                          ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${((direction.distanceToNextTurnInFeet??0)*0.3048).ceil()} m",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff8d8c8c),
+                                            height: 20 / 14,
                                           ),
+                                          textAlign: TextAlign.left,
                                         ),
+                                      ),
 
-                                      ],
-                                    ),
-                                    Spacer(),
-                                    ListExpand? Container(
-                                      height: 35,
-                                      width: 35,
+                                    ],
+                                  ),
+                                  Spacer(),
+                                  ListExpand? Container(
+                                    height: 35,
+                                    width: 35,
 
-                                      child: getCustomIcon((direction.turnDirection??""), context),
-                                    ):Container(),
+                                    child: getCustomIcon((direction.turnDirection??""), context),
+                                  ):Container(),
 
-                                  ],
+                                ],
 
-                                ),
-                                // SizedBox(height: 2,),
-                                ListExpand? index!=widget.directions.length-1? Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,):Container():Container(),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                              ),
+                              // SizedBox(height: 2,),
+                              ListExpand? index!=widget.directions.length-1? Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,):Container():Container(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
 
-                      widget.ShowLandmark? Container(
+                    widget.ShowLandmark? ExcludeSemantics(
+                      child: Container(
                         margin: EdgeInsets.only(top:20),
                         child: Text(
                           widget.endName,
@@ -215,22 +221,26 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                           ),
                           textAlign: TextAlign.left,
                         ),
-                      ): Container(),
-                      widget.ShowLandmark && widget.EndBuildingName != widget.endName?Container(
+                      ),
+                    ): Container(),
+                    widget.ShowLandmark && widget.EndBuildingName != widget.endName?ExcludeSemantics(
+                      child: Container(
                           margin: EdgeInsets.only(top: 8,bottom: 8),
                           padding: EdgeInsets.only(top:5,bottom: 5,left: 10,right: 10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
                             color: Color(0xffF9D2D3),
                           ),
-                          child:Text("${widget.EndBuildingName}", style: const TextStyle(fontSize: 14,color:Colors.black))): Container()
-                    ],
-                  ),
+                          child:Text("${widget.EndBuildingName}", style: const TextStyle(fontSize: 14,color:Colors.black))),
+                    ): Container()
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
   }
 
   Widget getCustomIcon(String direction,context) {

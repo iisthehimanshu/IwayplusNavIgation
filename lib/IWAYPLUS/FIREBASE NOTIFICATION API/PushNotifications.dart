@@ -98,9 +98,11 @@ class PushNotifications {
         channelDescription: 'your channel description',
         importance: Importance.max,
         priority: Priority.high,
-        ticker: 'ticker');
+        ticker: '');
     const NotificationDetails notificationDetails =
     NotificationDetails(android: androidNotificationDetails);
+    await _flutterLocalNotificationsPlugin.cancelAll();
+
     await _flutterLocalNotificationsPlugin
         .show(0, title, body, notificationDetails, payload: payload);
   }

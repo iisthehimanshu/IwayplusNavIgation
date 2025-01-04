@@ -13,6 +13,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../../IWAYPLUS/Elements/UserCredential.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
+import '../../IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import '/IWAYPLUS/API/buildingAllApi.dart';
 
 import 'package:vibration/vibration.dart';
@@ -36,7 +37,7 @@ class DirectionHeader extends StatefulWidget {
   String getSemanticValue;
   BuildContext context;
   final  Function(String? nearestBeacon,String? polyID, gmap.LatLng? gpsCoordinates,
-  {bool speakTTS, bool render}) paint;
+      {bool speakTTS, bool render}) paint;
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
   final Function() moveUser;
@@ -101,10 +102,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       });
     });
   }
+  bool isSemanticEnable = false;
 
   @override
   void initState() {
     super.initState();
+
 
     // initTts();
 
@@ -128,7 +131,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     btadapter.startScanning(Building.apibeaconmap);
     _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       if (widget.user.pathobj.index > 1) {
-        print("calling itself");
         listenToBin();
       }
     });
@@ -139,20 +141,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     widget.getSemanticValue = "";
 
+
     if (widget.user.floor != widget.user.pathobj.destinationFloor &&
         widget.user.pathobj.connections[widget.user.bid]?[widget.user.floor] ==
             (widget.user.showcoordY * UserState.cols +
                 widget.user.showcoordX)) {
-      speak(
-          convertTolng(
-              "Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
-              _currentLocale,
-              "",
-              "",
-              0,
-              ""),
-          _currentLocale,
-          prevpause: true);
+
+      Future.delayed(Duration(seconds: 4)).then((_) {
+        speak(
+            convertTolng(
+                "Use this lift and go to ${tools.numericalToAlphabetical(
+                    widget.user.pathobj.destinationFloor)} floor",
+                _currentLocale,
+                "",
+                "",
+                0,
+                ""),
+            _currentLocale,
+            prevpause: true);
+      });
+
     } else if (widget
         .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
         null) {
@@ -189,10 +197,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if (widget.direction == "Straight") {
           widget.direction = "Go Straight";
           if (!UserState.ttsOnlyTurns) {
-            speak(
-                "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context)}}",
-                _currentLocale,
-                prevpause: true);
+            Future.delayed(Duration(seconds: 4)).then((_) {
+              speak("${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context)}}", _currentLocale, prevpause: true);
+            });
+
           }
         } else {
           widget.direction = convertTolng(
@@ -203,7 +211,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               0,
               "");
           if (!UserState.ttsOnlyTurns) {
-            speak("${widget.direction}", _currentLocale, prevpause: true);
+            Future.delayed(Duration(seconds: 4)).then((_){
+              speak("${widget.direction}", _currentLocale, prevpause: true);
+            });
           }
           widget.getSemanticValue =
           "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
@@ -216,6 +226,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           systemNavigationBarColor: Colors.white// Set the icon color to dark
       ));
     } catch (e) {}
+
   }
 
   @override
@@ -237,8 +248,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> sumMapAvg = {};
 
   var newMap = <String, double>{};
-  Map<String, DateTime> beaconTimeouts = {};
-  double weight=0;
 
   bool listenToBin() {
     double highestweight = 0;
@@ -248,15 +257,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     print("threshold");
     threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!
         .realtimeLocalisationThreshold??'5';
+    print(widget.user.building!.patchData[widget.user.bid]!.patchData!
+        .realtimeLocalisationThreshold);
+    print(threshold);
     //
     sortedsumMap.clear();
-    sumMap.forEach((key, value) {
-      // Check if the beacon is within the timeout
-      if (beaconTimeouts.containsKey(key) &&
-          beaconTimeouts[key]!.isAfter(DateTime.now())) {
-        return; // Skip beacons in timeout
-      }
+    //
 
+    sumMap.forEach((key, value) {
       if (highestweight <= value) {
         nearestBeacon = key;
         highestweight = value;
@@ -264,7 +272,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     });
 
     setState(() {
-      weight= highestweight;
       sumMap;
       ShowsumMap = HelperClass().sortMapByValue(sumMap);
     });
@@ -393,7 +400,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
-              highestweight >= double.parse(threshold!)) {
+              highestweight >= int.parse(threshold!)) {
             widget.user.onConnection = false;
             //
             List<int> beaconcoord = [
@@ -407,45 +414,45 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             double d = tools.calculateDistance(beaconcoord, usercoord);
             int distanceFromPath = 100000000;
             int? indexOnPath = null;
-           List<double> newPoint=[];
-          if(widget.user.bid==buildingAllApi.outdoorID){
-            List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
-            List<Cell> nearPoints=findTwoNearestPoints(beaconLatLng,widget.user.cellPath,widget.user.bid);
-            for(var point in nearPoints){
-              print("found near point is [${point.x},${point.y}]");
-            }
-
-            newPoint=projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1],widget
-                .user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
-
-            List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
-            Cell point = Cell((np[1]*nearPoints[0].numCols)+np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
-
-            indexOnPath=insertProjectedPoint(widget.user.cellPath,point);
-            widget.user.path.insert(indexOnPath, point.node);
-            widget.user.cellPath.insert(
-                indexOnPath,
-                Cell(
-                    point.node,
-                    point.x,
-                    point.y,
-                    tools.eightcelltransition,
-                    point.lat,
-                    point.lng,
-                    buildingAllApi.outdoorID,
-                    point.floor,
-                    point.numCols,
-                    imaginedCell: true));
-          }else{
-            widget.user.cellPath.forEach((node) {
-              List<int> pathcoord = [node.x, node.y];
-              double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-              if (d1 < distanceFromPath) {
-                distanceFromPath = d1.toInt();
-                indexOnPath = widget.user.path.indexOf(node.node);
+            List<double> newPoint=[];
+            if(widget.user.bid==buildingAllApi.outdoorID){
+              List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
+              List<Cell> nearPoints=findTwoNearestPoints(beaconLatLng,widget.user.cellPath,widget.user.bid);
+              for(var point in nearPoints){
+                print("found near point is [${point.x},${point.y}]");
               }
-            });
-          }
+
+              newPoint=projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1],widget
+                  .user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
+
+              List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
+              Cell point = Cell((np[1]*nearPoints[0].numCols)+np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
+
+              indexOnPath=insertProjectedPoint(widget.user.cellPath,point);
+              widget.user.path.insert(indexOnPath, point.node);
+              widget.user.cellPath.insert(
+                  indexOnPath,
+                  Cell(
+                      point.node,
+                      point.x,
+                      point.y,
+                      tools.eightcelltransition,
+                      point.lat,
+                      point.lng,
+                      buildingAllApi.outdoorID,
+                      point.floor,
+                      point.numCols,
+                      imaginedCell: true));
+            }else{
+              widget.user.cellPath.forEach((node) {
+                List<int> pathcoord = [node.x, node.y];
+                double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+                if (d1 < distanceFromPath) {
+                  distanceFromPath = d1.toInt();
+                  indexOnPath = widget.user.path.indexOf(node.node);
+                }
+              });
+            }
             if (distanceFromPath > 10) {
               _timer.cancel();
               widget.repaint(nearestBeacon);
@@ -454,15 +461,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               nextTurnIndex = 1;
               return false; //away from path
             }else {
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                if (!UserState.ttsOnlyTurns) {
-                  speak(
-                      "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
-                      _currentLocale);
-                }
-                widget.user.moveToPointOnPath(indexOnPath!);
-                widget.moveUser();
-                DirectionIndex = nextTurnIndex;
+              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+              if (!UserState.ttsOnlyTurns) {
+                speak(
+                    "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
+                    _currentLocale);
+              }
+              widget.user.moveToPointOnPath(indexOnPath!);
+              widget.moveUser();
+              DirectionIndex = nextTurnIndex;
               return true; //moved on path
             }
           }
@@ -521,7 +528,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // Sort the list of turn points by distance to the beacon
     print("turnPoints[0].x ${turnPoints.length} ${turnPoints[0].x}");
     List<Cell> filteredPoints = turnPoints.where((point) =>
-     (point.bid == userBid && point.imaginedCell == false)
+    (point.bid == userBid && point.imaginedCell == false)
     ).toList();
     print("filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
 
@@ -561,6 +568,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
+
     if (!UserState.ttsAllStop) {
       if (disposed) return;
 
@@ -606,8 +614,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
 
       await flutterTts.setPitch(1.0);
-      await flutterTts.speak(msg);
 
+      if(isSemanticEnable){
+        PushNotifications.showSimpleNotification(title: msg, body: "", payload: "");
+      }else {
+        await flutterTts.speak(msg);
+      }
       setState(() {
         isSpeaking = !isSpeaking;
       });
@@ -863,7 +875,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           UserState.isTurn = false;
           if (!UserState.ttsOnlyTurns) {
             speak(
-                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
+                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
                 _currentLocale,
                 prevpause: true);
           }
@@ -902,8 +914,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
             if (!UserState.ttsOnlyTurns) {
               speak(
-                  convertTolng(
-                      "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
+                  convertTolng("You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
                       _currentLocale,
                       '',
                       direc,
@@ -1101,6 +1112,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
+    isSemanticEnable = MediaQuery.of(context).accessibleNavigation;
 
     // String binString = btadapter.BIN.entries.map((entry) {
     //   int key = entry.key;

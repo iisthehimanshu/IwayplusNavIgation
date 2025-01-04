@@ -3759,6 +3759,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   List<LatLng> matchPolygonPoints = [];
   Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,
       {Color? color}) async {
+    print("landmarkvenueclicked");
     selectedroomMarker.clear(); // Clear existing markers
     matchPolygonId = PolygonId("$polygonPoints");
     matchPolygonPoints = polygonPoints;
@@ -3772,7 +3773,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
-    cachedPolygon.clear();// Clear existing markers
+    cachedPolygon.clear(); // Clear existing markers
 
     List<geo.LatLng> points = [];
     for (var e in polygonPoints) {
@@ -3780,28 +3781,65 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     Uint8List iconMarker =
     await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
+
+    LatLng centerPosition = calculateRoomCenter(polygonPoints);
+
+    // Add marker with bouncing animation
+    await _addBouncingMarker(centerPosition, iconMarker);
+  }
+  Future<void> _addBouncingMarker(LatLng position, Uint8List iconMarker) async {
+    double bounceHeight = 0.0001; // Height of the bounce
+    int bounceDuration = 200; // Milliseconds for each bounce cycle
+    int bounceCount = 10; // Total number of bounces
+
+    Marker marker = Marker(
+      markerId: MarkerId('selectedroomMarker'),
+      position: position,
+      icon: BitmapDescriptor.fromBytes(iconMarker),
+      onTap: () {},
+    );
+
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-          Marker(
-              markerId: MarkerId('selectedroomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              onTap: () {}),
-        );
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(marker);
       } else {
         selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-          Marker(
-              markerId: MarkerId('selectedroomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              onTap: () {}),
-        );
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(marker);
       }
     });
-  }
 
+    // Simulate bouncing animation
+    for (int i = 0; i < bounceCount; i++) {
+      await Future.delayed(Duration(milliseconds: bounceDuration), () {
+        double offset = (i % 2 == 0) ? bounceHeight : -bounceHeight;
+        setState(() {
+          selectedroomMarker[buildingAllApi.getStoredString()]?.remove(marker);
+          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+            Marker(
+              markerId: MarkerId('selectedroomMarker'),
+              position: LatLng(position.latitude + offset, position.longitude),
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              onTap: () {},
+            ),
+          );
+        });
+      });
+    }
+
+    // Reset the marker to its original position after bouncing
+    setState(() {
+      selectedroomMarker[buildingAllApi.getStoredString()]?.removeWhere(
+              (m) => m.markerId == MarkerId('selectedroomMarker'));
+      selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+        Marker(
+          markerId: MarkerId('selectedroomMarker'),
+          position: position,
+          icon: BitmapDescriptor.fromBytes(iconMarker),
+          onTap: () {},
+        ),
+      );
+    });
+  }
   Future<void> addselectedMarker(LatLng Point) async {
     selectedroomMarker.clear(); // Clear existing markers
 
@@ -5586,7 +5624,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // if(user.isnavigating==false){
     //   clearPathVariables();
     // }
-
+print("got inside it");
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -11145,7 +11183,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
-
     if (user.floor ==
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()]) {
@@ -11161,7 +11198,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         });
       }
     }
-
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathMarkers[key] != null &&
           pathMarkers[key]![SingletonFunctionController.building.floor[key]] !=
@@ -11429,6 +11465,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   void onLandmarkVenueClicked(String ID,
       {bool DirectlyStartNavigation = false}) async {
+
+    print("this is the main function");
     final snapshot = await SingletonFunctionController.building.landmarkdata;
     SingletonFunctionController.building.selectedLandmarkID = ID;
 

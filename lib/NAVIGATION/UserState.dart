@@ -73,18 +73,18 @@ class UserState {
 
   UserState(
       {required this.floor,
-      required this.coordX,
-      required this.coordY,
-      required this.lat,
-      required this.lng,
-      required this.theta,
-      this.key = "",
-      this.bid = "",
-      this.showcoordX = 0,
-      this.showcoordY = 0,
-      this.isnavigating = false,
-      this.coordXf = 0.0,
-      this.coordYf = 0.0});
+        required this.coordX,
+        required this.coordY,
+        required this.lat,
+        required this.lng,
+        required this.theta,
+        this.key = "",
+        this.bid = "",
+        this.showcoordX = 0,
+        this.showcoordY = 0,
+        this.isnavigating = false,
+        this.coordXf = 0.0,
+        this.coordYf = 0.0});
 
   Future<void> move(BuildContext context) async {
     List<Cell> turnPoints = [];
@@ -159,11 +159,11 @@ class UserState {
       double d = tools.calculateAerialDist(snapped.position!.latitude, snapped.position!.longitude, lat, lng);
       print("distance calc is $d");
       if(snapped.imaginedIndex != null && d>snapped.position!.accuracy){
-        path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
-        cellPath.insert(snapped.imaginedIndex!, snapped);
-        moveToPointOnPath(snapped.imaginedIndex!);
-        renderHere();
-        //addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
+        // path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
+        // cellPath.insert(snapped.imaginedIndex!, snapped);
+        // moveToPointOnPath(snapped.imaginedIndex!);
+        // renderHere();
+        addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
       }
     });
   }
@@ -211,7 +211,7 @@ class UserState {
       }
 
       List<int> cellAnalysis =
-          tools.analyzeCell(cellPath, cellPath[pathobj.index]);
+      tools.analyzeCell(cellPath, cellPath[pathobj.index]);
       List<int> transition = cellPath[pathobj.index].move(theta,
           currPointer: cellAnalysis[1], totalCells: cellAnalysis[0]);
 
@@ -289,15 +289,15 @@ class UserState {
         floor == pathobj.destinationFloor && bid == pathobj.destinationBid;
 
     bool isNearLastTurnPoint = tools.calculateDistance(
-            [turnPoints.last.x, turnPoints.last.y],
-            [pathobj.destinationX, pathobj.destinationY]) <
+        [turnPoints.last.x, turnPoints.last.y],
+        [pathobj.destinationX, pathobj.destinationY]) <
         10;
 
     bool isAtLastTurnPoint =
         showcoordX == turnPoints.last.x && showcoordY == turnPoints.last.y;
 
     bool isNearDestination = tools.calculateDistance([showcoordX, showcoordY],
-            [pathobj.destinationX, pathobj.destinationY]) <
+        [pathobj.destinationX, pathobj.destinationY]) <
         6;
 
     return (isSameFloorAndBuilding &&
@@ -389,9 +389,9 @@ class UserState {
 
   bool isInOutdoor() {
     return (bid == buildingAllApi.outdoorID &&
-            cellPath[pathobj.index].bid == buildingAllApi.outdoorID) &&
+        cellPath[pathobj.index].bid == buildingAllApi.outdoorID) &&
         tools.calculateDistance([showcoordX, showcoordY],
-                [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
+            [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
             3;
   }
 
@@ -418,12 +418,12 @@ class UserState {
           element.properties!.polygonExist != true) {
 
         if (tools.calculateDistance([
-              showcoordX,
-              showcoordY
-            ], [
-              element.doorX ?? element.coordinateX!,
-              element.doorY ?? element.coordinateY!
-            ]) <=
+          showcoordX,
+          showcoordY
+        ], [
+          element.doorX ?? element.coordinateX!,
+          element.doorY ?? element.coordinateY!
+        ]) <=
             5) {
 
           if (!UserState.ttsOnlyTurns) {
@@ -485,12 +485,12 @@ class UserState {
 
 
       else if (tools.calculateDistance([
-            showcoordX,
-            showcoordY
-          ], [
-            element.doorX ?? element.coordinateX!,
-            element.doorY ?? element.coordinateY!
-          ]) <=
+        showcoordX,
+        showcoordY
+      ], [
+        element.doorX ?? element.coordinateX!,
+        element.doorY ?? element.coordinateY!
+      ]) <=
           6) {
         double angle = tools.calculateAngle2(
             [showcoordX, showcoordY],
@@ -534,7 +534,7 @@ class UserState {
     updateGlobalCoordinates();
 
     String? previousBuildingName =
-        b.Building.buildingData?[cellPath[pathobj.index - 1].bid];
+    b.Building.buildingData?[cellPath[pathobj.index - 1].bid];
     String? nextBuildingName = b.Building.buildingData?[pathobj.destinationBid];
 
     if (previousBuildingName != null && nextBuildingName != null) {
@@ -592,7 +592,7 @@ class UserState {
     coordX = coordX + transitionvalue[0];
     coordY = coordY + transitionvalue[1];
     List<double> values =
-        tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
+    tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
     lat = values[0];
     lng = values[1];
     if (isnavigating && pathobj.path.isNotEmpty && pathobj.numCols![bid]![floor] != 0) {
@@ -643,8 +643,8 @@ class UserState {
     } else if (name != null &&
         msg ==
             "$name is on your ${(
-              tools.angleToClocks(agl, context),
-              context
+            tools.angleToClocks(agl, context),
+            context
             )}") {
       if (lngCode == 'en') {
         return msg;
@@ -722,7 +722,7 @@ class UserState {
     coordY = showcoordY;
     pathobj.index = index + 1;
     List<double> values =
-        tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
+    tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
@@ -762,8 +762,8 @@ class UserState {
       for (int j = 0; j < turnPoints.length; j++) {
         if (cellPath[i] == turnPoints[j]) {
           if (tools.calculateDistance(
-                  [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
-                  [turnPoints[j].x, turnPoints[j].y]) <=
+              [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
+              [turnPoints[j].x, turnPoints[j].y]) <=
               10) {
             pathobj.index = cellPath.indexOf(turnPoints[j]);
           }

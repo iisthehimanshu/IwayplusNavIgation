@@ -19,8 +19,7 @@ import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
-import 'path.dart';
-import 'package:intl/intl.dart';
+
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -246,7 +245,7 @@ class tools {
     double hor = dist * cos(ang * pi / 180.0);
 
     Map<String, double> finalCoords =
-        obtainCoordinates(ref[leastLat], ver, hor);
+    obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
@@ -259,9 +258,9 @@ class tools {
     double difflon =
         ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-            cos((secondLocation["lat"]! * pi) / 180) *
-            sin(difflon / 2) *
-            sin(difflon / 2) +
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
@@ -777,9 +776,9 @@ class tools {
   }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    
-    
-    
+
+
+
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -808,7 +807,7 @@ class tools {
 
     return angleInDegrees;
   }
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+  static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //
     // //
     // //
@@ -992,11 +991,11 @@ class tools {
     List<int> c = [node.x , node.y];
 
 
-    // 
-    // 
-    // 
-    // 
-    // 
+    //
+    //
+    //
+    //
+    //
     // //
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -1036,11 +1035,11 @@ class tools {
     List<int> c = [prev.x , prev.y];
 
 
-    // 
-    // 
-    // 
-    // 
-    // 
+    //
+    //
+    //
+    //
+    //
     // //
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -1288,7 +1287,7 @@ class tools {
           if (d < distance) {
 
             if (!nearbyLandmarks.contains(value)) {
-              
+
               nearbyLandmarks.add(value);
             }
           }
@@ -1333,7 +1332,7 @@ class tools {
           if (d<distance) {
 
             Landmarks currentLandInfo = value;
-            
+
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
             //
@@ -1393,7 +1392,7 @@ class tools {
           if (d<distance) {
 
             Landmarks currentLandInfo =value;
-            
+
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
             //
@@ -1520,7 +1519,7 @@ class tools {
           if (d<distance) {
             coordinates.add(value.coordinateX!);
             coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
+            // finalCords.add(coordinates);
           }
         }
       }
@@ -1673,7 +1672,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-   // //
+    // //
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1695,7 +1694,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1713,7 +1712,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1728,11 +1727,11 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontal(double angle,{int? currPointer,int? totalCells}) {
-    
+
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1747,11 +1746,11 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontalSpecial(double angle,{int? currPointer,int? totalCells}) {
-    
+
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -2161,14 +2160,14 @@ class tools {
   }
 
   static int distancebetweennodes(int node1, int node2, int numCols){
-    
+
     int x1 = node1 % numCols;
     int y1 = node1 ~/ numCols;
 
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
-    
+
 
 
     // //
@@ -2179,14 +2178,14 @@ class tools {
   }
 
   static int distancebetweennodes_inCell(Cell node1, Cell node2){
-    
+
     double x1 = node1.lat;
     double y1 = node1.lng;
 
     double x2 = node2.lat;
     double y2 = node2.lng;
 
-    
+
 
     //return calculateDistance([node1.x,node1.y], [node2.x,node2.y]).toInt();
     // //

@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../Elements/HelperClass.dart';
@@ -50,6 +51,7 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     super.initState();
+    requestNotificationPermission();
     // Initialize the fields with provided parameters if available
     if (widget.emailOrPhoneNumber != null) {
       mailEditingController.text = widget.emailOrPhoneNumber!;
@@ -68,6 +70,30 @@ class _SignInState extends State<SignIn> {
     }
 
 
+  }
+
+  Future<bool> requestNotificationPermission() async {
+    // Check current platform
+    if (await Permission.notification.isGranted) {
+      print('Notification permission already granted');
+      return true;
+    }
+
+    // Request permission
+    PermissionStatus status = await Permission.notification.request();
+
+    if (status.isGranted) {
+      print('Notification permission granted');
+      return true;
+    } else if (status.isDenied) {
+      print('Notification permission denied');
+    } else if (status.isPermanentlyDenied) {
+      print('Notification permission permanently denied');
+      // Optionally, open app settings
+      openAppSettings();
+    }
+
+    return false;
   }
 
   void emailFieldListner() {

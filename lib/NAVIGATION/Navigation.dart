@@ -991,8 +991,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await requestLocationPermission();
     await requestBluetoothConnectPermission();
     await enableBT();
+    await requestNotificationPermission();
     //  await requestActivityPermission();
   }
+
+  Future<bool> requestNotificationPermission() async {
+    // Check current platform
+    if (await Permission.notification.isGranted) {
+      print('Notification permission already granted');
+      return true;
+    }
+
+    // Request permission
+    PermissionStatus status = await Permission.notification.request();
+
+    if (status.isGranted) {
+      print('Notification permission granted');
+      return true;
+    } else if (status.isDenied) {
+      print('Notification permission denied');
+    } else if (status.isPermanentlyDenied) {
+      print('Notification permission permanently denied');
+      // Optionally, open app settings
+      openAppSettings();
+    }
+
+    return false;
+  }
+
 
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});

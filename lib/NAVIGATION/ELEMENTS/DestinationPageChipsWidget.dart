@@ -32,7 +32,8 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: widget.text + (widget.selected?"selected":""),
+      label: widget.text,
+      toggled: widget.selected,
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
@@ -96,19 +97,22 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              isBlack? InkWell(
-                onTap: (){
-                  setState(() {
-                    isBlack=!isBlack;
-                    widget.selected=!widget.selected;
-                    widget.onTap("");
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 4),
-                  child: Semantics(
-                    label: "Unselect ${widget.text}",
-                      child: Icon(Icons.close, size: 18, color: isBlack? Colors.white: Colors.black,)),
+              isBlack? Semantics(
+                excludeSemantics: true,
+                child: InkWell(
+                  onTap: (){
+                    setState(() {
+                      isBlack=!isBlack;
+                      widget.selected=!widget.selected;
+                      widget.onTap("");
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 4),
+                    child: Semantics(
+                      label: "Unselect ${widget.text}",
+                        child: Icon(Icons.close, size: 18, color: isBlack? Colors.white: Colors.black,)),
+                  ),
                 ),
               ) : Container()
 

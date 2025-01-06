@@ -3853,7 +3853,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
   }
 
-
   Future<void> addselectedMarker(LatLng Point) async {
     selectedroomMarker.clear(); // Clear existing markers
 
@@ -5638,7 +5637,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // if(user.isnavigating==false){
     //   clearPathVariables();
     // }
-print("got inside it");
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -11197,6 +11196,7 @@ print("got inside it");
   }
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
+
     if (user.floor ==
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()]) {
@@ -11212,6 +11212,7 @@ print("got inside it");
         });
       }
     }
+
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathMarkers[key] != null &&
           pathMarkers[key]![SingletonFunctionController.building.floor[key]] !=
@@ -11293,6 +11294,7 @@ print("got inside it");
         setState(() {
           Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
+
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(false, marker);
               updatedMarkers.add(_marker);
@@ -11478,8 +11480,6 @@ print("got inside it");
 
   void onLandmarkVenueClicked(String ID,
       {bool DirectlyStartNavigation = false}) async {
-
-    print("this is the main function");
     final snapshot = await SingletonFunctionController.building.landmarkdata;
     SingletonFunctionController.building.selectedLandmarkID = ID;
 

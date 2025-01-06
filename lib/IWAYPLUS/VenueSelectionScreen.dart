@@ -216,7 +216,6 @@ if(userLoc!=null){
 
   }
 
-  String? _FCMToken = infoBox.get("FCMToken");
 
   void apiCall() async  {
     await buildingAllApi().fetchBuildingAllData().then((value) {

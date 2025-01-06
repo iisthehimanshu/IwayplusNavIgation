@@ -18,6 +18,12 @@
 @import app_settings;
 #endif
 
+#if __has_include(<awesome_notifications/AwesomeNotificationsPlugin.h>)
+#import <awesome_notifications/AwesomeNotificationsPlugin.h>
+#else
+@import awesome_notifications;
+#endif
+
 #if __has_include(<bluetooth_enable_fork/BluetoothEnablePlugin.h>)
 #import <bluetooth_enable_fork/BluetoothEnablePlugin.h>
 #else
@@ -185,6 +191,7 @@
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [AppLinksPlugin registerWithRegistrar:[registry registrarForPlugin:@"AppLinksPlugin"]];
   [AppSettingsPlugin registerWithRegistrar:[registry registrarForPlugin:@"AppSettingsPlugin"]];
+  [AwesomeNotificationsPlugin registerWithRegistrar:[registry registrarForPlugin:@"AwesomeNotificationsPlugin"]];
   [BluetoothEnablePlugin registerWithRegistrar:[registry registrarForPlugin:@"BluetoothEnablePlugin"]];
   [ConnectivityPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"ConnectivityPlusPlugin"]];
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];

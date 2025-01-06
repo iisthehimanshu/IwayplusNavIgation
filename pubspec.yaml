@@ -98,6 +98,7 @@ dependencies:
   string_similarity: ^2.1.1
   new_version_plus: ^0.0.12
   provider: ^6.1.2
+  awesome_notifications: ^0.10.0
 
 
 

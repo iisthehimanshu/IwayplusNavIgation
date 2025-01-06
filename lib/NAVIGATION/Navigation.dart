@@ -8255,68 +8255,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          Semantics(
-                                            label: _routeDetailPannelController
-                                                .isAttached
-                                                ? _routeDetailPannelController
-                                                .isPanelClosed
-                                                ? "Steps Preview"
-                                                : "Close Steps preview"
-                                                : "Steps Preview",
-                                            excludeSemantics: true,
-
-                                            child: ElevatedButton.icon(
-                                              icon: Icon(
-                                                _routeDetailPannelController
-                                                    .isAttached
-                                                    ? _routeDetailPannelController
-                                                    .isPanelClosed
-                                                    ? Icons
-                                                    .short_text_outlined
-                                                    : Icons.map_sharp
-                                                    : Icons
-                                                    .short_text_outlined,
-                                                color: Colors.blue,
-                                              ),
-                                              label: Text(
-                                                _routeDetailPannelController
-                                                    .isAttached
-                                                    ? _routeDetailPannelController
-                                                    .isPanelClosed
-                                                    ? "${LocaleData.steps.getString(context)}"
-                                                    : "${LocaleData.maps.getString(context)}"
-                                                    : "${LocaleData.steps.getString(context)}",
-                                                style: TextStyle(
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                if (_routeDetailPannelController
-                                                    .isPanelOpen) {
-                                                  _routeDetailPannelController
-                                                      .close();
-                                                } else {
-                                                  _routeDetailPannelController
-                                                      .open();
-                                                  _directionFocus.requestFocus();
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.white,
-                                                side: BorderSide(color: Colors.blue),
-                                                padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8.0),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
                                           kIsWeb?Container():Semantics(
                                             label: "Start Navigation",
                                             hint: "Button. Double tap to activate",
 
 
-                                            excludeSemantics: true,
+                                            excludeSemantics: false,
 
                                             child: ElevatedButton.icon(
                                               icon: Icon(Icons.navigation, color: Colors.white),
@@ -8625,6 +8569,64 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                               ),
                                             ),
                                           ),
+                                          Semantics(
+                                            label: _routeDetailPannelController
+                                                .isAttached
+                                                ? _routeDetailPannelController
+                                                .isPanelClosed
+                                                ? "Steps Preview"
+                                                : "Close Steps preview"
+                                                : "Steps Preview",
+                                            excludeSemantics: false,
+
+                                            child: Focus(
+                                              child: ElevatedButton.icon(
+                                                icon: Icon(
+                                                  _routeDetailPannelController
+                                                      .isAttached
+                                                      ? _routeDetailPannelController
+                                                      .isPanelClosed
+                                                      ? Icons
+                                                      .short_text_outlined
+                                                      : Icons.map_sharp
+                                                      : Icons
+                                                      .short_text_outlined,
+                                                  color: Colors.blue,
+                                                ),
+                                                label: Text(
+                                                  _routeDetailPannelController
+                                                      .isAttached
+                                                      ? _routeDetailPannelController
+                                                      .isPanelClosed
+                                                      ? "${LocaleData.steps.getString(context)}"
+                                                      : "${LocaleData.maps.getString(context)}"
+                                                      : "${LocaleData.steps.getString(context)}",
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  if (_routeDetailPannelController
+                                                      .isPanelOpen) {
+                                                    _routeDetailPannelController
+                                                        .close();
+                                                  } else {
+                                                    _routeDetailPannelController
+                                                        .open();
+                                                    _directionFocus.requestFocus();
+                                                  }
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white,
+                                                  side: BorderSide(color: Colors.blue),
+                                                  padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(8.0),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ):Container(),
@@ -8647,6 +8649,71 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                         ),
                                       ),
                                     ),
+                                    isSemanticEnabled? Container(
+                                      padding: EdgeInsets.only(bottom: 0),
+                                      color: Colors.white, // Background color set to white
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Semantics(
+                                            label: _routeDetailPannelController
+                                                .isAttached
+                                                ? _routeDetailPannelController
+                                                .isPanelClosed
+                                                ? "Steps Preview"
+                                                : "Close Steps preview"
+                                                : "Steps Preview",
+                                            excludeSemantics: true,
+
+                                            child: ElevatedButton.icon(
+                                              icon: Icon(
+                                                _routeDetailPannelController
+                                                    .isAttached
+                                                    ? _routeDetailPannelController
+                                                    .isPanelClosed
+                                                    ? Icons
+                                                    .short_text_outlined
+                                                    : Icons.map_sharp
+                                                    : Icons
+                                                    .short_text_outlined,
+                                                color: Colors.blue,
+                                              ),
+                                              label: Text(
+                                                _routeDetailPannelController
+                                                    .isAttached
+                                                    ? _routeDetailPannelController
+                                                    .isPanelClosed
+                                                    ? "${LocaleData.steps.getString(context)}"
+                                                    : "${LocaleData.maps.getString(context)}"
+                                                    : "${LocaleData.steps.getString(context)}",
+                                                style: TextStyle(
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                if (_routeDetailPannelController
+                                                    .isPanelOpen) {
+                                                  _routeDetailPannelController
+                                                      .close();
+                                                } else {
+                                                  _routeDetailPannelController
+                                                      .open();
+                                                  _directionFocus.requestFocus();
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                side: BorderSide(color: Colors.blue),
+                                                padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ):Container(),
 
                                   ],
                                 ),

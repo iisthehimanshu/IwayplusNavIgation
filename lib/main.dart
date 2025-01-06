@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
 
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,14 +39,12 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
-  PushNotifications.localNotiInit();
-
   if(!kIsWeb){
     mobileInitialization();
     runApp(const MobileApp());
@@ -91,7 +90,6 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
-
 }
 
 Future<void> mobileInitialization () async {

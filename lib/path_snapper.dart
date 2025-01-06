@@ -94,9 +94,9 @@ class PathSnapper {
     for (int i = 0; i < path.length - 1; i++) {
       var start = path[i];
       var end = path[i + 1];
-if(start.x == end.x && start.y == end.y){
-  continue;
-}
+      if(start.x == end.x && start.y == end.y){
+        continue;
+      }
       // Find the projection on the segment
       var projection = _projectPointOnSegment(position.latitude, position.longitude, start, end);
       if (projection != null) {
@@ -108,24 +108,24 @@ if(start.x == end.x && start.y == end.y){
         if (distance < minDistance) {
           minDistance = distance;
           nearestCell = Cell(
-            (projection.y * start.numCols) + projection.x,
-            projection.x,
-            projection.y,
-            start.move,
-            projectionLat,
-            projectionLng,
-            start.bid,
-            start.floor,
-            start.numCols,
-            imaginedIndex: path.indexOf(start) + 1,
-            imaginedCell: true,
-            position: position
+              (projection.y * start.numCols) + projection.x,
+              projection.x,
+              projection.y,
+              start.move,
+              projectionLat,
+              projectionLng,
+              start.bid,
+              start.floor,
+              start.numCols,
+              imaginedIndex: path.indexOf(start) + 1,
+              imaginedCell: true,
+              position: position
           );
         }
       }
     }
     if(nearestCell != null){
-     // path.insert(nearestCell.imaginedIndex!, nearestCell);
+      // path.insert(nearestCell.imaginedIndex!, nearestCell);
     }
     return nearestCell;
   }

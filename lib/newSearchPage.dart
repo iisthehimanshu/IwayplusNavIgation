@@ -551,12 +551,14 @@ class _NewsearchpageState extends State<NewSearchPage> {
                           if (Text.isNotEmpty) {
                             search(Text);
                           } else {
-                            search(Text);
-                            _controller.text="";
-                            searchResults = [];
-                            searcCategoryhResults=[];
+                            setState(() {
+                              _controller.text="";
+                              searchResults = [];
+                              searcCategoryhResults=[];
+                              vall = -1;
+                            });
                             //searcCategoryhResults = [];
-                            vall = -1;
+
                           }
                         }, icon: getIcon(optionListForUI[i].toLowerCase()),
                       );

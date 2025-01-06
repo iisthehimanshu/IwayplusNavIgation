@@ -13,9 +13,6 @@ class DestinationPageChipsWidget extends StatefulWidget {
   final IconData icon;
   final Function(bool selected) onSelect;
   final Function(String Text) onTap;
-
-
-
   DestinationPageChipsWidget({
     required this.svgPath,
     required this.text,
@@ -30,7 +27,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
 }
 
 class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget> {
-bool isBlack=false;
+  bool isBlack=false;
 
   @override
   Widget build(BuildContext context) {

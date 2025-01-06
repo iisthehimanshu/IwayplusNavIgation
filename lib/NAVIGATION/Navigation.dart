@@ -3757,12 +3757,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Set<Polygon> _polygon = Set();
   PolygonId matchPolygonId = PolygonId("");
   List<LatLng> matchPolygonPoints = [];
-  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,
-      {Color? color}) async {
+  AnimationController? _controller12;
+  Animation<double>? _sizeAnimation;
+
+  Future<void> addselectedRoomMarker(
+      List<LatLng> polygonPoints, {
+        Color? color,
+      }) async {
+    // Cancel any ongoing animation
+    _controller12?.stop();
+    _controller12?.dispose();
+    _controller12 = null;
+
     selectedroomMarker.clear(); // Clear existing markers
     matchPolygonId = PolygonId("$polygonPoints");
     matchPolygonPoints = polygonPoints;
-    _polygon.clear(); // Clear existing markers
+    _polygon.clear();
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
       points: polygonPoints,
@@ -3772,35 +3782,77 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
-    cachedPolygon.clear();// Clear existing markers
 
+    cachedPolygon.clear();
     List<geo.LatLng> points = [];
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
-    Uint8List iconMarker =
-    await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
-    setState(() {
-      if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
+
+    Uint8List baseIcon = await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
+
+    // Initialize a new animation controller
+    _controller12 = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 900),
+    );
+
+    _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
+    );
+
+    void updateMarkerSize() async {
+      double scale = _sizeAnimation?.value ?? 1.0;
+      Uint8List resizedIcon =
+      await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', (140 * scale).toInt());
+
+      setState(() {
+        if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
+          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+            Marker(
+              markerId: MarkerId('selectedRoomMarker'),
+              position: calculateRoomCenter(polygonPoints),
+              icon: BitmapDescriptor.fromBytes(resizedIcon),
+              onTap: () {},
+            ),
+          );
+        } else {
+          selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
+          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+            Marker(
+              markerId: MarkerId('selectedRoomMarker'),
+              position: calculateRoomCenter(polygonPoints),
+              icon: BitmapDescriptor.fromBytes(resizedIcon),
+              onTap: () {},
+            ),
+          );
+        }
+      });
+    }
+
+    // Start the animation
+    _controller12?.addListener(updateMarkerSize);
+    _controller12?.repeat(reverse: true);
+
+    // Stop animation after 5 seconds
+    Timer(Duration(seconds: 5), () {
+      _controller12?.stop();
+      _controller12?.dispose();
+      _controller12 = null;
+
+      setState(() {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
           Marker(
-              markerId: MarkerId('selectedroomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              onTap: () {}),
+            markerId: MarkerId('selectedRoomMarker'),
+            position: calculateRoomCenter(polygonPoints),
+            icon: BitmapDescriptor.fromBytes(baseIcon),
+            onTap: () {},
+          ),
         );
-      } else {
-        selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-          Marker(
-              markerId: MarkerId('selectedroomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              onTap: () {}),
-        );
-      }
+      });
     });
   }
+
 
   Future<void> addselectedMarker(LatLng Point) async {
     selectedroomMarker.clear(); // Clear existing markers
@@ -5586,7 +5638,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // if(user.isnavigating==false){
     //   clearPathVariables();
     // }
-
+print("got inside it");
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -11145,7 +11197,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
-
     if (user.floor ==
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()]) {
@@ -11161,7 +11212,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         });
       }
     }
-
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathMarkers[key] != null &&
           pathMarkers[key]![SingletonFunctionController.building.floor[key]] !=
@@ -11243,7 +11293,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         setState(() {
           Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
-
             if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(false, marker);
               updatedMarkers.add(_marker);
@@ -11429,6 +11478,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   void onLandmarkVenueClicked(String ID,
       {bool DirectlyStartNavigation = false}) async {
+
+    print("this is the main function");
     final snapshot = await SingletonFunctionController.building.landmarkdata;
     SingletonFunctionController.building.selectedLandmarkID = ID;
 
@@ -11862,6 +11913,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.geoLng=0.0;
     flutterTts.stop();
     PDRTimer!.cancel();
+    _controller12?.dispose();
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();

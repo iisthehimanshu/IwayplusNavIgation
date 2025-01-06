@@ -39,7 +39,6 @@ import '/NAVIGATION/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '/NAVIGATION/HomeNestedSearch.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'FIREBASE NOTIFICATION API/FCMServer.dart';
 import 'MODELS/VenueModel.dart';
 import 'NotificationScreen.dart';
 
@@ -222,7 +221,7 @@ if(userLoc!=null){
   void apiCall() async  {
     if(_FCMToken != null){
       try {
-        await FCMServer().sendFCM(_FCMToken!);
+
       }catch(e){}
     }
     await buildingAllApi().fetchBuildingAllData().then((value) {

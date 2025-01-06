@@ -2,8 +2,6 @@
 import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -40,11 +38,6 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
-Future _firebaseBackgroundMessage(RemoteMessage message) async {
-  if(message.notification != null){
-    print("Some notification Received");
-  }
-}
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -100,51 +93,6 @@ Future<void> localDBInitialsation() async {
 Future<void> mobileInitialization () async {
   WidgetsFlutterBinding.ensureInitialized();
   WakelockPlus.enable();
-  await Firebase.initializeApp(
-    //options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  //ON BACKGROUND TAPPED
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-    if(message.notification != null){
-      print("BACKGROUNG NOTIFICATION TAPPED");
-      //navigatorKey.currentState!.pushNamed("/message",arguments: message);
-    }
-  });
-
-  // PushNotifications.init();
-  PushNotifications.localNotiInit();
-  //firebase listen to background notification
-  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
-  PushNotifications().foregroundMessage();
-
-  //to handle foreground notifications
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-
-    String payloadData = jsonEncode(message.data);
-    print("Got a message in foreground");
-    if(kDebugMode){
-      print("notificationtitle ${message.notification!.title}");
-      print("notificationbody ${message.notification!.body}");
-    }
-    if(Platform.isIOS){
-      PushNotifications().foregroundMessage();
-    }
-
-    if(message.notification!=null){
-      PushNotifications.showSimpleNotification(title: message.notification!.title!, body: message.notification!.body!, payload: payloadData);
-    }
-  });
-
-  // for handling in terminated state
-  FirebaseMessaging.instance.getInitialMessage().then((message){
-    if (message != null) {
-      print("Launched from terminated state");
-      Future.delayed(Duration(seconds: 1), () {
-        navigatorKey.currentState!.pushNamed("/message", arguments: message);
-      });
-    }
-  });
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

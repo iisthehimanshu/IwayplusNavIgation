@@ -49,6 +49,7 @@ Future _firebaseBackgroundMessage(RemoteMessage message) async {
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
   PushNotifications.localNotiInit();

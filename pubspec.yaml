@@ -67,7 +67,6 @@ dependencies:
   turf: ^0.0.10
   geolocator: ^12.0.0
   upgrader:
-  firebase_messaging:
   lottie: ^2.6.0
   speech_to_text:
   fuzzy: <1.0.0
@@ -98,6 +97,7 @@ dependencies:
   string_similarity: ^2.1.1
   new_version_plus: ^0.0.12
   provider: ^6.1.2
+  image:
 
 
 

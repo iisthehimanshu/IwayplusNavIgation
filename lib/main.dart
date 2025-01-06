@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -51,6 +52,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
   PushNotifications.localNotiInit();
+  AwesomeNotifications().initialize(null,
+      [
+        NotificationChannel(channelKey: 'basic_channel', channelName: 'Basic Notifications', channelDescription: "notification channel for basic tests")
+      ],
+      debug: true
+  );
 
   if(!kIsWeb){
     mobileInitialization();

@@ -96,7 +96,7 @@ class PushNotifications {
         channelDescription: 'your channel description',
         importance: Importance.max,
         priority: Priority.high,
-        ticker: 'ticker');
+        ticker: '');
     const NotificationDetails notificationDetails =
     NotificationDetails(android: androidNotificationDetails);
     await _flutterLocalNotificationsPlugin
@@ -141,7 +141,7 @@ class PushNotifications {
       importance: Importance.max,
       priority: Priority.high,
       styleInformation: bigPictureStyleInformation,
-      ticker: 'ticker',
+      ticker: '',
     );
 
     final NotificationDetails notificationDetails =
@@ -179,7 +179,7 @@ class PushNotifications {
       importance: Importance.max,
       priority: Priority.high,
       styleInformation: bigPictureStyleInformation,
-      ticker: 'ticker',
+      ticker: '',
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction('Direction', 'Direction',)
       ]

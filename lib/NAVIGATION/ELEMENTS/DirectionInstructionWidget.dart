@@ -73,7 +73,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
 
 
     return Semantics(
-    label: "Semantics",
+    label: "",
       child: GestureDetector(
         onTap: (){
           ListExpand = !ListExpand;

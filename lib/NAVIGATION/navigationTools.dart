@@ -1164,7 +1164,7 @@ class tools {
     turns.insert(0, path[0]);
     turns.add(path.last);
     print("turns $turns");
-    double Nextdistance = tools.calculateDistance([turns[0].x,turns[0].y], [turns[1].x,turns[1].y]);
+    double Nextdistance = tools.calculateAerialDist(turns[0].lat,turns[0].lng, turns[1].lat,turns[1].lng);
     print("adding turn distance as $Nextdistance between ${[turns[0].x,turns[0].y]} and ${[turns[1].x,turns[1].y]}");
 
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
@@ -1189,9 +1189,9 @@ class tools {
         angle = 0;
       }
       String direc = tools.angleToClocks(angle,context);
-      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i].node], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
+      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
     }
-    Directions.add(direction(turns.last.node, "Straight", null, null, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
+    Directions.add(direction(turns.last.node, "Straight", null, 1, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
     return Directions;
   }
 

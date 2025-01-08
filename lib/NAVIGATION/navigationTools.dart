@@ -479,6 +479,104 @@ class tools {
     return degree * pi / 180.0;
   }
 
+  static String generateNarration(List<Map<String, dynamic>> instructions, {bool isMultiFloor = false}) {
+    StringBuffer narration = StringBuffer();
+
+    for (int i = 0; i < instructions.length; i++) {
+      var step = instructions[i];
+      String? action = step['action']; // e.g., "Go Straight", "Turn Right"
+      double? distance = step['distance']; // Distance in meters
+      String? landmark = step['landmark']; // Optional landmark (e.g., "3A Entry")
+      String? floorChange = step['floorChange']; // Optional floor change instruction (e.g., "Take Lift to Ground Floor")
+
+      if (floorChange != null) {
+        // Handle floor change instructions for multi-floor
+        narration.writeln(
+            "When you reach ${landmark ?? 'the end of this path'}, $floorChange.");
+        continue;
+      }
+
+      if (i == 0) {
+        // For the first instruction, begin the narration
+        narration.write(
+            "Begin by moving $action for ${(distance ?? 1).toInt()} meters");
+      } else {
+        // For subsequent instructions, adjust based on context
+        if (action == instructions[i - 1]['action'] && landmark == null) {
+          // Concatenate similar instructions for brevity
+          double previousDistance = instructions[i - 1]['distance'] ?? 1;
+          instructions[i - 1]['distance'] = previousDistance + (distance ?? 1);
+          continue;
+        }
+        narration.write(
+            "Then you have to $action for ${(distance ?? 1).toInt()} meters");
+      }
+
+      if (landmark != null) {
+        narration.write(", at $landmark");
+      }
+
+      // End the sentence with a period
+      narration.writeln(".");
+    }
+
+    // Add a final statement for multi-floor
+    if (isMultiFloor) {
+      narration.writeln(
+          "Follow the instructions carefully as you navigate across floors.");
+    }
+
+    // Add a final statement for reaching the destination
+    narration.writeln("Then you will reach your destination.");
+
+    return narration.toString();
+  }
+
+
+  static List<Map<String, dynamic>> processInstructions(List<direction> rawInstructions) {
+    List<Map<String, dynamic>> mappedInstructions = [];
+
+    for (direction instruction in rawInstructions) {
+      if (instruction.turnDirection != null && instruction.distanceToNextTurnInFeet != null) {
+        String action = instruction.turnDirection!.trim(); // Action (e.g., "Turn Right")
+        double distance = instruction.distanceToNextTurnInFeet!; // Distance in feet
+
+        // Parse landmarks if the action contains "from [landmark]"
+        String? landmark;
+        final regex = RegExp(r'from\s(.*)'); // Matches "from [landmark]"
+        final match = regex.firstMatch(action);
+
+        if (match != null) {
+          landmark = match.group(1)?.trim(); // Extract the landmark
+          action = action.replaceFirst(RegExp(r'from\s.*'), '').trim(); // Remove landmark from action
+        }
+
+        mappedInstructions.add({
+          'action': action, // Direction action
+          'distance': distance, // Distance in feet
+          'landmark': landmark, // Landmark, if any
+        });
+      } else if (instruction.turnDirection != null && instruction.turnDirection!.startsWith('Take')) {
+        // Handle floor change instructions
+        mappedInstructions.add({
+          'action': 'floorChange',
+          'details': instruction.turnDirection!.trim(), // Store floor change instruction
+        });
+      } else {
+        // Handle incomplete or unrecognized instructions
+        mappedInstructions.add({
+          'action': 'Go Straight',
+          'details': instruction.turnDirection?.trim() ?? 'Unknown Instruction',
+        });
+      }
+    }
+
+    return mappedInstructions;
+  }
+
+
+
+
 
   // static double calculateBearing(List<double> pointA, List<double> pointB) {
   //   double lat1 = toRadians(pointA[0]);

@@ -3761,7 +3761,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Animation<double>? _sizeAnimation;
 
   Future<void> addselectedRoomMarker(
-      List<LatLng> polygonPoints, {
+      List<LatLng> polygonPoints,String assetPath ,{
         Color? color,
       }) async {
     // Cancel any ongoing animation
@@ -3789,7 +3789,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
 
-    Uint8List baseIcon = await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
+    Uint8List baseIcon = await getImagesFromMarker(assetPath, 140);
 
     // Initialize a new animation controller
     _controller12 = AnimationController(
@@ -3804,7 +3804,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     void updateMarkerSize() async {
       double scale = _sizeAnimation?.value ?? 1.0;
       Uint8List resizedIcon =
-      await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', (140 * scale).toInt());
+      await getImagesFromMarker(assetPath, (140 * scale).toInt());
 
       setState(() {
         if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
@@ -3851,6 +3851,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         );
       });
     });
+
+    // polygonPoints=[];
   }
 
 
@@ -4407,7 +4409,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates);
+                            addselectedRoomMarker(coordinates,'assets/Office.png');
                           }
                         });
                       }));
@@ -4469,7 +4471,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates);
+                            addselectedRoomMarker(coordinates,'assets/ATM.png');
                           }
                         });
                       }));
@@ -4530,7 +4532,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates);
+                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png');
                           }
                         });
                       }));
@@ -4604,7 +4606,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,
+                            addselectedRoomMarker(coordinates,'assets/entry.png',
                                 color: Colors.greenAccent);
                           }
                         });
@@ -4658,7 +4660,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,
+                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
                                 color: Colors.white);
                           }
                         });
@@ -4712,7 +4714,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,
+                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
                                 color: Colors.white);
                           }
                         });
@@ -5638,7 +5640,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // if(user.isnavigating==false){
     //   clearPathVariables();
     // }
-print("got inside it");
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     if (!snapshot.hasData ||
@@ -6382,6 +6383,7 @@ print("got inside it");
                                 .landmarksMap![SingletonFunctionController
                                 .building.selectedLandmarkID]!
                                 .buildingID!;
+                            // _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
                     
                             setState(() {
                               calculatingPath = true;
@@ -6710,6 +6712,7 @@ print("got inside it");
         time = time.ceil().toDouble();
         distance = distance * 0.3048;
         distance = double.parse(distance.toStringAsFixed(1));
+
         setState(() {
           _focusNodeA.unfocus();
           _focusNodeA.requestFocus();
@@ -6731,6 +6734,8 @@ print("got inside it");
     } else {
       print("starting calc not happening");
     }
+
+
     // } catch (e) {
     //   setState(() {
     //     PathState.noPathFound = true;
@@ -7448,11 +7453,17 @@ print("got inside it");
 
       List<LatLng> coordinates = [];
       if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
-        for (var node in path) {
+        for (int i = 0; i<path.length-2;i++) {
+          int node = path[i];
+          int node1=path[i+2];
+          int row1 = (node1 % numCols); //divide by floor length
+          int col1 = (node1 ~/ numCols);
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
+          List<double> value1 = tools.localtoglobal(
+    row1, col1, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
           if (singleroute[bid] == null) {
             singleroute.putIfAbsent(bid, () => Map());
@@ -7467,7 +7478,7 @@ print("got inside it");
               color: oldPolyline.color,
               width: oldPolyline.width,
             );
-            setState(() {
+            setState((){
               // Remove the old polyline and add the updated polyline
               singleroute[bid]![floor]!.remove(oldPolyline);
               singleroute[bid]![floor]!.add(updatedPolyline);
@@ -7483,9 +7494,14 @@ print("got inside it");
               ));
             });
           }
+          print("rendering path");
+
           await Future.delayed(Duration(microseconds: 1500));
+          coordinates.add(LatLng(value[0], value[1]));
+          alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
         }
       } else {
+        coordinates=[];
         if (singleroute[bid] == null) {
           singleroute.putIfAbsent(bid, () => Map());
         }
@@ -7653,8 +7669,6 @@ print("got inside it");
     });
     print("pathCovered $pathCovered");
   }
-
-
   Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
       {String? liftName}) async {
     await SingletonFunctionController.building.landmarkdata!.then((value) {
@@ -7685,10 +7699,6 @@ print("got inside it");
               path.first.bid ?? ""));
         }
         directions.addAll(tools.getDirections(path, value, PathState, lifts, context));
-        // directions.forEach((element) {
-        //
-        // });
-
         directions.addAll(PathState.directions);
         PathState.directions = directions;
       });
@@ -7843,7 +7853,7 @@ print("got inside it");
   void addDirectionsWidget(){
 
   }
-
+bool _isPlaying=false;
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   List<Widget> directionWidgets = [];
@@ -8285,6 +8295,18 @@ print("got inside it");
                                               textAlign: TextAlign.left,
                                             ),
                                           ),
+                                          Semantics(
+                                            excludeSemantics: true,
+                                            child: IconButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _isPlaying=!_isPlaying;
+                                                  });
+                                                  String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
+                                                  print("narration ${msg}");
+                                                  speak(msg, _currentLocale);
+                                                },
+                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)),
                                           Spacer(),
                                           Semantics(
                                             excludeSemantics: true,
@@ -8338,6 +8360,7 @@ print("got inside it");
                                                 },
                                                 icon: SvgPicture.asset('assets/routeDetailPannel_ShareIcon.svg',color: Colors.black,)),
                                           ),
+
                                           Semantics(
                                             excludeSemantics: true,
                                             child: Container(
@@ -9281,12 +9304,12 @@ print("got inside it");
     print(onStart);
     double screenHeight=MediaQuery.of(context).size.height;
     double pixelRatio=MediaQuery.of(context).devicePixelRatio;
-    mapState.tilt = 33.5;
+    mapState.tilt = 0.0;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
         user.showcoordY.toInt(),
         SingletonFunctionController.building.patchData[user.bid]);
-    mapState.target = LatLng(val[0], val[1]);
+    mapState.target = LatLng(A[0], A[1]);
     mapState.bearing = tools.calculateBearing(A, B);
     ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
 
@@ -9309,6 +9332,7 @@ print("got inside it");
             bearing: mapState.bearing!,
             tilt: mapState.tilt),
       ));
+
     });
   }
 

@@ -13,6 +13,9 @@ class DestinationPageChipsWidget extends StatefulWidget {
   final IconData icon;
   final Function(bool selected) onSelect;
   final Function(String Text) onTap;
+
+
+
   DestinationPageChipsWidget({
     required this.svgPath,
     required this.text,
@@ -27,7 +30,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
 }
 
 class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget> {
-  bool isBlack=false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
         padding: EdgeInsets.all(8),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: isBlack ? Colors.black : Colors.white,
+          color: widget.selected ? Colors.black : Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(10)),
           boxShadow: [
             BoxShadow(
@@ -53,18 +56,10 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
           borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
           onTap: () {
             setState(() {
-              isBlack=!isBlack;
               widget.selected = !widget.selected;
             });
-            if(isBlack==false){
-              setState(() {
-                widget.onTap("");
-              });
-            }else{
-              widget.onTap(widget.text);
-              widget.onSelect(widget.selected);
-            }
-
+            widget.onTap(widget.text);
+            widget.onSelect(widget.selected);
             widget.selected ? print("black") : print("white");
             // Navigator.push(
             //     context,
@@ -77,7 +72,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(left: 4),
-                child: Icon(widget.icon, size: 18, color: isBlack? Colors.white: Colors.black,),
+                child: Icon(widget.icon, size: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
               Semantics(
                 excludeSemantics: true,
@@ -89,17 +84,16 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                       fontFamily: "Roboto",
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: isBlack? Colors.white : Color(0xff49454f) ,
+                      color: widget.selected? Colors.white : Color(0xff49454f) ,
                       height: 20 / 14,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              isBlack? InkWell(
+              widget.selected? InkWell(
                 onTap: (){
                   setState(() {
-                    isBlack=!isBlack;
                     widget.selected=!widget.selected;
                     widget.onTap("");
                   });
@@ -107,8 +101,8 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                 child: Container(
                   margin: EdgeInsets.only(left: 4),
                   child: Semantics(
-                    label: "Unselect ${widget.text}",
-                      child: Icon(Icons.close, size: 18, color: isBlack? Colors.white: Colors.black,)),
+                      label: "Unselect ${widget.text}",
+                      child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
                 ),
               ) : Container()
 

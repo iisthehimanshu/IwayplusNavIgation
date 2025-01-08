@@ -212,6 +212,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool excludeFloorSemanticWork = false;
   bool markerSldShown = true;
   Set<Marker> _markers = Set();
+  Set<Marker> _exploreModeMarker = Set();
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   final GlobalKey rerouteButton = GlobalKey();
@@ -1313,8 +1314,7 @@ bool isAppinForeground=true;
   }
 
   List<String> finalDirections = [];
-  List<String> calcDirectionsExploreMode(List<int> userCords,
-      List<int> newUserCord, List<nearestLandInfo> nearbyLandmarkCoords) {
+  List<String> calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<nearestLandInfo> nearbyLandmarkCoords) {
     List<String> finalDirections = [];
     for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
       double value = tools.calculateAngle2(userCords, newUserCord, [
@@ -1324,8 +1324,25 @@ bool isAppinForeground=true;
 
       //
       //
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      //
+      finalDirections.add(finalvalue);
+    }
+    return finalDirections;
+  }
+
+  List<String> EM_finalDirections = [];
+  List<String> EM_calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
+    List<String> finalDirections = [];
+    for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
+      double value = tools.calculateAngle2(userCords, newUserCord, [
+        nearbyLandmarkCoords[i].coordinateX!,
+        nearbyLandmarkCoords[i].coordinateY!
+      ]);
+
+      //
+      //
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
       //
       finalDirections.add(finalvalue);
     }
@@ -2028,7 +2045,7 @@ bool isAppinForeground=true;
                 circleId: CircleId("circle"),
                 center: LatLng(user.lat, user.lng),
                 radius: _animation.value,
-                strokeWidth: 1,
+                strokeWidth: 0,
                 strokeColor: Colors.blue,
                 fillColor: Colors.lightBlue.withOpacity(0.2),
                 zIndex: 2
@@ -3932,9 +3949,56 @@ bool isAppinForeground=true;
   Map<String, double> sumMap = new Map();
   Map<String, double> sortedsumMapfordebug = new Map();
   String lastBeaconValue = "";
+  String EM_lastBeaconValue = "";
+
+  List<Landmarks> EM_NearLandmarks = [];
+
+  Future<void> exploreModePaintUser(HashMap<String, beacon> apibeaconmap, Map<String, Landmarks> EM_buildingLandmark, beacon EM_NEAREST_BEACON_VALUE) async{
+    final Uint8List iconMarker = await getImagesFromMarker('assets/EM_landmark.png', 85);
+
+    if(EM_NEAREST_BEACON_VALUE.name != EM_lastBeaconValue){
+      _exploreModeMarker.clear();
+      EM_NearLandmarks = tools.EM_localizefindAllNearbyLandmark(EM_NEAREST_BEACON_VALUE, EM_buildingLandmark);
+      EM_NearLandmarks.forEach((landmark){
+        List<double> value =[];
+        if(landmark.doorX != null) {
+          value = tools.localtoglobal(landmark.doorX!, landmark.doorY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
+        }else{
+          value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
+        }
+        _exploreModeMarker.add(Marker(
+          markerId: MarkerId("${value[0]}, ${value[1]}"),
+          position: LatLng(value[0], value[1]),
+          icon: BitmapDescriptor.fromBytes(iconMarker),
+        ));
+        setState(() {});
+      });
 
 
-  Future<void> realTimeReLocalizeUser(
+      List<int> tv = tools.eightcelltransition(user.theta);
+      EM_finalDirections = EM_calcDirectionsExploreMode(
+          [EM_NEAREST_BEACON_VALUE.coordinateX!,EM_NEAREST_BEACON_VALUE.coordinateY!],
+          [EM_NEAREST_BEACON_VALUE.coordinateX! + tv[0],EM_NEAREST_BEACON_VALUE.coordinateY! + tv[1]],
+          EM_NearLandmarks
+      );
+      EM_lastBeaconValue = EM_NEAREST_BEACON_VALUE.name!;
+      paintUser(EM_NEAREST_BEACON_VALUE.name!);
+      setState(() {
+
+      });
+
+    }
+  }
+
+  land EM_buildingLandmark = land();
+  Future<void> initializeScanAndLandmarkData() async {
+    print("initializeScanAndLandmarkData");
+    EM_buildingLandmark = await SingletonFunctionController.building.landmarkdata!;
+    exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!,bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE);
+  }
+
+
+    Future<void> realTimeReLocalizeUser(
       HashMap<String, beacon> apibeaconmap) async {
 
     print("apibeaconmap");
@@ -11475,15 +11539,18 @@ bool isAppinForeground=true;
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
   Widget ExploreModePannel() {
+
     List<Widget> Exwidgets = [];
-    for (int i = 0; i < getallnearestInfo.length; i++) {
-      Exwidgets.add(
-          ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
+    if(EM_finalDirections.length >0) {
+      for (int i = 0; i < EM_NearLandmarks.length; i++) {
+        Exwidgets.add(
+            ExploreModeWidget(EM_NearLandmarks[i], EM_finalDirections[i]));
+      }
     }
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
-          maxHeight: 90 + 8 + (getallnearestInfo.length * 100),
+          maxHeight: 90 + 8 + (EM_NearLandmarks.length * 100),
           minHeight: 90 + 8,
           controller: ExploreModePannelController,
           panel: Container(
@@ -11491,6 +11558,7 @@ bool isAppinForeground=true;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 Center(
                   child: Container(
                     width: 38,
@@ -11504,6 +11572,7 @@ bool isAppinForeground=true;
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+
                     Text(
                       "Explore Mode",
                       style: const TextStyle(
@@ -11519,16 +11588,22 @@ bool isAppinForeground=true;
                         onPressed: () {
                           isLiveLocalizing = false;
                           HelperClass.showToast("Explore mode is disabled");
-                          _exploreModeTimer!.cancel();
+                          //_exploreModeTimer!.cancel();
                           _isExploreModePannelOpen = false;
                           _isBuildingPannelOpen = true;
                           lastBeaconValue = "";
+                          ExploreModePannelController.close();
+                          _exploreModeMarker.clear();
+                          bluetoothScanAndroidClass.stopScan();
                         },
                         icon: Icon(Icons.close))
                   ],
                 ),
                 SizedBox(
                   height: 8,
+                ),
+                Container(
+                  child: Text(bluetoothScanAndroidClass.EM_RSSI_AVERAGE.toString()),
                 ),
                 Column(
                   children: Exwidgets,
@@ -12374,6 +12449,7 @@ bool isAppinForeground=true;
     _messageTimer?.cancel();
     _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    bluetoothScanAndroidClass.stopScan();
     super.dispose();
   }
 
@@ -12555,7 +12631,7 @@ bool isAppinForeground=true;
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker),
+                    .union(restBuildingMarker).union(_exploreModeMarker),
                 buildingsEnabled: false,
                 compassEnabled: false,
                 rotateGesturesEnabled: true,
@@ -13008,64 +13084,94 @@ bool isAppinForeground=true;
                           _isBuildingPannelOpen &&
                           !_isnavigationPannelOpen && user.initialallyLocalised)
                       ? FloatingActionButton(
-                    onPressed: () async {
-                      if (user.initialallyLocalised) {
-                        setState(() {
-                          if (isLiveLocalizing) {
-                            isLiveLocalizing = false;
-                            HelperClass.showToast(
-                                "Explore mode is disabled");
-                            _exploreModeTimer!.cancel();
-                            _isExploreModePannelOpen = false;
-                            _isBuildingPannelOpen = true;
-                            lastBeaconValue = "";
-                          } else {
-                            speak(
-                                "${LocaleData.exploremodenabled.getString(context)}",
-                                _currentLocale);
-                            isLiveLocalizing = true;
-                            HelperClass.showToast(
-                                "Explore mode enabled");
-                            _exploreModeTimer = Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  if (Platform.isAndroid) {
-                                    SingletonFunctionController.btadapter
-                                        .startScanning(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  } else {
-                                    SingletonFunctionController.btadapter
-                                        .startScanningIOS(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  }
-                                  Future.delayed(
-                                      Duration(milliseconds: 2000))
-                                      .then((value) => {
-
-                                    realTimeReLocalizeUser(
-                                        resBeacons)
-                                    // listenToBin()
-                                  });
-                                });
+                          onPressed: () async {
+                            bluetoothScanAndroidClass.startScan();
                             _isBuildingPannelOpen = false;
                             _isExploreModePannelOpen = true;
-                          }
-                        });
-                      }
-                    },
-                    child: Semantics(
-                      label: "Explore mode",
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                      ),
-                    ),
-                    backgroundColor: Color(
-                        0xff24B9B0), // Set the background color of the FAB
-                  )
+                            //ExploreModePannelController.open();
+
+
+                            Timer.periodic(Duration(seconds: 5), (_){
+                              // bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap).then((_){
+                              //   print("bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE");
+                              //   print(bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE.name);
+                              //
+                              //
+                              // });
+                              bluetoothScanAndroidClass.listenToScanUpdates(SingletonFunctionController.apibeaconmap);
+
+                              initializeScanAndLandmarkData();
+                            });
+
+
+
+                            // if (user.initialallyLocalised) {
+                            //   setState(() {
+                            //     if (isLiveLocalizing) {
+                            //       //bluetoothScanAndroidClass.stopScan();
+                            //       isLiveLocalizing = false;
+                            //       HelperClass.showToast(
+                            //           "Explore mode is disabled");
+                            //       // _exploreModeTimer!.cancel();
+                            //       c
+                            //       _isBuildingPannelOpen = true;
+                            //       lastBeaconValue = "";
+                            //     } else {
+                            //       speak(
+                            //           "${LocaleData.exploremodenabled.getString(context)}",
+                            //           _currentLocale);
+                            //       isLiveLocalizing = true;
+                            //       if (Platform.isAndroid) {
+                            //         _isBuildingPannelOpen = false;
+                            //         // _isExploreModePannelOpen = true;
+                            //
+                            //         bluetoothScanAndroidClass.startScan();
+                            //         bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap);
+                            //
+                            //         initializeScanAndLandmarkData();
+                            //         // ExploreModePannelController.open();
+                            //       }
+                            //       HelperClass.showToast("Explore mode enabled");
+                            //       _exploreModeTimer = Timer.periodic(
+                            //           Duration(milliseconds: 5000),
+                            //               (timer) async {
+                            //             if (Platform.isAndroid) {
+                            //             } else {
+                            //               SingletonFunctionController.btadapter
+                            //                   .startScanningIOS(
+                            //                   SingletonFunctionController
+                            //                       .apibeaconmap);
+                            //             }
+                            //             Future.delayed(
+                            //                 Duration(milliseconds: 2000))
+                            //                 .then((_){
+                            //                   print("printexploremodecheck");
+                            //                   print(bluetoothScanAndroidClass.EM_NEAREST_BEACON);
+                            //
+                            //             exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!,bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE);
+                            //
+                            //               // realTimeReLocalizeUser(
+                            //               //     resBeacons)
+                            //               // listenToBin()
+                            //             });
+                            //           });
+                            //       // _isBuildingPannelOpen = false;
+                            //       // _isExploreModePannelOpen = true;
+                            //     }
+                            //   });
+                            // }
+                          },
+                          child: Semantics(
+                            label: "Explore mode",
+                            child: SvgPicture.asset(
+                              "assets/Navigation_RTLIcon.svg",
+                              // color:
+                              // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                            ),
+                          ),
+                          backgroundColor: Color(
+                              0xff24B9B0), // Set the background color of the FAB
+                        )
                       : Container(), // Adjust the height as needed// Adjust the height as needed
                   // FloatingActionButton(
                   //   onPressed: () async {

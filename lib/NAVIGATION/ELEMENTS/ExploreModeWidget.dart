@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../navigationTools.dart';
+import '../APIMODELS/landmark.dart';
 
 class ExploreModeWidget extends StatelessWidget {
-  nearestLandInfo currentInfo;
+  Landmarks currentInfo;
   String finalDirection;
   
   ExploreModeWidget(this.currentInfo,this.finalDirection);

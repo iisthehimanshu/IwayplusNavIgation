@@ -305,6 +305,7 @@ class Properties {
   String? callLocation;
   String? panelDir;
   String? shopNature;
+  String? alertName;
   String? photo;
   bool? polygonExist;
   String? polyId;
@@ -370,6 +371,7 @@ class Properties {
         this.callLocation,
         this.panelDir,
         this.shopNature,
+        this.alertName,
         this.photo,
         this.polygonExist,
         this.polyId,
@@ -435,6 +437,7 @@ class Properties {
     callLocation = json['callLocation'];
     panelDir = json['panelDir'];
     shopNature = json['shopNature'];
+    alertName = json['alertName'];
     photo = json['photo'];
     polygonExist = json['polygonExist'];
     polyId = json['polyId'];
@@ -502,6 +505,7 @@ class Properties {
     data['callLocation'] = this.callLocation;
     data['panelDir'] = this.panelDir;
     data['shopNature'] = this.shopNature;
+    data['alertName'] = this.alertName;
     data['photo'] = this.photo;
     data['polygonExist'] = this.polygonExist;
     data['polyId'] = this.polyId;

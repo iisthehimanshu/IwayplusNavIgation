@@ -412,107 +412,99 @@ class UserState {
   }
 
   void handleNearbyLandmarks(BuildContext context) {
-    List<int> transitionvalue = cellPath[pathobj.index].move(theta);
+    List<int> transitionValue = cellPath[pathobj.index].move(theta);
+
     pathState.nearbyLandmarks.retainWhere((element) {
-      if (element.element!.subType == "room door" &&
-          element.properties!.polygonExist != true) {
-
-        if (tools.calculateDistance([
-          showcoordX,
-          showcoordY
-        ], [
-          element.doorX ?? element.coordinateX!,
-          element.doorY ?? element.coordinateY!
-        ]) <=
-            5) {
-
-          if (!UserState.ttsOnlyTurns) {
-            speak(
-                convertTolng("Passing by ${element.name}", element.name, 0.0,
-                    context, 0.0, "", ""),
-                lngCode);
-          }
-          return false;
-        } else if(tools.calculateDistance([
-          showcoordX,
-          showcoordY
-        ], [
-          element.doorX ?? element.coordinateX!,
-          element.doorY ?? element.coordinateY!
-        ]) <=
-            10) {
-          print("speak passing by ${tools.calculateDistance([
-            showcoordX,
-            showcoordY
-          ], [
-            element.doorX ?? element.coordinateX!,
-            element.doorY ?? element.coordinateY!
-          ])}");
-          double angle = tools.calculateAngle2(
-              [showcoordX, showcoordY],
-              [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
-              [element.coordinateX!, element.coordinateY!]);
-          if (!UserState.ttsOnlyTurns) {
-            if(tools.angleToClocks(angle, context)=="Straight"){
-              speak(
-                //convertTolng(
-                  "${element.name} door ahead",
-                  // element.name!,
-                  // 0.0,
-                  // context,
-                  // 0.0,
-                  // "",
-                  // ""),
-                  lngCode);
-            }else{
-              speak(
-                //convertTolng(
-                  "${element.name} door is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
-                  // element.name!,
-                  // 0.0,
-                  // context,
-                  // 0.0,
-                  // "",
-                  // ""),
-                  lngCode);
-            }
-
-          }
-          return false;
-        }
-      }
-
-
-
-      else if (tools.calculateDistance([
+      double distance = tools.calculateDistance([
         showcoordX,
         showcoordY
       ], [
         element.doorX ?? element.coordinateX!,
         element.doorY ?? element.coordinateY!
-      ]) <=
-          6) {
-        double angle = tools.calculateAngle2(
-            [showcoordX, showcoordY],
-            [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
-            [element.coordinateX!, element.coordinateY!]);
-        if (!UserState.ttsOnlyTurns) {
-          speak(
-              convertTolng(
-                  "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
-                  element.name!,
-                  0.0,
-                  context,
-                  0.0,
-                  "",
-                  ""),
-              lngCode);
+      ]);
+
+      if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
+        if (distance <= 5) {
+          _speakPassingBy(context, element.name);
+          return false;
+        } else if (distance <= 10) {
+          _speakDoorAheadOrDirection(context, element, transitionValue);
+          return false;
         }
+      } else if(element.element!.subType == "Alert" && element.properties != null && element.properties!.alertName != null && element.properties!.alertName!.isNotEmpty){
+        _speakAlert(context, element.properties!.alertName);
+      } else if (distance <= 6) {
+        _speakElementDirection(context, element, transitionValue);
         return false;
       }
+
       return true;
     });
   }
+
+  void _speakPassingBy(BuildContext context, String? name) {
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng("Passing by $name", name, 0.0, context, 0.0, "", ""),
+          lngCode
+      );
+    }
+  }
+
+  void _speakDoorAheadOrDirection(BuildContext context, dynamic element, List<int> transitionValue) {
+    double angle = tools.calculateAngle2(
+        [showcoordX, showcoordY],
+        [showcoordX + transitionValue[0], showcoordY + transitionValue[1]],
+        [element.coordinateX!, element.coordinateY!]
+    );
+
+    if (!UserState.ttsOnlyTurns) {
+      String direction = tools.angleToClocks(angle, context);
+      if (direction == "Straight") {
+        speak("${element.name} door ahead", lngCode);
+      } else {
+        speak(
+            "${element.name} door is on your ${LocaleData.getProperty5(direction, context)}",
+            lngCode
+        );
+      }
+    }
+  }
+
+  void _speakAlert(BuildContext context, String? name) {
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng("Alert, $name ahead ", name, 0.0, context, 0.0, "", ""),
+          lngCode
+      );
+    }
+  }
+
+  void _speakElementDirection(BuildContext context, dynamic element, List<int> transitionValue) {
+    double angle = tools.calculateAngle2(
+        [showcoordX, showcoordY],
+        [showcoordX + transitionValue[0], showcoordY + transitionValue[1]],
+        [element.coordinateX!, element.coordinateY!]
+    );
+
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng(
+              "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
+              element.name!,
+              0.0,
+              context,
+              0.0,
+              "",
+              ""
+          ),
+          lngCode
+      );
+    }
+  }
+
+
+
 
   void updateDisplayCoordinates() {
     showcoordX = cellPath[pathobj.index].x;
@@ -675,8 +667,9 @@ class UserState {
       } else {
         return "$destname की ओर आगे बढ़ते रहें";
       }
+    }else{
+      return msg;
     }
-    return "";
   }
 
   Future<void> checkForMerge() async {

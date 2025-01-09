@@ -3954,6 +3954,7 @@ bool isAppinForeground=true;
   List<Landmarks> EM_NearLandmarks = [];
 
   Future<void> exploreModePaintUser(HashMap<String, beacon> apibeaconmap, Map<String, Landmarks> EM_buildingLandmark, beacon EM_NEAREST_BEACON_VALUE) async{
+    print("exploreModePaintUser");
     final Uint8List iconMarker = await getImagesFromMarker('assets/EM_landmark.png', 85);
 
     if(EM_NEAREST_BEACON_VALUE.name != EM_lastBeaconValue){
@@ -3961,9 +3962,7 @@ bool isAppinForeground=true;
       EM_NearLandmarks = tools.EM_localizefindAllNearbyLandmark(EM_NEAREST_BEACON_VALUE, EM_buildingLandmark);
       EM_NearLandmarks.forEach((landmark){
         List<double> value =[];
-        if(landmark.doorX != null) {
-          value = tools.localtoglobal(landmark.doorX!, landmark.doorY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
-        }else{
+        if(landmark.coordinateX != null) {
           value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
         }
         _exploreModeMarker.add(Marker(
@@ -3983,10 +3982,7 @@ bool isAppinForeground=true;
       );
       EM_lastBeaconValue = EM_NEAREST_BEACON_VALUE.name!;
       paintUser(EM_NEAREST_BEACON_VALUE.name!);
-      setState(() {
-
-      });
-
+      setState(() {});
     }
   }
 
@@ -3994,7 +3990,7 @@ bool isAppinForeground=true;
   Future<void> initializeScanAndLandmarkData() async {
     print("initializeScanAndLandmarkData");
     EM_buildingLandmark = await SingletonFunctionController.building.landmarkdata!;
-    exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!,bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE);
+
   }
 
 
@@ -11539,7 +11535,6 @@ bool isAppinForeground=true;
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
   Widget ExploreModePannel() {
-
     List<Widget> Exwidgets = [];
     if(EM_finalDirections.length >0) {
       for (int i = 0; i < EM_NearLandmarks.length; i++) {
@@ -11572,7 +11567,6 @@ bool isAppinForeground=true;
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
                     Text(
                       "Explore Mode",
                       style: const TextStyle(
@@ -11586,6 +11580,7 @@ bool isAppinForeground=true;
                     ),
                     IconButton(
                         onPressed: () {
+                          EM_TIMER.cancel();
                           isLiveLocalizing = false;
                           HelperClass.showToast("Explore mode is disabled");
                           //_exploreModeTimer!.cancel();
@@ -11603,7 +11598,7 @@ bool isAppinForeground=true;
                   height: 8,
                 ),
                 Container(
-                  child: Text(bluetoothScanAndroidClass.EM_RSSI_AVERAGE.toString()),
+                  child: Text(BluetoothScanAndroidClass.EM_RSSI_AVERAGE.toString()),
                 ),
                 Column(
                   children: Exwidgets,
@@ -11638,8 +11633,7 @@ bool isAppinForeground=true;
     return Visibility(
         visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(
-          label:
-          "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
+          label: "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
           excludeSemantics: true,
           child: SlidingUpPanel(
             controller: _panelController,
@@ -12582,6 +12576,9 @@ bool isAppinForeground=true;
   //   ));
   // }
 
+  late Timer EM_TIMER;
+  String EM_LastBeacon = "";
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -13010,8 +13007,7 @@ bool isAppinForeground=true;
                         //  _getUserLocation();
                         SingletonFunctionController.btadapter.emptyBin();
                         if (!user.isnavigating && !isLocalized) {
-                          SingletonFunctionController.btadapter
-                              .stopScanning();
+                          SingletonFunctionController.btadapter.stopScanning();
                           if (Platform.isAndroid) {
                             bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((_){
                               localizeUser().then((value) => {
@@ -13020,18 +13016,12 @@ bool isAppinForeground=true;
                                 })
                               });
                             });
-
-                            // SingletonFunctionController.btadapter.startScanning(
-                            //     SingletonFunctionController.apibeaconmap);
                           } else {
-                            SingletonFunctionController.btadapter
-                                .startScanningIOS(
-                                SingletonFunctionController.apibeaconmap);
+                            SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
                           }
                           setState(() {
                             isLocalized = true;
-                            resBeacons =
-                                SingletonFunctionController.apibeaconmap;
+                            resBeacons = SingletonFunctionController.apibeaconmap;
                           });
 
                           // late Timer _timer;
@@ -13090,17 +13080,27 @@ bool isAppinForeground=true;
                             _isExploreModePannelOpen = true;
                             //ExploreModePannelController.open();
 
+                            await initializeScanAndLandmarkData().then((_){
+                              bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap);
+                            });
 
-                            Timer.periodic(Duration(seconds: 5), (_){
+
+                            EM_TIMER = Timer.periodic(Duration(seconds: 4), (_){
                               // bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap).then((_){
                               //   print("bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE");
                               //   print(bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE.name);
-                              //
-                              //
                               // });
-                              bluetoothScanAndroidClass.listenToScanUpdates(SingletonFunctionController.apibeaconmap);
+                              print("BluetoothScanAndroidClass.EM_RSSI_VALUES");
+                              print(BluetoothScanAndroidClass.EM_RSSI_VALUES);
+                              print(BluetoothScanAndroidClass.EM_DEVICE_NAME);
+                              print(BluetoothScanAndroidClass.EM_RSSI_WEIGHT);
+                              BluetoothScanAndroidClass.EM_RSSI_AVERAGE = bluetoothScanAndroidClass.calculateAverageFromRssi(BluetoothScanAndroidClass.EM_RSSI_VALUES, BluetoothScanAndroidClass.EM_DEVICE_NAME, BluetoothScanAndroidClass.EM_RSSI_WEIGHT);
+                              String closestDeviceDetails = bluetoothScanAndroidClass.findLowestRssiDevice(BluetoothScanAndroidClass.EM_RSSI_AVERAGE);
+                              //print("EM_LastBeacon Closest Device Details: $closestDeviceDetails");
+                              if(closestDeviceDetails != "No devices found" && closestDeviceDetails != EM_LastBeacon){
+                                exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!,SingletonFunctionController.apibeaconmap[closestDeviceDetails]!);
+                              }
 
-                              initializeScanAndLandmarkData();
                             });
 
 

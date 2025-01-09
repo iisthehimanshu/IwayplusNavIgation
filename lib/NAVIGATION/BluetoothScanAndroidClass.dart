@@ -32,7 +32,7 @@ class BluetoothScanAndroidClass{
 
   String EM_NEAREST_BEACON = "";
   beacon EM_NEAREST_BEACON_VALUE = beacon();
-  Map<String, List<int>> EM_RSSI_VALUES = {};
+  static Map<String, List<int>> EM_RSSI_VALUES = {};
 
 
 
@@ -82,15 +82,13 @@ class BluetoothScanAndroidClass{
 
 
   List<String> nearestBeaconList = [];
-  Map<String, String> EM_DEVICE_NAME = {};
-  Map<String, List<double>> EM_RSSI_WEIGHT = {};
-  Map<String, double> EM_RSSI_AVERAGE = {};
+  static Map<String, String> EM_DEVICE_NAME = {};
+  static Map<String, List<double>> EM_RSSI_WEIGHT = {};
+  static Map<String, double> EM_RSSI_AVERAGE = {};
   Future<void> listenToScanExploreMode(HashMap<String, beacon> apibeaconmap) async {
     print("listenToScanExploreMode");
     String closestDeviceDetails = "";
     String deviceMacId = "";
-
-
     StreamSubscription? subscription;
     try {
       // Listen to the stream continuously
@@ -141,26 +139,25 @@ class BluetoothScanAndroidClass{
             }
           });
         }
-
       });
 
     }
 
-    print("Processing scan results...EM");
-    print("Device Names: $EM_DEVICE_NAME");
-    print("RSSI Values: $EM_RSSI_VALUES");
-    print("RSSI Weights: $EM_RSSI_WEIGHT");
-
-    EM_RSSI_AVERAGE = calculateAverageFromRssi(EM_RSSI_VALUES, EM_DEVICE_NAME, EM_RSSI_WEIGHT);
-    closestDeviceDetails = findLowestRssiDevice(EM_RSSI_AVERAGE);
-
-    print("Closest Device Details: $closestDeviceDetails");
-    if(closestDeviceDetails != "No devices found"){
-      EM_NEAREST_BEACON = closestDeviceDetails;
-    }
-    if(apibeaconmap.containsKey(EM_NEAREST_BEACON)){
-      EM_NEAREST_BEACON_VALUE = apibeaconmap[EM_NEAREST_BEACON]!;
-    }
+    // print("Processing scan results...EM");
+    // print("Device Names: $EM_DEVICE_NAME");
+    // print("RSSI Values: $EM_RSSI_VALUES");
+    // print("RSSI Weights: $EM_RSSI_WEIGHT");
+    //
+    // EM_RSSI_AVERAGE = calculateAverageFromRssi(EM_RSSI_VALUES, EM_DEVICE_NAME, EM_RSSI_WEIGHT);
+    // closestDeviceDetails = findLowestRssiDevice(EM_RSSI_AVERAGE);
+    //
+    // print("Closest Device Details: $closestDeviceDetails");
+    // if(closestDeviceDetails != "No devices found"){
+    //   EM_NEAREST_BEACON = closestDeviceDetails;
+    // }
+    // if(apibeaconmap.containsKey(EM_NEAREST_BEACON)){
+    //   EM_NEAREST_BEACON_VALUE = apibeaconmap[EM_NEAREST_BEACON]!;
+    // }
   }
 
   Future<void> listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap) async {
@@ -274,7 +271,6 @@ class BluetoothScanAndroidClass{
 
         print("closestDeviceDetails");
         print(closestDeviceDetails);
-        EM_NEAREST_BEACON_VALUE = apibeaconmap[closestDeviceDetails]!;
 
         //addtoBin(deviceDetails.DeviceAddress, int.parse(deviceDetails.DeviceRssi));
       }else{
@@ -411,14 +407,12 @@ class BluetoothScanAndroidClass{
     double? lowestValue;
 
     rssiAverage.forEach((key, value) {
-      if (lowestValue == null || value > lowestValue!) {
+      if (lowestValue != null) {
         lowestValue = value;
         lowestKey = key;
       }
     });
     closestRSSI = lowestValue.toString();
-    print("findLowestRssiDevice");
-    print(lowestValue);
 
     return lowestKey ?? "No devices found";
   }

@@ -18,6 +18,25 @@ class beaconapi {
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
+  String encryptDecrypt(String input, String key){
+    StringBuffer result = StringBuffer();
+    for (int i = 0; i < input.length; i++) {
+      // XOR each character of the input with the corresponding character of the key
+      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
+    }
+    return result.toString();
+  }
+  String getDecryptedData(String encryptedData){
+    Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
+    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
+    List<dynamic> originalList = jsonDecode(newResponse);
+    // Wrap in landmarks header
+    Map<String, dynamic> wrappedResponse = {
+      "landmarks": originalList
+    };
+    return jsonEncode(wrappedResponse);
+  }
+
   Future<List<beacon>> fetchBeaconData(String id) async {
 
     print("beacon---");
@@ -52,28 +71,32 @@ class beaconapi {
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
       },
     );
 
     if (response.statusCode == 200) {
       print("BEACON DATA FROM API");
-      List<dynamic> responseBody = json.decode(response.body);
-      List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-      print("response.statusCode");
-      print("beaconList $beaconList $id");
-      final beaconData = BeaconAPIModel(responseBody: responseBody);
-      print(beaconData);
-      String i = id;
-      if(beaconList.isNotEmpty){
-        i=beaconList[0].buildingID!;
-      }
-      BeaconBox.put(i,beaconData);
-      beaconData.save();
-      print(BeaconBox.keys);
+      try{
+      print("beaconapiresponse ${response.body}");
+        List<dynamic> responseBody = json.decode(response.body);
+        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
+        print("response.statusCode");
+        print("beaconList $beaconList $id");
+        final beaconData = BeaconAPIModel(responseBody: responseBody);
+        print(beaconData);
+        String i = id;
+        if(beaconList.isNotEmpty){
+          i=beaconList[0].buildingID!;
+        }
+        BeaconBox.put(i,beaconData);
+        beaconData.save();
+        print(BeaconBox.keys);
+        return beaconList;
+      }catch(e){
+          return [];
+     }
 
-
-      return beaconList;
 
     }else if (response.statusCode == 403) {
       print("BEACON API in error 403");

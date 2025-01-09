@@ -36,6 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.5.3
+  google_maps_flutter_web:
   google_maps_polyline:
   http: ^1.1.0
   flutter_speed_dial: ^7.0.0
@@ -49,7 +50,6 @@ dependencies:
   flutter_svg: ^2.0.9
   path_provider:
   hive: ^2.2.3
-  firebase_core:
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
@@ -65,9 +65,8 @@ dependencies:
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
   turf: ^0.0.10
-  geolocator: ^11.0.0
+  geolocator: ^12.0.0
   upgrader:
-  firebase_messaging:
   lottie: ^2.6.0
   speech_to_text:
   fuzzy: <1.0.0
@@ -98,6 +97,7 @@ dependencies:
   string_similarity: ^2.1.1
   new_version_plus: ^0.0.12
   provider: ^6.1.2
+  image:
 
 
 

@@ -7,7 +7,6 @@ class DebugToggle extends StatefulWidget {
   static bool StepButton = kDebugMode?true:false;
   static bool PDRIcon = kDebugMode?false:false;
   const DebugToggle({super.key});
-
   @override
   State<DebugToggle> createState() => _DebugToggleState();
 }

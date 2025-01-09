@@ -23,10 +23,30 @@ class patchAPI {
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
+  String encryptDecrypt(String input, String key){
+    StringBuffer result = StringBuffer();
+    for (int i = 0; i < input.length; i++) {
+      // XOR each character of the input with the corresponding character of the key
+      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
+    }
+    return result.toString();
+  }
+  String getDecryptedData(String encryptedData){
+    Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
+    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
+    print("new response ${newResponse}");
+    Map<String,dynamic> originalList = jsonDecode(newResponse);
+    // Wrap in landmarks header
+    Map<String, dynamic> wrappedResponse = {
+      "patchData": originalList
+    };
+    return jsonEncode(wrappedResponse);
+  }
+
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    String manufacturer = await DeviceInformation.deviceManufacturer;
-    String deviceModel = await DeviceInformation.deviceModel;
+    String manufacturer = kIsWeb?"WEB":await DeviceInformation.deviceManufacturer;
+    String deviceModel = kIsWeb?"WEB":await DeviceInformation.deviceModel;
     print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
@@ -54,18 +74,31 @@ class patchAPI {
       Uri.parse(baseUrl), body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
-
     if (response.statusCode == 200) {
-      Map<String, dynamic> responseBody = json.decode(response.body);
-      final patchData = PatchAPIModel(responseBody: responseBody);
-      print("patchdata $responseBody for id $id");
-      PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
-      patchData.save();
-      print("PATCH API DATA FROM API");
-      return patchDataModel.fromJson(responseBody);
+      print("data from patch ${response.body}");
+      try{
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        final patchData = PatchAPIModel(responseBody: responseBody);
+        print("patchdata $responseBody for id $id");
+        PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
+        patchData.save();
+        print("PATCH API DATA FROM API");
+        return patchDataModel.fromJson(responseBody);
+      }catch(e){
+        String finalResponse=getDecryptedData(response.body);
+        Map<String, dynamic> responseBody = json.decode(finalResponse);
+        final patchData = PatchAPIModel(responseBody: responseBody);
+        print("patchdata $responseBody for id $id");
+        PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
+        patchData.save();
+        print("PATCH API DATA FROM API");
+        return patchDataModel.fromJson(responseBody);
+      }
+
 
     }else if (response.statusCode == 403)  {
       print("PATCH API in error 403");
@@ -91,7 +124,7 @@ class patchAPI {
         return patchDataModel.fromJson(responseBody);
 
       }else{
-        print("PATCH API EMPTY DATA FROM API AFTER 403");
+        print("${response.body}  PATCH API EMPTY DATA FROM API AFTER 403");
         patchDataModel patchData = patchDataModel();
         return patchData;
       }

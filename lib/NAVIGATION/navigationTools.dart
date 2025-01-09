@@ -1,9 +1,11 @@
 import 'dart:collection';
 import 'dart:math';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
@@ -15,9 +17,9 @@ import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'Navigation.dart';
 import 'directionClass.dart';
-import 'path.dart';
-import 'package:intl/intl.dart';
+
 
 class tools {
   static List<PDM.Coordinates>? _cachedCordData;
@@ -243,7 +245,7 @@ class tools {
     double hor = dist * cos(ang * pi / 180.0);
 
     Map<String, double> finalCoords =
-        obtainCoordinates(ref[leastLat], ver, hor);
+    obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
@@ -256,9 +258,9 @@ class tools {
     double difflon =
         ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-            cos((secondLocation["lat"]! * pi) / 180) *
-            sin(difflon / 2) *
-            sin(difflon / 2) +
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
@@ -517,9 +519,6 @@ class tools {
   //   return bearingDegrees;
   // }
 
-
-
-
   static double calculateBearing(List<double> pointA, List<double> pointB) {
     double lat1 = toRadians(pointA[0]); //user
     double lon1 = toRadians(pointA[1]); //user
@@ -777,9 +776,9 @@ class tools {
   }
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    
-    
-    
+
+
+
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -808,9 +807,7 @@ class tools {
 
     return angleInDegrees;
   }
-
-
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+  static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //
     // //
     // //
@@ -831,6 +828,26 @@ class tools {
 
     return angleInDegrees;
   }
+
+  static double calculateAngle5(List<double> a, List<double> b, List<double> c) {
+    // Convert the points to vectors
+    List<double> ab = [b[0] - a[0], b[1] - a[1]];
+    List<double> ac = [c[0] - a[0], c[1] - a[1]];
+
+    // Calculate the angle between the two vectors in radians
+    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180 / pi;
+
+    // Ensure the angle is within [0, 360] degrees
+    if (angleInDegrees < 0) {
+      angleInDegrees += 360;
+    }
+
+    return angleInDegrees;
+  }
+
 
   static void setBuildingAngle(String angle){
     AngleBetweenBuildingandGlobalNorth = double.parse(angle);
@@ -974,11 +991,11 @@ class tools {
     List<int> c = [node.x , node.y];
 
 
-    // 
-    // 
-    // 
-    // 
-    // 
+    //
+    //
+    //
+    //
+    //
     // //
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -1018,11 +1035,11 @@ class tools {
     List<int> c = [prev.x , prev.y];
 
 
-    // 
-    // 
-    // 
-    // 
-    // 
+    //
+    //
+    //
+    //
+    //
     // //
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -1147,7 +1164,7 @@ class tools {
     turns.insert(0, path[0]);
     turns.add(path.last);
     print("turns $turns");
-    double Nextdistance = tools.calculateDistance([turns[0].x,turns[0].y], [turns[1].x,turns[1].y]);
+    double Nextdistance = tools.calculateAerialDist(turns[0].lat,turns[0].lng, turns[1].lat,turns[1].lng);
     print("adding turn distance as $Nextdistance between ${[turns[0].x,turns[0].y]} and ${[turns[1].x,turns[1].y]}");
 
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
@@ -1159,16 +1176,22 @@ class tools {
           lifts.removeLast();
         }
       }
+      if(turns[i].bid != turns[i+1].bid){
+        continue;
+      }
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
-      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]}");
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
+      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]} distance $Nextdistance and $Prevdistance");
+
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
+      if(path[index-1].bid != path[index].bid){
+        angle = 0;
+      }
       String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
     }
-    Directions.add(direction(turns.last.node, "Straight", null, null, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
-
+    Directions.add(direction(turns.last.node, "Straight", null, 1, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
     return Directions;
   }
 
@@ -1177,6 +1200,72 @@ class tools {
     return number >= 0 ? rounded : rounded - 1;
   }
 
+  static List<LatLng> convertToLatLngList(List<dynamic> coordinates) {
+    return coordinates.map((coordinate) {
+      // Split the coordinate string by comma
+      var parts = coordinate.split(',');
+      // Convert the parts to double and return as LatLng
+      return LatLng(double.parse(parts[0]), double.parse(parts[1]));
+    }).toList();
+  }
+
+  static List<IntPoint> convertToIntPointList(List<dynamic> coordinates) {
+    return coordinates.map((coordinate) {
+      // Split the coordinate string by comma
+      var parts = coordinate.split(',');
+      // Convert the parts to int and return as IntPoint
+      return IntPoint(int.parse(parts[0]), int.parse(parts[1]));
+    }).toList();
+  }
+
+  static bool isPointOnLineSegment(List<int> x, List<int> y, List<int> z) {
+    // Check if point x is collinear with points y and z using the area of triangle approach
+    int area = (y[0] * (z[1] - x[1])) + (x[0] * (y[1] - z[1])) + (z[0] * (x[1] - y[1]));
+
+    // If the area is zero, points are collinear, now check if x is within the segment range
+    if (area == 0) {
+      // Check if point x is between points y and z on both x and y coordinates
+      return (x[0] >= y[0] && x[0] <= z[0] || x[0] <= y[0] && x[0] >= z[0]) &&
+          (x[1] >= y[1] && x[1] <= z[1] || x[1] <= y[1] && x[1] >= z[1]);
+    }
+    return false;
+  }
+
+  static navPoints findCartesianCoordinates(navPoints pointX, navPoints pointY, navPoints pointZ) {
+    // Calculate the transformation parameters (slopes)
+    double slopeX = (pointY.x - pointX.x) / (pointY.latitude - pointX.latitude);
+    double slopeY = (pointY.y - pointX.y) / (pointY.latitude - pointX.latitude);
+
+    // Apply the transformation to point Z
+    int xZ = pointX.x + (slopeX * (pointZ.latitude - pointX.latitude)).round();
+    int yZ = pointX.y + (slopeY * (pointZ.latitude - pointX.latitude)).round();
+
+    // Return the Cartesian coordinates of point Z
+    return navPoints(pointZ.latitude, pointZ.longitude, xZ, yZ);
+  }
+
+  static IntPoint findCoordinatesOfWaypoint(LatLng waypoint){
+    final polylineData = SingletonFunctionController.building.polylinedatamap;
+    IntPoint point = IntPoint(0, 0);
+    polylineData.forEach((key,value){
+      if(key == buildingAllApi.outdoorID ){
+        for (var floor in value.polyline!.floors!) {
+          for (var polyline in floor.polyArray!) {
+            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(0)){
+              for (var node in polyline.nodes!) {
+                if(node.lat == waypoint.latitude && node.lon == waypoint.longitude){
+                  point.x = node.coordx!;
+                  point.y = node.coordy!;
+                  continue;
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return point;
+  }
 
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,
@@ -1198,7 +1287,7 @@ class tools {
           if (d < distance) {
 
             if (!nearbyLandmarks.contains(value)) {
-              
+
               nearbyLandmarks.add(value);
             }
           }
@@ -1209,9 +1298,9 @@ class tools {
   }
 
 
-  static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
-    PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
+    PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
     int distance=20;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
@@ -1242,9 +1331,8 @@ class tools {
           }
           if (d<distance) {
 
-            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-            
+            Landmarks currentLandInfo = value;
+
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
             //
@@ -1255,9 +1343,9 @@ class tools {
       }
     });
 
-    nearestLandInfo? nearestLandmark;
+    Landmarks? nearestLandmark;
     if(priorityQueue.isNotEmpty){
-      MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+      MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
       nearestLandmark = entry.key;
     }else{
       //
@@ -1301,7 +1389,7 @@ class tools {
           if (d<distance) {
 
             Landmarks currentLandInfo =value;
-            
+
             priorityQueue.add(MapEntry(currentLandInfo, d));
 
             //
@@ -1329,10 +1417,10 @@ class tools {
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
-          double d = 0.0;
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
 
           if (value.doorX != null) {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
@@ -1346,7 +1434,19 @@ class tools {
               Landmarks currentLandInfo = Landmarks(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY, doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
               priorityQueue.add(MapEntry(currentLandInfo, d));
             }
+
           }
+        }else{
+          d = calculateDistance(
+              pCoord, [value.coordinateX!, value.coordinateY!]);
+          //
+          //
+          if (d<distance) {
+            Landmarks currentLandInfo = Landmarks(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+          }
+        }
 
       }
     });
@@ -1410,11 +1510,7 @@ class tools {
     return nearestLandmark;
   }
 
-
   static List<int> localizefindNearbyLandmarkCoordinated(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-
-    //
-
     int distance=10;
     List<int> coordinates=[];
     int i=0;
@@ -1470,7 +1566,7 @@ class tools {
           if (d<distance) {
             coordinates.add(value.coordinateX!);
             coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
+            // finalCords.add(coordinates);
           }
         }
       }
@@ -1623,7 +1719,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-   // //
+    // //
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1645,7 +1741,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1663,7 +1759,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1678,11 +1774,11 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontal(double angle,{int? currPointer,int? totalCells}) {
-    
+
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1697,11 +1793,11 @@ class tools {
   }
 
   static List<int> twocelltransitionhorizontalSpecial(double angle,{int? currPointer,int? totalCells}) {
-    
+
     if (angle < 0) {
       angle = angle + 360;
     }
-    
+
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -2111,14 +2207,14 @@ class tools {
   }
 
   static int distancebetweennodes(int node1, int node2, int numCols){
-    
+
     int x1 = node1 % numCols;
     int y1 = node1 ~/ numCols;
 
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
 
-    
+
 
 
     // //
@@ -2129,14 +2225,14 @@ class tools {
   }
 
   static int distancebetweennodes_inCell(Cell node1, Cell node2){
-    
+
     double x1 = node1.lat;
     double y1 = node1.lng;
 
     double x2 = node2.lat;
     double y2 = node2.lng;
 
-    
+
 
     //return calculateDistance([node1.x,node1.y], [node2.x,node2.y]).toInt();
     // //
@@ -2305,5 +2401,19 @@ class Element {
     data['type'] = this.type;
     data['subType'] = this.subType;
     return data;
+  }
+}
+
+class navPoints {
+  final double latitude;
+  final double longitude;
+  final int x;
+  final int y;
+
+  navPoints(this.latitude, this.longitude, this.x, this.y);
+
+  @override
+  String toString() {
+    return 'navPoints{latitude: $latitude, longitude: $longitude, x: $x, y: $y}';
   }
 }

@@ -6,12 +6,14 @@ import '/IWAYPLUS/Elements/HelperClass.dart';
 import '../API/ladmarkApi.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../FloorSelectionPage.dart';
+
+
 class SearchpageCategoryResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
   final String name;
   final String buildingName;
 
-  const SearchpageCategoryResults({required this.name,required this.buildingName,required this.onClicked});
+  const SearchpageCategoryResults({required this.name, required this.buildingName,required this.onClicked});
 
   @override
   State<SearchpageCategoryResults> createState() => _SearchpageCategoryResultsState();
@@ -44,7 +46,6 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     print("sortedListString");
     print(sortedListString);
   }
-
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
@@ -61,33 +62,27 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
         landmarkData.mergeLandmarks(value.landmarks);
       });
     });
-
   }
-
   Future<void> calculateFloor() async{
     print("In calfloor");
     setState(() {
-
       landmarkData.landmarksMap!.forEach((key, value) {
         if (value.floor != null && value.buildingName == widget.buildingName) {
           floors.add(value.floor!);
           //floors.sort();
           print("floors");
           print(floors);
-        } else {
+        }else{
           return;
         }
       });
     });
   }
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     //calculateFloor();
-
     return InkWell(
       onTap: (){
         Navigator.push(
@@ -99,7 +94,6 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
           print("value $value");
           widget.onClicked(value[0],value[1],value[2],value[3]);
         });
-
       },
       child: Container(
         margin: EdgeInsets.only(top: 10,left: 16,right: 16),

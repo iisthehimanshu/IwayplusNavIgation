@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../../../NAVIGATION/API/RefreshTokenAPI.dart';
@@ -44,6 +45,9 @@ class SignInAPI{
         ss.payload?.roles = responseBody["payload"]["roles"];
         // print("printing box length ${SigninBox.length}");
 
+        if(!kIsWeb){
+
+        }
         var signInBox = Hive.box('SignInDatabase');
         signInBox.put("accessToken", responseBody["accessToken"]);
         signInBox.put("refreshToken", responseBody["refreshToken"]);

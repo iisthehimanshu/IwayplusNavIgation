@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../APIMODELS/landmark.dart';
 import '../navigationTools.dart';
 import '../APIMODELS/landmark.dart';
 

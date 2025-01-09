@@ -48,7 +48,7 @@ class SingletonFunctionController {
     // Mark the function as running and create a new Completer
     _isRunning = true;
     _completer = Completer<void>();
-    
+
 
     var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
     building.beacondata = beaconData;
@@ -61,7 +61,6 @@ class SingletonFunctionController {
       await Future.wait(allBuildingID.entries.map((entry) async {
         print("entry$entry");
         var key = entry.key;
-
         var beaconData = await beaconapi().fetchBeaconData(key);
         print("keydata${beaconData.length}");
         if (building.beacondata == null) {
@@ -73,7 +72,6 @@ class SingletonFunctionController {
           building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
           print("entryprint${building.beacondata!.length}");
         }
-
         for (var beacon in beaconData) {
           if (beacon.name != null) {
             apibeaconmap[beacon.name!] = beacon;
@@ -82,7 +80,6 @@ class SingletonFunctionController {
         Building.apibeaconmap = apibeaconmap;
         print(buildingAllApi.allBuildingID);
         print(apibeaconmap);
-
       })).then((value) async {
         print("blue statusssss");
         print(await FlutterBluePlus.isOn);
@@ -114,7 +111,7 @@ class SingletonFunctionController {
   beacon? getlocalizedBeacon(){
     double highestweight = 0;
     String nearestBeacon = "";
-   // if(isBinEmpty() == false){
+    // if(isBinEmpty() == false){
     // }
 
     return (SingletonFunctionController.currentBeacon!="")?Building.apibeaconmap[SingletonFunctionController.currentBeacon]:null;

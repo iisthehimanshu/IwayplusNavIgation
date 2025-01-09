@@ -13,12 +13,11 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
-import '../IWAYPLUS/Elements/HelperClass.dart';
-import '/IWAYPLUS/API/buildingAllApi.dart';
-import '/NAVIGATION/API/ladmarkApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../IWAYPLUS/API/buildingAllApi.dart';
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
@@ -39,32 +38,21 @@ class FloorSelectionPage extends StatefulWidget {
 
 class _FloorSelectionPageState extends State<FloorSelectionPage> {
   land landmarkData = land();
-
   List<SearchpageResults> searchResults = [];
-
   List<SearchpageResults> recentResults = [];
-
   List<dynamic> recent = [];
-
   TextEditingController _controller = TextEditingController();
-
   final SpeechToText speetchText = SpeechToText();
   bool speechEnabled = false;
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
-
-
   FlutterTts flutterTts = FlutterTts();
-
   Future<void> speak(String msg) async {
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
-
-
-
   @override
   void initState() {
     super.initState();
@@ -85,15 +73,11 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           print("Tag=00");
         }
       });
-
     }
-
     optionListForUI.add(widget.filterName);
     optionListForUI.add(widget.filterBuildingName);
     print("Floorselection");
     print(widget.floors);
-
-
     if(widget.filterName!=""){
       setState(() {
         _controller.text = widget.filterName;
@@ -113,7 +97,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
     }
   }
-
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
@@ -121,7 +104,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       });
     });
   }
-
   bool category = false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
@@ -138,7 +120,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   List<int> checkfloors = [];
 
   void search(String filterText,String buildingText,List<int> floor){
-
     setState(() {
       if(landmarkData.landmarksMap!.isNotEmpty) {
         searchResults.clear();
@@ -146,8 +127,12 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           if (searchResults.length < 10) {
             if (value.name != null && value.element!.subType != "beacons") {
               if(floor.isNotEmpty){
+                print("floor.isNotEmptyif");
                 print(value.floor);
+                print(floor);
+                print(floor.contains(value.floor));
                 if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
+                  print("inside floor.isNotEmptyif");
                   searchResults.add(SearchpageResults(name: "${value.name}",
                     location: "Floor ${value.floor}, ${value
                         .buildingName}, ${value.venueName}",
@@ -156,7 +141,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     bid: value.buildingID!,
                     floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
-                  print("NO");
+                  print("floor.isNotEmptyelse");
                 }
               }else{
                 if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase())) {
@@ -177,8 +162,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           }
         });
       }
-
-
       if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
         sortResultsByDistance(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!);
       }
@@ -325,8 +308,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
               ),
 
               Semantics(
+                label: "Selected Facilities and Buildings for Floor View",
                 header: true,
-                label: "Filter Chip",
                 child: Container(
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
@@ -352,7 +335,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
               ),
               Semantics(
                 header: true,
-                label: "Floor Filter",
+                label: "Available Floors for Facility Viewing",
                 child: Container(
                   width: screenWidth,
                   margin: EdgeInsets.only(bottom: 10),
@@ -360,9 +343,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     value: tag,
                     onChanged: (val){
                       setState(() => tag = val);
-                      if(HelperClass.SemanticEnabled) {
-                        speak("Floor ${widget.floors[val]} selected");
-                      }
+                      // if(HelperClass.SemanticEnabled) {
+                      //   speak("Floor ${widget.floors[val]} selected");
+                      // }
                       // print("wilsonchecker");
                       // print(val);
                       print("Floor check");
@@ -407,8 +390,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                   flex: 1,
                   child: SingleChildScrollView(
                       child: Semantics(
-                        header: true,
-                        label: "Column",
+                          header: true,
+                          label: "${searchHintString} available on floor ${tag}",
+
                           child: Column(children:searchResults,))
                   )
               ),
@@ -466,6 +450,8 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
       duration: Duration(milliseconds: 500),
       child: Semantics(
         label: widget.text + "Selected",
+        hint: "Button. Double tap to Unselect",
+        excludeSemantics: true,
         child: InkWell(
           borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
           onTap: () {
@@ -478,21 +464,18 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
                 margin: EdgeInsets.only(left: 4),
                 child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
-              Semantics(
-                excludeSemantics: true,
-                child: Container(
-                  margin: EdgeInsets.only(left: 8, right: 4),
-                  child: Text(
-                    widget.text,
-                    style: TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: widget.selected? Colors.white : Color(0xff49454f) ,
-                      height: 20 / 14,
-                    ),
-                    textAlign: TextAlign.center,
+              Container(
+                margin: EdgeInsets.only(left: 8, right: 4),
+                child: Text(
+                  widget.text,
+                  style: TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: widget.selected? Colors.white : Color(0xff49454f) ,
+                    height: 20 / 14,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
@@ -547,6 +530,9 @@ class _FloorWidgetForFloorSelectionPageState extends State<FloorWidgetForFloorSe
       duration: Duration(milliseconds: 500),
       child: Semantics(
         label: "Filter Floor"+widget.floorNo,
+        value: widget.selected ? "Selected" : "",
+        hint: "Button. Double tap to activate",
+        excludeSemantics: true,
         child: InkWell(
           onTap: () {
             setState(() {
@@ -562,14 +548,11 @@ class _FloorWidgetForFloorSelectionPageState extends State<FloorWidgetForFloorSe
             // );
           },
           child: Center(
-            child: Semantics(
-              excludeSemantics: true,
-              child: Text(
-                widget.floorNo,
-                style: TextStyle(
-                  color: widget.selected ? Colors.white : Colors.black,
-                  fontSize: 16, // Adjust font size as needed
-                ),
+            child: Text(
+              widget.floorNo,
+              style: TextStyle(
+                color: widget.selected ? Colors.white : Colors.black,
+                fontSize: 16, // Adjust font size as needed
               ),
             ),
           ),

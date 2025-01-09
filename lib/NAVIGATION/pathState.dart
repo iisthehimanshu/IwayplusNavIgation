@@ -45,11 +45,9 @@ class pathState {
   bool didPathStart = false;
   // Default constructor without arguments
   pathState();
-
   // Additional constructor with named parameters for creating instances with specific values
   pathState.withValues(
       this.sourceX, this.sourceY, this.sourceFloor, this.destinationX, this.destinationY, this.destinationFloor, this.numCols, this.index);
-
 
   void clear(){
     path.clear();
@@ -64,7 +62,6 @@ class pathState {
     noPathFound = false;
     didPathStart = false;
   }
-
   void swap() {
     // Swap source and destination information
     String tempPolyID = sourcePolyID;

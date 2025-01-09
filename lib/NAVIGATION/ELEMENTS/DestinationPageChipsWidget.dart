@@ -35,7 +35,8 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: widget.text + (widget.selected?"selected":""),
+      label: widget.text,
+      toggled: widget.selected,
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
@@ -58,14 +59,16 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
             setState(() {
               widget.selected = !widget.selected;
             });
-            widget.onTap(widget.text);
-            widget.onSelect(widget.selected);
-            widget.selected ? print("black") : print("white");
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
-            // );
+            if(widget.selected){
+              widget.onTap(widget.text);
+              widget.onSelect(widget.selected);
+              widget.selected ? print("black") : print("white");
+            }else{
+              setState(() {
+                widget.onTap("");
+              });
+            }
+
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -91,18 +94,21 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? InkWell(
-                onTap: (){
-                  setState(() {
-                    widget.selected=!widget.selected;
-                    widget.onTap("");
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 4),
-                  child: Semantics(
-                    label: "Unselect ${widget.text}",
-                      child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
+              widget.selected? Semantics(
+                excludeSemantics: true,
+                child: InkWell(
+                  onTap: (){
+                    setState(() {
+                      widget.selected=!widget.selected;
+                      widget.onTap("");
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 4),
+                    child: Semantics(
+                        label: "Unselect ${widget.text}",
+                        child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
+                  ),
                 ),
               ) : Container()
 

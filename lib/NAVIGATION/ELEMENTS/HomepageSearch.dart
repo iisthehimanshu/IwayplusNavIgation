@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/newSearchPage.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/locales.dart';
 import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
@@ -17,8 +18,6 @@ import 'package:animated_checkmark/animated_checkmark.dart';
 
 import '../UserState.dart';
 import 'HomepageFilter.dart';
-
-
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
@@ -62,10 +61,8 @@ class _HomepageSearchState extends State<HomepageSearch> {
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    Future.delayed(Duration(seconds: 5), () {
-
-    });
     print("Running init");
   }
 
@@ -74,14 +71,9 @@ class _HomepageSearchState extends State<HomepageSearch> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    Future.delayed(Duration(seconds: 5), () {
-
-    });
-
     return Column(
       children: [
         Semantics(
-
           header: true,
           label: "Search Bar",
           child: Container(
@@ -107,35 +99,40 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Semantics(
-                      sortKey: const OrdinalSortKey(0),
-                      label: "${LocaleData.waytogo.getString(context)}",
-
-                      child: InkWell(
-                        onTap: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                          ).then((value){
-                            print("POP22");
-                            widget.onVenueClicked(value,DirectlyStartNavigation: false);
-                          });
-                        },
+                    child: FocusScope(
+                      autofocus: true,
+                      child: Focus(
                         child: Semantics(
-                          excludeSemantics: true,
-                          child: Container(
-                              margin: EdgeInsets.only(left: 16),
-                              child: Text(
-                                "${LocaleData.waytogo.getString(context)}",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff8e8d8d),
-                                  height: 25 / 16,
-                                ),
-                              )),
+                          sortKey: const OrdinalSortKey(0),
+                          label: "${LocaleData.waytogo.getString(context)}",
+
+                          child: InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                              ).then((value){
+                                print("POP22");
+                                widget.onVenueClicked(value,DirectlyStartNavigation: false);
+                              });
+                            },
+                            child: Semantics(
+                              excludeSemantics: true,
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 16),
+                                  child: Text(
+                                    "${LocaleData.waytogo.getString(context)}",
+                                    style: const TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xff8e8d8d),
+                                      height: 25 / 16,
+                                    ),
+                                  )),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -150,7 +147,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
+                                  builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                           ).then((value){
                             print("POPPP");
                             widget.onVenueClicked(value);
@@ -206,14 +203,13 @@ class _HomepageSearchState extends State<HomepageSearch> {
         ),
         Semantics(
           header: true,
-          label: "Filters",
+          label: "Facilities Filter",
           child: Container(
             width: screenWidth,
             child: ChipsChoice<int>.single(
               value: vall,
               onChanged: (val){
                 setState(() => vall = val);
-
                 if(HelperClass.SemanticEnabled){
                   speak("${options[val]} selected");
                 }else if(lastValueStored == val){
@@ -229,7 +225,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 label: (i, v) => v,
               ),
               choiceBuilder: (item, i) {
-                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: _icons[i],);
+                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(options[i].toLowerCase()),);
               },
               direction: Axis.horizontal,
             ),
@@ -239,6 +235,29 @@ class _HomepageSearchState extends State<HomepageSearch> {
     );
   }
 }
+
+IconData getIcon(String option) {
+  switch (option.toLowerCase()) {
+    case 'washroom':
+      return Icons.wash_sharp;
+    case 'cafeteria':
+      return Icons.local_cafe;
+    case 'drinking water':
+      return Icons.water_drop;
+    case 'atm':
+      return Icons.atm_sharp;
+    case 'entry':
+      return Icons.door_front_door_outlined;
+    case 'lift':
+      return Icons.elevator;
+    case 'reception':
+      return Icons.desk_sharp;
+    default:
+      return Icons.help_outline; // Return a default icon if no match is found
+  }
+}
+
+
 
 class CustomChip extends StatelessWidget {
   final String label;

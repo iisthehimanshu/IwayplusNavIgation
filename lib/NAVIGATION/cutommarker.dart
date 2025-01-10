@@ -36,6 +36,17 @@ class customMarker {
     );
   }
 
+  static Marker changeIcon(BitmapDescriptor icon , Marker marker ) {
+    return Marker(
+        markerId: marker.markerId,
+        position: marker.position,
+        icon: icon,
+        rotation: marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
+        anchor: marker.anchor,
+        visible: marker.visible
+    );
+  }
+
   static Marker toggleVisibility(Marker marker ) {
     return Marker(
         markerId: marker.markerId,

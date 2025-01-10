@@ -8,6 +8,8 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
+import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
@@ -206,6 +208,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   final pdr = <StreamSubscription<dynamic>>[];
   Duration sensorInterval = Duration(milliseconds: 100);
+  final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
+
 
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
@@ -1564,6 +1568,78 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
   }
 
+  Map<MarkerId, Marker> nearbyLandmarks = {};
+  Landmarks? PinedLandmark ;
+
+  Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name) async {
+    final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
+    BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
+
+    final markerId = MarkerId(id);
+
+    setState(() {
+      nearbyLandmarks[markerId] = Marker(
+        markerId: MarkerId(name),
+        position: point,
+        visible: true,
+        icon: optionLandmark,
+      );
+    });
+    PinLandmarkPannel.togglePanel();
+    print("Added NearbyLandmark at $point with ID: $markerId");
+  }
+
+  void selectPinLandmark(CameraPosition cameraposition){
+    double distance = 5;
+    MarkerId? id;
+    nearbyLandmarks.forEach((key,value){
+      double d = tools.calculateAerialDist(cameraposition.target.latitude, cameraposition.target.longitude, value.position.latitude, value.position.longitude);
+      if(d<distance){
+        distance = d;
+        id = key;
+      }
+    });
+    if(id != null){
+      updateNearbyLandmarkMarkers(id!);
+    }
+  }
+
+  void focusOnPinLandmark(LatLng position){
+    _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        position,
+        22, // Specify your custom zoom level here
+      ),
+    );
+  }
+
+  Future<void> updateNearbyLandmarkMarkers(MarkerId id) async {
+
+    if (!nearbyLandmarks.containsKey(id) || PinedLandmark == SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first) return;
+
+    final Uint8List selectedMarker = await getImagesFromMarker('assets/LandmarkSelected.png', 85);
+    BitmapDescriptor selectedLandmark = BitmapDescriptor.fromBytes(selectedMarker);
+
+    final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
+    BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
+
+    setState(() {
+      // Update all markers to default
+      nearbyLandmarks.updateAll((markerId, marker) {
+        return marker.copyWith(iconParam: optionLandmark);
+      });
+
+      // Update the selected marker to a different icon
+      nearbyLandmarks[id] = nearbyLandmarks[id]!.copyWith(iconParam: selectedLandmark);
+    });
+    focusOnPinLandmark(nearbyLandmarks[id]!.position);
+    if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
+      PinedLandmark = SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first;
+    }
+    print("Updated NearbyLandmark with ID: ${nearbyLandmarks[id]!.markerId.value}  now the list is $nearbyLandmarks");
+  }
+
+
 
   ClosestPointResult shortestPoint(
       LatLng userLatLng, LatLng targetLatLng, IntPoint targetintPoint,
@@ -1773,16 +1849,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         final landmarkData = await SingletonFunctionController.building.landmarkdata;
         if (landmarkData != null) {
-          final userSetLocation = tools.localizefindNearbyLandmark(
-              beaconData,
-              landmarkData.landmarksMap!
-          );
 
-          if (userSetLocation != null) {
-            initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
-          } else {
-            unableToFindLocation();
+          SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData,
+              landmarkData.landmarksMap!);
+          if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
+            detected = false;
+            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
+            return;
           }
+
+          // final userSetLocation = tools.localizefindNearbyLandmark(
+          //     beaconData,
+          //     landmarkData.landmarksMap!
+          // );
+          //
+          // if (userSetLocation != null) {
+          //   initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
+          // } else {
+          //   unableToFindLocation();
+          // }
+
+
         } else {
           unableToFindLocation();
         }
@@ -1794,6 +1881,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (speakTTS) unableToFindLocation();
     }
   }
+
+
 
   Future<void> _handlePolygonLocalization(
       String polyID,
@@ -1858,6 +1947,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _currentLocale);
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
+  }
+
+  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks) async {
+    SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
+    await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
+    await Future.delayed(Duration(milliseconds: 1000));
+    focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
+    for (var landmark in landmarks) {
+      addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"");
+    }
+  }
+
+  void localizeOnPinedLandmark(){
+    if(PinedLandmark != null){
+      initializeUser(PinedLandmark!, null);
+    }else{
+      unableToFindLocation();
+    }
+
+    PinLandmarkPannel.hidePanel();
+    setState(() {
+      nearbyLandmarks.clear();
+      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = null;
+      PinedLandmark = null;
+    });
   }
 
   void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
@@ -12526,7 +12640,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker).union(debugMarker),
+                    .union(restBuildingMarker).union(debugMarker).union(nearbyLandmarks.values.toSet()),
                 buildingsEnabled: false,
                 compassEnabled: false,
                 rotateGesturesEnabled: true,
@@ -12539,55 +12653,54 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
+
+                  mapState.cameraposition = cameraPosition; // User has started panning
+
+                  // Check zoom level and decide rendering strategy
                   if (cameraPosition.zoom > 16.8) {
                     focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5 && cameraPosition.zoom <= 16.8) {
-                    renderCampusPatchTransition(buildingAllApi.allBuildingID.keys.toList(), outdoorID: buildingAllApi.outdoorID);
+                  } else if (cameraPosition.zoom > 15.5) {
+                    renderCampusPatchTransition(
+                      buildingAllApi.allBuildingID.keys.toList(),
+                      outdoorID: buildingAllApi.outdoorID,
+                    );
                   } else {
                     renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
 
+                  // Update map alignment based on camera position
+                  mapState.aligned = cameraPosition.target.latitude.toStringAsFixed(5) ==
+                      mapState.target.latitude.toStringAsFixed(5);
 
-
-
-                  if (cameraPosition.target.latitude.toStringAsFixed(5) !=
-                      mapState.target.latitude.toStringAsFixed(5)) {
-                    mapState.aligned = false;
-                  } else {
-                    mapState.aligned = true;
-                  }
-                  mapState.interaction = true;
+                  mapState.interaction = true; // Interaction has occurred
                   mapbearing = cameraPosition.bearing;
+
+                  // Sync zoom level only when there’s no active interaction
                   if (!mapState.interaction) {
                     mapState.zoom = cameraPosition.zoom;
                   }
-                  if (true) {
-                    _updateMarkers(cameraPosition.zoom);
-                    //_updateBuilding(cameraPosition.zoom);
-                  }
-                  // _updateMarkers(cameraPosition.zoom);
-                  if (cameraPosition.zoom < 17) {
+
+                  // Update markers based on zoom level
+                  _updateMarkers(cameraPosition.zoom);
+
+                  if (cameraPosition.zoom < 17 || user.isnavigating) {
                     _markers.clear();
                     markerSldShown = false;
                   } else {
-                    if (user.isnavigating) {
-                      _markers.clear();
-                      markerSldShown = false;
-                    } else {
-                      markerSldShown = true;
-                    }
+                    markerSldShown = true;
                   }
+
+                  // Update specific markers if they should be shown
                   if (markerSldShown) {
                     _updateMarkers11(cameraPosition.zoom);
-                  } else {
-
                   }
-
-                  // _updateEntryMarkers11(cameraPosition.zoom);
-                  //_markerLocations.clear();
-                  //
                 },
                 onCameraIdle: () {
+                  if (mapState.cameraposition != null) {
+                    print("selecting landmark");
+                    selectPinLandmark(mapState.cameraposition!);
+                    mapState.cameraposition = null; // User has stopped panning
+                  }
                   if (!mapState.interaction) {
                     mapState.interaction2 = true;
                   }
@@ -12628,7 +12741,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   //
                   // // Text(Building.thresh),
 
-                  isSemanticEnabled
+                  isSemanticEnabled || PinLandmarkPannel.isPanelOpened()
                       ? Container()
                       : SpeedDial(
                     icon: _mainIcon,
@@ -12759,7 +12872,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         });
                       })
                       : Container(),
-                  !isSemanticEnabled
+                  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
                       ? Semantics(
                     label: "Change floor",
                     child: SpeedDial(
@@ -12898,7 +13011,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   //   ),
                   // ),
 
-                  isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen ? Container(): Semantics(
+                  isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
                         //  _getUserLocation();
@@ -13076,7 +13189,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   right: 16,
                   child: _isLandmarkPanelOpen ||
                       _isRoutePanelOpen ||
-                      _isnavigationPannelOpen
+                      _isnavigationPannelOpen || PinLandmarkPannel.isPanelOpened()
                       ? Semantics(excludeSemantics: true, child: Container())
                       : FocusScope(
                     autofocus: true,
@@ -13112,6 +13225,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           navigationPannel(),
           SafeArea(child: reroutePannel(context)),
           SafeArea(child: ExploreModePannel()),
+          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark,nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           // FloatingActionButton(
@@ -13182,7 +13296,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           // ),
           (!SingletonFunctionController.building.destinationQr &&
               !user.initialallyLocalised &&
-              !SingletonFunctionController.building.qrOpened)
+              !SingletonFunctionController.building.qrOpened && !PinLandmarkPannel.isPanelOpened())
               ? Container(
             height: screenHeight,
             width: screenWidth,
@@ -13206,7 +13320,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               ],
             ),
           )
-              : Container()
+              : Container(),
+          ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
         ],
       ),
     );

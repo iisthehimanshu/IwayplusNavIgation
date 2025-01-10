@@ -18,6 +18,7 @@ class Building{
   static Map<String,List<int>> numberOfFloorsDelhi = Map();
   Map<String,Map<int, List<int>>> nonWalkable = Map();
   Map<String,Map<int,List<int>>> floorDimenssion = Map();
+  List<Landmarks>? listOfNearbyLandmarksToLocalize;
   //Map<int,List<poly.Nodes>> wayPoints = {};
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();

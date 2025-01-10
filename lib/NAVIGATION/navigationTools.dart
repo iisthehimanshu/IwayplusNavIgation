@@ -1355,6 +1355,38 @@ class tools {
     return nearestLandmark;
   }
 
+  static List<Landmarks>? findListOfNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
+    List<Landmarks> queue = [];
+    int distance=10;
+    List<int> pCoord = [];
+    pCoord.add(Beacon.coordinateX!);
+    pCoord.add(Beacon.coordinateY!);
+    landmarksMap.forEach((key, value) {
+
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+        if (Beacon.floor! == value.floor) {
+          double d = 0.0;
+          if (value.doorX != null) {
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+          }else{
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+          }
+          if (d<distance) {
+            queue.add(value);
+          }
+        }
+      }
+    });
+    if(queue.isNotEmpty){
+     return queue;
+    }else{
+      return null;
+    }
+  }
+
   static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap,{bool increaserange = false}) {
 
     PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));

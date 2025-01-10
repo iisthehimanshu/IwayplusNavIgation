@@ -395,6 +395,7 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
+                PushNotifications().showSimpleNotification();
                 Navigator.push(
                   context,
                   MaterialPageRoute(

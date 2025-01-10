@@ -866,16 +866,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               ),
             ),
-            category && _controller.text.isNotEmpty ? Semantics(
-              header: true,
-              label: "Building Filter section",
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: newvall,
-                  onChanged: (val) {
-
+            !category && _controller.text.isNotEmpty ? Visibility(
+              visible: isTyping,
+              child: Semantics(
+                header: true,
+                label: "Building Filter section",
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: newvall,
+                    onChanged: (val) {
 
                       // if(HelperClass.SemanticEnabled) {
                       //   speak("${optionListItemBuildingName.toList()[val]} selected");

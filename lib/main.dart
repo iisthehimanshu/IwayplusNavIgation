@@ -99,6 +99,8 @@ Future<void> mobileInitialization () async {
 
   // PushNotifications.init();
   PushNotifications.localNotiInit();
+  PushNotifications.resetBadgeCount();
+
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

@@ -15,6 +15,7 @@ class BluetoothScanAndroidClass{
   static const eventChannel = EventChannel('com.example.bluetooth/scanUpdates');
   List<BluetoothDevice> devices = [];
   bool isScanning = false;
+  bool EM_isScanning = false;
   static StreamSubscription? _scanSubscription; // Variable to hold the subscription
   int count = 0;
 
@@ -86,6 +87,7 @@ class BluetoothScanAndroidClass{
   static Map<String, List<double>> EM_RSSI_WEIGHT = {};
   static Map<String, double> EM_RSSI_AVERAGE = {};
   Future<void> listenToScanExploreMode(HashMap<String, beacon> apibeaconmap) async {
+    EM_isScanning = true;
     print("listenToScanExploreMode");
     String closestDeviceDetails = "";
     String deviceMacId = "";
@@ -122,7 +124,7 @@ class BluetoothScanAndroidClass{
       print("Error starting scan or receiving updates: $e");
     }
 
-    if(isScanning) {
+    if(EM_isScanning) {
       Timer.periodic(Duration(seconds: 2), (timer) {
         if (EM_RSSI_VALUES.isNotEmpty) {
           EM_RSSI_VALUES.forEach((key, value) {
@@ -407,15 +409,38 @@ class BluetoothScanAndroidClass{
     double? lowestValue;
 
     rssiAverage.forEach((key, value) {
-      if (lowestValue != null) {
+      if (lowestValue == null || value > lowestValue!) {
         lowestValue = value;
         lowestKey = key;
       }
     });
     closestRSSI = lowestValue.toString();
+    print("findLowestRssiDevice");
+    print(lowestValue);
 
     return lowestKey ?? "No devices found";
   }
+
+  String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
+    String? lowestKey;
+    double? lowestValue = 3;
+print("rssiAverage");
+print(rssiAverage);
+    rssiAverage.forEach((key, value) {
+
+      if (lowestValue == null || value > lowestValue!) {
+        lowestValue = value;
+        lowestKey = key;
+      }
+    });
+    closestRSSI = lowestValue.toString();
+    print("findLowestRssiDevice");
+    print(lowestValue);
+    print(lowestKey);
+
+    return lowestKey ?? "No devices found";
+  }
+
 
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   HashMap<String,int> numberOfSample = HashMap();

@@ -50,14 +50,17 @@ class PushNotifications {
   static Future localNotiInit() async {
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    final DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
-      onDidReceiveLocalNotification: (id, title, body, payload) => null,
+    final DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings(
+      onDidReceiveLocalNotification: (id, title, body, payload) {
+        print("Notification received: $title, $body");
+      },
+      requestSoundPermission: true,
+      requestBadgePermission: true,
+      requestAlertPermission: true,
     );
     final LinuxInitializationSettings initializationSettingsLinux =
     LinuxInitializationSettings(defaultActionName: 'Open notification');
-    final InitializationSettings initializationSettings =
-    InitializationSettings(
+    final InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
         iOS: initializationSettingsDarwin,
         linux: initializationSettingsLinux);
@@ -85,6 +88,12 @@ class PushNotifications {
     // navigatorKey.currentState!.pushNamed("/message", arguments: notificationResponse);
   }
 
+  static Future resetBadgeCount() async {
+    // await _flutterLocalNotificationsPlugin
+    //     .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+    //     ?.setApplicationIconBadgeNumber(0);
+  }
+
   // show a simple notification
   static Future showSimpleNotification({
     required String title,
@@ -97,10 +106,14 @@ class PushNotifications {
         importance: Importance.max,
         priority: Priority.high,
         ticker: '');
-    const NotificationDetails notificationDetails =
-    NotificationDetails(android: androidNotificationDetails);
-    await _flutterLocalNotificationsPlugin
-        .show(0, title, body, notificationDetails, payload: payload);
+
+    const DarwinNotificationDetails darwinNotificationDetails = DarwinNotificationDetails(badgeNumber: 1); // Set badge count to 1
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+      iOS: darwinNotificationDetails,
+    );
+    await _flutterLocalNotificationsPlugin.show(0, title, body, notificationDetails, payload: payload);
   }
   // Helper function to download an image and save it locally
   static Future<String?> _downloadAndSaveImage(String url, String fileName) async {

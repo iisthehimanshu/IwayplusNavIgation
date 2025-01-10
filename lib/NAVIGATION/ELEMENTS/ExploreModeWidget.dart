@@ -6,7 +6,7 @@ import '../navigationTools.dart';
 import '../APIMODELS/landmark.dart';
 
 class ExploreModeWidget extends StatelessWidget {
-  Landmarks currentInfo;
+  nearestLandInfo currentInfo;
   String finalDirection;
   
   ExploreModeWidget(this.currentInfo,this.finalDirection);

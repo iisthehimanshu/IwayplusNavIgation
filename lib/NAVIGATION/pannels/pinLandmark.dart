@@ -117,7 +117,7 @@ class _pinLandmarkState extends State<pinLandmark> {
             children:
 
     widget.nearbyLandmarks.values
-        .map((marker) => Center(child: Text(marker.markerId.value)))
+        .map((marker) => Center(child: Text(marker.markerId.value.split('#').first)))
         .toList()
                ,
           ),

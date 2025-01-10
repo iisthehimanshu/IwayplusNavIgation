@@ -35,16 +35,41 @@ class pinLandmarkPannel {
   }
 
   // Method to get the SlidingUpPanel widget
-  SlidingUpPanel getPanelWidget(BuildContext context, Function(MarkerId) update, Function() localize,Map<MarkerId, Marker> nearbyLandmarks, Landmarks? pinedLandmark) {
-    return SlidingUpPanel(
-      controller: _panelController,
-      panel: pinLandmark(
-        update: update, nearbyLandmarks: nearbyLandmarks,pinedLandmark: pinedLandmark, localize: localize,  // Pass the hidePanel method to close the panel
-      ),
-      minHeight: 0,
-      maxHeight: 250,  // Maximum height of the panel
-      backdropOpacity: 0.5,
-      isDraggable: false,
+  Widget getPanelWidget(BuildContext context, Function(MarkerId) update, Function() localize, Function() closePanel, Map<MarkerId, Marker> nearbyLandmarks, Landmarks? pinedLandmark) {
+    return Stack(
+      children: [
+        Visibility(
+          visible: isPanelOpened(),
+          child: Positioned(
+            left: 10,
+            top: 24,
+            child: ElevatedButton(
+              onPressed: closePanel,
+              style: ElevatedButton.styleFrom(
+                shape: CircleBorder(), // Make the button circular
+                padding: EdgeInsets.all(8), // Adjust the size of the circle
+                elevation: 5, // Add elevation for the raised effect
+                backgroundColor: Color(0xff24B9B0), // Background color of the button
+                foregroundColor: Colors.white, // Icon color
+              ),
+              child: Icon(
+                Icons.arrow_back, // Back arrow icon
+                size: 32, // Adjust the size of the icon
+              ),
+            ),
+          ),
+        ),
+        SlidingUpPanel(
+        controller: _panelController,
+        panel: pinLandmark(
+          update: update, nearbyLandmarks: nearbyLandmarks,pinedLandmark: pinedLandmark, localize: localize,  // Pass the hidePanel method to close the panel
+        ),
+        minHeight: 0,
+        maxHeight: 250,  // Maximum height of the panel
+        backdropOpacity: 0.5,
+        isDraggable: false,
+      )
+      ],
     );
   }
 }

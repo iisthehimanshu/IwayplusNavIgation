@@ -1430,6 +1430,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} पर है";
       }
+    } else if (msg == "Confirm Your Location Amongst Below Given List") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "नीचे दी गई सूची में से अपना स्थान पुष्टि करें";
+      }
     }
     return "";
   }
@@ -1571,15 +1577,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Map<MarkerId, Marker> nearbyLandmarks = {};
   Landmarks? PinedLandmark ;
 
-  Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name) async {
+  Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible) async {
     final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
 
     final markerId = MarkerId(id);
 
     setState(() {
+      if(nearbyLandmarks[markerId] != null){
+        print("already exists a landmark ${markerId.value}");
+      }
       nearbyLandmarks[markerId] = Marker(
-        markerId: MarkerId(name),
+        markerId: MarkerId("$name#$id"),
         position: point,
         visible: true,
         icon: optionLandmark,
@@ -1604,16 +1613,32 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-  void focusOnPinLandmark(LatLng position){
-    _googleMapController.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        position,
-        22, // Specify your custom zoom level here
-      ),
+  Future<void> focusOnPinLandmark(LatLng position) async {
+    LatLngBounds bounds = await _googleMapController.getVisibleRegion();
+
+    LatLng center = LatLng(
+      (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
+      (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
     );
+    if(center.latitude.toStringAsFixed(5) != position.latitude.toStringAsFixed(5) || center.longitude.toStringAsFixed(5) != position.longitude.toStringAsFixed(5)){
+      print("focusing map");
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: position, // Use the last known target
+            zoom: 22,     // Use the last known zoom
+            bearing: user.theta,               // Update the bearing
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> updateNearbyLandmarkMarkers(MarkerId id) async {
+
+    if(PinedLandmark == SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first){
+      focusOnPinLandmark(nearbyLandmarks[id]!.position);
+    }
 
     if (!nearbyLandmarks.containsKey(id) || PinedLandmark == SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first) return;
 
@@ -1802,7 +1827,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       String? nearestBeacon,
       String? polyID,
       LatLng? gpsCoordinates,
-      {bool speakTTS = true, bool render = true}
+      {bool speakTTS = true, bool render = true, bool providePinSelection = false}
       ) async {
     Landmarks? userSetLocation = Landmarks();
 
@@ -1815,7 +1840,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     // If nearestBeacon is provided, localize the user to it
     if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
-      await _handleBeaconLocalization(nearestBeacon, speakTTS, render);
+      await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
@@ -1823,7 +1848,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
-      await _handleGlobalCoordinatesLocalization(speakTTS, render);
+      await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
     }
 
     // Reset direct source ID and Land ID
@@ -1838,7 +1863,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> _handleBeaconLocalization(
       String nearestBeacon,
       bool speakTTS,
-      bool render
+      bool render,
+      bool providePinSelection
       ) async {
     try {
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
@@ -1850,25 +1876,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         final landmarkData = await SingletonFunctionController.building.landmarkdata;
         if (landmarkData != null) {
 
-          SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData,
-              landmarkData.landmarksMap!);
-          if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
-            detected = false;
-            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
-            return;
+          if(providePinSelection){
+            SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData,
+                landmarkData.landmarksMap!);
+            if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
+              detected = false;
+              showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
+              return;
+            }
+          } else{
+            final userSetLocation = tools.localizefindNearbyLandmark(
+                beaconData,
+                landmarkData.landmarksMap!
+            );
+
+            if (userSetLocation != null) {
+              initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
+            } else {
+              unableToFindLocation();
+            }
           }
-
-          // final userSetLocation = tools.localizefindNearbyLandmark(
-          //     beaconData,
-          //     landmarkData.landmarksMap!
-          // );
-          //
-          // if (userSetLocation != null) {
-          //   initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
-          // } else {
-          //   unableToFindLocation();
-          // }
-
 
         } else {
           unableToFindLocation();
@@ -1908,7 +1935,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS,
-      bool render
+      bool render,
+      bool providePinSelection
       ) async {
 
     GPS gps = GPS();
@@ -1918,7 +1946,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     subscription = gps.positionStream.listen((position) {
       _kalmanFilter.applyFilter(position.latitude, position.longitude);
     });
-    await Future.delayed(Duration(seconds: 9));
+    await Future.delayed(const Duration(seconds: 9));
     subscription.cancel();
     gps.dispose();
 
@@ -1953,9 +1981,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
     await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
     await Future.delayed(Duration(milliseconds: 1000));
+    speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks) {
-      addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"");
+      addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
     }
   }
 
@@ -1966,6 +1995,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       unableToFindLocation();
     }
 
+    PinLandmarkPannel.hidePanel();
+    setState(() {
+      nearbyLandmarks.clear();
+      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = null;
+      PinedLandmark = null;
+    });
+  }
+
+  void closePinnedLandmarkPannel(){
+    unableToFindLocation();
     PinLandmarkPannel.hidePanel();
     setState(() {
       nearbyLandmarks.clear();
@@ -3355,7 +3394,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
-    paintUser(nearestBeacon,null,null, speakTTS: speakTTS);
+    paintUser(nearestBeacon,null,null, speakTTS: speakTTS, providePinSelection: true);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
@@ -6172,7 +6211,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   child: IconButton(
                                       onPressed: () {
                                         HelperClass.shareContent(
-                                            "https://dev.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
+                                            "https://maps.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
                                       },
                                       icon: Semantics(
                                           label: "Share route information",
@@ -9513,7 +9552,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Widget feedbackPanel(BuildContext context) {
     String destpoly = destiPoly.length > 1 ? destiPoly : destiPoly;
     String destiN = destiName.length > 1 ? destiName : destiName;
-
     if (SingletonFunctionController.building.landmarkdata != null) {
       SingletonFunctionController.building.landmarkdata!.then((value) {
         if (value.landmarksMap![destpoly] != null) {
@@ -13225,7 +13263,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           navigationPannel(),
           SafeArea(child: reroutePannel(context)),
           SafeArea(child: ExploreModePannel()),
-          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark,nearbyLandmarks,PinedLandmark)),
+          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           // FloatingActionButton(

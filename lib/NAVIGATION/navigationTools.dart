@@ -16,6 +16,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
@@ -1358,6 +1359,7 @@ class tools {
   static List<Landmarks>? findListOfNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     List<Landmarks> queue = [];
+    List<Landmarks> nodesQueue = [];
     int distance=10;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
@@ -1380,6 +1382,57 @@ class tools {
         }
       }
     });
+
+    final polylineData = SingletonFunctionController.building.polylinedatamap;
+    polylineData.forEach((key,value){
+      if(key == Beacon.buildingID ){
+        value.polyline!.floors!.forEach((floor){
+          floor.polyArray!.forEach((polyline){
+            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(Beacon.floor ?? 0)){
+              polyline.nodes!.forEach((node){
+                double d = calculateDistance(pCoord, [node.coordx!, node.coordy!]);
+                print("waypoint distance is $d");
+                if (d < distance) {
+                  print("foundwaypoint to option");
+                  var closestLandmark = queue[0];
+                  double minDistance = calculateDistance([node.coordx!, node.coordy!], [closestLandmark.coordinateX!,closestLandmark.coordinateY!]);
+                  for (var landmark in queue) {
+                    double distance = calculateDistance([node.coordx!, node.coordy!], [landmark.coordinateX!,landmark.coordinateY!]);
+                    if (distance < minDistance) {
+                      minDistance = distance;
+                      closestLandmark = landmark;
+                    }
+                  }
+                  Map<String, dynamic> data = closestLandmark.toJson();
+                  var duplicateLandmark = Landmarks.fromJson(data);
+                  duplicateLandmark.coordinateX = node.coordx;
+                  duplicateLandmark.coordinateY = node.coordy;
+                  duplicateLandmark.doorX = node.coordx;
+                  duplicateLandmark.doorY = node.coordy;
+                  duplicateLandmark.properties!.latitude = node.lat.toString();
+                  duplicateLandmark.properties!.longitude = node.lon.toString();
+                  duplicateLandmark.properties!.isWaypoint = true;
+                  duplicateLandmark.sId = "Himanshu";
+                  duplicateLandmark.name = node.sId;
+                  nodesQueue.add(duplicateLandmark);
+                }
+              });
+            }
+          });
+        });
+      }
+    });
+    queue.forEach((value){
+      print("queue id ${value.sId}");
+    });
+    nodesQueue.forEach((value){
+      print("nodesQueue id ${value.sId}  [${value.coordinateX},${value.coordinateY}]");
+    });
+    queue.addAll(nodesQueue);
+
+
+
+
     if(queue.isNotEmpty){
      return queue;
     }else{

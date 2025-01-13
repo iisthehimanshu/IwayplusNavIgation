@@ -873,7 +873,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print(msg);
         PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
       }else {
-        await flutterTts.speak(msg);
+        PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
+
+        //await flutterTts.speak(msg);
       }
 
     }

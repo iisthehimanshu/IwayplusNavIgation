@@ -29,57 +29,61 @@
 	<key>NSAppleMusicUsageDescription</key>
 	<string>To play music</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Using Bluetooth to localize the user</string>
+	<string>using bluetooth in order to localize the user</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Using Bluetooth to localize the user</string>
+	<string>using bluetooth in order to localize the user</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>To add or access events in your calendar</string>
+	<string>To add or access events to your calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes</string>
+
 	<key>NSContactsUsageDescription</key>
-	<string>To access contact information</string>
+
+	<string>To add access contact information</string>
+	<key>CFBundleName</key>
+    <string>flutter_local_notifications_example</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app needs to access location to enhance navigation in the background.</string>
+	<string>This app needs to access the location in order to enhance navigation in the background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app needs to access location to enhance navigation.</string>
+	<string>This app needs to access the location in order to enhance navigation.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>This app needs to access location to enhance navigation in the foreground.</string>
+	<string>This app needs to access the location in order to enhance navigation in the foreground.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs to access location to enhance navigation.</string>
+	<string>This app needs to access the location in order to enhance navigation.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone for speech recognition.</string>
+	<string>We need access to your microphone to enable speech recognition.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>This app tracks your steps</string>
+	<string>This application tracks your steps</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>To select a profile photo</string>
+	<string>SelectProfilePhoto</string>
 	<key>NSSiriUsageDescription</key>
-	<string>To interact with Siri for app-related features</string>
+	<string>To add or access events to your calendar</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Voice search</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>We use this to send personalized notifications.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-
-	<key>CFBundleURLTypes</key>
     <array>
-      <dict>
-        <key>CFBundleURLName</key>
-        <string>com.example.app</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>myapp</string>
-        </array>
-      </dict>
+        <string>fetch</string>
+        <string>remote-notification</string>
     </array>
-	<key>UNUserNotificationCenter</key>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use this to send personalized notifications.</string>
+    <key>UNUserNotificationCenter</key>
     <true/>
-
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+        <string>UIInterfaceOrientationPortrait</string>
+     </array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -87,13 +91,12 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
+
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
 </dict>
 </plist>

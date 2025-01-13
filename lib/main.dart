@@ -1,7 +1,6 @@
 
 import 'dart:convert';
 
-import 'package:app_links/app_links.dart';
 
 
 import 'package:flutter/foundation.dart';
@@ -123,15 +122,12 @@ class _MobileAppState extends State<MobileApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket('com.iwaypus.navigation');
   NotificationSocket notificationSocket = NotificationSocket();
-  late AppLinks _appLinks;
 
   @override
   void initState() {
     configureLocalization();
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initDeepLinkListener(context);
-    });
+
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
@@ -144,13 +140,13 @@ class _MobileAppState extends State<MobileApp> {
     });
   }
 
-  void _initDeepLinkListener(BuildContext c) async {
-    _appLinks = AppLinks();
-    _appLinks.uriLinkStream.listen((Uri? uri) {
-      Deeplink.deeplinkConditions(uri, c).then((v){
-      });
-    });
-  }
+  // void _initDeepLinkListener(BuildContext c) async {
+  //   _appLinks = AppLinks();
+  //   _appLinks.uriLinkStream.listen((Uri? uri) {
+  //     Deeplink.deeplinkConditions(uri, c).then((v){
+  //     });
+  //   });
+  // }
 
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
@@ -204,13 +200,13 @@ requestLocationPermission();
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
             }else{
-              _initDeepLinkListener(context);
+              // _initDeepLinkListener(context);
               return MainScreen(initialIndex: 0);
             } // Redirect to Sign-In screen if user is not authenticated
           } else {
             print("googleSignInUserName");
             print(googleSignInUserName);
-            _initDeepLinkListener(context);
+            // _initDeepLinkListener(context);
             return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
           }
         },

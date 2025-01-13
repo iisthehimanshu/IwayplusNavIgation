@@ -2,14 +2,13 @@
 FLUTTER_ROOT=/Users/iwayplus/development/flutter
 FLUTTER_APPLICATION_PATH=/Users/iwayplus/Documents/GitHub/iwayplusnavigation
 COCOAPODS_PARALLEL_CODE_SIGN=true
-FLUTTER_TARGET=/Users/iwayplus/Documents/GitHub/iwayplusnavigation/lib/main.dart
+FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=6.3.1
 FLUTTER_BUILD_NUMBER=24
 EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386
 EXCLUDED_ARCHS[sdk=iphoneos*]=armv7
-DART_DEFINES=Zmx1dHRlci5pbnNwZWN0b3Iuc3RydWN0dXJlZEVycm9ycz10cnVl,RkxVVFRFUl9XRUJfQ0FOVkFTS0lUX1VSTD1odHRwczovL3d3dy5nc3RhdGljLmNvbS9mbHV0dGVyLWNhbnZhc2tpdC9lZGQ4NTQ2MTE2NDU3YmRmMWM1YmRmYjEzZWNiOTQ2M2QyYmI1ZWQ0Lw==
 DART_OBFUSCATION=false
 TRACK_WIDGET_CREATION=true
 TREE_SHAKE_ICONS=false
-PACKAGE_CONFIG=/Users/iwayplus/Documents/GitHub/iwayplusnavigation/.dart_tool/package_config.json
+PACKAGE_CONFIG=.dart_tool/package_config.json

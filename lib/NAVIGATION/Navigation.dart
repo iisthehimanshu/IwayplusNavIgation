@@ -119,6 +119,7 @@ import 'package:lottie/lottie.dart' as lott;
 
 import 'fetchrouteParams.dart';
 import 'navigationTools.dart';
+import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 
 void main() {
   runApp(MyApp());
@@ -217,6 +218,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool markerSldShown = true;
   Set<Marker> _markers = Set();
   Set<Marker> _exploreModeMarker = Set();
+  Set<Marker> _exploreModeDebugBeaconMarker = Set();
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   final GlobalKey rerouteButton = GlobalKey();
@@ -267,164 +269,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void _initMarkers() async {
     final List<MapMarker> markers = [];
 
-    // mapMarkerLocationMapAndName.forEach((element) async {
-    //   final String values = element.tag;
-    //   final String LandmarkValue = element.landMarkName;
-    //   if(closestBuildingId!=""){
-    //
-    //     if (values == 'Lift' && element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Entry'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/log-in.png', 65);
-    //       try {
-    //         markers.add(
-    //           MapMarker(
-    //               id: element.latLng.toString(),
-    //               position: element.latLng,
-    //               icon: BitmapDescriptor.fromBytes(iconMarker),
-    //               Landmarkname: LandmarkValue,
-    //               mapController: _googleMapController,
-    //               offset: [0.5,0.5]
-    //           ),
-    //         );
-    //       } catch (e) {}
-    //     } else if (values == 'Pharmacy'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/hospital.png', 70);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Kitchen'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/cutlery.png', 60);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Female'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Male'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     }
-    //   }else{
-    //     if (values == 'Lift') {
-    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Entry') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/log-in.png', 65);
-    //       try {
-    //         markers.add(
-    //           MapMarker(
-    //               id: element.latLng.toString(),
-    //               position: element.latLng,
-    //               icon: BitmapDescriptor.fromBytes(iconMarker),
-    //               Landmarkname: LandmarkValue,
-    //               mapController: _googleMapController,
-    //               offset: [0.5,0.5]
-    //           ),
-    //         );
-    //       } catch (e) {}
-    //     } else if (values == 'Pharmacy') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/hospital.png', 70);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Kitchen') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/cutlery.png', 60);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Female') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Male') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     }
-    //   }
-    //
-    //
-    //
-    //
-    // });
     try {
       for (LatLng keys in _markerLocationsMap.keys) {
         final String values = _markerLocationsMap[keys]!;
@@ -528,8 +372,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await _updateMarkers11();
   }
 
-  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
-  /// updates state.
   Future<void> _updateMarkers11([double? updatedZoom]) async {
     if (updatedZoom != null && updatedZoom! > 15.5) {
       if (_clusterManager == null || updatedZoom == _currentZoom) return;
@@ -579,6 +421,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return bytes;
   }
 
+
+  late AnimationController PB_controller;
+  late Animation<double> PBanimation;
+  bool PB_isProgressing = false;
+
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   @override
@@ -627,6 +474,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       isLoading = true;
     });
 
+    PB_controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 5000),
+    );
+
+    // Define a Tween to animate the progress from 0.0 to 1.0
+    PBanimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: PB_controller,
+        curve: Curves.easeInOut, // Smooth linear curve for even progress
+      ),
+    );
     //  calibrate();
 
     //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
@@ -681,6 +540,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // fetchlist();
     // filterItems();
   }
+
+  // Start the animation loop
+  void PB_startAnimation() {
+    if (!PB_isProgressing) {
+      setState(() {
+        PB_isProgressing = true;
+      });
+      PB_controller.repeat(); // Make the animation repeat indefinitely
+    }
+  }
+
+  // Stop the animation loop
+  void PB_stopAnimation() {
+    if (PB_isProgressing) {
+      setState(() {
+        PB_isProgressing = false;
+      });
+      PB_controller.stop(); // Stop the animation
+    }
+  }
+
+
   void initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
@@ -3050,7 +2931,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             //   await DataVersionApi().fetchDataVersionApiData(key);
             // } catch (e) {}
             print("apicalls testing 3 for $key");
+            try{
             var patchData = await patchAPI().fetchPatchData(id: key);
+            }catch(e){
+
+            }
             Building.buildingData ??= Map();
 
             Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
@@ -3376,7 +3261,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     EM_buildingLandmark = await SingletonFunctionController.building.landmarkdata!;
 
   }
-
+  String firstValue = "";
 
   Future<void> realTimeReLocalizeUser(HashMap<String, beacon> apibeaconmap) async {
 
@@ -3389,8 +3274,33 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     setState(() {
       sumMap = SingletonFunctionController.btadapter.calculateAverage();
     });
+    final Uint8List iconMarker = await getImagesFromMarker('assets/dot.png', 30);
 
-    String firstValue = "";
+
+    sumMap.forEach((key, value) {
+      List<double> position = [];
+      if(SingletonFunctionController.apibeaconmap[key]! != null) {
+        if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! != null) {
+          position = tools.localtoglobal(
+              SingletonFunctionController.apibeaconmap[key]!.coordinateX!, SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
+              SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[key]!.sId! ??
+                  buildingAllApi.getStoredString()]);
+          _exploreModeDebugBeaconMarker.add(
+            Marker(
+              markerId: MarkerId("${SingletonFunctionController.apibeaconmap[key]!.name!}${position[0]}, ${position[1]}"),
+              position: LatLng(position[0], position[1]),
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              onTap: () {},
+            ),
+          );
+        }
+      }
+    });
+    setState(() {
+
+    });
+
+    firstValue = "";
 
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
@@ -10574,6 +10484,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return box.length;
   }
 
+
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
@@ -11658,15 +11569,85 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   String nearestAddressForPannel = "";
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
+  List<AnimationController> _controllers = [];
+  List<Animation<double>> _animations = [];
+  bool isPressed = false;
+
+  void EM_startAnimation() {
+    if (!isPressed) {
+      setState(() {
+        isPressed = true;
+      });
+      EM_addRipple();
+    }
+  }
+
+  void EM_stopAnimation() {
+    setState(() {
+      isPressed = false;
+    });
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    _controllers.clear();
+    _animations.clear();
+  }
+
+  void EM_addRipple() {
+    if (!isPressed) return;
+
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+
+    final currentAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    currentAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _animations.remove(currentAnimation);
+          _controllers.remove(controller);
+        });
+        controller.dispose();
+      }
+    });
+
+    setState(() {
+      _controllers.add(controller);
+      _animations.add(currentAnimation);
+    });
+
+    controller.forward();
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (isPressed) {
+        EM_addRipple();
+      }
+    });
+  }
+
+  late StreamSubscription<MagnetometerEvent> magnetometerSubscription;
+
+
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
     for (int i = 0; i < getallnearestInfo.length; i++) {
       Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
     }
+    final size = MediaQuery.of(context).size;
+    // Calculate the diagonal length of the screen
+    final screenDiagonal = sqrt(size.width * size.width + size.height * size.height);
+
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
-          maxHeight: 90 + 8 + (getallnearestInfo.length * 100),
+          maxHeight: 90+ (getallnearestInfo.length * 100),
           minHeight: 90 + 8,
           controller: ExploreModePannelController,
           panel: Container(
@@ -11707,16 +11688,151 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           _isExploreModePannelOpen = false;
                           _isBuildingPannelOpen = true;
                           lastBeaconValue = "";
+                          magnetometerSubscription.cancel();
                         },
                         icon: Icon(Icons.close))
                   ],
                 ),
                 SizedBox(
-                  height: 8,
+                  height: 0,
                 ),
                 Column(
                   children: Exwidgets,
-                )
+                ),
+                // Spacer(),
+                // Center(
+                //   child: Container(
+                //     width: 60,
+                //     height: 60,
+                //     margin: EdgeInsets.only(bottom: 20,top: 5),
+                //     color: Colors.white,
+                //     child: Center(
+                //       child: GestureDetector(
+                //         onTapDown: (_) => EM_startAnimation(),
+                //         onTapUp: (_) => EM_stopAnimation(),
+                //         onTapCancel: () => EM_stopAnimation(),
+                //         child: Stack(
+                //           alignment: Alignment.center,
+                //           children: [
+                //             // OverflowBox to allow ripple animations to go beyond screen bounds
+                //             OverflowBox(
+                //               maxWidth: double.infinity,
+                //               maxHeight: double.infinity,
+                //               child: Stack(
+                //                 alignment: Alignment.center,
+                //                 children: [
+                //                   ..._animations.map((animation) => AnimatedBuilder(
+                //                     animation: animation,
+                //                     builder: (context, child) {
+                //                       return Container(
+                //                         width: 50 * (1 + animation.value * screenDiagonal / 25),
+                //                         height: 50 * (1 + animation.value * screenDiagonal / 25),
+                //                         decoration: BoxDecoration(
+                //                           shape: BoxShape.circle,
+                //                           gradient: LinearGradient(
+                //                             colors: [
+                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
+                //                               Colors.teal.withOpacity(0.2 * (1 - animation.value)),
+                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
+                //                             ],
+                //                           ),
+                //                         ),
+                //                       );
+                //                     },
+                //                   )),
+                //                 ],
+                //               ),
+                //             ),
+                //             Container(
+                //               width: 70,
+                //               height: 70,
+                //               decoration: BoxDecoration(
+                //                 shape: BoxShape.circle,
+                //                 // gradient: const LinearGradient(
+                //                 //   colors: [
+                //                 //     Color(0xFF3B82F6),
+                //                 //     Color(0xFF8B5CF6),
+                //                 //     Color(0xFFEC4899),
+                //                 //   ],
+                //                 // ),
+                //                 boxShadow: [
+                //                   BoxShadow(
+                //                     color: Colors.black.withOpacity(0.1),
+                //                     blurRadius: 10,
+                //                     offset: const Offset(0, 4),
+                //                   ),
+                //                 ],
+                //               ),
+                //               child: ElevatedButton(
+                //                 onPressed: () {
+                //
+                //                   magnetometerSubscription = magnetometerEvents.listen((MagnetometerEvent event) {
+                //                     // Calculate angle using atan2 for rotation
+                //                     double angle = atan2(event.y, event.x);
+                //
+                //                     List<int> tv = tools.eightcelltransition(angle);
+                //
+                //                     if(firstValue != "" ) {
+                //                       List<String> finalDirections = calcDirectionsExploreMode([
+                //                             SingletonFunctionController
+                //                                 .apibeaconmap[firstValue]!
+                //                                 .coordinateX!,
+                //                             SingletonFunctionController
+                //                                 .apibeaconmap[firstValue]!
+                //                                 .coordinateY!
+                //                           ], [
+                //                         SingletonFunctionController
+                //                             .apibeaconmap[firstValue]!
+                //                             .coordinateX! + tv[0],
+                //                         SingletonFunctionController
+                //                             .apibeaconmap[firstValue]!
+                //                             .coordinateY! + tv[1]
+                //                       ], getallnearestInfo);
+                //                       print("finalDirections");
+                //                       print(finalDirections);
+                //
+                //                       print(Exwidgets.length);
+                //                       setState(() {
+                //                         Exwidgets.clear();
+                //                         print(Exwidgets.length);
+                //                       });
+                //                       // for (int i = 0; i < getallnearestInfo.length; i++) {
+                //                       //   if(finalDirections[i] == "Front") {
+                //                       //     Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i], facing: true,));
+                //                       //   }else{
+                //                       //     Exwidgets.add(ExploreModeWidget(
+                //                       //         getallnearestInfo[i],
+                //                       //         finalDirections[i]));
+                //                       //   }
+                //                       // }
+                //                       // setState(() {
+                //                       //
+                //                       // });
+                //                     }
+                //                   });
+                //                 },
+                //                 onFocusChange: (_){
+                //                   magnetometerSubscription.cancel();
+                //
+                //                 },
+                //                 style: ElevatedButton.styleFrom(
+                //                   padding: const EdgeInsets.only(bottom: 12,left: 5,right: 5,top: 5),
+                //                   backgroundColor: Colors.teal,
+                //                   shadowColor: Colors.tealAccent,
+                //                   shape: const CircleBorder(),
+                //                 ),
+                //                 child: Image.asset('assets/real-time-tracking.png',color: Colors.white,),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // )
+
+
+
               ],
             ),
           ),
@@ -12557,6 +12673,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     bluetoothScanAndroidClass.stopScan();
+    PB_controller.dispose(); // Dispose of the controller to free up resources
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    magnetometerSubscription.cancel();
+
     super.dispose();
   }
 
@@ -12691,6 +12813,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
 
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -12742,6 +12865,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .union(Markers)
 
                     .union(restBuildingMarker).union(_exploreModeMarker)
+                .union(_exploreModeDebugBeaconMarker)
 
                    .union(debugMarker),
 
@@ -12820,6 +12944,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ),
           //debug----
 
+
           DebugToggle.PDRIcon
               ? Positioned(
               top: 150,
@@ -12836,9 +12961,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               : Container(),
 
           Positioned(
-            bottom: isLiveLocalizing?300:150.0, // Adjust the position as needed
+            bottom: isLiveLocalizing?screenHeight*0.6:150.0, // Adjust the position as needed
             right: 16.0,
-
             child: Semantics(
               excludeSemantics: false,
               child: Column(
@@ -13242,6 +13366,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   _exploreModeTimer = Timer.periodic(
                                       Duration(milliseconds: 4000),
                                           (timer) async {
+                                        PB_startAnimation();
                                         if (Platform.isAndroid) {
                                           SingletonFunctionController.btadapter
                                               .startScanning(
@@ -13259,7 +13384,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
                                           realTimeReLocalizeUser(
                                               resBeacons)
-                                          // listenToBin()
+
+                                            // listenToBin()
                                         });
                                       });
                                   _isBuildingPannelOpen = false;
@@ -13326,6 +13452,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           SafeArea(
             child: Stack(
               children:[
+
+                Positioned(
+                  top:25,
+                  left: 30,
+                  right: 30,
+                  child: Container(
+                    height: 3,
+                    child: AnimatedBuilder(
+                      animation: PB_controller,
+                      builder: (context, child) {
+                        return LinearProgressIndicator(
+                          borderRadius: BorderRadius.circular(15), // Apply the border radius directly
+                          value: PBanimation.value, // Progress value between 0.0 and 1.0
+                          minHeight: 6.0, // Customize the height of the progress bar
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.teal), // Customize the color
+                          backgroundColor: Colors.grey[300], // Background color of the progress bar
+                        );
+                      },
+                    ),
+                  )
+                ),
                 !isLiveLocalizing? Positioned(
                   top: 16,
                   left: 16,

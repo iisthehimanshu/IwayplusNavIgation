@@ -58,17 +58,18 @@ class PushNotifications {
       requestBadgePermission: true,
       requestAlertPermission: true,
     );
-    final LinuxInitializationSettings initializationSettingsLinux =
-    LinuxInitializationSettings(defaultActionName: 'Open notification');
+    final LinuxInitializationSettings initializationSettingsLinux = LinuxInitializationSettings(defaultActionName: 'Open notification');
+
     final InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
         iOS: initializationSettingsDarwin,
         linux: initializationSettingsLinux);
-        _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: onNotificationTap,
-        onDidReceiveBackgroundNotificationResponse: onNotificationTap,
 
-        );
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
+
+      }
+    );
 
 
     // _flutterLocalNotificationsPlugin.initialize(initializationSettings,

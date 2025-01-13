@@ -129,9 +129,9 @@ class _MobileAppState extends State<MobileApp> {
   void initState() {
     configureLocalization();
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   _initDeepLinkListener(context);
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initDeepLinkListener(context);
+    });
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');

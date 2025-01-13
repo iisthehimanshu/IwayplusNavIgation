@@ -42,7 +42,7 @@ import '/NAVIGATION/Navigation.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'MODELS/VenueModel.dart';
 import 'NotificationScreen.dart';
-
+import 'package:iwaymaps/IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -66,7 +66,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-    //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();
@@ -395,13 +394,13 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
-                PushNotifications().showSimpleNotification();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BluetoothScanAndroid(),
-                  ),
-                );
+                PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => BluetoothScanAndroid(),
+                //   ),
+                // );
               },
             ),
             Container(

@@ -1558,7 +1558,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Set<Marker> debugMarker = Set();
   void addDebugMarkers(LatLng point, {double? hue,int? id}){
-    print("adding marker at $point");
+    if(kDebugMode){
+      print("adding marker at $point");
       setState(() {
         debugMarker.add(Marker(
           markerId: MarkerId("debug${DateTime.now().toString()}"),
@@ -1573,6 +1574,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           icon: BitmapDescriptor.defaultMarkerWithHue(hue??BitmapDescriptor.hueAzure),
         ));
       });
+    }
   }
 
   Map<MarkerId, Marker> nearbyLandmarks = {};
@@ -3140,11 +3142,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           SingletonFunctionController.building.floor[key] = 0;
           print("apicalls testing 1 for $key");
 
-          if(key == buildingAllApi.outdoorID){
-            var waypointData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
-            Building.GlobalAnnotation = waypointData;
-            //return;
+
+          try{
+            if(key == buildingAllApi.outdoorID){
+              var waypointData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
+              Building.GlobalAnnotation = waypointData;
+              //return;
+            }
+          }catch(e){
+
           }
+
 
           try {
               var waypointData = await waypointapi()

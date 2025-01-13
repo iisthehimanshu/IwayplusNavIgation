@@ -498,18 +498,31 @@ class tools {
 
       if (i == 0) {
         // For the first instruction, begin the narration
+        if(action=="Go Straight"){
+          action="Straight";
+        }
         narration.write(
             "Begin by moving $action for ${(distance ?? 1).toInt()} meters");
       } else {
         // For subsequent instructions, adjust based on context
+
         if (action == instructions[i - 1]['action'] && landmark == null) {
           // Concatenate similar instructions for brevity
           double previousDistance = instructions[i - 1]['distance'] ?? 1;
           instructions[i - 1]['distance'] = previousDistance + (distance ?? 1);
           continue;
         }
-        narration.write(
-            "Then you have to $action for ${(distance ?? 1).toInt()} meters");
+        if (action == "Go Straight") {
+          action = "Straight";
+        }
+
+        if (action != "floorChange") {
+          narration.write(
+              "Then you have to $action for ${(distance ?? 1).toInt()} meters");
+        } else {
+          narration.write(
+              "Then take this lift and go to ${(distance ?? 0).toInt()} floor");
+        }
       }
 
       if (landmark != null) {

@@ -116,8 +116,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
   var currentData;
 
-
-
   Future<void> customEnableBT(BuildContext context) async {
     String dialogTitle = "Hey! Please give me permission to use Bluetooth!";
     bool displayDialogContent = true;
@@ -146,9 +144,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       print(value);
     });
   }
-
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -303,10 +298,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                   ),
                 ),
                 Container(
-
                   height: 225,
-
-
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box("Favourites").listenable(),
                     builder: (BuildContext context, Box<dynamic> value, Widget? child) {
@@ -325,12 +317,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
 
                               child: ListTile(
                                 onTap: (){
-
                                  //if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
                                     wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
                                     wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
-
-
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
@@ -343,7 +332,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     //
                                     // }
                                     //customEnableBT(context);
-
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

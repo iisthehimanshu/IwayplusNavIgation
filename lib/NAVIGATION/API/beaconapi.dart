@@ -17,7 +17,6 @@ class beaconapi {
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
-
   String encryptDecrypt(String input, String key){
     StringBuffer result = StringBuffer();
     for (int i = 0; i < input.length; i++) {

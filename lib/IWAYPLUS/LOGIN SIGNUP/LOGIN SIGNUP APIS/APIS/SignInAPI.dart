@@ -10,7 +10,7 @@ import '../MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/signin2";
+  final String baseUrl = "https://maps.iwayplus.in/auth/signin2";
 
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
@@ -88,7 +88,7 @@ class SignInAPI{
   static Future<int> sendOtpForgetPassword(String user) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
-        'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
+        'POST', Uri.parse('https://maps.iwayplus.in/auth/otp/username'));
     request.body = json.encode({"username": "${user}", "digits":4,});
     request.headers.addAll(headers);
 
@@ -107,7 +107,7 @@ class SignInAPI{
   static Future<int> changePassword(String user, String pass, String otp) async {
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
-        'POST', Uri.parse('https://dev.iwayplus.in/auth/reset-password'));
+        'POST', Uri.parse('https://maps.iwayplus.in/auth/reset-password'));
     request.body = json.encode({
       "username": "$user",
       "password": "$pass",

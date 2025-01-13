@@ -64,7 +64,7 @@ class buildingCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4)),
                   child: Image.network(
-                    'https://dev.iwayplus.in/uploads/$imageURL',
+                    'https://maps.iwayplus.in/uploads/$imageURL',
                     // You can replace the placeholder image URL with your default image URL
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(

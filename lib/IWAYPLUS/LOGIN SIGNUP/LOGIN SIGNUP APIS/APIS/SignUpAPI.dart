@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '/IWAYPLUS/Elements/HelperClass.dart';
 class SignUpAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/signup";
+  final String baseUrl = "https://maps.iwayplus.in/auth/signup";
 
   Future<bool> signUP(String username,String name, String password,String OTP) async {
     final Map<String, dynamic> data = {

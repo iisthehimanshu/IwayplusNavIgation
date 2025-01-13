@@ -123,6 +123,7 @@ class Landmarks {
         this.venueName,
         this.wasPolyIdNull});
 
+
   Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
@@ -304,6 +305,7 @@ class Properties {
   String? capacity;
   String? callLocation;
   String? panelDir;
+  bool isWaypoint = false;
   String? shopNature;
   String? alertName;
   String? photo;

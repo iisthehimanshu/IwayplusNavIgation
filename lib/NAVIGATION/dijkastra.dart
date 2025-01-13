@@ -14,7 +14,7 @@ double euclideanDistance(String point1, String point2) {
 }
 
 // Dijkstra's algorithm to find the shortest path
-Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start, String goal, int col, {bool isoutdoorPath = false})async{
+Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, String goal, int col, {bool isoutdoorPath = false})async{
 
 
 
@@ -105,7 +105,7 @@ List<List<int>> addCoordinatesBetweenVertices(List<List<int>> coordinates, int c
 }
 
 List<String> findNearestAndSecondNearestVertices(
-    Map<String, List<dynamic>> pathNetwork,
+    Map<String, dynamic> pathNetwork,
     List<int> coord1,
     List<int> coord2) {
   String nearestToCoord1 = '';
@@ -254,7 +254,7 @@ List<int> mergeLists(List<int> l1, List<int> l2, List<int> l3) {
 }
 
 
-Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int> nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int> nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
   List<String> states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
   String start1 = states[0];
   String start2 = states[1];
